@@ -21,7 +21,7 @@ public class XexunFrameDecoder extends FrameDecoder {
             Channel channel,
             ChannelBuffer buf) throws Exception {
 
-        System.out.println("read: " + buf.readableBytes());
+        //System.out.println("read: " + buf.readableBytes());
 
         // Check minimum length
         int length = buf.readableBytes();

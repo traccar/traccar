@@ -99,7 +99,7 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
 
         // Parse message
         String sentence = (String) msg;
-        System.out.println("parse: " + sentence);
+        //System.out.println("parse: " + sentence);
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             throw new ParseException(null, 0);

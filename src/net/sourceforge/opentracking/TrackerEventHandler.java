@@ -41,7 +41,7 @@ public class TrackerEventHandler extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
 
-        System.out.println("message recieved");
+        //System.out.println("message recieved");
 
         if (e.getMessage() instanceof Position) {
 
@@ -49,14 +49,14 @@ public class TrackerEventHandler extends SimpleChannelHandler {
             try {
                 dataManager.writePosition((Position) e.getMessage());
             } catch (Exception error) {
-                System.out.println("write error");
+                //System.out.println("write error");
             }
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-        System.out.println("error: " + e.getCause().getMessage());
+        //System.out.println("error: " + e.getCause().getMessage());
         e.getChannel().close();
     }
 

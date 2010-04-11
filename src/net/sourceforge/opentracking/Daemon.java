@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import net.sourceforge.opentracking.helper.NamedParameterStatement;
-import org.jboss.netty.handler.codec.frame.FixedLengthFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import net.sourceforge.opentracking.protocol.xexun.XexunFrameDecoder;
 import net.sourceforge.opentracking.protocol.xexun.XexunProtocolDecoder;
