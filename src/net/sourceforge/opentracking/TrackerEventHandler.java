@@ -20,7 +20,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.ChannelPipelineCoverage;
-import java.sql.SQLException;
 
 /**
  * Tracker message handler
@@ -47,9 +46,8 @@ public class TrackerEventHandler extends SimpleChannelHandler {
 
             // Write position to database
             try {
-                dataManager.writePosition((Position) e.getMessage());
+                dataManager.setPosition((Position) e.getMessage());
             } catch (Exception error) {
-                //System.out.println("write error");
             }
         }
     }

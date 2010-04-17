@@ -1,4 +1,4 @@
-package net.sourceforge.opentracking.protocol.xexun;
+package net.sourceforge.opentracking.protocol.gps103;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -9,7 +9,7 @@ import net.sourceforge.opentracking.Position;
 import net.sourceforge.opentracking.DataManager;
 import static org.junit.Assert.*;
 
-public class XexunProtocolDecoderTest {
+public class Gps103ProtocolDecoderTest {
 
     private class TestDataManager implements DataManager {
         public List getDevices() {
@@ -30,15 +30,16 @@ public class XexunProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        String testMsg =
-                "GPRMC,010203.000,A,0102.0003,N,00102.0003,E,1.02,1.02,010203,,,A*00,F,, " +
-                "imei:10000000000000,";
+        String testMsg1 = "##,imei:10000000000000,A";
 
-        XexunProtocolDecoder decoder = new XexunProtocolDecoder(new TestDataManager());
-        Position position = (Position) decoder.decode(null, null, testMsg);
+        String testMsg2 = "imei:10000000000000,help me,1004171910,,F,010203.000,A,0102.0003,N,00102.0003,E,1.02,";
 
-        Date time = new GregorianCalendar(2003, 1, 1, 1, 2, 3).getTime();
-        assertEquals(time, position.getTime());
+        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new TestDataManager());
+        assertNull(decoder.decode(null, null, testMsg1));
+        Position position = (Position) decoder.decode(null, null, testMsg2);
+
+        //Date time = new GregorianCalendar(2003, 1, 1, 1, 2, 3).getTime();
+        //assertEquals(time, position.getTime());
 
         assertEquals(true, position.getValid());
 
@@ -51,9 +52,6 @@ public class XexunProtocolDecoderTest {
         Double speed = 1.02;
         assertEquals(speed, position.getSpeed());
 
-        Double course = 1.02;
-        assertEquals(course, position.getCourse());
-        
         Long deviceId = new Long(1);
         assertEquals(deviceId, position.getDeviceId());
     }

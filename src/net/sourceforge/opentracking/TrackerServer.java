@@ -47,7 +47,6 @@ public class TrackerServer extends ServerBootstrap {
 
         @Override
         public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
-            //System.out.println("connected: " + e.getChannel().getRemoteAddress());
             server.getChannelGroup().add(e.getChannel());
         }
     }

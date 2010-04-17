@@ -15,6 +15,8 @@
  */
 package net.sourceforge.opentracking;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -30,16 +32,16 @@ import net.sourceforge.opentracking.protocol.xexun.XexunFrameDecoder;
 import net.sourceforge.opentracking.protocol.xexun.XexunProtocolDecoder;
 
 /**
- * Daemon
+ * Server
  */
-public class Daemon implements DataManager {
+public class Server implements DataManager {
 
     /**
      * Server list
      */
     private List serverList;
 
-    public Daemon() {
+    public Server() {
         serverList = new LinkedList();
     }
 
@@ -51,8 +53,13 @@ public class Daemon implements DataManager {
 
         // Load properties
         Properties properties = new Properties();
-        properties.loadFromXML(new FileInputStream(arguments[0]));
-        //properties.loadFromXML(Daemon.class.getResourceAsStream("/configuration.xml"));
+        if (arguments.length > 0) {
+            properties.loadFromXML(new FileInputStream(arguments[0]));
+        } else {
+            properties.loadFromXML(
+                    new FileInputStream("/home/user/NetBeansProjects/tracker-server/dev/configuration.xml"));
+        }
+        //properties.loadFromXML(Server.class.getResourceAsStream("/configuration.xml"));
 
         initDatabase(properties);
         initXexunServer(properties);
@@ -102,7 +109,12 @@ public class Daemon implements DataManager {
         }
     }
 
-    public synchronized List readDevice() throws SQLException {
+    /**
+     * Devices
+     */
+    private Map devices;
+
+    public synchronized List getDevices() throws SQLException {
 
         List deviceList = new LinkedList();
 
@@ -117,7 +129,23 @@ public class Daemon implements DataManager {
         return deviceList;
     }
 
-    public synchronized void writePosition(Position position) throws SQLException {
+    public Device getDeviceByImei(String imei) throws SQLException {
+
+        // Init device list
+        if (devices == null) {
+            devices = new HashMap();
+
+            List deviceList = getDevices();
+
+            for (Object device: deviceList) {
+                devices.put(((Device) device).getImei(), device);
+            }
+        }
+
+        return (Device) devices.get(imei);
+    }
+
+    public synchronized void setPosition(Position position) throws SQLException {
 
         insertPosition.setInt("device_id", position.getDeviceId().intValue());
         insertPosition.setTimestamp("time", position.getTime());
@@ -149,6 +177,13 @@ public class Daemon implements DataManager {
 
             serverList.add(server);
         }
+    }
+
+    /**
+     * Init Gps103 server
+     */
+    public void initGps103Server(Properties properties) throws SQLException {
+
     }
 
     /**

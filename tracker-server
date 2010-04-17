@@ -1,0 +1,24 @@
+#! /bin/sh
+
+PATH=/sbin:/bin
+
+case "$1" in
+  start)
+	/usr/bin/java -cp /usr/share/tracker-server -jar /usr/share/tracker-server/tracker-server.jar "/etc/tracker-server/configuration.xml" <&- &
+	pid=$!
+	echo ${pid} > /var/run/tracker-server.pid
+	;;
+  restart|reload|force-reload)
+	echo "Error: argument '$1' not supported" >&2
+	exit 3
+	;;
+  stop)
+	kill `cat /var/run/tracker-server.pid`
+	rm /var/run/tracker-server.pid
+	;;
+  *)
+	echo "Usage: $0 start|stop" >&2
+	exit 3
+	;;
+esac
+

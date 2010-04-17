@@ -1,10 +1,10 @@
-import net.sourceforge.opentracking.Daemon;
+import net.sourceforge.opentracking.Server;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        Daemon service = new Daemon();
+        Server service = new Server();
         service.init(args);
         service.start();
     }

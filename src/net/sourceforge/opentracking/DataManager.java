@@ -16,7 +16,6 @@
 package net.sourceforge.opentracking;
 
 import java.util.List;
-import java.sql.SQLException;
 
 /**
  * Data manager
@@ -24,13 +23,18 @@ import java.sql.SQLException;
 public interface DataManager {
 
     /**
-     * Get device list
+     * Read device list
      */
-    public List readDevice() throws SQLException;
+    public List getDevices() throws Exception;
+
+    /**
+     * Get device by imei
+     */
+    public Device getDeviceByImei(String imei) throws Exception;
 
     /**
      * Write position
      */
-    public void writePosition(Position position) throws SQLException;
+    public void setPosition(Position position) throws Exception;
 
 }
