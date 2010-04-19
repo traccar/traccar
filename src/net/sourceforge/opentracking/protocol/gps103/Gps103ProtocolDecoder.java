@@ -17,6 +17,7 @@ package net.sourceforge.opentracking.protocol.gps103;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import org.jboss.netty.channel.Channel;
@@ -69,7 +70,9 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
             throws Exception {
 
         // Parse message
+
         String sentence = (String) msg;
+        System.out.println("message: " + sentence);
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
@@ -85,8 +88,7 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
         position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
 
         // Time
-        Calendar time = new GregorianCalendar();
-        time.clear();
+        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));

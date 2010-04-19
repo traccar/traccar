@@ -1,18 +1,3 @@
-/*
- * Copyright 2010 Anton Tananaev (anton@tananaev.com)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package net.sourceforge.opentracking.helper;
 
 import java.sql.Connection;
@@ -128,34 +113,26 @@ public class NamedParameterStatement {
         statement.close();
     }
 
-    /**
-     * Set a parameter
-     */
-    /*public void setObject(String name, Object value) throws SQLException {
-
-        List indexList = (List) indexMap.get(name);
-        if (indexList != null) {
-            for (Object index: indexList) {
-                statement.setObject((Integer) index, value);
-            }
-        }
-        else {
-            throw new IllegalArgumentException();
-        }
-    }*/
-
     public void setInt(String name, int value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
-        for (Object index: indexList) {
+        if (indexList != null) for (Object index: indexList) {
             statement.setInt((Integer) index, value);
+        }
+    }
+
+    public void setLong(String name, long value) throws SQLException {
+
+        List indexList = (List) indexMap.get(name);
+        if (indexList != null) for (Object index: indexList) {
+            statement.setLong((Integer) index, value);
         }
     }
 
     public void setBoolean(String name, boolean value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
-        for (Object index: indexList) {
+        if (indexList != null) for (Object index: indexList) {
             statement.setBoolean((Integer) index, value);
         }
     }
@@ -163,7 +140,7 @@ public class NamedParameterStatement {
     public void setDouble(String name, double value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
-        for (Object index: indexList) {
+        if (indexList != null) for (Object index: indexList) {
             statement.setDouble((Integer) index, value);
         }
     }
@@ -171,7 +148,7 @@ public class NamedParameterStatement {
     public void setTimestamp(String name, Date value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
-        for (Object index: indexList) {
+        if (indexList != null) for (Object index: indexList) {
             statement.setTimestamp(
                     (Integer) index,
                     new Timestamp(value.getTime()));

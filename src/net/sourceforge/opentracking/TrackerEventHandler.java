@@ -40,21 +40,23 @@ public class TrackerEventHandler extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
 
-        //System.out.println("message recieved");
-
         if (e.getMessage() instanceof Position) {
+            
+            Position position = (Position) e.getMessage();
+
+            System.out.println("id: " + position.getDeviceId() + ", lat: " + position.getLatitude() + ", lon: " + position.getLongitude() );
 
             // Write position to database
             try {
-                dataManager.setPosition((Position) e.getMessage());
+                dataManager.setPosition(position);
             } catch (Exception error) {
+                System.out.println(error.getMessage());
             }
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-        //System.out.println("error: " + e.getCause().getMessage());
         e.getChannel().close();
     }
 
