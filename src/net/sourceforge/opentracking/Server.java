@@ -26,10 +26,16 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import net.sourceforge.opentracking.helper.NamedParameterStatement;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.logging.LoggingHandler;
 import net.sourceforge.opentracking.protocol.xexun.XexunFrameDecoder;
 import net.sourceforge.opentracking.protocol.xexun.XexunProtocolDecoder;
 import net.sourceforge.opentracking.protocol.gps103.Gps103ProtocolDecoder;
@@ -44,8 +50,11 @@ public class Server implements DataManager {
      */
     private List serverList;
 
+    private boolean loggerEnable;
+
     public Server() {
         serverList = new LinkedList();
+        loggerEnable = false;
     }
 
     /**
@@ -58,13 +67,11 @@ public class Server implements DataManager {
         Properties properties = new Properties();
         if (arguments.length > 0) {
             properties.loadFromXML(new FileInputStream(arguments[0]));
-        }/*  else {
-            properties.loadFromXML(
-                    new FileInputStream("/home/user/NetBeansProjects/tracker-server/dev/configuration2.xml"));
-        }*/
-        //properties.loadFromXML(Server.class.getResourceAsStream("/configuration.xml"));
+        }
 
         initDatabase(properties);
+        initLogger(properties);
+
         initXexunServer(properties);
         initGps103Server(properties);
     }
@@ -163,6 +170,36 @@ public class Server implements DataManager {
     }
 
     /**
+     * Init logger
+     */
+    public void initLogger(Properties properties) throws IOException {
+
+        loggerEnable = Boolean.valueOf(properties.getProperty("logger.enable"));
+
+        if (loggerEnable) {
+
+            Logger logger = Logger.getLogger("logger");
+            String fileName = properties.getProperty("logger.file");
+            if (fileName != null) {
+
+                FileHandler file = new FileHandler(fileName, true);
+
+                file.setFormatter(new Formatter() {
+                    private final String LINE_SEPARATOR =
+                            System.getProperty("line.separator", "\n");
+
+                    public String format(LogRecord record) {
+                        return record.getMessage().concat(LINE_SEPARATOR);
+                    }
+                });
+
+                logger.setLevel(Level.ALL);
+                logger.addHandler(file);
+            }
+        }
+    }
+
+    /**
      * Init Xexun server
      */
     public void initXexunServer(Properties properties) throws SQLException {
@@ -173,6 +210,9 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(
                     Integer.valueOf(properties.getProperty("xexun.port")));
 
+            if (loggerEnable) {
+                server.getPipeline().addLast("logger", new LoggingHandler("logger"));
+            }
             server.getPipeline().addLast("frameDecoder", new XexunFrameDecoder());
             server.getPipeline().addLast("stringDecoder", new StringDecoder());
             server.getPipeline().addLast("objectDecoder", new XexunProtocolDecoder(this));
@@ -194,6 +234,9 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(
                     Integer.valueOf(properties.getProperty("gps103.port")));
 
+            if (loggerEnable) {
+                server.getPipeline().addLast("logger", new LoggingHandler("logger"));
+            }
             byte delimiter[] = { (byte) ';' };
             server.getPipeline().addLast("frameDecoder",
                     new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));

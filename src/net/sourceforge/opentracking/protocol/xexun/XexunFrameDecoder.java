@@ -52,9 +52,6 @@ public class XexunFrameDecoder extends FrameDecoder {
             Channel channel,
             ChannelBuffer buf) throws Exception {
 
-        System.out.println("read: " + buf.readableBytes());
-        System.out.println("buffer: " + buf.toString("UTF-8"));
-
         // Check minimum length
         int length = buf.readableBytes();
         if (length < 100) {

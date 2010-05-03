@@ -72,7 +72,6 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
         // Parse message
 
         String sentence = (String) msg;
-        System.out.println("message: " + sentence);
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
