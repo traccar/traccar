@@ -1,0 +1,75 @@
+May 2, 2010 9:51:59 PM net.sourceforge.opentracking.Server init
+WARNING: test
+May 2, 2010 9:51:59 PM net.sourceforge.opentracking.Server init
+WARNING: test2
+May 2, 2010 9:54:20 PM net.sourceforge.opentracking.Server init
+WARNING: test
+May 2, 2010 9:54:20 PM net.sourceforge.opentracking.Server init
+WARNING: test2
+May 2, 2010 10:14:26 PM net.sourceforge.opentracking.Server init
+FINE: test fine
+May 2, 2010 10:14:47 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] BOUND: /0:0:0:0:0:0:0:1:5000
+May 2, 2010 10:14:47 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] CONNECTED: /0:0:0:0:0:0:0:1:49581
+May 2, 2010 10:14:49 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=1024) - (HEXDUMP: 730d0a)
+May 2, 2010 10:14:49 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=1024) - (HEXDUMP: 610d0a)
+May 2, 2010 10:14:50 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=960) - (HEXDUMP: 620d0a)
+May 2, 2010 10:14:51 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=6, cap=960) - (HEXDUMP: 313131310d0a)
+May 2, 2010 10:14:57 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] DISCONNECTED
+May 2, 2010 10:14:57 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] UNBOUND
+May 2, 2010 10:14:58 PM net.sourceforge.opentracking
+FINE: [id: 0x01148603, /0:0:0:0:0:0:0:1:49581 => /0:0:0:0:0:0:0:1:5000] CLOSED
+May 2, 2010 10:18:07 PM net.sourceforge.opentracking.Server init
+FINE: test fine
+May 2, 2010 10:18:14 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] BOUND: /0:0:0:0:0:0:0:1:5000
+May 2, 2010 10:18:15 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] CONNECTED: /0:0:0:0:0:0:0:1:55726
+May 2, 2010 10:18:16 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=6, cap=1024) - (HEXDUMP: 68656c6c0d0a)
+May 2, 2010 10:18:18 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=1024) - (HEXDUMP: 6f0d0a)
+May 2, 2010 10:18:21 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=7, cap=960) - (HEXDUMP: 31323334350d0a)
+May 2, 2010 10:18:26 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] DISCONNECTED
+May 2, 2010 10:18:27 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] UNBOUND
+May 2, 2010 10:18:27 PM net.sourceforge.opentracking
+FINE: [id: 0x012b3349, /0:0:0:0:0:0:0:1:55726 => /0:0:0:0:0:0:0:1:5000] CLOSED
+May 2, 2010 10:42:28 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] BOUND: /127.0.0.1:5000
+May 2, 2010 10:42:28 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] CONNECTED: /127.0.0.1:45082
+May 2, 2010 10:42:30 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=1024) - (HEXDUMP: 610d0a)
+May 2, 2010 10:42:31 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=1024) - (HEXDUMP: 620d0a)
+May 2, 2010 10:42:34 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=960) - (HEXDUMP: 1b0d0a)
+May 2, 2010 10:42:39 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] DISCONNECTED
+May 2, 2010 10:42:39 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] UNBOUND
+May 2, 2010 10:42:39 PM net.sourceforge.opentracking
+FINE: [id: 0x006db33c, /127.0.0.1:45082 => /127.0.0.1:5000] CLOSED
+[id: 0x0158689a, /0:0:0:0:0:0:0:1:45776 => /0:0:0:0:0:0:0:1:5000] BOUND: /0:0:0:0:0:0:0:1:5000[id: 0x0158689a, /0:0:0:0:0:0:0:1:45776 => /0:0:0:0:0:0:0:1:5000] CONNECTED: /0:0:0:0:0:0:0:1:45776[id: 0x0158689a, /0:0:0:0:0:0:0:1:45776 => /0:0:0:0:0:0:0:1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=8, cap=1024) - (HEXDUMP: 7177657274790d0a)[id: 0x0158689a, /0:0:0:0:0:0:0:1:45776 => /0:0:0:0:0:0:0:1:5000] DISCONNECTED[id: 0x0158689a, /0:0:0:0:0:0:0:1:45776 => /0:0:0:0:0:0:0:1:5000] UNBOUND[id: 0x0158689a, /0:0:0:0:0:0:0:1:45776 => /0:0:0:0:0:0:0:1:5000] CLOSED[id: 0x0158689a, /127.0.0.1:33077 => /127.0.0.1:5000] BOUND: /127.0.0.1:5000
+[id: 0x0158689a, /127.0.0.1:33077 => /127.0.0.1:5000] CONNECTED: /127.0.0.1:33077
+[id: 0x0158689a, /127.0.0.1:33077 => /127.0.0.1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=3, cap=1024) - (HEXDUMP: 310d0a)
+[id: 0x0158689a, /127.0.0.1:33077 => /127.0.0.1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=5, cap=1024) - (HEXDUMP: 3233340d0a)
+[id: 0x0158689a, /127.0.0.1:33077 => /127.0.0.1:5000] DISCONNECTED
+[id: 0x0158689a, /127.0.0.1:33077 => /127.0.0.1:5000] UNBOUND
+[id: 0x0158689a, /127.0.0.1:33077 => /127.0.0.1:5000] CLOSED
+[id: 0x0158689a, /127.0.0.1:35718 => /127.0.0.1:5000] BOUND: /127.0.0.1:5000
+[id: 0x0158689a, /127.0.0.1:35718 => /127.0.0.1:5000] CONNECTED: /127.0.0.1:35718
+[id: 0x0158689a, /127.0.0.1:35718 => /127.0.0.1:5000] RECEIVED: BigEndianHeapChannelBuffer(ridx=0, widx=59, cap=1024) - (HEXDUMP: 6161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161610d0a)
+[id: 0x0158689a, /127.0.0.1:35718 => /127.0.0.1:5000] DISCONNECTED
+[id: 0x0158689a, /127.0.0.1:35718 => /127.0.0.1:5000] UNBOUND
+[id: 0x0158689a, /127.0.0.1:35718 => /127.0.0.1:5000] CLOSED

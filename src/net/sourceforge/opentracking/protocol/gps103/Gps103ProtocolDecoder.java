@@ -18,6 +18,8 @@ package net.sourceforge.opentracking.protocol.gps103;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import org.jboss.netty.channel.Channel;
@@ -26,6 +28,9 @@ import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.jboss.netty.channel.ChannelPipelineCoverage;
 import net.sourceforge.opentracking.Position;
 import net.sourceforge.opentracking.DataManager;
+import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelState;
+import org.jboss.netty.channel.ChannelStateEvent;
 
 /**
  * Gps 103 tracker protocol decoder
@@ -69,9 +74,14 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
 
-        // Parse message
-
         String sentence = (String) msg;
+
+        // Send response
+        if (sentence.contains("##")) {
+            channel.write("LOAD");
+        }
+
+        // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
@@ -114,6 +124,38 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
         position.setCourse(0.0);
 
         return position;
+    }
+
+    /**
+     * Disconnect channel
+     */
+    class DisconnectTask extends TimerTask {
+        private Channel channel;
+        
+        public DisconnectTask(Channel channel) {
+            this.channel = channel;
+        }
+        
+        public void run() {
+            channel.disconnect();
+        } 
+    }
+
+    /**
+     * Handle connect event
+     */
+    @Override
+    public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
+        super.handleUpstream(ctx, evt);
+
+        if (evt instanceof ChannelStateEvent) {
+            ChannelStateEvent event = (ChannelStateEvent) evt;
+
+            if (event.getState() == ChannelState.CONNECTED && event.getValue() != null) {
+                new Timer().schedule(new DisconnectTask(evt.getChannel()) , 5 * 60 * 1000);
+            }
+        }
+
     }
 
 }

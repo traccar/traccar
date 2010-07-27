@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import net.sourceforge.opentracking.helper.NamedParameterStatement;
 import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.logging.LoggingHandler;
@@ -241,6 +242,7 @@ public class Server implements DataManager {
             server.getPipeline().addLast("frameDecoder",
                     new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
             server.getPipeline().addLast("stringDecoder", new StringDecoder());
+            server.getPipeline().addLast("stringEncoder", new StringEncoder());
             server.getPipeline().addLast("objectDecoder", new Gps103ProtocolDecoder(this));
 
             server.getPipeline().addLast("handler", new TrackerEventHandler(this));
