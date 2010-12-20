@@ -58,7 +58,8 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
             "([\\d]+)," +                       // IMEI
             "[^,]+," +
             "[\\d]+," +
-            ",[FL]," +                          // F - full / L - low
+            "[\\d]*," +
+            "[FL]," +                           // F - full / L - low
             "([\\d]{2})([\\d]{2})([\\d]{2}).([\\d]{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
             "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
