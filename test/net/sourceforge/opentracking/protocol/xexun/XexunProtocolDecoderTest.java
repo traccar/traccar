@@ -33,6 +33,8 @@ public class XexunProtocolDecoderTest {
         String testMsg =
                 "GPRMC,010203.000,A,0102.0003,N,00102.0003,E,1.02,1.02,010203,,,A*00,F,, " +
                 "imei:10000000000000,";
+                //"GPRMC,233842.000,A,5001.3060,N,01429.3243,E,0.00,,210211,,,A*74,F," +
+                //"imei:354776030495631,";
 
         XexunProtocolDecoder decoder = new XexunProtocolDecoder(new TestDataManager());
         Position position = (Position) decoder.decode(null, null, testMsg);

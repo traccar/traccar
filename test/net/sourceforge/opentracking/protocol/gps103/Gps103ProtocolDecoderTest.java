@@ -1,6 +1,7 @@
 package net.sourceforge.opentracking.protocol.gps103;
 
-import java.util.Date;
+import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.GregorianCalendar;
 import java.util.List;
 import org.junit.Test;
@@ -29,6 +30,13 @@ public class Gps103ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
+
+        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        time.set(Calendar.HOUR, 0);
+        time.set(Calendar.MINUTE, 1);
+        time.set(Calendar.SECOND, 2);
+        time.set(Calendar.MILLISECOND, 3);
+        String x = time.getTime().toString();
 
         String testMsg1 = "##,imei:10000000000000,A";
         // NEW MESSAGE: imei:359587017470280,tracker,0000000000,03184511405,L,;

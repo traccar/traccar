@@ -58,7 +58,7 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
             "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
             "([EW])," +
             "([\\d]+.[\\d]{2})," +              // Speed
-            "([\\d]+.[\\d]{2})," +              // Course
+            "([\\d]+.[\\d]{2})?," +              // Course
             "([\\d]{2})([\\d]{2})([\\d]{2})," + // Date (DDMMYY)
             ".*imei:" +
             "([\\d]+),");                       // IMEI
@@ -105,9 +105,14 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
         if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
         position.setLongitude(lonlitude);
 
-        // Speed and course
+        // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(Double.valueOf(parser.group(index++)));
+
+        // Course
+        String course = parser.group(index++);
+        if (course != null) {
+            position.setCourse(Double.valueOf(course));
+        }
 
         // Date
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
