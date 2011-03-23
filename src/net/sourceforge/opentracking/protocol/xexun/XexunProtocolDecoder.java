@@ -112,6 +112,8 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
         String course = parser.group(index++);
         if (course != null) {
             position.setCourse(Double.valueOf(course));
+        } else {
+            position.setCourse(0.0);
         }
 
         // Date

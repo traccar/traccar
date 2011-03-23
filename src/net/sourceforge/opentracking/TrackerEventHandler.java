@@ -44,7 +44,15 @@ public class TrackerEventHandler extends SimpleChannelHandler {
             
             Position position = (Position) e.getMessage();
 
-            System.out.println("id: " + position.getDeviceId() + ", lat: " + position.getLatitude() + ", lon: " + position.getLongitude() );
+            System.out.println(
+                    "id: " + position.getId() +
+                    ", deviceId: " + position.getDeviceId() +
+                    ", valid: " + position.getValid() +
+                    ", time: " + position.getTime() +
+                    ", latitude: " + position.getLatitude() +
+                    ", longitude: " + position.getLongitude() +
+                    ", speed: " + position.getSpeed() +
+                    ", course: " + position.getCourse());
 
             // Write position to database
             try {
