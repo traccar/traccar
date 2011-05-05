@@ -40,6 +40,7 @@ import org.jboss.netty.handler.logging.LoggingHandler;
 import net.sourceforge.opentracking.protocol.xexun.XexunFrameDecoder;
 import net.sourceforge.opentracking.protocol.xexun.XexunProtocolDecoder;
 import net.sourceforge.opentracking.protocol.gps103.Gps103ProtocolDecoder;
+import net.sourceforge.opentracking.protocol.tk103.Tk103ProtocolDecoder;
 
 /**
  * Server
@@ -75,6 +76,7 @@ public class Server implements DataManager {
 
         initXexunServer(properties);
         initGps103Server(properties);
+        initTk103Server(properties);
     }
 
     /**
@@ -216,7 +218,9 @@ public class Server implements DataManager {
             }
             server.getPipeline().addLast("frameDecoder", new XexunFrameDecoder());
             server.getPipeline().addLast("stringDecoder", new StringDecoder());
-            server.getPipeline().addLast("objectDecoder", new XexunProtocolDecoder(this));
+            String resetDelay = properties.getProperty("xexun.resetDelay");
+            server.getPipeline().addLast("objectDecoder", new XexunProtocolDecoder(this,
+                    (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
 
             server.getPipeline().addLast("handler", new TrackerEventHandler(this));
 
@@ -243,7 +247,38 @@ public class Server implements DataManager {
                     new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
             server.getPipeline().addLast("stringDecoder", new StringDecoder());
             server.getPipeline().addLast("stringEncoder", new StringEncoder());
-            server.getPipeline().addLast("objectDecoder", new Gps103ProtocolDecoder(this));
+            String resetDelay = properties.getProperty("gps103.resetDelay");
+            server.getPipeline().addLast("objectDecoder", new Gps103ProtocolDecoder(this,
+                    (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+
+            server.getPipeline().addLast("handler", new TrackerEventHandler(this));
+
+            serverList.add(server);
+        }
+    }
+
+    /**
+     * Init Tk103 server
+     */
+    public void initTk103Server(Properties properties) throws SQLException {
+
+        boolean enable = Boolean.valueOf(properties.getProperty("tk103.enable"));
+        if (enable) {
+
+            TrackerServer server = new TrackerServer(
+                    Integer.valueOf(properties.getProperty("tk103.port")));
+
+            if (loggerEnable) {
+                server.getPipeline().addLast("logger", new LoggingHandler("logger"));
+            }
+            byte delimiter[] = { (byte) ')' };
+            server.getPipeline().addLast("frameDecoder",
+                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+            server.getPipeline().addLast("stringDecoder", new StringDecoder());
+            server.getPipeline().addLast("stringEncoder", new StringEncoder());
+            String resetDelay = properties.getProperty("tk103.resetDelay");
+            server.getPipeline().addLast("objectDecoder", new Tk103ProtocolDecoder(this,
+                    (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
 
             server.getPipeline().addLast("handler", new TrackerEventHandler(this));
 

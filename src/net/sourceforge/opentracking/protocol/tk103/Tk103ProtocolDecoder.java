@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.opentracking.protocol.gps103;
+package net.sourceforge.opentracking.protocol.tk103;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -36,7 +36,7 @@ import org.jboss.netty.channel.ChannelStateEvent;
  * Gps 103 tracker protocol decoder
  */
 @ChannelPipelineCoverage("all")
-public class Gps103ProtocolDecoder extends OneToOneDecoder {
+public class Tk103ProtocolDecoder extends OneToOneDecoder {
 
     /**
      * Data manager
@@ -51,7 +51,7 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
     /**
      * Init device table
      */
-    public Gps103ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
+    public Tk103ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
         this.dataManager = dataManager;
         this.resetDelay = resetDelay;
     }
@@ -60,19 +60,21 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "imei:" +
-            "([\\d]+)," +                       // IMEI
-            "[^,]+," +
-            "[\\d]+," +
-            "[\\d]*," +
-            "[FL]," +                           // F - full / L - low
-            "([\\d]{2})([\\d]{2})([\\d]{2}).([\\d]{3})," + // Time (HHMMSS.SSS)
-            "([AV])," +                         // Validity
-            "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "([\\d]+.[\\d]{2}),");              // Speed
+            "\\(" +
+            "(\\d+)" +                   // Device ID
+            "(.{4})" +                   // Command
+            "(\\d{15})" +                // IMEI (?)
+            "(\\d{2})(\\d{2})(\\d{2})" + // Date (YYMMDD)
+            "([AV])" +                   // Validity
+            "(\\d{2})(\\d{2}.\\d{4})" +  // Latitude (DDMM.MMMM)
+            "([NS])" +
+            "(\\d{3})(\\d{2}.\\d{4})" +  // Longitude (DDDMM.MMMM)
+            "([EW])" +
+            "(\\d+.\\d)" +               // Speed
+            "(\\d{2})(\\d{2})(\\d{2})" + // Time (HHMMSS)
+            "(\\d+.\\d{2})" +            // Course
+            "(\\d+)" +                   // State
+            ".+");                       // Mileage (?)
 
     /**
      * Decode message
@@ -83,10 +85,7 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
 
         String sentence = (String) msg;
 
-        // Send response
-        if (sentence.contains("##")) {
-            channel.write("LOAD");
-        }
+        // TODO: Send response (?)
 
         // Parse message
         Matcher parser = pattern.matcher(sentence);
@@ -98,18 +97,18 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
         Position position = new Position();
 
         Integer index = 1;
+        index += 2; // Skip Device ID and command
 
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
 
-        // Time
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
-        position.setTime(time.getTime());
+        // Date
+        Calendar time = new GregorianCalendar();
+        time.clear();
+        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
@@ -128,7 +127,15 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(0.0);
+
+        // Time
+        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        position.setTime(time.getTime());
+
+        // Course
+        position.setCourse(Double.valueOf(parser.group(index++)));
 
         return position;
     }
@@ -138,14 +145,14 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
      */
     class DisconnectTask extends TimerTask {
         private Channel channel;
-        
+
         public DisconnectTask(Channel channel) {
             this.channel = channel;
         }
-        
+
         public void run() {
             channel.disconnect();
-        } 
+        }
     }
 
     /**

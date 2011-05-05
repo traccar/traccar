@@ -20,13 +20,17 @@ import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.text.ParseException;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.jboss.netty.channel.ChannelPipelineCoverage;
 import net.sourceforge.opentracking.Position;
 import net.sourceforge.opentracking.DataManager;
-import java.sql.SQLException;
+import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelState;
+import org.jboss.netty.channel.ChannelStateEvent;
 
 /**
  * Xexun tracker protocol decoder
@@ -40,10 +44,16 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
     private DataManager dataManager;
 
     /**
+     * Reset connection delay
+     */
+    private Integer resetDelay;
+
+    /**
      * Init device table
      */
-    public XexunProtocolDecoder(DataManager newDataManager) {
-        dataManager = newDataManager;
+    public XexunProtocolDecoder(DataManager dataManager, Integer resetDelay) {
+        this.dataManager = dataManager;
+        this.resetDelay = resetDelay;
     }
 
     /**
@@ -127,6 +137,37 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
         position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
 
         return position;
+    }
+
+    /**
+     * Disconnect channel
+     */
+    class DisconnectTask extends TimerTask {
+        private Channel channel;
+
+        public DisconnectTask(Channel channel) {
+            this.channel = channel;
+        }
+
+        public void run() {
+            channel.disconnect();
+        }
+    }
+
+    /**
+     * Handle connect event
+     */
+    @Override
+    public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
+        super.handleUpstream(ctx, evt);
+
+        if (evt instanceof ChannelStateEvent) {
+            ChannelStateEvent event = (ChannelStateEvent) evt;
+
+            if (event.getState() == ChannelState.CONNECTED && event.getValue() != null && resetDelay != 0) {
+                new Timer().schedule(new DisconnectTask(evt.getChannel()), resetDelay);
+            }
+        }
     }
 
 }

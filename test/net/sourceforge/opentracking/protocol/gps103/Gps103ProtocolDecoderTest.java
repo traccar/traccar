@@ -43,7 +43,7 @@ public class Gps103ProtocolDecoderTest {
 
         String testMsg2 = "imei:10000000000000,help me,1004171910,,F,010203.000,A,0102.0003,N,00102.0003,E,1.02,";
 
-        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new TestDataManager());
+        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new TestDataManager(), 0);
         //assertNull(decoder.decode(null, null, testMsg1));
         Position position = (Position) decoder.decode(null, null, testMsg2);
 

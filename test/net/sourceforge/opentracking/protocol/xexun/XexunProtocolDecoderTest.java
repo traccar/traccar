@@ -39,7 +39,7 @@ public class XexunProtocolDecoderTest {
                 //"GPRMC,080303.000,A,5546.7313,N,03738.6005,E,0.56,160.13,100311,,,A*6A,L," +
                 //"imei:354778030461167,";
 
-        XexunProtocolDecoder decoder = new XexunProtocolDecoder(new TestDataManager());
+        XexunProtocolDecoder decoder = new XexunProtocolDecoder(new TestDataManager(), 0);
         Position position = (Position) decoder.decode(null, null, testMsg);
 
         Date time = new GregorianCalendar(2003, 1, 1, 1, 2, 3).getTime();
