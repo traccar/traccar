@@ -23,33 +23,11 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
 
 /**
  * Tracker server
  */
 public class TrackerServer extends ServerBootstrap {
-
-    /**
-     * Open channel handler
-     */
-    @ChannelPipelineCoverage("all")
-    protected class OpenChannelHandler extends SimpleChannelHandler {
-
-        TrackerServer server;
-
-        public OpenChannelHandler(TrackerServer newServer) {
-            server = newServer;
-        }
-
-        @Override
-        public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
-            server.getChannelGroup().add(e.getChannel());
-        }
-    }
 
     /**
      * Initialization
@@ -60,11 +38,8 @@ public class TrackerServer extends ServerBootstrap {
 
         // Create channel factory
         setFactory(new NioServerSocketChannelFactory(
-                Executors.newFixedThreadPool(threadPoolSize),
-                Executors.newFixedThreadPool(threadPoolSize)));
-
-        // Add open channel handler
-        getPipeline().addLast("openHandler", new OpenChannelHandler(this));
+                Executors.newCachedThreadPool(),
+                Executors.newCachedThreadPool()));
     }
 
     public TrackerServer(Integer port) {

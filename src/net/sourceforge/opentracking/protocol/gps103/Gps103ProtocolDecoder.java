@@ -17,7 +17,6 @@ package net.sourceforge.opentracking.protocol.gps103;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
@@ -25,7 +24,6 @@ import java.util.regex.Matcher;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
 import net.sourceforge.opentracking.Position;
 import net.sourceforge.opentracking.DataManager;
 import org.jboss.netty.channel.ChannelEvent;
@@ -35,7 +33,6 @@ import org.jboss.netty.channel.ChannelStateEvent;
 /**
  * Gps 103 tracker protocol decoder
  */
-@ChannelPipelineCoverage("all")
 public class Gps103ProtocolDecoder extends OneToOneDecoder {
 
     /**
@@ -63,8 +60,8 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
             "imei:" +
             "([\\d]+)," +                       // IMEI
             "[^,]+," +
-            "[\\d]+," +
-            "[\\d]*," +
+            "(\\d{2})(\\d{2})(\\d{2})[\\d]+," + // Date
+            "[+]?[\\d]*," +
             "[FL]," +                           // F - full / L - low
             "([\\d]{2})([\\d]{2})([\\d]{2}).([\\d]{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -102,9 +99,15 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
+        
+        // Date
+        Calendar time = new GregorianCalendar();
+        time.clear();
+        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
 
         // Time
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));

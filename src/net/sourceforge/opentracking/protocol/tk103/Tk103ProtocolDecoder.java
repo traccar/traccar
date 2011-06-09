@@ -17,7 +17,6 @@ package net.sourceforge.opentracking.protocol.tk103;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
@@ -25,7 +24,6 @@ import java.util.regex.Matcher;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
 import net.sourceforge.opentracking.Position;
 import net.sourceforge.opentracking.DataManager;
 import org.jboss.netty.channel.ChannelEvent;
@@ -35,7 +33,6 @@ import org.jboss.netty.channel.ChannelStateEvent;
 /**
  * Gps 103 tracker protocol decoder
  */
-@ChannelPipelineCoverage("all")
 public class Tk103ProtocolDecoder extends OneToOneDecoder {
 
     /**
@@ -85,11 +82,14 @@ public class Tk103ProtocolDecoder extends OneToOneDecoder {
 
         String sentence = (String) msg;
 
+        System.out.println(sentence); // DELME
+
         // TODO: Send response (?)
 
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
+            System.out.println("Pattern doesn't match."); // DELME
             return null;
         }
 
