@@ -20,6 +20,7 @@ import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.text.ParseException;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.jboss.netty.channel.Channel;
@@ -91,7 +92,7 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
         Integer index = 1;
 
         // Time
-        Calendar time = new GregorianCalendar();
+        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));

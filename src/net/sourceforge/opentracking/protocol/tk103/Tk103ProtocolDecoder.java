@@ -17,6 +17,7 @@ package net.sourceforge.opentracking.protocol.tk103;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
@@ -104,7 +105,7 @@ public class Tk103ProtocolDecoder extends OneToOneDecoder {
         position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
 
         // Date
-        Calendar time = new GregorianCalendar();
+        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
