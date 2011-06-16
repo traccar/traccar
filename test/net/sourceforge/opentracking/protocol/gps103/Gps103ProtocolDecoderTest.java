@@ -42,7 +42,8 @@ public class Gps103ProtocolDecoderTest {
         // NEW MESSAGE: imei:359587017470280,tracker,0000000000,03184511405,L,;
 
         String testMsg2 = //"imei:10000000000000,help me,1004171910,,F,010203.000,A,0102.0003,N,00102.0003,E,1.02,";
-                "imei:353451040164707,tracker,1105182344,+36304665439,F,214418.000,A,4804.2222,N,01916.7593,E,0.37,";
+                //"imei:353451040164707,tracker,1105182344,+36304665439,F,214418.000,A,4804.2222,N,01916.7593,E,0.37,";
+                "imei:353451042861763,tracker,1106132241,,F,144114.000,A,2301.9052,S,04909.3676,W,0.13,";
 
         Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new TestDataManager(), 0);
         //assertNull(decoder.decode(null, null, testMsg1));

@@ -80,9 +80,14 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
 
         String sentence = (String) msg;
 
-        // Send response
+        // Send response #1
         if (sentence.contains("##")) {
             channel.write("LOAD");
+        }
+        
+        // Send response #2
+        if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
+            channel.write("ON");
         }
 
         // Parse message

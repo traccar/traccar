@@ -43,16 +43,20 @@ public class TrackerEventHandler extends SimpleChannelHandler {
         if (e.getMessage() instanceof Position) {
             
             Position position = (Position) e.getMessage();
-
-            System.out.println(
-                    "id: " + position.getId() +
-                    ", deviceId: " + position.getDeviceId() +
-                    ", valid: " + position.getValid() +
-                    ", time: " + position.getTime() +
-                    ", latitude: " + position.getLatitude() +
-                    ", longitude: " + position.getLongitude() +
-                    ", speed: " + position.getSpeed() +
-                    ", course: " + position.getCourse());
+            
+            if (position == null) {
+                System.out.println("null message");
+            } else {
+                System.out.println(
+                        "id: " + position.getId() +
+                        ", deviceId: " + position.getDeviceId() +
+                        ", valid: " + position.getValid() +
+                        ", time: " + position.getTime() +
+                        ", latitude: " + position.getLatitude() +
+                        ", longitude: " + position.getLongitude() +
+                        ", speed: " + position.getSpeed() +
+                        ", course: " + position.getCourse());
+            }
 
             // Write position to database
             try {
