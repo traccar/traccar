@@ -54,6 +54,7 @@ public class TrackerEventHandler extends SimpleChannelHandler {
                         ", time: " + position.getTime() +
                         ", latitude: " + position.getLatitude() +
                         ", longitude: " + position.getLongitude() +
+                        ", altitude: " + position.getAltitude() +
                         ", speed: " + position.getSpeed() +
                         ", course: " + position.getCourse());
             }
