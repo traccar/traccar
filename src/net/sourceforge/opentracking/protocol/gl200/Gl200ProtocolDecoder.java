@@ -58,19 +58,22 @@ public class Gl200ProtocolDecoder extends OneToOneDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "imei:" +
-            "([\\d]+)," +                       // IMEI
-            "[^,]+," +
-            "(\\d{2})(\\d{2})(\\d{2})[\\d]+," + // Date
-            "[+]?[\\d]*," +
-            "[FL]," +                           // F - full / L - low
-            "([\\d]{2})([\\d]{2})([\\d]{2}).([\\d]{3})," + // Time (HHMMSS.SSS)
-            "([AV])," +                         // Validity
-            "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "([\\d]+.[\\d]{2}),");              // Speed
+            "\\+RESP:GT...," +
+            "\\d{6}," +                         // Protocol version
+            "(\\d{15})," +                      // IMEI
+            "[^,]*," +                          // Device name
+            "\\d," +                            // Report ID
+            "\\d," +                            // Report type
+            "\\d*," +                           // Number
+            "(\\d*)," +                         // GPS accuracy
+            "(\\d+.\\d)," +                     // Speed
+            "(\\d+)," +                         // Course
+            "(-?\\d+.\\d)," +                   // Altitude
+            "(-?\\d+.\\d+)," +                  // Longitude
+            "(-?\\d+.\\d+)," +                  // Latitude
+            "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)
+            "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
+            "[^$]*");
 
     /**
      * Decode message
@@ -80,16 +83,6 @@ public class Gl200ProtocolDecoder extends OneToOneDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-
-        // Send response #1
-        if (sentence.contains("##")) {
-            channel.write("LOAD");
-        }
-        
-        // Send response #2
-        if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
-            channel.write("ON");
-        }
 
         // Parse message
         Matcher parser = pattern.matcher(sentence);
@@ -106,10 +99,20 @@ public class Gl200ProtocolDecoder extends OneToOneDecoder {
         String imei = parser.group(index++);
         position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
         
+        // Validity
+        position.setValid(Integer.valueOf(parser.group(index++)) == 0 ? false : true);
+        
+        // Position info
+        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setAltitude(Double.valueOf(parser.group(index++)));
+        position.setLongitude(Double.valueOf(parser.group(index++)));
+        position.setLatitude(Double.valueOf(parser.group(index++)));
+        
         // Date
         Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
 
@@ -117,27 +120,7 @@ public class Gl200ProtocolDecoder extends OneToOneDecoder {
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
-
-        // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
-
-        // Longitude
-        Double lonlitude = Double.valueOf(parser.group(index++));
-        lonlitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
-        position.setLongitude(lonlitude);
-
-        // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(0.0);
 
         return position;
     }

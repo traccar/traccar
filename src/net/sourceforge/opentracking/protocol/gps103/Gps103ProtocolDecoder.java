@@ -134,6 +134,9 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
         lonlitude += Double.valueOf(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
         position.setLongitude(lonlitude);
+        
+        // Altitude
+        position.setAltitude(0.0);
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));

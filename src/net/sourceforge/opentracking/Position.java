@@ -99,6 +99,19 @@ public class Position {
     public void setLongitude(Double newLongitude) {
         longitude = newLongitude;
     }
+    
+    /**
+     * Altitude
+     */
+    private Double altitude;
+    
+    public Double getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(Double newAltitude) {
+        altitude = newAltitude;
+    }
 
     /**
      * Speed (knots)

@@ -44,6 +44,7 @@ import net.sourceforge.opentracking.protocol.xexun.XexunFrameDecoder;
 import net.sourceforge.opentracking.protocol.xexun.XexunProtocolDecoder;
 import net.sourceforge.opentracking.protocol.gps103.Gps103ProtocolDecoder;
 import net.sourceforge.opentracking.protocol.tk103.Tk103ProtocolDecoder;
+import net.sourceforge.opentracking.protocol.gl200.Gl200ProtocolDecoder;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -90,6 +91,7 @@ public class Server implements DataManager {
         initXexunServer(properties);
         initGps103Server(properties);
         initTk103Server(properties);
+        initGl200Server(properties);
     }
 
     /**
@@ -177,6 +179,7 @@ public class Server implements DataManager {
         insertPosition.setLong("device_id", position.getDeviceId());
         insertPosition.setTimestamp("time", position.getTime());
         insertPosition.setBoolean("valid", position.getValid());
+        insertPosition.setDouble("altitude", position.getAltitude());
         insertPosition.setDouble("latitude", position.getLatitude());
         insertPosition.setDouble("longitude", position.getLongitude());
         insertPosition.setDouble("speed", position.getSpeed());
@@ -391,6 +394,58 @@ public class Server implements DataManager {
             serverList.add(server);
         }
     }
+
+    /**
+     * Gl200 pipeline factory
+     */
+    protected class Gl200PipelineFactory implements ChannelPipelineFactory {
+
+        private TrackerServer server;
+        private Server serverCreator;
+        private Integer resetDelay;
+        
+        public Gl200PipelineFactory(
+                TrackerServer server, Server serverCreator, Integer resetDelay) {
+            this.server = server;
+            this.serverCreator = serverCreator;
+            this.resetDelay = resetDelay;
+        }
+        
+        public ChannelPipeline getPipeline() {
+            ChannelPipeline pipeline = Channels.pipeline();
+            pipeline.addLast("openHandler", new OpenChannelHandler(server));
+            if (serverCreator.isLoggerEnabled()) {
+                pipeline.addLast("logger", new LoggingHandler("logger"));
+            }
+            byte delimiter[] = { (byte) '$' };
+            pipeline.addLast("frameDecoder",
+                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+            pipeline.addLast("stringDecoder", new StringDecoder());
+            pipeline.addLast("stringEncoder", new StringEncoder());
+            pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(serverCreator, resetDelay));
+            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));
+            return pipeline;
+        }
+    }    
+    
+    /**
+     * Init Gl200 server
+     */
+    public void initGl200Server(Properties properties) throws SQLException {
+
+        boolean enable = Boolean.valueOf(properties.getProperty("gl200.enable"));
+        if (enable) {
+
+            TrackerServer server = new TrackerServer(
+                    Integer.valueOf(properties.getProperty("gl200.port")));
+
+            String resetDelay = properties.getProperty("gl200.resetDelay");
+            server.setPipelineFactory(new Gl200PipelineFactory(
+                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+
+            serverList.add(server);
+        }
+    }    
 
     /**
      * Start

@@ -126,6 +126,9 @@ public class Tk103ProtocolDecoder extends OneToOneDecoder {
         if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
         position.setLongitude(lonlitude);
 
+        // Altitude
+        position.setAltitude(0.0);
+
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
 
