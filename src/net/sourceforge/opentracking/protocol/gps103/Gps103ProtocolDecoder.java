@@ -70,7 +70,8 @@ public class Gps103ProtocolDecoder extends OneToOneDecoder {
             "([NS])," +
             "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "([\\d]+.[\\d]{2}),");              // Speed
+            "([\\d]+.[\\d]{2})," +              // Speed
+            ".*");
 
     /**
      * Decode message
