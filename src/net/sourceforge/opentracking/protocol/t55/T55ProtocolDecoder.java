@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.opentracking.protocol.tk103;
+package net.sourceforge.opentracking.protocol.t55;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -34,7 +34,7 @@ import org.jboss.netty.channel.ChannelStateEvent;
 /**
  * Gps 103 tracker protocol decoder
  */
-public class Tk103ProtocolDecoder extends OneToOneDecoder {
+public class T55ProtocolDecoder extends OneToOneDecoder {
 
     /**
      * Data manager
@@ -49,7 +49,7 @@ public class Tk103ProtocolDecoder extends OneToOneDecoder {
     /**
      * Init device table
      */
-    public Tk103ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
+    public T55ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
         this.dataManager = dataManager;
         this.resetDelay = resetDelay;
     }

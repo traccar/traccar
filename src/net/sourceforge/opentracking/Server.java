@@ -45,6 +45,7 @@ import net.sourceforge.opentracking.protocol.xexun.XexunProtocolDecoder;
 import net.sourceforge.opentracking.protocol.gps103.Gps103ProtocolDecoder;
 import net.sourceforge.opentracking.protocol.tk103.Tk103ProtocolDecoder;
 import net.sourceforge.opentracking.protocol.gl200.Gl200ProtocolDecoder;
+import net.sourceforge.opentracking.protocol.t55.T55ProtocolDecoder;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -445,7 +446,59 @@ public class Server implements DataManager {
 
             serverList.add(server);
         }
+    }
+    
+    /**
+     * T55 pipeline factory
+     */
+    protected class T55PipelineFactory implements ChannelPipelineFactory {
+
+        private TrackerServer server;
+        private Server serverCreator;
+        private Integer resetDelay;
+        
+        public T55PipelineFactory(
+                TrackerServer server, Server serverCreator, Integer resetDelay) {
+            this.server = server;
+            this.serverCreator = serverCreator;
+            this.resetDelay = resetDelay;
+        }
+        
+        public ChannelPipeline getPipeline() {
+            ChannelPipeline pipeline = Channels.pipeline();
+            pipeline.addLast("openHandler", new OpenChannelHandler(server));
+            if (serverCreator.isLoggerEnabled()) {
+                pipeline.addLast("logger", new LoggingHandler("logger"));
+            }
+            byte delimiter[] = { (byte) '\r' };
+            pipeline.addLast("frameDecoder",
+                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+            pipeline.addLast("stringDecoder", new StringDecoder());
+            pipeline.addLast("stringEncoder", new StringEncoder());
+            pipeline.addLast("objectDecoder", new T55ProtocolDecoder(serverCreator, resetDelay));
+            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));
+            return pipeline;
+        }
     }    
+    
+    /**
+     * Init T55 server
+     */
+    public void initT55Server(Properties properties) throws SQLException {
+
+        boolean enable = Boolean.valueOf(properties.getProperty("t55.enable"));
+        if (enable) {
+
+            TrackerServer server = new TrackerServer(
+                    Integer.valueOf(properties.getProperty("t55.port")));
+
+            String resetDelay = properties.getProperty("t55.resetDelay");
+            server.setPipelineFactory(new T55PipelineFactory(
+                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+
+            serverList.add(server);
+        }
+    }
 
     /**
      * Start
