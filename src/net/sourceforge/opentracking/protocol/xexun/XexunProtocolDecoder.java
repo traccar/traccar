@@ -66,8 +66,8 @@ public class XexunProtocolDecoder extends OneToOneDecoder {
             "([NS])," +
             "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "([\\d]+.[\\d]+)," +              // Speed
-            "([\\d]+.[\\d]+)?," +              // Course
+            "([\\d]+.[\\d]+)," +                // Speed
+            "([\\d]+.[\\d]+)?," +               // Course
             "([\\d]{2})([\\d]{2})([\\d]{2})," + // Date (DDMMYY)
             ".*imei:" +
             "([\\d]+),");                       // IMEI

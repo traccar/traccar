@@ -45,6 +45,11 @@ public class T55ProtocolDecoder extends OneToOneDecoder {
      * Reset connection delay
      */
     private Integer resetDelay;
+    
+    /**
+     * Device ID
+     */
+    private Long deviceId;
 
     /**
      * Init device table
@@ -58,21 +63,17 @@ public class T55ProtocolDecoder extends OneToOneDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "\\(" +
-            "(\\d+)" +                   // Device ID
-            "(.{4})" +                   // Command
-            "(\\d{15})" +                // IMEI (?)
-            "(\\d{2})(\\d{2})(\\d{2})" + // Date (YYMMDD)
-            "([AV])" +                   // Validity
-            "(\\d{2})(\\d{2}.\\d{4})" +  // Latitude (DDMM.MMMM)
-            "([NS])" +
-            "(\\d{3})(\\d{2}.\\d{4})" +  // Longitude (DDDMM.MMMM)
-            "([EW])" +
-            "(\\d+.\\d)" +               // Speed
-            "(\\d{2})(\\d{2})(\\d{2})" + // Time (HHMMSS)
-            "(\\d+.\\d{2})" +            // Course
-            "(\\d+)" +                   // State
-            ".+");                       // Mileage (?)
+            "\\$GPRMC," +
+            "(\\d{2})(\\d{2})(\\d{2}).(\\d{3})," + // Time (HHMMSS.SSS)
+            "([AV])," +                  // Validity
+            "(\\d{2})(\\d{2}.\\d{4})," + // Latitude (DDMM.MMMM)
+            "([NS])," +
+            "(\\d{3})(\\d{2}.\\d{4})," + // Longitude (DDDMM.MMMM)
+            "([EW])," +
+            "(\\d+.\\d{2})?," +           // Speed
+            "(\\d+.\\d{2})?," +           // Course
+            "(\\d{2})(\\d{2})(\\d{2})" + // Date (DDMMYY)
+            ".+");                     // Other (Checksumm)
 
     /**
      * Decode message
@@ -82,65 +83,87 @@ public class T55ProtocolDecoder extends OneToOneDecoder {
             throws Exception {
 
         String sentence = (String) msg;
+        
+        //System.out.println(sentence);
 
-        System.out.println(sentence); // DELME
-
-        // TODO: Send response (?)
-
-        // Parse message
-        Matcher parser = pattern.matcher(sentence);
-        if (!parser.matches()) {
-            return null;
+        // Detect device ID
+        if (sentence.contains("$PGID")) {
+            String imei = sentence.substring(6, 6 + 15);
+            deviceId = dataManager.getDeviceByImei(imei).getId();
         }
 
-        // Create new position
-        Position position = new Position();
+        // Parse message
+        else if (sentence.contains("$GPRMC") && deviceId != null) {
 
-        Integer index = 1;
-        index += 2; // Skip Device ID and command
+            // Send response
+            if (channel != null) {
+                channel.write("OK1\r\n");
+            }
 
-        // Get device by IMEI
-        String imei = parser.group(index++);
-        position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
+            // Parse message
+            Matcher parser = pattern.matcher(sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+            
+            // Create new position
+            Position position = new Position();
+            position.setDeviceId(deviceId);
+            
+            Integer index = 1;
 
-        // Date
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            // Time
+            Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            time.clear();
+            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+            index += 1; // Skip milliseconds
+            position.setTime(time.getTime());
+        
+            // Validity
+            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            
+            // Latitude
+            Double latitude = Double.valueOf(parser.group(index++));
+            latitude += Double.valueOf(parser.group(index++)) / 60;
+            if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
+            position.setLatitude(latitude);
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            // Longitude
+            Double lonlitude = Double.valueOf(parser.group(index++));
+            lonlitude += Double.valueOf(parser.group(index++)) / 60;
+            if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
+            position.setLongitude(lonlitude);
 
-        // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+            // Speed
+            String speed = parser.group(index++);
+            if (speed != null) {
+                position.setSpeed(Double.valueOf(speed));
+            } else {
+                position.setSpeed(0.0);
+            }
 
-        // Longitude
-        Double lonlitude = Double.valueOf(parser.group(index++));
-        lonlitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
-        position.setLongitude(lonlitude);
+            // Course
+            String course = parser.group(index++);
+            if (course != null) {
+                position.setCourse(Double.valueOf(course));
+            } else {
+                position.setCourse(0.0);
+            }
+            
+            // Date
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            
+            // Altitude
+            position.setAltitude(0.0);
+            
+            return position;
+        }
 
-        // Altitude
-        position.setAltitude(0.0);
-
-        // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-
-        // Time
-        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
-
-        return position;
+        return null;
     }
 
     /**

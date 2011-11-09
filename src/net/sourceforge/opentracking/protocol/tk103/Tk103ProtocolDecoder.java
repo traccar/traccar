@@ -83,8 +83,6 @@ public class Tk103ProtocolDecoder extends OneToOneDecoder {
 
         String sentence = (String) msg;
 
-        System.out.println(sentence); // DELME
-
         // TODO: Send response (?)
 
         // Parse message
