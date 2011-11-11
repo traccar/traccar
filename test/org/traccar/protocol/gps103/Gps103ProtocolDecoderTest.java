@@ -1,13 +1,13 @@
-package net.sourceforge.opentracking.protocol.gps103;
+package org.traccar.protocol.gps103;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.GregorianCalendar;
 import java.util.List;
 import org.junit.Test;
-import net.sourceforge.opentracking.Device;
-import net.sourceforge.opentracking.Position;
-import net.sourceforge.opentracking.DataManager;
+import org.traccar.Device;
+import org.traccar.Position;
+import org.traccar.DataManager;
 import static org.junit.Assert.*;
 
 public class Gps103ProtocolDecoderTest {

@@ -1,15 +1,16 @@
-package net.sourceforge.opentracking.protocol.t55;
+package org.traccar.protocol.tk103;
 
-import java.util.Date;
+import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.GregorianCalendar;
 import java.util.List;
 import org.junit.Test;
-import net.sourceforge.opentracking.Device;
-import net.sourceforge.opentracking.Position;
-import net.sourceforge.opentracking.DataManager;
+import org.traccar.Device;
+import org.traccar.Position;
+import org.traccar.DataManager;
 import static org.junit.Assert.*;
 
-public class T55ProtocolDecoderTest {
+public class Tk103ProtocolDecoderTest {
 
     private class TestDataManager implements DataManager {
         public List getDevices() {
@@ -30,15 +31,10 @@ public class T55ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
         
-        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new TestDataManager(), 0);
+        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new TestDataManager(), 0);
         
-        assertNull(decoder.decode(null, null, "$PGID,359853000144328*0F"));
-
         assertNotNull(decoder.decode(null, null,
-                "$GPRMC,094907.000,A,6000.5332,N,03020.5192,E,1.17,60.26,091111,,*33"));
-
-        assertNotNull(decoder.decode(null, null,
-                "$GPRMC,115528.000,A,6000.5432,N,03020.4948,E,,,091111,,*06"));
+                "(035988863964BP05000035988863964110524A4241.7977N02318.7561E000.0123536356.5100000000L000946BB"));
 
     }
 

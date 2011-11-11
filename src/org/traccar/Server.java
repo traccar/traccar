@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.opentracking;
+package org.traccar;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -34,18 +34,18 @@ import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import net.sourceforge.opentracking.helper.NamedParameterStatement;
+import org.traccar.helper.NamedParameterStatement;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.logging.LoggingHandler;
-import net.sourceforge.opentracking.protocol.xexun.XexunFrameDecoder;
-import net.sourceforge.opentracking.protocol.xexun.XexunProtocolDecoder;
-import net.sourceforge.opentracking.protocol.gps103.Gps103ProtocolDecoder;
-import net.sourceforge.opentracking.protocol.tk103.Tk103ProtocolDecoder;
-import net.sourceforge.opentracking.protocol.gl200.Gl200ProtocolDecoder;
-import net.sourceforge.opentracking.protocol.t55.T55ProtocolDecoder;
+import org.traccar.protocol.xexun.XexunFrameDecoder;
+import org.traccar.protocol.xexun.XexunProtocolDecoder;
+import org.traccar.protocol.gps103.Gps103ProtocolDecoder;
+import org.traccar.protocol.tk103.Tk103ProtocolDecoder;
+import org.traccar.protocol.gl200.Gl200ProtocolDecoder;
+import org.traccar.protocol.t55.T55ProtocolDecoder;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
