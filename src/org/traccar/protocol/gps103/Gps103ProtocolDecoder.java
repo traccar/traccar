@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.opentracking.protocol.gps103;
+package org.traccar.protocol.gps103;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -25,8 +25,8 @@ import java.util.regex.Matcher;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-import net.sourceforge.opentracking.Position;
-import net.sourceforge.opentracking.DataManager;
+import org.traccar.Position;
+import org.traccar.DataManager;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelState;
 import org.jboss.netty.channel.ChannelStateEvent;
