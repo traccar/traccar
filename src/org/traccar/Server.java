@@ -95,6 +95,7 @@ public class Server implements DataManager {
         initTk103Server(properties);
         initGl200Server(properties);
         initT55Server(properties);
+        initXexun2Server(properties);
     }
 
     /**
