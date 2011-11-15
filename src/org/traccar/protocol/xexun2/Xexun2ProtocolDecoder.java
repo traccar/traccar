@@ -59,19 +59,28 @@ public class Xexun2ProtocolDecoder extends OneToOneDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
+            "\\d+," +
+            "\\+\\d+," +
             "GPRMC," +
-            "([\\d]{2})([\\d]{2})([\\d]{2}).([\\d]{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2}).(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
-            "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}.\\d{4})," +        // Latitude (DDMM.MMMM)
             "([NS])," +
-            "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}.\\d{4})," +        // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "([\\d]+.[\\d]+)," +                // Speed
-            "([\\d]+.[\\d]+)?," +               // Course
-            "([\\d]{2})([\\d]{2})([\\d]{2})," + // Date (DDMMYY)
+            "(\\d+.\\d+)," +                    // Speed
+            "(\\d+.\\d+)?," +                   // Course
+            "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             ".*imei:" +
-            "([\\d]+),");                       // IMEI
+            "([\\d]+)," +                       // IMEI
+            "\\d+," +
+            "\\d+.\\d+," +
+            "F:(\\d+.\\d+)V," +                 // Power
+            ".*");
 
+    //"111111120009,+436763737552,GPRMC,120009.590,A,4639.6774,N,01418.5737,E,0.00,0.00,111111"
+    //",,,A*68,F,, imei:012207000694569,04,481.2,F:4.15V,0,139,2689,232,03,2725,0576"
+    
     /**
      * Decode message
      */
@@ -137,6 +146,9 @@ public class Xexun2ProtocolDecoder extends OneToOneDecoder {
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
+        
+        // Power
+        position.setPower(Double.valueOf(parser.group(index++)));
 
         return position;
     }

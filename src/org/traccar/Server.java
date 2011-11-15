@@ -52,6 +52,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.traccar.protocol.xexun2.Xexun2ProtocolDecoder;
 
 /**
  * Server
@@ -496,6 +497,57 @@ public class Server implements DataManager {
 
             String resetDelay = properties.getProperty("t55.resetDelay");
             server.setPipelineFactory(new T55PipelineFactory(
+                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+
+            serverList.add(server);
+        }
+    }
+    
+    /**
+     * Xexun 2 pipeline factory
+     */
+    protected class Xexun2PipelineFactory implements ChannelPipelineFactory {
+
+        private TrackerServer server;
+        private Server serverCreator;
+        private Integer resetDelay;
+        
+        public Xexun2PipelineFactory(
+                TrackerServer server, Server serverCreator, Integer resetDelay) {
+            this.server = server;
+            this.serverCreator = serverCreator;
+            this.resetDelay = resetDelay;
+        }
+        
+        public ChannelPipeline getPipeline() {
+            ChannelPipeline pipeline = Channels.pipeline();
+            pipeline.addLast("openHandler", new OpenChannelHandler(server));
+            if (serverCreator.isLoggerEnabled()) {
+                pipeline.addLast("logger", new LoggingHandler("logger"));
+            }
+            byte delimiter[] = { (byte) '\r', (byte) '\n' };
+            pipeline.addLast("frameDecoder",
+                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+            pipeline.addLast("stringDecoder", new StringDecoder());
+            pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(serverCreator, resetDelay));
+            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));            
+            return pipeline;
+        }
+    }
+    
+    /**
+     * Init Xexun 2 server
+     */
+    public void initXexun2Server(Properties properties) throws SQLException {
+
+        boolean enable = Boolean.valueOf(properties.getProperty("xexun2.enable"));
+        if (enable) {
+
+            TrackerServer server = new TrackerServer(
+                    Integer.valueOf(properties.getProperty("xexun2.port")));
+
+            String resetDelay = properties.getProperty("xexun2.resetDelay");
+            server.setPipelineFactory(new Xexun2PipelineFactory(
                     server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
 
             serverList.add(server);
