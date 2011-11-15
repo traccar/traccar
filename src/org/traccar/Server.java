@@ -186,6 +186,7 @@ public class Server implements DataManager {
         insertPosition.setDouble("longitude", position.getLongitude());
         insertPosition.setDouble("speed", position.getSpeed());
         insertPosition.setDouble("course", position.getCourse());
+        insertPosition.setDouble("power", position.getPower());
 
         insertPosition.executeUpdate();
     }

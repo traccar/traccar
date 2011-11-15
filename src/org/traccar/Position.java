@@ -139,4 +139,17 @@ public class Position {
         course = newCourse;
     }
 
+    /**
+     * Power
+     */
+    private Double power;
+
+    public Double getPower() {
+        return power;
+    }
+
+    public void setPower(Double newPower) {
+        power = newPower;
+    }
+    
 }

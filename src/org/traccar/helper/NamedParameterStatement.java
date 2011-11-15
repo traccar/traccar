@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -113,35 +114,51 @@ public class NamedParameterStatement {
         statement.close();
     }
 
-    public void setInt(String name, int value) throws SQLException {
+    public void setInt(String name, Integer value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
         if (indexList != null) for (Object index: indexList) {
-            statement.setInt((Integer) index, value);
+            if (value != null) {
+                statement.setInt((Integer) index, value);
+            } else {
+                statement.setNull((Integer) index, Types.INTEGER);
+            }
         }
     }
 
-    public void setLong(String name, long value) throws SQLException {
+    public void setLong(String name, Long value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
         if (indexList != null) for (Object index: indexList) {
-            statement.setLong((Integer) index, value);
+            if (value != null) {
+                statement.setLong((Integer) index, value);
+            } else {
+                statement.setNull((Integer) index, Types.INTEGER);
+            }
         }
     }
 
-    public void setBoolean(String name, boolean value) throws SQLException {
+    public void setBoolean(String name, Boolean value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
         if (indexList != null) for (Object index: indexList) {
-            statement.setBoolean((Integer) index, value);
+            if (value != null) {
+                statement.setBoolean((Integer) index, value);
+            } else {
+                statement.setNull((Integer) index, Types.BOOLEAN);
+            }
         }
     }
 
-    public void setDouble(String name, double value) throws SQLException {
+    public void setDouble(String name, Double value) throws SQLException {
 
         List indexList = (List) indexMap.get(name);
         if (indexList != null) for (Object index: indexList) {
-            statement.setDouble((Integer) index, value);
+            if (value != null) {
+                statement.setDouble((Integer) index, value);
+            } else {
+                statement.setNull((Integer) index, Types.DOUBLE);
+            }
         }
     }
 
@@ -149,9 +166,12 @@ public class NamedParameterStatement {
 
         List indexList = (List) indexMap.get(name);
         if (indexList != null) for (Object index: indexList) {
-            statement.setTimestamp(
-                    (Integer) index,
-                    new Timestamp(value.getTime()));
+            if (value != null) {
+                statement.setTimestamp(
+                        (Integer) index, new Timestamp(value.getTime()));
+            } else {
+                statement.setNull((Integer) index, Types.TIMESTAMP);
+            }
         }
     }
 
