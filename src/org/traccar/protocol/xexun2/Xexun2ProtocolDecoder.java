@@ -78,9 +78,6 @@ public class Xexun2ProtocolDecoder extends OneToOneDecoder {
             "F:(\\d+.\\d+)V," +                 // Power
             ".*");
 
-    //"111111120009,+436763737552,GPRMC,120009.590,A,4639.6774,N,01418.5737,E,0.00,0.00,111111"
-    //",,,A*68,F,, imei:012207000694569,04,481.2,F:4.15V,0,139,2689,232,03,2725,0576"
-    
     /**
      * Decode message
      */

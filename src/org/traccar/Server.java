@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 import java.util.logging.FileHandler;
@@ -102,10 +103,10 @@ public class Server implements DataManager {
      * Database connection
      */
     private Connection connection;
-
-    private NamedParameterStatement selectDevice;
-
-    private NamedParameterStatement insertPosition;
+    
+    private String selectDeviceQuery;
+    
+    private String insertPositionQuery;
 
     /**
      * Init database
@@ -130,27 +131,23 @@ public class Server implements DataManager {
             connection = DriverManager.getConnection(url);
         }
 
-        // Init statements
-        String selectDeviceQuery = properties.getProperty("database.selectDevice");
-        if (selectDeviceQuery != null) {
-            selectDevice = new NamedParameterStatement(connection, selectDeviceQuery);
-        }
-
-        String insertPositionQuery = properties.getProperty("database.insertPosition");
-        if (insertPositionQuery != null) {
-            insertPosition = new NamedParameterStatement(connection, insertPositionQuery);
-        }
+        selectDeviceQuery = properties.getProperty("database.selectDevice");
+        insertPositionQuery = properties.getProperty("database.insertPosition");
     }
 
     /**
      * Devices
      */
     private Map devices;
+    private Calendar devicesLastUpdate;
+    private Long devicesListRefreshDelay = new Long(5 * 60 * 1000);
 
     public synchronized List getDevices() throws SQLException {
 
         List deviceList = new LinkedList();
 
+        NamedParameterStatement selectDevice =
+                new NamedParameterStatement(connection, selectDeviceQuery);
         ResultSet result = selectDevice.executeQuery();
         while (result.next()) {
             Device device = new Device();
@@ -161,18 +158,16 @@ public class Server implements DataManager {
 
         return deviceList;
     }
-
+    
     public Device getDeviceByImei(String imei) throws SQLException {
-
-        // Init device list
-        if (devices == null) {
+        
+        if ((devices == null) || (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesListRefreshDelay)) {
             devices = new HashMap();
-
             List deviceList = getDevices();
-
             for (Object device: deviceList) {
                 devices.put(((Device) device).getImei(), device);
             }
+            devicesLastUpdate = Calendar.getInstance();
         }
 
         return (Device) devices.get(imei);
@@ -180,6 +175,9 @@ public class Server implements DataManager {
 
     public synchronized void setPosition(Position position) throws SQLException {
 
+        NamedParameterStatement insertPosition =
+                new NamedParameterStatement(connection, insertPositionQuery);
+        
         insertPosition.setLong("device_id", position.getDeviceId());
         insertPosition.setTimestamp("time", position.getTime());
         insertPosition.setBoolean("valid", position.getValid());
