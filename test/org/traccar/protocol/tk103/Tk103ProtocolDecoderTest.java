@@ -1,8 +1,5 @@
 package org.traccar.protocol.tk103;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.GregorianCalendar;
 import java.util.List;
 import org.junit.Test;
 import org.traccar.Device;

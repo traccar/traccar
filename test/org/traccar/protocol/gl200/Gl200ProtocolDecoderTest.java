@@ -1,8 +1,5 @@
 package org.traccar.protocol.gl200;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.GregorianCalendar;
 import java.util.List;
 import org.junit.Test;
 import org.traccar.Device;
@@ -35,6 +32,21 @@ public class Gl200ProtocolDecoderTest {
         
         assertNotNull(decoder.decode(null, null,
                 "+RESP:GTFRI,020102,000035988863964,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,,20090214093254,11F0"));
+
+        assertNotNull(decoder.decode(null, null,
+                "+RESP:GTFRI,020102,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,,20090214093254,11F0"));
+ 
+        assertNotNull(decoder.decode(null, null,
+                "+RESP:GTFRI,020102,135790246811220,,0,0,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,,20090214093254,11F0"));
+ 
+        assertNotNull(decoder.decode(null, null,
+                "+RESP:GTDOG,020102,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0"));
+
+        assertNotNull(decoder.decode(null, null,
+                "+RESP:GTLBC,020102,135790246811220,,+8613800000000,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,,20090214093254,11F0"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "+RESP:GTGCR,020102,135790246811220,,3,50,180,2,0.4,296,-5.4,121.391055,31.164473,20100714104934,0460,0000,1878,0873,00,,20100714104934,000C"));
 
     }
 

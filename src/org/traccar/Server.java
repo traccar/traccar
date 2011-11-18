@@ -53,6 +53,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.traccar.protocol.gl100.Gl100ProtocolDecoder;
 import org.traccar.protocol.xexun2.Xexun2ProtocolDecoder;
 
 /**
@@ -94,6 +95,7 @@ public class Server implements DataManager {
         initXexunServer(properties);
         initGps103Server(properties);
         initTk103Server(properties);
+        initGl100Server(properties);
         initGl200Server(properties);
         initT55Server(properties);
         initXexun2Server(properties);
@@ -398,6 +400,59 @@ public class Server implements DataManager {
         }
     }
 
+    /**
+     * Gl100 pipeline factory
+     */
+    protected class Gl100PipelineFactory implements ChannelPipelineFactory {
+
+        private TrackerServer server;
+        private Server serverCreator;
+        private Integer resetDelay;
+        
+        public Gl100PipelineFactory(
+                TrackerServer server, Server serverCreator, Integer resetDelay) {
+            this.server = server;
+            this.serverCreator = serverCreator;
+            this.resetDelay = resetDelay;
+        }
+        
+        public ChannelPipeline getPipeline() {
+            ChannelPipeline pipeline = Channels.pipeline();
+            pipeline.addLast("openHandler", new OpenChannelHandler(server));
+            if (serverCreator.isLoggerEnabled()) {
+                pipeline.addLast("logger", new LoggingHandler("logger"));
+            }
+            byte delimiter[] = { (byte) 0x0 };
+            pipeline.addLast("frameDecoder",
+                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+            pipeline.addLast("stringDecoder", new StringDecoder());
+            pipeline.addLast("stringEncoder", new StringEncoder());
+            pipeline.addLast("objectDecoder", new Gl100ProtocolDecoder(serverCreator, resetDelay));
+            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));
+            return pipeline;
+        }
+    }    
+    
+    /**
+     * Init Gl100 server
+     */
+    public void initGl100Server(Properties properties) throws SQLException {
+
+        boolean enable = Boolean.valueOf(properties.getProperty("gl100.enable"));
+        if (enable) {
+
+            TrackerServer server = new TrackerServer(
+                    Integer.valueOf(properties.getProperty("gl100.port")));
+
+            String resetDelay = properties.getProperty("gl100.resetDelay");
+            server.setPipelineFactory(new Gl100PipelineFactory(
+                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+
+            serverList.add(server);
+        }
+    }
+
+    
     /**
      * Gl200 pipeline factory
      */

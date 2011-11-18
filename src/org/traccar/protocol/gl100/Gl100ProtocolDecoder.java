@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.protocol.gl200;
+package org.traccar.protocol.gl100;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -34,7 +34,7 @@ import org.jboss.netty.channel.ChannelStateEvent;
 /**
  * GL200 tracker protocol decoder
  */
-public class Gl200ProtocolDecoder extends OneToOneDecoder {
+public class Gl100ProtocolDecoder extends OneToOneDecoder {
 
     /**
      * Data manager
@@ -49,7 +49,7 @@ public class Gl200ProtocolDecoder extends OneToOneDecoder {
     /**
      * Init device table
      */
-    public Gl200ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
+    public Gl100ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
         this.dataManager = dataManager;
         this.resetDelay = resetDelay;
     }
@@ -59,17 +59,16 @@ public class Gl200ProtocolDecoder extends OneToOneDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
-            "\\d{6}," +                         // Protocol version
             "(\\d{15})," +                      // IMEI
-            "[^,]*," +                          // Device name
-            "(?:(?:\\d," +                      // Report ID / Geo mode
-            "\\d*," +                           // Report type / Geo radius
-            "\\d*)|" +                          // Number / Geo check interval
-            "(?:[^,]*))," +                     // Call number
-            "(\\d*)," +                         // GPS accuracy
+            "(?:(?:\\d+," +                     // Number
+            "\\d," +                            // Reserved / Geofence id
+            "\\d)|" +                           // Reserved / Geofence alert
+            "(?:[^,]*))," +                     // Calling number
+            "([01])," +                         // GPS fix
             "(\\d+.\\d)," +                     // Speed
             "(\\d+)," +                         // Course
             "(-?\\d+.\\d)," +                   // Altitude
+            "\\d*," +                           // GPS accuracy
             "(-?\\d+.\\d+)," +                  // Longitude
             "(-?\\d+.\\d+)," +                  // Latitude
             "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)

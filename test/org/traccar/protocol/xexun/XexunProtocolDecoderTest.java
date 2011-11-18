@@ -1,7 +1,5 @@
 package org.traccar.protocol.xexun;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import org.junit.Test;
 import org.traccar.Device;
