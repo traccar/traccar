@@ -524,7 +524,7 @@ public class Server implements DataManager {
             if (serverCreator.isLoggerEnabled()) {
                 pipeline.addLast("logger", new LoggingHandler("logger"));
             }
-            byte delimiter[] = { (byte) '\r', (byte) '\n' };
+            byte delimiter[] = { (byte) '\n' }; // tracker bug \n\r
             pipeline.addLast("frameDecoder",
                     new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
             pipeline.addLast("stringDecoder", new StringDecoder());

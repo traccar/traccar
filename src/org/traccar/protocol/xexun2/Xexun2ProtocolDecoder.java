@@ -59,6 +59,7 @@ public class Xexun2ProtocolDecoder extends OneToOneDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
+            "[\r\n]*" +
             "\\d+," +
             "\\+\\d+," +
             "GPRMC," +
@@ -72,11 +73,12 @@ public class Xexun2ProtocolDecoder extends OneToOneDecoder {
             "(\\d+.\\d+)?," +                   // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             ".*imei:" +
-            "([\\d]+)," +                       // IMEI
+            "(\\d+)," +                         // IMEI
             "\\d+," +
             "\\d+.\\d+," +
             "F:(\\d+.\\d+)V," +                 // Power
-            ".*");
+            ".*" +
+            "[\r\n]*");
 
     /**
      * Decode message
@@ -89,7 +91,8 @@ public class Xexun2ProtocolDecoder extends OneToOneDecoder {
         String sentence = (String) msg;
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
-            throw new ParseException(null, 0);
+            //throw new ParseException(null, 0);
+            return null;
         }
 
         // Create new position
