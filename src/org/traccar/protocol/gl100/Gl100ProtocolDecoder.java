@@ -84,6 +84,14 @@ public class Gl100ProtocolDecoder extends OneToOneDecoder {
 
         String sentence = (String) msg;
         
+        // Send response
+        if (sentence.contains("AT+GTHBD=")) {
+            String response = "+RESP:GTHBD,GPRS ACTIVE,";
+            response += sentence.substring(9, sentence.lastIndexOf(','));
+            response += '\0';
+            channel.write(response);
+        }
+        
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
