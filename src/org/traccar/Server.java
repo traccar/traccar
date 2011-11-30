@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.DriverManager;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -53,6 +51,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.traccar.helper.AdvancedConnection;
 import org.traccar.protocol.gl100.Gl100ProtocolDecoder;
 import org.traccar.protocol.xexun2.Xexun2ProtocolDecoder;
 
@@ -102,13 +101,10 @@ public class Server implements DataManager {
     }
 
     /**
-     * Database connection
+     * Database statements
      */
-    private Connection connection;
-    
-    private String selectDeviceQuery;
-    
-    private String insertPositionQuery;
+    private NamedParameterStatement selectDevice;
+    private NamedParameterStatement insertPosition;
 
     /**
      * Init database
@@ -126,15 +122,13 @@ public class Server implements DataManager {
         String url = properties.getProperty("database.url");
         String user = properties.getProperty("database.user");
         String password = properties.getProperty("database.password");
+        AdvancedConnection connection = new AdvancedConnection(url, user, password);
 
-        if (user != null && password != null) {
-            connection = DriverManager.getConnection(url, user, password);
-        } else {
-            connection = DriverManager.getConnection(url);
-        }
+        String query = properties.getProperty("database.selectDevice");
+        selectDevice = new NamedParameterStatement(connection, query);
 
-        selectDeviceQuery = properties.getProperty("database.selectDevice");
-        insertPositionQuery = properties.getProperty("database.insertPosition");
+        query = properties.getProperty("database.insertPosition");
+        insertPosition = new NamedParameterStatement(connection, query);
     }
 
     /**
@@ -148,8 +142,6 @@ public class Server implements DataManager {
 
         List deviceList = new LinkedList();
 
-        NamedParameterStatement selectDevice =
-                new NamedParameterStatement(connection, selectDeviceQuery);
         ResultSet result = selectDevice.executeQuery();
         while (result.next()) {
             Device device = new Device();
@@ -177,9 +169,6 @@ public class Server implements DataManager {
 
     public synchronized void setPosition(Position position) throws SQLException {
 
-        NamedParameterStatement insertPosition =
-                new NamedParameterStatement(connection, insertPositionQuery);
-        
         insertPosition.setLong("device_id", position.getDeviceId());
         insertPosition.setTimestamp("time", position.getTime());
         insertPosition.setBoolean("valid", position.getValid());
