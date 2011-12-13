@@ -142,6 +142,7 @@ public class Server implements DataManager {
 
         List deviceList = new LinkedList();
 
+        selectDevice.prepare();
         ResultSet result = selectDevice.executeQuery();
         while (result.next()) {
             Device device = new Device();
@@ -168,6 +169,8 @@ public class Server implements DataManager {
     }
 
     public synchronized void setPosition(Position position) throws SQLException {
+        
+        insertPosition.prepare();
 
         insertPosition.setLong("device_id", position.getDeviceId());
         insertPosition.setTimestamp("time", position.getTime());

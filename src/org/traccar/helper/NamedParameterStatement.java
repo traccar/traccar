@@ -114,11 +114,8 @@ public class NamedParameterStatement {
 
         return parsedQuery.toString();
     }
-
-    /**
-     * Execute query with result
-     */
-    public ResultSet executeQuery() throws SQLException {
+    
+    public void prepare() throws SQLException {
         try {
             if (statement == null) {
                 statement = connection.getInstance().prepareStatement(parsedQuery);
@@ -127,6 +124,12 @@ public class NamedParameterStatement {
             connection.reset();
             statement = connection.getInstance().prepareStatement(parsedQuery);
         }
+    }
+
+    /**
+     * Execute query with result
+     */
+    public ResultSet executeQuery() throws SQLException {
         return statement.executeQuery();
     }
 
@@ -135,14 +138,6 @@ public class NamedParameterStatement {
      * Executes query without result
      */
     public int executeUpdate() throws SQLException {
-        try {
-            if (statement == null) {
-                statement = connection.getInstance().prepareStatement(parsedQuery);
-            }
-        } catch (SQLException error) {
-            connection.reset();
-            statement = connection.getInstance().prepareStatement(parsedQuery);
-        }
         return statement.executeUpdate();
     }
 
