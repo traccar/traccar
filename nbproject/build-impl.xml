@@ -20,10 +20,10 @@ is divided into following sections:
 
         -->
 <project xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1" xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3" xmlns:jaxrpc="http://www.netbeans.org/ns/j2se-project/jax-rpc" basedir=".." default="default" name="tracker-server-impl">
-    <fail message="Please build using Ant 1.7.1 or higher.">
+    <fail message="Please build using Ant 1.8.0 or higher.">
         <condition>
             <not>
-                <antversion atleast="1.7.1"/>
+                <antversion atleast="1.8.0"/>
             </not>
         </condition>
     </fail>
@@ -198,6 +198,7 @@ is divided into following sections:
         <property name="javac.fork" value="${jdkBug6558476}"/>
         <property name="jar.index" value="false"/>
         <property name="jar.index.metainf" value="${jar.index}"/>
+        <property name="copylibs.rebase" value="true"/>
         <available file="${meta.inf.dir}/persistence.xml" property="has.persistence.xml"/>
     </target>
     <target name="-post-init">
@@ -384,6 +385,7 @@ is divided into following sections:
                 <property environment="env"/>
                 <resolve name="profiler.current.path" value="${profiler.info.pathvar}"/>
                 <java classname="@{classname}" dir="${profiler.info.dir}" fork="true" jvm="${profiler.info.jvm}">
+                    <jvmarg line="${endorsed.classpath.cmd.line.arg}"/>
                     <jvmarg value="${profiler.info.jvmargs.agent}"/>
                     <jvmarg line="${profiler.info.jvmargs}"/>
                     <env key="${profiler.info.pathvar}" path="${profiler.info.agentpath}:${profiler.current.path}"/>
@@ -514,7 +516,7 @@ is divided into following sections:
                     </chainedmapper>
                 </pathconvert>
                 <taskdef classname="org.netbeans.modules.java.j2seproject.copylibstask.CopyLibs" classpath="${libs.CopyLibs.classpath}" name="copylibs"/>
-                <copylibs compress="${jar.compress}" index="${jar.index}" indexMetaInf="${jar.index.metainf}" jarfile="${dist.jar}" manifest="@{manifest}" runtimeclasspath="${run.classpath.without.build.classes.dir}">
+                <copylibs compress="${jar.compress}" index="${jar.index}" indexMetaInf="${jar.index.metainf}" jarfile="${dist.jar}" manifest="@{manifest}" rebase="${copylibs.rebase}" runtimeclasspath="${run.classpath.without.build.classes.dir}">
                     <fileset dir="${build.classes.dir}"/>
                     <manifest>
                         <attribute name="Class-Path" value="${jar.classpath}"/>
@@ -839,16 +841,26 @@ is divided into following sections:
             -->
     <target depends="init" if="have.sources" name="-javadoc-build">
         <mkdir dir="${dist.javadoc.dir}"/>
+        <condition else="" property="javadoc.endorsed.classpath.cmd.line.arg" value="-J${endorsed.classpath.cmd.line.arg}">
+            <and>
+                <isset property="endorsed.classpath.cmd.line.arg"/>
+                <not>
+                    <equals arg1="${endorsed.classpath.cmd.line.arg}" arg2=""/>
+                </not>
+            </and>
+        </condition>
         <javadoc additionalparam="${javadoc.additionalparam}" author="${javadoc.author}" charset="UTF-8" destdir="${dist.javadoc.dir}" docencoding="UTF-8" encoding="${javadoc.encoding.used}" failonerror="true" noindex="${javadoc.noindex}" nonavbar="${javadoc.nonavbar}" notree="${javadoc.notree}" private="${javadoc.private}" source="${javac.source}" splitindex="${javadoc.splitindex}" use="${javadoc.use}" useexternalfile="true" version="${javadoc.version}" windowtitle="${javadoc.windowtitle}">
             <classpath>
                 <path path="${javac.classpath}"/>
             </classpath>
-            <fileset dir="${src.dir}" excludes="${excludes}" includes="${includes}">
+            <fileset dir="${src.dir}" excludes="*.java,${excludes}" includes="${includes}">
                 <filename name="**/*.java"/>
             </fileset>
             <fileset dir="${build.generated.sources.dir}" erroronmissingdir="false">
                 <include name="**/*.java"/>
+                <exclude name="*.java"/>
             </fileset>
+            <arg line="${javadoc.endorsed.classpath.cmd.line.arg}"/>
         </javadoc>
         <copy todir="${dist.javadoc.dir}">
             <fileset dir="${src.dir}" excludes="${excludes}" includes="${includes}">

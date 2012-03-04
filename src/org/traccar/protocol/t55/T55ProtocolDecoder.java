@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Anton Tananaev (anton@tananaev.com)
+ * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.jboss.netty.channel.ChannelState;
 import org.jboss.netty.channel.ChannelStateEvent;
 
 /**
- * Gps 103 tracker protocol decoder
+ * T55 tracker protocol decoder
  */
 public class T55ProtocolDecoder extends OneToOneDecoder {
 
@@ -70,10 +70,10 @@ public class T55ProtocolDecoder extends OneToOneDecoder {
             "([NS])," +
             "(\\d{3})(\\d{2}.\\d{4})," + // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+.\\d{2})?," +           // Speed
-            "(\\d+.\\d{2})?," +           // Course
+            "(\\d+.\\d{2})?," +          // Speed
+            "(\\d+.\\d{2})?," +          // Course
             "(\\d{2})(\\d{2})(\\d{2})" + // Date (DDMMYY)
-            ".+");                     // Other (Checksumm)
+            ".+");                       // Other (Checksumm)
 
     /**
      * Decode message
