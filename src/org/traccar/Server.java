@@ -54,6 +54,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.traccar.helper.AdvancedConnection;
 import org.traccar.protocol.gl100.Gl100ProtocolDecoder;
 import org.traccar.protocol.xexun2.Xexun2ProtocolDecoder;
+import org.traccar.protocol.avl08.Avl08ProtocolDecoder;
 
 /**
  * Server
@@ -98,6 +99,7 @@ public class Server implements DataManager {
         initGl200Server(properties);
         initT55Server(properties);
         initXexun2Server(properties);
+        initAvl08Server(properties);
     }
 
     /**
@@ -600,6 +602,57 @@ public class Server implements DataManager {
         }
     }
 
+    /**
+     * AVL-08 pipeline factory
+     */
+    protected class Avl08PipelineFactory implements ChannelPipelineFactory {
+
+        private TrackerServer server;
+        private Server serverCreator;
+        private Integer resetDelay;
+        
+        public Avl08PipelineFactory(
+                TrackerServer server, Server serverCreator, Integer resetDelay) {
+            this.server = server;
+            this.serverCreator = serverCreator;
+            this.resetDelay = resetDelay;
+        }
+        
+        public ChannelPipeline getPipeline() {
+            ChannelPipeline pipeline = Channels.pipeline();
+            pipeline.addLast("openHandler", new OpenChannelHandler(server));
+            if (serverCreator.isLoggerEnabled()) {
+                pipeline.addLast("logger", new LoggingHandler("logger"));
+            }
+            byte delimiter[] = { (byte) '$', (byte) '$' }; // probably use \r\n
+            pipeline.addLast("frameDecoder",
+                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+            pipeline.addLast("stringDecoder", new StringDecoder());
+            pipeline.addLast("objectDecoder", new Avl08ProtocolDecoder(serverCreator, resetDelay));
+            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));            
+            return pipeline;
+        }
+    }
+    
+    /**
+     * Init AVL-08 server
+     */
+    public void initAvl08Server(Properties properties) throws SQLException {
+
+        boolean enable = Boolean.valueOf(properties.getProperty("avl08.enable"));
+        if (enable) {
+
+            TrackerServer server = new TrackerServer(
+                    Integer.valueOf(properties.getProperty("avl08.port")));
+
+            String resetDelay = properties.getProperty("avl08.resetDelay");
+            server.setPipelineFactory(new Xexun2PipelineFactory(
+                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+
+            serverList.add(server);
+        }
+    }
+    
     /**
      * Start
      */
