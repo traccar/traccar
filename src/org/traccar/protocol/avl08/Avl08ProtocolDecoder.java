@@ -15,49 +15,27 @@
  */
 package org.traccar.protocol.avl08;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.Position;
 import org.traccar.DataManager;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelState;
-import org.jboss.netty.channel.ChannelStateEvent;
+import org.traccar.GenericProtocolDecoder;
 
 /**
  * AVL-08 tracker protocol decoder
  */
-public class Avl08ProtocolDecoder extends OneToOneDecoder {
+public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
 
     /**
-     * Data manager
-     */
-    private DataManager dataManager;
-
-    /**
-     * Reset connection delay
-     */
-    private Integer resetDelay;
-    
-    /**
-     * Device ID
-     */
-    private Long deviceId;
-
-    /**
-     * Init device table
+     * Initialize
      */
     public Avl08ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        this.dataManager = dataManager;
-        this.resetDelay = resetDelay;
+        super(dataManager, resetDelay);
     }
     
     /**
@@ -99,7 +77,7 @@ public class Avl08ProtocolDecoder extends OneToOneDecoder {
 
         // Get device by IMEI
         String imei = parser.group(index++);
-        position.setDeviceId(dataManager.getDeviceByImei(imei).getId());
+        position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
         
         // Time
         Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -145,37 +123,6 @@ public class Avl08ProtocolDecoder extends OneToOneDecoder {
         position.setTime(time.getTime());
 
         return position;
-    }
-
-    /**
-     * Disconnect channel
-     */
-    class DisconnectTask extends TimerTask {
-        private Channel channel;
-
-        public DisconnectTask(Channel channel) {
-            this.channel = channel;
-        }
-
-        public void run() {
-            channel.disconnect();
-        }
-    }
-
-    /**
-     * Handle connect event
-     */
-    @Override
-    public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
-        super.handleUpstream(ctx, evt);
-
-        if (evt instanceof ChannelStateEvent) {
-            ChannelStateEvent event = (ChannelStateEvent) evt;
-
-            if (event.getState() == ChannelState.CONNECTED && event.getValue() != null && resetDelay != 0) {
-                new Timer().schedule(new Avl08ProtocolDecoder.DisconnectTask(evt.getChannel()), resetDelay);
-            }
-        }
     }
 
 }

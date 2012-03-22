@@ -646,7 +646,7 @@ public class Server implements DataManager {
                     Integer.valueOf(properties.getProperty("avl08.port")));
 
             String resetDelay = properties.getProperty("avl08.resetDelay");
-            server.setPipelineFactory(new Xexun2PipelineFactory(
+            server.setPipelineFactory(new Avl08PipelineFactory(
                     server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
 
             serverList.add(server);
