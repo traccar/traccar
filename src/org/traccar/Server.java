@@ -624,7 +624,7 @@ public class Server implements DataManager {
             if (serverCreator.isLoggerEnabled()) {
                 pipeline.addLast("logger", new LoggingHandler("logger"));
             }
-            byte delimiter[] = { (byte) '$', (byte) '$' }; // probably use \r\n
+            byte delimiter[] = { (byte) '\r', (byte) '\n' };
             pipeline.addLast("frameDecoder",
                     new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
             pipeline.addLast("stringDecoder", new StringDecoder());

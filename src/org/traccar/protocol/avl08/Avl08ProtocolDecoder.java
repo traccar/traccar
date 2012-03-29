@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.Position;
 import org.traccar.DataManager;
+import org.traccar.Device; // DELME
 import org.traccar.GenericProtocolDecoder;
 
 /**
@@ -42,7 +43,7 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            ".{2}" +                     // Length
+            "\\$\\$.{2}" +               // Length
             "(\\d{15})\\|" +             // IMEI
             ".{2}" +                     // Alarm Type
             "\\$GPRMC," +
