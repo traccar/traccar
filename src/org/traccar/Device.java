@@ -29,8 +29,8 @@ public class Device {
         return id;
     }
 
-    public void setId(Long newId) {
-        id = newId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     /**
@@ -42,8 +42,8 @@ public class Device {
         return imei;
     }
 
-    public void setImei(String newImei) {
-        imei = newImei;
+    public void setImei(String imei) {
+        this.imei = imei;
     }
 
 }

@@ -209,4 +209,16 @@ public class NamedParameterStatement {
         }
     }
 
+    public void setString(String name, String value) throws SQLException {
+
+        List indexList = (List) indexMap.get(name);
+        if (indexList != null) for (Object index: indexList) {
+            if (value != null) {
+                statement.setString((Integer) index, value);
+            } else {
+                statement.setNull((Integer) index, Types.VARCHAR);
+            }
+        }
+    }
+
 }

@@ -31,8 +31,8 @@ public class Position {
         return id;
     }
 
-    public void setId(Long newId) {
-        id = newId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     /**
@@ -44,8 +44,8 @@ public class Position {
         return deviceId;
     }
 
-    public void setDeviceId(Long newDeviceId) {
-        deviceId = newDeviceId;
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
     }
 
     /**
@@ -57,8 +57,8 @@ public class Position {
         return time;
     }
 
-    public void setTime(Date newTime) {
-        time = newTime;
+    public void setTime(Date time) {
+        this.time = time;
     }
 
     /**
@@ -70,8 +70,8 @@ public class Position {
         return valid;
     }
 
-    public void setValid(Boolean newValid) {
-        valid = newValid;
+    public void setValid(Boolean valid) {
+        this.valid = valid;
     }
 
     /**
@@ -83,8 +83,8 @@ public class Position {
         return latitude;
     }
 
-    public void setLatitude(Double newLatitude) {
-        latitude = newLatitude;
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
     /**
@@ -96,8 +96,8 @@ public class Position {
         return longitude;
     }
 
-    public void setLongitude(Double newLongitude) {
-        longitude = newLongitude;
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
     
     /**
@@ -109,8 +109,8 @@ public class Position {
         return altitude;
     }
 
-    public void setAltitude(Double newAltitude) {
-        altitude = newAltitude;
+    public void setAltitude(Double altitude) {
+        this.altitude = altitude;
     }
 
     /**
@@ -122,8 +122,8 @@ public class Position {
         return speed;
     }
 
-    public void setSpeed(Double newSpeed) {
-        speed = newSpeed;
+    public void setSpeed(Double speed) {
+        this.speed = speed;
     }
 
     /**
@@ -135,8 +135,8 @@ public class Position {
         return course;
     }
 
-    public void setCourse(Double newCourse) {
-        course = newCourse;
+    public void setCourse(Double course) {
+        this.course = course;
     }
 
     /**
@@ -148,8 +148,21 @@ public class Position {
         return power;
     }
 
-    public void setPower(Double newPower) {
-        power = newPower;
+    public void setPower(Double power) {
+        this.power = power;
     }
-    
+
+    /**
+     * Extended information in XML format
+     */
+    private String extendedInfo;
+
+    public String getExtendedInfo() {
+        return extendedInfo;
+    }
+
+    public void setExtendedInfo(String extendedInfo) {
+        this.extendedInfo = extendedInfo;
+    }
+
 }

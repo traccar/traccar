@@ -35,9 +35,16 @@ public abstract class GenericProtocolDecoder extends OneToOneDecoder {
     private DataManager dataManager;
 
     /**
+     * Set data manager
+     */
+    public final void setDataManager(DataManager dataManager) {
+        this.dataManager = dataManager;
+    }
+    
+    /**
      * Return data manager
      */
-    public DataManager getDataManager() {
+    public final DataManager getDataManager() {
         return dataManager;
     }
 
@@ -45,13 +52,26 @@ public abstract class GenericProtocolDecoder extends OneToOneDecoder {
      * Reset connection delay
      */
     private Integer resetDelay;
-    
+
     /**
-     * Initialize variables
+     * Set reset connection delay
+     */
+    public final void setResetDelay(Integer resetDelay) {
+        this.resetDelay = resetDelay;
+    }
+
+    /**
+     * Default constructor
+     */
+    public GenericProtocolDecoder() {
+    }
+
+    /**
+     * Initialize
      */
     public GenericProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        this.dataManager = dataManager;
-        this.resetDelay = resetDelay;
+        setDataManager(dataManager);
+        setResetDelay(resetDelay);
     }
     
     /**
