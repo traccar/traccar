@@ -1,29 +1,9 @@
-package org.traccar.protocol.gps103;
+package org.traccar.protocol;
 
-import java.util.List;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
-import org.traccar.Device;
-import org.traccar.Position;
-import org.traccar.DataManager;
-import static org.junit.Assert.*;
 
 public class Gps103ProtocolDecoderTest {
-
-    private class TestDataManager implements DataManager {
-        public List getDevices() {
-            return null;
-        }
-
-        public Device getDeviceByImei(String imei) {
-            Device device = new Device();
-            device.setId(new Long(1));
-            device.setImei("10000000000000");
-            return device;
-        }
-
-        public void setPosition(Position position) {
-        }
-    }
 
     @Test
     public void testDecode() throws Exception {

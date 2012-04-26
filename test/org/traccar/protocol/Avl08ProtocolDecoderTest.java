@@ -1,40 +1,16 @@
-package org.traccar.protocol.avl08;
+package org.traccar.protocol;
 
-import java.util.List;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
-import org.traccar.Device;
-import org.traccar.Position;
-import org.traccar.DataManager;
-import static org.junit.Assert.*;
 
 public class Avl08ProtocolDecoderTest {
-
-    private class TestDataManager implements DataManager {
-        public List getDevices() {
-            return null;
-        }
-
-        public Device getDeviceByImei(String imei) {
-            Device device = new Device();
-            device.setId(new Long(1));
-            device.setImei("10000000000000");
-            return device;
-        }
-
-        public void setPosition(Position position) {
-        }
-    }
 
     @Test
     public void testDecode() throws Exception {
         
-        Avl08ProtocolDecoder decoder = new Avl08ProtocolDecoder(new Avl08ProtocolDecoderTest.TestDataManager(), 0);
+        Avl08ProtocolDecoder decoder = new Avl08ProtocolDecoder(new TestDataManager(), 0);
 
-        //$$(2 Bytes) + Len(2 Bytes) + IMEI(15 Bytes) + | + AlarmType(2 Bytes) + GPRMC + | +
-        //PDOP + | + HDOP + | + VDOP + | + Status(12 Bytes) + | + RTC(14 Bytes) + | + Voltage(8 Bytes)
-        //+ | + ADC(8 Bytes) + | + LACCI(8 Bytes) + | + Temperature(4 Bytes) | +Mile-meter+| +Serial(4
-        //Bytes) + | +RFID(10Bytes)+|+ Checksum (4 Byte) + \r\n(2 Bytes)
-        
         assertNull(decoder.decode(null, null,
                 "$$AE359772033395899|AA000000000000000000000000000000000000000000000000000000000000|00.0|00.0|00.0|000000000000|20090215000153|13601435|00000000|00000000|0000|0.0000|0007|2DAA"));
 
@@ -58,6 +34,9 @@ public class Avl08ProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 "$$B3359772032399074|AA$GPRMC,234603.000,A,3648.2179,N,01008.0962,E,0.00,,030412,,,A*74|01.8|01.0|01.5|000000000000|20120403234603|14251914|00000000|0012D888|0000|0.0000|3674||940B"));
+
+        assertNotNull(decoder.decode(null, null,
+                "$$B3359772032399074|AA$GPRMC,234603.000,A,3648.2179,N,01008.0962,E,0.00,,030412,,,A*74|01.8|01.0|01.5|000000000000|20120403234603|14251914|00000000|0012D888|0000|0.0000|3674|940B"));
     }
 
 }

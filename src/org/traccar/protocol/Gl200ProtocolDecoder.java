@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.protocol.gl100;
+package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -29,12 +29,12 @@ import org.traccar.GenericProtocolDecoder;
 /**
  * GL200 tracker protocol decoder
  */
-public class Gl100ProtocolDecoder extends GenericProtocolDecoder {
+public class Gl200ProtocolDecoder extends GenericProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Gl100ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
+    public Gl200ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
         super(dataManager, resetDelay);
     }
 
@@ -43,16 +43,17 @@ public class Gl100ProtocolDecoder extends GenericProtocolDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
+            "\\d{6}," +                         // Protocol version
             "(\\d{15})," +                      // IMEI
-            "(?:(?:\\d+," +                     // Number
-            "\\d," +                            // Reserved / Geofence id
-            "\\d)|" +                           // Reserved / Geofence alert
-            "(?:[^,]*))," +                     // Calling number
-            "([01])," +                         // GPS fix
+            "[^,]*," +                          // Device name
+            "(?:(?:\\d," +                      // Report ID / Geo mode
+            "\\d*," +                           // Report type / Geo radius
+            "\\d*)|" +                          // Number / Geo check interval
+            "(?:[^,]*))," +                     // Call number
+            "(\\d*)," +                         // GPS accuracy
             "(\\d+.\\d)," +                     // Speed
             "(\\d+)," +                         // Course
             "(-?\\d+.\\d)," +                   // Altitude
-            "\\d*," +                           // GPS accuracy
             "(-?\\d+.\\d+)," +                  // Longitude
             "(-?\\d+.\\d+)," +                  // Latitude
             "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)
@@ -67,14 +68,6 @@ public class Gl100ProtocolDecoder extends GenericProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
-        // Send response
-        if (sentence.contains("AT+GTHBD=")) {
-            String response = "+RESP:GTHBD,GPRS ACTIVE,";
-            response += sentence.substring(9, sentence.lastIndexOf(','));
-            response += '\0';
-            channel.write(response);
-        }
         
         // Parse message
         Matcher parser = pattern.matcher(sentence);

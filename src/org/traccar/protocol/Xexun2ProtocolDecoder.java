@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.protocol.xexun2;
+package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;

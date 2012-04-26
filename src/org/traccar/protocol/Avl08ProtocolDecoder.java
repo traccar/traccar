@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.protocol.avl08;
+package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -65,8 +65,9 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
             "(.\\d{3})\\|" +             // Temperature
             "(\\d+.\\d{4})\\|" +         // Mileage
             "(\\d{4})\\|" +              // Serial
-            "(.{10})?\\|" +              // RFID
-            ".+");
+            "(.{10})?\\|?" +             // RFID
+            ".+"); // TODO: Use non-capturing group
+
     /**
      * Decode message
      */

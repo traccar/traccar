@@ -39,12 +39,12 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.logging.LoggingHandler;
-import org.traccar.protocol.xexun.XexunFrameDecoder;
-import org.traccar.protocol.xexun.XexunProtocolDecoder;
-import org.traccar.protocol.gps103.Gps103ProtocolDecoder;
-import org.traccar.protocol.tk103.Tk103ProtocolDecoder;
-import org.traccar.protocol.gl200.Gl200ProtocolDecoder;
-import org.traccar.protocol.t55.T55ProtocolDecoder;
+import org.traccar.protocol.XexunFrameDecoder;
+import org.traccar.protocol.XexunProtocolDecoder;
+import org.traccar.protocol.Gps103ProtocolDecoder;
+import org.traccar.protocol.Tk103ProtocolDecoder;
+import org.traccar.protocol.Gl200ProtocolDecoder;
+import org.traccar.protocol.T55ProtocolDecoder;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -52,9 +52,9 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.traccar.helper.AdvancedConnection;
-import org.traccar.protocol.gl100.Gl100ProtocolDecoder;
-import org.traccar.protocol.xexun2.Xexun2ProtocolDecoder;
-import org.traccar.protocol.avl08.Avl08ProtocolDecoder;
+import org.traccar.protocol.Gl100ProtocolDecoder;
+import org.traccar.protocol.Xexun2ProtocolDecoder;
+import org.traccar.protocol.Avl08ProtocolDecoder;
 
 /**
  * Server
