@@ -18,14 +18,13 @@ package org.traccar.protocol;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.Position;
-import org.traccar.DataManager;
-import org.traccar.Device; // DELME
+import org.traccar.model.DataManager;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.model.Position;
 
 /**
  * AVL-08 tracker protocol decoder

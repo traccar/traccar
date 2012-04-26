@@ -15,46 +15,26 @@
  */
 package org.traccar;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.logging.Logger;
-import java.util.logging.FileHandler;
+import java.util.*;
 import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import org.traccar.helper.NamedParameterStatement;
+import java.util.logging.*;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
-import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.logging.LoggingHandler;
-import org.traccar.protocol.XexunFrameDecoder;
-import org.traccar.protocol.XexunProtocolDecoder;
-import org.traccar.protocol.Gps103ProtocolDecoder;
-import org.traccar.protocol.Tk103ProtocolDecoder;
-import org.traccar.protocol.Gl200ProtocolDecoder;
-import org.traccar.protocol.T55ProtocolDecoder;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.traccar.helper.AdvancedConnection;
-import org.traccar.protocol.Gl100ProtocolDecoder;
-import org.traccar.protocol.Xexun2ProtocolDecoder;
-import org.traccar.protocol.Avl08ProtocolDecoder;
+import org.traccar.helper.NamedParameterStatement;
+import org.traccar.model.DataManager;
+import org.traccar.model.Device;
+import org.traccar.model.Position;
+import org.traccar.protocol.*;
 
 /**
  * Server
@@ -66,15 +46,15 @@ public class Server implements DataManager {
      */
     private List serverList;
 
-    private boolean loggerEnable;
+    private boolean loggerEnabled;
 
     public Server() {
         serverList = new LinkedList();
-        loggerEnable = false;
+        loggerEnabled = false;
     }
-    
+
     public boolean isLoggerEnabled() {
-        return loggerEnable;
+        return loggerEnabled;
     }
 
     /**
@@ -100,6 +80,31 @@ public class Server implements DataManager {
         initT55Server(properties);
         initXexun2Server(properties);
         initAvl08Server(properties);
+    }
+
+    /**
+     * Start
+     */
+    public void start() {
+        for (Object server: serverList) {
+            ((TrackerServer) server).start();
+        }
+    }
+
+    /**
+     * Stop
+     */
+    public void stop() {
+        for (Object server: serverList) {
+            ((TrackerServer) server).stop();
+        }
+    }
+
+    /**
+     * Destroy
+     */
+    public void destroy() {
+        serverList.clear();
     }
 
     /**
@@ -155,9 +160,9 @@ public class Server implements DataManager {
 
         return deviceList;
     }
-    
+
     public Device getDeviceByImei(String imei) throws SQLException {
-        
+
         if ((devices == null) || (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesListRefreshDelay)) {
             devices = new HashMap();
             List deviceList = getDevices();
@@ -171,7 +176,7 @@ public class Server implements DataManager {
     }
 
     public synchronized void setPosition(Position position) throws SQLException {
-        
+
         insertPosition.prepare();
 
         insertPosition.setLong("device_id", position.getDeviceId());
@@ -187,15 +192,15 @@ public class Server implements DataManager {
 
         insertPosition.executeUpdate();
     }
-    
+
     /**
      * Init logger
      */
     public void initLogger(Properties properties) throws IOException {
 
-        loggerEnable = Boolean.valueOf(properties.getProperty("logger.enable"));
+        loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
 
-        if (loggerEnable) {
+        if (loggerEnabled) {
 
             Logger logger = Logger.getLogger("logger");
             String fileName = properties.getProperty("logger.file");
@@ -206,7 +211,7 @@ public class Server implements DataManager {
                 file.setFormatter(new Formatter() {
                     private final String LINE_SEPARATOR =
                             System.getProperty("line.separator", "\n");
-                    
+
                     private final DateFormat dateFormat =
                             new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
@@ -225,458 +230,231 @@ public class Server implements DataManager {
         }
     }
 
-    /**
-     * Open channel handler
-     */
-    protected class OpenChannelHandler extends SimpleChannelHandler {
-
-        private TrackerServer server;
-
-        public OpenChannelHandler(TrackerServer server) {
-            this.server = server;
+    private boolean isProtocolEnabled(Properties properties, String protocol) {
+        String enabled = properties.getProperty(protocol + ".enable");
+        if (enabled != null) {
+            return Boolean.valueOf(enabled);
         }
-
-        @Override
-        public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
-            server.getChannelGroup().add(e.getChannel());
-        }
+        return false;
     }
 
-    /**
-     * Xexun pipeline factory
-     */
-    protected class XexunPipelineFactory implements ChannelPipelineFactory {
-
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public XexunPipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
+    private Integer getProtocolPort(Properties properties, String protocol) {
+        String port = properties.getProperty(protocol + ".port");
+        if (port != null) {
+            return Integer.valueOf(port);
         }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            pipeline.addLast("frameDecoder", new XexunFrameDecoder());
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("objectDecoder", new XexunProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));            
-            return pipeline;
-        }
+        return 5000; // Magic number
     }
-    
+
+    private Integer getProtocolResetDelay(Properties properties, String protocol) {
+        String resetDelay = properties.getProperty(protocol + ".resetDelay");
+        if (resetDelay != null) {
+            return Integer.valueOf(resetDelay);
+        }
+        return 0;
+    }
+
     /**
      * Init Xexun server
      */
     public void initXexunServer(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("xexun.enable"));
-        if (enable) {
+        String protocol = "xexun";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("xexun.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("xexun.resetDelay");
-            server.setPipelineFactory(new XexunPipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new XexunFrameDecoder());
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new XexunProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
     }
 
-    /**
-     * Gps103 pipeline factory
-     */
-    protected class Gps103PipelineFactory implements ChannelPipelineFactory {
-
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public Gps103PipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
-        }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            byte delimiter[] = { (byte) ';' };
-            pipeline.addLast("frameDecoder",
-                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("stringEncoder", new StringEncoder());
-            pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));            
-            return pipeline;
-        }
-    }
-    
     /**
      * Init Gps103 server
      */
     public void initGps103Server(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("gps103.enable"));
-        if (enable) {
+        String protocol = "gps103";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("gps103.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("gps103.resetDelay");
-            server.setPipelineFactory(new Gps103PipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) ';' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
     }
 
-    /**
-     * Tk103 pipeline factory
-     */
-    protected class Tk103PipelineFactory implements ChannelPipelineFactory {
-
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public Tk103PipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
-        }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            byte delimiter[] = { (byte) ')' };
-            pipeline.addLast("frameDecoder",
-                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("stringEncoder", new StringEncoder());
-            pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));            
-            return pipeline;
-        }
-    }    
-    
     /**
      * Init Tk103 server
      */
     public void initTk103Server(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("tk103.enable"));
-        if (enable) {
+        String protocol = "tk103";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("tk103.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("tk103.resetDelay");
-            server.setPipelineFactory(new Tk103PipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) ')' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
     }
 
-    /**
-     * Gl100 pipeline factory
-     */
-    protected class Gl100PipelineFactory implements ChannelPipelineFactory {
-
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public Gl100PipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
-        }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            byte delimiter[] = { (byte) 0x0 };
-            pipeline.addLast("frameDecoder",
-                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("stringEncoder", new StringEncoder());
-            pipeline.addLast("objectDecoder", new Gl100ProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));
-            return pipeline;
-        }
-    }    
-    
     /**
      * Init Gl100 server
      */
     public void initGl100Server(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("gl100.enable"));
-        if (enable) {
+        String protocol = "gl100";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("gl100.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("gl100.resetDelay");
-            server.setPipelineFactory(new Gl100PipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) 0x0 };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Gl100ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
     }
 
-    
-    /**
-     * Gl200 pipeline factory
-     */
-    protected class Gl200PipelineFactory implements ChannelPipelineFactory {
-
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public Gl200PipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
-        }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            byte delimiter[] = { (byte) '$' };
-            pipeline.addLast("frameDecoder",
-                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("stringEncoder", new StringEncoder());
-            pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));
-            return pipeline;
-        }
-    }    
-    
     /**
      * Init Gl200 server
      */
     public void initGl200Server(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("gl200.enable"));
-        if (enable) {
+        String protocol = "gl200";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("gl200.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("gl200.resetDelay");
-            server.setPipelineFactory(new Gl200PipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '$' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
     }
-    
-    /**
-     * T55 pipeline factory
-     */
-    protected class T55PipelineFactory implements ChannelPipelineFactory {
 
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public T55PipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
-        }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            byte delimiter[] = { (byte) '\r', (byte) '\n' };
-            pipeline.addLast("frameDecoder",
-                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("stringEncoder", new StringEncoder());
-            pipeline.addLast("objectDecoder", new T55ProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));
-            return pipeline;
-        }
-    }    
-    
     /**
      * Init T55 server
      */
     public void initT55Server(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("t55.enable"));
-        if (enable) {
+        String protocol = "t55";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("t55.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("t55.resetDelay");
-            server.setPipelineFactory(new T55PipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new T55ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
     }
-    
-    /**
-     * Xexun 2 pipeline factory
-     */
-    protected class Xexun2PipelineFactory implements ChannelPipelineFactory {
 
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public Xexun2PipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
-        }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            byte delimiter[] = { (byte) '\n' }; // tracker bug \n\r
-            pipeline.addLast("frameDecoder",
-                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));            
-            return pipeline;
-        }
-    }
-    
     /**
      * Init Xexun 2 server
      */
     public void initXexun2Server(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("xexun2.enable"));
-        if (enable) {
+        String protocol = "xexun2";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("xexun2.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("xexun2.resetDelay");
-            server.setPipelineFactory(new Xexun2PipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\n' }; // tracker bug \n\r
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
     }
 
-    /**
-     * AVL-08 pipeline factory
-     */
-    protected class Avl08PipelineFactory implements ChannelPipelineFactory {
-
-        private TrackerServer server;
-        private Server serverCreator;
-        private Integer resetDelay;
-        
-        public Avl08PipelineFactory(
-                TrackerServer server, Server serverCreator, Integer resetDelay) {
-            this.server = server;
-            this.serverCreator = serverCreator;
-            this.resetDelay = resetDelay;
-        }
-        
-        public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("openHandler", new OpenChannelHandler(server));
-            if (serverCreator.isLoggerEnabled()) {
-                pipeline.addLast("logger", new LoggingHandler("logger"));
-            }
-            byte delimiter[] = { (byte) '\r', (byte) '\n' };
-            pipeline.addLast("frameDecoder",
-                    new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-            pipeline.addLast("stringDecoder", new StringDecoder());
-            pipeline.addLast("objectDecoder", new Avl08ProtocolDecoder(serverCreator, resetDelay));
-            pipeline.addLast("handler", new TrackerEventHandler(serverCreator));            
-            return pipeline;
-        }
-    }
-    
     /**
      * Init AVL-08 server
      */
     public void initAvl08Server(Properties properties) throws SQLException {
 
-        boolean enable = Boolean.valueOf(properties.getProperty("avl08.enable"));
-        if (enable) {
+        String protocol = "avl08";
+        if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(
-                    Integer.valueOf(properties.getProperty("avl08.port")));
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            String resetDelay = properties.getProperty("avl08.resetDelay");
-            server.setPipelineFactory(new Avl08PipelineFactory(
-                    server, this, (resetDelay == null) ? 0 : Integer.valueOf(resetDelay)));
+            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new Avl08ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
 
             serverList.add(server);
         }
-    }
-    
-    /**
-     * Start
-     */
-    public void start() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).start();
-        }
-    }
-
-    /**
-     * Stop
-     */
-    public void stop() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).stop();
-        }
-    }
-
-    /**
-     * Destroy
-     */
-    public void destroy() {
-        serverList.clear();
     }
 
 }

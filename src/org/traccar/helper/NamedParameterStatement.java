@@ -15,17 +15,9 @@
  */
 package org.traccar.helper;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedList;
+import java.sql.*;
 import java.util.Date;
+import java.util.*;
 
 public class NamedParameterStatement {
 

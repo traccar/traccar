@@ -15,17 +15,17 @@
  */
 package org.traccar.protocol;
 
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.text.ParseException;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.Position;
-import org.traccar.DataManager;
+import org.traccar.model.DataManager;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.model.Position;
 
 /**
  * Xexun tracker protocol decoder

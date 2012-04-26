@@ -17,12 +17,9 @@ package org.traccar;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelState;
-import org.jboss.netty.channel.ChannelStateEvent;
+import org.traccar.model.DataManager;
 
 /**
  * Base class for protocol decoders
