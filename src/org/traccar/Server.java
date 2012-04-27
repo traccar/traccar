@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
+import org.traccar.http.WebServer;
 import org.traccar.model.DataManager;
 import org.traccar.model.DatabaseDataManager;
 import org.traccar.protocol.*;
@@ -57,6 +58,8 @@ public class Server {
 
     private DataManager dataManager;
 
+    private WebServer webServer;
+
     /**
      * Initialize
      */
@@ -81,12 +84,17 @@ public class Server {
         initT55Server(properties);
         initXexun2Server(properties);
         initAvl08Server(properties);
+
+        // Initialize web server
+        Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
+        webServer = new WebServer(port);
     }
 
     /**
      * Start
      */
     public void start() {
+        webServer.start();
         for (Object server: serverList) {
             ((TrackerServer) server).start();
         }
@@ -99,6 +107,7 @@ public class Server {
         for (Object server: serverList) {
             ((TrackerServer) server).stop();
         }
+        webServer.stop();
     }
 
     /**
