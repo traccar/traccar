@@ -23,18 +23,18 @@ import java.util.List;
 public interface DataManager {
 
     /**
-     * Read device list
+     * Manage devices
      */
     public List getDevices() throws Exception;
-
-    /**
-     * Get device by imei
-     */
+    public void addDevice(Device device) throws Exception;
+    public void addUpdate(Device device) throws Exception;
+    public void addRemove(Device device) throws Exception;
     public Device getDeviceByImei(String imei) throws Exception;
 
     /**
-     * Write position
+     * Manage positions
      */
-    public void setPosition(Position position) throws Exception;
+    public List getPositions(Long deviceId) throws Exception;
+    public void addPosition(Position position) throws Exception;
 
 }

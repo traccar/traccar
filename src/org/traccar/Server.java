@@ -17,29 +17,27 @@ package org.traccar;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.logging.Formatter;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 import java.util.logging.*;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
-import org.traccar.helper.AdvancedConnection;
-import org.traccar.helper.NamedParameterStatement;
 import org.traccar.model.DataManager;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
+import org.traccar.model.DatabaseDataManager;
 import org.traccar.protocol.*;
 
 /**
  * Server
  */
-public class Server implements DataManager {
+public class Server {
 
     /**
      * Server list
@@ -57,8 +55,10 @@ public class Server implements DataManager {
         return loggerEnabled;
     }
 
+    private DataManager dataManager;
+
     /**
-     * Init
+     * Initialize
      */
     public void init(String[] arguments)
             throws IOException, ClassNotFoundException, SQLException {
@@ -69,7 +69,8 @@ public class Server implements DataManager {
             properties.loadFromXML(new FileInputStream(arguments[0]));
         }
 
-        initDatabase(properties);
+        dataManager = new DatabaseDataManager(properties);
+
         initLogger(properties);
 
         initXexunServer(properties);
@@ -108,93 +109,7 @@ public class Server implements DataManager {
     }
 
     /**
-     * Database statements
-     */
-    private NamedParameterStatement selectDevice;
-    private NamedParameterStatement insertPosition;
-
-    /**
-     * Init database
-     */
-    private void initDatabase(Properties properties)
-            throws ClassNotFoundException, SQLException {
-
-        // Load driver
-        String driver = properties.getProperty("database.driver");
-        if (driver != null) {
-            Class.forName(driver);
-        }
-
-        // Connect database
-        String url = properties.getProperty("database.url");
-        String user = properties.getProperty("database.user");
-        String password = properties.getProperty("database.password");
-        AdvancedConnection connection = new AdvancedConnection(url, user, password);
-
-        String query = properties.getProperty("database.selectDevice");
-        selectDevice = new NamedParameterStatement(connection, query);
-
-        query = properties.getProperty("database.insertPosition");
-        insertPosition = new NamedParameterStatement(connection, query);
-    }
-
-    /**
-     * Devices
-     */
-    private Map devices;
-    private Calendar devicesLastUpdate;
-    private Long devicesListRefreshDelay = new Long(5 * 60 * 1000);
-
-    public synchronized List getDevices() throws SQLException {
-
-        List deviceList = new LinkedList();
-
-        selectDevice.prepare();
-        ResultSet result = selectDevice.executeQuery();
-        while (result.next()) {
-            Device device = new Device();
-            device.setId(result.getLong("id"));
-            device.setImei(result.getString("imei"));
-            deviceList.add(device);
-        }
-
-        return deviceList;
-    }
-
-    public Device getDeviceByImei(String imei) throws SQLException {
-
-        if ((devices == null) || (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesListRefreshDelay)) {
-            devices = new HashMap();
-            List deviceList = getDevices();
-            for (Object device: deviceList) {
-                devices.put(((Device) device).getImei(), device);
-            }
-            devicesLastUpdate = Calendar.getInstance();
-        }
-
-        return (Device) devices.get(imei);
-    }
-
-    public synchronized void setPosition(Position position) throws SQLException {
-
-        insertPosition.prepare();
-
-        insertPosition.setLong("device_id", position.getDeviceId());
-        insertPosition.setTimestamp("time", position.getTime());
-        insertPosition.setBoolean("valid", position.getValid());
-        insertPosition.setDouble("altitude", position.getAltitude());
-        insertPosition.setDouble("latitude", position.getLatitude());
-        insertPosition.setDouble("longitude", position.getLongitude());
-        insertPosition.setDouble("speed", position.getSpeed());
-        insertPosition.setDouble("course", position.getCourse());
-        insertPosition.setDouble("power", position.getPower());
-        insertPosition.setString("extended_info", position.getExtendedInfo());
-
-        insertPosition.executeUpdate();
-    }
-
-    /**
-     * Init logger
+     * Initialize logger
      */
     public void initLogger(Properties properties) throws IOException {
 
@@ -265,7 +180,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new XexunFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
@@ -288,7 +203,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) ';' };
                     pipeline.addLast("frameDecoder",
@@ -314,7 +229,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) ')' };
                     pipeline.addLast("frameDecoder",
@@ -340,7 +255,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) 0x0 };
                     pipeline.addLast("frameDecoder",
@@ -366,7 +281,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '$' };
                     pipeline.addLast("frameDecoder",
@@ -392,7 +307,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -418,7 +333,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\n' }; // tracker bug \n\r
                     pipeline.addLast("frameDecoder",
@@ -443,7 +358,7 @@ public class Server implements DataManager {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, this, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",

@@ -39,9 +39,9 @@ public class TrackerEventHandler extends SimpleChannelHandler {
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
 
         if (e.getMessage() instanceof Position) {
-            
+
             Position position = (Position) e.getMessage();
-            
+
             if (position == null) {
                 System.out.println("null message");
             } else {
@@ -59,7 +59,7 @@ public class TrackerEventHandler extends SimpleChannelHandler {
 
             // Write position to database
             try {
-                dataManager.setPosition(position);
+                dataManager.addPosition(position);
             } catch (Exception error) {
                 System.out.println(error.getMessage());
             }
