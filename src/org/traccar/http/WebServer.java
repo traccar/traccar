@@ -41,6 +41,8 @@ public class WebServer {
 
         private DataManager dataManager;
 
+        public static final int BUFFER_SIZE = 1024;
+
         public WebHandler(DataManager dataManager) {
             this.dataManager = dataManager;
         }
@@ -53,7 +55,23 @@ public class WebServer {
             InputStream in = this.getClass().getClassLoader().getResourceAsStream("index.html");
             OutputStream out = response.getOutputStream();
 
-            byte[] buffer = new byte[1024]; // Magic number
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int count;
+            while ((count = in.read(buffer)) != -1) {
+                out.write(buffer, 0, count);
+            }
+            out.flush();
+        }
+
+        public void handleIcon(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
+                throws IOException, ServletException {
+
+            response.setContentType("image/x-icon");
+
+            InputStream in = this.getClass().getClassLoader().getResourceAsStream("favicon.ico");
+            OutputStream out = response.getOutputStream();
+
+            byte[] buffer = new byte[BUFFER_SIZE];
             int count;
             while ((count = in.read(buffer)) != -1) {
                 out.write(buffer, 0, count);
@@ -90,8 +108,7 @@ public class WebServer {
                             Position position = i.next();
                             out.format("{'device_id':%d,'time':'%tF %tT','valid':%b,'latitude':%f,'longitude':%f,'speed':%f,'course':%f}",
                                     position.getDeviceId(),
-                                    position.getTime(),
-                                    position.getTime(),
+                                    position.getTime(), position.getTime(),
                                     position.getValid(),
                                     position.getLatitude(),
                                     position.getLongitude(),
@@ -121,6 +138,8 @@ public class WebServer {
         {
             if (target.equals("/") || target.equals("/index.html")) {
                 handleIndex(target, baseRequest, request, response);
+            } else if (target.matches("/favicon.ico")) {
+                handleIcon(target, baseRequest, request, response);
             } else if (target.matches("/.+\\.json")) {
                 handleData(target, baseRequest, request, response);
             } else {
