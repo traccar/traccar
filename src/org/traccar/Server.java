@@ -87,7 +87,7 @@ public class Server {
 
         // Initialize web server
         Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
-        webServer = new WebServer(port);
+        webServer = new WebServer(port, dataManager);
     }
 
     /**

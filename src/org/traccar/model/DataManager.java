@@ -25,7 +25,7 @@ public interface DataManager {
     /**
      * Manage devices
      */
-    public List getDevices() throws Exception;
+    public List<Device> getDevices() throws Exception;
     public void addDevice(Device device) throws Exception;
     public void addUpdate(Device device) throws Exception;
     public void addRemove(Device device) throws Exception;
@@ -34,7 +34,7 @@ public interface DataManager {
     /**
      * Manage positions
      */
-    public List getPositions(Long deviceId) throws Exception;
+    public List<Position> getPositions(Long deviceId) throws Exception;
     public void addPosition(Position position) throws Exception;
 
 }

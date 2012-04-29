@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+<head>
+<title>Traccar Manager</title>
+<link rel="stylesheet" type="text/css" href="http://cdn.sencha.io/ext-4.1.0-gpl/resources/css/ext-all.css" />
+<script type="text/javascript" src="http://cdn.sencha.io/ext-4.1.0-gpl/ext-all.js"></script>
+
+<!-- WARNING: integrate to page -->
+<!-- <script type="text/javascript" src="https://raw.github.com/VinylFox/ExtJS.ux.GMapPanel/master/src/GMapPanel3.js"></script> -->
+
+<script type="text/javascript">
+Ext.onReady(function() {
+
+    Ext.define('Device', {
+        extend: 'Ext.data.Model',
+        fields: [
+            {name: 'id', type: 'int'},
+            {name: 'imei',type: 'string'}
+        ]
+    });
+
+    Ext.define('Position', {
+        extend: 'Ext.data.Model',
+        fields: [
+        {name: 'device_id', type: 'int'},
+            {name: 'time', type: 'date'},
+            {name: 'valid', type: 'boolean'},
+            {name: 'latitude', type: 'float'},
+            {name: 'longitude', type: 'float'},
+            {name: 'speed', type: 'float'},
+            {name: 'course', type: 'float'},
+            {name: 'power', type: 'float'}
+        ]
+    });
+
+    var devicesUrl = 'devices.json';
+    var positionsUrl = 'positions.json';
+
+    var devices = Ext.create('Ext.data.Store', {
+        id: 'devices',
+        model: 'Device',
+        fields: ['id', 'imei'],
+        proxy: {
+            type: 'ajax',
+            url: devicesUrl,
+            reader: {
+                type: 'json',
+                root: 'results'
+            }
+        }
+    });
+
+    var positions = Ext.create('Ext.data.Store', {
+        id: 'positions',
+        model: 'Position',
+        fields: [
+            'device_id',
+            'time',
+            'valid',
+            'latitude',
+            'longitude',
+            'speed',
+            'course',
+            'power'
+        ],
+        proxy: {
+            type: 'ajax',
+            url: positionsUrl,
+            reader: {
+                type: 'json',
+                root: 'results'
+            }
+        }
+    });
+
+    console.log(positions);
+
+    var devicesPanel = Ext.create('Ext.grid.Panel', {
+        title: 'Devices',
+        region: 'west',
+        split: true,
+        width: 300,
+        margins: {top: 5, bottom: 0, right: 0, left: 5},
+
+        sortableColumns: false,
+        enableColumnHide: false,
+
+        store: devices,
+        tbar: [
+            {
+                id: 'device_update',
+                text: 'Update',
+                handler : function() {
+                    devices.load();
+                }
+            },
+            {
+                id: 'device_add',
+                text: 'Add',
+                handler : function() {
+                    Ext.Msg.prompt('Add', 'Device IMEI:', function() {
+                    });
+                }
+            },
+            {
+                id: 'device_remove',
+                text: 'Remove',
+                disabled: true,
+                handler : function() {
+                    Ext.Msg.confirm('Remove', 'Are you sure to remove item?', function() {
+                    });
+                }
+            },
+            {
+                id: 'device_edit',
+                text: 'Edit',
+                disabled: true,
+                handler : function() {
+                    Ext.Msg.prompt('Edit', 'Device IMEI:', function() {
+                    }, this, false, devicesPanel.getSelectionModel().getLastSelected().get('imei'));
+                }
+            }
+        ],
+        columns: [
+            {header: 'Id',  dataIndex: 'id'},
+            {header: 'IMEI', dataIndex: 'imei', flex: 1}
+        ],
+        listeners: {
+            selectionchange: function(sender, selected, eOpts) {
+                if (selected.length != 0) {
+                    Ext.getCmp('device_remove').enable();
+                    Ext.getCmp('device_edit').enable();
+
+                    positions.getProxy().url = positionsUrl + '?deviceId=' +
+                        devicesPanel.getSelectionModel().getLastSelected().get('id');
+                    positions.load();
+                    Ext.getCmp('position_update').enable();
+                } else {
+                    Ext.getCmp('position_update').disable();
+                    positions.getProxy().url = positionsUrl;
+                    positions.load();
+
+                    Ext.getCmp('device_edit').disable();
+                    Ext.getCmp('device_remove').disable();
+                }
+            }
+        }
+    });
+
+    var positionsPanel = Ext.create('Ext.grid.Panel', {
+        title: 'Positions',
+        region: 'south',
+        split: true,
+        height: 300,
+        margins: {top: 0, bottom: 5, right: 5, left: 5},
+
+        sortableColumns: false,
+        enableColumnHide: false,
+
+        store: positions,
+        tbar: [
+            {
+                id: 'position_update',
+                text: 'Update',
+                disabled: true,
+                handler : function() {
+                    positions.load();
+                }
+            }
+        ],
+        columns: [
+            {header: 'Device Id', dataIndex: 'device_id'},
+            {
+                header: 'Time',
+                dataIndex: 'time',
+                flex: 1,
+                renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s')
+            },
+            {header: 'Valid', dataIndex: 'valid'},
+            {header: 'Latitude', dataIndex: 'latitude'},
+            {header: 'Longitude', dataIndex: 'longitude'},
+            {header: 'Speed', dataIndex: 'speed'},
+            {header: 'Course', dataIndex: 'course'},
+            {header: 'Power', dataIndex: 'power'}
+        ]
+    });
+
+    /*var map = Ext.create('Ext.ux.GMapPanel', {
+        id: 'gmap',
+        setCenter: {lat: 0, lng: 0}
+    });*/
+
+    var mapPanel = Ext.create('Ext.panel.Panel', {
+        title: 'Map',
+        region: 'center',
+        margins: {top: 5, bottom: 0, right: 5, left: 0}/*,
+
+        layout: 'fit',
+        items: [map]*/
+    });
+
+    Ext.create('Ext.container.Viewport', {
+        renderTo: Ext.getBody(),
+        layout: 'border',
+        items: [devicesPanel, positionsPanel, mapPanel]
+    });
+
+    devices.load();
+});
+</script>
+</head>
+<body></body>
+</html>

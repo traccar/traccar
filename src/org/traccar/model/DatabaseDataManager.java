@@ -77,9 +77,9 @@ public class DatabaseDataManager implements DataManager {
         queryAddPosition = new NamedParameterStatement(connection, query);
     }
 
-    public synchronized List getDevices() throws SQLException {
+    public synchronized List<Device> getDevices() throws SQLException {
 
-        List deviceList = new LinkedList();
+        List<Device> deviceList = new LinkedList();
 
         queryGetDevices.prepare();
         ResultSet result = queryGetDevices.executeQuery();
@@ -101,9 +101,8 @@ public class DatabaseDataManager implements DataManager {
 
         if ((devices == null) || (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesRefreshDelay)) {
             devices = new HashMap();
-            List deviceList = getDevices();
-            for (Object device: deviceList) {
-                devices.put(((Device) device).getImei(), device);
+            for (Device device: getDevices()) {
+                devices.put(device.getImei(), device);
             }
             devicesLastUpdate = Calendar.getInstance();
         }
@@ -111,7 +110,23 @@ public class DatabaseDataManager implements DataManager {
         return (Device) devices.get(imei);
     }
 
-    public List getPositions(Long deviceId) { return null; } // TODO: implement
+    public List<Position> getPositions(Long deviceId) { // TODO: implement
+
+        List<Position> positionList = new LinkedList();
+
+        Position p = new Position();
+        p.setDeviceId(new Long(1));
+        p.setTime(new Date());
+        p.setValid(true);
+        p.setLatitude(1.0);
+        p.setLongitude(1.0);
+        p.setSpeed(1.0);
+        p.setCourse(1.0);
+
+        positionList.add(p);
+
+        return positionList;
+    }
 
     public synchronized void addPosition(Position position) throws SQLException {
 
