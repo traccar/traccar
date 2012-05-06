@@ -86,15 +86,19 @@ public class Server {
         initAvl08Server(properties);
 
         // Initialize web server
-        Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
-        webServer = new WebServer(port, dataManager);
+        if (Boolean.valueOf(properties.getProperty("http.enable"))) {
+            Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
+            webServer = new WebServer(port, dataManager);
+        }
     }
 
     /**
      * Start
      */
     public void start() {
-        webServer.start();
+        if (webServer != null) {
+            webServer.start();
+        }
         for (Object server: serverList) {
             ((TrackerServer) server).start();
         }
@@ -107,7 +111,9 @@ public class Server {
         for (Object server: serverList) {
             ((TrackerServer) server).stop();
         }
-        webServer.stop();
+        if (webServer != null) {
+            webServer.stop();
+        }
     }
 
     /**

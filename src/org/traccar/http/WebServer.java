@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,28 +81,65 @@ public class WebServer {
             out.flush();
         }
 
+        private Device parseDevice(String json) {
+
+            Pattern pattern = Pattern.compile("\\{\"id\":(\\d+),\"imei\":\"(.*)\"\\}");
+            Matcher parser = pattern.matcher(json);
+            if (parser.matches()) {
+                Device device = new Device();
+                device.setId(Long.valueOf(parser.group(1)));
+                device.setImei(parser.group(2));
+                return device;
+            }
+
+            return null;
+        }
+
+        // TODO: separate method into small parts
         public void handleData(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
                 throws IOException, ServletException {
 
             response.setContentType("application/json");
 
             PrintWriter out = response.getWriter();
-            out.print("{'success':true,'results':[");
 
             try {
                 if (target.equals("/devices.json")) {
 
-                    Iterator<Device> i = dataManager.getDevices().iterator();
-                    while (i.hasNext()) {
-                        Device device = i.next();
+                    String action = request.getParameter("action");
+                    if (action == null) {
+                        Iterator<Device> i = dataManager.getDevices().iterator();
+                        out.print("{'success':true,'results':[");
+                        while (i.hasNext()) {
+                            Device device = i.next();
+                            out.format("{'id':%d,'imei':'%s'}",
+                                    device.getId(),
+                                    device.getImei());
+                            if (i.hasNext()) out.print(",");
+                        }
+                    } else if (action.equals("create")) {
+                        Device device = parseDevice(request.getReader().readLine());
+                        dataManager.addDevice(device);
+                        out.print("{'success':true,'results':[");
                         out.format("{'id':%d,'imei':'%s'}",
                                 device.getId(),
                                 device.getImei());
-                        if (i.hasNext()) out.print(",");
+                    } else if (action.equals("update")) {
+                        Device device = parseDevice(request.getReader().readLine());
+                        dataManager.updateDevice(device);
+                        out.print("{'success':true,'results':[");
+                        out.format("{'id':%d,'imei':'%s'}",
+                                device.getId(),
+                                device.getImei());
+                    } else if (action.equals("destroy")) {
+                        Device device = parseDevice(request.getReader().readLine());
+                        dataManager.removeDevice(device);
+                        out.print("{'success':true,'results':[");
                     }
 
                 } else if (target.equals("/positions.json")) {
 
+                    out.print("{'success':true,'results':[");
                     String deviceId = request.getParameter("deviceId");
                     if (deviceId != null) {
                         Iterator<Position> i = dataManager.getPositions(Long.valueOf(deviceId)).iterator();
@@ -120,10 +159,10 @@ public class WebServer {
 
                 }
             } catch (Exception error) {
+                out.print("{'success':false,'results':[");
                 System.out.println(error.getMessage());
             }
 
-            //" {'id': 1, 'imei': '123456789012345'} ]}");
             out.print("]}");
             out.flush();
         }
@@ -138,7 +177,7 @@ public class WebServer {
         {
             if (target.equals("/") || target.equals("/index.html")) {
                 handleIndex(target, baseRequest, request, response);
-            } else if (target.matches("/favicon.ico")) {
+            } else if (target.equals("/favicon.ico")) {
                 handleIcon(target, baseRequest, request, response);
             } else if (target.matches("/.+\\.json")) {
                 handleData(target, baseRequest, request, response);

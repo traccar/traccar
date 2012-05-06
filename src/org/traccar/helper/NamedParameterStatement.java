@@ -30,12 +30,12 @@ public class NamedParameterStatement {
      * Index mapping
      */
     private final Map indexMap;
-    
+
     /**
      * Query string
      */
     private final String parsedQuery;
-    
+
     /**
      * Database connection
      */
@@ -106,7 +106,7 @@ public class NamedParameterStatement {
 
         return parsedQuery.toString();
     }
-    
+
     public void prepare() throws SQLException {
         try {
             if (statement == null) {
@@ -131,6 +131,13 @@ public class NamedParameterStatement {
      */
     public int executeUpdate() throws SQLException {
         return statement.executeUpdate();
+    }
+
+    /**
+     * Return generated keys
+     */
+    public ResultSet getGeneratedKeys() throws SQLException {
+        return statement.getGeneratedKeys();
     }
 
     /**

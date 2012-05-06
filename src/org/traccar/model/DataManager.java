@@ -27,8 +27,8 @@ public interface DataManager {
      */
     public List<Device> getDevices() throws Exception;
     public void addDevice(Device device) throws Exception;
-    public void addUpdate(Device device) throws Exception;
-    public void addRemove(Device device) throws Exception;
+    public void updateDevice(Device device) throws Exception;
+    public void removeDevice(Device device) throws Exception;
     public Device getDeviceByImei(String imei) throws Exception;
 
     /**

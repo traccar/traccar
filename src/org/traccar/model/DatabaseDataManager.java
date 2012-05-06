@@ -35,14 +35,11 @@ public class DatabaseDataManager implements DataManager {
      * Database statements
      */
     private NamedParameterStatement queryGetDevices;
+    private NamedParameterStatement queryAddDevice;
+    private NamedParameterStatement queryUpdateDevice;
+    private NamedParameterStatement queryRemoveDevice;
+    private NamedParameterStatement queryGetPositions;
     private NamedParameterStatement queryAddPosition;
-
-    /**
-     * Devices cache
-     */
-    private Map devices;
-    private Calendar devicesLastUpdate;
-    private Long devicesRefreshDelay;
 
     /**
      * Initialize database
@@ -70,8 +67,23 @@ public class DatabaseDataManager implements DataManager {
         String password = properties.getProperty("database.password");
         AdvancedConnection connection = new AdvancedConnection(url, user, password);
 
-        String query = properties.getProperty("database.selectDevice");
+        // Load statements from configuration
+        String query;
+
+        query = properties.getProperty("database.selectDevice");
         queryGetDevices = new NamedParameterStatement(connection, query);
+
+        query = properties.getProperty("database.insertDevice");
+        queryAddDevice = new NamedParameterStatement(connection, query);
+
+        query = properties.getProperty("database.updateDevice");
+        queryUpdateDevice = new NamedParameterStatement(connection, query);
+
+        query = properties.getProperty("database.deleteDevice");
+        queryRemoveDevice = new NamedParameterStatement(connection, query);
+
+        query = properties.getProperty("database.selectPosition");
+        queryGetPositions = new NamedParameterStatement(connection, query);
 
         query = properties.getProperty("database.insertPosition");
         queryAddPosition = new NamedParameterStatement(connection, query);
@@ -93,9 +105,46 @@ public class DatabaseDataManager implements DataManager {
         return deviceList;
     }
 
-    public void addDevice(Device device) {} // TODO: implement
-    public void addUpdate(Device device) {} // TODO: implement
-    public void addRemove(Device device) {} // TODO: implement
+    public synchronized void addDevice(Device device) throws SQLException {
+
+        queryAddDevice.prepare();
+        queryAddDevice.setString("imei", device.getImei());
+        queryAddDevice.executeUpdate();
+
+        // Find generated id
+        ResultSet result = queryAddDevice.getGeneratedKeys();
+        if (result.next()) {
+            device.setId(result.getLong(1));
+        }
+
+        devices = null;
+    }
+
+    public synchronized void updateDevice(Device device) throws SQLException {
+
+        queryUpdateDevice.prepare();
+        queryUpdateDevice.setLong("id", device.getId());
+        queryUpdateDevice.setString("imei", device.getImei());
+        queryUpdateDevice.executeUpdate();
+
+        devices = null;
+    }
+
+    public synchronized void removeDevice(Device device) throws SQLException {
+
+        queryRemoveDevice.prepare();
+        queryRemoveDevice.setLong("id", device.getId());
+        queryRemoveDevice.executeUpdate();
+
+        devices = null;
+    }
+
+    /**
+     * Devices cache
+     */
+    private Map devices;
+    private Calendar devicesLastUpdate;
+    private Long devicesRefreshDelay;
 
     public Device getDeviceByImei(String imei) throws SQLException {
 
@@ -110,20 +159,26 @@ public class DatabaseDataManager implements DataManager {
         return (Device) devices.get(imei);
     }
 
-    public List<Position> getPositions(Long deviceId) { // TODO: implement
+    public synchronized List<Position> getPositions(Long deviceId) throws SQLException {
 
         List<Position> positionList = new LinkedList();
 
-        Position p = new Position();
-        p.setDeviceId(new Long(1));
-        p.setTime(new Date());
-        p.setValid(true);
-        p.setLatitude(1.0);
-        p.setLongitude(1.0);
-        p.setSpeed(1.0);
-        p.setCourse(1.0);
-
-        positionList.add(p);
+        queryGetPositions.prepare();
+        queryGetPositions.setLong("device_id", deviceId);
+        ResultSet result = queryGetPositions.executeQuery();
+        while (result.next()) {
+            // TODO: include other parameters
+            Position position = new Position();
+            position.setDeviceId(result.getLong("device_id"));
+            position.setTime(result.getTimestamp("time"));
+            position.setValid(result.getBoolean("valid"));
+            position.setLatitude(result.getDouble("latitude"));
+            position.setLongitude(result.getDouble("longitude"));
+            position.setSpeed(result.getDouble("speed"));
+            position.setCourse(result.getDouble("course"));
+            position.setPower(result.getDouble("power"));
+            positionList.add(position);
+        }
 
         return positionList;
     }
@@ -144,6 +199,8 @@ public class DatabaseDataManager implements DataManager {
         queryAddPosition.setString("extended_info", position.getExtendedInfo());
 
         queryAddPosition.executeUpdate();
+
+        // TODO: probably return row id
     }
 
 }
