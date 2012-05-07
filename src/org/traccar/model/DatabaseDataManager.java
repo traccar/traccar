@@ -87,6 +87,16 @@ public class DatabaseDataManager implements DataManager {
 
         query = properties.getProperty("database.insertPosition");
         queryAddPosition = new NamedParameterStatement(connection, query);
+
+        // Create database schema
+        query = properties.getProperty("database.initialize");
+        if (query != null) try {
+            NamedParameterStatement initializeQuery = new NamedParameterStatement(connection, query);
+            initializeQuery.prepare();
+            initializeQuery.executeUpdate();
+        } catch (Exception error) {
+            System.out.println(error.getMessage());
+        }
     }
 
     public synchronized List<Device> getDevices() throws SQLException {
