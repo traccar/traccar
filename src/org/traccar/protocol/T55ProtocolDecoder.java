@@ -67,8 +67,6 @@ public class T55ProtocolDecoder extends GenericProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
-        //System.out.println(sentence);
 
         // Detect device ID
         if (sentence.contains("$PGID")) {
@@ -89,11 +87,11 @@ public class T55ProtocolDecoder extends GenericProtocolDecoder {
             if (!parser.matches()) {
                 return null;
             }
-            
+
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            
+
             Integer index = 1;
 
             // Time
@@ -103,10 +101,10 @@ public class T55ProtocolDecoder extends GenericProtocolDecoder {
             time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             index += 1; // Skip milliseconds
-        
+
             // Validity
             position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
-            
+
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));
             latitude += Double.valueOf(parser.group(index++)) / 60;
@@ -134,16 +132,16 @@ public class T55ProtocolDecoder extends GenericProtocolDecoder {
             } else {
                 position.setCourse(0.0);
             }
-            
+
             // Date
             time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
-            
+
             // Altitude
             position.setAltitude(0.0);
-            
+
             return position;
         }
 

@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import org.traccar.helper.AdvancedConnection;
+import org.traccar.helper.Log;
 import org.traccar.helper.NamedParameterStatement;
 
 /**
@@ -95,7 +96,7 @@ public class DatabaseDataManager implements DataManager {
             initializeQuery.prepare();
             initializeQuery.executeUpdate();
         } catch (Exception error) {
-            System.out.println(error.getMessage());
+            Log.warning(error.getMessage());
         }
     }
 

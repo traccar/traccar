@@ -1,4 +1,5 @@
 import org.traccar.Server;
+import org.traccar.helper.Log;
 
 public class Main {
 
@@ -7,14 +8,14 @@ public class Main {
         final Server service = new Server();
         service.init(args);
 
-        System.out.println("starting server...");
+        Log.info("starting server...");
         service.start();
 
         // Shutdown server properly
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                System.out.println("shutting down server...");
+                Log.info("shutting down server...");
                 service.stop();
             }
         });

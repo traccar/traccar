@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -160,7 +161,7 @@ public class WebServer {
                 }
             } catch (Exception error) {
                 out.print("{'success':false,'results':[");
-                System.out.println(error.getMessage());
+                Log.warning(error.getMessage());
             }
 
             out.print("]}");
@@ -196,7 +197,7 @@ public class WebServer {
         try {
             server.start();
         } catch (Exception error) {
-            System.out.println(error.getMessage());
+            Log.warning(error.getMessage());
         }
     }
 
@@ -204,7 +205,7 @@ public class WebServer {
         try {
             server.stop();
         } catch (Exception error) {
-            System.out.println(error.getMessage());
+            Log.warning(error.getMessage());
         }
     }
 

@@ -15,8 +15,11 @@
  */
 package org.traccar;
 
+import java.net.InetSocketAddress;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.logging.LoggingHandler;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 
 /**
@@ -44,31 +47,59 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
             server.getChannelGroup().add(e.getChannel());
         }
     }
-    
+
+    /**
+     * Logging using global logger
+     */
+    protected class StandardLoggingHandler extends LoggingHandler {
+
+        static final String HEX_CHARS = "0123456789ABCDEF";
+
+        @Override
+        public void log(ChannelEvent e) {
+            if (e instanceof MessageEvent) {
+                MessageEvent event = (MessageEvent) e;
+                String msg = "[" + ((InetSocketAddress) e.getChannel().getLocalAddress()).getPort() + " - ";
+                msg += ((InetSocketAddress) event.getRemoteAddress()).getAddress().getHostAddress() +  "]";
+
+                // Append hex message
+                if (event.getMessage() instanceof ChannelBuffer) {
+                    ChannelBuffer buffer = (ChannelBuffer) event.getMessage();
+                    msg += " - (HEX: ";
+                    for (int i = buffer.readerIndex(); i < buffer.writerIndex(); i++) {
+                        byte b = buffer.getByte(i);
+                        msg += HEX_CHARS.charAt((b & 0xf0) >> 4);
+                        msg += HEX_CHARS.charAt((b & 0x0F));
+                    }
+                    msg += ")";
+                }
+
+                Log.fine(msg);
+            }
+        }
+    }
+
     public GenericPipelineFactory(
             TrackerServer server, DataManager dataManager, Boolean loggerEnabled) {
         this.server = server;
         this.dataManager = dataManager;
         this.loggerEnabled = loggerEnabled;
     }
-    
+
     protected DataManager getDataManager() {
         return dataManager;
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
-    
+
     public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = Channels.pipeline();
         pipeline.addLast("openHandler", new OpenChannelHandler(server));
         if (loggerEnabled) {
-            pipeline.addLast("logger", new LoggingHandler("logger"));
+            pipeline.addLast("logger", new StandardLoggingHandler());
         }
         addSpecificHandlers(pipeline);
-        //pipeline.addLast("frameDecoder", new XexunFrameDecoder());
-        //pipeline.addLast("stringDecoder", new StringDecoder());
-        //pipeline.addLast("objectDecoder", new XexunProtocolDecoder(serverCreator, resetDelay));
-        pipeline.addLast("handler", new TrackerEventHandler(dataManager));            
+        pipeline.addLast("handler", new TrackerEventHandler(dataManager));
         return pipeline;
     }
 }

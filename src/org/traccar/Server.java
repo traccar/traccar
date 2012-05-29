@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
+import org.traccar.helper.Log;
 import org.traccar.http.WebServer;
 import org.traccar.model.DataManager;
 import org.traccar.model.DatabaseDataManager;
@@ -132,12 +133,12 @@ public class Server {
 
         if (loggerEnabled) {
 
-            Logger logger = Logger.getLogger("logger");
             String fileName = properties.getProperty("logger.file");
             if (fileName != null) {
 
                 FileHandler file = new FileHandler(fileName, true);
 
+                // Simple formatter
                 file.setFormatter(new Formatter() {
                     private final String LINE_SEPARATOR =
                             System.getProperty("line.separator", "\n");
@@ -147,15 +148,16 @@ public class Server {
 
                     public String format(LogRecord record) {
                         String line = dateFormat.format(new Date(record.getMillis()));
-                        line += " - ";
+                        line += " " + record.getLevel().getName() + ": ";
                         line += formatMessage(record);
                         line += LINE_SEPARATOR;
                         return line;
                     }
                 });
 
-                logger.setLevel(Level.ALL);
-                logger.addHandler(file);
+                // NOTE: Console logger level will remain INFO
+                Log.getLogger().setLevel(Level.ALL);
+                Log.getLogger().addHandler(file);
             }
         }
     }

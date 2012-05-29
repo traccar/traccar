@@ -16,6 +16,7 @@
 package org.traccar;
 
 import org.jboss.netty.channel.*;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -43,9 +44,9 @@ public class TrackerEventHandler extends SimpleChannelHandler {
             Position position = (Position) e.getMessage();
 
             if (position == null) {
-                System.out.println("null message");
+                Log.info("null message");
             } else {
-                System.out.println(
+                Log.info(
                         "id: " + position.getId() +
                         ", deviceId: " + position.getDeviceId() +
                         ", valid: " + position.getValid() +
@@ -61,7 +62,7 @@ public class TrackerEventHandler extends SimpleChannelHandler {
             try {
                 dataManager.addPosition(position);
             } catch (Exception error) {
-                System.out.println(error.getMessage());
+                Log.warning(error.getMessage());
             }
         }
     }
