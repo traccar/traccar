@@ -22,8 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.model.DataManager;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
@@ -43,8 +43,8 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "[\r\n]*" +
-            "\\d+," +
-            "\\+\\d+," +
+            "(\\d+)," +                         // Serial
+            "(\\+\\d+)," +                      // Number
             "GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2}).(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -55,10 +55,13 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
             "(\\d+.\\d+)," +                    // Speed
             "(\\d+.\\d+)?," +                   // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
+            ",,.\\*..," +                       // Checksum
+            "([FL])," +                         // Signal
+            "(.*)," +                           // Alarm
             ".*imei:" +
             "(\\d+)," +                         // IMEI
-            "\\d+," +
-            "\\d+.\\d+," +
+            "(\\d+)," +                         // Satellites
+            "(\\d+.\\d+)," +                    // Altitude
             "F:(\\d+.\\d+)V," +                 // Power
             ".*" +
             "[\r\n]*");
@@ -80,8 +83,15 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
 
         // Create new position
         Position position = new Position();
+        String extendedInfo = "<protocol>xexun2</protocol>";
 
         Integer index = 1;
+
+        // Serial
+        extendedInfo += "<serial>" + parser.group(index++) + "</serial>";
+
+        // Number
+        extendedInfo += "<number>" + parser.group(index++) + "</number>";
 
         // Time
         Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -106,9 +116,6 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
         if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
         position.setLongitude(lonlitude);
 
-        // Altitude
-        position.setAltitude(0.0);
-        
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
 
@@ -126,12 +133,27 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
+        // Signal
+        extendedInfo += "<signal>" + parser.group(index++) + "</signal>";
+
+        // Alarm
+        extendedInfo += "<alarm>" + parser.group(index++) + "</alarm>";
+
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        
+
+        // Satellites
+        extendedInfo += "<satellites>" + parser.group(index++).replaceFirst ("^0*(?![\\.$])", "") + "</satellites>";
+
+        // Altitude
+        position.setAltitude(Double.valueOf(parser.group(index++)));
+
         // Power
         position.setPower(Double.valueOf(parser.group(index++)));
+
+        // Extended info
+        position.setExtendedInfo(extendedInfo);
 
         return position;
     }
