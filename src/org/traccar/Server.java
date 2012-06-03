@@ -24,10 +24,14 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
+import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.helper.Log;
@@ -85,6 +89,7 @@ public class Server {
         initT55Server(properties);
         initXexun2Server(properties);
         initAvl08Server(properties);
+        initEnforaServer(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -382,6 +387,28 @@ public class Server {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new Avl08ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+
+    /**
+     * Init Enfora server
+     */
+    public void initEnforaServer(Properties properties) throws SQLException {
+
+        String protocol = "enfora";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
+                    pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(getDataManager(), resetDelay));
                 }
             });
 
