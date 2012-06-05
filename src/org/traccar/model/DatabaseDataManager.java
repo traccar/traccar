@@ -72,22 +72,34 @@ public class DatabaseDataManager implements DataManager {
         String query;
 
         query = properties.getProperty("database.selectDevice");
-        queryGetDevices = new NamedParameterStatement(connection, query);
+        if (query != null) {
+            queryGetDevices = new NamedParameterStatement(connection, query);
+        }
 
         query = properties.getProperty("database.insertDevice");
-        queryAddDevice = new NamedParameterStatement(connection, query);
+        if (query != null) {
+            queryAddDevice = new NamedParameterStatement(connection, query);
+        }
 
         query = properties.getProperty("database.updateDevice");
-        queryUpdateDevice = new NamedParameterStatement(connection, query);
+        if (query != null) {
+            queryUpdateDevice = new NamedParameterStatement(connection, query);
+        }
 
         query = properties.getProperty("database.deleteDevice");
-        queryRemoveDevice = new NamedParameterStatement(connection, query);
+        if (query != null) {
+            queryRemoveDevice = new NamedParameterStatement(connection, query);
+        }
 
         query = properties.getProperty("database.selectPosition");
-        queryGetPositions = new NamedParameterStatement(connection, query);
+        if (query != null) {
+            queryGetPositions = new NamedParameterStatement(connection, query);
+        }
 
         query = properties.getProperty("database.insertPosition");
-        queryAddPosition = new NamedParameterStatement(connection, query);
+        if (query != null) {
+            queryAddPosition = new NamedParameterStatement(connection, query);
+        }
 
         // Create database schema
         query = properties.getProperty("database.initialize");
