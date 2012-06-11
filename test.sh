@@ -35,3 +35,6 @@ echo "7. avl08"
 echo "8. enfora"
 (echo -n -e "\x00\x71\x00\x04\x02\x00                 123456789012345 13 \$GPRMC,120800.00,A,6000.000000,N,13000.000000,E,0.0,0.0,010112,,,A*52\r\n";) | nc -v localhost 5008
 
+echo "9. meiligao"
+(echo -n -e "\x24\x24\x00\x11\x12\x34\x56\xFF\xFF\xFF\xFF\x50\x00\x8B\x9B\x0D\x0A";) | nc -v localhost 5009
+

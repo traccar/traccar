@@ -90,6 +90,7 @@ public class Server {
         initXexun2Server(properties);
         initAvl08Server(properties);
         initEnforaServer(properties);
+        initMeiligaoServer(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -409,6 +410,28 @@ public class Server {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
                     pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+
+    /**
+     * Init Meiligao server
+     */
+    public void initMeiligaoServer(Properties properties) throws SQLException {
+
+        String protocol = "meiligao";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 4));
+                    pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(getDataManager(), resetDelay));
                 }
             });
 
