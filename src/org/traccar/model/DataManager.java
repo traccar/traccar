@@ -30,11 +30,13 @@ public interface DataManager {
     public void updateDevice(Device device) throws Exception;
     public void removeDevice(Device device) throws Exception;
     public Device getDeviceByImei(String imei) throws Exception;
+    public Device getDeviceByPhoneNumber(String phoneNumber) throws Exception;
+    public Device getDeviceByUniqueId(String uniqueId) throws Exception;
 
     /**
      * Manage positions
      */
-    public List<Position> getPositions(Long deviceId) throws Exception;
     public void addPosition(Position position) throws Exception;
+    public List<Position> getPositions(Long deviceId) throws Exception;
 
 }

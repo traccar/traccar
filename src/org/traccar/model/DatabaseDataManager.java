@@ -182,6 +182,16 @@ public class DatabaseDataManager implements DataManager {
         return (Device) devices.get(imei);
     }
 
+    public Device getDeviceByPhoneNumber(String phoneNumber) {
+        // TODO: implement getDeviceByPhoneNumber
+        return null;
+    }
+
+    public Device getDeviceByUniqueId(String uniqueId) {
+        // TODO: implement getDeviceByUniqueId
+        return null;
+    }
+
     public synchronized List<Position> getPositions(Long deviceId) throws SQLException {
 
         List<Position> positionList = new LinkedList();
