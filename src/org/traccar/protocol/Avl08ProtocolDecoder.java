@@ -16,14 +16,13 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.model.DataManager;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
@@ -37,7 +36,7 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
     public Avl08ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
         super(dataManager, resetDelay);
     }
-    
+
     /**
      * Regular expressions pattern
      */
@@ -90,12 +89,12 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        
+
         // Alarm type
         extendedInfo += "<alarm>" + parser.group(index++) + "</alarm>";
-        
+
         // Time
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
@@ -119,7 +118,7 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
 
         // Altitude
         position.setAltitude(0.0);
-        
+
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
 

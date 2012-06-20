@@ -17,6 +17,8 @@ public class TestDataManager implements DataManager {
         device.setImei("123456789012345");
         return device;
     }
+    public Device getDeviceByPhoneNumber(String phoneNumber) { return null; }
+    public Device getDeviceByUniqueId(String uniqueId) { return null; }
     public List getPositions(Long deviceId) { return null; }
     public void addPosition(Position position) {}
 

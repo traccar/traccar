@@ -16,14 +16,13 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.model.DataManager;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
@@ -67,7 +66,7 @@ public class Gl100ProtocolDecoder extends GenericProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         // Send response
         if (sentence.contains("AT+GTHBD=")) {
             String response = "+RESP:GTHBD,GPRS ACTIVE,";
@@ -75,7 +74,7 @@ public class Gl100ProtocolDecoder extends GenericProtocolDecoder {
             response += '\0';
             channel.write(response);
         }
-        
+
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
@@ -90,19 +89,19 @@ public class Gl100ProtocolDecoder extends GenericProtocolDecoder {
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        
+
         // Validity
         position.setValid(Integer.valueOf(parser.group(index++)) == 0 ? false : true);
-        
+
         // Position info
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setLatitude(Double.valueOf(parser.group(index++)));
-        
+
         // Date
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);

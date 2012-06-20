@@ -16,14 +16,13 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.model.DataManager;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
@@ -70,7 +69,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
         if (sentence.contains("##")) {
             channel.write("LOAD");
         }
-        
+
         // Send response #2
         if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
             channel.write("ON");
@@ -90,9 +89,9 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        
+
         // Date
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
@@ -119,7 +118,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
         lonlitude += Double.valueOf(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
         position.setLongitude(lonlitude);
-        
+
         // Altitude
         position.setAltitude(0.0);
 

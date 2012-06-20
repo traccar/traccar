@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -139,7 +138,7 @@ public class EnforaProtocolDecoder extends GenericProtocolDecoder {
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
 
         // Time
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));

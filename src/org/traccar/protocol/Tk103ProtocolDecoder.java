@@ -16,14 +16,13 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.model.DataManager;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
@@ -84,7 +83,7 @@ public class Tk103ProtocolDecoder extends GenericProtocolDecoder {
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
 
         // Date
-        Calendar time = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
