@@ -82,7 +82,7 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        String extendedInfo = "<protocol>avl08</protocol>";
+        StringBuilder extendedInfo = new StringBuilder("<protocol>avl08</protocol>");
 
         Integer index = 1;
 
@@ -91,7 +91,9 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
 
         // Alarm type
-        extendedInfo += "<alarm>" + parser.group(index++) + "</alarm>";
+        extendedInfo.append("<alarm>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</alarm>");
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -137,44 +139,68 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
         position.setTime(time.getTime());
 
         // Dilution of precision
-        extendedInfo += "<pdop>" + parser.group(index++).replaceFirst ("^0*(?![\\.$])", "") + "</pdop>";
-        extendedInfo += "<hdop>" + parser.group(index++).replaceFirst ("^0*(?![\\.$])", "") + "</hdop>";
-        extendedInfo += "<vdop>" + parser.group(index++).replaceFirst ("^0*(?![\\.$])", "") + "</vdop>";
+        extendedInfo.append("<pdop>");
+        extendedInfo.append(parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+        extendedInfo.append("</pdop>");
+        extendedInfo.append("<hdop>");
+        extendedInfo.append(parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+        extendedInfo.append("</hdop>");
+        extendedInfo.append("<vdop>");
+        extendedInfo.append(parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+        extendedInfo.append("</vdop>");
 
         // Status
-        extendedInfo += "<status>" + parser.group(index++) + "</status>";
+        extendedInfo.append("<status>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</status>");
 
         // Real time clock
-        extendedInfo += "<clock>" + parser.group(index++) + "</clock>";
+        extendedInfo.append("<clock>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</clock>");
 
         // Voltage
         String voltage = parser.group(index++);
         position.setPower(Double.valueOf(voltage.substring(1, 4)) / 100);
-        extendedInfo += "<voltage>" + voltage + "</voltage>";
+        extendedInfo.append("<voltage>");
+        extendedInfo.append(voltage);
+        extendedInfo.append("</voltage>");
 
         // ADC
-        extendedInfo += "<adc>" + parser.group(index++) + "</adc>";
+        extendedInfo.append("<adc>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</adc>");
 
         // Cell
-        extendedInfo += "<cell>" + parser.group(index++) + "</cell>";
+        extendedInfo.append("<cell>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</cell>");
 
         // Temperature
-        extendedInfo += "<temperature>" + parser.group(index++) + "</temperature>";
+        extendedInfo.append("<temperature>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</temperature>");
 
         // Mileage
-        extendedInfo += "<mileage>" + parser.group(index++) + "</mileage>";
+        extendedInfo.append("<mileage>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</mileage>");
 
         // Serial
-        extendedInfo += "<serial>" + parser.group(index++).replaceFirst ("^0*", "") + "</serial>";
+        extendedInfo.append("<serial>");
+        extendedInfo.append(parser.group(index++).replaceFirst ("^0*", ""));
+        extendedInfo.append("</serial>");
 
         // RFID
         String rfid = parser.group(index++);
         if (rfid != null) {
-            extendedInfo += "<rfid>" + rfid + "</rfid>";
+            extendedInfo.append("<rfid>");
+            extendedInfo.append(rfid);
+            extendedInfo.append("</rfid>");
         }
 
         // Extended info
-        position.setExtendedInfo(extendedInfo);
+        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }

@@ -82,15 +82,19 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        String extendedInfo = "<protocol>xexun2</protocol>";
+        StringBuilder extendedInfo = new StringBuilder("<protocol>xexun2</protocol>");
 
         Integer index = 1;
 
         // Serial
-        extendedInfo += "<serial>" + parser.group(index++) + "</serial>";
+        extendedInfo.append("<serial>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</serial>");
 
         // Number
-        extendedInfo += "<number>" + parser.group(index++) + "</number>";
+        extendedInfo.append("<number>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</number>");
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -133,17 +137,23 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
         position.setTime(time.getTime());
 
         // Signal
-        extendedInfo += "<signal>" + parser.group(index++) + "</signal>";
+        extendedInfo.append("<signal>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</signal>");
 
         // Alarm
-        extendedInfo += "<alarm>" + parser.group(index++) + "</alarm>";
+        extendedInfo.append("<alarm>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</alarm>");
 
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
 
         // Satellites
-        extendedInfo += "<satellites>" + parser.group(index++).replaceFirst ("^0*(?![\\.$])", "") + "</satellites>";
+        extendedInfo.append("<satellites>");
+        extendedInfo.append(parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+        extendedInfo.append("</satellites>");
 
         // Altitude
         position.setAltitude(Double.valueOf(parser.group(index++)));
@@ -152,7 +162,7 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
         position.setPower(Double.valueOf(parser.group(index++)));
 
         // Extended info
-        position.setExtendedInfo(extendedInfo);
+        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }

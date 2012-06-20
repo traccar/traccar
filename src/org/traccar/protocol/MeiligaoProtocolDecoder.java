@@ -128,7 +128,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        String extendedInfo = "<protocol>meiligao</protocol>";
+        StringBuilder extendedInfo = new StringBuilder("<protocol>meiligao</protocol>");
 
         // Get device by id
         // TODO: change imei to unique id
@@ -184,7 +184,9 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
         position.setTime(time.getTime());
 
         // Dilution of precision
-        extendedInfo += "<hdop>" + parser.group(index++) + "</hdop>";
+        extendedInfo.append("<hdop>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</hdop>");
 
         // Altitude
         String altitude = parser.group(index++);
@@ -195,10 +197,12 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
         }
 
         // State
-        extendedInfo += "<state>" + parser.group(index++) + "</state>";
+        extendedInfo.append("<state>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</state>");
 
         // Extended info
-        position.setExtendedInfo(extendedInfo);
+        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }
