@@ -75,7 +75,11 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
                 }
 
                 Log.fine(msg);
+            } else if (e instanceof ExceptionEvent) {
+                ExceptionEvent event = (ExceptionEvent) e;
+                Log.warning(event.getCause().getMessage());
             }
+            // TODO: handle other events
         }
     }
 
