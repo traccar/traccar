@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.logging.LoggingHandler;
+import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 
@@ -30,6 +31,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
     private TrackerServer server;
     private DataManager dataManager;
     private Boolean loggerEnabled;
+    private ReverseGeocoder geocoder;
 
     /**
      * Open channel handler
@@ -84,10 +86,11 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
     }
 
     public GenericPipelineFactory(
-            TrackerServer server, DataManager dataManager, Boolean loggerEnabled) {
+            TrackerServer server, DataManager dataManager, Boolean loggerEnabled, ReverseGeocoder geocoder) {
         this.server = server;
         this.dataManager = dataManager;
         this.loggerEnabled = loggerEnabled;
+        this.geocoder = geocoder;
     }
 
     protected DataManager getDataManager() {
@@ -103,6 +106,9 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("logger", new StandardLoggingHandler());
         }
         addSpecificHandlers(pipeline);
+        if (geocoder != null) {
+            pipeline.addLast("geocoder", new ReverseGeocoderHandler(geocoder));
+        }
         pipeline.addLast("handler", new TrackerEventHandler(dataManager));
         return pipeline;
     }

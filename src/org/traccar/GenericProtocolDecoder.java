@@ -37,7 +37,7 @@ public abstract class GenericProtocolDecoder extends OneToOneDecoder {
     public final void setDataManager(DataManager dataManager) {
         this.dataManager = dataManager;
     }
-    
+
     /**
      * Return data manager
      */
@@ -70,7 +70,7 @@ public abstract class GenericProtocolDecoder extends OneToOneDecoder {
         setDataManager(dataManager);
         setResetDelay(resetDelay);
     }
-    
+
     /**
      * Disconnect channel
      */

@@ -26,7 +26,7 @@ public class Position {
      * Id
      */
     private Long id;
-    
+
     public Long getId() {
         return id;
     }
@@ -99,12 +99,12 @@ public class Position {
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
-    
+
     /**
      * Altitude
      */
     private Double altitude;
-    
+
     public Double getAltitude() {
         return altitude;
     }
@@ -150,6 +150,19 @@ public class Position {
 
     public void setPower(Double power) {
         this.power = power;
+    }
+
+    /**
+     * Address
+     */
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     /**

@@ -34,6 +34,8 @@ import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
+import org.traccar.geocode.GoogleReverseGeocoder;
+import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.http.WebServer;
 import org.traccar.model.DataManager;
@@ -65,6 +67,8 @@ public class Server {
 
     private WebServer webServer;
 
+    private ReverseGeocoder geocoder;
+
     /**
      * Initialize
      */
@@ -80,6 +84,7 @@ public class Server {
         dataManager = new DatabaseDataManager(properties);
 
         initLogger(properties);
+        initGeocoder(properties);
 
         initXexunServer(properties);
         initGps103Server(properties);
@@ -133,7 +138,7 @@ public class Server {
     /**
      * Initialize logger
      */
-    public void initLogger(Properties properties) throws IOException {
+    private void initLogger(Properties properties) throws IOException {
 
         loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
 
@@ -168,6 +173,12 @@ public class Server {
         }
     }
 
+    private void initGeocoder(Properties properties) throws IOException {
+        if (Boolean.parseBoolean("geocoder.enable")) {
+            geocoder = new GoogleReverseGeocoder();
+        }
+    }
+
     private boolean isProtocolEnabled(Properties properties, String protocol) {
         String enabled = properties.getProperty(protocol + ".enable");
         if (enabled != null) {
@@ -195,7 +206,7 @@ public class Server {
     /**
      * Init Xexun server
      */
-    public void initXexunServer(Properties properties) throws SQLException {
+    private void initXexunServer(Properties properties) throws SQLException {
 
         String protocol = "xexun";
         if (isProtocolEnabled(properties, protocol)) {
@@ -203,7 +214,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new XexunFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
@@ -218,7 +229,7 @@ public class Server {
     /**
      * Init Gps103 server
      */
-    public void initGps103Server(Properties properties) throws SQLException {
+    private void initGps103Server(Properties properties) throws SQLException {
 
         String protocol = "gps103";
         if (isProtocolEnabled(properties, protocol)) {
@@ -226,7 +237,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) ';' };
                     pipeline.addLast("frameDecoder",
@@ -244,7 +255,7 @@ public class Server {
     /**
      * Init Tk103 server
      */
-    public void initTk103Server(Properties properties) throws SQLException {
+    private void initTk103Server(Properties properties) throws SQLException {
 
         String protocol = "tk103";
         if (isProtocolEnabled(properties, protocol)) {
@@ -252,7 +263,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) ')' };
                     pipeline.addLast("frameDecoder",
@@ -270,7 +281,7 @@ public class Server {
     /**
      * Init Gl100 server
      */
-    public void initGl100Server(Properties properties) throws SQLException {
+    private void initGl100Server(Properties properties) throws SQLException {
 
         String protocol = "gl100";
         if (isProtocolEnabled(properties, protocol)) {
@@ -278,7 +289,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) 0x0 };
                     pipeline.addLast("frameDecoder",
@@ -296,7 +307,7 @@ public class Server {
     /**
      * Init Gl200 server
      */
-    public void initGl200Server(Properties properties) throws SQLException {
+    private void initGl200Server(Properties properties) throws SQLException {
 
         String protocol = "gl200";
         if (isProtocolEnabled(properties, protocol)) {
@@ -304,7 +315,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '$' };
                     pipeline.addLast("frameDecoder",
@@ -322,7 +333,7 @@ public class Server {
     /**
      * Init T55 server
      */
-    public void initT55Server(Properties properties) throws SQLException {
+    private void initT55Server(Properties properties) throws SQLException {
 
         String protocol = "t55";
         if (isProtocolEnabled(properties, protocol)) {
@@ -330,7 +341,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -348,7 +359,7 @@ public class Server {
     /**
      * Init Xexun 2 server
      */
-    public void initXexun2Server(Properties properties) throws SQLException {
+    private void initXexun2Server(Properties properties) throws SQLException {
 
         String protocol = "xexun2";
         if (isProtocolEnabled(properties, protocol)) {
@@ -356,7 +367,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\n' }; // tracker bug \n\r
                     pipeline.addLast("frameDecoder",
@@ -373,7 +384,7 @@ public class Server {
     /**
      * Init AVL-08 server
      */
-    public void initAvl08Server(Properties properties) throws SQLException {
+    private void initAvl08Server(Properties properties) throws SQLException {
 
         String protocol = "avl08";
         if (isProtocolEnabled(properties, protocol)) {
@@ -381,7 +392,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -398,7 +409,7 @@ public class Server {
     /**
      * Init Enfora server
      */
-    public void initEnforaServer(Properties properties) throws SQLException {
+    private void initEnforaServer(Properties properties) throws SQLException {
 
         String protocol = "enfora";
         if (isProtocolEnabled(properties, protocol)) {
@@ -406,7 +417,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
                     pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(getDataManager(), resetDelay));
@@ -420,7 +431,7 @@ public class Server {
     /**
      * Init Meiligao server
      */
-    public void initMeiligaoServer(Properties properties) throws SQLException {
+    private void initMeiligaoServer(Properties properties) throws SQLException {
 
         String protocol = "meiligao";
         if (isProtocolEnabled(properties, protocol)) {
@@ -428,7 +439,7 @@ public class Server {
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
-            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled()) {
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 4));
                     pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(getDataManager(), resetDelay));
