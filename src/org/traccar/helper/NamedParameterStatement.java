@@ -29,7 +29,7 @@ public class NamedParameterStatement {
     /**
      * Index mapping
      */
-    private final Map indexMap;
+    private final Map<String, List<Integer>> indexMap;
 
     /**
      * Query string
@@ -46,7 +46,7 @@ public class NamedParameterStatement {
      */
     public NamedParameterStatement(AdvancedConnection connection, String query) {
 
-        indexMap = new HashMap();
+        indexMap = new HashMap<String, List<Integer>>();
         parsedQuery = parse(query, indexMap);
         this.connection = connection;
     }
@@ -54,7 +54,7 @@ public class NamedParameterStatement {
     /**
      * Parse query
      */
-    static String parse(String query, Map paramMap) {
+    static String parse(String query, Map<String, List<Integer>> paramMap) {
 
         int length = query.length();
         StringBuilder parsedQuery = new StringBuilder(length);
@@ -90,12 +90,12 @@ public class NamedParameterStatement {
                     i += name.length();
 
                     // Add to list
-                    List indexList = (List) paramMap.get(name);
+                    List<Integer> indexList = paramMap.get(name);
                     if (indexList == null) {
-                        indexList = new LinkedList();
+                        indexList = new LinkedList<Integer>();
                         paramMap.put(name, indexList);
                     }
-                    indexList.add(new Integer(index));
+                    indexList.add(index);
 
                     index++;
                 }
@@ -149,73 +149,72 @@ public class NamedParameterStatement {
 
     public void setInt(String name, Integer value) throws SQLException {
 
-        List indexList = (List) indexMap.get(name);
-        if (indexList != null) for (Object index: indexList) {
+        List<Integer> indexList = indexMap.get(name);
+        if (indexList != null) for (Integer index: indexList) {
             if (value != null) {
-                statement.setInt((Integer) index, value);
+                statement.setInt(index, value);
             } else {
-                statement.setNull((Integer) index, Types.INTEGER);
+                statement.setNull(index, Types.INTEGER);
             }
         }
     }
 
     public void setLong(String name, Long value) throws SQLException {
 
-        List indexList = (List) indexMap.get(name);
-        if (indexList != null) for (Object index: indexList) {
+        List<Integer> indexList = indexMap.get(name);
+        if (indexList != null) for (Integer index: indexList) {
             if (value != null) {
-                statement.setLong((Integer) index, value);
+                statement.setLong(index, value);
             } else {
-                statement.setNull((Integer) index, Types.INTEGER);
+                statement.setNull(index, Types.INTEGER);
             }
         }
     }
 
     public void setBoolean(String name, Boolean value) throws SQLException {
 
-        List indexList = (List) indexMap.get(name);
-        if (indexList != null) for (Object index: indexList) {
+        List<Integer> indexList = indexMap.get(name);
+        if (indexList != null) for (Integer index: indexList) {
             if (value != null) {
-                statement.setBoolean((Integer) index, value);
+                statement.setBoolean(index, value);
             } else {
-                statement.setNull((Integer) index, Types.BOOLEAN);
+                statement.setNull(index, Types.BOOLEAN);
             }
         }
     }
 
     public void setDouble(String name, Double value) throws SQLException {
 
-        List indexList = (List) indexMap.get(name);
-        if (indexList != null) for (Object index: indexList) {
+        List<Integer> indexList = indexMap.get(name);
+        if (indexList != null) for (Integer index: indexList) {
             if (value != null) {
-                statement.setDouble((Integer) index, value);
+                statement.setDouble(index, value);
             } else {
-                statement.setNull((Integer) index, Types.DOUBLE);
+                statement.setNull(index, Types.DOUBLE);
             }
         }
     }
 
     public void setTimestamp(String name, Date value) throws SQLException {
 
-        List indexList = (List) indexMap.get(name);
-        if (indexList != null) for (Object index: indexList) {
+        List<Integer> indexList = indexMap.get(name);
+        if (indexList != null) for (Integer index: indexList) {
             if (value != null) {
-                statement.setTimestamp(
-                        (Integer) index, new Timestamp(value.getTime()));
+                statement.setTimestamp(index, new Timestamp(value.getTime()));
             } else {
-                statement.setNull((Integer) index, Types.TIMESTAMP);
+                statement.setNull(index, Types.TIMESTAMP);
             }
         }
     }
 
     public void setString(String name, String value) throws SQLException {
 
-        List indexList = (List) indexMap.get(name);
-        if (indexList != null) for (Object index: indexList) {
+        List<Integer> indexList = indexMap.get(name);
+        if (indexList != null) for (Integer index: indexList) {
             if (value != null) {
-                statement.setString((Integer) index, value);
+                statement.setString(index, value);
             } else {
-                statement.setNull((Integer) index, Types.VARCHAR);
+                statement.setNull(index, Types.VARCHAR);
             }
         }
     }

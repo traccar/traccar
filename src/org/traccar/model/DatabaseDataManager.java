@@ -114,7 +114,7 @@ public class DatabaseDataManager implements DataManager {
 
     public synchronized List<Device> getDevices() throws SQLException {
 
-        List<Device> deviceList = new LinkedList();
+        List<Device> deviceList = new LinkedList<Device>();
 
         queryGetDevices.prepare();
         ResultSet result = queryGetDevices.executeQuery();
@@ -165,21 +165,21 @@ public class DatabaseDataManager implements DataManager {
     /**
      * Devices cache
      */
-    private Map devices;
+    private Map<String, Device> devices;
     private Calendar devicesLastUpdate;
     private Long devicesRefreshDelay;
 
     public Device getDeviceByImei(String imei) throws SQLException {
 
         if ((devices == null) || (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesRefreshDelay)) {
-            devices = new HashMap();
+            devices = new HashMap<String, Device>();
             for (Device device: getDevices()) {
                 devices.put(device.getImei(), device);
             }
             devicesLastUpdate = Calendar.getInstance();
         }
 
-        return (Device) devices.get(imei);
+        return devices.get(imei);
     }
 
     public Device getDeviceByPhoneNumber(String phoneNumber) {
@@ -194,7 +194,7 @@ public class DatabaseDataManager implements DataManager {
 
     public synchronized List<Position> getPositions(Long deviceId) throws SQLException {
 
-        List<Position> positionList = new LinkedList();
+        List<Position> positionList = new LinkedList<Position>();
 
         queryGetPositions.prepare();
         queryGetPositions.setLong("device_id", deviceId);

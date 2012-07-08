@@ -50,12 +50,12 @@ public class Server {
     /**
      * Server list
      */
-    private List serverList;
+    private List<TrackerServer> serverList;
 
     private boolean loggerEnabled;
 
     public Server() {
-        serverList = new LinkedList();
+        serverList = new LinkedList<TrackerServer>();
         loggerEnabled = false;
     }
 
