@@ -54,7 +54,7 @@ public class EnforaProtocolDecoder extends GenericProtocolDecoder {
             "(\\d+.\\d)?," +             // Speed
             "(\\d+.\\d)?," +             // Course
             "(\\d{2})(\\d{2})(\\d{2})," + // Date (DDMMYY)
-            ".*[\r\n]*");
+            ".*[\r\n\u0000]*");
 
     public static final int IMEI_LENGTH = 15;
 
