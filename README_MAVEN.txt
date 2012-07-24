@@ -4,6 +4,7 @@ project into Eclipse. We've tested against Eclipse 3.6. Later versions
 will likely also work, earlier versions may not. 
 
 Eclipse users will need to install the following plugin components:
+=======
 - m2eclipse Core
 - Maven Integration for WTP (in m2eclipse extras)
   Instructions for installing the maven plugins can be found here:
