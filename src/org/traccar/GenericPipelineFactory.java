@@ -59,6 +59,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
 
         @Override
         public void log(ChannelEvent e) {
+        	 server.mandaMSG();
             if (e instanceof MessageEvent) {
                 MessageEvent event = (MessageEvent) e;
                 String msg = "[" + ((InetSocketAddress) e.getChannel().getLocalAddress()).getPort() + " - ";
@@ -110,6 +111,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("geocoder", new ReverseGeocoderHandler(geocoder));
         }
         pipeline.addLast("handler", new TrackerEventHandler(dataManager));
+       
         return pipeline;
     }
 }

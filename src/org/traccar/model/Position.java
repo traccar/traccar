@@ -151,6 +151,18 @@ public class Position {
     public void setPower(Double power) {
         this.power = power;
     }
+    /**
+     * Mode / 1 - Parking | 2 - Driving
+     */
+    private int mode;
+
+    public int getMode() {
+        return mode;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
 
     /**
      * Address

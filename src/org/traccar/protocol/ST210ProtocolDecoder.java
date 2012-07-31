@@ -596,6 +596,9 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
 	@Override
 	public Object decode(ChannelHandlerContext ctx, Channel channel, Object msg)
 			throws Exception {
+		if (channel != null) {
+			channel.write("OI AMIGO do decoder");
+		}
 		String sentence = (String) msg;
 		return decodeMsg(sentence);
 	}
