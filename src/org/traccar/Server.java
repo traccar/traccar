@@ -120,8 +120,7 @@ public class Server {
 
 		// Initialize web server
 		if (Boolean.valueOf(properties.getProperty("http.enable"))) {
-			Integer port = Integer.valueOf(properties.getProperty("http.port",
-					"8082"));
+			Integer port = Integer.valueOf(properties.getProperty("http.port","8082"));
 			webServer = new WebServer(port, dataManager);
 		}
 	}
@@ -162,8 +161,7 @@ public class Server {
 	 */
 	private void initLogger(Properties properties) throws IOException {
 
-		loggerEnabled = Boolean
-				.valueOf(properties.getProperty("logger.enable"));
+		loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
 
 		if (loggerEnabled) {
 
