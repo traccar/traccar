@@ -172,15 +172,12 @@ public class Server {
 
 				// Simple formatter
 				file.setFormatter(new Formatter() {
-					private final String LINE_SEPARATOR = System.getProperty(
-							"line.separator", "\n");
+					private final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
 
-					private final DateFormat dateFormat = new SimpleDateFormat(
-							"yyyy-MM-dd hh:mm:ss");
+					private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
 					public String format(LogRecord record) {
-						String line = dateFormat.format(new Date(record
-								.getMillis()));
+						String line = dateFormat.format(new Date(record.getMillis()));
 						line += " " + record.getLevel().getName() + ": ";
 						line += formatMessage(record);
 						line += LINE_SEPARATOR;
@@ -233,18 +230,14 @@ public class Server {
 		String protocol = "xexun";
 		if (isProtocolEnabled(properties, protocol)) {
 
-			TrackerServer server = new TrackerServer(getProtocolPort(
-					properties, protocol));
-			final Integer resetDelay = getProtocolResetDelay(properties,
-					protocol);
+			TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+			final Integer resetDelay = getProtocolResetDelay(properties,protocol);
 
-			server.setPipelineFactory(new GenericPipelineFactory(server,
-					dataManager, isLoggerEnabled(), geocoder) {
+			server.setPipelineFactory(new GenericPipelineFactory(server,dataManager, isLoggerEnabled(), geocoder) {
 				protected void addSpecificHandlers(ChannelPipeline pipeline) {
 					pipeline.addLast("frameDecoder", new XexunFrameDecoder());
 					pipeline.addLast("stringDecoder", new StringDecoder());
-					pipeline.addLast("objectDecoder", new XexunProtocolDecoder(
-							getDataManager(), resetDelay));
+					pipeline.addLast("objectDecoder", new XexunProtocolDecoder(getDataManager(), resetDelay));
 				}
 			});
 
