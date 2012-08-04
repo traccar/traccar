@@ -45,7 +45,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
             "([\\d]+)," +                       // IMEI
             "[^,]+," +
             "(\\d{2})(\\d{2})(\\d{2})[\\d]+," + // Date
-            "[+]?[\\d]*," +
+            "[^,]*," +
             "[FL]," +                           // F - full / L - low
             "([\\d]{2})([\\d]{2})([\\d]{2}).([\\d]{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
