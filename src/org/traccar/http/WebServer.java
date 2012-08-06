@@ -55,7 +55,7 @@ public class WebServer {
 
             response.setContentType("text/html");
 
-            InputStream in = this.getClass().getClassLoader().getResourceAsStream("index.html");
+            InputStream in = this.getClass().getClassLoader().getResourceAsStream("web/index.html");
             OutputStream out = response.getOutputStream();
 
             byte[] buffer = new byte[BUFFER_SIZE];
@@ -71,7 +71,7 @@ public class WebServer {
 
             response.setContentType("image/x-icon");
 
-            InputStream in = this.getClass().getClassLoader().getResourceAsStream("favicon.ico");
+            InputStream in = this.getClass().getClassLoader().getResourceAsStream("web/favicon.ico");
             OutputStream out = response.getOutputStream();
 
             byte[] buffer = new byte[BUFFER_SIZE];

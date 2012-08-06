@@ -42,7 +42,7 @@ public class Gl200ProtocolDecoder extends GenericProtocolDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
-            "\\d{6}," +                         // Protocol version
+            "[0-9a-fA-F]{6}," +                 // Protocol version
             "(\\d{15})," +                      // IMEI
             "[^,]*," +                          // Device name
             "(?:(?:\\d," +                      // Report ID / Geo mode
