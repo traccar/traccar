@@ -242,7 +242,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -276,7 +276,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -309,7 +309,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -342,7 +342,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -375,7 +375,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -408,7 +408,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -441,7 +441,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -473,7 +473,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -502,7 +502,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -531,7 +531,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 		}
 	}
 
@@ -561,7 +561,7 @@ public class Server {
 			});
 
 			serverList.add(server);
-			Log.info("Activeting protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
+			Log.info("Activating protocol " + protocol + " @ " + getProtocolPort(properties, protocol));
 
 		}
 	}
