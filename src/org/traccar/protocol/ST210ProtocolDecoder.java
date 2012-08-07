@@ -1,6 +1,7 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -97,34 +98,41 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
 
             case DATE: {
                 // Date
-                Calendar time = Calendar.getInstance(TimeZone
-                        .getTimeZone("UTC"));
+                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 time.clear();
-                time.set(Calendar.YEAR, Integer.valueOf(Integer
-                        .valueOf(groupValue.substring(0, 4))));
-                time.set(Calendar.MONTH, Integer.valueOf(Integer
-                        .valueOf(groupValue.substring(4, 6))));
-                time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(Integer
-                        .valueOf(groupValue.substring(6, 8))));
-                position.setTime(time.getTime());
+                time.set(Calendar.YEAR, Integer.valueOf(Integer.valueOf(groupValue.substring(0, 4))));
+                time.set(Calendar.MONTH, Integer.valueOf(Integer.valueOf(groupValue.substring(4, 6))-1));
+                time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(Integer.valueOf(groupValue.substring(6, 8))));
+                
+                Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                
+                ret.setTimeInMillis(time.getTimeInMillis() + 
+                					TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
+                					TimeZone.getDefault().getOffset(time.getTimeInMillis()));
+
+                position.setTime(ret.getTime());
+                
                 break;
             }
 
             case TIME: {
 
-                Calendar time = Calendar.getInstance(TimeZone
-                        .getTimeZone("UTC"));
+                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 time.clear();
                 time.setTime(position.getTime());
+                
+                time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(Integer.valueOf(groupValue.substring(0, 2))));
+                time.set(Calendar.MINUTE, Integer.valueOf(Integer.valueOf(groupValue.substring(3, 5))));
+                time.set(Calendar.SECOND, Integer.valueOf(Integer.valueOf(groupValue.substring(6, 8))));
 
-                time.set(Calendar.HOUR, Integer.valueOf(Integer
-                        .valueOf(groupValue.substring(0, 2))));
-                time.set(Calendar.MINUTE, Integer.valueOf(Integer
-                        .valueOf(groupValue.substring(3, 5))));
-                time.set(Calendar.SECOND, Integer.valueOf(Integer
-                        .valueOf(groupValue.substring(6, 8))));
+                Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                
+                ret.setTimeInMillis(time.getTimeInMillis() + 
+                					TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
+                					TimeZone.getDefault().getOffset(time.getTimeInMillis()));
 
-                position.setTime(time.getTime());
+                position.setTime(ret.getTime());
+                
                 break;
             }
 
