@@ -20,6 +20,11 @@
             <version>5.1.21</version>
         </dependency>
         <dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.1-407.jdbc3</version>
+		</dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
             <version>3.5.2.Final</version>
@@ -84,9 +89,11 @@
                 <executions>
                     <execution>
                         <phase>install</phase>
+                       
                         <goals>
                             <goal>copy-dependencies</goal>
-                        </goals>
+                        </goals> 
+                        
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                             <excludeArtifactIds>junit</excludeArtifactIds>
