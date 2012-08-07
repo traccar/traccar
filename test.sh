@@ -38,3 +38,9 @@ echo "8. enfora"
 echo "9. meiligao"
 (echo -n -e "\x24\x24\x00\x11\x12\x34\x56\xFF\xFF\xFF\xFF\x50\x00\x8B\x9B\x0D\x0A";) | nc -v localhost 5009
 
+echo "10. st210"
+(echo -n -e "SA200STT;317652;042;20120807;10:43:23;16d41;-15.618767;-056.083214;000.011;000.00;11;1;41557;12.21;000000;1;3205\r";) | nc -v localhost 8801
+
+
+
+
