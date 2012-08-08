@@ -59,7 +59,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
 
         @Override
         public void log(ChannelEvent e) {
-        	 server.mandaMSG();
+        	
             if (e instanceof MessageEvent) {
                 MessageEvent event = (MessageEvent) e;
                 String msg = "[" + ((InetSocketAddress) e.getChannel().getLocalAddress()).getPort() + " - ";
