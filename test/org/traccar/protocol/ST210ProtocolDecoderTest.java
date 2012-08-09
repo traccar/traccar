@@ -14,6 +14,7 @@ import org.traccar.server.SocketCliente;
 
 public class ST210ProtocolDecoderTest {
 
+	/*
 	@BeforeClass
 	public static void UpServer() {
 		final Server service = new Server();
@@ -50,7 +51,9 @@ public class ST210ProtocolDecoderTest {
 				"SA200STT;317652;042;20120718;15:37:12;16d41;-15.618755;-056.083241;000.024;000.00;8;1;41548;12.17;100000;2;1979");
 	}
 
-/*	@Test
+*/
+	
+	@Test
 	public void testDecode() throws Exception {
 
 		ST210ProtocolDecoder decoder = new ST210ProtocolDecoder(
@@ -68,6 +71,6 @@ public class ST210ProtocolDecoderTest {
 				.decode(null,
 						null,
 						"SA200STT;317652;042;20120722;00:24:23;16d41;-15.618767;-056.083214;000.011;000.00;11;1;41557;12.21;000000;1;3205"));
-	}*/
+	}
 
 }
