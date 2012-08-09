@@ -76,7 +76,7 @@ public class Server {
     	
     	for (Iterator iterator = serverList.iterator(); iterator.hasNext();) {
     		TrackerServer type = (TrackerServer) iterator.next();
-    		if(type.getPort().equals(5010)){
+    		if(type.getPort().equals(8801)){
     			
     			for (Iterator it = type.getChannelGroup().iterator(); it.hasNext();) {
     				Channel chanel = (Channel) it.next();
