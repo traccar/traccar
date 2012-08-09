@@ -23,31 +23,30 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
 	}
 
 	private enum ST210FIELDS {
-        HDR_STATUS("SA200STT;", "Status Report"), HDR_EMERGENCY("SA200EMG;",
-                "Emergency Report"), HDR_EVENT("SA200EVT;", "Event Report"), HDR_ALERT(
-                "SA200ALT;", "Alert Report"), HDR_ALIVE("SA200ALV;",
-                "Alive Report"), DEV_ID("(\\d+);", "Device ID"), SW_VER(
-                "(\\d{3});", "Software Release Version"), DATE("(\\d+);",
-                "GPS date (yyyymmdd) Year + Month + Day"), TIME(
-                "(\\d{2}:\\d{2}:\\d{2});",
-                "GPS time (hh:mm:ss) Hour : Minute : Second"), CELL(
-                "(\\d{2}\\w\\d{2});",
-                "Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"), LAT(
-                "(-\\d{2}.\\d+);", "Latitude (+/-xx.xxxxxx)"), LON(
-                "(-\\d{3}.\\d+);", "Longitude (+/-xxx.xxxxxx)"), SPD(
-                "(\\d{3}.\\d{3});",
-                "Speed in km/h - This value returns to 0 when it is over than 200,000Km"), CRS(
-                "(\\d{3}.\\d{2});", "Course over ground in degree"), SATT(
-                "(\\d+);", "Number of satellites"), FIX("(\\d);",
-                "GPS is fixed(1)\n" + "GPS is not fixed(0)"), DIST("(\\d+);",
-                "Traveled ddistance in meter"), PWR_VOLT("(\\d{2}.\\d{2});",
-                "Voltage value of main power"), IO("(\\d+);",
-                "Current I/O status of inputs and outputs."), MODE("(\\d);",
-                "1 = Idle mode (Parking)\n" + "2 = Active Mode (Driving)"), MSG_NUM(
-                "(\\d{4})",
-                "Message number - After 9999 is reported, message number returns to 0000"), EMG_ID(
-                "(\\d);", "Emergency type"), EVT_ID("(\\d);", "Event type"), ALERT_ID(
-                "(\\d);", "Alert type");
+        HDR_STATUS("SA200STT;", 
+        		"Status Report"), 
+        		HDR_EMERGENCY("SA200EMG;","Emergency Report"), 
+                HDR_EVENT("SA200EVT;", "Event Report"), 
+                HDR_ALERT("SA200ALT;","Alert Report"), 
+                HDR_ALIVE("SA200ALV;","Alive Report"), 
+                DEV_ID("(\\d+);", "Device ID"), 
+                SW_VER("(\\d{3});", "Software Release Version"), 
+                DATE("(\\d+);","GPS date (yyyymmdd) Year + Month + Day"), 
+                TIME("(\\d{2}:\\d{2}:\\d{2});","GPS time (hh:mm:ss) Hour : Minute : Second"), 
+                CELL("(\\d{2}\\w\\d{2});","Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"), 
+                LAT("(-\\d{2}.\\d+);", "Latitude (+/-xx.xxxxxx)"), 
+                LON("(-\\d{3}.\\d+);", "Longitude (+/-xxx.xxxxxx)"), 
+                SPD("(\\d{3}.\\d{3});","Speed in km/h - This value returns to 0 when it is over than 200,000Km"), 
+                CRS("(\\d{3}.\\d{2});", "Course over ground in degree"),
+                SATT("(\\d+);", "Number of satellites"),
+                FIX("(\\d);","GPS is fixed(1)\n" + "GPS is not fixed(0)"), 
+                DIST("(\\d+);","Traveled ddistance in meter"), 
+                PWR_VOLT("(\\d+.\\d{2});","Voltage value of main power"), 
+                IO("(\\d+);","Current I/O status of inputs and outputs."), 
+                MODE("(\\d);","1 = Idle mode (Parking)\n" + "2 = Active Mode (Driving)"),
+                MSG_NUM("(\\d{4})","Message number - After 9999 is reported, message number returns to 0000"), 
+                EMG_ID("(\\d);", "Emergency type"), EVT_ID("(\\d);", "Event type"), 
+                ALERT_ID("(\\d);", "Alert type");
 
         private String pattern;
 
@@ -175,7 +174,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             case 0:
                 return NOT_FIXED;
             default:
-                throw new IllegalArgumentException("�ndice n�o definido");
+                throw new IllegalArgumentException("Index not defined");
             }
         }
     }
@@ -212,7 +211,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             case 2:
                 return DRIVING;
             default:
-                throw new IllegalArgumentException("�ndice n�o definido");
+                throw new IllegalArgumentException("Index not defined");
             }
         }
     }
@@ -256,7 +255,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             case 5:
                 return ANTI_THEFT;
             default:
-                throw new IllegalArgumentException("�ndice n�o definido");
+                throw new IllegalArgumentException("Index not defined");
             }
         }
     }
@@ -306,7 +305,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             case 6:
                 return INPUT3_OPEN;
             default:
-                throw new IllegalArgumentException("�ndice n�o definido");
+                throw new IllegalArgumentException("Index not defined");
             }
         }
     }
@@ -383,7 +382,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             case 19:
                 return ENTER_ROUT;
             default:
-                throw new IllegalArgumentException("�ndice n�o definido");
+                throw new IllegalArgumentException("Index not defined");
             }
         }
     }
