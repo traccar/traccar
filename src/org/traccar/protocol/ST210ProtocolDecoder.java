@@ -608,6 +608,8 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
 
     public Position decodeMsg(String msg) throws Exception {
 
+    	Log.info("Msg: " + msg);
+    	
         ST210REPORTS report = getReportType(msg);
 
         List<ST210FIELDS> protocol = report.getProtocol();
@@ -615,7 +617,6 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         Pattern protocolPattern = report.getProtocolPattern();
 
         Log.info("Protocol Pattern: " + protocolPattern.toString());
-        Log.info("Msg: " + msg);
 
         // Parse message
         Matcher parser = protocolPattern.matcher(msg);
