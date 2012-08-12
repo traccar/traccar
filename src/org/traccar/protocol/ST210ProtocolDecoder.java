@@ -45,7 +45,8 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 IO("(\\d+);","Current I/O status of inputs and outputs."), 
                 MODE("(\\d);","1 = Idle mode (Parking)\n" + "2 = Active Mode (Driving)"),
                 MSG_NUM("(\\d{4})","Message number - After 9999 is reported, message number returns to 0000"), 
-                EMG_ID("(\\d);", "Emergency type"), EVT_ID("(\\d);", "Event type"), 
+                EMG_ID("(\\d)", "Emergency type"), 
+                EVT_ID("(\\d);", "Event type"), 
                 ALERT_ID("(\\d);", "Alert type");
 
         private String pattern;
@@ -217,10 +218,10 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     }
 
     private enum FIELD_EMG_ID_VALUE {
-        PANIC(1, "Emergency by panic button"), PARKING(2,
-                "Emergency by parking lock"), MAIN_POWER(3,
-                "Emergency by removing main power"), ANTI_THEFT(5,
-                "Emergency by anti-theft");
+        PANIC(1, "Emergency by panic button"), 
+        PARKING(2,"Emergency by parking lock"), 
+        MAIN_POWER(3,"Emergency by removing main power"), 
+        ANTI_THEFT(5,"Emergency by anti-theft");
 
         private int value;
 
@@ -261,12 +262,12 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     }
 
     private enum FIELD_EVT_ID_VALUE {
-        INPUT1_GROUND(1, "Input1 goes to ground state"), INPUT1_OPEN(2,
-                "Input1 goes to open state"), INPUT2_GROUND(3,
-                "Input2 goes to ground state"), INPUT2_OPEN(4,
-                "Input2 goes to open state"), INPUT3_GROUND(5,
-                "Input3 goes to ground state"), INPUT3_OPEN(6,
-                "Input3 goes to open state");
+        INPUT1_GROUND(1, "Input1 goes to ground state"), 
+        INPUT1_OPEN(2,"Input1 goes to open state"), 
+        INPUT2_GROUND(3,"Input2 goes to ground state"), 
+        INPUT2_OPEN(4,"Input2 goes to open state"), 
+        INPUT3_GROUND(5,"Input3 goes to ground state"), 
+        INPUT3_OPEN(6,"Input3 goes to open state");
 
         private int value;
 
@@ -288,7 +289,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         public FIELD_EVT_ID_VALUE getValueOf(String indiceStr) {
             int indice = Integer.valueOf(indiceStr);
             return getValueOf(indice);
-        }
+        }                
 
         public FIELD_EVT_ID_VALUE getValueOf(int indice) {
             switch (indice) {
@@ -311,21 +312,21 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     }
 
     private enum FIELD_ALERT_ID_VALUE {
-        DRIVING_FASTER(1, "Start driving faster than SPEED_LIMIT"), OVER_SPPED(
-                2, "Ended over speed condition"), DISCON_GPS(3,
-                "Disconnected GPS antenna"), RECON_GPS(4,
-                "Reconnected GPS antenna after disconnected"), OUT_GEO_FENCE(5,
-                "The vehicle went out from the geo-fence that has following ID"), INTO_GEO_FENCE(
-                6,
-                "The vehicle entered into the geo-fence that has following ID"), SHORTED_GPS(
-                8, "Shorted GPS antenna"), DEEP_SLEEP_ON(9,
-                "Enter to deep sleep mode"), DEEP_SLEEP_OFF(10,
-                "Exite from deep sleep mode"), BKP_BATTERY(13,
-                "Backup battery error"), BATTERY_DOWN(14,
-                "Vehicle battery goes down to so low level"), SHOCKED(15,
-                "Shocked"), COLLISION(16, "Occurred some collision"), DEVIATE_ROUT(
-                18, "Deviate from predefined rout"), ENTER_ROUT(19,
-                "Enter into predefined rout");
+        DRIVING_FASTER(1, "Start driving faster than SPEED_LIMIT"), 
+        OVER_SPPED(2, "Ended over speed condition"), 
+        DISCON_GPS(3,"Disconnected GPS antenna"), 
+        RECON_GPS(4,"Reconnected GPS antenna after disconnected"), 
+        OUT_GEO_FENCE(5,"The vehicle went out from the geo-fence that has following ID"), 
+        INTO_GEO_FENCE(6,"The vehicle entered into the geo-fence that has following ID"), 
+        SHORTED_GPS(8, "Shorted GPS antenna"), 
+        DEEP_SLEEP_ON(9,"Enter to deep sleep mode"), 
+        DEEP_SLEEP_OFF(10,"Exite from deep sleep mode"), 
+        BKP_BATTERY(13,"Backup battery error"), 
+        BATTERY_DOWN(14,"Vehicle battery goes down to so low level"), 
+        SHOCKED(15,"Shocked"), 
+        COLLISION(16, "Occurred some collision"), 
+        DEVIATE_ROUT(18, "Deviate from predefined rout"),
+        ENTER_ROUT(19,"Enter into predefined rout");
 
         private int value;
 
@@ -599,28 +600,35 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     };
 
     @Override
-    public Object decode(ChannelHandlerContext ctx, Channel channel, Object msg)
-            throws Exception {
+    public Object decode(ChannelHandlerContext ctx, Channel channel, Object msg) {
         String sentence = (String) msg;
-        return decodeMsg(sentence);
+        Log.info("Msg: " + msg);
+        
+        Position position = null;
+        
+        try{
+        	position = decodeMsg(sentence);
+        	Log.info("MESSAGE DECODED WITH SUCCESS!");
+        }
+        catch(Exception e){
+        	Log.info("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
+        }
+        
+        return position;
     }
 
     public Position decodeMsg(String msg) throws Exception {
 
-    	Log.info("Msg: " + msg);
-    	
         ST210REPORTS report = getReportType(msg);
 
         List<ST210FIELDS> protocol = report.getProtocol();
 
         Pattern protocolPattern = report.getProtocolPattern();
 
-        Log.info("Protocol Pattern: " + protocolPattern.toString());
-
         // Parse message
         Matcher parser = protocolPattern.matcher(msg);
         if (!parser.matches()) {
-            return null;
+            throw new Exception("Pattern no match: " + protocolPattern.toString());
         }
 
         // Create new position
