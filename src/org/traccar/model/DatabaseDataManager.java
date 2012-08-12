@@ -210,6 +210,7 @@ public class DatabaseDataManager implements DataManager {
             position.setSpeed(result.getDouble("speed"));
             position.setCourse(result.getDouble("course"));
             position.setPower(result.getDouble("power"));
+            position.setMode(result.getInt("mode"));
             positionList.add(position);
         }
 
@@ -229,6 +230,7 @@ public class DatabaseDataManager implements DataManager {
         queryAddPosition.setDouble("speed", position.getSpeed());
         queryAddPosition.setDouble("course", position.getCourse());
         queryAddPosition.setDouble("power", position.getPower());
+        queryAddPosition.setInt("mode", position.getMode());
         queryAddPosition.setString("address", position.getAddress());
         queryAddPosition.setString("extended_info", position.getExtendedInfo());
 

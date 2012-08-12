@@ -16,6 +16,7 @@
 package org.traccar;
 
 import java.net.InetSocketAddress;
+import java.util.Iterator;
 import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -29,60 +30,74 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
  */
 public class TrackerServer extends ServerBootstrap {
 
-    /**
-     * Initialization
-     */
-    private void init(Integer port, Integer threadPoolSize) {
-        
-        setPort(port);
+	/**
+	 * Initialization
+	 */
+	private void init(Integer port, Integer threadPoolSize) {
 
-        // Create channel factory
-        setFactory(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool()));
-    }
+		setPort(port);
 
-    public TrackerServer(Integer port) {
-        init(port, 1);
-    }
+		// Create channel factory
+		setFactory(new NioServerSocketChannelFactory(
+				Executors.newCachedThreadPool(),
+				Executors.newCachedThreadPool()));
+	}
 
-    /**
-     * Server port
-     */
-    private Integer port;
+	public TrackerServer(Integer port) {
+		init(port, 1);
+	}
 
-    public Integer getPort() {
-        return port;
-    }
+	/**
+	 * Server port
+	 */
+	private Integer port;
 
-    private void setPort(Integer newPort) {
-        port = newPort;
-    }
+	public Integer getPort() {
+		return port;
+	}
 
-    /**
-     * Opened channels
-     */
-    private ChannelGroup allChannels = new DefaultChannelGroup();
+	private void setPort(Integer newPort) {
+		port = newPort;
+	}
 
-    public ChannelGroup getChannelGroup() {
-        return allChannels;
-    }
-    
-    /**
-     * Start server
-     */
-    public void start() {
-        Channel channel = bind(new InetSocketAddress(getPort()));
-        getChannelGroup().add(channel);
-    }
-    
-    /**
-     * Stop server
-     */
-    public void stop() {
-        ChannelGroupFuture future = getChannelGroup().close();
-        future.awaitUninterruptibly();
-        getFactory().releaseExternalResources();
-    }
+	/**
+	 * Opened channels
+	 */
+	private ChannelGroup allChannels = new DefaultChannelGroup();
+
+	public ChannelGroup getChannelGroup() {
+		return allChannels;
+	}
+
+	public void mandaMSG() {
+
+	/*	for (Iterator it = this.getChannelGroup().iterator(); it.hasNext();) {
+			Channel chanel = (Channel) it.next();
+			System.out.println(chanel.getRemoteAddress());
+			if(chanel.getRemoteAddress() !=null)
+			this.getChannelGroup().write("OI AMIGO", chanel.getRemoteAddress());
+
+		}
+*/
+		// System.out.println(type.getPort());
+
+	}
+
+	/**
+	 * Start server
+	 */
+	public void start() {
+		Channel channel = bind(new InetSocketAddress(getPort()));
+		getChannelGroup().add(channel);
+	}
+
+	/**
+	 * Stop server
+	 */
+	public void stop() {
+		ChannelGroupFuture future = getChannelGroup().close();
+		future.awaitUninterruptibly();
+		getFactory().releaseExternalResources();
+	}
 
 }
