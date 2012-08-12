@@ -146,14 +146,15 @@ public class WebServer {
                         Iterator<Position> i = dataManager.getPositions(Long.valueOf(deviceId)).iterator();
                         while (i.hasNext()) {
                             Position position = i.next();
-                            out.format("{'device_id':%d,'time':'%tF %tT','valid':%b,'latitude':%f,'longitude':%f,'speed':%f,'course':%f}",
+                            out.format("{'device_id':%d,'time':'%s','valid':%b,'latitude':%s,'longitude':%s,'speed':%s,'course':%s,'mode':%d}",
                                     position.getDeviceId(),
-                                    position.getTime(), position.getTime(),
+                                    position.getTimeFormated(),
                                     position.getValid(),
-                                    position.getLatitude(),
-                                    position.getLongitude(),
-                                    position.getSpeed(),
-                                    position.getCourse());
+                                    position.getLatitude().toString(),
+                                    position.getLongitude().toString(),
+                                    position.getSpeed().toString(),
+                                    position.getCourse().toString(),
+                                    position.getMode());
                             if (i.hasNext()) out.print(",");
                         }
                     }

@@ -1,7 +1,9 @@
-<!doctype html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Traccar Manager</title>
+<title>Jornada Beta</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
 <link rel="stylesheet" type="text/css" href="http://cdn.sencha.io/ext-4.1.0-gpl/resources/css/ext-all.css" />
 <script type="text/javascript" src="http://cdn.sencha.io/ext-4.1.0-gpl/ext-all.js"></script>
 
@@ -758,6 +760,7 @@ Ext.onReady(function() {
         ]
     });
 
+    
     Ext.define('Position', {
         extend: 'Ext.data.Model',
         fields: [
@@ -768,7 +771,8 @@ Ext.onReady(function() {
             {name: 'longitude', type: 'float'},
             {name: 'speed', type: 'float'},
             {name: 'course', type: 'float'},
-            {name: 'power', type: 'float'}
+            {name: 'power', type: 'float'},
+            {name: 'mode', type: 'int'}
         ]
     });
 
@@ -806,7 +810,8 @@ Ext.onReady(function() {
             'longitude',
             'speed',
             'course',
-            'power'
+            'power',
+            'mode'
         ],
         proxy: {
             type: 'ajax',
@@ -824,7 +829,7 @@ Ext.onReady(function() {
     });
 
     var devicesPanel = Ext.create('Ext.grid.Panel', {
-        title: 'Devices',
+        title: 'Dispositivos',
         region: 'west',
         split: true,
         width: 300,
@@ -837,16 +842,16 @@ Ext.onReady(function() {
         tbar: [
             {
                 id: 'device_update',
-                text: 'Update',
+                text: 'Atualizar',
                 handler : function() {
                     devices.load();
                 }
             },
             {
                 id: 'device_add',
-                text: 'Add',
+                text: 'Incluir',
                 handler : function() {
-                    Ext.Msg.prompt('Add', 'Device IMEI:', function(btn, text) {
+                    Ext.Msg.prompt('Incluir', 'IMEI do Dispositivo:', function(btn, text) {
                         if (btn == 'ok') {
                             devices.add({imei: text});
                         }
@@ -855,10 +860,10 @@ Ext.onReady(function() {
             },
             {
                 id: 'device_remove',
-                text: 'Remove',
+                text: 'Remover',
                 disabled: true,
                 handler : function() {
-                    Ext.Msg.confirm('Remove', 'Are you sure to remove item?', function(btn) {
+                    Ext.Msg.confirm('Remover', 'Confirma remoção do item?', function(btn) {
                         if (btn == 'yes') {
                             devices.remove(devicesPanel.getSelectionModel().getLastSelected());
                         }
@@ -867,10 +872,10 @@ Ext.onReady(function() {
             },
             {
                 id: 'device_edit',
-                text: 'Edit',
+                text: 'Alterar',
                 disabled: true,
                 handler : function() {
-                    Ext.Msg.prompt('Edit', 'Device IMEI:', function(btn, text) {
+                    Ext.Msg.prompt('Alterar', 'IMEI do Dispositivo:', function(btn, text) {
                         if (btn == 'ok') {
                             devicesPanel.getSelectionModel().getLastSelected().set('imei', text);
                         }
@@ -888,11 +893,11 @@ Ext.onReady(function() {
                     Ext.getCmp('device_remove').enable();
                     Ext.getCmp('device_edit').enable();
 
-                    positions.getProxy().url = positionsUrl + '?deviceId=' +
-                        devicesPanel.getSelectionModel().getLastSelected().get('id');
+                    positions.getProxy().url = positionsUrl + '?deviceId=' + devicesPanel.getSelectionModel().getLastSelected().get('id');
                     positions.load();
                     Ext.getCmp('position_update').enable();
-                } else {
+                } 
+                else {
                     Ext.getCmp('position_update').disable();
                     positions.getProxy().url = positionsUrl;
                     positions.load();
@@ -905,7 +910,7 @@ Ext.onReady(function() {
     });
 
     var positionsPanel = Ext.create('Ext.grid.Panel', {
-        title: 'Positions',
+        title: 'Posicionamentos',
         region: 'south',
         split: true,
         height: 300,
@@ -918,7 +923,7 @@ Ext.onReady(function() {
         tbar: [
             {
                 id: 'position_update',
-                text: 'Update',
+                text: 'Atualizar',
                 disabled: true,
                 handler : function() {
                     positions.load();
@@ -926,19 +931,18 @@ Ext.onReady(function() {
             }
         ],
         columns: [
-            {header: 'Device Id', dataIndex: 'device_id'},
-            {
-                header: 'Time',
-                dataIndex: 'time',
+            {header: 'Id Dispositivo', dataIndex: 'device_id'},
+            {header: 'Data/Hora',dataIndex: 'time',
                 flex: 1,
-                renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s')
+                renderer: Ext.util.Format.dateRenderer('d/m/Y H:i:s')
             },
-            {header: 'Valid', dataIndex: 'valid'},
+            {header: 'Válido', dataIndex: 'valid'},
             {header: 'Latitude', dataIndex: 'latitude'},
             {header: 'Longitude', dataIndex: 'longitude'},
-            {header: 'Speed', dataIndex: 'speed'},
-            {header: 'Course', dataIndex: 'course'},
-            {header: 'Power', dataIndex: 'power'}
+            {header: 'Velocidade', dataIndex: 'speed'},
+            {header: 'Curso', dataIndex: 'course'},
+            {header: 'Voltagem', dataIndex: 'power'},
+            {header: 'Modo',  dataIndex: 'mode'}
         ],
         listeners: {
             selectionchange: function(sender, selected, eOpts) {
@@ -955,7 +959,7 @@ Ext.onReady(function() {
     });
 
     var mapPanel = Ext.create('Ext.panel.Panel', {
-        title: 'Map',
+        title: 'Mapa',
         region: 'center',
         margins: {top: 5, bottom: 0, right: 5, left: 0},
 

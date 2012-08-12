@@ -15,6 +15,7 @@
  */
 package org.traccar.model;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -55,6 +56,12 @@ public class Position {
 
     public Date getTime() {
         return time;
+    }
+    
+    public String getTimeFormated(){
+    	SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		df.setLenient(false);
+    	return df.format(time);
     }
 
     public void setTime(Date time) {
