@@ -174,7 +174,7 @@ public class Server {
     }
 
     private void initGeocoder(Properties properties) throws IOException {
-        if (Boolean.parseBoolean("geocoder.enable")) {
+        if (Boolean.parseBoolean(properties.getProperty("geocoder.enable"))) {
             geocoder = new GoogleReverseGeocoder();
         }
     }

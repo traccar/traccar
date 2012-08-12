@@ -15,16 +15,17 @@
  */
 package org.traccar;
 
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.model.Position;
 
 /**
  * Reverse geocoding channel event handler
  */
-public class ReverseGeocoderHandler extends SimpleChannelHandler {
+public class ReverseGeocoderHandler extends OneToOneDecoder {
 
     /**
      * Geocoder object
@@ -36,14 +37,19 @@ public class ReverseGeocoderHandler extends SimpleChannelHandler {
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        if (e.getMessage() instanceof Position) {
-            Position position = (Position) e.getMessage();
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, Object msg)
+            throws Exception {
+
+        if (msg instanceof Position) {
+            Position position = (Position) msg;
             if (geocoder != null) {
                 position.setAddress(geocoder.getAddress(
                         position.getLatitude(), position.getLongitude()));
             }
         }
+
+        return msg;
     }
 
 }

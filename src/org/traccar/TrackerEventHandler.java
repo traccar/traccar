@@ -55,7 +55,8 @@ public class TrackerEventHandler extends SimpleChannelHandler {
                         ", longitude: " + position.getLongitude() +
                         ", altitude: " + position.getAltitude() +
                         ", speed: " + position.getSpeed() +
-                        ", course: " + position.getCourse());
+                        ", course: " + position.getCourse() +
+                        ", power: " + position.getPower());
             }
 
             // Write position to database
