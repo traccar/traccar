@@ -10,7 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.traccar.Server;
 import org.traccar.helper.Log;
-import org.traccar.server.SocketCliente;
+//import org.traccar.server.SocketCliente;
 
 public class ST210ProtocolDecoderTest {
 
