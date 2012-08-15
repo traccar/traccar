@@ -27,7 +27,7 @@ public class ST210ProtocolDecoderTest {
 		assertNotNull(decoder
 				.decode(null,
 						null,
-						"SA200STT;315198;042;20120808;20:37:34;42948;-15.618731;-056.083216;000.007;000.00;12;1;48;0.00;000000;1;0127"));
+						"SA200STT;315198;042;20120808;20:37:34;3fac25;-15.618731;-056.083216;000.007;000.00;12;1;48;0.00;000000;1;0127"));
 		assertNotNull(decoder
 				.decode(null,
 						null,
