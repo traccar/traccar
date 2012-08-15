@@ -33,7 +33,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 SW_VER("(\\d{3});", "Software Release Version"), 
                 DATE("(\\d+);","GPS date (yyyymmdd) Year + Month + Day"), 
                 TIME("(\\d{2}:\\d{2}:\\d{2});","GPS time (hh:mm:ss) Hour : Minute : Second"), 
-                CELL("(\\d{2}\\w\\d{2});","Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"), 
+                CELL("(\\w{3}\\d{2});","Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"), 
                 LAT("(-\\d{2}.\\d+);", "Latitude (+/-xx.xxxxxx)"), 
                 LON("(-\\d{3}.\\d+);", "Longitude (+/-xxx.xxxxxx)"), 
                 SPD("(\\d{3}.\\d{3});","Speed in km/h - This value returns to 0 when it is over than 200,000Km"), 
