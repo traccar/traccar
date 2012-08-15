@@ -211,6 +211,7 @@ public class DatabaseDataManager implements DataManager {
             position.setCourse(result.getDouble("course"));
             position.setPower(result.getDouble("power"));
             position.setMode(result.getInt("mode"));
+            position.setAddress(result.getString("address"));
             positionList.add(position);
         }
 

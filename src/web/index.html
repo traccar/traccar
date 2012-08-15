@@ -166,11 +166,12 @@ setCenter: {
 },
 
 // or just specify lat/long
+*/
 setCenter: {
-    lat: 42.345573,
-    lng: -71.098326
-}
-     * </code></pre>
+    lat: '-15.618767',
+    lng: '-56.083214'
+},
+ /* * </code></pre>listeners
      */
     /**
      * @cfg {Number} zoomLevel
@@ -178,7 +179,7 @@ setCenter: {
      * Also used as the zoom level for panoramas, zero specifies no zoom at all.
      * Defaults to <tt>3</tt>.
      */
-    zoomLevel: 3,
+    zoomLevel: 10,
     /**
      * @cfg {Number} yaw
      * The Yaw, or rotational direction of the users perspective in degrees. Only applies to panoramas.
@@ -291,7 +292,7 @@ markers: [{
 
           Ext.defer(function(){
               if (this.gmapType === 'map'){
-                  this.gmap = new google.maps.Map(this.getEl().dom, {zoom:this.zoomLevel,mapTypeId: google.maps.MapTypeId.ROADMAP});
+                  this.gmap = new google.maps.Map(this.getEl().dom, {zoom:this.zoomLevel,mapTypeId: google.maps.MapTypeId.HYBRID});
                   this.mapDefined = true;
                   this.mapDefinedGMap = true;
               }
@@ -302,7 +303,7 @@ markers: [{
               }
 
               if (!this.mapDefined && this.gmapType){
-                 this.gmap = new google.maps.Map(this.getEl().dom, {zoom:this.zoomLevel,mapTypeId: google.maps.MapTypeId.ROADMAP});
+                 this.gmap = new google.maps.Map(this.getEl().dom, {zoom:this.zoomLevel,mapTypeId: google.maps.MapTypeId.HYBRID});
                  this.gmap.setMapTypeId(this.gmapType);
                  this.mapDefined = true;
                  this.mapDefinedGMap = true;
@@ -317,7 +318,7 @@ markers: [{
                       this.geoCodeLookup(this.setCenter.geoCodeAddr, this.setCenter.marker, false, true, this.setCenter.listeners);
                   }else{
                       if (this.gmapType === 'map'){
-                          var point = new google.maps.LatLng(this.setCenter.lat,this.setCenter.lng);
+                          var point = new google.maps.LatLng(-15.618767,-56.083214);
                           this.getMap().setCenter(point, this.zoomLevel);
                           this.lastCenter = point;
                       }
@@ -473,9 +474,7 @@ markers: [{
             this.lastCenter = point;
         }
 
-        var mark = new google.maps.Marker(Ext.apply(marker, {
-            position: point
-        }));
+        var mark = new google.maps.Marker(Ext.apply(marker, {position: point}));
 
         if (marker.infoWindow){
             this.createInfoWindow(marker.infoWindow, point, mark);
@@ -772,7 +771,8 @@ Ext.onReady(function() {
             {name: 'speed', type: 'float'},
             {name: 'course', type: 'float'},
             {name: 'power', type: 'float'},
-            {name: 'mode', type: 'int'}
+            {name: 'mode', type: 'int'},
+            {name: 'address', type: 'string'}
         ]
     });
 
@@ -811,7 +811,8 @@ Ext.onReady(function() {
             'speed',
             'course',
             'power',
-            'mode'
+            'mode',
+            'address'
         ],
         proxy: {
             type: 'ajax',
@@ -932,25 +933,30 @@ Ext.onReady(function() {
         ],
         columns: [
             {header: 'Id Dispositivo', dataIndex: 'device_id'},
-            {header: 'Data/Hora',dataIndex: 'time',
+            {header: 'Data/Hora',
+                dataIndex: 'time',
                 flex: 1,
-                renderer: Ext.util.Format.dateRenderer('d/m/Y H:i:s')
+                sortable: true,
+                renderer: Ext.util.Format.dateRenderer('d/m/Y H:i:s'),
+                width: 100
             },
-            {header: 'Válido', dataIndex: 'valid'},
-            {header: 'Latitude', dataIndex: 'latitude'},
-            {header: 'Longitude', dataIndex: 'longitude'},
-            {header: 'Velocidade', dataIndex: 'speed'},
-            {header: 'Curso', dataIndex: 'course'},
-            {header: 'Voltagem', dataIndex: 'power'},
-            {header: 'Modo',  dataIndex: 'mode'}
+            {header: 'Endereço', dataIndex: 'address', width: 480},
+            {header: 'Latitude', dataIndex: 'latitude', width: 70},
+            {header: 'Longitude', dataIndex: 'longitude', width: 70},
+            {header: 'Velocidade', dataIndex: 'speed', width: 70},
+            {header: 'Curso', dataIndex: 'course', width: 70},
+            {header: 'Voltagem', dataIndex: 'power', width: 70},
+            {header: 'Modo',  dataIndex: 'mode', width: 70},
+            {header: 'Válido', dataIndex: 'valid', width: 70}            
         ],
         listeners: {
             selectionchange: function(sender, selected, eOpts) {
                 if (selected.length != 0) {
                     var lat = positionsPanel.getSelectionModel().getLastSelected().get('latitude');
                     var lng = positionsPanel.getSelectionModel().getLastSelected().get('longitude');
+                    var title = positionsPanel.getSelectionModel().getLastSelected().get('address');
                     var point = new google.maps.LatLng(lat, lng);
-                    map.addMarker(point, {lat: lat, lng: lng}, true, true);
+                    map.addMarker(point, {lat: lat, lng: lng, title: title}, true, true);
                 } else {
                     map.clearMarkers(); // private?
                 }
