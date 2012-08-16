@@ -100,7 +100,12 @@ public class Server {
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
             Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
-            webServer = new WebServer(port, dataManager);
+            String address = properties.getProperty("http.address");
+            if (address != null) {
+                webServer = new WebServer(address, port, dataManager);
+            } else {
+                webServer = new WebServer(port, dataManager);
+            }
         }
     }
 

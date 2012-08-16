@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -190,6 +191,11 @@ public class WebServer {
 
     public WebServer(Integer port, DataManager dataManager) {
         server = new Server(port);
+        server.setHandler(new WebHandler(dataManager));
+    }
+
+    public WebServer(String address, Integer port, DataManager dataManager) {
+        server = new Server(new InetSocketAddress(address, port));
         server.setHandler(new WebHandler(dataManager));
     }
 
