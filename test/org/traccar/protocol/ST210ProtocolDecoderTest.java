@@ -1,6 +1,7 @@
 package org.traccar.protocol;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -36,6 +37,10 @@ public class ST210ProtocolDecoderTest {
 				.decode(null,
 						null,
 						"SA200EMG;317652;042;20120718;15:35:41;16d41;-15.618740;-056.083252;000.034;000.00;8;1;41548;12.17;110000;1"));
+		assertNull(decoder
+				.decode(null,
+						null,
+						"SA200ALV;317652"));
 	}
 
 }

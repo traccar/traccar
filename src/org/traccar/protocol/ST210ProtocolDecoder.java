@@ -23,8 +23,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
 	}
 
 	private enum ST210FIELDS {
-        HDR_STATUS("SA200STT;", 
-        		"Status Report"), 
+        		HDR_STATUS("SA200STT;","Status Report"), 
         		HDR_EMERGENCY("SA200EMG;","Emergency Report"), 
                 HDR_EVENT("SA200EVT;", "Event Report"), 
                 HDR_ALERT("SA200ALT;","Alert Report"), 
@@ -44,8 +43,8 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 PWR_VOLT("(\\d+.\\d{2});","Voltage value of main power"), 
                 IO("(\\d+);","Current I/O status of inputs and outputs."), 
                 MODE("(\\d);","1 = Idle mode (Parking)\n" + "2 = Active Mode (Driving)"),
-                MSG_NUM("(\\d{4})","Message number - After 9999 is reported, message number returns to 0000"), 
-                EMG_ID("(\\d)", "Emergency type"), 
+                MSG_NUM("(\\d{4});","Message number - After 9999 is reported, message number returns to 0000"), 
+                EMG_ID("(\\d);", "Emergency type"), 
                 EVT_ID("(\\d);", "Event type"), 
                 ALERT_ID("(\\d);", "Alert type");
 
@@ -488,6 +487,10 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             patternStr += field.getPattern();
         }
 
+        if(patternStr.endsWith(";")){
+        	patternStr = patternStr.substring(0, patternStr.length()-1);
+        }
+        
         return Pattern.compile(patternStr);
 
     }
@@ -631,6 +634,10 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             throw new Exception("Pattern no match: " + protocolPattern.toString());
         }
 
+        if(report.equals(ST210REPORTS.ALIVE)){
+        	return null;
+        }
+        
         // Create new position
         Position position = new Position();
 
