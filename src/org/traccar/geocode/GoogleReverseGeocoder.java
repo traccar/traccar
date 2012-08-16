@@ -19,6 +19,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
+
 import org.traccar.helper.Log;
 
 /**
@@ -36,8 +38,10 @@ public class GoogleReverseGeocoder implements ReverseGeocoder {
         try {
             URL url = new URL("http://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," + longitude + "&sensor=false");
             URLConnection connection = url.openConnection();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream()));
+
+            connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),Charset.forName("UTF-8")));
 
             // Find address line
             String line;
