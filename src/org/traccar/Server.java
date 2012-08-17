@@ -96,6 +96,7 @@ public class Server {
         initAvl08Server(properties);
         initEnforaServer(properties);
         initMeiligaoServer(properties);
+        initMaxonServer(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -448,6 +449,28 @@ public class Server {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 4));
                     pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+
+    private void initMaxonServer(Properties properties) throws SQLException {
+        String protocol = "maxon";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new MaxonProtocolDecoder(getDataManager(), resetDelay));
                 }
             });
 
