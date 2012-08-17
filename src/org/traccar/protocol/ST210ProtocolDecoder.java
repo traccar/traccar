@@ -614,7 +614,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         	Log.info("MESSAGE DECODED WITH SUCCESS!");
         }
         catch(Exception e){
-        	Log.info("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
+        	Log.severe("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
         }
         
         return position;
