@@ -23,8 +23,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
 	}
 
 	private enum ST210FIELDS {
-        HDR_STATUS("SA200STT;", 
-        		"Status Report"), 
+        		HDR_STATUS("SA200STT;","Status Report"), 
         		HDR_EMERGENCY("SA200EMG;","Emergency Report"), 
                 HDR_EVENT("SA200EVT;", "Event Report"), 
                 HDR_ALERT("SA200ALT;","Alert Report"), 
@@ -33,7 +32,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 SW_VER("(\\d{3});", "Software Release Version"), 
                 DATE("(\\d+);","GPS date (yyyymmdd) Year + Month + Day"), 
                 TIME("(\\d{2}:\\d{2}:\\d{2});","GPS time (hh:mm:ss) Hour : Minute : Second"), 
-                CELL("(\\d{2}\\w\\d{2});","Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"), 
+                CELL("(\\w+);","Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"), 
                 LAT("(-\\d{2}.\\d+);", "Latitude (+/-xx.xxxxxx)"), 
                 LON("(-\\d{3}.\\d+);", "Longitude (+/-xxx.xxxxxx)"), 
                 SPD("(\\d{3}.\\d{3});","Speed in km/h - This value returns to 0 when it is over than 200,000Km"), 
@@ -44,8 +43,8 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 PWR_VOLT("(\\d+.\\d{2});","Voltage value of main power"), 
                 IO("(\\d+);","Current I/O status of inputs and outputs."), 
                 MODE("(\\d);","1 = Idle mode (Parking)\n" + "2 = Active Mode (Driving)"),
-                MSG_NUM("(\\d{4})","Message number - After 9999 is reported, message number returns to 0000"), 
-                EMG_ID("(\\d)", "Emergency type"), 
+                MSG_NUM("(\\d{4});","Message number - After 9999 is reported, message number returns to 0000"), 
+                EMG_ID("(\\d);", "Emergency type"), 
                 EVT_ID("(\\d);", "Event type"), 
                 ALERT_ID("(\\d);", "Alert type");
 
@@ -488,6 +487,10 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             patternStr += field.getPattern();
         }
 
+        if(patternStr.endsWith(";")){
+        	patternStr = patternStr.substring(0, patternStr.length()-1);
+        }
+        
         return Pattern.compile(patternStr);
 
     }
@@ -611,7 +614,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         	Log.info("MESSAGE DECODED WITH SUCCESS!");
         }
         catch(Exception e){
-        	Log.info("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
+        	Log.severe("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
         }
         
         return position;
@@ -631,6 +634,10 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             throw new Exception("Pattern no match: " + protocolPattern.toString());
         }
 
+        if(report.equals(ST210REPORTS.ALIVE)){
+        	return null;
+        }
+        
         // Create new position
         Position position = new Position();
 

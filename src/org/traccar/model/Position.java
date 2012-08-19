@@ -15,6 +15,7 @@
  */
 package org.traccar.model;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -55,6 +56,12 @@ public class Position {
 
     public Date getTime() {
         return time;
+    }
+    
+    public String getTimeFormated(){
+    	SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		df.setLenient(false);
+    	return df.format(time);
     }
 
     public void setTime(Date time) {
@@ -150,6 +157,18 @@ public class Position {
 
     public void setPower(Double power) {
         this.power = power;
+    }
+    /**
+     * Mode / 1 - Parking | 2 - Driving
+     */
+    private int mode;
+
+    public int getMode() {
+        return mode;
+    }
+
+    public void setMode(int mode) {
+        this.mode = mode;
     }
 
     /**
