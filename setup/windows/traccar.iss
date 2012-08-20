@@ -12,16 +12,16 @@ Name: "{app}\lib"
 Name: "{app}\logs"
 
 [Files]
-Source: "wrapper\bin\wrapper.exe"; DestDir: "{app}\bin"
+Source: "wrapper\bin\wrapper-windows-x86-32.exe"; DestDir: "{app}\bin"; DestName: "wrapper.exe"
 Source: "wrapper\src\bin\App.bat.in"; DestDir: "{app}\bin"; DestName: "Traccar.bat"
 Source: "wrapper\src\bin\InstallApp-NT.bat.in"; DestDir: "{app}\bin"; DestName: "InstallTraccar-NT.bat"
 Source: "wrapper\src\bin\UninstallApp-NT.bat.in"; DestDir: "{app}\bin"; DestName: "UninstallTraccar-NT.bat"
-Source: "wrapper\lib\wrapper.dll"; DestDir: "{app}\lib";
+Source: "wrapper\lib\wrapper-windows-x86-32.dll"; DestDir: "{app}\lib"; DestName: "wrapper.dll"
 Source: "wrapper\lib\wrapper.jar"; DestDir: "{app}\lib";
 Source: "wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: "wrapper.conf"; AfterInstall: ConfigureWrapper
 
-Source: "tracker-server.jar"; DestDir: "{app}"
-Source: "lib\*"; DestDir: "{app}\lib"
+Source: "..\..\target\tracker-server.jar"; DestDir: "{app}"
+Source: "..\..\target\lib\*"; DestDir: "{app}\lib"
 Source: "windows.cfg"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
 
 [Run]
