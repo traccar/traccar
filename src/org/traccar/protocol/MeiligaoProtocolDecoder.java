@@ -112,6 +112,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
             if (channel != null) {
                 channel.write(sendBuf);
             }
+            return null;
         }
 
         // Data offset

@@ -2,6 +2,7 @@
 
 # testing data:
 # imei - 123456789012345
+# id - 123456 (trackers that dont send imei)
 # time - 12:0X (where X is different for each tracker)
 # server - localhost
 # ports - default
@@ -36,11 +37,10 @@ echo "8. enfora"
 (echo -n -e "\x00\x71\x00\x04\x02\x00                 123456789012345 13 \$GPRMC,120800.00,A,6000.000000,N,13000.000000,E,0.0,0.0,010112,,,A*52\r\n";) | nc -v localhost 5008
 
 echo "9. meiligao"
-(echo -n -e "\x24\x24\x00\x11\x12\x34\x56\xFF\xFF\xFF\xFF\x50\x00\x8B\x9B\x0D\x0A";) | nc -v localhost 5009
+(echo -n -e "\$\$\x00\x60\x12\x34\x56\xFF\xFF\xFF\xFF\x99\x55120900.000,A,6000.0000,N,13000.0000,E,0.00,,010112,,*1C|11.5|194|0000|0000,0000\x69\x62\x0D\x0A";) | nc -v localhost 5009
 
-echo "10. st210"
-(echo -n -e "SA200STT;317652;042;20120807;10:43:23;16d41;-15.618767;-056.083214;000.011;000.00;11;1;41557;12.21;000000;1;3205\r";) | nc -v localhost 8801
-
+echo "10. maxon"
 
 
-
+echo "11. st210"
+(echo -n -e "SA200STT;123456;042;20120101;12:11:00;16d41;-15.618767;-056.083214;000.011;000.00;11;1;41557;12.21;000000;1;3205\r";) | nc -v localhost 5011

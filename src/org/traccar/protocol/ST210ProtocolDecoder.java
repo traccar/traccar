@@ -16,15 +16,15 @@ import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 public class ST210ProtocolDecoder extends GenericProtocolDecoder {
-	
+    
 
     public ST210ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-		super(dataManager, resetDelay);
-	}
+        super(dataManager, resetDelay);
+    }
 
-	private enum ST210FIELDS {
-        		HDR_STATUS("SA200STT;","Status Report"), 
-        		HDR_EMERGENCY("SA200EMG;","Emergency Report"), 
+    private enum ST210FIELDS {
+                HDR_STATUS("SA200STT;","Status Report"), 
+                HDR_EMERGENCY("SA200EMG;","Emergency Report"), 
                 HDR_EVENT("SA200EVT;", "Event Report"), 
                 HDR_ALERT("SA200ALT;","Alert Report"), 
                 HDR_ALIVE("SA200ALV;","Alive Report"), 
@@ -103,13 +103,13 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 time.set(Calendar.MONTH, Integer.valueOf(Integer.valueOf(groupValue.substring(4, 6))-1));
                 time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(Integer.valueOf(groupValue.substring(6, 8))));
                 
-                Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                /*Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                 
                 ret.setTimeInMillis(time.getTimeInMillis() + 
-                					TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
-                					TimeZone.getDefault().getOffset(time.getTimeInMillis()));
+                                    TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
+                                    TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
 
-                position.setTime(ret.getTime());
+                position.setTime(time.getTime());
                 
                 break;
             }
@@ -124,13 +124,13 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 time.set(Calendar.MINUTE, Integer.valueOf(Integer.valueOf(groupValue.substring(3, 5))));
                 time.set(Calendar.SECOND, Integer.valueOf(Integer.valueOf(groupValue.substring(6, 8))));
 
-                Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                /*Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                 
                 ret.setTimeInMillis(time.getTimeInMillis() + 
-                					TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
-                					TimeZone.getDefault().getOffset(time.getTimeInMillis()));
+                                    TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
+                                    TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
 
-                position.setTime(ret.getTime());
+                position.setTime(time.getTime());
                 
                 break;
             }
@@ -488,7 +488,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         }
 
         if(patternStr.endsWith(";")){
-        	patternStr = patternStr.substring(0, patternStr.length()-1);
+            patternStr = patternStr.substring(0, patternStr.length()-1);
         }
         
         return Pattern.compile(patternStr);
@@ -610,11 +610,11 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         Position position = null;
         
         try{
-        	position = decodeMsg(sentence);
-        	Log.info("MESSAGE DECODED WITH SUCCESS!");
+            position = decodeMsg(sentence);
+            Log.info("MESSAGE DECODED WITH SUCCESS!");
         }
         catch(Exception e){
-        	Log.severe("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
+            Log.severe("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
         }
         
         return position;
@@ -635,7 +635,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         }
 
         if(report.equals(ST210REPORTS.ALIVE)){
-        	return null;
+            return null;
         }
         
         // Create new position
