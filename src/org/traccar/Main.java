@@ -15,12 +15,16 @@
  */
 package org.traccar;
 
+import java.util.Locale;
 import org.traccar.helper.Log;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        // TODO: Temporary formatting workaround
+        Locale.setDefault(Locale.ENGLISH);
+        
         final Server service = new Server();
         service.init(args);
 
