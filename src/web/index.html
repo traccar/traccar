@@ -762,7 +762,7 @@ Ext.onReady(function() {
         extend: 'Ext.data.Model',
         fields: [
             {name: 'device_id', type: 'int'},
-            {name: 'time', type: 'date'},
+            {name: 'time', type: 'string'},
             {name: 'valid', type: 'boolean'},
             {name: 'latitude', type: 'float'},
             {name: 'longitude', type: 'float'},
@@ -930,8 +930,8 @@ Ext.onReady(function() {
             {
                 header: 'Time',
                 dataIndex: 'time',
-                flex: 1,
-                renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s')
+                flex: 1
+                //renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s')
             },
             {header: 'Valid', dataIndex: 'valid'},
             {header: 'Latitude', dataIndex: 'latitude'},
