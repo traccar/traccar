@@ -68,11 +68,13 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
         // Send response #1
         if (sentence.contains("##")) {
             channel.write("LOAD");
+            return null;
         }
 
         // Send response #2
         if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
             channel.write("ON");
+            return null;
         }
 
         // Parse message
