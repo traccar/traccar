@@ -65,6 +65,9 @@ public class Tk103ProtocolDecoder extends GenericProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
+        
+        // TODO: Send answer
+        //(090411121854AP05)
 
         // Parse message
         Matcher parser = pattern.matcher(sentence);
