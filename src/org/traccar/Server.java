@@ -499,5 +499,24 @@ public class Server {
             serverList.add(server);
         }
     }
-    
+
+    private void initProgressServer(Properties properties) throws SQLException {
+        String protocol = "progress";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setEndianness(java.nio.ByteOrder.LITTLE_ENDIAN);
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 0, 0));
+                    pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }    
+
 }

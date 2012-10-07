@@ -16,8 +16,10 @@
 package org.traccar;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
 import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
@@ -57,6 +59,13 @@ public class TrackerServer extends ServerBootstrap {
 
     private void setPort(Integer newPort) {
         port = newPort;
+    }
+
+    /**
+     * Set endianness
+     */
+    void setEndianness(ByteOrder byteOrder) {
+        setOption("child.bufferFactory", new HeapChannelBufferFactory(byteOrder));
     }
 
     /**
