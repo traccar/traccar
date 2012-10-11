@@ -15,8 +15,11 @@
  */
 package org.traccar.protocol;
 
+import java.util.Calendar;
+import java.util.TimeZone;
 import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
@@ -77,11 +80,56 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
         // Position
         else if (type == MSG_POINT || type == MSG_ALARM) {
             Position position = new Position();
+            StringBuilder extendedInfo = new StringBuilder("<protocol>progress</protocol>");
             position.setDeviceId(deviceId);
-            // TODO: parse messages here
 
+            // Message index
+            buf.readUnsignedInt();
+
+            // Time
+            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            time.clear();
+            time.setTimeInMillis(buf.readUnsignedInt() * 1000);
+            position.setTime(time.getTime());
+
+            // Latitude
+            position.setLatitude(((double) buf.readInt()) / 0x7FFFFFFF * 180.0);
+
+            // Longitude
+            position.setLongitude(((double) buf.readInt()) / 0x7FFFFFFF * 180.0);
+
+            // Speed
+            position.setSpeed(((double) buf.readUnsignedInt()) / 100);
+
+            // Course
+            position.setCourse(((double) buf.readUnsignedShort()) / 100);
+
+            // Altitude
+            position.setAltitude(((double) buf.readUnsignedShort()) / 100);
+
+            // Satellites
+            int satellitesNumber = buf.readUnsignedByte();
+            extendedInfo.append("<sat>");
+            extendedInfo.append(satellitesNumber);
+            extendedInfo.append("</sat>");
+            position.setValid(satellitesNumber >= 3); // TODO: probably wrong
+
+            // Cell signal
+            extendedInfo.append("<gsm>");
+            extendedInfo.append(buf.readUnsignedByte());
+            extendedInfo.append("</gsm>");
+
+            // TODO: process other data
+
+            // Extended info
+            position.setExtendedInfo(extendedInfo.toString());
+
+            // Send response for alarm message
             if (type == MSG_ALARM) {
-                // TODO: send MSG_ALARM_RECIEVED / channel.write(...);
+                byte[] response = {(byte)0xC9,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+                channel.write(ChannelBuffers.wrappedBuffer(response));
+
+                extendedInfo.append("<alarm>true</alarm>");
             }
 
             return position;
