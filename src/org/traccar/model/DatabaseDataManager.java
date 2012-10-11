@@ -15,8 +15,7 @@
  */
 package org.traccar.model;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import org.traccar.helper.AdvancedConnection;
 import org.traccar.helper.Log;
@@ -130,7 +129,7 @@ public class DatabaseDataManager implements DataManager {
 
     public synchronized void addDevice(Device device) throws SQLException {
 
-        queryAddDevice.prepare();
+        queryAddDevice.prepare(Statement.RETURN_GENERATED_KEYS);
         queryAddDevice.setString("imei", device.getImei());
         queryAddDevice.executeUpdate();
 
