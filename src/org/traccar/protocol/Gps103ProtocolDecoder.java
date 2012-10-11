@@ -43,7 +43,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
     static private Pattern pattern = Pattern.compile(
             "imei:" +
             "([\\d]+)," +                       // IMEI
-            "[^,]+," +
+            "([^,]+)," +                        // Alarm
             "(\\d{2})(\\d{2})(\\d{2})[\\d]+," + // Date
             "[^,]*," +
             "[FL]," +                           // F - full / L - low
@@ -85,12 +85,18 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
 
         // Create new position
         Position position = new Position();
+        StringBuilder extendedInfo = new StringBuilder("<protocol>gps103</protocol>");
 
         Integer index = 1;
 
         // Get device by IMEI
         String imei = parser.group(index++);
         position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+
+        // Alarm message
+        extendedInfo.append("<alarm>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</alarm>");
 
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -127,6 +133,9 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(0.0);
+
+        // Extended info
+        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }
