@@ -98,6 +98,9 @@ public class Server {
         initMeiligaoServer(properties);
         initMaxonServer(properties);
         initST210Server(properties);
+        initProgressServer(properties);
+        initH02Server(properties);
+        
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
