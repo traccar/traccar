@@ -9,9 +9,9 @@ public class GoogleReverseGeocoderTest {
     public void testGetAddress() {
 
         ReverseGeocoder reverseGeocoder = new GoogleReverseGeocoder();
-
+        
         assertEquals(
-                "Novotsentral'naya ulitsa, Saint Petersburg, Russia",
+                "Novotsentral'naya ulitsa, 45, Saint Petersburg, Russia",
                 reverseGeocoder.getAddress(60.0, 30.0));
 
     }
