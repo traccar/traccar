@@ -24,6 +24,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
@@ -58,35 +59,6 @@ public class EnforaProtocolDecoder extends GenericProtocolDecoder {
 
     public static final int IMEI_LENGTH = 15;
 
-    // TODO: avoid copy-paste (from XexunFrameDecoder)
-    private static Integer find(
-            ChannelBuffer buf,
-            Integer start,
-            Integer length,
-            String subString) {
-
-        int index = start;
-        boolean match;
-
-        for (; index < length; index++) {
-            match = true;
-
-            for (int i = 0; i < subString.length(); i++) {
-                char c = (char) buf.getByte(index + i);
-                if (c != subString.charAt(i)) {
-                    match = false;
-                    break;
-                }
-            }
-
-            if (match) {
-                return index;
-            }
-        }
-
-        return null;
-    }
-
     /**
      * Decode message
      */
@@ -117,7 +89,7 @@ public class EnforaProtocolDecoder extends GenericProtocolDecoder {
         }
 
         // Find GPSMC string
-        Integer start = find(buf, 0, buf.readableBytes(), "GPRMC");
+        Integer start = ChannelBufferTools.find(buf, 0, buf.readableBytes(), "GPRMC");
         if (start == null) {
             // Message does not contain GPS data
             return null;
