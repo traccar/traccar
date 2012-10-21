@@ -52,5 +52,29 @@ public class ChannelBufferTools {
 
         return null;
     }
+    
+    /**
+     * Convert hex to integer (length in hex digits)
+     */
+    public static int readHexInteger(ChannelBuffer buf, int length) {
+        
+        int result = 0;
+        
+        for (int i = 0; i < length / 2; i++) {
+            int b = buf.readUnsignedByte();
+            result *= 10;
+            result += b >>> 4;
+            result *= 10;
+            result += b & 0x0f;
+        }
+        
+        if (length % 2 == 1) {
+            int b = buf.getUnsignedByte(buf.readerIndex());
+            result *= 10;
+            result += b >>> 4;
+        }
+        
+        return result;
+    }
 
 }

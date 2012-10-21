@@ -100,6 +100,7 @@ public class Server {
         initST210Server(properties);
         initProgressServer(properties);
         initH02Server(properties);
+        initJt600Server(properties);
         
 
         // Initialize web server
@@ -547,4 +548,25 @@ public class Server {
         }
     }
 
+    /**
+     * Init JT600 server
+     */
+    private void initJt600Server(Properties properties) throws SQLException {
+
+        String protocol = "jt600";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new Jt600FrameDecoder());
+                    pipeline.addLast("objectDecoder", new Jt600ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
 }
