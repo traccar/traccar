@@ -50,8 +50,8 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
         buf.readByte(); // header
         
         // Get device by identifier
-        int id = ChannelBufferTools.readHexInteger(buf, 10);
-        position.setDeviceId(getDataManager().getDeviceByImei(String.valueOf(id)).getId());
+        String id = Long.valueOf(ChannelBufferTools.readHexString(buf, 10)).toString();
+        position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         
         buf.readByte(); // protocol version + data type
         

@@ -5,7 +5,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
-public class Jt600ProtocolDecoderTest1 {
+public class Jt600ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {

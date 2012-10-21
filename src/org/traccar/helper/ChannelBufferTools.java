@@ -15,6 +15,7 @@
  */
 package org.traccar.helper;
 
+import java.util.Formatter;
 import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
@@ -77,4 +78,23 @@ public class ChannelBufferTools {
         return result;
     }
 
+    /**
+     * Return hex string
+     */
+    public static String readHexString(ChannelBuffer buf, int length) {
+        
+        StringBuilder result = new StringBuilder();
+        Formatter formatter = new Formatter(result);
+        
+        for (int i = 0; i < length / 2; i++) {
+            formatter.format("%02x", buf.readByte());
+        }
+        
+        if (length % 2 == 1) {
+            int b = buf.getUnsignedByte(buf.readerIndex());
+            formatter.format("%01x", b >>> 4);
+        }
+        
+        return result.toString();
+    }
 }
