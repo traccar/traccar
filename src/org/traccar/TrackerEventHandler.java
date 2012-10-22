@@ -63,6 +63,7 @@ public class TrackerEventHandler extends SimpleChannelHandler {
             try {
                 dataManager.addPosition(position);
             } catch (Exception error) {
+                Log.info("Exception during query execution");
                 Log.warning(error.getMessage());
             }
         }

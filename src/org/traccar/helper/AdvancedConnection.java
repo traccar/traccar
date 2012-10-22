@@ -40,6 +40,10 @@ public class AdvancedConnection {
     }
     
     public final void reset() throws SQLException {
+        if (connection != null) {
+            connection.close();
+            connection = null;
+        }
         if (user != null && password != null) {
             connection = DriverManager.getConnection(url, user, password);
         } else {
