@@ -46,7 +46,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 MSG_NUM("(\\d{4});","Message number - After 9999 is reported, message number returns to 0000"), 
                 EMG_ID("(\\d);", "Emergency type"), 
                 EVT_ID("(\\d);", "Event type"), 
-                ALERT_ID("(\\d);", "Alert type");
+                ALERT_ID("(\\d+);", "Alert type");
 
         private String pattern;
 
@@ -94,6 +94,10 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             case SPD:
                 position.setSpeed(Double.valueOf(groupValue));
                 break;
+                
+            case MODE:
+                //position.setMode(Integer.parseInt(groupValue));
+                break;
 
             case DATE: {
                 // Date
@@ -107,7 +111,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 
                 ret.setTimeInMillis(time.getTimeInMillis() + 
                                     TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
-                                    TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
+                					TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
 
                 position.setTime(time.getTime());
                 
@@ -128,7 +132,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 
                 ret.setTimeInMillis(time.getTimeInMillis() + 
                                     TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
-                                    TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
+                					TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
 
                 position.setTime(time.getTime());
                 
