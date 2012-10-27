@@ -21,6 +21,9 @@ public class Gps103ProtocolDecoderTest {
         //assertNull(decoder.decode(null, null, "imei:359586015829802,tracker,000000000,13554900601,L,;"));
 
         assertNotNull(decoder.decode(null, null,
+                "imei:012497000431811,tracker,1210260609,,F,220925.000,A,0845.5500,N,07024.7673,W,0.00,,"));
+
+        assertNotNull(decoder.decode(null, null,
                 "imei:100000000000000,help me,1004171910,,F,010203.000,A,0102.0003,N,00102.0003,E,1.02,"));
 
         assertNotNull(decoder.decode(null, null,
