@@ -1,6 +1,6 @@
 /*
  * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
- * Enhancement done by Luis Parada (luis.parada@gmail.com)
+ *                Luis Parada (luis.parada@gmail.com)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,14 @@ import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
- *
  * Ev603 Protocol Decoder
  */
 public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
+
+    /**
+     * Device ID
+     */
+    private Long deviceId;
     
     /**
      * Initialize
@@ -43,16 +47,14 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "!A," +                              // Start Character
-            "([\\d]{2})\\/([\\d]{2})\\/([\\d]{2})," +   // Date dd/mm/YY
-            "([\\d]{2}):([\\d]{2}):([\\d]{2})," +       // Time hh:mm:ss
-            "(-?[\\d]+\\.[\\d]+)," +  // Latitude (DDMM.MMMM)
-            "(-?[\\d]+\\.[\\d]+)," +  // Longitude (DDDMM.MMMM)
-            "([\\d]+.[\\d]{2})," +              // Speed
-            "([\\d]+|[\\d]+\\.[\\d]+)," +       // degrees
+            "!A," +                           // Type
+            "(\\d{2})\\/(\\d{2})\\/(\\d{2})," + // Date dd/mm/YY
+            "(\\d{2}):(\\d{2}):(\\d{2})," +   // Time hh:mm:ss
+            "(-?\\d+\\.\\d+)," +              // Latitude (DDMM.MMMM)
+            "(-?\\d+\\.\\d+)," +              // Longitude (DDDMM.MMMM)
+            "(\\d+\\.\\d+)," +                // Speed
+            "(\\d+\\.?\\d+)," +               // Course
             ".*");
-    
-    static private Pattern deviceImei = Pattern.compile("([\\d]+);");
 
     /**
      * Decode message
@@ -63,67 +65,60 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
 
         String sentence = (String) msg;
 
-        // Parse message
-        Matcher parser = pattern.matcher(sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        // Create new position
-        Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>ev603</protocol>");
-
-        // Get imei from First message
-        if (sentence.contains("!1,")) {
-            Matcher imeiparser = deviceImei.matcher(sentence);
-            if (!imeiparser.matches()){
-                return null;
-            }else{
-                String imei = imeiparser.group(1);
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            }
+        // Detect device ID
+        if (sentence.startsWith("!1,")) {
+            String imei = sentence.substring(3);
+            deviceId = getDataManager().getDeviceByImei(imei).getId();
         }
         
-        Integer index = 1;
+        else if (sentence.startsWith("!A,")) {
+            // Parse message
+            Matcher parser = pattern.matcher(sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+            
+            // Create new position
+            Position position = new Position();
+            position.setDeviceId(deviceId);
+            StringBuilder extendedInfo = new StringBuilder("<protocol>ev603</protocol>");
+            Integer index = 1;
+            
+            // Date
+            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            time.clear();
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
 
-        // Date
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            // Time
+            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+            position.setTime(time.getTime());
+            
+            // Validity
+            position.setValid(true);
 
-        // Time
-        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-        position.setTime(time.getTime());
+            // Coordinates
+            position.setLatitude(Double.valueOf(parser.group(index++)));
+            position.setLongitude(Double.valueOf(parser.group(index++)));
 
-        // Validity
-        position.setValid(true);
+            // Altitude
+            position.setAltitude(0.0);
 
-        // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 60;
-        position.setLatitude(latitude);
+            // Speed
+            position.setSpeed(Double.valueOf(parser.group(index++)));
+            
+            // Course
+            position.setCourse(Double.valueOf(parser.group(index++)));
+            
+            // Extended info
+            position.setExtendedInfo(extendedInfo.toString());
+            
+            return position;
+        }
 
-        // Longitude
-        Double lonlitude = Double.valueOf(parser.group(index++));
-        lonlitude += Double.valueOf(parser.group(index++)) / 60;
-        position.setLongitude(lonlitude);
-
-        // Altitude
-        position.setAltitude(0.0);
-
-        // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(0.0);
-
-        // Extended info
-        extendedInfo.append("<course>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</course>");
-
-        return position;
+        return null;
     }
 }

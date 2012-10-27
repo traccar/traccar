@@ -101,7 +101,7 @@ public class Server {
         initProgressServer(properties);
         initH02Server(properties);
         initJt600Server(properties);
-        
+        initEv603Server(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -563,6 +563,31 @@ public class Server {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Jt600FrameDecoder());
                     pipeline.addLast("objectDecoder", new Jt600ProtocolDecoder(getDataManager(), resetDelay));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+    
+    /**
+     * Init EV603 server
+     */
+    private void initEv603Server(Properties properties) throws SQLException {
+
+        String protocol = "ev603";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) ';' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new Ev603ProtocolDecoder(getDataManager(), resetDelay));
                 }
             });
 
