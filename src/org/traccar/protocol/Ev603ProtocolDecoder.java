@@ -46,10 +46,10 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
             "!A," +                              // Start Character
             "([\\d]{2})\\/([\\d]{2})\\/([\\d]{2})," +   // Date dd/mm/YY
             "([\\d]{2}):([\\d]{2}):([\\d]{2})," +       // Time hh:mm:ss
-            "(-?[\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
-            "(-?[\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
+            "(-?[\\d]+\\.[\\d]+)," +  // Latitude (DDMM.MMMM)
+            "(-?[\\d]+\\.[\\d]+)," +  // Longitude (DDDMM.MMMM)
             "([\\d]+.[\\d]{2})," +              // Speed
-            "([\\d]{2-3}+.[\\d]{1-3})," +       // degrees
+            "([\\d]+|[\\d]+\\.[\\d]+)," +       // degrees
             ".*");
     
     static private Pattern deviceImei = Pattern.compile("([\\d]+);");
