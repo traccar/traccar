@@ -33,8 +33,8 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public Gps103ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public Gps103ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

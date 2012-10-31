@@ -15,32 +15,29 @@
  */
 package org.traccar;
 
-import java.util.concurrent.Executors;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.util.HashedWheelTimer;
+import org.jboss.netty.util.Timer;
 
 /**
- * Channel factory
+ * Global idle timer
  */
-public class GlobalChannelFactory {
+public class GlobalTimer {
 
-    private static ChannelFactory instance = null;
+    private static Timer instance = null;
 
-    private GlobalChannelFactory() {
+    private GlobalTimer() {
     }
     
     public static void release() {
         if (instance != null) {
-            instance.releaseExternalResources();
+            instance.stop();
         }
         instance = null;
     }
-
-    public static ChannelFactory getFactory() {
+    
+    public static Timer getTimer() {
         if(instance == null) {
-            instance = new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool());
+            instance = new HashedWheelTimer();
         }
         return instance;
     }

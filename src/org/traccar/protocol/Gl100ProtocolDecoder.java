@@ -33,8 +33,8 @@ public class Gl100ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public Gl100ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public Gl100ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

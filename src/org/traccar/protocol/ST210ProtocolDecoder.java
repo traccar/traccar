@@ -1,13 +1,11 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
@@ -18,8 +16,8 @@ import org.traccar.model.Position;
 public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     
 
-    public ST210ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public ST210ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     private enum ST210FIELDS {

@@ -42,8 +42,8 @@ public class MaxonProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public MaxonProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public MaxonProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**
@@ -51,20 +51,19 @@ public class MaxonProtocolDecoder extends GenericProtocolDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2}).(\\d{2})," + // Time (HHMMSS.SSS)
-            "([AV])," +                  // Validity
-            "(\\d{2})(\\d{2}.\\d{5})," + // Latitude (DDMM.MMMMM)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{2})," + // Time (HHMMSS.SSS)
+            "([AV])," +                    // Validity
+            "(\\d{2})(\\d{2}\\.\\d{5})," + // Latitude (DDMM.MMMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}.\\d{5})," + // Longitude (DDDMM.MMMMM)
+            "(\\d{3})(\\d{2}\\.\\d{5})," + // Longitude (DDDMM.MMMMM)
             "([EW])," +
-            "(\\d+.\\d{3})?," +          // Speed
-            "(\\d+.\\d{2})?," +          // Course
-            "(\\d{2})(\\d{2})(\\d{2})" + // Date (DDMMYY)
-            ".+");                       // Other (Checksumm)
+            "(\\d+\\.\\d{3})?," +          // Speed
+            "(\\d+\\.\\d{2})?," +          // Course
+            "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
+            ".+");                         // Other (Checksumm)
 
     static private Pattern gpfidPattern = Pattern.compile(
-        "\\$GPFID,(\\d+)$"
-        );
+            "\\$GPFID,(\\d+)$");
 
     /**
      * Decode message"

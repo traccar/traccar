@@ -33,8 +33,8 @@ public class H02ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public H02ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public H02ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

@@ -36,8 +36,8 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public Jt600ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public Jt600ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

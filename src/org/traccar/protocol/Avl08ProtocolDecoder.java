@@ -33,8 +33,8 @@ public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public Avl08ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public Avl08ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

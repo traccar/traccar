@@ -9,7 +9,7 @@ public class Ev603ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
         
-        Ev603ProtocolDecoder decoder = new Ev603ProtocolDecoder(new TestDataManager(), 0);
+        Ev603ProtocolDecoder decoder = new Ev603ProtocolDecoder(new TestDataManager());
         
         assertNull(decoder.decode(null, null, "!5,17,V"));
 

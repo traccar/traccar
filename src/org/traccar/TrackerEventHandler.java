@@ -16,6 +16,8 @@
 package org.traccar;
 
 import org.jboss.netty.channel.*;
+import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
+import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
@@ -24,7 +26,7 @@ import org.traccar.model.Position;
  * Tracker message handler
  */
 @ChannelHandler.Sharable
-public class TrackerEventHandler extends SimpleChannelHandler {
+public class TrackerEventHandler extends IdleStateAwareChannelHandler {
 
     /**
      * Data manager
@@ -70,8 +72,21 @@ public class TrackerEventHandler extends SimpleChannelHandler {
     }
 
     @Override
+    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
+        Log.info("Closing connection by disconnect");
+        e.getChannel().close();
+    }
+    
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+        Log.info("Closing connection by exception");
         e.getChannel().close();
     }
 
+    @Override
+    public void channelIdle(ChannelHandlerContext ctx, IdleStateEvent e) {
+        Log.info("Closing connection by timeout");
+        e.getChannel().close();
+    }
+    
 }

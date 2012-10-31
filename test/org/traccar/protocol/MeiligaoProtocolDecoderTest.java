@@ -11,7 +11,7 @@ public class MeiligaoProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(new TestDataManager(), 0);
+        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(new TestDataManager());
         ChannelBufferFactory factory = new HeapChannelBufferFactory();
 
         byte[] buf1 = {0x12,0x34,0x56,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,0x50,0x00,(byte)0x8B,(byte)0x9B,0x0D,0x0A};

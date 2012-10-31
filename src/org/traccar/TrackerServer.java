@@ -87,7 +87,6 @@ public class TrackerServer extends ServerBootstrap {
     public void stop() {
         ChannelGroupFuture future = getChannelGroup().close();
         future.awaitUninterruptibly();
-        getFactory().releaseExternalResources();
     }
 
 }

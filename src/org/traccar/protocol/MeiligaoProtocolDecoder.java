@@ -38,8 +38,8 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public MeiligaoProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public MeiligaoProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**
@@ -55,7 +55,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
             "(\\d+.\\d+)," +                    // Speed
             "(\\d+\\.?\\d+)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            "[^\\|]+\\|(\\d+.\\d)\\|" +         // Dilution of precision
+            "[^\\|]+\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
             "(\\d+)\\|" +                       // Altitude
             "([0-9a-fA-F]+)\\|" +               // State
             ".*"); // TODO: parse ADC

@@ -11,7 +11,7 @@ public class ST210ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         ST210ProtocolDecoder decoder = new ST210ProtocolDecoder(
-                new TestDataManager(), 0);
+                new TestDataManager());
 
         //Status
         assertNotNull(decoder

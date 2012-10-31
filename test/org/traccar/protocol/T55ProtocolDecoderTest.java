@@ -9,7 +9,7 @@ public class T55ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
         
-        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new TestDataManager(), 0);
+        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new TestDataManager());
         
         assertNull(decoder.decode(null, null, "$PGID,359853000144328*0F"));
 
