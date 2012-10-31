@@ -8,7 +8,7 @@ public class XexunProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
         
-        XexunProtocolDecoder decoder = new XexunProtocolDecoder(new TestDataManager(), 0);
+        XexunProtocolDecoder decoder = new XexunProtocolDecoder(new TestDataManager());
 
         assertNotNull(decoder.decode(null, null,
                 "GPRMC,150120.000,A,3346.4463,S,15057.3083,E,0.0,117.4,010911,,,A*76,F,imei:351525010943661,"));

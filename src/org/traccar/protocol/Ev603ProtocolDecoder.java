@@ -39,8 +39,8 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
     /**
      * Initialize
      */
-    public Ev603ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public Ev603ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
     
     /**

@@ -33,8 +33,8 @@ public class Tk103ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public Tk103ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public Tk103ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**
@@ -47,13 +47,13 @@ public class Tk103ProtocolDecoder extends GenericProtocolDecoder {
             "(\\d{15})" +                // IMEI (?)
             "(\\d{2})(\\d{2})(\\d{2})" + // Date (YYMMDD)
             "([AV])" +                   // Validity
-            "(\\d{2})(\\d{2}.\\d{4})" +  // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d{4})" +  // Latitude (DDMM.MMMM)
             "([NS])" +
-            "(\\d{3})(\\d{2}.\\d{4})" +  // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d{4})" +  // Longitude (DDDMM.MMMM)
             "([EW])" +
-            "(\\d+.\\d)" +               // Speed
+            "(\\d+\\.\\d)" +             // Speed
             "(\\d{2})(\\d{2})(\\d{2})" + // Time (HHMMSS)
-            "(\\d+.\\d{2})" +            // Course
+            "(\\d+\\.\\d{2})" +          // Course
             "(\\d+)" +                   // State
             ".+");                       // Mileage (?)
 

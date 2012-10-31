@@ -33,8 +33,8 @@ public class V680ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public V680ProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public V680ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

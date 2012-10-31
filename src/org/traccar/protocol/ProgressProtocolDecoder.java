@@ -39,8 +39,8 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public ProgressProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public ProgressProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /*

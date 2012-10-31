@@ -37,8 +37,8 @@ public class EnforaProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public EnforaProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public EnforaProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

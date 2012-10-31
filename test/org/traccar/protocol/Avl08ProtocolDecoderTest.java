@@ -9,7 +9,7 @@ public class Avl08ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
         
-        Avl08ProtocolDecoder decoder = new Avl08ProtocolDecoder(new TestDataManager(), 0);
+        Avl08ProtocolDecoder decoder = new Avl08ProtocolDecoder(new TestDataManager());
 
         assertNull(decoder.decode(null, null,
                 "$$AE359772033395899|AA000000000000000000000000000000000000000000000000000000000000|00.0|00.0|00.0|000000000000|20090215000153|13601435|00000000|00000000|0000|0.0000|0007|2DAA"));

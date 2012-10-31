@@ -34,8 +34,8 @@ public class XexunProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public XexunProtocolDecoder(DataManager dataManager, Integer resetDelay) {
-        super(dataManager, resetDelay);
+    public XexunProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     /**

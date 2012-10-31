@@ -11,7 +11,7 @@ public class EnforaProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(new TestDataManager(), 0);
+        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(new TestDataManager());
         ChannelBufferFactory factory = new HeapChannelBufferFactory();
 
         byte[] buf1 = {0x00,0x0A,0x08,0x00,0x20,0x20,0x20,0x20,0x20,0x30,0x31,0x31,0x30,0x37,0x30,0x30,0x30,0x30,0x35,0x37,0x30,0x32,0x36,0x37};

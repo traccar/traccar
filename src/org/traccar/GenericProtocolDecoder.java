@@ -46,18 +46,6 @@ public abstract class GenericProtocolDecoder extends OneToOneDecoder {
     }
 
     /**
-     * Reset connection delay
-     */
-    private Integer resetDelay;
-
-    /**
-     * Set reset connection delay
-     */
-    public final void setResetDelay(Integer resetDelay) {
-        this.resetDelay = resetDelay;
-    }
-
-    /**
      * Default constructor
      */
     public GenericProtocolDecoder() {
@@ -66,40 +54,8 @@ public abstract class GenericProtocolDecoder extends OneToOneDecoder {
     /**
      * Initialize
      */
-    public GenericProtocolDecoder(DataManager dataManager, Integer resetDelay) {
+    public GenericProtocolDecoder(DataManager dataManager) {
         setDataManager(dataManager);
-        setResetDelay(resetDelay);
-    }
-
-    /**
-     * Disconnect channel
-     */
-    private class DisconnectTask extends TimerTask {
-        private Channel channel;
-
-        public DisconnectTask(Channel channel) {
-            this.channel = channel;
-        }
-
-        public void run() {
-            channel.disconnect();
-        }
-    }
-
-    /**
-     * Handle connect event
-     */
-    @Override
-    public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
-        super.handleUpstream(ctx, evt);
-
-        if (evt instanceof ChannelStateEvent) {
-            ChannelStateEvent event = (ChannelStateEvent) evt;
-
-            if (event.getState() == ChannelState.CONNECTED && event.getValue() != null && resetDelay != 0) {
-                new Timer().schedule(new GenericProtocolDecoder.DisconnectTask(evt.getChannel()), resetDelay);
-            }
-        }
     }
 
 }
