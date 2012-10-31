@@ -15,6 +15,7 @@
  */
 package org.traccar.helper;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -28,21 +29,30 @@ public class Log {
     public static Logger getLogger() {
         return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     }
+    
+    private static void write(Level level, String msg) {
+        StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+        if (stack != null && stack.length > 3) {
+            getLogger().logp(level, stack[3].getClassName(), stack[3].getMethodName(), msg);
+        } else {
+            getLogger().log(level, msg);
+        }
+    }
 
     public static void severe(String msg) {
-        getLogger().severe(msg);
+        write(Level.SEVERE, msg);
     }
 
     public static void warning(String msg) {
-        getLogger().warning(msg);
+        write(Level.WARNING, msg);
     }
 
     public static void info(String msg) {
-        getLogger().info(msg);
+        write(Level.INFO, msg);
     }
 
     public static void fine(String msg) {
-        getLogger().fine(msg);
+        write(Level.FINE, msg);
     }
 
 }
