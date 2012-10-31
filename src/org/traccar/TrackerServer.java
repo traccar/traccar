@@ -17,14 +17,12 @@ package org.traccar;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
-import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 /**
  * Tracker server
@@ -34,18 +32,16 @@ public class TrackerServer extends ServerBootstrap {
     /**
      * Initialization
      */
-    private void init(Integer port, Integer threadPoolSize) {
+    private void init(Integer port) {
         
         setPort(port);
 
         // Create channel factory
-        setFactory(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool()));
+        setFactory(GlobalChannelFactory.getFactory());
     }
 
     public TrackerServer(Integer port) {
-        init(port, 1);
+        init(port);
     }
 
     /**
