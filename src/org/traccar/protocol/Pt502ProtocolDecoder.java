@@ -37,20 +37,21 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
     public Pt502ProtocolDecoder(DataManager dataManager) {
         super(dataManager);
     }
-
     /**
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "\\$POS," +                         // Data Frame start
-            "([\\d]+)," +                       // IMEI
+            "\\$POS," + // Data Frame start
+            "([\\d]+)," + // IMEI
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
-            "([AV])," +                         // Validity
-            "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "([\\d]+.[\\d]{2})," +              // Speed
+            "([AV])," + // Validity
+            "([\\d]{2})([\\d]{2}.[\\d]{4})," + // Latitude (DDMM.MMMM)
+            "([NS]),"
+            + "([\\d]{3})([\\d]{2}.[\\d]{4})," + // Longitude (DDDMM.MMMM)
+            "([EW]),"
+            + "([\\d]+\\.[\\d]{2}|[\\d]+\\.[\\d]+)," + // Speed
+            "([\\d]+\\.[\\d]{2}|[\\d]+\\.[\\d]+)," + // Distance
+            "(\\d{2})(\\d{2})(\\d{2})[\\d]+," + // Date
             ".*");
 
     /*
@@ -67,7 +68,7 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
         if (!parser.matches()) {
             Log.getLogger().info("BAD REGEX");
             return null;
-        }else{
+        } else {
             Log.getLogger().info("GOOD REGEX");
         }
 
@@ -78,55 +79,37 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        try {
-            String imei = parser.group(index++);
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch (Exception e) {
-            Log.getLogger().info(e.getMessage()+" LOG1");
-        }
-        
+        String imei = parser.group(index++);
+        position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+
+
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.clear();
         // Time
-        try {
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
-            position.setTime(time.getTime());
-        } catch (Exception e) {
-            Log.getLogger().info(e.getMessage()+" LOG2");
-        }
+        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
+
 
         // Validity
-        try {
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
-        } catch (Exception e) {
-            Log.getLogger().info(e.getMessage()+" LOG3");
-        }
+        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
 
         // Latitude
-        try {
-            Double latitude = Double.valueOf(parser.group(index++));
-            latitude += Double.valueOf(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("S") == 0) {
-                latitude = -latitude;
-            }
-            position.setLatitude(latitude);
-        } catch (Exception e) {
-            Log.getLogger().info(e.getMessage()+" LOG4");
+        Double latitude = Double.valueOf(parser.group(index++));
+        latitude += Double.valueOf(parser.group(index++)) / 60;
+        if (parser.group(index++).compareTo("S") == 0) {
+            latitude = -latitude;
         }
+        position.setLatitude(latitude);
 
         // Longitude
-        try {
-            Double lonlitude = Double.valueOf(parser.group(index++));
-            lonlitude += Double.valueOf(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("W") == 0) {
-                lonlitude = -lonlitude;
-            }
-            position.setLongitude(lonlitude);
-        } catch (Exception e) {
-            Log.getLogger().info(e.getMessage()+" LOG5");
+        Double lonlitude = Double.valueOf(parser.group(index++));
+        lonlitude += Double.valueOf(parser.group(index++)) / 60;
+        if (parser.group(index++).compareTo("W") == 0) {
+            lonlitude = -lonlitude;
         }
+        position.setLongitude(lonlitude);
 
         // Altitude
         position.setAltitude(0.0);
@@ -135,10 +118,19 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(0.0);
 
+        // Distance
+        index++;
+
+        // Date
+        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++) + 2));
+        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index--)));
+        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index--)));
+        position.setTime(time.getTime());
+
+
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }
-
 }
