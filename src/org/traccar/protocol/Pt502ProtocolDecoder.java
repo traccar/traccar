@@ -49,6 +49,7 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
             "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
             "([NS])," +
             "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
+            "([EW])," +
             "([\\d]+.[\\d]{2})," +              // Speed
             ".*");
 
