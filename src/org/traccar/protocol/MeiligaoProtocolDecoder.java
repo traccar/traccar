@@ -57,7 +57,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             "[^\\|]+\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
             "(\\d+)\\|" +                       // Altitude
-            "([0-9a-fA-F]+)\\|" +               // State
+            "([0-9a-fA-F]+)" +                  // State
             ".*"); // TODO: parse ADC
 
     /**
