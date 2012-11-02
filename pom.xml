@@ -22,7 +22,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
-            <version>3.5.4.Final</version>
+            <version>3.5.9.Final</version>
         </dependency>
 
         <dependency>
@@ -40,27 +40,27 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-continuation</artifactId>
-            <version>8.1.5.v20120716</version>
+            <version>8.1.7.v20120910</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-http</artifactId>
-            <version>8.1.5.v20120716</version>
+            <version>8.1.7.v20120910</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-io</artifactId>
-            <version>8.1.5.v20120716</version>
+            <version>8.1.7.v20120910</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>8.1.5.v20120716</version>
+            <version>8.1.7.v20120910</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>8.1.5.v20120716</version>
+            <version>8.1.7.v20120910</version>
         </dependency>
     </dependencies>
 
@@ -81,7 +81,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.5</version>
+                <version>2.5.1</version>
                 <executions>
                     <execution>
                         <phase>install</phase>
