@@ -176,7 +176,7 @@ setCenter: {
      * Also used as the zoom level for panoramas, zero specifies no zoom at all.
      * Defaults to <tt>3</tt>.
      */
-    zoomLevel: 3,
+    zoomLevel: 13,
     /**
      * @cfg {Number} yaw
      * The Yaw, or rotational direction of the users perspective in degrees. Only applies to panoramas.
@@ -835,7 +835,7 @@ Ext.onReady(function() {
     var map = Ext.create('Ext.ux.GMapPanel', {
         id: 'gmap',
         setCenter: cityCarousel[Math.floor((Math.random() * cityCarousel.length))],
-        zoomLevel: 9
+        zoomLevel: 10
     });
 
     var devicesPanel = Ext.create('Ext.grid.Panel', {
