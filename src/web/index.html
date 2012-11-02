@@ -324,7 +324,7 @@ markers: [{
                       }
                   }
                   if (this.gmapType === 'panorama'){
-                      this.getMap().setLocationAndPOV(new google.maps.LatLng(this.setCenter.lat,this.setCenter.lng), {yaw: this.yaw, pitch: this.pitch, zoom: this.zoomLevel});
+                      this.getMap().setLocationAndPOV(new google.maps.LatLng(this.setCenter.lat,this.setCenter.lng), {yaw: this.yaw, pitch: this.pitch, zoom: zoomLevel});
                   }
               }
         }, 200,this); // Ext.defer
