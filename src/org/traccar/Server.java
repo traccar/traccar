@@ -103,6 +103,7 @@ public class Server {
         initJt600Server(properties);
         initEv603Server(properties);
         initV680Server(properties);
+        initPt502Server(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -619,6 +620,32 @@ public class Server {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new V680ProtocolDecoder(getDataManager()));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+    
+    /**
+     * Init PT502 server
+     */
+    private void initPt502Server(Properties properties) throws SQLException {
+
+        String protocol = "pt502";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Pt502ProtocolDecoder(getDataManager()));
                 }
             });
 
