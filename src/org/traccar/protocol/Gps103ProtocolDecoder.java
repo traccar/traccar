@@ -40,6 +40,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Regular expressions pattern
      */
+    //imei:863070010423167,tracker,1211051840,,F,104000.000,A,2220.6483,N,11407.6377,,0,0,
     static private Pattern pattern = Pattern.compile(
             "imei:" +
             "([\\d]+)," +                       // IMEI
@@ -52,7 +53,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
             "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
             "([NS])," +
             "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
-            "([EW])," +
+            "([EW])?," +
             "([\\d]+.[\\d]{2})," +              // Speed
             ".*");
 
@@ -124,7 +125,10 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
         // Longitude
         Double lonlitude = Double.valueOf(parser.group(index++));
         lonlitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
+        String hemisphere = parser.group(index++);
+        if (hemisphere != null) {
+            if (hemisphere.compareTo("W") == 0) lonlitude = -lonlitude;
+        }
         position.setLongitude(lonlitude);
 
         // Altitude

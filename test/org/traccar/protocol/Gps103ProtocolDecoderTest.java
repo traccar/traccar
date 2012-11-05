@@ -57,6 +57,9 @@ public class Gps103ProtocolDecoderTest {
         // Over speed alarm
         assertNotNull(decoder.decode(null, null,
                 "imei:359586015829802,speed,0809231429,13554900601,F,062947.294,A,2234.4026,N,11354.3277,E,0.00,"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "imei:863070010423167,tracker,1211051840,,F,104000.000,A,2220.6483,N,11407.6377,,0,0,"));
 
     }
 
