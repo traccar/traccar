@@ -47,13 +47,14 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})\\d+," +   // Date
             "[^,]*," +
             "[FL]," +                           // F - full / L - low
-            "(\\d{2})(\\d{2})(\\d{2}).(\\d{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
-            "(\\d{2})(\\d{2}.\\d{4})," +        // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d{4})," +      // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}.\\d{4})," +        // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d{4})," +      // Longitude (DDDMM.MMMM)
             "([EW])?," +
             "(\\d+\\.?\\d*)," +                 // Speed
+            "(\\d+\\.\\d+)?" +                  // Course
             ".*");
 
     /**
@@ -135,7 +136,14 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(0.0);
+        
+        // Course
+        String course = parser.group(index++);
+        if (course != null) {
+            position.setCourse(Double.valueOf(course));
+        } else {
+            position.setCourse(0.0);
+        }
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
