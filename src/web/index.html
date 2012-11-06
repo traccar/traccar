@@ -842,7 +842,7 @@ Ext.onReady(function() {
         title: 'Devices',
         region: 'west',
         split: true,
-        width: 300,
+        width: 200,
         margins: {top: 5, bottom: 0, right: 0, left: 5},
 
         sortableColumns: false,
@@ -894,7 +894,7 @@ Ext.onReady(function() {
             }
         ],
         columns: [
-            {header: 'Id',  dataIndex: 'id'},
+            {header: 'Id',  dataIndex: 'id', width: 30},
             {header: 'IMEI', dataIndex: 'imei', flex: 1}
         ],
         listeners: {
@@ -923,7 +923,7 @@ Ext.onReady(function() {
         title: 'Positions',
         region: 'south',
         split: true,
-        height: 300,
+        height: 250,
         margins: {top: 0, bottom: 5, right: 5, left: 5},
 
         sortableColumns: false,
