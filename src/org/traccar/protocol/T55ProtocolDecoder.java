@@ -47,11 +47,11 @@ public class T55ProtocolDecoder extends GenericProtocolDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})," + // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d{4})," + // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+\\.\\d{2})?," +          // Speed
             "(\\d+\\.\\d{2})?," +          // Course
