@@ -171,8 +171,9 @@ public class DatabaseDataManager implements DataManager {
     public Device getDeviceByImei(String imei) throws SQLException {
 
         if ((devices == null) || (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesRefreshDelay)) {
+            List<Device> list = getDevices();
             devices = new HashMap<String, Device>();
-            for (Device device: getDevices()) {
+            for (Device device: list) {
                 devices.put(device.getImei(), device);
             }
             devicesLastUpdate = Calendar.getInstance();
