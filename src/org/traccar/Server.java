@@ -104,6 +104,7 @@ public class Server {
         initEv603Server(properties);
         initV680Server(properties);
         initPt502Server(properties);
+        initTr20Server(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -646,6 +647,32 @@ public class Server {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new Pt502ProtocolDecoder(getDataManager()));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+
+    /**
+     * Init TR20 server
+     */
+    private void initTr20Server(Properties properties) throws SQLException {
+
+        String protocol = "tr20";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Tr20ProtocolDecoder(getDataManager()));
                 }
             });
 
