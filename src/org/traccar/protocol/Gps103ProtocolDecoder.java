@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -81,6 +82,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
+            Log.info("Parsing error");
             return null;
         }
 

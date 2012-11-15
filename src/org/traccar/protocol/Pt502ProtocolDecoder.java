@@ -51,8 +51,8 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
             "([NS])," +
             "(\\d{3})(\\d{2}\\.\\d{4})," +      // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+\\.\\d+)," +                  // Speed
-            "(\\d+\\.\\d+)," +                  // Course (or Distance???)
+            "(\\d+\\.\\d+)?," +                 // Speed
+            "(\\d+\\.\\d+)?," +                 // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date
             ".*");
 
@@ -68,7 +68,7 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
-            Log.getLogger().info("Parsing error");
+            Log.info("Parsing error");
             return null;
         }
 
@@ -113,8 +113,20 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
         position.setAltitude(0.0);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        String speed = parser.group(index++);
+        if (speed != null) {
+            position.setSpeed(Double.valueOf(speed));
+        } else {
+            position.setSpeed(0.0);
+        }
+        
+        // Course
+        String course = parser.group(index++);
+        if (course != null) {
+            position.setCourse(Double.valueOf(course));
+        } else {
+            position.setCourse(0.0);
+        }
 
         // Date
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
