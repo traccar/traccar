@@ -21,6 +21,10 @@ public class Pt502ProtocolDecoderTest {
         
         assertNotNull(decoder.decode(null, null,
                 "$POS,6095,233344.000,V,0933.0451,N,06912.3360,W,,,151112,,,N/00000,00000/0/1677600/"));
+        
+        /*assertNotNull(decoder.decode(null, null,
+                "$PHO0,6091,233606.000,A,0902.9855,N,06944.3654,W,0.0,43.8,141112,,,A/00010,00000/0/224000//"));*/
+
 
     }
 
