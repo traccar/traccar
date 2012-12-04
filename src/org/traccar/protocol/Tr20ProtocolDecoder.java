@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -91,7 +92,12 @@ public class Tr20ProtocolDecoder extends GenericProtocolDecoder {
             
             // Get device by id
             String id = parser.group(index++);
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+            try {
+                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + id);
+                return null;
+            }
             
             // Validity
             position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);

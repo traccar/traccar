@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -142,7 +143,12 @@ public class MaxonProtocolDecoder extends GenericProtocolDecoder {
 
             if (parser.matches()) {
                 String imei = parser.group(1);
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+                try {
+                    position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+                } catch(Exception error) {
+                    Log.warning("Unknown device - " + imei);
+                    return null;
+                }
                 return position;
             }
         }

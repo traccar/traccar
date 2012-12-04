@@ -23,6 +23,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -74,7 +75,11 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
+            try {
+                deviceId = getDataManager().getDeviceByImei(imei).getId();
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + imei);
+            }
         }
 
         // Position

@@ -80,7 +80,12 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
 
         // Get device by IMEI
         String id = parser.group(index++);
-        position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+            return null;
+        }
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

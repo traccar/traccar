@@ -94,7 +94,12 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
 
         // Get device by IMEI
         String imei = parser.group(index++);
-        position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + imei);
+            return null;
+        }
 
         // Alarm message
         extendedInfo.append("<alarm>");

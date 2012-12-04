@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -70,7 +71,11 @@ public class T55ProtocolDecoder extends GenericProtocolDecoder {
         // Detect device ID
         if (sentence.contains("$PGID")) {
             String imei = sentence.substring(6, 6 + 15);
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
+            try {
+                deviceId = getDataManager().getDeviceByImei(imei).getId();
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + imei);
+            }
         }
 
         // Parse message

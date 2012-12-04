@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -51,7 +52,12 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
         
         // Get device by identifier
         String id = Long.valueOf(ChannelBufferTools.readHexString(buf, 10)).toString();
-        position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+            return null;
+        }
         
         buf.readByte(); // protocol version + data type
         
@@ -157,7 +163,12 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
 
         // Get device by identifier
         String id = parser.group(index++);
-        position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+            return null;
+        }
 
         // Longitude
         Double lonlitude = Double.valueOf(parser.group(index++));

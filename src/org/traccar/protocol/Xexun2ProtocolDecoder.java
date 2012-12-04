@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -148,7 +149,12 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
 
         // Get device by IMEI
         String imei = parser.group(index++);
-        position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + imei);
+            return null;
+        }
 
         // Satellites
         extendedInfo.append("<satellites>");

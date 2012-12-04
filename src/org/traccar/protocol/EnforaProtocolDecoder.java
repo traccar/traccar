@@ -107,7 +107,12 @@ public class EnforaProtocolDecoder extends GenericProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + imei);
+            return null;
+        }
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

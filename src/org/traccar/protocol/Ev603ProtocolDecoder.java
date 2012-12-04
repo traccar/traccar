@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -68,7 +69,12 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
         // Detect device ID
         if (sentence.startsWith("!1,")) {
             String imei = sentence.substring(3);
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
+            try {
+                deviceId = getDataManager().getDeviceByImei(imei).getId();
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + imei);
+                return null;
+            }
         }
         
         else if (sentence.startsWith("!A,")) {

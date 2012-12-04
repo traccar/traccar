@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
 import org.traccar.helper.Crc;
+import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
@@ -133,7 +134,13 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
 
         // Get device by id
         // TODO: change imei to unique id
-        position.setDeviceId(getDataManager().getDeviceByImei(getId(buf)).getId());
+        String id = getId(buf);
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+            return null;
+        }
 
         // Parse message
         String sentence = buf.toString(offset, buf.readableBytes() - offset - 4, Charset.defaultCharset());

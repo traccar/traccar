@@ -277,12 +277,11 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
     private Object processHandshake(Channel channel, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
         imei = buf.toString(Charset.defaultCharset());
-
         try {
             databaseDeviceId = getDataManager().getDeviceByImei(imei).getId();
             sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", charset));
         } catch(Exception error) {
-            Log.warning(error.toString());
+            Log.warning("Unknown device - " + imei);
         }
         return null;
     }
