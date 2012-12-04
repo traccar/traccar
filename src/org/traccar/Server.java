@@ -17,6 +17,7 @@ package org.traccar;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -105,6 +106,7 @@ public class Server {
         initV680Server(properties);
         initPt502Server(properties);
         initTr20Server(properties);
+        initNavisServer(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -517,7 +519,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
-            server.setEndianness(java.nio.ByteOrder.LITTLE_ENDIAN);
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -673,6 +675,29 @@ public class Server {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new Tr20ProtocolDecoder(getDataManager()));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+
+    /**
+     * Init Navis server
+     */
+    private void initNavisServer(Properties properties) throws SQLException {
+
+        String protocol = "navis";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
+                    pipeline.addLast("objectDecoder", new NavisProtocolDecoder(getDataManager()));
                 }
             });
 

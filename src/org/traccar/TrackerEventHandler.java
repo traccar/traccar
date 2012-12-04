@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import java.util.List;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
@@ -37,36 +38,41 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         super();
         dataManager = newDataManager;
     }
+    
+    private void processSinglePosition(Position position) {
+        if (position == null) {
+            Log.info("null message");
+        } else {
+            Log.info(
+                    "id: " + position.getId() +
+                    ", deviceId: " + position.getDeviceId() +
+                    ", valid: " + position.getValid() +
+                    ", time: " + position.getTime() +
+                    ", latitude: " + position.getLatitude() +
+                    ", longitude: " + position.getLongitude() +
+                    ", altitude: " + position.getAltitude() +
+                    ", speed: " + position.getSpeed() +
+                    ", course: " + position.getCourse() +
+                    ", power: " + position.getPower());
+        }
+
+        // Write position to database
+        try {
+            dataManager.addPosition(position);
+        } catch (Exception error) {
+            Log.info("Exception during query execution");
+            Log.warning(error.getMessage());
+        }
+    }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-
         if (e.getMessage() instanceof Position) {
-
-            Position position = (Position) e.getMessage();
-
-            if (position == null) {
-                Log.info("null message");
-            } else {
-                Log.info(
-                        "id: " + position.getId() +
-                        ", deviceId: " + position.getDeviceId() +
-                        ", valid: " + position.getValid() +
-                        ", time: " + position.getTime() +
-                        ", latitude: " + position.getLatitude() +
-                        ", longitude: " + position.getLongitude() +
-                        ", altitude: " + position.getAltitude() +
-                        ", speed: " + position.getSpeed() +
-                        ", course: " + position.getCourse() +
-                        ", power: " + position.getPower());
-            }
-
-            // Write position to database
-            try {
-                dataManager.addPosition(position);
-            } catch (Exception error) {
-                Log.info("Exception during query execution");
-                Log.warning(error.getMessage());
+            processSinglePosition((Position) e.getMessage());
+        } else if (e.getMessage() instanceof List) {
+            List<Position> positions = (List<Position>) e.getMessage();
+            for (Position position : positions) {
+                processSinglePosition(position);
             }
         }
     }
