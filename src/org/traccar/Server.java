@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -179,11 +180,18 @@ public class Server {
                             new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
                     public String format(LogRecord record) {
-                        String line = dateFormat.format(new Date(record.getMillis()));
-                        line += " " + record.getLevel().getName() + ": ";
-                        line += formatMessage(record);
-                        line += LINE_SEPARATOR;
-                        return line;
+                        StringBuffer line = new StringBuffer();
+                        dateFormat.format(new Date(record.getMillis()), line, new FieldPosition(0));
+                        line.append(" ");
+                        line.append(record.getSourceClassName());
+                        line.append(".");
+                        line.append(record.getSourceMethodName());
+                        line.append(" ");
+                        line.append(record.getLevel().getName());
+                        line.append(": ");
+                        line.append(formatMessage(record));
+                        line.append(LINE_SEPARATOR);
+                        return line.toString();
                     }
                 });
 
