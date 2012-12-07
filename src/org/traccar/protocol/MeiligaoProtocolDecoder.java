@@ -46,6 +46,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Regular expressions pattern
      */
+    //"155422.000,V,2230.7623,N,11403.4218,E,0.00,0,060211,,*1A|0.0|26|0000|0000,0000|0000000000000000|63|00000000"
     static private Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -54,7 +55,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
             "(\\d{3})(\\d{2}\\.\\d{4})," +      // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+.\\d+)," +                    // Speed
-            "(\\d+\\.?\\d+)?," +                // Course
+            "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             "[^\\|]+\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
             "(\\d+)\\|" +                       // Altitude
