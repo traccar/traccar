@@ -217,6 +217,10 @@ public class Server {
         return false;
     }
 
+    private String getProtocolInterface(Properties properties, String protocol) {
+        return properties.getProperty(protocol + ".address");
+    }
+
     private Integer getProtocolPort(Properties properties, String protocol) {
         String port = properties.getProperty(protocol + ".port");
         if (port != null) {
@@ -242,6 +246,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -265,6 +270,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -291,6 +297,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -317,6 +324,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -343,6 +351,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -369,6 +378,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -395,6 +405,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -420,6 +431,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -445,6 +457,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -467,6 +480,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -485,6 +499,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -507,6 +522,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -528,6 +544,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -551,6 +568,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -576,6 +594,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -598,6 +617,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -623,6 +643,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -648,6 +669,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -674,6 +696,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
@@ -700,6 +723,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -723,6 +747,7 @@ public class Server {
         if (isProtocolEnabled(properties, protocol)) {
 
             TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {

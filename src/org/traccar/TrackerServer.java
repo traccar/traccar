@@ -53,8 +53,21 @@ public class TrackerServer extends ServerBootstrap {
         return port;
     }
 
-    private void setPort(Integer newPort) {
-        port = newPort;
+    private void setPort(Integer port) {
+        this.port = port;
+    }
+
+    /**
+     * Server listening interface
+     */
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     /**
@@ -77,7 +90,13 @@ public class TrackerServer extends ServerBootstrap {
      * Start server
      */
     public void start() {
-        Channel channel = bind(new InetSocketAddress(getPort()));
+        InetSocketAddress endpoint;
+        if (address == null) {
+            endpoint = new InetSocketAddress(port);
+        } else {
+            endpoint = new InetSocketAddress(address, port);
+        }
+        Channel channel = bind(endpoint);
         getChannelGroup().add(channel);
     }
     
