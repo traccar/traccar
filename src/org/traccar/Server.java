@@ -30,6 +30,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
@@ -245,7 +246,8 @@ public class Server {
         String protocol = "xexun";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -269,7 +271,8 @@ public class Server {
         String protocol = "gps103";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -296,7 +299,8 @@ public class Server {
         String protocol = "tk103";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -323,7 +327,8 @@ public class Server {
         String protocol = "gl100";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -350,7 +355,8 @@ public class Server {
         String protocol = "gl200";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -377,7 +383,8 @@ public class Server {
         String protocol = "t55";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -404,7 +411,8 @@ public class Server {
         String protocol = "xexun2";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -430,7 +438,8 @@ public class Server {
         String protocol = "avl08";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -456,7 +465,8 @@ public class Server {
         String protocol = "enfora";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -479,7 +489,8 @@ public class Server {
         String protocol = "meiligao";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -498,7 +509,8 @@ public class Server {
         String protocol = "maxon";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -521,7 +533,8 @@ public class Server {
         String protocol = "st210";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -543,7 +556,8 @@ public class Server {
         String protocol = "progress";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
@@ -567,7 +581,8 @@ public class Server {
         String protocol = "h02";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -593,7 +608,8 @@ public class Server {
         String protocol = "jt600";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -616,7 +632,8 @@ public class Server {
         String protocol = "ev603";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -642,7 +659,8 @@ public class Server {
         String protocol = "v680";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -668,7 +686,8 @@ public class Server {
         String protocol = "pt502";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -695,7 +714,8 @@ public class Server {
         String protocol = "tr20";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
@@ -722,7 +742,8 @@ public class Server {
         String protocol = "navis";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
@@ -746,7 +767,8 @@ public class Server {
         String protocol = "meitrack";
         if (isProtocolEnabled(properties, protocol)) {
 
-            TrackerServer server = new TrackerServer(getProtocolPort(properties, protocol));
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 

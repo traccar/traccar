@@ -17,9 +17,12 @@ package org.traccar;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
+import org.jboss.netty.bootstrap.Bootstrap;
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
@@ -27,21 +30,15 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 /**
  * Tracker server
  */
-public class TrackerServer extends ServerBootstrap {
+public class TrackerServer /*extends ServerBootstrap*/ {
+    
+    Bootstrap bootstrap;
 
-    /**
-     * Initialization
-     */
-    private void init(Integer port) {
-        
-        setPort(port);
+    public TrackerServer(Bootstrap bootstrap) {
+        this.bootstrap = bootstrap;
 
         // Create channel factory
-        setFactory(GlobalChannelFactory.getFactory());
-    }
-
-    public TrackerServer(Integer port) {
-        init(port);
+        bootstrap.setFactory(GlobalChannelFactory.getFactory());
     }
 
     /**
@@ -53,7 +50,7 @@ public class TrackerServer extends ServerBootstrap {
         return port;
     }
 
-    private void setPort(Integer port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
@@ -74,7 +71,7 @@ public class TrackerServer extends ServerBootstrap {
      * Set endianness
      */
     void setEndianness(ByteOrder byteOrder) {
-        setOption("child.bufferFactory", new HeapChannelBufferFactory(byteOrder));
+        bootstrap.setOption("child.bufferFactory", new HeapChannelBufferFactory(byteOrder));
     }
 
     /**
@@ -84,6 +81,10 @@ public class TrackerServer extends ServerBootstrap {
 
     public ChannelGroup getChannelGroup() {
         return allChannels;
+    }
+    
+    public void setPipelineFactory(ChannelPipelineFactory pipelineFactory) {
+        bootstrap.setPipelineFactory(pipelineFactory);
     }
     
     /**
@@ -96,8 +97,17 @@ public class TrackerServer extends ServerBootstrap {
         } else {
             endpoint = new InetSocketAddress(address, port);
         }
-        Channel channel = bind(endpoint);
-        getChannelGroup().add(channel);
+        
+        Channel channel = null;
+        if (bootstrap instanceof ServerBootstrap) {
+            channel = ((ServerBootstrap) bootstrap).bind(endpoint);
+        } else if (bootstrap instanceof ConnectionlessBootstrap) {
+            channel = ((ConnectionlessBootstrap) bootstrap).bind(endpoint);
+        }
+
+        if (channel != null) {
+            getChannelGroup().add(channel);
+        }
     }
     
     /**
