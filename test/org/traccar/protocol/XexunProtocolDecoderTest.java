@@ -21,6 +21,9 @@ public class XexunProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 "GPRMC,080303.000,A,5546.7313,N,03738.6005,E,0.56,160.13,100311,,,A*6A,L,imei:354778030461167,"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "GPRMC,014623.000,A,4710.8260,N,1948.1220,E,0.11,105.40,111212,00,0000.0,A*49,F,,imei:357713002048962,"));
 
     }
 

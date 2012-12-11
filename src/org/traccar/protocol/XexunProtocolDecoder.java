@@ -48,7 +48,7 @@ public class XexunProtocolDecoder extends GenericProtocolDecoder {
             "([AV])," +                         // Validity
             "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
             "([NS])," +
-            "([\\d]{3})([\\d]{2}.[\\d]{4})," +  // Longitude (DDDMM.MMMM)
+            "([\\d]{2,3})([\\d]{2}.[\\d]{4})," + // Longitude (DDDMM.MMMM)
             "([EW])," +
             "([\\d]+.[\\d]+)," +                // Speed
             "([\\d]+.[\\d]+)?," +               // Course
