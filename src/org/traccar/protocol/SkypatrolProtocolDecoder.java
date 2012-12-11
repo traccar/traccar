@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 /**
  * T55 tracker protocol decoder
  */
-public class T55ProtocolDecoder extends GenericProtocolDecoder {
+public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
 
     /**
      * Device ID
@@ -39,7 +39,7 @@ public class T55ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public T55ProtocolDecoder(DataManager dataManager) {
+    public SkypatrolProtocolDecoder(DataManager dataManager) {
         super(dataManager);
     }
 

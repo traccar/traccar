@@ -110,6 +110,7 @@ public class Server {
         initTr20Server(properties);
         initNavisServer(properties);
         initMeitrackServer(properties);
+        initSkypatrolServer(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -780,6 +781,29 @@ public class Server {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(getDataManager()));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+
+    /**
+     * Init SkyPatrol server
+     */
+    private void initSkypatrolServer(Properties properties) throws SQLException {
+
+        String protocol = "skypatrol";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("objectDecoder", new SkypatrolProtocolDecoder(getDataManager()));
                 }
             });
 
