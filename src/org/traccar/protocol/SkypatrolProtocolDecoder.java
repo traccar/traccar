@@ -15,10 +15,10 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
@@ -32,119 +32,208 @@ import org.traccar.model.Position;
 public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
 
     /**
-     * Device ID
-     */
-    private Long deviceId;
-
-    /**
      * Initialize
      */
     public SkypatrolProtocolDecoder(DataManager dataManager) {
         super(dataManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
-    static private Pattern pattern = Pattern.compile(
-            "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
-            "([AV])," +                    // Validity
-            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+\\.\\d{2})?," +          // Speed
-            "(\\d+\\.\\d{2})?," +          // Course
-            "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
-            ".+");                         // Other (Checksumm)
-
+    private static boolean checkBit(long mask, int bit) {
+        long checkMask = 1 << bit;
+        return (mask & checkMask) == checkMask;
+    }
+    
+    private static double convertCoordinate(long coordinate) {
+        int sign = 1;
+        if (coordinate > 0x7fffffffl) {
+            sign = -1;
+            coordinate = 0xffffffffl - coordinate;
+        }
+        
+        double degrees = coordinate / 1000000;
+        degrees += (coordinate % 1000000) / 600000.0;
+        
+        return sign * degrees;
+    }
+    
     /**
      * Decode message
      */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
 
-        String sentence = (String) msg;
+        ChannelBuffer buf = (ChannelBuffer) msg;
 
-        // Detect device ID
-        if (sentence.contains("$PGID")) {
-            String imei = sentence.substring(6, 6 + 15);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
+        // Read header
+        int apiNumber = buf.readUnsignedShort();
+        int commandType = buf.readUnsignedByte();
+        int messageType = buf.getUnsignedByte(buf.readerIndex()) >> 4;
+        boolean needAck = (buf.readUnsignedByte() & 0xf) == 1;
+        long mask = 0;
+        if (buf.readUnsignedByte() == 4) {
+            mask = buf.readUnsignedInt();
         }
 
-        // Parse message
-        else if (sentence.contains("$GPRMC") && deviceId != null) {
-
-            // Send response
-            if (channel != null) {
-                channel.write("OK1\r\n");
-            }
-
-            // Parse message
-            Matcher parser = pattern.matcher(sentence);
-            if (!parser.matches()) {
-                return null;
-            }
-
+        // Binary position report
+        if (apiNumber == 5 &&
+            commandType == 2 &&
+            messageType == 1 &&
+            checkBit(mask, 0)) {
+            
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
+            StringBuilder extendedInfo = new StringBuilder("<protocol>skypatrol</protocol>");
+            
+            // Status code
+            if (checkBit(mask, 1)) {
+                extendedInfo.append("<status>");
+                extendedInfo.append(buf.readUnsignedInt());
+                extendedInfo.append("</status>");
+            }
+            
+            // Device id
+            String id = null;
+            if (checkBit(mask, 23)) {
+                id = buf.toString(buf.readerIndex(), 8, Charset.defaultCharset()).trim();
+                buf.skipBytes(8);
+            } else if (checkBit(mask, 2)) {
+                id = buf.toString(buf.readerIndex(), 22, Charset.defaultCharset()).trim();
+                buf.skipBytes(22);
+            } else {
+                Log.warning("No device id field");
+                return null;
+            }
+            try {
+                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + id);
+                return null;
+            }
+            
+            // IO data
+            if (checkBit(mask, 3)) {
+                buf.readUnsignedShort();
+            }
+            
+            // ADC 1
+            if (checkBit(mask, 4)) {
+                buf.readUnsignedShort();
+            }
 
-            Integer index = 1;
+            // ADC 2
+            if (checkBit(mask, 5)) {
+                buf.readUnsignedShort();
+            }
 
-            // Time
+            // Function category
+            if (checkBit(mask, 7)) {
+                buf.readUnsignedByte();
+            }
+            
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
-            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-            index += 1; // Skip milliseconds
 
-            // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            // Date
+            if (checkBit(mask, 8)) {
+                time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
+                time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
+                time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
+            }
+
+            // GPS status
+            if (checkBit(mask, 9)) {
+                position.setValid(buf.readUnsignedByte() == 1);
+            }
 
             // Latitude
-            Double latitude = Double.valueOf(parser.group(index++));
-            latitude += Double.valueOf(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-            position.setLatitude(latitude);
+            if (checkBit(mask, 10)) {
+                position.setLatitude(convertCoordinate(buf.readUnsignedInt()));
+            }
 
             // Longitude
-            Double lonlitude = Double.valueOf(parser.group(index++));
-            lonlitude += Double.valueOf(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
-            position.setLongitude(lonlitude);
-
+            if (checkBit(mask, 11)) {
+                position.setLongitude(convertCoordinate(buf.readUnsignedInt()));
+            }
+            
             // Speed
-            String speed = parser.group(index++);
-            if (speed != null) {
-                position.setSpeed(Double.valueOf(speed));
-            } else {
-                position.setSpeed(0.0);
+            if (checkBit(mask, 12)) {
+                position.setSpeed(buf.readUnsignedShort() / 10.0);
             }
 
             // Course
-            String course = parser.group(index++);
-            if (course != null) {
-                position.setCourse(Double.valueOf(course));
-            } else {
-                position.setCourse(0.0);
+            if (checkBit(mask, 13)) {
+                position.setCourse(buf.readUnsignedShort() / 10.0);
             }
 
-            // Date
-            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            // Time
+            if (checkBit(mask, 14)) {
+                time.set(Calendar.HOUR, buf.readUnsignedByte());
+                time.set(Calendar.MINUTE, buf.readUnsignedByte());
+                time.set(Calendar.SECOND, buf.readUnsignedByte());
+            }
+            
             position.setTime(time.getTime());
-
+            
             // Altitude
-            position.setAltitude(0.0);
+            if (checkBit(mask, 15)) {
+                buf.skipBytes(3);
+            }
+            
+            // Satellites
+            if (checkBit(mask, 16)) {
+                extendedInfo.append("<satellites>");
+                extendedInfo.append(buf.readUnsignedByte());
+                extendedInfo.append("</satellites>");
+            }
+            
+            // Battery percentage
+            if (checkBit(mask, 17)) {
+                buf.readUnsignedShort();
+            }
+            
+            // Trip milage
+            if (checkBit(mask, 20)) {
+                extendedInfo.append("<trip>");
+                extendedInfo.append(buf.readUnsignedInt());
+                extendedInfo.append("</trip>");
+            }
+            
+            // Milage
+            if (checkBit(mask, 21)) {
+                extendedInfo.append("<milage>");
+                extendedInfo.append(buf.readUnsignedInt());
+                extendedInfo.append("</milage>");
+            }
+            
+            // Time of message generation
+            if (checkBit(mask, 22)) {
+                buf.skipBytes(6);
+            }
+            
+            // Battery level
+            if (checkBit(mask, 24)) {
+                position.setPower(buf.readUnsignedShort() / 1000.0);
+            }
+            
+            // GPS overspeed
+            if (checkBit(mask, 25)) {
+                buf.skipBytes(18);
+            }
+            
+            // Cell information
+            if (checkBit(mask, 26)) {
+                buf.skipBytes(54);
+            }
+            
+            // Sequence number
+            if (checkBit(mask, 28)) {
+                position.setId((long) buf.readUnsignedShort());
+            }
+
+            // Extended info
+            position.setExtendedInfo(extendedInfo.toString());
 
             return position;
         }
