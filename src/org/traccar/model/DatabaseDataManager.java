@@ -220,6 +220,7 @@ public class DatabaseDataManager implements DataManager {
 
         queryAddPosition.prepare();
 
+        queryAddPosition.setLong("id", position.getId());
         queryAddPosition.setLong("device_id", position.getDeviceId());
         queryAddPosition.setTimestamp("time", position.getTime());
         queryAddPosition.setBoolean("valid", position.getValid());

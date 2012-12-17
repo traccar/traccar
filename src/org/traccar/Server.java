@@ -111,6 +111,8 @@ public class Server {
         initNavisServer(properties);
         initMeitrackServer(properties);
         initSkypatrolServer(properties);
+        initGt02Server(properties);
+        initGt06Server(properties);        
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -810,4 +812,36 @@ public class Server {
             serverList.add(server);
         }
     }
+
+    /**
+     * Init GT02 server
+     */
+    private void initGt02Server(Properties properties) throws SQLException {
+
+        String protocol = "gt02";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
+            //server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
+                    pipeline.addLast("objectDecoder", new NavisProtocolDecoder(getDataManager()));
+                }
+            });
+
+            serverList.add(server);
+        }
+    }
+
+    /**
+     * Init GT06 server
+     */
+    private void initGt06Server(Properties properties) throws SQLException {
+    }
+
 }

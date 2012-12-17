@@ -15,9 +15,9 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -60,6 +60,7 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Decode message
      */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -74,22 +75,24 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
             length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
+            buf.skipBytes(length);
+            length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
             try {
                 deviceId = getDataManager().getDeviceByImei(imei).getId();
             } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
+                Log.warning("Unknown device - " + imei + " (id - " + id + ")");
             }
         }
 
         // Position
-        else if (type == MSG_POINT || type == MSG_ALARM) {
+        else if (deviceId != 0 && (type == MSG_POINT || type == MSG_ALARM)) {
             Position position = new Position();
             StringBuilder extendedInfo = new StringBuilder("<protocol>progress</protocol>");
             position.setDeviceId(deviceId);
 
             // Message index
-            buf.readUnsignedInt();
+            position.setId(buf.readUnsignedInt());
 
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -114,9 +117,11 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
 
             // Satellites
             int satellitesNumber = buf.readUnsignedByte();
-            extendedInfo.append("<sat>");
+            extendedInfo.append("<satellites>");
             extendedInfo.append(satellitesNumber);
-            extendedInfo.append("</sat>");
+            extendedInfo.append("</satellites>");
+
+            // Validity
             position.setValid(satellitesNumber >= 3); // TODO: probably wrong
 
             // Cell signal
@@ -124,10 +129,35 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
             extendedInfo.append(buf.readUnsignedByte());
             extendedInfo.append("</gsm>");
 
-            // TODO: process other data
+            // Milage
+            extendedInfo.append("<milage>");
+            extendedInfo.append(buf.readUnsignedInt());
+            extendedInfo.append("</milage>");
+            
+            long extraFlags = buf.readLong();
 
-            // Extended info
-            position.setExtendedInfo(extendedInfo.toString());
+            // Analog inputs
+            if ((extraFlags & 0x1) == 0x1) {
+                int count = buf.readUnsignedShort();
+                for (int i = 1; i <= count; i++) {
+                    extendedInfo.append("<adc").append(i).append(">");
+                    extendedInfo.append(buf.readUnsignedShort());
+                    extendedInfo.append("</adc").append(i).append(">");
+                }
+                
+            }
+
+            // CAN adapter
+            if ((extraFlags & 0x2) == 0x2) {
+                int size = buf.readUnsignedShort();
+                buf.skipBytes(size);
+            }
+            
+            // Passenger sensor
+            if ((extraFlags & 0x4) == 0x4) {
+                int size = buf.readUnsignedShort();
+                buf.skipBytes(size);
+            }
 
             // Send response for alarm message
             if (type == MSG_ALARM) {
@@ -136,6 +166,9 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
 
                 extendedInfo.append("<alarm>true</alarm>");
             }
+
+            // Extended info
+            position.setExtendedInfo(extendedInfo.toString());
 
             return position;
         }
