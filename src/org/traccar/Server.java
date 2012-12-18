@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -200,7 +202,12 @@ public class Server {
                     }
                 });
 
-                // NOTE: Console logger level will remain INFO
+                // Remove old logging handlers
+                Handler[] handlers = Logger.getLogger("").getHandlers();
+                for(Handler handler : handlers) {
+                    Logger.getLogger("").removeHandler(handler);
+                }
+                
                 Log.getLogger().setLevel(Level.ALL);
                 Log.getLogger().addHandler(file);
             }

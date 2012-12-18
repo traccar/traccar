@@ -47,15 +47,17 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
     /*
      * Message types
      */
-    static final int MSG_NULL = 0;
-    static final int MSG_IDENT = 1;
-    static final int MSG_IDENT_FULL = 2;
-    static final int MSG_POINT = 10;
-    static final int MSG_LOG_SYNC = 100;
-    static final int MSG_LOGMSG = 101;
-    static final int MSG_TEXT = 102;
-    static final int MSG_ALARM = 200;
-    static final int MSG_ALARM_RECIEVED = 201;
+    private static final int MSG_NULL = 0;
+    private static final int MSG_IDENT = 1;
+    private static final int MSG_IDENT_FULL = 2;
+    private static final int MSG_POINT = 10;
+    private static final int MSG_LOG_SYNC = 100;
+    private static final int MSG_LOGMSG = 101;
+    private static final int MSG_TEXT = 102;
+    private static final int MSG_ALARM = 200;
+    private static final int MSG_ALARM_RECIEVED = 201;
+    
+    private static final String HEX_CHARS = "0123456789ABCDEF";
 
     /**
      * Decode message
@@ -150,12 +152,28 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
             // CAN adapter
             if ((extraFlags & 0x2) == 0x2) {
                 int size = buf.readUnsignedShort();
+                extendedInfo.append("<can>");
+                extendedInfo.append(buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
+                extendedInfo.append("</can>");
                 buf.skipBytes(size);
             }
             
             // Passenger sensor
             if ((extraFlags & 0x4) == 0x4) {
                 int size = buf.readUnsignedShort();
+                
+                // Convert binary data to hex
+                StringBuilder hex = new StringBuilder();
+                for (int i = buf.readerIndex(); i < buf.readerIndex() + size; i++) {
+                    byte b = buf.getByte(i);
+                    hex.append(HEX_CHARS.charAt((b & 0xf0) >> 4));
+                    hex.append(HEX_CHARS.charAt((b & 0x0F)));
+                }
+
+                extendedInfo.append("<passenger>");
+                extendedInfo.append(hex);
+                extendedInfo.append("</passenger>");
+                
                 buf.skipBytes(size);
             }
 

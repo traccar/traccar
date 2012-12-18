@@ -22,12 +22,14 @@ import java.util.logging.Logger;
  * Logger
  */
 public class Log {
+    
+    private static String TRACCAR_LOGGER_NAME = "traccar";
 
     /**
      * Return global logger
      */
     public static Logger getLogger() {
-        return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        return Logger.getLogger(TRACCAR_LOGGER_NAME);
     }
     
     private static void write(Level level, String msg) {

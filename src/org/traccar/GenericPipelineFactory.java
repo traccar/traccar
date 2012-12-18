@@ -17,6 +17,7 @@ package org.traccar;
 
 import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
@@ -63,22 +64,19 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
         public void log(ChannelEvent e) {
             if (e instanceof MessageEvent) {
                 MessageEvent event = (MessageEvent) e;
-                String msg = "[" + ((InetSocketAddress) e.getChannel().getLocalAddress()).getPort() + " - ";
-                msg += ((InetSocketAddress) event.getRemoteAddress()).getAddress().getHostAddress() +  "]";
+                StringBuilder msg = new StringBuilder();
+                
+                msg.append("[").append(((InetSocketAddress) e.getChannel().getLocalAddress()).getPort()).append(" - ");
+                msg.append(((InetSocketAddress) event.getRemoteAddress()).getAddress().getHostAddress()).append("]");
 
                 // Append hex message
                 if (event.getMessage() instanceof ChannelBuffer) {
-                    ChannelBuffer buffer = (ChannelBuffer) event.getMessage();
-                    msg += " - (HEX: ";
-                    for (int i = buffer.readerIndex(); i < buffer.writerIndex(); i++) {
-                        byte b = buffer.getByte(i);
-                        msg += HEX_CHARS.charAt((b & 0xf0) >> 4);
-                        msg += HEX_CHARS.charAt((b & 0x0F));
-                    }
-                    msg += ")";
+                    msg.append(" - (HEX: ");
+                    msg.append(ChannelBuffers.hexDump((ChannelBuffer) event.getMessage()));
+                    msg.append(")");
                 }
 
-                Log.fine(msg);
+                Log.fine(msg.toString());
             } else if (e instanceof ExceptionEvent) {
                 ExceptionEvent event = (ExceptionEvent) e;
                 Log.warning(event.getCause().toString());
