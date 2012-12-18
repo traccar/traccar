@@ -202,13 +202,6 @@ public class Server {
                     }
                 });
 
-                // Remove old logging handlers
-                Handler[] handlers = Logger.getLogger("").getHandlers();
-                for(Handler handler : handlers) {
-                    Logger.getLogger("").removeHandler(handler);
-                }
-                
-                Log.getLogger().setLevel(Level.ALL);
                 Log.getLogger().addHandler(file);
             }
         }

@@ -23,13 +23,20 @@ import java.util.logging.Logger;
  */
 public class Log {
     
-    private static String TRACCAR_LOGGER_NAME = "traccar";
+    private static final String TRACCAR_LOGGER_NAME = "traccar";
+    
+    private static Logger logger = null;
 
     /**
      * Return global logger
      */
     public static Logger getLogger() {
-        return Logger.getLogger(TRACCAR_LOGGER_NAME);
+        if (logger == null) {
+            logger = Logger.getLogger(TRACCAR_LOGGER_NAME);
+            logger.setUseParentHandlers(false);
+            logger.setLevel(Level.ALL);
+        }
+        return logger;
     }
     
     private static void write(Level level, String msg) {
