@@ -829,8 +829,8 @@ public class Server {
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
-                    pipeline.addLast("objectDecoder", new NavisProtocolDecoder(getDataManager()));
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 1, 2, 0));
+                    pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(getDataManager()));
                 }
             });
 
