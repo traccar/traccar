@@ -184,7 +184,7 @@ public class Server {
                             System.getProperty("line.separator", "\n");
 
                     private final DateFormat dateFormat =
-                            new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
                     public String format(LogRecord record) {
                         StringBuffer line = new StringBuffer();
