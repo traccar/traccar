@@ -108,7 +108,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
             sendBuf.writeByte(0x01);
             array = new byte[sendBuf.readableBytes()];
             sendBuf.getBytes(0, array);
-            sendBuf.writeShort(Crc.crc16Ccitt(array));
+            sendBuf.writeShort(Crc.crc16X25Ccitt(array));
             sendBuf.writeByte('\r');
             sendBuf.writeByte('\n');
             if (channel != null) {
