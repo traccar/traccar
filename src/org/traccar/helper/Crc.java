@@ -15,6 +15,8 @@
  */
 package org.traccar.helper;
 
+import java.nio.ByteBuffer;
+
 /**
  * CRC functions
  */
@@ -93,35 +95,35 @@ public class Crc {
     private static final int crc16CcittStart = 0xFFFF;
     private static final int crc16CcittXorout = 0xFFFF;
 
-    private static int crc16Unreflected(byte[] buf, int crc_in, int[] table) {
+    private static int crc16Unreflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
         
-        for (int i = 0; i < buf.length; i++) {
-            crc16 = table[((crc16 >> 8) ^ buf[i]) & 0xff] ^ (crc16 << 8);
+        for (int i = 0; i < buf.remaining(); i++) {
+            crc16 = table[((crc16 >> 8) ^ buf.get(i)) & 0xff] ^ (crc16 << 8);
         }
 
         return crc16 & 0xFFFF;
     }
 
-    private static int crc16Reflected(byte[] buf, int crc_in, int[] table) {
+    private static int crc16Reflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
         
-        for (int i = 0; i < buf.length; i++) {
-            crc16 = table[(crc16 ^ buf[i]) & 0xff] ^ (crc16 >> 8);
+        for (int i = 0; i < buf.remaining(); i++) {
+            crc16 = table[(crc16 ^ buf.get(i)) & 0xff] ^ (crc16 >> 8);
         }
 
         return crc16 & 0xFFFF;
     }
 
-    public static int crc16Ccitt(byte[] buf) {
+    public static int crc16Ccitt(ByteBuffer buf) {
         return crc16Reflected(buf, crc16CcittStart, crc16CcittTableReverse) ^ crc16CcittXorout;
     }
 
-    public static int crc16X25Ccitt(byte[] buf) {
+    public static int crc16X25Ccitt(ByteBuffer buf) {
         return crc16Unreflected(buf, crc16CcittStart, crc16CcittTable);
     }
 
-    public static int crc16CcittSeed(byte[] buf, int seed) {
+    public static int crc16CcittSeed(ByteBuffer buf, int seed) {
         return crc16Reflected(buf, seed, crc16CcittTableReverse) ^ crc16CcittXorout;
     }
 

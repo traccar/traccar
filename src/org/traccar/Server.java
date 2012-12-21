@@ -28,10 +28,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -255,6 +252,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new XexunFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
@@ -280,6 +278,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) ';' };
                     pipeline.addLast("frameDecoder",
@@ -308,6 +307,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) ')' };
                     pipeline.addLast("frameDecoder",
@@ -336,6 +336,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) 0x0 };
                     pipeline.addLast("frameDecoder",
@@ -364,6 +365,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '$' };
                     pipeline.addLast("frameDecoder",
@@ -392,6 +394,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -420,6 +423,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\n' }; // tracker bug \n\r
                     pipeline.addLast("frameDecoder",
@@ -447,6 +451,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -474,6 +479,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
                     pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(getDataManager()));
@@ -498,6 +504,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 4));
                     pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(getDataManager()));
@@ -518,6 +525,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -542,6 +550,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r' };
                     pipeline.addLast("frameDecoder",
@@ -566,6 +575,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 0, 0));
                     pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(getDataManager()));
@@ -590,6 +600,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '#' };
                     pipeline.addLast("frameDecoder",
@@ -617,6 +628,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Jt600FrameDecoder());
                     pipeline.addLast("objectDecoder", new Jt600ProtocolDecoder(getDataManager()));
@@ -641,6 +653,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) ';' };
                     pipeline.addLast("frameDecoder",
@@ -668,6 +681,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '#', (byte) '#' };
                     pipeline.addLast("frameDecoder",
@@ -695,6 +709,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -723,6 +738,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -752,6 +768,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
                     pipeline.addLast("objectDecoder", new NavisProtocolDecoder(getDataManager()));
@@ -776,6 +793,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     byte delimiter[] = { (byte) '\r', (byte) '\n' };
                     pipeline.addLast("frameDecoder",
@@ -804,6 +822,7 @@ public class Server {
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new SkypatrolProtocolDecoder(getDataManager()));
                 }
@@ -824,12 +843,12 @@ public class Server {
             TrackerServer server = new TrackerServer(new ServerBootstrap());
             server.setPort(getProtocolPort(properties, protocol));
             server.setAddress(getProtocolInterface(properties, protocol));
-            //server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             final Integer resetDelay = getProtocolResetDelay(properties, protocol);
 
             server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 1, 2, 0));
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
                     pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(getDataManager()));
                 }
             });
@@ -842,6 +861,25 @@ public class Server {
      * Init GT06 server
      */
     private void initGt06Server(Properties properties) throws SQLException {
+
+        String protocol = "gt06";
+        if (isProtocolEnabled(properties, protocol)) {
+
+            TrackerServer server = new TrackerServer(new ServerBootstrap());
+            server.setPort(getProtocolPort(properties, protocol));
+            server.setAddress(getProtocolInterface(properties, protocol));
+            final Integer resetDelay = getProtocolResetDelay(properties, protocol);
+
+            server.setPipelineFactory(new GenericPipelineFactory(server, dataManager, isLoggerEnabled(), resetDelay, geocoder) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
+                    pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(getDataManager()));
+                }
+            });
+
+            serverList.add(server);
+        }
     }
 
 }

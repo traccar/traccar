@@ -17,8 +17,6 @@ package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -116,7 +114,7 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
             // Speed
             position.setSpeed((double) buf.readUnsignedByte());
             
-            // Speed
+            // Course
             position.setCourse((double) buf.readUnsignedShort());
             
             buf.skipBytes(3); // reserved

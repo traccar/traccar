@@ -17,13 +17,12 @@ package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.GenericProtocolDecoder;
+import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
@@ -31,12 +30,14 @@ import org.traccar.model.Position;
 /**
  * T55 tracker protocol decoder
  */
-public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
+public class Gt06ProtocolDecoder extends GenericProtocolDecoder {
+    
+    private Long deviceId;
 
     /**
      * Initialize
      */
-    public Gt02ProtocolDecoder(DataManager dataManager) {
+    public Gt06ProtocolDecoder(DataManager dataManager) {
         super(dataManager);
     }
     
@@ -52,8 +53,24 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
         return imei.toString();
     }
 
-    private static final int MSG_HEARTBEAT = 0x1A;
-    private static final int MSG_DATA = 0x10;
+    private static final int MSG_LOGIN = 0x01;
+    private static final int MSG_DATA = 0x12;
+    private static final int MSG_HEARTBEAT = 0x13;
+    private static final int MSG_STRING = 0x15;
+    private static final int MSG_ALARM = 0x16;
+    
+    private static void sendResponse(Channel channel, int type, int index) {
+        if (channel == null) {
+            ChannelBuffer response = ChannelBuffers.directBuffer(10);
+            response.writeByte(0x78); response.writeByte(0x78); // header
+            response.writeByte(0x05); // size
+            response.writeByte(type);
+            response.writeShort(index);
+            response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(2, 4)));
+            response.writeByte(0x0D); response.writeByte(0x0A); // ending
+            channel.write(response);
+        }
+    }
     
     /**
      * Decode message
@@ -68,33 +85,28 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
         buf.skipBytes(2); // header
         buf.readByte(); // size
         
-        // Zero for location messages
-        buf.readByte(); // voltage
-        buf.readByte(); // gsm signal
-        
-        String imei = readImei(buf);
-        long index = buf.readUnsignedShort();
         int type = buf.readUnsignedByte();
         
-        if (type == MSG_HEARTBEAT) {
-            if (channel != null) {
-                byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(ChannelBuffers.wrappedBuffer(response));
-            }
-        }
-        
-        else if (type == MSG_DATA) {
-            
-            // Create new position
-            Position position = new Position();
-            position.setId(index);
-            
-            // Get device id
+        if (type == MSG_LOGIN) {
+            String imei = readImei(buf);
             try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+                deviceId = getDataManager().getDeviceByImei(imei).getId();
+                sendResponse(channel, type, buf.readUnsignedShort());
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
             }
+        }
+        
+        else if (type == MSG_HEARTBEAT) {
+            buf.skipBytes(5);
+            sendResponse(channel, type, buf.readUnsignedShort());
+        }
+        
+        else if (type == MSG_DATA) {
+            // Create new position
+            Position position = new Position();
+            position.setDeviceId(deviceId);
+            StringBuilder extendedInfo = new StringBuilder("<protocol>gt06</protocol>");
             
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -107,6 +119,11 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
             time.set(Calendar.SECOND, buf.readUnsignedByte());
             position.setTime(time.getTime());
             
+            // Satellites count
+            extendedInfo.append("<satellites>");
+            extendedInfo.append(buf.readUnsignedByte());
+            extendedInfo.append("</satellites>");
+            
             // Latitude
             double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
             
@@ -115,22 +132,36 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
             
             // Speed
             position.setSpeed((double) buf.readUnsignedByte());
-            
-            // Speed
-            position.setCourse((double) buf.readUnsignedShort());
-            
-            buf.skipBytes(3); // reserved
-            
-            // Flags
-            long flags = buf.readUnsignedInt();
-            position.setValid((flags & 0x1) == 0x1);
-            if ((flags & 0x2) == 0) latitude = -latitude;
-            if ((flags & 0x4) == 0) longitude = -longitude;
+
+            // Course and flags
+            int union = buf.readUnsignedShort();
+            position.setCourse((double) (union & 0x03FF));
+            position.setValid((union & 0x1000) != 0);
+            if ((union & 0x0400) == 0) latitude = -latitude;
+            if ((union & 0x0800) == 0) longitude = -longitude;
             
             position.setLatitude(latitude);
             position.setLongitude(longitude);
             position.setAltitude(0.0);
+            
+            // Cell information
+            extendedInfo.append("<mcc>");
+            extendedInfo.append(buf.readUnsignedShort());
+            extendedInfo.append("</mcc>");
+            extendedInfo.append("<mnc>");
+            extendedInfo.append(buf.readUnsignedByte());
+            extendedInfo.append("</mnc>");
+            extendedInfo.append("<lac>");
+            extendedInfo.append(buf.readUnsignedShort());
+            extendedInfo.append("</lac>");
+            extendedInfo.append("<cell>");
+            extendedInfo.append(buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
+            extendedInfo.append("</cell>");
+            
+            // Index
+            position.setId((long) buf.readUnsignedShort());
 
+            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 
