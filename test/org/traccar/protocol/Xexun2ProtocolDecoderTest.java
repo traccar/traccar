@@ -19,6 +19,8 @@ public class Xexun2ProtocolDecoderTest {
         assertNotNull(decoder.decode(null, null,
                 "111111120009,+436763737552,GPRMC,120600.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,,A*68,F,help me!, imei:123456789012345,04,481.2,L:3.5V,0,139,2689,232,03,2725,0576"));
 
+        assertNotNull(decoder.decode(null, null,
+                "111111120009,436763737552,GPRMC,120600.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,,A*68,F,help me!, imei:123456789012345,04,481.2,L:3.5V,0,139,2689,232,03,2725,0576"));
     }
 
 }
