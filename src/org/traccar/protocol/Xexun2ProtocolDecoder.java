@@ -44,7 +44,7 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
     static private Pattern pattern = Pattern.compile(
             "[\r\n]*" +
             "(\\d+)," +                         // Serial
-            "(\\+\\d+)," +                      // Number
+            "(\\+?\\d+)," +                      // Number
             "GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -62,7 +62,7 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
             "(\\d+)," +                         // IMEI
             "(\\d+)," +                         // Satellites
             "(\\d+\\.\\d+)," +                  // Altitude
-            "F:(\\d+\\.\\d+)V," +               // Power
+            "[FL]:(\\d+\\.\\d+)V," +               // Power
             ".*" +
             "[\r\n]*");
 
