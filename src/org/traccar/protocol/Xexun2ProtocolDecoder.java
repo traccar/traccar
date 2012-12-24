@@ -62,7 +62,7 @@ public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
             "(\\d+)," +                         // IMEI
             "(\\d+)," +                         // Satellites
             "(\\d+\\.\\d+)," +                  // Altitude
-            "F:(\\d+\\.\\d+)V," +               // Power
+            "[FL]:(\\d+\\.\\d+)V," +               // Power
             ".*" +
             "[\r\n]*");
 
