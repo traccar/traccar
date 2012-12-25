@@ -46,6 +46,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Regular expressions pattern
      */
+    //"020600.930,A,2309.2051,N,11318.8449,E,0.00,0.00,090710,,,A*6A|2.6|96.7|0000|0000,3FFF|000000000"
     //"155422.000,V,2230.7623,N,11403.4218,E,0.00,0,060211,,*1A|0.0|26|0000|0000,0000|0000000000000000|63|00000000"
     static private Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
@@ -58,7 +59,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
             "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             "[^\\|]+\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
-            "(\\d+)\\|" +                       // Altitude
+            "(\\d+\\.?\\d*)\\|" +               // Altitude
             "([0-9a-fA-F]+)" +                  // State
             ".*"); // TODO: parse ADC
 
@@ -88,6 +89,7 @@ public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Decode message
      */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
