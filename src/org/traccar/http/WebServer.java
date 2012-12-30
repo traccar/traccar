@@ -174,6 +174,7 @@ public class WebServer {
             response.sendRedirect(response.encodeRedirectURL("/"));
         }
 
+        @Override
         public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response)
                 throws IOException, ServletException
         {
@@ -192,6 +193,26 @@ public class WebServer {
     public WebServer(Integer port, DataManager dataManager) {
         server = new Server(port);
         server.setHandler(new WebHandler(dataManager));
+
+        /*WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath("/");
+        webapp.setWar("/home/user/Documents/traccar-web/target/traccar-web-1.0-SNAPSHOT.war");
+        try {
+            
+            Context context = new InitialContext();
+            
+            Class clazz = Class.forName("org.h2.jdbcx.JdbcDataSource");
+            
+            DataSource ds = (DataSource) clazz.newInstance();
+            clazz.getMethod("setURL", String.class).invoke(ds, "jdbc:h2:/home/user/Documents/traccar/target/database2");
+            clazz.getMethod("setUser", String.class).invoke(ds, "sa");
+            //clazz.getMethod("setPassword", String.class).invoke(ds, "");
+
+            context.bind("java:/DefaultDS", ds);
+
+        } catch (Exception error) {
+        }
+        server.setHandler(webapp);*/
     }
 
     public WebServer(String address, Integer port, DataManager dataManager) {
