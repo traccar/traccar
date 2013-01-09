@@ -61,6 +61,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Decode message
      */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -143,7 +144,7 @@ public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
-        
+
         // Course
         String course = parser.group(index++);
         if (course != null) {
