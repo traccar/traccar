@@ -111,17 +111,11 @@ public class Server {
         initMeitrackServer(properties);
         initSkypatrolServer(properties);
         initGt02Server(properties);
-        initGt06Server(properties);        
+        initGt06Server(properties);
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
-            Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
-            String address = properties.getProperty("http.address");
-            if (address != null) {
-                webServer = new WebServer(address, port, dataManager);
-            } else {
-                webServer = new WebServer(port, dataManager);
-            }
+            webServer = new WebServer(properties);
         }
     }
 
@@ -144,11 +138,11 @@ public class Server {
         for (Object server: serverList) {
             ((TrackerServer) server).stop();
         }
-        
+
         // Release resources
         GlobalChannelFactory.release();
         GlobalTimer.release();
-        
+
         if (webServer != null) {
             webServer.stop();
         }
@@ -638,7 +632,7 @@ public class Server {
             serverList.add(server);
         }
     }
-    
+
     /**
      * Init EV603 server
      */
@@ -666,7 +660,7 @@ public class Server {
             serverList.add(server);
         }
     }
-    
+
     /**
      * Init V680 server
      */
@@ -694,7 +688,7 @@ public class Server {
             serverList.add(server);
         }
     }
-    
+
     /**
      * Init PT502 server
      */

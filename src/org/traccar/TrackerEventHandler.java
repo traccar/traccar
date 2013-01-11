@@ -38,7 +38,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         super();
         dataManager = newDataManager;
     }
-    
+
     private void processSinglePosition(Position position) {
         if (position == null) {
             Log.info("null message");
@@ -58,7 +58,10 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
 
         // Write position to database
         try {
-            dataManager.addPosition(position);
+            Long id = dataManager.addPosition(position);
+            if (id != null) {
+                dataManager.updateLatestPosition(position.getDeviceId(), id);
+            }
         } catch (Exception error) {
             Log.info("Exception during query execution");
             Log.warning(error.getMessage());
@@ -82,7 +85,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         Log.info("Closing connection by disconnect");
         e.getChannel().close();
     }
-    
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
         Log.info("Closing connection by exception");
@@ -94,5 +97,5 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         Log.info("Closing connection by timeout");
         e.getChannel().close();
     }
-    
+
 }

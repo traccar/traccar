@@ -26,17 +26,12 @@ public interface DataManager {
      * Manage devices
      */
     public List<Device> getDevices() throws Exception;
-    public void addDevice(Device device) throws Exception;
-    public void updateDevice(Device device) throws Exception;
-    public void removeDevice(Device device) throws Exception;
     public Device getDeviceByImei(String imei) throws Exception;
-    public Device getDeviceByPhoneNumber(String phoneNumber) throws Exception;
-    public Device getDeviceByUniqueId(String uniqueId) throws Exception;
 
     /**
      * Manage positions
      */
-    public void addPosition(Position position) throws Exception;
-    public List<Position> getPositions(Long deviceId) throws Exception;
+    public Long addPosition(Position position) throws Exception;
+    public void updateLatestPosition(Long deviceId, Long positionId) throws Exception;
 
 }

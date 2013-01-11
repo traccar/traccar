@@ -7,19 +7,22 @@ import org.traccar.model.Position;
 
 public class TestDataManager implements DataManager {
 
-    public List getDevices() { return null; }
-    public void addDevice(Device device) {}
-    public void updateDevice(Device device) {}
-    public void removeDevice(Device device) {}
+    @Override
+    public List getDevices() {
+        return null;
+    }
+    @Override
     public Device getDeviceByImei(String imei) {
         Device device = new Device();
         device.setId(new Long(1));
         device.setImei("123456789012345");
         return device;
     }
-    public Device getDeviceByPhoneNumber(String phoneNumber) { return null; }
-    public Device getDeviceByUniqueId(String uniqueId) { return null; }
-    public List getPositions(Long deviceId) { return null; }
-    public void addPosition(Position position) {}
-
+    @Override
+    public Long addPosition(Position position) {
+        return null;
+    }
+    @Override
+    public void updateLatestPosition(Long deviceId, Long positionId) throws Exception {
+    }
 }
