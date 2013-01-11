@@ -1,6 +1,6 @@
 [Setup]
 AppName=Traccar
-AppVersion=1.4
+AppVersion=2.0
 DefaultDirName={pf}\Traccar
 AlwaysRestart=yes
 
@@ -12,16 +12,17 @@ Name: "{app}\lib"
 Name: "{app}\logs"
 
 [Files]
-Source: "wrapper\bin\wrapper-windows-x86-32.exe"; DestDir: "{app}\bin"; DestName: "wrapper.exe"
-Source: "wrapper\src\bin\App.bat.in"; DestDir: "{app}\bin"; DestName: "Traccar.bat"
-Source: "wrapper\src\bin\InstallApp-NT.bat.in"; DestDir: "{app}\bin"; DestName: "InstallTraccar-NT.bat"
-Source: "wrapper\src\bin\UninstallApp-NT.bat.in"; DestDir: "{app}\bin"; DestName: "UninstallTraccar-NT.bat"
-Source: "wrapper\lib\wrapper-windows-x86-32.dll"; DestDir: "{app}\lib"; DestName: "wrapper.dll"
-Source: "wrapper\lib\wrapper.jar"; DestDir: "{app}\lib";
-Source: "wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: "wrapper.conf"; AfterInstall: ConfigureWrapper
+Source: "..\wrapper\bin\wrapper-windows-x86-32.exe"; DestDir: "{app}\bin"; DestName: "wrapper.exe"
+Source: "..\wrapper\src\bin\App.bat.in"; DestDir: "{app}\bin"; DestName: "Traccar.bat"
+Source: "..\wrapper\src\bin\InstallApp-NT.bat.in"; DestDir: "{app}\bin"; DestName: "InstallTraccar-NT.bat"
+Source: "..\wrapper\src\bin\UninstallApp-NT.bat.in"; DestDir: "{app}\bin"; DestName: "UninstallTraccar-NT.bat"
+Source: "..\wrapper\lib\wrapper-windows-x86-32.dll"; DestDir: "{app}\lib"; DestName: "wrapper.dll"
+Source: "..\wrapper\lib\wrapper.jar"; DestDir: "{app}\lib";
+Source: "..\wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: "wrapper.conf"; AfterInstall: ConfigureWrapper
 
 Source: "..\..\target\tracker-server.jar"; DestDir: "{app}"
 Source: "..\..\target\lib\*"; DestDir: "{app}\lib"
+Source: "..\traccar-web.war"; DestDir: "{app}"
 Source: "windows.cfg"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
 
 [Run]
@@ -64,6 +65,7 @@ var
 begin
   LoadStringFromFile(ExpandConstant(CurrentFileName), S);
   StringChangeEx(S, '[DATABASE]', ExpandConstant('{app}\data\database'), true);
+  StringChangeEx(S, '[WAR]', ExpandConstant('{app}\traccar-web.war'), true);
   StringChangeEx(S, '[LOG]', ExpandConstant('{app}\logs\tracker-server.log'), true);
   SaveStringToFile(ExpandConstant(CurrentFileName), S, false);
 end;
