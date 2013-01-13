@@ -22,6 +22,7 @@ import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
@@ -30,16 +31,36 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 /**
  * Tracker server
  */
-public class TrackerServer /*extends ServerBootstrap*/ {
-    
-    Bootstrap bootstrap;
+public abstract class TrackerServer {
 
-    public TrackerServer(Bootstrap bootstrap) {
-        this.bootstrap = bootstrap;
+    private ServerManager serverManager;
+    private Bootstrap bootstrap;
+    private String protocol;
 
-        // Create channel factory
-        bootstrap.setFactory(GlobalChannelFactory.getFactory());
+    public String getProtocol() {
+        return protocol;
     }
+
+    public TrackerServer(ServerManager serverManager, Bootstrap bootstrap, String protocol) {
+        this.serverManager = serverManager;
+        this.bootstrap = bootstrap;
+        this.protocol = protocol;
+
+        bootstrap.setFactory(GlobalChannelFactory.getFactory());
+
+        address = serverManager.getProperties().getProperty(protocol + ".address");
+        String portProperty = serverManager.getProperties().getProperty(protocol + ".port");
+        port = (portProperty != null) ? Integer.valueOf(portProperty) : 5000;
+
+        bootstrap.setPipelineFactory(new GenericPipelineFactory(serverManager, this, protocol) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                TrackerServer.this.addSpecificHandlers(pipeline);
+            }
+        });
+    }
+
+    protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
 
     /**
      * Server port
@@ -82,11 +103,11 @@ public class TrackerServer /*extends ServerBootstrap*/ {
     public ChannelGroup getChannelGroup() {
         return allChannels;
     }
-    
+
     public void setPipelineFactory(ChannelPipelineFactory pipelineFactory) {
         bootstrap.setPipelineFactory(pipelineFactory);
     }
-    
+
     /**
      * Start server
      */
@@ -97,7 +118,7 @@ public class TrackerServer /*extends ServerBootstrap*/ {
         } else {
             endpoint = new InetSocketAddress(address, port);
         }
-        
+
         Channel channel = null;
         if (bootstrap instanceof ServerBootstrap) {
             channel = ((ServerBootstrap) bootstrap).bind(endpoint);
@@ -109,7 +130,7 @@ public class TrackerServer /*extends ServerBootstrap*/ {
             getChannelGroup().add(channel);
         }
     }
-    
+
     /**
      * Stop server
      */

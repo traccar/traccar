@@ -24,8 +24,8 @@ public class Main {
 
         // TODO: Temporary formatting workaround
         Locale.setDefault(Locale.ENGLISH);
-        
-        final Server service = new Server();
+
+        final ServerManager service = new ServerManager();
         service.init(args);
 
         Log.info("starting server...");

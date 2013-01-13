@@ -34,7 +34,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
     private DataManager dataManager;
     private Boolean loggerEnabled;
     private Integer resetDelay;
-    private ReverseGeocoder geocoder;
+    private ReverseGeocoder reverseGeocoder;
 
     /**
      * Open channel handler
@@ -65,7 +65,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
             if (e instanceof MessageEvent) {
                 MessageEvent event = (MessageEvent) e;
                 StringBuilder msg = new StringBuilder();
-                
+
                 msg.append("[").append(((InetSocketAddress) e.getChannel().getLocalAddress()).getPort()).append(" - ");
                 msg.append(((InetSocketAddress) event.getRemoteAddress()).getAddress().getHostAddress()).append("]");
 
@@ -85,13 +85,16 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
         }
     }
 
-    public GenericPipelineFactory(
-            TrackerServer server, DataManager dataManager, Boolean loggerEnabled, Integer resetDelay, ReverseGeocoder geocoder) {
+    public GenericPipelineFactory(ServerManager serverManager, TrackerServer server, String protocol) {
         this.server = server;
-        this.dataManager = dataManager;
-        this.loggerEnabled = loggerEnabled;
-        this.resetDelay = resetDelay;
-        this.geocoder = geocoder;
+        dataManager = serverManager.getDataManager();
+        loggerEnabled = serverManager.isLoggerEnabled();
+        reverseGeocoder = serverManager.getReverseGeocoder();
+
+        String resetDelayProperty = serverManager.getProperties().getProperty(protocol + ".resetDelay");
+        if (resetDelayProperty != null) {
+            resetDelay = Integer.valueOf(resetDelayProperty);
+        }
     }
 
     protected DataManager getDataManager() {
@@ -100,9 +103,10 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
 
+    @Override
     public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = Channels.pipeline();
-        if (resetDelay != 0) {
+        if (resetDelay != null) {
             pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), resetDelay, 0, 0));
         }
         pipeline.addLast("openHandler", new OpenChannelHandler(server));
@@ -110,8 +114,8 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("logger", new StandardLoggingHandler());
         }
         addSpecificHandlers(pipeline);
-        if (geocoder != null) {
-            pipeline.addLast("geocoder", new ReverseGeocoderHandler(geocoder));
+        if (reverseGeocoder != null) {
+            pipeline.addLast("geocoder", new ReverseGeocoderHandler(reverseGeocoder));
         }
         pipeline.addLast("handler", new TrackerEventHandler(dataManager));
         return pipeline;
