@@ -25,22 +25,22 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Meiligao protocol decoder
  */
-public class MeiligaoProtocolDecoder extends GenericProtocolDecoder {
+public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public MeiligaoProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public MeiligaoProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**

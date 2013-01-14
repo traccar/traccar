@@ -7,9 +7,10 @@ public class Gl100ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
-        
-        Gl100ProtocolDecoder decoder = new Gl100ProtocolDecoder(new TestDataManager());
-        
+
+        Gl100ProtocolDecoder decoder = new Gl100ProtocolDecoder(null);
+        decoder.setDataManager(new TestDataManager());
+
         assertNotNull(decoder.decode(null, null,
                 "+RESP:GTSOS,359231030000010,0,0,0,1,4.3,92,70.0,1,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,11F0,0102120204"));
 

@@ -21,9 +21,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
@@ -33,7 +33,7 @@ import org.traccar.model.Position;
  * It sends its identity after the GPRMC sentence, and with the type
  * GPFID.
  */
-public class MaxonProtocolDecoder extends GenericProtocolDecoder {
+public class MaxonProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Device ID
@@ -43,8 +43,8 @@ public class MaxonProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public MaxonProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public MaxonProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**

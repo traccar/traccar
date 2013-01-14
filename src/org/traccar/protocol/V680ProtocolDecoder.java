@@ -21,21 +21,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * V680 tracker protocol decoder
  */
-public class V680ProtocolDecoder extends GenericProtocolDecoder {
+public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public V680ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public V680ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**
@@ -95,41 +95,41 @@ public class V680ProtocolDecoder extends GenericProtocolDecoder {
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") == 0 ? true : false);
-        
+
         // Password
         extendedInfo.append("<password>");
         extendedInfo.append(parser.group(index++));
         extendedInfo.append("</password>");
-        
+
         // Packet number
         extendedInfo.append("<packet>");
         extendedInfo.append(parser.group(index++));
         extendedInfo.append("</packet>");
-        
+
         // GSM base station
         extendedInfo.append("<gsm>");
         extendedInfo.append(parser.group(index++));
         extendedInfo.append("</gsm>");
-        
+
         // Longitude
         Double lonlitude = Double.valueOf(parser.group(index++));
         lonlitude += Double.valueOf(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
         position.setLongitude(lonlitude);
-        
+
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
         latitude += Double.valueOf(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
-        
+
         // Altitude
         position.setAltitude(0.0);
 
         // Speed and Course
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(Double.valueOf(parser.group(index++)));
-        
+
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();

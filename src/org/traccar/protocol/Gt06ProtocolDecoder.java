@@ -21,24 +21,24 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * T55 tracker protocol decoder
  */
-public class Gt06ProtocolDecoder extends GenericProtocolDecoder {
+public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
 
     /**
      * Initialize
      */
-    public Gt06ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Gt06ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     private String readImei(ChannelBuffer buf) {

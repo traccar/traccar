@@ -21,21 +21,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * AVL-08 tracker protocol decoder
  */
-public class Avl08ProtocolDecoder extends GenericProtocolDecoder {
+public class Avl08ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Avl08ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Avl08ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**

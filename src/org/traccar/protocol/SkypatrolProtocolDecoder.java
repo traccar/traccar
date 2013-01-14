@@ -21,41 +21,41 @@ import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * T55 tracker protocol decoder
  */
-public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
+public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public SkypatrolProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public SkypatrolProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     private static boolean checkBit(long mask, int bit) {
         long checkMask = 1 << bit;
         return (mask & checkMask) == checkMask;
     }
-    
+
     private static double convertCoordinate(long coordinate) {
         int sign = 1;
         if (coordinate > 0x7fffffffl) {
             sign = -1;
             coordinate = 0xffffffffl - coordinate;
         }
-        
+
         double degrees = coordinate / 1000000;
         degrees += (coordinate % 1000000) / 600000.0;
-        
+
         return sign * degrees;
     }
-    
+
     /**
      * Decode message
      */
@@ -81,18 +81,18 @@ public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
             commandType == 2 &&
             messageType == 1 &&
             checkBit(mask, 0)) {
-            
+
             // Create new position
             Position position = new Position();
             StringBuilder extendedInfo = new StringBuilder("<protocol>skypatrol</protocol>");
-            
+
             // Status code
             if (checkBit(mask, 1)) {
                 extendedInfo.append("<status>");
                 extendedInfo.append(buf.readUnsignedInt());
                 extendedInfo.append("</status>");
             }
-            
+
             // Device id
             String id = null;
             if (checkBit(mask, 23)) {
@@ -111,12 +111,12 @@ public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
                 Log.warning("Unknown device - " + id);
                 return null;
             }
-            
+
             // IO data
             if (checkBit(mask, 3)) {
                 buf.readUnsignedShort();
             }
-            
+
             // ADC 1
             if (checkBit(mask, 4)) {
                 buf.readUnsignedShort();
@@ -131,7 +131,7 @@ public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
             if (checkBit(mask, 7)) {
                 buf.readUnsignedByte();
             }
-            
+
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
 
@@ -156,7 +156,7 @@ public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
             if (checkBit(mask, 11)) {
                 position.setLongitude(convertCoordinate(buf.readUnsignedInt()));
             }
-            
+
             // Speed
             if (checkBit(mask, 12)) {
                 position.setSpeed(buf.readUnsignedShort() / 10.0);
@@ -173,60 +173,60 @@ public class SkypatrolProtocolDecoder extends GenericProtocolDecoder {
                 time.set(Calendar.MINUTE, buf.readUnsignedByte());
                 time.set(Calendar.SECOND, buf.readUnsignedByte());
             }
-            
+
             position.setTime(time.getTime());
-            
+
             // Altitude
             if (checkBit(mask, 15)) {
                 buf.skipBytes(3);
             }
-            
+
             // Satellites
             if (checkBit(mask, 16)) {
                 extendedInfo.append("<satellites>");
                 extendedInfo.append(buf.readUnsignedByte());
                 extendedInfo.append("</satellites>");
             }
-            
+
             // Battery percentage
             if (checkBit(mask, 17)) {
                 buf.readUnsignedShort();
             }
-            
+
             // Trip milage
             if (checkBit(mask, 20)) {
                 extendedInfo.append("<trip>");
                 extendedInfo.append(buf.readUnsignedInt());
                 extendedInfo.append("</trip>");
             }
-            
+
             // Milage
             if (checkBit(mask, 21)) {
                 extendedInfo.append("<milage>");
                 extendedInfo.append(buf.readUnsignedInt());
                 extendedInfo.append("</milage>");
             }
-            
+
             // Time of message generation
             if (checkBit(mask, 22)) {
                 buf.skipBytes(6);
             }
-            
+
             // Battery level
             if (checkBit(mask, 24)) {
                 position.setPower(buf.readUnsignedShort() / 1000.0);
             }
-            
+
             // GPS overspeed
             if (checkBit(mask, 25)) {
                 buf.skipBytes(18);
             }
-            
+
             // Cell information
             if (checkBit(mask, 26)) {
                 buf.skipBytes(54);
             }
-            
+
             // Sequence number
             if (checkBit(mask, 28)) {
                 position.setId((long) buf.readUnsignedShort());

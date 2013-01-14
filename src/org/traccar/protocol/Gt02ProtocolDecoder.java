@@ -21,23 +21,23 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * T55 tracker protocol decoder
  */
-public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
+public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Gt02ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Gt02ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
-    
+
     private String readImei(ChannelBuffer buf) {
         int b = buf.readUnsignedByte();
         StringBuilder imei = new StringBuilder();
@@ -52,7 +52,7 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
 
     private static final int MSG_HEARTBEAT = 0x1A;
     private static final int MSG_DATA = 0x10;
-    
+
     /**
      * Decode message
      */
@@ -62,38 +62,38 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-        
+
         buf.skipBytes(2); // header
         buf.readByte(); // size
-        
+
         // Zero for location messages
         buf.readByte(); // voltage
         buf.readByte(); // gsm signal
-        
+
         String imei = readImei(buf);
         long index = buf.readUnsignedShort();
         int type = buf.readUnsignedByte();
-        
+
         if (type == MSG_HEARTBEAT) {
             if (channel != null) {
                 byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
                 channel.write(ChannelBuffers.wrappedBuffer(response));
             }
         }
-        
+
         else if (type == MSG_DATA) {
-            
+
             // Create new position
             Position position = new Position();
             position.setId(index);
-            
+
             // Get device id
             try {
                 position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
             }
-            
+
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
@@ -104,27 +104,27 @@ public class Gt02ProtocolDecoder extends GenericProtocolDecoder {
             time.set(Calendar.MINUTE, buf.readUnsignedByte());
             time.set(Calendar.SECOND, buf.readUnsignedByte());
             position.setTime(time.getTime());
-            
+
             // Latitude
             double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-            
+
             // Longitude
             double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-            
+
             // Speed
             position.setSpeed((double) buf.readUnsignedByte());
-            
+
             // Course
             position.setCourse((double) buf.readUnsignedShort());
-            
+
             buf.skipBytes(3); // reserved
-            
+
             // Flags
             long flags = buf.readUnsignedInt();
             position.setValid((flags & 0x1) == 0x1);
             if ((flags & 0x2) == 0) latitude = -latitude;
             if ((flags & 0x4) == 0) longitude = -longitude;
-            
+
             position.setLatitude(latitude);
             position.setLongitude(longitude);
             position.setAltitude(0.0);

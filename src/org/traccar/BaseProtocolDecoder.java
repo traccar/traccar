@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,47 +15,38 @@
  */
 package org.traccar;
 
-import java.util.Timer;
-import java.util.TimerTask;
-import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.model.DataManager;
 
 /**
  * Base class for protocol decoders
  */
-public abstract class GenericProtocolDecoder extends OneToOneDecoder {
+public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
-    /**
-     * Data manager
-     */
+    private ServerManager serverManager;
     private DataManager dataManager;
 
-    /**
-     * Set data manager
-     */
     public final void setDataManager(DataManager dataManager) {
         this.dataManager = dataManager;
     }
 
-    /**
-     * Return data manager
-     */
     public final DataManager getDataManager() {
         return dataManager;
     }
 
-    /**
-     * Default constructor
-     */
-    public GenericProtocolDecoder() {
+    public final void setServerManager(ServerManager serverManager) {
+        this.serverManager = serverManager;
     }
 
-    /**
-     * Initialize
-     */
-    public GenericProtocolDecoder(DataManager dataManager) {
-        setDataManager(dataManager);
+    public final ServerManager getServerManager() {
+        return serverManager;
+    }
+
+    public BaseProtocolDecoder() {
+    }
+
+    public BaseProtocolDecoder(ServerManager serverManager) {
+        this.serverManager = serverManager;
     }
 
 }

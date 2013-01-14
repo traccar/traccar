@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 
 /**
-  * Generic pipeline factory
+  * Base pipeline factory
   */
-public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
+public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private TrackerServer server;
     private DataManager dataManager;
@@ -85,7 +85,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
         }
     }
 
-    public GenericPipelineFactory(ServerManager serverManager, TrackerServer server, String protocol) {
+    public BasePipelineFactory(ServerManager serverManager, TrackerServer server, String protocol) {
         this.server = server;
         dataManager = serverManager.getDataManager();
         loggerEnabled = serverManager.isLoggerEnabled();
@@ -120,4 +120,5 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
         pipeline.addLast("handler", new TrackerEventHandler(dataManager));
         return pipeline;
     }
+
 }

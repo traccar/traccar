@@ -21,21 +21,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Xexun tracker protocol decoder
  */
-public class Xexun2ProtocolDecoder extends GenericProtocolDecoder {
+public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Xexun2ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Xexun2ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**

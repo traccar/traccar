@@ -8,42 +8,43 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
-public class ST210ProtocolDecoder extends GenericProtocolDecoder {
-    
+public class ST210ProtocolDecoder extends BaseProtocolDecoder {
 
-    public ST210ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+
+    public ST210ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     private enum ST210FIELDS {
-                HDR_STATUS("SA200STT;","Status Report"), 
-                HDR_EMERGENCY("SA200EMG;","Emergency Report"), 
-                HDR_EVENT("SA200EVT;", "Event Report"), 
-                HDR_ALERT("SA200ALT;","Alert Report"), 
-                HDR_ALIVE("SA200ALV;","Alive Report"), 
-                DEV_ID("(\\d+);", "Device ID"), 
-                SW_VER("(\\d{3});", "Software Release Version"), 
-                DATE("(\\d+);","GPS date (yyyymmdd) Year + Month + Day"), 
-                TIME("(\\d{2}:\\d{2}:\\d{2});","GPS time (hh:mm:ss) Hour : Minute : Second"), 
-                CELL("(\\w+);","Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"), 
-                LAT("(-\\d{2}.\\d+);", "Latitude (+/-xx.xxxxxx)"), 
-                LON("(-\\d{3}.\\d+);", "Longitude (+/-xxx.xxxxxx)"), 
-                SPD("(\\d{3}.\\d{3});","Speed in km/h - This value returns to 0 when it is over than 200,000Km"), 
+                HDR_STATUS("SA200STT;","Status Report"),
+                HDR_EMERGENCY("SA200EMG;","Emergency Report"),
+                HDR_EVENT("SA200EVT;", "Event Report"),
+                HDR_ALERT("SA200ALT;","Alert Report"),
+                HDR_ALIVE("SA200ALV;","Alive Report"),
+                DEV_ID("(\\d+);", "Device ID"),
+                SW_VER("(\\d{3});", "Software Release Version"),
+                DATE("(\\d+);","GPS date (yyyymmdd) Year + Month + Day"),
+                TIME("(\\d{2}:\\d{2}:\\d{2});","GPS time (hh:mm:ss) Hour : Minute : Second"),
+                CELL("(\\w+);","Location Code ID (3 digits hex) + Serving Cell BSIC(2 digits decimal)"),
+                LAT("(-\\d{2}.\\d+);", "Latitude (+/-xx.xxxxxx)"),
+                LON("(-\\d{3}.\\d+);", "Longitude (+/-xxx.xxxxxx)"),
+                SPD("(\\d{3}.\\d{3});","Speed in km/h - This value returns to 0 when it is over than 200,000Km"),
                 CRS("(\\d{3}.\\d{2});", "Course over ground in degree"),
                 SATT("(\\d+);", "Number of satellites"),
-                FIX("(\\d);","GPS is fixed(1)\n" + "GPS is not fixed(0)"), 
-                DIST("(\\d+);","Traveled ddistance in meter"), 
-                PWR_VOLT("(\\d+.\\d{2});","Voltage value of main power"), 
-                IO("(\\d+);","Current I/O status of inputs and outputs."), 
+                FIX("(\\d);","GPS is fixed(1)\n" + "GPS is not fixed(0)"),
+                DIST("(\\d+);","Traveled ddistance in meter"),
+                PWR_VOLT("(\\d+.\\d{2});","Voltage value of main power"),
+                IO("(\\d+);","Current I/O status of inputs and outputs."),
                 MODE("(\\d);","1 = Idle mode (Parking)\n" + "2 = Active Mode (Driving)"),
-                MSG_NUM("(\\d{4});","Message number - After 9999 is reported, message number returns to 0000"), 
-                EMG_ID("(\\d);", "Emergency type"), 
-                EVT_ID("(\\d);", "Event type"), 
+                MSG_NUM("(\\d{4});","Message number - After 9999 is reported, message number returns to 0000"),
+                EMG_ID("(\\d);", "Emergency type"),
+                EVT_ID("(\\d);", "Event type"),
                 ALERT_ID("(\\d+);", "Alert type");
 
         private String pattern;
@@ -92,7 +93,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
             case SPD:
                 position.setSpeed(Double.valueOf(groupValue));
                 break;
-                
+
             case MODE:
                 //position.setMode(Integer.parseInt(groupValue));
                 break;
@@ -104,15 +105,15 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 time.set(Calendar.YEAR, Integer.valueOf(Integer.valueOf(groupValue.substring(0, 4))));
                 time.set(Calendar.MONTH, Integer.valueOf(Integer.valueOf(groupValue.substring(4, 6))-1));
                 time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(Integer.valueOf(groupValue.substring(6, 8))));
-                
+
                 /*Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                
-                ret.setTimeInMillis(time.getTimeInMillis() + 
+
+                ret.setTimeInMillis(time.getTimeInMillis() +
                                     TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
                 					TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
 
                 position.setTime(time.getTime());
-                
+
                 break;
             }
 
@@ -121,19 +122,19 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
                 Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 time.clear();
                 time.setTime(position.getTime());
-                
+
                 time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(Integer.valueOf(groupValue.substring(0, 2))));
                 time.set(Calendar.MINUTE, Integer.valueOf(Integer.valueOf(groupValue.substring(3, 5))));
                 time.set(Calendar.SECOND, Integer.valueOf(Integer.valueOf(groupValue.substring(6, 8))));
 
                 /*Calendar ret = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                
-                ret.setTimeInMillis(time.getTimeInMillis() + 
+
+                ret.setTimeInMillis(time.getTimeInMillis() +
                                     TimeZone.getTimeZone("UTC").getOffset(time.getTimeInMillis()) -
                 					TimeZone.getDefault().getOffset(time.getTimeInMillis()));*/
 
                 position.setTime(time.getTime());
-                
+
                 break;
             }
 
@@ -219,9 +220,9 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     }
 
     private enum FIELD_EMG_ID_VALUE {
-        PANIC(1, "Emergency by panic button"), 
-        PARKING(2,"Emergency by parking lock"), 
-        MAIN_POWER(3,"Emergency by removing main power"), 
+        PANIC(1, "Emergency by panic button"),
+        PARKING(2,"Emergency by parking lock"),
+        MAIN_POWER(3,"Emergency by removing main power"),
         ANTI_THEFT(5,"Emergency by anti-theft");
 
         private int value;
@@ -263,11 +264,11 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     }
 
     private enum FIELD_EVT_ID_VALUE {
-        INPUT1_GROUND(1, "Input1 goes to ground state"), 
-        INPUT1_OPEN(2,"Input1 goes to open state"), 
-        INPUT2_GROUND(3,"Input2 goes to ground state"), 
-        INPUT2_OPEN(4,"Input2 goes to open state"), 
-        INPUT3_GROUND(5,"Input3 goes to ground state"), 
+        INPUT1_GROUND(1, "Input1 goes to ground state"),
+        INPUT1_OPEN(2,"Input1 goes to open state"),
+        INPUT2_GROUND(3,"Input2 goes to ground state"),
+        INPUT2_OPEN(4,"Input2 goes to open state"),
+        INPUT3_GROUND(5,"Input3 goes to ground state"),
         INPUT3_OPEN(6,"Input3 goes to open state");
 
         private int value;
@@ -290,7 +291,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         public FIELD_EVT_ID_VALUE getValueOf(String indiceStr) {
             int indice = Integer.valueOf(indiceStr);
             return getValueOf(indice);
-        }                
+        }
 
         public FIELD_EVT_ID_VALUE getValueOf(int indice) {
             switch (indice) {
@@ -313,19 +314,19 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     }
 
     private enum FIELD_ALERT_ID_VALUE {
-        DRIVING_FASTER(1, "Start driving faster than SPEED_LIMIT"), 
-        OVER_SPPED(2, "Ended over speed condition"), 
-        DISCON_GPS(3,"Disconnected GPS antenna"), 
-        RECON_GPS(4,"Reconnected GPS antenna after disconnected"), 
-        OUT_GEO_FENCE(5,"The vehicle went out from the geo-fence that has following ID"), 
-        INTO_GEO_FENCE(6,"The vehicle entered into the geo-fence that has following ID"), 
-        SHORTED_GPS(8, "Shorted GPS antenna"), 
-        DEEP_SLEEP_ON(9,"Enter to deep sleep mode"), 
-        DEEP_SLEEP_OFF(10,"Exite from deep sleep mode"), 
-        BKP_BATTERY(13,"Backup battery error"), 
-        BATTERY_DOWN(14,"Vehicle battery goes down to so low level"), 
-        SHOCKED(15,"Shocked"), 
-        COLLISION(16, "Occurred some collision"), 
+        DRIVING_FASTER(1, "Start driving faster than SPEED_LIMIT"),
+        OVER_SPPED(2, "Ended over speed condition"),
+        DISCON_GPS(3,"Disconnected GPS antenna"),
+        RECON_GPS(4,"Reconnected GPS antenna after disconnected"),
+        OUT_GEO_FENCE(5,"The vehicle went out from the geo-fence that has following ID"),
+        INTO_GEO_FENCE(6,"The vehicle entered into the geo-fence that has following ID"),
+        SHORTED_GPS(8, "Shorted GPS antenna"),
+        DEEP_SLEEP_ON(9,"Enter to deep sleep mode"),
+        DEEP_SLEEP_OFF(10,"Exite from deep sleep mode"),
+        BKP_BATTERY(13,"Backup battery error"),
+        BATTERY_DOWN(14,"Vehicle battery goes down to so low level"),
+        SHOCKED(15,"Shocked"),
+        COLLISION(16, "Occurred some collision"),
         DEVIATE_ROUT(18, "Deviate from predefined rout"),
         ENTER_ROUT(19,"Enter into predefined rout");
 
@@ -492,7 +493,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         if(patternStr.endsWith(";")){
             patternStr = patternStr.substring(0, patternStr.length()-1);
         }
-        
+
         return Pattern.compile(patternStr);
 
     }
@@ -608,9 +609,9 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
     public Object decode(ChannelHandlerContext ctx, Channel channel, Object msg) {
         String sentence = (String) msg;
         Log.info("Msg: " + msg);
-        
+
         Position position = null;
-        
+
         try{
             position = decodeMsg(sentence);
             Log.info("MESSAGE DECODED WITH SUCCESS!");
@@ -618,7 +619,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         catch(Exception e){
             Log.severe("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
         }
-        
+
         return position;
     }
 
@@ -639,7 +640,7 @@ public class ST210ProtocolDecoder extends GenericProtocolDecoder {
         if(report.equals(ST210REPORTS.ALIVE)){
             return null;
         }
-        
+
         // Create new position
         Position position = new Position();
 

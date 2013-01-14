@@ -10,8 +10,8 @@ public class ST210ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        ST210ProtocolDecoder decoder = new ST210ProtocolDecoder(
-                new TestDataManager());
+        ST210ProtocolDecoder decoder = new ST210ProtocolDecoder(null);
+        decoder.setDataManager(new TestDataManager());
 
         //Status
         assertNotNull(decoder
@@ -48,7 +48,7 @@ public class ST210ProtocolDecoderTest {
         assertNotNull(decoder
                 .decode(null,
                         null,
-                        "SA200ALT;317652;042;20120829;14:25:58;16d41;-15.618770;-056.083242;000.029;000.00;0;0;2404240;0.00;000000;10"));        
+                        "SA200ALT;317652;042;20120829;14:25:58;16d41;-15.618770;-056.083242;000.029;000.00;0;0;2404240;0.00;000000;10"));
     }
 
 }

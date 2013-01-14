@@ -22,22 +22,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * PT502 tracker protocol decoder
  */
-public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
+public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Pt502ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Pt502ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
+
     /**
      * Regular expressions pattern
      */
@@ -124,7 +125,7 @@ public class Pt502ProtocolDecoder extends GenericProtocolDecoder {
         } else {
             position.setSpeed(0.0);
         }
-        
+
         // Course
         String course = parser.group(index++);
         if (course != null) {

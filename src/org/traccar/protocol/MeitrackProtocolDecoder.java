@@ -21,21 +21,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Meitrack protocol decoder
  */
-public class MeitrackProtocolDecoder extends GenericProtocolDecoder {
+public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public MeitrackProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public MeitrackProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**
@@ -94,11 +94,11 @@ public class MeitrackProtocolDecoder extends GenericProtocolDecoder {
         extendedInfo.append("<event>");
         extendedInfo.append(parser.group(index++));
         extendedInfo.append("</event>");
-        
+
         // Coordinates
         position.setLatitude(Double.valueOf(parser.group(index++)));
         position.setLongitude(Double.valueOf(parser.group(index++)));
-        
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -109,10 +109,10 @@ public class MeitrackProtocolDecoder extends GenericProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-        
+
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
-        
+
         // Satellites
         extendedInfo.append("<satellites>");
         extendedInfo.append(parser.group(index++));
@@ -136,7 +136,7 @@ public class MeitrackProtocolDecoder extends GenericProtocolDecoder {
 
         // Altitude
         position.setAltitude(Double.valueOf(parser.group(index++)));
-        
+
         // Milage
         extendedInfo.append("<milage>");
         extendedInfo.append(parser.group(index++));

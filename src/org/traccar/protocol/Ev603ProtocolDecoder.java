@@ -1,7 +1,7 @@
 /*
  * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
  *                Luis Parada (luis.parada@gmail.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,28 +22,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Ev603 Protocol Decoder
  */
-public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
+public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
     /**
      * Device ID
      */
     private Long deviceId;
-    
+
     /**
      * Initialize
      */
-    public Ev603ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Ev603ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
-    
+
     /**
      * Regular expressions pattern
      */
@@ -76,20 +76,20 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
                 return null;
             }
         }
-        
+
         else if (sentence.startsWith("!A,")) {
             // Parse message
             Matcher parser = pattern.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }
-            
+
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
             StringBuilder extendedInfo = new StringBuilder("<protocol>ev603</protocol>");
             Integer index = 1;
-            
+
             // Date
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
@@ -102,7 +102,7 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
             time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
-            
+
             // Validity
             position.setValid(true);
 
@@ -115,13 +115,13 @@ public class Ev603ProtocolDecoder extends GenericProtocolDecoder{
 
             // Speed
             position.setSpeed(Double.valueOf(parser.group(index++)));
-            
+
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
-            
+
             // Extended info
             position.setExtendedInfo(extendedInfo.toString());
-            
+
             return position;
         }
 

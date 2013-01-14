@@ -21,21 +21,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Gps 103 tracker protocol decoder
  */
-public class Gps103ProtocolDecoder extends GenericProtocolDecoder {
+public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Gps103ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Gps103ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**

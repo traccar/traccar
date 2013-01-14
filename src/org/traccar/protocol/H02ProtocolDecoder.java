@@ -21,21 +21,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * H02 tracker protocol decoder
  */
-public class H02ProtocolDecoder extends GenericProtocolDecoder {
+public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public H02ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public H02ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**

@@ -25,19 +25,19 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Navis protocol decoder
  */
-public class NavisProtocolDecoder extends GenericProtocolDecoder {
+public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private String prefix;
     private long deviceId, serverId;
-    
+
     private static final Charset charset = Charset.defaultCharset();
 
     private String imei;
@@ -46,8 +46,8 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public NavisProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public NavisProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     // Format types
@@ -58,7 +58,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
     public static final int F50 = 0x05;
     public static final int F51 = 0x15;
     public static final int F52 = 0x25;
-    
+
     private static boolean isFormat(int type, int... types) {
         for (int i : types) {
             if (type == i) {
@@ -71,7 +71,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
     private Position parsePosition(ChannelBuffer buf) {
         Position position = new Position();
         StringBuilder extendedInfo = new StringBuilder("<protocol>navis</protocol>");
-        
+
         position.setDeviceId(databaseDeviceId);
         position.setAltitude(0.0);
 
@@ -85,14 +85,14 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         extendedInfo.append("<format>");
         extendedInfo.append(format);
         extendedInfo.append("</format>");
-        
+
         position.setId(buf.readUnsignedInt()); // sequence number
 
         // Event type
         extendedInfo.append("<event>");
         extendedInfo.append(buf.readUnsignedShort());
         extendedInfo.append("</event>");
-        
+
         // Event time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -105,22 +105,22 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         extendedInfo.append("<time>");
         extendedInfo.append(time.getTimeInMillis());
         extendedInfo.append("</time>");
-        
+
         // Alarm status
         extendedInfo.append("<alarm>");
         extendedInfo.append(buf.readUnsignedByte());
         extendedInfo.append("</alarm>");
-        
+
         // Modules status
         extendedInfo.append("<status>");
         extendedInfo.append(buf.readUnsignedByte());
         extendedInfo.append("</status>");
-        
+
         // GSM signal
         extendedInfo.append("<gsm>");
         extendedInfo.append(buf.readUnsignedByte());
         extendedInfo.append("</gsm>");
-        
+
         // Output
         extendedInfo.append("<output>");
         if (isFormat(format, F10, F20, F30)) {
@@ -129,7 +129,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
             extendedInfo.append(buf.readUnsignedByte());
         }
         extendedInfo.append("</output>");
-        
+
         // Input
         extendedInfo.append("<input>");
         if (isFormat(format, F10, F20, F30, F40)) {
@@ -138,7 +138,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
             extendedInfo.append(buf.readUnsignedByte());
         }
         extendedInfo.append("</input>");
-        
+
         position.setPower(buf.readUnsignedShort() / 1000.0); // power
 
         // Battery power
@@ -164,13 +164,13 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
             extendedInfo.append(buf.readUnsignedShort());
             extendedInfo.append("</adc2>");
         }
-        
+
         if (isFormat(format, F20, F50, F51, F52)) {
             // Impulse counters
             buf.readUnsignedInt();
             buf.readUnsignedInt();
         }
-        
+
         if (isFormat(format, F20, F50, F51, F52)) {
             // Validity
             int locationStatus = buf.readUnsignedByte();
@@ -185,28 +185,28 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
             time.set(Calendar.MONTH, buf.readUnsignedByte());
             time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
             position.setTime(time.getTime());
-            
+
             // Location data
             position.setLatitude(buf.readFloat() / Math.PI * 180);
             position.setLongitude(buf.readFloat() / Math.PI * 180);
             position.setSpeed((double) buf.readFloat());
             position.setCourse((double) buf.readUnsignedShort());
-            
+
             // Milage
             extendedInfo.append("<milage>");
             extendedInfo.append(buf.readFloat());
             extendedInfo.append("</milage>");
-            
+
             // Last segment
             extendedInfo.append("<segment>");
             extendedInfo.append(buf.readFloat());
             extendedInfo.append("</segment>");
-            
+
             // Segment times
             buf.readUnsignedShort();
             buf.readUnsignedShort();
         }
-        
+
         if (isFormat(format, F51, F52)) {
             // Other stuff
             buf.readUnsignedShort();
@@ -219,7 +219,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
             buf.readByte();
             buf.readUnsignedShort();
         }
-        
+
         if (isFormat(format, F40, F52)) {
             // Four temperature sensors
             buf.readByte();
@@ -233,10 +233,10 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
 
         return position;
     }
-    
+
     private Object processSingle(Channel channel, ChannelBuffer buf) {
         Position position = parsePosition(buf);
-        
+
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
         response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<T", charset));
         response.writeInt(position.getId().intValue());
@@ -246,10 +246,10 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         if (position.getValid() == null) {
             return null;
         }
-        
+
         return position;
     }
-    
+
     private Object processArray(Channel channel, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<Position>();
         int count = buf.readUnsignedByte();
@@ -260,7 +260,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
                 positions.add(position);
             }
         }
-        
+
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
         response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<A", charset));
         response.writeByte(count);
@@ -270,10 +270,10 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         if (positions.isEmpty()) {
             return null;
         }
-        
+
         return positions;
     }
-    
+
     private Object processHandshake(Channel channel, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
         imei = buf.toString(Charset.defaultCharset());
@@ -285,7 +285,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         }
         return null;
     }
-    
+
     private static short checksum(ChannelBuffer buf) {
         short sum = 0;
         for (int i = 0; i < buf.readableBytes(); i++) {
@@ -293,7 +293,7 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         }
         return sum;
     }
-    
+
     private void sendReply(Channel channel, ChannelBuffer data) {
         ChannelBuffer header = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 16);
         header.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, prefix, charset));
@@ -302,19 +302,19 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         header.writeShort(data.readableBytes());
         header.writeByte(checksum(data));
         header.writeByte(checksum(header));
-        
+
         if (channel != null) {
             channel.write(ChannelBuffers.copiedBuffer(header, data));
         }
     }
-    
+
     /**
      * Decode message
      */
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
-        
+
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         // Read header
@@ -324,15 +324,15 @@ public class NavisProtocolDecoder extends GenericProtocolDecoder {
         deviceId = buf.readUnsignedInt();
         int length = buf.readUnsignedShort();
         buf.skipBytes(2); // header and data XOR checksum
-        
+
         if (length == 0) {
             return null; // keep alive message
         }
-        
+
         // Read message type
         String type = buf.toString(buf.readerIndex(), 3, charset);
         buf.skipBytes(type.length());
-        
+
         if (type.equals("*>T")) {
             return processSingle(channel, buf);
         } else if (type.equals("*>A")) {

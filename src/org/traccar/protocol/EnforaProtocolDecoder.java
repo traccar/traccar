@@ -23,22 +23,22 @@ import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Enfora protocol decoder
  */
-public class EnforaProtocolDecoder extends GenericProtocolDecoder {
+public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public EnforaProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public EnforaProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**

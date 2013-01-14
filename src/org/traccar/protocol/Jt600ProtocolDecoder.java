@@ -23,33 +23,33 @@ import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * JT600 protocol decoder
  */
-public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
+public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Jt600ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Jt600ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /**
      * Decode regular message
      */
     private Position decodeNormalMessage(ChannelBuffer buf) throws Exception {
-        
+
         Position position = new Position();
-        
+
         buf.readByte(); // header
-        
+
         // Get device by identifier
         String id = Long.valueOf(ChannelBufferTools.readHexString(buf, 10)).toString();
         try {
@@ -58,11 +58,11 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
             Log.warning("Unknown device - " + id);
             return null;
         }
-        
+
         buf.readByte(); // protocol version + data type
-        
+
         buf.readBytes(2); // length
-        
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -73,7 +73,7 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
         time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
         time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
         position.setTime(time.getTime());
-        
+
         // Coordinates
         int temp = ChannelBufferTools.readHexInteger(buf, 8);
         double latitude = temp % 1000000;
@@ -83,7 +83,7 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
         double longitude = temp % 1000000;
         longitude /= 60 * 10000;
         longitude += temp / 1000000;
-        
+
         // Flags
         byte flags = buf.readByte();
         position.setValid((flags & 0x1) == 0x1);
@@ -91,7 +91,7 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
         position.setLatitude(latitude);
         if ((flags & 0x4) == 0) longitude = -longitude;
         position.setLongitude(longitude);
-        
+
         // Speed
         double speed = ChannelBufferTools.readHexInteger(buf, 2);
         position.setSpeed(speed);
@@ -99,26 +99,26 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
         // Course
         double course = buf.readUnsignedByte() * 2;
         position.setCourse(course);
-        
+
         buf.readByte(); // number of satellites
-        
+
         // Course
         double power = buf.readUnsignedByte();
         position.setPower(power);
-        
+
         buf.readByte(); // other flags and sensors
-        
+
         // Altitude
         double altitude = buf.readUnsignedShort();
         position.setAltitude(altitude);
-        
+
         buf.readUnsignedShort(); // cell id
         buf.readUnsignedShort(); // lac
-        
+
         buf.readUnsignedByte(); // gsm signal
-        
+
         buf.readUnsignedByte(); // message number
-        
+
         return position;
     }
 
@@ -150,7 +150,7 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
     private Position decodeAlertMessage(ChannelBuffer buf) throws Exception {
 
         String message = buf.toString(Charset.defaultCharset());
-        
+
         // Parse message
         Matcher parser = pattern.matcher(message);
         if (!parser.matches()) {
@@ -175,7 +175,7 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
         lonlitude += Double.valueOf(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
         position.setLongitude(lonlitude);
-        
+
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
         latitude += Double.valueOf(parser.group(index++)) / 60;
@@ -184,7 +184,7 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
-        
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -204,7 +204,7 @@ public class Jt600ProtocolDecoder extends GenericProtocolDecoder {
 
         // Power
         position.setPower(Double.valueOf(parser.group(index++)));
-        
+
         return position;
     }
 

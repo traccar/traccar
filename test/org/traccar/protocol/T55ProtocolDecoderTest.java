@@ -8,9 +8,10 @@ public class T55ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
-        
-        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new TestDataManager());
-        
+
+        T55ProtocolDecoder decoder = new T55ProtocolDecoder(null);
+        decoder.setDataManager(new TestDataManager());
+
         assertNull(decoder.decode(null, null, "$PGID,359853000144328*0F"));
 
         assertNotNull(decoder.decode(null, null,

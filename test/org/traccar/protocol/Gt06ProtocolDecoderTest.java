@@ -10,7 +10,8 @@ public class Gt06ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(new TestDataManager());
+        Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(null);
+        decoder.setDataManager(new TestDataManager());
 
         byte[] buf1 = {0x78,0x78,0x0d,0x01,0x03,0x53,0x41,(byte)0x90,0x36,0x06,0x60,0x61,0x00,0x03,(byte)0xc3,(byte)0xdf,0x0d,0x0a};
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf1)));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public abstract class TrackerServer {
         String portProperty = serverManager.getProperties().getProperty(protocol + ".port");
         port = (portProperty != null) ? Integer.valueOf(portProperty) : 5000;
 
-        bootstrap.setPipelineFactory(new GenericPipelineFactory(serverManager, this, protocol) {
+        bootstrap.setPipelineFactory(new BasePipelineFactory(serverManager, this, protocol) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 TrackerServer.this.addSpecificHandlers(pipeline);

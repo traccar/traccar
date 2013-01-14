@@ -21,21 +21,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * TR20 tracker protocol decoder
  */
-public class Tr20ProtocolDecoder extends GenericProtocolDecoder {
+public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Initialize
      */
-    public Tr20ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public Tr20ProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     static private Pattern patternPing = Pattern.compile(
@@ -69,16 +69,16 @@ public class Tr20ProtocolDecoder extends GenericProtocolDecoder {
         // Keep alive message
         Matcher parser = patternPing.matcher(sentence);
         if (parser.matches()) {
-            
+
             // Send response
             if (channel != null) {
                 channel.write("&&" + parser.group(1) + "\r\n");
             }
         } else {
-            
+
             // Data message parse
             parser = patternData.matcher(sentence);
-            
+
             // Unknown message
             if (!parser.matches()) {
                 return null;
@@ -89,7 +89,7 @@ public class Tr20ProtocolDecoder extends GenericProtocolDecoder {
             StringBuilder extendedInfo = new StringBuilder("<protocol>tr20</protocol>");
 
             Integer index = 1;
-            
+
             // Get device by id
             String id = parser.group(index++);
             try {
@@ -98,10 +98,10 @@ public class Tr20ProtocolDecoder extends GenericProtocolDecoder {
                 Log.warning("Unknown device - " + id);
                 return null;
             }
-            
+
             // Validity
             position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
-            
+
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
@@ -112,7 +112,7 @@ public class Tr20ProtocolDecoder extends GenericProtocolDecoder {
             time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
             position.setTime(time.getTime());
-            
+
             // Latitude
             int hemisphere = 1;
             if (parser.group(index++).compareTo("S") == 0) hemisphere = -1;
@@ -135,10 +135,10 @@ public class Tr20ProtocolDecoder extends GenericProtocolDecoder {
 
             // Altitude
             position.setAltitude(0.0);
-            
+
             // Extended info
             position.setExtendedInfo(extendedInfo.toString());
-            
+
             return position;
         }
 

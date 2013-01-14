@@ -22,15 +22,15 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.GenericProtocolDecoder;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.ServerManager;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
 /**
  * Progress tracker protocol decoder
  */
-public class ProgressProtocolDecoder extends GenericProtocolDecoder {
+public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
     /**
      * Device ID
@@ -40,8 +40,8 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
     /**
      * Initialize
      */
-    public ProgressProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
+    public ProgressProtocolDecoder(ServerManager serverManager) {
+        super(serverManager);
     }
 
     /*
@@ -56,7 +56,7 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
     private static final int MSG_TEXT = 102;
     private static final int MSG_ALARM = 200;
     private static final int MSG_ALARM_RECIEVED = 201;
-    
+
     private static final String HEX_CHARS = "0123456789ABCDEF";
 
     /**
@@ -135,7 +135,7 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
             extendedInfo.append("<milage>");
             extendedInfo.append(buf.readUnsignedInt());
             extendedInfo.append("</milage>");
-            
+
             long extraFlags = buf.readLong();
 
             // Analog inputs
@@ -146,7 +146,7 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
                     extendedInfo.append(buf.readUnsignedShort());
                     extendedInfo.append("</adc").append(i).append(">");
                 }
-                
+
             }
 
             // CAN adapter
@@ -157,11 +157,11 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
                 extendedInfo.append("</can>");
                 buf.skipBytes(size);
             }
-            
+
             // Passenger sensor
             if ((extraFlags & 0x4) == 0x4) {
                 int size = buf.readUnsignedShort();
-                
+
                 // Convert binary data to hex
                 StringBuilder hex = new StringBuilder();
                 for (int i = buf.readerIndex(); i < buf.readerIndex() + size; i++) {
@@ -173,7 +173,7 @@ public class ProgressProtocolDecoder extends GenericProtocolDecoder {
                 extendedInfo.append("<passenger>");
                 extendedInfo.append(hex);
                 extendedInfo.append("</passenger>");
-                
+
                 buf.skipBytes(size);
             }
 
