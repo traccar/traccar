@@ -17,6 +17,7 @@ package org.traccar;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.FieldPosition;
@@ -407,13 +408,15 @@ public class ServerManager {
 
     private void initProgressServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 0, 0));
                     pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(ServerManager.this));
                 }
-            });
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
@@ -508,13 +511,15 @@ public class ServerManager {
 
     private void initNavisServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
                     pipeline.addLast("objectDecoder", new NavisProtocolDecoder(ServerManager.this));
                 }
-            });
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
