@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +32,6 @@ import org.traccar.ServerManager;
 import org.traccar.helper.AdvancedConnection;
 import org.traccar.helper.Log;
 import org.traccar.helper.NamedParameterStatement;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 /**
@@ -43,6 +41,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
     private long deviceId;
     private long lastIndex;
+    private long newIndex;
 
     public ProgressProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
@@ -64,7 +63,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     private static final String HEX_CHARS = "0123456789ABCDEF";
 
     /**
-     * Hack to load last index
+     * Hack to load last index from database
      */
     /*private void loadLastIndex() {
         try {
@@ -85,11 +84,11 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Request archive messages
      */
-    private void requestArchive(Channel channel, long newIndex) {
+    private void requestArchive(Channel channel) {
         if (lastIndex == 0) {
             lastIndex = newIndex;
         } else if (newIndex > lastIndex) {
-            ChannelBuffer request = ChannelBuffers.directBuffer(ByteOrder.BIG_ENDIAN, 12);
+            ChannelBuffer request = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 12);
             request.writeShort(MSG_LOG_SYNC);
             request.writeShort(4);
             request.writeInt((int) lastIndex);
@@ -128,7 +127,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Position
-        else if (deviceId != 0 && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
+        else if (/*deviceId != 0 &&*/ (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
             List<Position> positions = new LinkedList<Position>();
 
             int recordCount = 1;
@@ -143,9 +142,16 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
                 // Message index
                 if (type == MSG_LOGMSG) {
+                    extendedInfo.append("<archive>true</archive>");
+                    int subtype = buf.readUnsignedShort();
+                    if (subtype == MSG_ALARM) {
+                        extendedInfo.append("<alarm>true</alarm>");
+                    }
+                    buf.readUnsignedShort(); // length
                     lastIndex = buf.readUnsignedInt();
+                    position.setId(lastIndex);
                 } else {
-                    requestArchive(channel, buf.readUnsignedInt());
+                    newIndex = buf.readUnsignedInt();
                 }
 
                 // Time
@@ -235,15 +241,18 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     channel.write(ChannelBuffers.wrappedBuffer(response));
 
                     extendedInfo.append("<alarm>true</alarm>");
-                } else if (type == MSG_LOGMSG) {
-                    extendedInfo.append("<archive>true</archive>");
                 }
+
+                // Skip CRC
+                buf.readUnsignedInt();
 
                 // Extended info
                 position.setExtendedInfo(extendedInfo.toString());
 
                 positions.add(position);
             }
+
+            requestArchive(channel);
 
             return positions;
         }
