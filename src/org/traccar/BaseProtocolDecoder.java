@@ -46,8 +46,10 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
     }
 
     public BaseProtocolDecoder(ServerManager serverManager) {
-        this.serverManager = serverManager;
-        dataManager = serverManager.getDataManager();
+        if (serverManager != null) {
+            this.serverManager = serverManager;
+            dataManager = serverManager.getDataManager();
+        }
     }
 
 }
