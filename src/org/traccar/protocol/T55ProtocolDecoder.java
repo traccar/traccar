@@ -70,7 +70,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         // Detect device ID
         if (sentence.contains("$PGID")) {
-            String imei = sentence.substring(6, 6 + 15);
+            String imei = sentence.substring(6, sentence.length() - 3);
             try {
                 deviceId = getDataManager().getDeviceByImei(imei).getId();
             } catch(Exception error) {
