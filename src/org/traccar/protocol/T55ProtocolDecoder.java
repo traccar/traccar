@@ -62,6 +62,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Decode message
      */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
