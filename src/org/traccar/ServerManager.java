@@ -411,7 +411,7 @@ public class ServerManager {
             TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 0, 0));
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
                     pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(ServerManager.this));
                 }
             };

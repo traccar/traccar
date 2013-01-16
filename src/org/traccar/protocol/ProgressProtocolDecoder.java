@@ -65,7 +65,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Hack to load last index from database
      */
-    /*private void loadLastIndex() {
+    private void loadLastIndex() {
         try {
             Properties p = getServerManager().getProperties();
             AdvancedConnection connection = new AdvancedConnection(
@@ -79,7 +79,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             }
         } catch(Exception error) {
         }
-    }*/
+    }
 
     /**
      * Request archive messages
@@ -127,7 +127,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Position
-        else if (/*deviceId != 0 &&*/ (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
+        else if (deviceId != 0 && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
             List<Position> positions = new LinkedList<Position>();
 
             int recordCount = 1;
