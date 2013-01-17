@@ -48,9 +48,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Regular expressions pattern
      */
-    //"191020.000,A,2438.1016,S,02553.3551,E,0.00,,150113,,,A*69|1.7|1009|"
+    //                             | HDOP | Altitude | State | AD| BASE ID | CSQ | Journey
+    //"191020.000,A,2438.1016,S,02553.3551,E,0.00,,150113,,,A*69    |1.7|1009|"
     //"020600.930,A,2309.2051,N,11318.8449,E,0.00,0.00,090710,,,A*6A|2.6|96.7|0000|0000,3FFF|000000000"
-    //"155422.000,V,2230.7623,N,11403.4218,E,0.00,0,060211,,*1A|0.0|26|0000|0000,0000|0000000000000000|63|00000000"
+    //"155422.000,V,2230.7623,N,11403.4218,E,0.00,0,060211,,*1A     |0.0|26  |0000|0000,0000|0000000000000000|63|00000000"
     static private Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -64,6 +65,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "[^\\|]+\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
             "(\\d+\\.?\\d*)\\|" +               // Altitude
             "([0-9a-fA-F]+)?" +                 // State
+            "(?:\\|([0-9a-fA-F]+),([0-9a-fA-F]+))?" + // ADC
+            "(?:\\|([0-9a-fA-F]+))?" +          // Cell
+            "(?:\\|([0-9a-fA-F]+))?" +          // Signal
+            "(?:\\|([0-9a-fA-F]+))?" +          // Milage
             ".*"); // TODO: parse ADC
 
     /**
@@ -212,9 +217,46 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // State
-        extendedInfo.append("<state>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</state>");
+        String state = parser.group(index++);
+        if (state != null) {
+            extendedInfo.append("<state>");
+            extendedInfo.append(state);
+            extendedInfo.append("</state>");
+        }
+
+        // ADC
+        for (int i = 1; i <= 2; i++) {
+            String adc = parser.group(index++);
+            if (adc != null) {
+                extendedInfo.append("<adc").append(i).append(">");
+                extendedInfo.append(Integer.parseInt(adc, 16));
+                extendedInfo.append("</adc").append(i).append(">");
+            }
+        }
+
+        // Cell identifier
+        String cell = parser.group(index++);
+        if (cell != null) {
+            extendedInfo.append("<cell>");
+            extendedInfo.append(cell);
+            extendedInfo.append("</cell>");
+        }
+
+        // GSM signal
+        String gsm = parser.group(index++);
+        if (gsm != null) {
+            extendedInfo.append("<gsm>");
+            extendedInfo.append(Integer.parseInt(gsm, 16));
+            extendedInfo.append("</gsm>");
+        }
+
+        // Milage
+        String milage = parser.group(index++);
+        if (milage != null) {
+            extendedInfo.append("<milage>");
+            extendedInfo.append(Integer.parseInt(milage, 16));
+            extendedInfo.append("</milage>");
+        }
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
