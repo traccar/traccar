@@ -43,24 +43,24 @@ public class Avl08ProtocolDecoder extends BaseProtocolDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "\\$\\$.{2}" +               // Length
-            "(\\d{15})\\|" +             // IMEI
+            "(\\d+)\\|" +                // IMEI
             "(.{2})" +                   // Alarm Type
             "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2}).(\\d{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                  // Validity
-            "(\\d{2})(\\d{2}.\\d{4})," + // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)," + // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}.\\d{4})," + // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d+)," + // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+.\\d{2})?," +          // Speed
-            "(\\d+.\\d{2})?," +          // Course
+            "(\\d+\\.\\d+)?," +          // Speed
+            "(\\d+\\.\\d+)?," +          // Course
             "(\\d{2})(\\d{2})(\\d{2}),[^\\|]*\\|" + // Date (DDMMYY)
-            "(\\d+.\\d)\\|(\\d+.\\d)\\|(\\d+.\\d)\\|" + // Dilution of precision
+            "(\\d+\\.?\\d+)\\|(\\d+\\.?\\d+)\\|(\\d+\\.?\\d+)\\|" + // Dilution of precision
             "(\\d{12})\\|" +             // Status
             "(\\d{14})\\|" +             // Clock
             "(\\d{8})\\|" +              // Voltage
             "(\\d{8})\\|" +              // ADC
-            "(.{8})\\|" +                // Cell
+            "([0-9a-fA-F]{8})\\|" +      // Cell
             "(.\\d{3})\\|" +             // Temperature
             "(\\d+.\\d{4})\\|" +         // Mileage
             "(\\d{4})\\|" +              // Serial
@@ -70,6 +70,7 @@ public class Avl08ProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Decode message
      */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {

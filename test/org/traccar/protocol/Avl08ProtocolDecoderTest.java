@@ -12,6 +12,9 @@ public class Avl08ProtocolDecoderTest {
         Avl08ProtocolDecoder decoder = new Avl08ProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
 
+        assertNotNull(decoder.decode(null, null,
+                "$$B0456123|61$GPRMC,114725.00,A,1258.68276,N,07730.60237,E,0.410,,080113,,,A*79|1.44|0.66|1.27|000000000000|20130108114425|03600000|00000000|053C2BFE|0000|0.3325|0063|2005"));
+
         assertNull(decoder.decode(null, null,
                 "$$AE359772033395899|AA000000000000000000000000000000000000000000000000000000000000|00.0|00.0|00.0|000000000000|20090215000153|13601435|00000000|00000000|0000|0.0000|0007|2DAA"));
 
