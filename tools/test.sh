@@ -80,3 +80,6 @@ echo "22. gt02"
 
 echo "23. gt06"
 
+
+echo "24. megastek"
+(echo -n -e "STX,102110830074542,\$GPRMC,122400.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,,A*64,F,LowBattery,imei:123456789012345,03,113.1,Battery=24%,,1,460,01,2531,647E;57\r\n";) | nc -v localhost 5024

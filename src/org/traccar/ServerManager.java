@@ -127,6 +127,7 @@ public class ServerManager {
         initSkypatrolServer("skypatrol");
         initGt02Server("gt02");
         initGt06Server("gt06");
+        initMegastekServer("megastek");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -569,6 +570,22 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
                     pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initMegastekServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new MegastekProtocolDecoder(ServerManager.this));
                 }
             });
         }
