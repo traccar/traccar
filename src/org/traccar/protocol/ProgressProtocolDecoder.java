@@ -68,14 +68,16 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     private void loadLastIndex() {
         try {
             Properties p = getServerManager().getProperties();
-            AdvancedConnection connection = new AdvancedConnection(
-                    p.getProperty("database.url"), p.getProperty("database.user"), p.getProperty("database.password"));
-            NamedParameterStatement queryLastIndex = new NamedParameterStatement(connection, p.getProperty("database.selectLastIndex"));
-            queryLastIndex.prepare();
-            queryLastIndex.setLong("device_id", deviceId);
-            ResultSet result = queryLastIndex.executeQuery();
-            if (result.next()) {
-                lastIndex = result.getLong(1);
+            if (p.contains("database.selectLastIndex")) {
+                AdvancedConnection connection = new AdvancedConnection(
+                        p.getProperty("database.url"), p.getProperty("database.user"), p.getProperty("database.password"));
+                NamedParameterStatement queryLastIndex = new NamedParameterStatement(connection, p.getProperty("database.selectLastIndex"));
+                queryLastIndex.prepare();
+                queryLastIndex.setLong("device_id", deviceId);
+                ResultSet result = queryLastIndex.executeQuery();
+                if (result.next()) {
+                    lastIndex = result.getLong(1);
+                }
             }
         } catch(Exception error) {
         }
@@ -120,7 +122,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
             try {
                 deviceId = getDataManager().getDeviceByImei(imei).getId();
-                //loadLastIndex();
+                loadLastIndex();
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei + " (id - " + id + ")");
             }
