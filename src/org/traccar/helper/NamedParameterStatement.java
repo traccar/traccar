@@ -128,10 +128,13 @@ public class NamedParameterStatement {
             } else if (statement.getWarnings() != null) {
                 reset(true);
             }
-        } catch (SQLException error) {
-            Log.info("Exception during query preparation");
-            Log.warning(error.getMessage());
-            reset(true);
+        } catch (SQLException firstError) {
+            try {
+                reset(true);
+            } catch (SQLException secondError) {
+                Log.info("Exception during query preparation");
+                throw secondError;
+            }
         }
     }
 
