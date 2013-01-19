@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -54,10 +55,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final int MSG_LOGIN = 0x01;
-    private static final int MSG_DATA = 0x12;
-    private static final int MSG_HEARTBEAT = 0x13;
+    private static final int MSG_GPS = 0x10;
+    private static final int MSG_LBS = 0x11;
+    private static final int MSG_GPS_LBS = 0x12;
+    private static final int MSG_STATUS = 0x13;
     private static final int MSG_STRING = 0x15;
-    private static final int MSG_ALARM = 0x16;
+    private static final int MSG_GPS_LBS_STATUS = 0x16;
 
     private static void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
@@ -83,7 +86,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         buf.skipBytes(2); // header
-        buf.readByte(); // size
+        int length = buf.readByte(); // size
+        int dataLength = length - 5;
 
         int type = buf.readUnsignedByte();
 
@@ -91,18 +95,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             String imei = readImei(buf);
             try {
                 deviceId = getDataManager().getDeviceByImei(imei).getId();
+                buf.skipBytes(dataLength - 8);
                 sendResponse(channel, type, buf.readUnsignedShort());
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
             }
         }
 
-        else if (type == MSG_HEARTBEAT) {
-            buf.skipBytes(5);
+        else if (type == MSG_STATUS) {
+            buf.skipBytes(dataLength);
             sendResponse(channel, type, buf.readUnsignedShort());
         }
 
-        else if (type == MSG_DATA) {
+        else if (type == MSG_GPS || type == MSG_GPS_LBS || type == MSG_GPS_LBS_STATUS) {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
@@ -119,10 +124,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.SECOND, buf.readUnsignedByte());
             position.setTime(time.getTime());
 
-            // Satellites count
+            // GPS length and Satellites count
+            int gpsLength = buf.readUnsignedByte();
             extendedInfo.append("<satellites>");
-            extendedInfo.append(buf.readUnsignedByte());
+            extendedInfo.append(gpsLength & 0xf);
             extendedInfo.append("</satellites>");
+            gpsLength >>= 4;
 
             // Latitude
             double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
@@ -144,22 +151,52 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
             position.setAltitude(0.0);
 
-            // Cell information
-            extendedInfo.append("<mcc>");
-            extendedInfo.append(buf.readUnsignedShort());
-            extendedInfo.append("</mcc>");
-            extendedInfo.append("<mnc>");
-            extendedInfo.append(buf.readUnsignedByte());
-            extendedInfo.append("</mnc>");
-            extendedInfo.append("<lac>");
-            extendedInfo.append(buf.readUnsignedShort());
-            extendedInfo.append("</lac>");
-            extendedInfo.append("<cell>");
-            extendedInfo.append(buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
-            extendedInfo.append("</cell>");
+            buf.skipBytes(gpsLength - 12); // skip reserved
+
+            if (type == MSG_GPS_LBS || type == MSG_GPS_LBS_STATUS) {
+
+                int lbsLength = 0;
+                if (type == MSG_GPS_LBS_STATUS) {
+                    lbsLength = buf.readUnsignedByte();
+                }
+
+                // Cell information
+                extendedInfo.append("<mcc>");
+                extendedInfo.append(buf.readUnsignedShort());
+                extendedInfo.append("</mcc>");
+                extendedInfo.append("<mnc>");
+                extendedInfo.append(buf.readUnsignedByte());
+                extendedInfo.append("</mnc>");
+                extendedInfo.append("<lac>");
+                extendedInfo.append(buf.readUnsignedShort());
+                extendedInfo.append("</lac>");
+                extendedInfo.append("<cell>");
+                extendedInfo.append(buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
+                extendedInfo.append("</cell>");
+                buf.skipBytes(lbsLength - 9);
+
+                // Status
+                if (type == MSG_GPS_LBS_STATUS) {
+                    int flags = buf.readUnsignedByte(); // TODO parse flags
+                    extendedInfo.append("<alarm>true</alarm>");
+
+                    // Voltage
+                    position.setPower((double) buf.readUnsignedByte());
+
+                    // GSM signal
+                    extendedInfo.append("<gsm>");
+                    extendedInfo.append(buf.readUnsignedByte());
+                    extendedInfo.append("</gsm>");
+                }
+            }
 
             // Index
-            position.setId((long) buf.readUnsignedShort());
+            if (buf.readableBytes() > 6) {
+                buf.skipBytes(buf.readableBytes() - 6);
+            }
+            int index = buf.readUnsignedShort();
+            position.setId((long) index);
+            sendResponse(channel, type, index);
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
