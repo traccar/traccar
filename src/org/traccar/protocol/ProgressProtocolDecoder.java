@@ -149,7 +149,9 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     if (subtype == MSG_ALARM) {
                         extendedInfo.append("<alarm>true</alarm>");
                     }
-                    buf.readUnsignedShort(); // length
+                    if (buf.readUnsignedShort() > buf.readableBytes()) {
+                        break; // workaround for device bug
+                    }
                     lastIndex = buf.readUnsignedInt();
                     position.setId(lastIndex);
                 } else {
