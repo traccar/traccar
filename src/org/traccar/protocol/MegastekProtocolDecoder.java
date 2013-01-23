@@ -32,17 +32,15 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    //STX,102110830074542,$GPRMC,114229.000,A,2238.2024,N,11401.9619,E,0.00,0.00,310811,,,A*64
-    //,F,LowBattery,imei:012207005553885,03,113.1,Battery=24%,,1,460,01,2531,647E;57
     static private Pattern pattern = Pattern.compile(
             "STX," +
-            "\\d+," +                      // Identifier (not IMEI)
+            "[^,]+," +                     // Identifier (not IMEI)
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.\\d+," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
-            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+\\.\\d{2})?," +          // Speed
             "(\\d+\\.\\d{2})?," +          // Course
