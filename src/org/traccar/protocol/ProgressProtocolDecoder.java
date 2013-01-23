@@ -150,6 +150,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                         extendedInfo.append("<alarm>true</alarm>");
                     }
                     if (buf.readUnsignedShort() > buf.readableBytes()) {
+                        lastIndex += 1;
                         break; // workaround for device bug
                     }
                     lastIndex = buf.readUnsignedInt();
