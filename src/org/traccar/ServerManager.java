@@ -128,6 +128,7 @@ public class ServerManager {
         initGt02Server("gt02");
         initGt06Server("gt06");
         initMegastekServer("megastek");
+        initNavigilServer("navigil");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -588,6 +589,20 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new MegastekProtocolDecoder(ServerManager.this));
                 }
             });
+        }
+    }
+
+    private void initNavigilServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new NavigilFrameDecoder());
+                    pipeline.addLast("objectDecoder", new NavigilProtocolDecoder(ServerManager.this));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
