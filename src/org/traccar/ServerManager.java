@@ -369,7 +369,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 4));
+                    pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
                     pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(ServerManager.this));
                 }
             });

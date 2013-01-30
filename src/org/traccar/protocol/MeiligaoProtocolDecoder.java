@@ -29,18 +29,10 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 
-/**
- * Meiligao protocol decoder
- */
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public MeiligaoProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -48,10 +40,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Regular expressions pattern
      */
-    //                             | HDOP | Altitude | State | AD| BASE ID | CSQ | Journey
-    //"191020.000,A,2438.1016,S,02553.3551,E,0.00,,150113,,,A*69    |1.7|1009|"
-    //"020600.930,A,2309.2051,N,11318.8449,E,0.00,0.00,090710,,,A*6A|2.6|96.7|0000|0000,3FFF|000000000"
-    //"155422.000,V,2230.7623,N,11403.4218,E,0.00,0,060211,,*1A     |0.0|26  |0000|0000,0000|0000000000000000|63|00000000"
     static private Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -142,13 +130,9 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         StringBuilder extendedInfo = new StringBuilder("<protocol>meiligao</protocol>");
 
         // Get device by id
-        // TODO: change imei to unique id
         String id = getId(buf);
         try {
-            DataManager dm = getDataManager();
-            Device d = dm.getDeviceByImei(id);
-            d.getId();
-            //position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
             return null;
