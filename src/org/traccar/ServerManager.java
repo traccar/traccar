@@ -35,6 +35,8 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
+import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
@@ -129,6 +131,8 @@ public class ServerManager {
         initGt06Server("gt06");
         initMegastekServer("megastek");
         initNavigilServer("navigil");
+        initMta6Server("mta6");
+        initTeltonikaServer("teltonika");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -603,6 +607,31 @@ public class ServerManager {
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             serverList.add(server);
+        }
+    }
+
+    private void initMta6Server(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("httpDecoder", new HttpRequestDecoder());
+                    pipeline.addLast("httpEncoder", new HttpResponseEncoder());
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initTeltonikaServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
+                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(ServerManager.this));
+                }
+            });
         }
     }
 
