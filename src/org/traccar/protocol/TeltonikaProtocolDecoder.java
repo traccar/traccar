@@ -67,6 +67,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             StringBuilder extendedInfo = new StringBuilder("<protocol>teltonika</protocol>");
             
+            position.setDeviceId(deviceId);
             position.setTime(new Date(buf.readLong()));
             
             extendedInfo.append("<priority>");
