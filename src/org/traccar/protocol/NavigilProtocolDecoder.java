@@ -63,7 +63,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         data.writeShort(0); // OK
         
         ChannelBuffer header = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 20);
-        header.writeByte(1); header.writeByte(1);
+        header.writeByte(1); header.writeByte(0);
         header.writeShort(senderSequenceNumber++);
         header.writeShort(MESSAGE_ACKNOWLEDGEMENT);
         header.writeShort(header.capacity() + data.capacity());
