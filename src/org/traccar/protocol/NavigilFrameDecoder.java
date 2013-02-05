@@ -47,8 +47,9 @@ public class NavigilFrameDecoder extends FrameDecoder {
         if (buf.readableBytes() >= length) {
             if (hasPreamble) {
                 buf.readUnsignedInt();
+                length -= 4;
             }
-            return buf.readBytes(length - 4);
+            return buf.readBytes(length);
         }
 
         return null;

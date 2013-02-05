@@ -52,7 +52,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     private static final int MESSAGE_ACKNOWLEDGEMENT = 255;
     
     private static Date convertTimestamp(long timestamp) {
-        return new Date(timestamp - LEAP_SECONDS_DELTA);
+        return new Date((timestamp - LEAP_SECONDS_DELTA) * 1000l);
     }
     
     private int senderSequenceNumber = 1;
@@ -88,8 +88,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // report trigger
         buf.readUnsignedShort(); // flags
         
-        position.setLatitude(buf.readUnsignedInt() * 0.0000001);
-        position.setLongitude(buf.readUnsignedInt() * 0.0000001);
+        position.setLatitude(buf.readInt() * 0.0000001);
+        position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude((double) buf.readUnsignedShort());
         
         buf.readUnsignedShort(); // satellites in fix
@@ -128,8 +128,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         position.setTime(convertTimestamp(buf.readUnsignedInt()));
         
-        position.setLatitude(buf.readUnsignedInt() * 0.0000001);
-        position.setLongitude(buf.readUnsignedInt() * 0.0000001);
+        position.setLatitude(buf.readInt() * 0.0000001);
+        position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude((double) buf.readUnsignedShort());
         
         buf.readUnsignedByte(); // satellites in fix
@@ -161,8 +161,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceId);
         position.setTime(convertTimestamp(timestamp));
         
-        position.setLatitude(buf.readUnsignedMedium() * 0.00002);
-        position.setLongitude(buf.readUnsignedMedium() * 0.00002);
+        position.setLatitude(buf.readMedium() * 0.00002);
+        position.setLongitude(buf.readMedium() * 0.00002);
         position.setAltitude(0.0);
         
         position.setSpeed(buf.readUnsignedByte() * 0.539957);
@@ -185,8 +185,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceId);
         position.setTime(convertTimestamp(timestamp));
         
-        position.setLatitude(buf.readUnsignedInt() * 0.0000001);
-        position.setLongitude(buf.readUnsignedInt() * 0.0000001);
+        position.setLatitude(buf.readInt() * 0.0000001);
+        position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude(0.0);
         
         buf.readUnsignedByte(); // report trigger
@@ -197,7 +197,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         short flags = buf.readUnsignedByte();
         position.setValid((flags & 0x80) == 0x80 && (flags & 0x40) == 0x40);
         
-        buf.readUnsignedByte(); // satellites in fix
+        int x = buf.readUnsignedByte(); // satellites in fix
         buf.readUnsignedInt(); // distance
 
         position.setExtendedInfo(extendedInfo.toString());
@@ -221,8 +221,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         position.setTime(convertTimestamp(buf.readUnsignedInt()));
         
-        position.setLatitude(buf.readUnsignedInt() * 0.0000001);
-        position.setLongitude(buf.readUnsignedInt() * 0.0000001);
+        position.setLatitude(buf.readInt() * 0.0000001);
+        position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude((double) buf.readUnsignedShort());
         
         buf.readUnsignedByte(); // satellites in fix
@@ -260,8 +260,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         buf.readUnsignedShort(); // duration
 
-        position.setLatitude(buf.readUnsignedInt() * 0.0000001);
-        position.setLongitude(buf.readUnsignedInt() * 0.0000001);
+        position.setLatitude(buf.readInt() * 0.0000001);
+        position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude(0.0);
         
         position.setSpeed(buf.readUnsignedByte() * 0.539957);
@@ -287,6 +287,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // version id
         int sequenceNumber = buf.readUnsignedShort();
         int messageId = buf.readUnsignedShort();
+        buf.readUnsignedShort(); // length
         int flags = buf.readUnsignedShort();
         buf.readUnsignedShort(); // checksum
         
