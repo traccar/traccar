@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,8 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * H02 tracker protocol decoder
- */
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public H02ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -47,7 +41,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             "V\\d," +                           // Version?
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             "([AV])," +                         // Validity
-            "(\\d{2})(\\d{2}.\\d{4})," +        // Latitude (DDMM.MMMM)
+            "(\\d+)(\\d{2}.\\d{4})," +          // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d+)(\\d{2}.\\d{4})," +          // Longitude (DDMM.MMMM)
             "([EW])," +
@@ -56,9 +50,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             ".*");
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
