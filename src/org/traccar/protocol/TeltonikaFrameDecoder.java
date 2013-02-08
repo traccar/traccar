@@ -22,7 +22,7 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class TeltonikaFrameDecoder extends FrameDecoder {
 
-    private static final int MESSAGE_MINIMUM_LENGTH = 10;
+    private static final int MESSAGE_MINIMUM_LENGTH = 12;
     
     @Override
     protected Object decode(
@@ -43,8 +43,8 @@ public class TeltonikaFrameDecoder extends FrameDecoder {
             }
         } else {
             int dataLength = buf.getInt(buf.readerIndex() + 4);
-            if (buf.readableBytes() >= (dataLength + 10)) {
-                return buf.readBytes(dataLength + 10);
+            if (buf.readableBytes() >= (dataLength + 12)) {
+                return buf.readBytes(dataLength + 12);
             }
         }
         
