@@ -131,8 +131,10 @@ public class ServerManager {
         initGt06Server("gt06");
         initMegastekServer("megastek");
         initNavigilServer("navigil");
-        initMta6Server("mta6");
+        initGpsGateServer("gpsgate");
         initTeltonikaServer("teltonika");
+        initMta6Server("mta6");
+        initMta6CanServer("mta6can");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -610,6 +612,34 @@ public class ServerManager {
         }
     }
 
+    private void initGpsGateServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new GpsGateProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initTeltonikaServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
+                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+    
     private void initMta6Server(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
@@ -623,13 +653,14 @@ public class ServerManager {
         }
     }
 
-    private void initTeltonikaServer(String protocol) throws SQLException {
+    private void initMta6CanServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
-                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("httpDecoder", new HttpRequestDecoder());
+                    pipeline.addLast("httpEncoder", new HttpResponseEncoder());
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this));
                 }
             });
         }
