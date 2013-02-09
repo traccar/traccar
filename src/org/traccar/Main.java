@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,57 @@
  */
 package org.traccar;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
 import java.util.Locale;
 import org.traccar.helper.Log;
 
 public class Main {
+    
+    private static void printSystemInfo() {
+        try {
+            OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
+            Log.info("Operating System" +
+                " name: " + operatingSystemBean.getName() +
+                " version: " + operatingSystemBean.getVersion() +
+                " architecture: " + operatingSystemBean.getArch());
+
+            RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+            Log.info("Java Runtime" +
+                " name: " + runtimeBean.getVmName() +
+                " vendor: " + runtimeBean.getVmVendor() +
+                " version: " + runtimeBean.getVmVersion());
+
+            MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+            Log.info("Memory Limit" +
+                " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb" +
+                " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
+        } catch (Exception e) {
+            Log.warning("Failed to get system info");
+        }
+    }
 
     public static void main(String[] args) throws Exception {
-
-        // TODO: Temporary formatting workaround
         Locale.setDefault(Locale.ENGLISH);
 
         final ServerManager service = new ServerManager();
         service.init(args);
 
-        Log.info("starting server...");
+        Log.info("Starting server...");
+        printSystemInfo();
+
         service.start();
 
         // Shutdown server properly
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                Log.info("shutting down server...");
+                Log.info("Shutting down server...");
                 service.stop();
             }
         });
-
     }
+
 }
