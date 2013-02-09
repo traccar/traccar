@@ -126,6 +126,22 @@ chmod +x out/bin/traccar
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
 zip -j traccar-linux-64.zip traccar.run linux/README.txt
 
+# MACOSX PACKAGE
+
+rm out/conf/linux.cfg
+rm out/lib/libwrapper.so
+
+cp macosx/macosx.cfg out/conf
+
+sed -i "s/linux.cfg/macosx.cfg/g" out/conf/wrapper.conf
+
+cp wrapper/bin/wrapper-macosx-universal-64 out/bin/wrapper
+cp wrapper/lib/libwrapper-macosx-universal-64.jnilib out/lib/libwrapper.jnilib
+chmod +x out/bin/traccar
+
+makeself out traccar.run "traccar" "mkdir -p $app; cp -rf * $app; $app/bin/traccar install"
+zip -j traccar-macosx-64.zip traccar.run macosx/README.txt
+
 rm traccar.run
 rm -rf out
 
