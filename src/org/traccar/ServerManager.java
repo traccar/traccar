@@ -135,6 +135,7 @@ public class ServerManager {
         initTeltonikaServer("teltonika");
         initMta6Server("mta6");
         initMta6CanServer("mta6can");
+        initTlt2hServer("tlt2h");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -661,6 +662,22 @@ public class ServerManager {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
                     pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+    
+    private void initTlt2hServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '#', (byte) '#' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(ServerManager.this));
                 }
             });
         }
