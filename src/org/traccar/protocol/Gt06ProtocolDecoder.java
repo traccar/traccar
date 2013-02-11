@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -53,8 +52,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_LBS = 0x11;
     private static final int MSG_GPS_LBS = 0x12;
     private static final int MSG_STATUS = 0x13;
+    private static final int MSG_SATELLITE = 0x14;
     private static final int MSG_STRING = 0x15;
     private static final int MSG_GPS_LBS_STATUS = 0x16;
+    private static final int MSG_LBS_PHONE = 0x17;
+    private static final int MSG_LBS_EXTEND = 0x18;
+    private static final int MSG_LBS_STATUS = 0x19;
+    private static final int MSG_GPS_PHONE = 0x1A;
 
     private static void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
@@ -84,7 +88,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         int dataLength = length - 5;
 
         int type = buf.readUnsignedByte();
-
+        
         if (type == MSG_LOGIN) {
             String imei = readImei(buf);
             try {
@@ -96,12 +100,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        else if (type == MSG_STATUS) {
-            buf.skipBytes(dataLength);
-            sendResponse(channel, type, buf.readUnsignedShort());
-        }
+        else if (type == MSG_GPS ||
+                 type == MSG_GPS_LBS ||
+                 type == MSG_GPS_LBS_STATUS ||
+                 type == MSG_GPS_PHONE) {
 
-        else if (type == MSG_GPS || type == MSG_GPS_LBS || type == MSG_GPS_LBS_STATUS) {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
@@ -194,6 +197,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
+        }
+
+        else {
+            buf.skipBytes(dataLength);
+            sendResponse(channel, type, buf.readUnsignedShort());
         }
 
         return null;
