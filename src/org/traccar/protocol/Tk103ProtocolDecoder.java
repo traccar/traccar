@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,8 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * Gps 103 tracker protocol decoder
- */
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Tk103ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -43,31 +37,29 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
      */
     static private Pattern pattern = Pattern.compile(
             "\\(" +
-            "(\\d+)" +                   // Device ID
-            "(.{4})" +                   // Command
-            "(\\d{15})" +                // IMEI (?)
+            "(\\d{12})" +                // Device ID
+            ".{4}" +                     // Command
+            "\\d+" +                     // IMEI (?)
             "(\\d{2})(\\d{2})(\\d{2})" + // Date (YYMMDD)
             "([AV])" +                   // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})" +  // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d{4})" + // Latitude (DDMM.MMMM)
             "([NS])" +
-            "(\\d{3})(\\d{2}\\.\\d{4})" +  // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d{4})" + // Longitude (DDDMM.MMMM)
             "([EW])" +
             "(\\d+\\.\\d)" +             // Speed
             "(\\d{2})(\\d{2})(\\d{2})" + // Time (HHMMSS)
-            "(\\d+\\.\\d{2})" +          // Course
-            "(\\d+)" +                   // State
-            ".+");                       // Mileage (?)
+            "(\\d+\\.\\d+)" +            // Course
+            "(\\d{8})" +                 // State
+            "L([0-9a-fA-F]+)");          // Milage
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
 
         String sentence = (String) msg;
 
-        // TODO: Send answer
+        // TODO: Send answer?
         //(090411121854AP05)
 
         // Parse message
@@ -78,12 +70,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-
+        StringBuilder extendedInfo = new StringBuilder("<protocol>tk103</protocol>");
         Integer index = 1;
-        index += 2; // Skip Device ID and command
 
         // Get device by IMEI
-        String imei = parser.group(index++);
+        String imei = "000" + parser.group(index++);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
         } catch(Exception error) {
@@ -127,7 +118,18 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
+        
+        // State
+        extendedInfo.append("<state>");
+        extendedInfo.append(parser.group(index++));
+        extendedInfo.append("</state>");
 
+        // Milage
+        extendedInfo.append("<milage>");
+        extendedInfo.append(Integer.parseInt(parser.group(index++), 16));
+        extendedInfo.append("</milage>");
+
+        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 
