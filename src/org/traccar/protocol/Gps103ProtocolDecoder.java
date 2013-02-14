@@ -96,12 +96,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device by IMEI
         String imei = parser.group(index++);
-        try {
+        /*try {
             position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
         } catch(Exception error) {
             Log.warning("Unknown device - " + imei);
             return null;
-        }
+        }*/
 
         // Alarm message
         extendedInfo.append("<alarm>");
@@ -134,7 +134,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         } else if (deltaMinutes > 12) {
             deltaMinutes -= 24 * 60;
         }
-        time.add(Calendar.MINUTE, deltaMinutes);
+        time.add(Calendar.MINUTE, -deltaMinutes);
         position.setTime(time.getTime());
 
         // Validity
