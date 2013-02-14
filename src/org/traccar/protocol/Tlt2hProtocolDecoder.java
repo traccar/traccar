@@ -60,7 +60,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device identifier
         String imei = sentence.substring(1, sentence.indexOf('#', 1));
-        long deviceId = 0;
+        long deviceId;
         try {
             deviceId = getDataManager().getDeviceByImei(imei).getId();
         } catch(Exception error) {

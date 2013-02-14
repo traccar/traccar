@@ -10,6 +10,10 @@ public class Tlt2hProtocolDecoderTest {
 
         Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
+        
+        assertNotNull(decoder.decode(null, null,
+                "#357671030938911#V500#0000#AUTOSTOP#1\r\n" +
+                "#00b34d3c$GPRMC,140026.000,A,2623.6452,S,02828.8990,E,0.00,65.44,130213,,,A*4B\r\n"));
 
         assertNotNull(decoder.decode(null, null,
                 "#123456789000001#V3338#0000#SMS#3\r\n" +
