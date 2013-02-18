@@ -65,29 +65,30 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         
         // Process login
-        if (sentence.startsWith("$FRLIN")) {
-            if (sentence.startsWith("$FRLIN,IMEI")) {
-                String imei = sentence.substring(12, sentence.length() - 4);
-                try {
-                    deviceId = getDataManager().getDeviceByImei(imei).getId();
-                    send(channel, "$FRSES," + channel.getId());
-                } catch(Exception error) {
-                    Log.warning("Unknown device - " + imei);
-                    send(channel, "$FRERR,AuthError,Unknown device");
+        if (sentence.startsWith("$FRLIN,")) {
+            int beginIndex = sentence.indexOf(',', 7);
+            if (beginIndex != -1) {
+                beginIndex += 1;
+                int endIndex = sentence.indexOf(',', beginIndex);
+                if (endIndex != -1) {
+                    String imei = sentence.substring(beginIndex, endIndex);
+                    try {
+                        deviceId = getDataManager().getDeviceByImei(imei).getId();
+                        send(channel, "$FRSES," + channel.getId());
+                    } catch(Exception error) {
+                        Log.warning("Unknown device - " + imei);
+                        send(channel, "$FRERR,AuthError,Unknown device");
+                    }
+                } else {
+                    send(channel, "$FRERR,AuthError,Parse error");
                 }
             } else {
-                Log.warning("Unsupported login type");
-                send(channel, "$FRERR,AuthError,Unsupported login type");
+                send(channel, "$FRERR,AuthError,Parse error");
             }
         }
 
         // Process data
         else if (sentence.contains("$GPRMC") && deviceId != null) {
-
-            // Send response
-            if (channel != null) {
-                channel.write("OK1\r\n");
-            }
 
             // Parse message
             Matcher parser = pattern.matcher(sentence);
