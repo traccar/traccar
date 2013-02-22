@@ -71,6 +71,7 @@ public abstract class GenericPipelineFactory implements ChannelPipelineFactory {
 
                 // Append hex message
                 if (event.getMessage() instanceof ChannelBuffer) {
+                    msg.append((e instanceof DownstreamMessageEvent) ? " - Sent" : " - Received");
                     msg.append(" - (HEX: ");
                     msg.append(ChannelBuffers.hexDump((ChannelBuffer) event.getMessage()));
                     msg.append(")");
