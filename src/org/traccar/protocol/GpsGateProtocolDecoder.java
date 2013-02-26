@@ -87,8 +87,13 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        // Protocol version check
+        else if (sentence.startsWith("$FRVER,")) {
+            send(channel, "$FRVER,1,1,GpsGate Server 1.0");
+        }
+
         // Process data
-        else if (sentence.contains("$GPRMC") && deviceId != null) {
+        else if (sentence.startsWith("$GPRMC,") && deviceId != null) {
 
             // Parse message
             Matcher parser = pattern.matcher(sentence);
