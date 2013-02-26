@@ -49,8 +49,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "([EW])," +
             "(\\d+.\\d+)," +                    // Speed
             "(\\d+\\.?\\d*)?," +                // Course
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            "[^\\|]+\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
+            "(\\d{2})(\\d{2})(\\d{2})" +       // Date (DDMMYY)
+            "[^\\|]*\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
             "(\\d+\\.?\\d*)\\|" +               // Altitude
             "([0-9a-fA-F]+)?" +                 // State
             "(?:\\|([0-9a-fA-F]+),([0-9a-fA-F]+))?" + // ADC
