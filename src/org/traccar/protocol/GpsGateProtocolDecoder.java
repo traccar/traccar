@@ -89,7 +89,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
         // Protocol version check
         else if (sentence.startsWith("$FRVER,")) {
-            send(channel, "$FRVER,1,1,GpsGate Server 1.0");
+            send(channel, "$FRVER,1,0,GpsGate Server 1.0");
         }
 
         // Process data
