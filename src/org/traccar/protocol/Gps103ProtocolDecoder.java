@@ -154,7 +154,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(0.0);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
 
         // Course
         String course = parser.group(index++);
