@@ -36,10 +36,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "\\(" +
             "(\\d{12})" +                // Device ID
             ".{4}" +                     // Command
-            "\\d+" +                     // IMEI (?)
+            "\\d*" +                     // IMEI (?)
             "(\\d{2})(\\d{2})(\\d{2})" + // Date (YYMMDD)
             "([AV])" +                   // Validity
             "(\\d{2})(\\d{2}\\.\\d{4})" + // Latitude (DDMM.MMMM)
@@ -59,6 +58,12 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
+        // Find message start
+        int beginIndex = sentence.indexOf('(');
+        if (beginIndex != -1) {
+            sentence = sentence.substring(beginIndex + 1);
+        }
+
         // TODO: Send answer?
         //(090411121854AP05)
 
@@ -74,12 +79,17 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        String imei = "000" + parser.group(index++);
+        String imei = parser.group(index++);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
         } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
-            return null;
+            // Compatibility mode (remove in future)
+            try {
+                position.setDeviceId(getDataManager().getDeviceByImei("000" + imei).getId());
+            } catch(Exception error2) {
+                Log.warning("Unknown device - " + imei);
+                return null;
+            }
         }
 
         // Date
