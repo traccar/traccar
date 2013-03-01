@@ -13,13 +13,16 @@ public class Gps103ProtocolDecoderTest {
         decoder.setDataManager(new TestDataManager());
 
         // Log on request
-        //assertNull(decoder.decode(null, null, "##,imei:359586015829802,A"));
+        assertNull(decoder.decode(null, null, "##,imei:359586015829802,A"));
 
         // Heartbeat package
-        //assertNull(decoder.decode(null, null, "359586015829802"));
+        assertNull(decoder.decode(null, null, "359586015829802"));
 
         // No GPS signal
-        //assertNull(decoder.decode(null, null, "imei:359586015829802,tracker,000000000,13554900601,L,;"));
+        assertNull(decoder.decode(null, null, "imei:359586015829802,tracker,000000000,13554900601,L,;"));
+
+        assertNotNull(decoder.decode(null, null,
+                "imei:359710040656622,tracker,13/02/27 23:40,,F,125952.000,A,3450.9430,S,13828.6753,E,0.00,0"));
 
         assertNotNull(decoder.decode(null, null,
                 "imei:353451047570260,tracker,1302110948,,F,144807.000,A,0805.6615,S,07859.9763,W,0.00,,"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,8 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * Gps 103 tracker protocol decoder
- */
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Gps103ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -45,8 +39,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "imei:" +
             "(\\d+)," +                         // IMEI
             "([^,]+)," +                        // Alarm
-            "(\\d{2})(\\d{2})(\\d{2})" +        // Local Date
-            "(\\d{2})(\\d{2})," +               // Local Time
+            "(\\d{2})/?(\\d{2})/?(\\d{2})\\s?" + // Local Date
+            "(\\d{2}):?(\\d{2})," +             // Local Time
             "[^,]*," +
             "[FL]," +                           // F - full / L - low
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time UTC (HHMMSS.SSS)
@@ -59,9 +53,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.\\d+)?" +                  // Course
             ".*");
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -71,13 +62,17 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Send response #1
         if (sentence.contains("##")) {
-            channel.write("LOAD");
+            if (channel != null) {
+                channel.write("LOAD");
+            }
             return null;
         }
 
         // Send response #2
         if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
-            channel.write("ON");
+            if (channel != null) {
+                channel.write("ON");
+            }
             return null;
         }
 
