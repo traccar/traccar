@@ -126,6 +126,17 @@ chmod +x out/bin/traccar
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
 zip -j traccar-linux-64.zip traccar.run linux/README.txt
 
+# linux arm
+
+cp wrapper/bin/wrapper-linux-armel-32 out/bin/
+cp wrapper/bin/wrapper-linux-armhf-32 out/bin/
+cp wrapper/lib/libwrapper-linux-armel-32.so out/lib/
+cp wrapper/lib/libwrapper-linux-armhf-32.so out/lib/
+chmod +x out/bin/traccar
+
+makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ]; then mv $app/bin/wrapper-linux-armel-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armel-32.so $app/lib/libwrapper.so; else mv $app/bin/wrapper-linux-armhf-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armhf-32.so $app/lib/libwrapper.so; fi; $app/bin/traccar install"
+zip -j traccar-linux-arm.zip traccar.run linux/README.txt
+
 # MACOSX PACKAGE
 
 rm out/conf/linux.cfg
