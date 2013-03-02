@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,8 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * Xexun tracker protocol decoder
- */
 public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Xexun2ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -61,14 +55,12 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             ".*imei:" +
             "(\\d+)," +                         // IMEI
             "(\\d+)," +                         // Satellites
-            "(\\d+\\.\\d+)," +                  // Altitude
+            "(-?\\d+\\.\\d+)," +                  // Altitude
             "[FL]:(\\d+\\.\\d+)V," +               // Power
             ".*" +
             "[\r\n]*");
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -77,7 +69,6 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
-            //throw new ParseException(null, 0);
             return null;
         }
 
