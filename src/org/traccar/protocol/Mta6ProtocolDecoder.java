@@ -37,9 +37,12 @@ import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
+    
+    private boolean simple;
 
-    public Mta6ProtocolDecoder(ServerManager serverManager) {
+    public Mta6ProtocolDecoder(ServerManager serverManager, boolean simple) {
         super(serverManager);
+        this.simple = simple;
     }
 
     private void sendContinue(Channel channel) {
@@ -113,21 +116,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         }
         
     }
-    
-    private Date readTime(ChannelBuffer buf, FloatReader timeReader) {
-        long weekTime = (long) (timeReader.readFloat(buf) * 1000);
-        long weekNumber = buf.readUnsignedShort();
-        
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, 1980);
-        time.set(Calendar.MONTH, 0);
-        time.set(Calendar.DAY_OF_MONTH, 6);
-        long offset = time.getTimeInMillis();
-        
-        return new Date(offset + weekNumber * 7 * 24 * 60 * 60 * 1000 + weekTime);
-    }
-    
+
     private List<Position> parseFormatA(ChannelBuffer buf, long deviceId) {
         List<Position> positions = new LinkedList<Position>();
         
@@ -227,6 +216,94 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         
         return positions;
     }
+
+    private Position parseFormatA1(ChannelBuffer buf, long deviceId) {
+        Position position = new Position();
+        position.setDeviceId(deviceId);
+        StringBuilder extendedInfo = new StringBuilder("<protocol>mta6can</protocol>");
+
+        short flags = buf.readUnsignedByte();
+
+        // Skip events
+        short event = buf.readUnsignedByte();
+        if (checkBit(event, 7)) {
+            if (checkBit(event, 6)) {
+                buf.skipBytes(8);
+            } else {
+                while (checkBit(event, 7)) {
+                    event = buf.readUnsignedByte();
+                }
+            }
+        }
+
+        position.setLatitude(new FloatReader().readFloat(buf) / Math.PI * 180);
+        position.setLongitude(new FloatReader().readFloat(buf) / Math.PI * 180);
+        position.setTime(new TimeReader().readTime(buf));
+
+        buf.readUnsignedByte(); // status
+
+        if (checkBit(flags, 0)) {
+            position.setAltitude((double) buf.readUnsignedShort());
+            position.setSpeed((double) buf.readUnsignedByte());
+            position.setCourse((double) buf.readByte());
+            extendedInfo.append("<milage>");
+            extendedInfo.append(new FloatReader().readFloat(buf));
+            extendedInfo.append("</milage>");
+        }
+
+        if (checkBit(flags, 1)) {
+            new FloatReader().readFloat(buf); // fuel consumtion
+            extendedInfo.append("<hours>").append(new FloatReader().readFloat(buf)).append("</hours>");
+            extendedInfo.append("<tank>").append(buf.readUnsignedByte() * 0.4).append("</tank>");
+        }
+
+        if (checkBit(flags, 2)) {
+            extendedInfo.append("<engine>").append(buf.readUnsignedShort() * 0.125).append("</engine>");
+            extendedInfo.append("<pedals>").append(buf.readUnsignedByte()).append("</pedals>");
+            extendedInfo.append("<temperature>").append(buf.readUnsignedByte() - 40).append("</temperature>");
+            buf.readUnsignedShort(); // service milage
+        }
+
+        if (checkBit(flags, 3)) {
+            extendedInfo.append("<fuel>").append(buf.readUnsignedShort()).append("</fuel>");
+            extendedInfo.append("<adc2>").append(buf.readUnsignedShort()).append("</adc2>");
+            extendedInfo.append("<adc3>").append(buf.readUnsignedShort()).append("</adc3>");
+            extendedInfo.append("<adc4>").append(buf.readUnsignedShort()).append("</adc4>");
+        }
+
+        if (checkBit(flags, 4)) {
+            extendedInfo.append("<temperature>");
+            extendedInfo.append(buf.readByte());
+            extendedInfo.append("</temperature>");
+            buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
+            extendedInfo.append("<sensor>");
+            extendedInfo.append(buf.readUnsignedShort() & 0x0fff);
+            extendedInfo.append("</sensor>");
+            buf.readUnsignedShort(); // old sensor state (& 0x0fff)
+        }
+
+        if (checkBit(flags, 5)) {
+            extendedInfo.append("<battery>");
+            extendedInfo.append(buf.getUnsignedByte(buf.readerIndex()) >> 2);
+            extendedInfo.append("</battery>");
+            position.setPower((double) (buf.readUnsignedShort() & 0x03ff));
+            buf.readByte(); // microcontroller temperature
+
+            extendedInfo.append("<gsm>");
+            extendedInfo.append(buf.getUnsignedByte(buf.readerIndex()) >> 5);
+            extendedInfo.append("</gsm>");
+
+            int satellites = buf.readUnsignedByte() & 0x1f;
+            position.setValid(satellites >= 3);
+            extendedInfo.append("<satellites>").append(satellites).append("</satellites>");
+        }
+        
+        // TODO: process other data
+
+        position.setExtendedInfo(extendedInfo.toString());
+        
+        return position;
+    }
     
     @Override
     protected Object decode(
@@ -268,7 +345,11 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         
         // Parse data
         if (packetId == 0x31 || packetId == 0x32 || packetId == 0x36) {
-            return parseFormatA(buf, deviceId);
+            if (simple) {
+                return parseFormatA1(buf, deviceId);
+            } else {
+                return parseFormatA(buf, deviceId);
+            }
         } //else if (0x34 0x38 0x4F 0x59)
 
         return null;

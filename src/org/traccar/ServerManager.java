@@ -649,7 +649,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this, false));
                 }
             });
         }
@@ -662,7 +662,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this, true));
                 }
             });
         }
