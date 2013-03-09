@@ -126,7 +126,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         int deltaMinutes = (localHours - utcHours) * 60 + localMinutes - utcMinutes;
         if (deltaMinutes <= -12 * 60) {
             deltaMinutes += 24 * 60;
-        } else if (deltaMinutes > 12) {
+        } else if (deltaMinutes > 12 * 60) {
             deltaMinutes -= 24 * 60;
         }
         time.add(Calendar.MINUTE, -deltaMinutes);
