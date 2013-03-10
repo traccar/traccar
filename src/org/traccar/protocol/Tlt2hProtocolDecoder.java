@@ -38,7 +38,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "#([0-9a-f]+)" +               // Cell info
+            "#([0-9a-f]+)?" +              // Cell info
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -81,9 +81,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 Integer index = 1;
                 
                 // Cell
-                extendedInfo.append("<cell>");
-                extendedInfo.append(parser.group(index++));
-                extendedInfo.append("</cell>");
+                String cell = parser.group(index++);
+                if (cell != null) {
+                    extendedInfo.append("<cell>").append(cell).append("</cell>");
+                }
 
                 // Time
                 Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
