@@ -19,6 +19,9 @@ public class T55ProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 "$GPRMC,115528.000,A,6000.5432,N,03020.4948,E,,,091111,,*06"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "$GPRMC,064411.000,A,3717.240078,N,00603.046984,W,0.000,1,010313,,,A*6C"));
 
     }
 

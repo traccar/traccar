@@ -26,19 +26,10 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * T55 tracker protocol decoder
- */
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Device ID
-     */
     private Long deviceId;
 
-    /**
-     * Initialize
-     */
     public T55ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -54,14 +45,11 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +
             "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+\\.\\d{2})?," +          // Speed
-            "(\\d+\\.\\d{2})?," +          // Course
+            "(\\d+\\.?\\d*)?," +           // Speed
+            "(\\d+\\.?\\d*)?," +           // Course
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");                         // Other (Checksumm)
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
