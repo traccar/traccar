@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,8 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * Xexun tracker protocol decoder
- */
 public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public XexunProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -42,23 +36,22 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Regular expressions pattern
      */
+    //GPRMC,043435.000,A,811.299200,S,11339.9500,E,0.93,29.52,160313,00,0000.0,A*65,F,,imei:359585014597923,
     static private Pattern pattern = Pattern.compile(
             "GPRMC," +
-            "([\\d]{2})([\\d]{2})([\\d]{2}).([\\d]{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2}).(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
-            "([\\d]{2})([\\d]{2}.[\\d]{4})," +  // Latitude (DDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
             "([NS])," +
-            "([\\d]{2,3})([\\d]{2}.[\\d]{4})," + // Longitude (DDDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "([\\d]+.[\\d]+)," +                // Speed
-            "([\\d]+.[\\d]+)?," +               // Course
-            "([\\d]{2})([\\d]{2})([\\d]{2})," + // Date (DDMMYY)
+            "(\\d+\\.\\d+)," +                  // Speed
+            "(\\d+\\.\\d+)?," +                 // Course
+            "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             ".*imei:" +
-            "([\\d]+),");                       // IMEI
+            "(\\d+),");                         // IMEI
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {

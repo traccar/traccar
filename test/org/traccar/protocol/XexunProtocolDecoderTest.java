@@ -10,6 +10,9 @@ public class XexunProtocolDecoderTest {
 
         XexunProtocolDecoder decoder = new XexunProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
+        
+        assertNotNull(decoder.decode(null, null,
+                "GPRMC,043435.000,A,811.299200,S,11339.9500,E,0.93,29.52,160313,00,0000.0,A*65,F,,imei:359585014597923,"));
 
         assertNotNull(decoder.decode(null, null,
                 "GPRMC,150120.000,A,3346.4463,S,15057.3083,E,0.0,117.4,010911,,,A*76,F,imei:351525010943661,"));
