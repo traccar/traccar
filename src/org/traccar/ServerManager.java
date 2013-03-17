@@ -137,6 +137,7 @@ public class ServerManager {
         initMta6CanServer("mta6can");
         initTlt2hServer("tlt2h");
         initSyrusServer("syrus");
+        initVt300Server("vt300");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -695,6 +696,22 @@ public class ServerManager {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initVt300Server(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Vt300ProtocolDecoder(ServerManager.this));
                 }
             });
         }
