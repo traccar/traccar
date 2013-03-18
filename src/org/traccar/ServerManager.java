@@ -138,6 +138,7 @@ public class ServerManager {
         initTlt2hServer("tlt2h");
         initSyrusServer("syrus");
         initVt300Server("vt300");
+        initCellocatorServer("cellocator");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -714,6 +715,20 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new Vt300ProtocolDecoder(ServerManager.this));
                 }
             });
+        }
+    }
+
+    private void initCellocatorServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
+                    pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(ServerManager.this));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
