@@ -139,6 +139,7 @@ public class ServerManager {
         initSyrusServer("syrus");
         initVt300Server("vt300");
         initCellocatorServer("cellocator");
+        initGalileoServer("galileo");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -732,4 +733,18 @@ public class ServerManager {
         }
     }
 
+    private void initGalileoServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new GalileoFrameDecoder());
+                    pipeline.addLast("objectDecoder", new GalileoProtocolDecoder(ServerManager.this));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
+        }
+    }
+    
 }

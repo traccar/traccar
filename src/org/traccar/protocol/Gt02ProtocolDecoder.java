@@ -26,14 +26,8 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * T55 tracker protocol decoder
- */
 public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Gt02ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -53,9 +47,6 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_HEARTBEAT = 0x1A;
     private static final int MSG_DATA = 0x10;
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
