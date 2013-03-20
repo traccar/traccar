@@ -84,6 +84,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         }
     }
     
+    private Long deviceId;
+    
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -106,10 +108,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
                     buf.skipBytes(imei.length());
                     try {
-                        position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+                        deviceId = getDataManager().getDeviceByImei(imei).getId();
                     } catch(Exception error) {
                         Log.warning("Unknown device - " + imei);
-                        return null;
                     }
                     break;
 
@@ -161,19 +162,21 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (position.getDeviceId() == null ||
-            position.getValid() == null ||
-            position.getTime() == null ||
-            position.getSpeed() == null) {
-            Log.warning("Identifier or location information missing");
+        if (deviceId == null) {
+            Log.warning("Unknown device");
             return null;
         }
         
+        position.setDeviceId(deviceId);
+        sendReply(channel, buf.readUnsignedShort());
+
+        if (position.getValid() == null || position.getTime() == null || position.getSpeed() == null) {
+            return null;
+        }
+
         if (position.getAltitude() == null) {
             position.setAltitude(0.0);
         }
-        
-        sendReply(channel, buf.readUnsignedShort());
         
         position.setExtendedInfo(extendedInfo.toString());
         return position;
