@@ -26,17 +26,15 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-public class Vt300ProtocolDecoder extends BaseProtocolDecoder {
+public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
-    public Vt300ProtocolDecoder(ServerManager serverManager) {
+    public WondexProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
     /**
      * Regular expressions pattern
      */
-    //210000001,20070313170040,121.123456,12.654321,0,233,0,9,2,0.0, 0,0.00,0.00,0
-    //YYYYMMDDhhmmss
     static private Pattern pattern = Pattern.compile(
             ".*" +                         // Header
             "(\\d+)," +                    // Device Identifier
@@ -48,12 +46,12 @@ public class Vt300ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Course
             "(\\d+)," +                    // Altitude
             "(\\d+)," +                    // Satellites
-            "(\\d+)," +                    // Event
-            "(\\d+\\.\\d+)," +             // Milage
-            "(\\d+)," +                    // Input
-            "(\\d+\\.\\d+)," +             // ADC1
-            "(\\d+\\.\\d+)," +             // ADC2
-            "(\\d+)");                     // Output
+            "(\\d+),?" +                   // Event
+            "(\\d+\\.\\d+)?,?" +           // Milage
+            "(\\d+)?,?" +                  // Input
+            "(\\d+\\.\\d+)?,?" +           // ADC1
+            "(\\d+\\.\\d+)?,?" +           // ADC2
+            "(\\d+)?");                    // Output
 
     @Override
     protected Object decode(
@@ -109,23 +107,32 @@ public class Vt300ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.append("</event>");
         
         // Milage
-        extendedInfo.append("<milage>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</milage>");
+        String milage = parser.group(index++);
+        if (milage != null) {
+            extendedInfo.append("<milage>").append(milage).append("</milage>");
+        }
         
         // Input
-        extendedInfo.append("<input>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</input>");
+        String input = parser.group(index++);
+        if (input != null) {
+            extendedInfo.append("<input>").append(input).append("</input>");
+        }
         
         // ADC
-        extendedInfo.append("<adc1>").append(parser.group(index++)).append("</adc1>");
-        extendedInfo.append("<adc2>").append(parser.group(index++)).append("</adc2>");
+        String adc1 = parser.group(index++);
+        if (adc1 != null) {
+            extendedInfo.append("<adc1>").append(adc1).append("</adc1>");
+        }
+        String adc2 = parser.group(index++);
+        if (adc2 != null) {
+            extendedInfo.append("<adc2>").append(adc2).append("</adc2>");
+        }
         
         // Output
-        extendedInfo.append("<output>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</output>");
+        String output = parser.group(index++);
+        if (output != null) {
+            extendedInfo.append("<output>").append(output).append("</output>");
+        }
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
