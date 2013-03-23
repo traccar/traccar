@@ -132,7 +132,7 @@ public class NamedParameterStatement {
             try {
                 reset(true);
             } catch (SQLException secondError) {
-                Log.info("Exception during query preparation");
+                Log.warning("Exception during query preparation: " + secondError.getMessage());
                 throw secondError;
             }
         }
