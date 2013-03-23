@@ -36,7 +36,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            ".*" +                         // Header
+            "[^\\d]*" +                    // Header
             "(\\d+)," +                    // Device Identifier
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
