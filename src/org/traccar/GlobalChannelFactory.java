@@ -38,9 +38,7 @@ public class GlobalChannelFactory {
 
     public static ChannelFactory getFactory() {
         if(instance == null) {
-            instance = new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool());
+            instance = new NioServerSocketChannelFactory();
         }
         return instance;
     }

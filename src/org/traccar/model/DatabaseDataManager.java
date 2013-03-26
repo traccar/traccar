@@ -87,13 +87,15 @@ public class DatabaseDataManager implements DataManager {
 
         List<Device> deviceList = new LinkedList<Device>();
 
-        queryGetDevices.prepare();
-        ResultSet result = queryGetDevices.executeQuery();
-        while (result.next()) {
-            Device device = new Device();
-            device.setId(result.getLong("id"));
-            device.setImei(result.getString("imei"));
-            deviceList.add(device);
+        if (queryGetDevices != null) {
+            queryGetDevices.prepare();
+            ResultSet result = queryGetDevices.executeQuery();
+            while (result.next()) {
+                Device device = new Device();
+                device.setId(result.getLong("id"));
+                device.setImei(result.getString("imei"));
+                deviceList.add(device);
+            }
         }
 
         return deviceList;
@@ -124,26 +126,28 @@ public class DatabaseDataManager implements DataManager {
     @Override
     public synchronized Long addPosition(Position position) throws SQLException {
 
-        queryAddPosition.prepare(Statement.RETURN_GENERATED_KEYS);
+        if (queryAddPosition != null) {
+            queryAddPosition.prepare(Statement.RETURN_GENERATED_KEYS);
 
-        queryAddPosition.setLong("id", position.getId());
-        queryAddPosition.setLong("device_id", position.getDeviceId());
-        queryAddPosition.setTimestamp("time", position.getTime());
-        queryAddPosition.setBoolean("valid", position.getValid());
-        queryAddPosition.setDouble("altitude", position.getAltitude());
-        queryAddPosition.setDouble("latitude", position.getLatitude());
-        queryAddPosition.setDouble("longitude", position.getLongitude());
-        queryAddPosition.setDouble("speed", position.getSpeed());
-        queryAddPosition.setDouble("course", position.getCourse());
-        queryAddPosition.setDouble("power", position.getPower());
-        queryAddPosition.setString("address", position.getAddress());
-        queryAddPosition.setString("extended_info", position.getExtendedInfo());
+            queryAddPosition.setLong("id", position.getId());
+            queryAddPosition.setLong("device_id", position.getDeviceId());
+            queryAddPosition.setTimestamp("time", position.getTime());
+            queryAddPosition.setBoolean("valid", position.getValid());
+            queryAddPosition.setDouble("altitude", position.getAltitude());
+            queryAddPosition.setDouble("latitude", position.getLatitude());
+            queryAddPosition.setDouble("longitude", position.getLongitude());
+            queryAddPosition.setDouble("speed", position.getSpeed());
+            queryAddPosition.setDouble("course", position.getCourse());
+            queryAddPosition.setDouble("power", position.getPower());
+            queryAddPosition.setString("address", position.getAddress());
+            queryAddPosition.setString("extended_info", position.getExtendedInfo());
 
-        queryAddPosition.executeUpdate();
+            queryAddPosition.executeUpdate();
 
-        ResultSet result = queryAddPosition.getGeneratedKeys();
-        if (result != null && result.next()) {
-            return result.getLong(1);
+            ResultSet result = queryAddPosition.getGeneratedKeys();
+            if (result != null && result.next()) {
+                return result.getLong(1);
+            }
         }
 
         return null;
@@ -151,13 +155,15 @@ public class DatabaseDataManager implements DataManager {
 
     @Override
     public void updateLatestPosition(Long deviceId, Long positionId) throws SQLException {
+        
+        if (queryUpdateLatestPosition != null) {
+            queryUpdateLatestPosition.prepare();
 
-        queryUpdateLatestPosition.prepare();
+            queryUpdateLatestPosition.setLong("device_id", deviceId);
+            queryUpdateLatestPosition.setLong("id", positionId);
 
-        queryUpdateLatestPosition.setLong("device_id", deviceId);
-        queryUpdateLatestPosition.setLong("id", positionId);
-
-        queryUpdateLatestPosition.executeUpdate();
+            queryUpdateLatestPosition.executeUpdate();
+        }
     }
 
 }

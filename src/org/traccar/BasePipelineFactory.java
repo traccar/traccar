@@ -58,8 +58,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
      */
     protected class StandardLoggingHandler extends LoggingHandler {
 
-        static final String HEX_CHARS = "0123456789ABCDEF";
-
         @Override
         public void log(ChannelEvent e) {
             if (e instanceof MessageEvent) {
@@ -82,8 +80,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 ExceptionEvent event = (ExceptionEvent) e;
                 Log.warning(event.getCause().toString());
             }
-            // TODO: handle other events
         }
+
     }
 
     public BasePipelineFactory(ServerManager serverManager, TrackerServer server, String protocol) {
