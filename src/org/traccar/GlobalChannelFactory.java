@@ -17,29 +17,38 @@ package org.traccar;
 
 import java.util.concurrent.Executors;
 import org.jboss.netty.channel.ChannelFactory;
+import org.jboss.netty.channel.socket.DatagramChannelFactory;
+import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-/**
- * Channel factory
- */
 public class GlobalChannelFactory {
 
-    private static ChannelFactory instance = null;
+    private static ChannelFactory channelFactory = null;
+    private static DatagramChannelFactory datagramChannelFactory = null;
 
-    private GlobalChannelFactory() {
-    }
-    
     public static void release() {
-        if (instance != null) {
-            instance.releaseExternalResources();
+        if (channelFactory != null) {
+            channelFactory.releaseExternalResources();
         }
-        instance = null;
+        if (datagramChannelFactory != null) {
+            datagramChannelFactory.releaseExternalResources();
+        }
+        channelFactory = null;
+        datagramChannelFactory = null;
     }
 
     public static ChannelFactory getFactory() {
-        if(instance == null) {
-            instance = new NioServerSocketChannelFactory();
+        if (channelFactory == null) {
+            channelFactory = new NioServerSocketChannelFactory();
         }
-        return instance;
+        return channelFactory;
     }
+    
+    public static DatagramChannelFactory getDatagramFactory() {
+        if (datagramChannelFactory == null) {
+            datagramChannelFactory = new NioDatagramChannelFactory();
+        }
+        return datagramChannelFactory;
+    }
+
 }

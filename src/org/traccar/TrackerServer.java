@@ -46,7 +46,12 @@ public abstract class TrackerServer {
         this.bootstrap = bootstrap;
         this.protocol = protocol;
 
-        bootstrap.setFactory(GlobalChannelFactory.getFactory());
+        // Set appropriate channel factory
+        if (bootstrap instanceof ServerBootstrap) {
+            bootstrap.setFactory(GlobalChannelFactory.getFactory());
+        } else if (bootstrap instanceof ConnectionlessBootstrap) {
+            bootstrap.setFactory(GlobalChannelFactory.getDatagramFactory());
+        }
 
         address = serverManager.getProperties().getProperty(protocol + ".address");
         String portProperty = serverManager.getProperties().getProperty(protocol + ".port");
