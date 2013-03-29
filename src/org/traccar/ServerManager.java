@@ -265,17 +265,31 @@ public class ServerManager {
 
     private void initGps103Server(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) ';' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this));
-                }
-            });
+            if (isUDPEnabledForProtocol(properties, protocol)) {
+                serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                    @Override
+                    protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                        byte delimiter[] = { (byte) ';' };
+                        pipeline.addLast("frameDecoder",
+                                new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("stringEncoder", new StringEncoder());
+                        pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this));
+                    }
+                });
+            } else {
+                serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                    @Override
+                    protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                        byte delimiter[] = { (byte) ';' };
+                        pipeline.addLast("frameDecoder",
+                                new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("stringEncoder", new StringEncoder());
+                        pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this));
+                    }
+                });
+            }
         }
     }
 
@@ -285,7 +299,7 @@ public class ServerManager {
                 serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
                     @Override
                     protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                        byte delimiter[] = {(byte) ')'};
+                        byte delimiter[] = { (byte) ')' };
                         pipeline.addLast("frameDecoder",
                                 new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                         pipeline.addLast("stringDecoder", new StringDecoder());
