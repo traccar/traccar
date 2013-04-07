@@ -43,13 +43,13 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     static private Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})," +      // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)," +        // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d{4})," +      // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d+)," +        // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+.\\d+)," +                    // Speed
             "(\\d+\\.?\\d*)?," +                // Course
-            "(\\d{2})(\\d{2})(\\d{2})" +       // Date (DDMMYY)
+            "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
             "[^\\|]*\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
             "(\\d+\\.?\\d*)\\|" +               // Altitude
             "([0-9a-fA-F]+)?" +                 // State
