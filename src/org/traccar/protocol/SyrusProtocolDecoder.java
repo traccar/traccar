@@ -36,15 +36,14 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Regular expressions pattern
      */
-    //"REV691615354941+3570173+1397742703203212;ID=Test"
     static private Pattern pattern = Pattern.compile(
-            "REV" +                        // Type
-            "\\d{2}" +                     // Event index
+            "R[EP]V" +                     // Type
+            "(?:\\d{2}" +                  // Event index
             "(\\d{4})" +                   // Week
-            "(\\d)" +                      // Day
+            "(\\d))?" +                    // Day
             "(\\d{5})" +                   // Seconds
-            "([\\+\\-]\\d{2})(\\d{5})" +      // Latitude
-            "([\\+\\-]\\d{3})(\\d{5})" +      // Longitude
+            "([\\+\\-]\\d{2})(\\d{5})" +   // Latitude
+            "([\\+\\-]\\d{3})(\\d{5})" +   // Longitude
             "(\\d{3})" +                   // Speed
             "(\\d{3})" +                   // Course
             "\\d" +                        // Fix mode
@@ -60,6 +59,24 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
 
         long millis = time.getTimeInMillis();
         millis += ((week * 7 + day) * 24 * 60 * 60 + seconds) * 1000;
+
+        return new Date(millis);
+    }
+    
+    private Date getTime(long seconds) {
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.set(Calendar.HOUR, 0);
+        time.set(Calendar.MINUTE, 0);
+        time.set(Calendar.SECOND, 0);
+        time.set(Calendar.MILLISECOND, 0);
+        
+        long millis = time.getTimeInMillis() + seconds * 1000;
+        
+        long diff = new Date().getTime() - millis;
+        
+        if (diff > 12 * 60 * 60 * 1000) {
+            millis += 24 * 60 * 60 * 1000;
+        }
 
         return new Date(millis);
     }
@@ -114,12 +131,16 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceId);
 
         Integer index = 1;
-
+        
         // Time
-        int week = Integer.valueOf(parser.group(index++));
-        int day = Integer.valueOf(parser.group(index++));
+        String week = parser.group(index++);
+        String day = parser.group(index++);
         int seconds = Integer.valueOf(parser.group(index++));
-        position.setTime(getTime(week, day, seconds));
+        if (week != null && day != null) {
+            position.setTime(getTime(Integer.valueOf(week), Integer.valueOf(day), seconds));
+        } else {
+            position.setTime(getTime(seconds));
+        }
 
         // Latitude
         String latitude = parser.group(index) + '.' + parser.group(index + 1);
