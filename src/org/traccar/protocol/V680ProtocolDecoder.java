@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,42 +26,32 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * V680 tracker protocol decoder
- */
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public V680ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
-            "#" +
+            "#?" +
             "(\\d+)#" +                    // IMEI
-            "([^#]+)#" +                   // User
+            "([^#]*)#" +                   // User
             "([01])#" +                    // Fix
             "([^#]+)#" +                   // Password
             "[^#]+#" +
             "(\\d+)#" +                    // Packet number
-            "([^#]+)#" +                   // GSM base station
-            "(\\d{3})(\\d{2}\\.\\d{4})," + // Longitude (DDDMM.MMMM)
+            "(\\d+)." +                    // GSM base station
+            "[^#]+#" +
+            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d{2})(\\d{2}\\.\\d{4})," + // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d+\\.\\d+)," +             // Speed
             "(\\d+)#" +                    // Course
             "(\\d{2})(\\d{2})(\\d{2})#" +  // Date (DDMMYY)
             "(\\d{2})(\\d{2})(\\d{2})");   // Time (HHMMSS)
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
