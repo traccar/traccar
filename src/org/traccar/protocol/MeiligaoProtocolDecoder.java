@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,13 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    //"134743.003,A,0648.9866,S,10707.5795,E,000.0,000.0,260313"
+    
     /**
      * Regular expressions pattern
      */
     static private Pattern pattern = Pattern.compile(
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +        // Latitude (DDMM.MMMM)
             "([NS])," +
@@ -50,8 +52,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+.\\d+)," +                    // Speed
             "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
-            "[^\\|]*\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
-            "(\\d+\\.?\\d*)\\|" +               // Altitude
+            "(?:[^\\|]*\\|(\\d+\\.\\d+)\\|" +   // Dilution of precision
+            "(\\d+\\.?\\d*)\\|)?" +             // Altitude
             "([0-9a-fA-F]+)?" +                 // State
             "(?:\\|([0-9a-fA-F]+),([0-9a-fA-F]+))?" + // ADC
             "(?:\\|([0-9a-fA-F]+))?" +          // Cell
@@ -82,14 +84,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         return id;
     }
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
-
+        
         ChannelBuffer buf = (ChannelBuffer) msg;
         int command = buf.getUnsignedShort(7);
 
@@ -113,8 +112,21 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        // Data offset
+        // Payload offset
         int offset = 7 + 2;
+
+        // Create new position
+        Position position = new Position();
+        StringBuilder extendedInfo = new StringBuilder("<protocol>meiligao</protocol>");
+
+        // Alarm
+        if (command == 0x9999) {
+            extendedInfo.append("<alarm>");
+            extendedInfo.append(buf.getUnsignedByte(offset));
+            extendedInfo.append("</alarm>");
+        }
+
+        // Data offset
         if (command == 0x9955) {
             offset += 0;
         } else if (command == 0x9016) {
@@ -124,10 +136,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         } else {
             return null;
         }
-
-        // Create new position
-        Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>meiligao</protocol>");
 
         // Get device by id
         String id = getId(buf);
