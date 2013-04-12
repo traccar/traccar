@@ -92,7 +92,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         // Position data
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setLatitude(Double.valueOf(parser.group(index++)));
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
         position.setCourse(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
 
