@@ -66,7 +66,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>vt300</protocol>");
+        StringBuilder extendedInfo = new StringBuilder("<protocol>wondex</protocol>");
         int index = 1;
 
         // Device identifier
