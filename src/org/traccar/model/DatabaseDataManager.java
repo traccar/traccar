@@ -128,25 +128,34 @@ public class DatabaseDataManager implements DataManager {
 
         if (queryAddPosition != null) {
             queryAddPosition.prepare(Statement.RETURN_GENERATED_KEYS);
-
-            queryAddPosition.setLong("id", position.getId());
-            queryAddPosition.setLong("device_id", position.getDeviceId());
-            queryAddPosition.setTimestamp("time", position.getTime());
-            queryAddPosition.setBoolean("valid", position.getValid());
-            queryAddPosition.setDouble("altitude", position.getAltitude());
-            queryAddPosition.setDouble("latitude", position.getLatitude());
-            queryAddPosition.setDouble("longitude", position.getLongitude());
-            queryAddPosition.setDouble("speed", position.getSpeed());
-            queryAddPosition.setDouble("course", position.getCourse());
-            queryAddPosition.setDouble("power", position.getPower());
-            queryAddPosition.setString("address", position.getAddress());
-            queryAddPosition.setString("extended_info", position.getExtendedInfo());
-
-            queryAddPosition.executeUpdate();
-
-            ResultSet result = queryAddPosition.getGeneratedKeys();
-            if (result != null && result.next()) {
-                return result.getLong(1);
+            
+            Long deviceId = position.getDeviceId();
+            
+            if (deviceId == null)
+            {
+                return null;
+            }
+            else
+            {
+	            queryAddPosition.setLong("id", position.getId());
+	            queryAddPosition.setLong("device_id", position.getDeviceId());
+	            queryAddPosition.setTimestamp("time", position.getTime());
+	            queryAddPosition.setBoolean("valid", position.getValid());
+	            queryAddPosition.setDouble("altitude", position.getAltitude());
+	            queryAddPosition.setDouble("latitude", position.getLatitude());
+	            queryAddPosition.setDouble("longitude", position.getLongitude());
+	            queryAddPosition.setDouble("speed", position.getSpeed());
+	            queryAddPosition.setDouble("course", position.getCourse());
+	            queryAddPosition.setDouble("power", position.getPower());
+	            queryAddPosition.setString("address", position.getAddress());
+	            queryAddPosition.setString("extended_info", position.getExtendedInfo());
+	
+	            queryAddPosition.executeUpdate();
+	
+	            ResultSet result = queryAddPosition.getGeneratedKeys();
+	            if (result != null && result.next()) {
+	                return result.getLong(1);
+	            }
             }
         }
 
