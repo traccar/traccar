@@ -40,16 +40,17 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             "([^#]+)#" +                   // Password
             "[^#]+#" +
             "(\\d+)#" +                    // Packet number
-            "(\\d+)." +                    // GSM base station
-            "[^#]+#" +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
+            "([^#]+)#" +                   // GSM base station
+            "(?:[^#]+#)?" +
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d+\\.\\d+)," +             // Speed
-            "(\\d+)#" +                    // Course
+            "(\\d+\\.?\\d*)#" +            // Course
             "(\\d{2})(\\d{2})(\\d{2})#" +  // Date (DDMMYY)
-            "(\\d{2})(\\d{2})(\\d{2})");   // Time (HHMMSS)
+            "(\\d{2})(\\d{2})(\\d{2})" +   // Time (HHMMSS)
+            ".*");
 
     @Override
     protected Object decode(
