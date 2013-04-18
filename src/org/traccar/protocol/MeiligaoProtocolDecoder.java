@@ -38,6 +38,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     //"134743.003,A,0648.9866,S,10707.5795,E,000.0,000.0,260313"
+    //,,*38|0.8|245|2000|03F6,0000,0000,001C,0000,0000,0000,0000|0194000201CC627C|1A|01160849yt
     
     /**
      * Regular expressions pattern
@@ -56,6 +57,9 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)\\|)?" +             // Altitude
             "([0-9a-fA-F]+)?" +                 // State
             "(?:\\|([0-9a-fA-F]+),([0-9a-fA-F]+))?" + // ADC
+            "(?:,([0-9a-fA-F]+),([0-9a-fA-F]+)" +
+            ",([0-9a-fA-F]+),([0-9a-fA-F]+)" +
+            ",([0-9a-fA-F]+),([0-9a-fA-F]+))?" +
             "(?:\\|([0-9a-fA-F]+))?" +          // Cell
             "(?:\\|([0-9a-fA-F]+))?" +          // Signal
             "(?:\\|([0-9a-fA-F]+))?" +          // Milage
@@ -196,9 +200,12 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Dilution of precision
-        extendedInfo.append("<hdop>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</hdop>");
+        String hdop = parser.group(index++);
+        if (hdop != null) {
+            extendedInfo.append("<hdop>");
+            extendedInfo.append(hdop);
+            extendedInfo.append("</hdop>");
+        }
 
         // Altitude
         String altitude = parser.group(index++);
@@ -217,7 +224,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // ADC
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= 8; i++) {
             String adc = parser.group(index++);
             if (adc != null) {
                 extendedInfo.append("<adc").append(i).append(">");
