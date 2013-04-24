@@ -23,7 +23,7 @@ Source: "..\wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: 
 Source: "..\..\target\tracker-server.jar"; DestDir: "{app}"
 Source: "..\..\target\lib\*"; DestDir: "{app}\lib"
 Source: "..\traccar-web.war"; DestDir: "{app}"
-Source: "windows.cfg"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
+Source: "traccar.cfg"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
 
 [Run]
 Filename: "{app}\bin\InstallTraccar-NT.bat"
@@ -51,7 +51,7 @@ var
 begin
   LoadStringFromFile(ExpandConstant(CurrentFileName), S);
   Insert('wrapper.java.classpath.2=../tracker-server.jar' + #13#10, S, Pos('wrapper.java.classpath.1', S));
-  Insert(ExpandConstant('wrapper.app.parameter.2="{app}\conf\windows.cfg"') + #13#10, S, Pos('wrapper.app.parameter.1', S));
+  Insert(ExpandConstant('wrapper.app.parameter.2="{app}\conf\traccar.cfg"') + #13#10, S, Pos('wrapper.app.parameter.1', S));
   StringChangeEx(S, '<YourMainClass>', 'org.traccar.Main', true);
   StringChangeEx(S, '@app.name@', 'Traccar', true);
   StringChangeEx(S, '@app.long.name@', 'Traccar', true);

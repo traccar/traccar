@@ -96,13 +96,13 @@ cp wrapper/src/conf/wrapper.conf.in out/conf/wrapper.conf
 cp ../target/tracker-server.jar out
 cp ../target/lib/* out/lib
 cp traccar-web.war out
-cp linux/linux.cfg out/conf
+cp linux/traccar.cfg out/conf
 
 sed -i 's/@app.name@/traccar/g' out/bin/traccar
 sed -i 's/@app.long.name@/traccar/g' out/bin/traccar
 
 sed -i '/wrapper.java.classpath.1/i\wrapper.java.classpath.2=../tracker-server.jar' out/conf/wrapper.conf
-sed -i "/wrapper.app.parameter.1/i\wrapper.app.parameter.2=$app/conf/linux.cfg" out/conf/wrapper.conf
+sed -i "/wrapper.app.parameter.1/i\wrapper.app.parameter.2=$app/conf/traccar.cfg" out/conf/wrapper.conf
 sed -i 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
 sed -i 's/@app.name@/traccar/g' out/conf/wrapper.conf
 sed -i 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
@@ -142,9 +142,7 @@ zip -j traccar-linux-arm.zip traccar.run linux/README.txt
 rm out/conf/linux.cfg
 rm out/lib/libwrapper.so
 
-cp macosx/macosx.cfg out/conf
-
-sed -i "s/linux.cfg/macosx.cfg/g" out/conf/wrapper.conf
+cp macosx/traccar.cfg out/conf
 
 cp wrapper/bin/wrapper-macosx-universal-64 out/bin/wrapper
 cp wrapper/lib/libwrapper-macosx-universal-64.jnilib out/lib/libwrapper.jnilib
