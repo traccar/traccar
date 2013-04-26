@@ -14,10 +14,10 @@ import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
 import org.traccar.model.Position;
 
-public class ST210ProtocolDecoder extends BaseProtocolDecoder {
+public class St210ProtocolDecoder extends BaseProtocolDecoder {
 
 
-    public ST210ProtocolDecoder(ServerManager serverManager) {
+    public St210ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
@@ -482,7 +482,7 @@ public class ST210ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    public static Pattern getPattern(List<ST210FIELDS> protocol) {
+    private static Pattern getPattern(List<ST210FIELDS> protocol) {
 
         String patternStr = "";
 

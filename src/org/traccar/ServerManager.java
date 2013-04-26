@@ -416,7 +416,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new ST210ProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("objectDecoder", new St210ProtocolDecoder(ServerManager.this));
                 }
             });
         }

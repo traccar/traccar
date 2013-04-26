@@ -2,15 +2,14 @@ package org.traccar.protocol;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import org.junit.Test;
 
-public class ST210ProtocolDecoderTest {
+public class St210ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        ST210ProtocolDecoder decoder = new ST210ProtocolDecoder(null);
+        St210ProtocolDecoder decoder = new St210ProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
 
         //Status
