@@ -143,6 +143,7 @@ public class ServerManager {
         initYwtServer("ywt");
         initTk102Server("tk102");
         initIntellitracServer("intellitrac");
+        initXt7Server("xt7");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -793,6 +794,18 @@ public class ServerManager {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new IntellitracProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initXt7Server(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 20, 1, 5, 0));
+                    pipeline.addLast("objectDecoder", new Xt7ProtocolDecoder(ServerManager.this));
                 }
             });
         }
