@@ -791,9 +791,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("frameDecoder", new IntellitracFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new IntellitracProtocolDecoder(ServerManager.this));
