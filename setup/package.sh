@@ -139,7 +139,7 @@ zip -j traccar-linux-arm.zip traccar.run linux/README.txt
 
 # MACOSX PACKAGE
 
-rm out/conf/linux.cfg
+rm out/conf/traccar.cfg
 rm out/lib/libwrapper.so
 
 cp macosx/traccar.cfg out/conf
