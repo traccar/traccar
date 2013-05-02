@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
@@ -67,7 +68,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>V680</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("v680");
         Integer index = 1;
 
         // Get device by IMEI
@@ -80,27 +81,19 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // User
-        extendedInfo.append("<user>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</user>");
+        extendedInfo.set("user", parser.group(index++));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") == 0 ? true : false);
 
         // Password
-        extendedInfo.append("<password>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</password>");
+        extendedInfo.set("password", parser.group(index++));
 
         // Packet number
-        extendedInfo.append("<packet>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</packet>");
+        extendedInfo.set("packet", parser.group(index++));
 
         // GSM base station
-        extendedInfo.append("<gsm>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</gsm>");
+        extendedInfo.set("gsm", parser.group(index++));
 
         // Longitude
         Double lonlitude = Double.valueOf(parser.group(index++));

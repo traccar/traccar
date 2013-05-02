@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
@@ -74,7 +75,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            StringBuilder extendedInfo = new StringBuilder("<protocol>tk102</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tk102");
             position.setDeviceId(deviceId);
 
             Integer index = 1;

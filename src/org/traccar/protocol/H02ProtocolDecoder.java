@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
@@ -64,7 +65,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>h02</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("h02");
 
         Integer index = 1;
 

@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
@@ -34,9 +35,6 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "#([0-9a-f]+)?" +              // Cell info
             "\\$GPRMC," +
@@ -75,16 +73,13 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             Matcher parser = pattern.matcher(message);
             if (parser.matches()) {
                 Position position = new Position();
-                StringBuilder extendedInfo = new StringBuilder("<protocol>tlt2h</protocol>");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tlt2h");
                 position.setDeviceId(deviceId);
 
                 Integer index = 1;
                 
                 // Cell
-                String cell = parser.group(index++);
-                if (cell != null) {
-                    extendedInfo.append("<cell>").append(cell).append("</cell>");
-                }
+                extendedInfo.set("cell", parser.group(index++));
 
                 // Time
                 Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

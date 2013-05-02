@@ -24,23 +24,15 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * Meitrack protocol decoder
- */
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public MeitrackProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "\\$\\$." +                         // Flag
             "\\d+," +                           // Length
@@ -61,9 +53,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                         // Milage
             ".*"); // TODO: parse other stuff
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -77,7 +67,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>meitrack</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meitrack");
 
         Integer index = 1;
 
@@ -91,9 +81,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Event
-        extendedInfo.append("<event>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</event>");
+        extendedInfo.set("event", parser.group(index++));
 
         // Coordinates
         position.setLatitude(Double.valueOf(parser.group(index++)));
@@ -114,14 +102,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
 
         // Satellites
-        extendedInfo.append("<satellites>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</satellites>");
+        extendedInfo.set("satellites", parser.group(index++));
 
         // GSM Signal
-        extendedInfo.append("<gsm>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</gsm>");
+        extendedInfo.set("gsm", parser.group(index++));
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
@@ -130,17 +114,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // HDOP
-        extendedInfo.append("<hdop>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</hdop>");
+        extendedInfo.set("hdop", parser.group(index++));
 
         // Altitude
         position.setAltitude(Double.valueOf(parser.group(index++)));
 
         // Milage
-        extendedInfo.append("<milage>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</milage>");
+        extendedInfo.set("milage", parser.group(index++));
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());

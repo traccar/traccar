@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class WondexProtocolDecoder extends BaseProtocolDecoder {
@@ -32,9 +33,6 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "[^\\d]*" +                    // Header
             "(\\d+)," +                    // Device Identifier
@@ -66,7 +64,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>wondex</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("wondex");
         int index = 1;
 
         // Device identifier
@@ -99,40 +97,23 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        extendedInfo.append("<satellites>").append(satellites).append("</satellites>");
+        extendedInfo.set("satellites", satellites);
         
         // Event
-        extendedInfo.append("<event>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</event>");
+        extendedInfo.set("event", parser.group(index++));
         
         // Milage
-        String milage = parser.group(index++);
-        if (milage != null) {
-            extendedInfo.append("<milage>").append(milage).append("</milage>");
-        }
+        extendedInfo.set("milage", parser.group(index++));
         
         // Input
-        String input = parser.group(index++);
-        if (input != null) {
-            extendedInfo.append("<input>").append(input).append("</input>");
-        }
+        extendedInfo.set("input", parser.group(index++));
         
         // ADC
-        String adc1 = parser.group(index++);
-        if (adc1 != null) {
-            extendedInfo.append("<adc1>").append(adc1).append("</adc1>");
-        }
-        String adc2 = parser.group(index++);
-        if (adc2 != null) {
-            extendedInfo.append("<adc2>").append(adc2).append("</adc2>");
-        }
+        extendedInfo.set("adc1", parser.group(index++));
+        extendedInfo.set("adc2", parser.group(index++));
         
         // Output
-        String output = parser.group(index++);
-        if (output != null) {
-            extendedInfo.append("<output>").append(output).append("</output>");
-        }
+        extendedInfo.set("output", parser.group(index++));
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;

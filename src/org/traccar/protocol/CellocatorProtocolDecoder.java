@@ -25,6 +25,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
@@ -102,7 +103,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         // Parse location
         if (type == MSG_CLIENT_STATUS) {
             Position position = new Position();
-            StringBuilder extendedInfo = new StringBuilder("<protocol>cellocator</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("cellocator");
             
             // Device identifier
             try {
@@ -117,9 +118,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // protocol version
 
             // Status
-            extendedInfo.append("<status>");
-            extendedInfo.append(buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
-            extendedInfo.append("</status>");
+            extendedInfo.set("status", buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
             
             int operator = (buf.readUnsignedByte() & 0xf0) << 4;
             operator += buf.readUnsignedByte();
@@ -131,7 +130,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             
             operator <<= 8;
             operator += buf.readUnsignedByte();
-            extendedInfo.append("<operator>").append(operator).append("</operator>");
+            extendedInfo.set("operator", operator);
             
             buf.readUnsignedInt(); // ADC
             buf.readUnsignedMedium(); // milage

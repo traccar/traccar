@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
@@ -32,9 +33,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "(\\d{12})" +                // Device ID
             ".{4}" +                     // Command
@@ -75,7 +73,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>tk103</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tk103");
         Integer index = 1;
 
         // Get device by IMEI
@@ -130,14 +128,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
         
         // State
-        extendedInfo.append("<state>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</state>");
+        extendedInfo.set("state", parser.group(index++));
 
         // Milage
-        extendedInfo.append("<milage>");
-        extendedInfo.append(Integer.parseInt(parser.group(index++), 16));
-        extendedInfo.append("</milage>");
+        extendedInfo.set("milage", Integer.parseInt(parser.group(index++), 16));
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;

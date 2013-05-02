@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
@@ -73,7 +74,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>megastek</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("megastek");
         int index = 1;
 
         // Time
@@ -121,9 +122,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Alarm
-        extendedInfo.append("<alarm>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</alarm>");
+        extendedInfo.set("alarm", parser.group(index++));
 
         // IMEI
         String imei = parser.group(index++);
@@ -137,9 +136,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         String satellites = parser.group(index++);
         if (satellites != null) {
-            extendedInfo.append("<satellites>");
-            extendedInfo.append(satellites);
-            extendedInfo.append("</satellites>");
+            extendedInfo.set("satellites", satellites);
         }
 
         // Altitude
@@ -151,25 +148,17 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         // Charger
         String charger = parser.group(index++);
         if (charger != null) {
-            extendedInfo.append("<charger>");
-            extendedInfo.append(Integer.valueOf(charger) == 1);
-            extendedInfo.append("</charger>");
+            extendedInfo.set("charger", Integer.valueOf(charger) == 1);
         }
 
         // MCC
-        extendedInfo.append("<mcc>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</mcc>");
+        extendedInfo.set("mcc", parser.group(index++));
 
         // MNC
-        extendedInfo.append("<mnc>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</mnc>");
+        extendedInfo.set("mnc", parser.group(index++));
 
         // LAC
-        extendedInfo.append("<lac>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</lac>");
+        extendedInfo.set("lac", parser.group(index++));
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());

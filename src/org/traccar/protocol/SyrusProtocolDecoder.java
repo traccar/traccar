@@ -25,6 +25,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class SyrusProtocolDecoder extends BaseProtocolDecoder {
@@ -127,7 +128,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>syrus</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("syrus");
         position.setDeviceId(deviceId);
 
         Integer index = 1;

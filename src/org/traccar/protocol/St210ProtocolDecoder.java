@@ -12,6 +12,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.DataManager;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class St210ProtocolDecoder extends BaseProtocolDecoder {
@@ -645,7 +646,7 @@ public class St210ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
 
         position.setAltitude(0D);
-        position.setExtendedInfo("");
+        position.setExtendedInfo(new ExtendedInfoFormatter("st210").toString());
         position.setValid(true);
 
         Integer index = 0;

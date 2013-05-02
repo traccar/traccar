@@ -24,16 +24,11 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * TR20 tracker protocol decoder
- */
 public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Tr20ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -41,8 +36,6 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
     static private Pattern patternPing = Pattern.compile(
             "\\%\\%[^,]+,(\\d+)");
 
-    //%%TR-10,A,050916070549,N2240.8887E11359.2994,0,000,NA,D3800000,150,CFG:resend|
-    //%%123456789012345,A,120101121800,N6000.0000E13000.0000,0,000,0,01034802,150,[Message]
     static private Pattern patternData = Pattern.compile(
             "\\%\\%" +
             "([^,]+)," +                   // Id
@@ -57,9 +50,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Course
             ".*");
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -86,7 +77,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            StringBuilder extendedInfo = new StringBuilder("<protocol>tr20</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tr20");
 
             Integer index = 1;
 

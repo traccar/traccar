@@ -28,11 +28,9 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * Navis protocol decoder
- */
 public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private String prefix;
@@ -43,9 +41,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private String imei;
     private Long databaseDeviceId;
 
-    /**
-     * Initialize
-     */
     public NavisProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -70,7 +65,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Position parsePosition(ChannelBuffer buf) {
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>navis</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navis");
 
         position.setDeviceId(databaseDeviceId);
         position.setAltitude(0.0);
@@ -82,16 +77,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         } else {
             format = buf.readUnsignedByte();
         }
-        extendedInfo.append("<format>");
-        extendedInfo.append(format);
-        extendedInfo.append("</format>");
+        extendedInfo.set("format", format);
 
         position.setId(buf.readUnsignedInt()); // sequence number
 
         // Event type
-        extendedInfo.append("<event>");
-        extendedInfo.append(buf.readUnsignedShort());
-        extendedInfo.append("</event>");
+        extendedInfo.set("event", buf.readUnsignedShort());
 
         // Event time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -102,67 +93,44 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
         time.set(Calendar.MONTH, buf.readUnsignedByte());
         time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-        extendedInfo.append("<time>");
-        extendedInfo.append(time.getTimeInMillis());
-        extendedInfo.append("</time>");
+        extendedInfo.set("time", time.getTimeInMillis());
 
         // Alarm status
-        extendedInfo.append("<alarm>");
-        extendedInfo.append(buf.readUnsignedByte());
-        extendedInfo.append("</alarm>");
+        extendedInfo.set("alarm", buf.readUnsignedByte());
 
         // Modules status
-        extendedInfo.append("<status>");
-        extendedInfo.append(buf.readUnsignedByte());
-        extendedInfo.append("</status>");
+        extendedInfo.set("status", buf.readUnsignedByte());
 
         // GSM signal
-        extendedInfo.append("<gsm>");
-        extendedInfo.append(buf.readUnsignedByte());
-        extendedInfo.append("</gsm>");
+        extendedInfo.set("gsm", buf.readUnsignedByte());
 
         // Output
-        extendedInfo.append("<output>");
         if (isFormat(format, F10, F20, F30)) {
-            extendedInfo.append(buf.readUnsignedShort());
+            extendedInfo.set("output", buf.readUnsignedShort());
         } else if (isFormat(format, F40, F50, F51, F52)) {
-            extendedInfo.append(buf.readUnsignedByte());
+            extendedInfo.set("output", buf.readUnsignedByte());
         }
-        extendedInfo.append("</output>");
 
         // Input
-        extendedInfo.append("<input>");
         if (isFormat(format, F10, F20, F30, F40)) {
-            extendedInfo.append(buf.readUnsignedShort());
+            extendedInfo.set("input", buf.readUnsignedShort());
         } else if (isFormat(format, F50, F51, F52)) {
-            extendedInfo.append(buf.readUnsignedByte());
+            extendedInfo.set("input", buf.readUnsignedByte());
         }
-        extendedInfo.append("</input>");
 
         position.setPower(buf.readUnsignedShort() / 1000.0); // power
 
         // Battery power
-        extendedInfo.append("<battery>");
-        extendedInfo.append(buf.readUnsignedShort());
-        extendedInfo.append("</battery>");
+        extendedInfo.set("battery", buf.readUnsignedShort());
 
         // Temperature
         if (isFormat(format, F10, F20, F30)) {
-            extendedInfo.append("<temperature>");
-            extendedInfo.append(buf.readShort());
-            extendedInfo.append("</temperature>");
+            extendedInfo.set("temperature", buf.readShort());
         }
 
         if (isFormat(format, F10, F20, F50, F52)) {
-            // ADC 1
-            extendedInfo.append("<adc1>");
-            extendedInfo.append(buf.readUnsignedShort());
-            extendedInfo.append("</adc1>");
-
-            // ADC 2
-            extendedInfo.append("<adc2>");
-            extendedInfo.append(buf.readUnsignedShort());
-            extendedInfo.append("</adc2>");
+            extendedInfo.set("adc1", buf.readUnsignedShort());
+            extendedInfo.set("adc2", buf.readUnsignedShort());
         }
 
         if (isFormat(format, F20, F50, F51, F52)) {
@@ -193,14 +161,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse((double) buf.readUnsignedShort());
 
             // Milage
-            extendedInfo.append("<milage>");
-            extendedInfo.append(buf.readFloat());
-            extendedInfo.append("</milage>");
+            extendedInfo.set("milage", buf.readFloat());
 
             // Last segment
-            extendedInfo.append("<segment>");
-            extendedInfo.append(buf.readFloat());
-            extendedInfo.append("</segment>");
+            extendedInfo.set("segment", buf.readFloat());
 
             // Segment times
             buf.readUnsignedShort();
@@ -308,9 +272,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {

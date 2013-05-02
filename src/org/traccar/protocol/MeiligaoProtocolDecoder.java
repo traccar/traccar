@@ -29,6 +29,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
@@ -37,12 +38,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    //"134743.003,A,0648.9866,S,10707.5795,E,000.0,000.0,260313"
-    //,,*38|0.8|245|2000|03F6,0000,0000,001C,0000,0000,0000,0000|0194000201CC627C|1A|01160849yt
-    
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -121,13 +116,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>meiligao</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meiligao");
 
         // Alarm
         if (command == 0x9999) {
-            extendedInfo.append("<alarm>");
-            extendedInfo.append(buf.getUnsignedByte(offset));
-            extendedInfo.append("</alarm>");
+            extendedInfo.set("alarm", buf.getUnsignedByte(offset));
         }
 
         // Data offset
@@ -200,12 +193,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Dilution of precision
-        String hdop = parser.group(index++);
-        if (hdop != null) {
-            extendedInfo.append("<hdop>");
-            extendedInfo.append(hdop);
-            extendedInfo.append("</hdop>");
-        }
+        extendedInfo.set("hdop", parser.group(index++));
 
         // Altitude
         String altitude = parser.group(index++);
@@ -218,43 +206,33 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         // State
         String state = parser.group(index++);
         if (state != null) {
-            extendedInfo.append("<state>");
-            extendedInfo.append(state);
-            extendedInfo.append("</state>");
+            extendedInfo.set("state", state);
         }
 
         // ADC
         for (int i = 1; i <= 8; i++) {
             String adc = parser.group(index++);
             if (adc != null) {
-                extendedInfo.append("<adc").append(i).append(">");
-                extendedInfo.append(Integer.parseInt(adc, 16));
-                extendedInfo.append("</adc").append(i).append(">");
+                extendedInfo.set("adc" + i, Integer.parseInt(adc, 16));
             }
         }
 
         // Cell identifier
         String cell = parser.group(index++);
         if (cell != null) {
-            extendedInfo.append("<cell>");
-            extendedInfo.append(cell);
-            extendedInfo.append("</cell>");
+            extendedInfo.set("cell", cell);
         }
 
         // GSM signal
         String gsm = parser.group(index++);
         if (gsm != null) {
-            extendedInfo.append("<gsm>");
-            extendedInfo.append(Integer.parseInt(gsm, 16));
-            extendedInfo.append("</gsm>");
+            extendedInfo.set("gsm", Integer.parseInt(gsm, 16));
         }
 
         // Milage
         String milage = parser.group(index++);
         if (milage != null) {
-            extendedInfo.append("<milage>");
-            extendedInfo.append(Integer.parseInt(milage, 16));
-            extendedInfo.append("</milage>");
+            extendedInfo.set("milage", Integer.parseInt(milage, 16));
         }
 
         // Extended info

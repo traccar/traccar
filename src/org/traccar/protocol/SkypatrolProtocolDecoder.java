@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 /**
@@ -84,13 +85,11 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            StringBuilder extendedInfo = new StringBuilder("<protocol>skypatrol</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("skypatrol");
 
             // Status code
             if (checkBit(mask, 1)) {
-                extendedInfo.append("<status>");
-                extendedInfo.append(buf.readUnsignedInt());
-                extendedInfo.append("</status>");
+                extendedInfo.set("status", buf.readUnsignedInt());
             }
 
             // Device id
@@ -183,9 +182,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Satellites
             if (checkBit(mask, 16)) {
-                extendedInfo.append("<satellites>");
-                extendedInfo.append(buf.readUnsignedByte());
-                extendedInfo.append("</satellites>");
+                extendedInfo.set("satellites", buf.readUnsignedByte());
             }
 
             // Battery percentage
@@ -195,16 +192,12 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Trip milage
             if (checkBit(mask, 20)) {
-                extendedInfo.append("<trip>");
-                extendedInfo.append(buf.readUnsignedInt());
-                extendedInfo.append("</trip>");
+                extendedInfo.set("trip", buf.readUnsignedInt());
             }
 
             // Milage
             if (checkBit(mask, 21)) {
-                extendedInfo.append("<milage>");
-                extendedInfo.append(buf.readUnsignedInt());
-                extendedInfo.append("</milage>");
+                extendedInfo.set("milage", buf.readUnsignedInt());
             }
 
             // Time of message generation

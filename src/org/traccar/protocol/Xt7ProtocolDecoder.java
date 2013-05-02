@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
@@ -66,7 +67,7 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>xt7</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("xt7");
         
         // Get device by id
         String id = buf.readBytes(16).toString(Charset.defaultCharset()).trim();
@@ -130,42 +131,28 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // IMSI
-        extendedInfo.append("<imsi>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</imsi>");
+        extendedInfo.set("imsi", parser.group(index++));
 
         // Cell
-        extendedInfo.append("<cell>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</cell>");
+        extendedInfo.set("cell", parser.group(index++));
 
         // GSM signal quality
-        extendedInfo.append("<gsm>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</gsm>");
+        extendedInfo.set("gsm", parser.group(index++));
         
         // Battery
         position.setPower(Double.valueOf(parser.group(index++)));
         
         // Flags
-        extendedInfo.append("<flags>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</flags>");
+        extendedInfo.set("flags", parser.group(index++));
 
         // Sensors
-        extendedInfo.append("<sensors>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</sensors>");
+        extendedInfo.set("sensors", parser.group(index++));
 
         // Fuel
-        extendedInfo.append("<fuel>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</fuel>");
+        extendedInfo.set("fuel", parser.group(index++));
 
         // Alarm
-        extendedInfo.append("<alarm>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</alarm>");
+        extendedInfo.set("alarm", parser.group(index++));
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());

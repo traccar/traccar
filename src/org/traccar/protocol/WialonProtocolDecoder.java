@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class WialonProtocolDecoder extends BaseProtocolDecoder {
@@ -93,7 +94,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            StringBuilder extendedInfo = new StringBuilder("<protocol>wialon</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("wialon");
             position.setDeviceId(deviceId);
 
             Integer index = 1;
@@ -133,9 +134,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             // Satellites
             int satellites = Integer.valueOf(parser.group(index++));
             position.setValid(satellites >= 3);
-            extendedInfo.append("<satellites>");
-            extendedInfo.append(satellites);
-            extendedInfo.append("</satellites>");
+            extendedInfo.set("satellites", satellites);
             
             // Extended info
             position.setExtendedInfo(extendedInfo.toString());

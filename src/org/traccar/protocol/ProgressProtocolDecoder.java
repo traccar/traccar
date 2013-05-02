@@ -32,6 +32,7 @@ import org.traccar.ServerManager;
 import org.traccar.helper.AdvancedConnection;
 import org.traccar.helper.Log;
 import org.traccar.helper.NamedParameterStatement;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 /**
@@ -139,15 +140,15 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
-                StringBuilder extendedInfo = new StringBuilder("<protocol>progress</protocol>");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("progress");
                 position.setDeviceId(deviceId);
 
                 // Message index
                 if (type == MSG_LOGMSG) {
-                    extendedInfo.append("<archive>true</archive>");
+                    extendedInfo.set("archive", true);
                     int subtype = buf.readUnsignedShort();
                     if (subtype == MSG_ALARM) {
-                        extendedInfo.append("<alarm>true</alarm>");
+                        extendedInfo.set("alarm", true);
                     }
                     if (buf.readUnsignedShort() > buf.readableBytes()) {
                         lastIndex += 1;
@@ -182,22 +183,16 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
                 // Satellites
                 int satellitesNumber = buf.readUnsignedByte();
-                extendedInfo.append("<satellites>");
-                extendedInfo.append(satellitesNumber);
-                extendedInfo.append("</satellites>");
+                extendedInfo.set("satellites", satellitesNumber);
 
                 // Validity
                 position.setValid(satellitesNumber >= 3); // TODO: probably wrong
 
                 // Cell signal
-                extendedInfo.append("<gsm>");
-                extendedInfo.append(buf.readUnsignedByte());
-                extendedInfo.append("</gsm>");
+                extendedInfo.set("gsm", buf.readUnsignedByte());
 
                 // Milage
-                extendedInfo.append("<milage>");
-                extendedInfo.append(buf.readUnsignedInt());
-                extendedInfo.append("</milage>");
+                extendedInfo.set("milage", buf.readUnsignedInt());
 
                 long extraFlags = buf.readLong();
 
@@ -205,9 +200,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 if ((extraFlags & 0x1) == 0x1) {
                     int count = buf.readUnsignedShort();
                     for (int i = 1; i <= count; i++) {
-                        extendedInfo.append("<adc").append(i).append(">");
-                        extendedInfo.append(buf.readUnsignedShort());
-                        extendedInfo.append("</adc").append(i).append(">");
+                        extendedInfo.set("adc" + i, buf.readUnsignedShort());
                     }
 
                 }
@@ -215,9 +208,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 // CAN adapter
                 if ((extraFlags & 0x2) == 0x2) {
                     int size = buf.readUnsignedShort();
-                    extendedInfo.append("<can>");
-                    extendedInfo.append(buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
-                    extendedInfo.append("</can>");
+                    extendedInfo.set("can", buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
                     buf.skipBytes(size);
                 }
 
@@ -233,9 +224,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                         hex.append(HEX_CHARS.charAt((b & 0x0F)));
                     }
 
-                    extendedInfo.append("<passenger>");
-                    extendedInfo.append(hex);
-                    extendedInfo.append("</passenger>");
+                    extendedInfo.set("passenger", hex);
 
                     buf.skipBytes(size);
                 }
@@ -245,7 +234,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     byte[] response = {(byte)0xC9,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
                     channel.write(ChannelBuffers.wrappedBuffer(response));
 
-                    extendedInfo.append("<alarm>true</alarm>");
+                    extendedInfo.set("alarm", true);
                 }
 
                 // Skip CRC

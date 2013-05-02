@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
@@ -36,8 +37,8 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             "(?:.+,)?(\\d+)," +            // Device Identifier
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
-            "(\\d+\\.\\d+)," +             // Longitude
-            "(\\d+\\.\\d+)," +             // Latitude
+            "(-?\\d+\\.\\d+)," +           // Longitude
+            "(-?\\d+\\.\\d+)," +           // Latitude
             "(\\d+\\.?\\d*)," +            // Speed
             "(\\d+\\.?\\d*)," +            // Course
             "(\\d+\\.?\\d*)," +            // Altitude
@@ -63,7 +64,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>intellitrac</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("intellitrac");
         Integer index = 1;
 
         // Detect device
@@ -96,33 +97,27 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        extendedInfo.append("<satellites>");
-        extendedInfo.append(satellites);
-        extendedInfo.append("</satellites>");
+        extendedInfo.set("satellites", satellites);
         
         // Report identifier
         position.setId(Long.valueOf(parser.group(index++)));
 
         // Input
-        extendedInfo.append("<input>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</input>");
+        extendedInfo.set("input", parser.group(index++));
 
         // Output
-        extendedInfo.append("<output>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</output>");
+        extendedInfo.set("output", parser.group(index++));
 
         // ADC1
         String adc1 = parser.group(index++);
         if (adc1 != null) {
-            extendedInfo.append("<adc1>").append(adc1).append("</adc1>");
+            extendedInfo.set("adc1", adc1);
         }
 
         // ADC2
         String adc2 = parser.group(index++);
         if (adc2 != null) {
-            extendedInfo.append("<adc2>").append(adc2).append("</adc2>");
+            extendedInfo.set("adc2", adc2);
         }
 
         position.setExtendedInfo(extendedInfo.toString());

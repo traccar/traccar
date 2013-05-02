@@ -43,6 +43,9 @@ public class IntellitracProtocolDecoderTest {
         
         assertNotNull(decoder.decode(null, null,
                 "1010000001,20030105092129,121.651598,25.052325,0,0,33,0,1,0,0"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "1010000001,20030105092129,-121.651598,-25.052325,0,0,33,0,1,0,0"));
 
     }
 

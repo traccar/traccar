@@ -25,6 +25,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
@@ -108,7 +109,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            StringBuilder extendedInfo = new StringBuilder("<protocol>gt06</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt06");
 
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -123,9 +124,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             // GPS length and Satellites count
             int gpsLength = buf.readUnsignedByte();
-            extendedInfo.append("<satellites>");
-            extendedInfo.append(gpsLength & 0xf);
-            extendedInfo.append("</satellites>");
+            extendedInfo.set("satellites", gpsLength & 0xf);
             gpsLength >>= 4;
 
             // Latitude
@@ -158,32 +157,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 // Cell information
-                extendedInfo.append("<mcc>");
-                extendedInfo.append(buf.readUnsignedShort());
-                extendedInfo.append("</mcc>");
-                extendedInfo.append("<mnc>");
-                extendedInfo.append(buf.readUnsignedByte());
-                extendedInfo.append("</mnc>");
-                extendedInfo.append("<lac>");
-                extendedInfo.append(buf.readUnsignedShort());
-                extendedInfo.append("</lac>");
-                extendedInfo.append("<cell>");
-                extendedInfo.append(buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
-                extendedInfo.append("</cell>");
+                extendedInfo.set("mcc", buf.readUnsignedShort());
+                extendedInfo.set("mnc", buf.readUnsignedByte());
+                extendedInfo.set("lac", buf.readUnsignedShort());
+                extendedInfo.set("cell", buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
                 buf.skipBytes(lbsLength - 9);
 
                 // Status
                 if (type == MSG_GPS_LBS_STATUS) {
                     int flags = buf.readUnsignedByte(); // TODO parse flags
-                    extendedInfo.append("<alarm>true</alarm>");
+                    extendedInfo.set("alarm", true);
 
                     // Voltage
                     position.setPower((double) buf.readUnsignedByte());
 
                     // GSM signal
-                    extendedInfo.append("<gsm>");
-                    extendedInfo.append(buf.readUnsignedByte());
-                    extendedInfo.append("</gsm>");
+                    extendedInfo.set("gsm", buf.readUnsignedByte());
                 }
             }
 

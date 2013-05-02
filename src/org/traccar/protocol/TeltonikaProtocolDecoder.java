@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
@@ -65,32 +66,26 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         
         for (int i = 0; i < count; i++) {
             Position position = new Position();
-            StringBuilder extendedInfo = new StringBuilder("<protocol>teltonika</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("teltonika");
             
             position.setDeviceId(deviceId);
             position.setTime(new Date(buf.readLong()));
-            
-            extendedInfo.append("<priority>");
-            extendedInfo.append(buf.readUnsignedByte());
-            extendedInfo.append("</priority>");
+
+            extendedInfo.set("priority", buf.readUnsignedByte());
 
             position.setLongitude(buf.readUnsignedInt() / 10000000.0);
             position.setLatitude(buf.readUnsignedInt() / 10000000.0);
             position.setAltitude((double) buf.readUnsignedShort());
             position.setCourse((double) buf.readUnsignedShort());
             
-            extendedInfo.append("<satellites>");
             int satellites = buf.readUnsignedByte();
-            extendedInfo.append(satellites);
-            extendedInfo.append("</satellites>");
+            extendedInfo.set("satellites", satellites);
 
             position.setValid(satellites != 0);
             
             position.setSpeed((double) buf.readUnsignedShort());
-            
-            extendedInfo.append("<event>");
-            extendedInfo.append(buf.readUnsignedByte());
-            extendedInfo.append("</event>");
+
+            extendedInfo.set("event", buf.readUnsignedByte());
             
             // Skip IO data
             buf.readUnsignedByte(); // total IO data records

@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class CarscopProtocolDecoder extends BaseProtocolDecoder {
@@ -79,7 +80,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         position.setDeviceId(deviceId);
-        StringBuilder extendedInfo = new StringBuilder("<protocol>carscop</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("carscop");
         index = 1;
 
         // Time
@@ -120,14 +121,10 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
         
         // State
-        extendedInfo.append("<state>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</state>");
+        extendedInfo.set("state", parser.group(index++));
 
         // Milage
-        extendedInfo.append("<milage>");
-        extendedInfo.append(Integer.valueOf(parser.group(index++)));
-        extendedInfo.append("</milage>");
+        extendedInfo.set("milage", Integer.valueOf(parser.group(index++)));
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
