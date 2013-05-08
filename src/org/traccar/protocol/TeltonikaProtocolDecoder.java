@@ -73,8 +73,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
             extendedInfo.set("priority", buf.readUnsignedByte());
 
-            position.setLongitude(buf.readUnsignedInt() / 10000000.0);
-            position.setLatitude(buf.readUnsignedInt() / 10000000.0);
+            position.setLongitude(buf.readInt() / 10000000.0);
+            position.setLatitude(buf.readInt() / 10000000.0);
             position.setAltitude((double) buf.readUnsignedShort());
             position.setCourse((double) buf.readUnsignedShort());
             
