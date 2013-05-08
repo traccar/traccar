@@ -48,7 +48,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                         // GSM Signal
             "(\\d+)," +                         // Speed
             "(\\d+)," +                         // Course
-            "(\\d+)," +                         // HDOP
+            "(\\d+.?\\d*)," +                   // HDOP
             "(\\d+)," +                         // Altitude
             "(\\d+)," +                         // Milage
             ".*"); // TODO: parse other stuff

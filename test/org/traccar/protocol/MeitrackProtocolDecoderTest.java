@@ -10,6 +10,9 @@ public class MeitrackProtocolDecoderTest {
 
         MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
+        
+        assertNotNull(decoder.decode(null, null,
+                "$$X138,862170010187175,AAA,35,-29.960365,-51.655455,130507201625,A,8,9,0,107,0.9,7,169322,126582,724|6|0547|132B,0000,0009|000A||0278|0000,*BE"));
 
         assertNotNull(decoder.decode(null, null,
                 "$$]138,012896000475498,AAA,35,-6.138255,106.910545,121205074600,A,5,18,0,0,0,49,3800,24826,510|10|0081|4F4F,0000,0011|0012|0010|0963|0000,,*94"));
@@ -25,6 +28,7 @@ public class MeitrackProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 "$$A141,012896005334567,AAA,35,-33.866543,151.190148,121209081758,A,6,27,0,16,1,48,65551,152784,505|2|0B5F|D9D3,0000,0000|0000|0000|0A39|0000,,*5B"));
+
 
     }
 
