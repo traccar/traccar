@@ -87,12 +87,31 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
             extendedInfo.set("event", buf.readUnsignedByte());
             
-            // Skip IO data
             buf.readUnsignedByte(); // total IO data records
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 1));
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 2));
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 4));
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 8));
+
+            // Read 1 byte data
+            int cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedByte());
+            }
+            
+            // Read 2 byte data
+            cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+            }
+
+            // Read 4 byte data
+            cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+            }
+
+            // Read 8 byte data
+            cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readLong());
+            }
         
             position.setExtendedInfo(extendedInfo.toString());
             positions.add(position);
