@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
@@ -65,39 +66,52 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         
         for (int i = 0; i < count; i++) {
             Position position = new Position();
-            StringBuilder extendedInfo = new StringBuilder("<protocol>teltonika</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("teltonika");
             
             position.setDeviceId(deviceId);
             position.setTime(new Date(buf.readLong()));
-            
-            extendedInfo.append("<priority>");
-            extendedInfo.append(buf.readUnsignedByte());
-            extendedInfo.append("</priority>");
 
-            position.setLongitude(buf.readUnsignedInt() / 10000000.0);
-            position.setLatitude(buf.readUnsignedInt() / 10000000.0);
+            extendedInfo.set("priority", buf.readUnsignedByte());
+
+            position.setLongitude(buf.readInt() / 10000000.0);
+            position.setLatitude(buf.readInt() / 10000000.0);
             position.setAltitude((double) buf.readUnsignedShort());
             position.setCourse((double) buf.readUnsignedShort());
             
-            extendedInfo.append("<satellites>");
             int satellites = buf.readUnsignedByte();
-            extendedInfo.append(satellites);
-            extendedInfo.append("</satellites>");
+            extendedInfo.set("satellites", satellites);
 
             position.setValid(satellites != 0);
             
             position.setSpeed((double) buf.readUnsignedShort());
+
+            extendedInfo.set("event", buf.readUnsignedByte());
             
-            extendedInfo.append("<event>");
-            extendedInfo.append(buf.readUnsignedByte());
-            extendedInfo.append("</event>");
-            
-            // Skip IO data
             buf.readUnsignedByte(); // total IO data records
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 1));
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 2));
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 4));
-            buf.skipBytes(buf.readUnsignedByte() * (1 + 8));
+
+            // Read 1 byte data
+            int cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedByte());
+            }
+            
+            // Read 2 byte data
+            cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+            }
+
+            // Read 4 byte data
+            cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+            }
+
+            // Read 8 byte data
+            cnt = buf.readUnsignedByte();
+            for (int j = 0; j < cnt; j++) {
+                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readLong());
+            }
         
             position.setExtendedInfo(extendedInfo.toString());
             positions.add(position);

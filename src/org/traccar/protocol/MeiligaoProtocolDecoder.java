@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
@@ -37,23 +38,23 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})," +      // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)," +        // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d{4})," +      // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d+)," +        // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+.\\d+)," +                    // Speed
             "(\\d+\\.?\\d*)?," +                // Course
-            "(\\d{2})(\\d{2})(\\d{2})" +       // Date (DDMMYY)
-            "[^\\|]*\\|(\\d+\\.\\d)\\|" +       // Dilution of precision
-            "(\\d+\\.?\\d*)\\|" +               // Altitude
+            "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
+            "(?:[^\\|]*\\|(\\d+\\.\\d+)\\|" +   // Dilution of precision
+            "(\\d+\\.?\\d*)\\|)?" +             // Altitude
             "([0-9a-fA-F]+)?" +                 // State
             "(?:\\|([0-9a-fA-F]+),([0-9a-fA-F]+))?" + // ADC
+            "(?:,([0-9a-fA-F]+),([0-9a-fA-F]+)" +
+            ",([0-9a-fA-F]+),([0-9a-fA-F]+)" +
+            ",([0-9a-fA-F]+),([0-9a-fA-F]+))?" +
             "(?:\\|([0-9a-fA-F]+))?" +          // Cell
             "(?:\\|([0-9a-fA-F]+))?" +          // Signal
             "(?:\\|([0-9a-fA-F]+))?" +          // Milage
@@ -82,14 +83,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         return id;
     }
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
-
+        
         ChannelBuffer buf = (ChannelBuffer) msg;
         int command = buf.getUnsignedShort(7);
 
@@ -113,8 +111,19 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        // Data offset
+        // Payload offset
         int offset = 7 + 2;
+
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meiligao");
+
+        // Alarm
+        if (command == 0x9999) {
+            extendedInfo.set("alarm", buf.getUnsignedByte(offset));
+        }
+
+        // Data offset
         if (command == 0x9955) {
             offset += 0;
         } else if (command == 0x9016) {
@@ -124,10 +133,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         } else {
             return null;
         }
-
-        // Create new position
-        Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>meiligao</protocol>");
 
         // Get device by id
         String id = getId(buf);
@@ -188,9 +193,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Dilution of precision
-        extendedInfo.append("<hdop>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</hdop>");
+        extendedInfo.set("hdop", parser.group(index++));
 
         // Altitude
         String altitude = parser.group(index++);
@@ -203,43 +206,33 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         // State
         String state = parser.group(index++);
         if (state != null) {
-            extendedInfo.append("<state>");
-            extendedInfo.append(state);
-            extendedInfo.append("</state>");
+            extendedInfo.set("state", state);
         }
 
         // ADC
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= 8; i++) {
             String adc = parser.group(index++);
             if (adc != null) {
-                extendedInfo.append("<adc").append(i).append(">");
-                extendedInfo.append(Integer.parseInt(adc, 16));
-                extendedInfo.append("</adc").append(i).append(">");
+                extendedInfo.set("adc" + i, Integer.parseInt(adc, 16));
             }
         }
 
         // Cell identifier
         String cell = parser.group(index++);
         if (cell != null) {
-            extendedInfo.append("<cell>");
-            extendedInfo.append(cell);
-            extendedInfo.append("</cell>");
+            extendedInfo.set("cell", cell);
         }
 
         // GSM signal
         String gsm = parser.group(index++);
         if (gsm != null) {
-            extendedInfo.append("<gsm>");
-            extendedInfo.append(Integer.parseInt(gsm, 16));
-            extendedInfo.append("</gsm>");
+            extendedInfo.set("gsm", Integer.parseInt(gsm, 16));
         }
 
         // Milage
         String milage = parser.group(index++);
         if (milage != null) {
-            extendedInfo.append("<milage>");
-            extendedInfo.append(Integer.parseInt(milage, 16));
-            extendedInfo.append("</milage>");
+            extendedInfo.set("milage", Integer.parseInt(milage, 16));
         }
 
         // Extended info

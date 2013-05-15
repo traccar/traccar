@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,44 +24,36 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * V680 tracker protocol decoder
- */
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public V680ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
-            "#" +
+            "#?" +
             "(\\d+)#" +                    // IMEI
-            "([^#]+)#" +                   // User
+            "([^#]*)#" +                   // User
             "([01])#" +                    // Fix
             "([^#]+)#" +                   // Password
             "[^#]+#" +
             "(\\d+)#" +                    // Packet number
             "([^#]+)#" +                   // GSM base station
-            "(\\d{3})(\\d{2}\\.\\d{4})," + // Longitude (DDDMM.MMMM)
+            "(?:[^#]+#)?" +
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d{2})(\\d{2}\\.\\d{4})," + // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d+\\.\\d+)," +             // Speed
-            "(\\d+)#" +                    // Course
+            "(\\d+\\.?\\d*)#" +            // Course
             "(\\d{2})(\\d{2})(\\d{2})#" +  // Date (DDMMYY)
-            "(\\d{2})(\\d{2})(\\d{2})");   // Time (HHMMSS)
+            "(\\d{2})(\\d{2})(\\d{2})" +   // Time (HHMMSS)
+            ".*");
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -76,7 +68,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>V680</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("v680");
         Integer index = 1;
 
         // Get device by IMEI
@@ -89,27 +81,19 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // User
-        extendedInfo.append("<user>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</user>");
+        extendedInfo.set("user", parser.group(index++));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") == 0 ? true : false);
 
         // Password
-        extendedInfo.append("<password>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</password>");
+        extendedInfo.set("password", parser.group(index++));
 
         // Packet number
-        extendedInfo.append("<packet>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</packet>");
+        extendedInfo.set("packet", parser.group(index++));
 
         // GSM base station
-        extendedInfo.append("<gsm>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</gsm>");
+        extendedInfo.set("gsm", parser.group(index++));
 
         // Longitude
         Double lonlitude = Double.valueOf(parser.group(index++));

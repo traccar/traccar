@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class YwtProtocolDecoder extends BaseProtocolDecoder {
@@ -32,10 +33,6 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
-    //%GP,3000012345:0,090723182813,E114.602345,N22.069725,,30,160,4,0,00,,2794-10FF-46000,3>0-0
     static private Pattern pattern = Pattern.compile(
             "%(..)," +                     // Type
             "(\\d+):" +                    // Unit identifier
@@ -69,7 +66,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>ywt</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("ywt");
         Integer index = 1;
         String type = parser.group(index++);
 
@@ -122,15 +119,13 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        extendedInfo.append("<satellites>").append(satellites).append("</satellites>");
+        extendedInfo.set("satellites", satellites);
         
         // Report identifier
         String reportId = parser.group(index++);
         
         // Status
-        extendedInfo.append("<status>");
-        extendedInfo.append(parser.group(index++));
-        extendedInfo.append("</status>");
+        extendedInfo.set("status", parser.group(index++));
 
         // Send response
         if (type.equals("KP") || type.equals("EP") || type.equals("EP")) {

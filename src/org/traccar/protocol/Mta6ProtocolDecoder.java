@@ -34,6 +34,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
@@ -128,7 +129,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readable()) {
                 Position position = new Position();
                 position.setDeviceId(deviceId);
-                StringBuilder extendedInfo = new StringBuilder("<protocol>mta6</protocol>");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("mta6");
 
                 short flags = buf.readUnsignedByte();
 
@@ -162,50 +163,40 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (checkBit(flags, 3)) {
-                    extendedInfo.append("<milage>");
-                    extendedInfo.append(buf.readUnsignedShort());
-                    extendedInfo.append("</milage>");
+                    extendedInfo.set("milage", buf.readUnsignedShort());
                 }
 
                 if (checkBit(flags, 4)) {
-                    extendedInfo.append("<fuel1>").append(buf.readUnsignedInt()).append("</fuel1>");
-                    extendedInfo.append("<fuel2>").append(buf.readUnsignedInt()).append("</fuel2>");
-                    extendedInfo.append("<hours1>").append(buf.readUnsignedShort()).append("</hours1>");
-                    extendedInfo.append("<hours2>").append(buf.readUnsignedShort()).append("</hours2>");
+                    extendedInfo.set("fuel1", buf.readUnsignedInt());
+                    extendedInfo.set("fuel2", buf.readUnsignedInt());
+                    extendedInfo.set("hours1", buf.readUnsignedShort());
+                    extendedInfo.set("hours2", buf.readUnsignedShort());
                 }
 
                 if (checkBit(flags, 5)) {
-                    extendedInfo.append("<adc1>").append(buf.readUnsignedShort() & 0x03ff).append("</adc1>");
-                    extendedInfo.append("<adc2>").append(buf.readUnsignedShort() & 0x03ff).append("</adc2>");
-                    extendedInfo.append("<adc3>").append(buf.readUnsignedShort() & 0x03ff).append("</adc3>");
-                    extendedInfo.append("<adc4>").append(buf.readUnsignedShort() & 0x03ff).append("</adc4>");
+                    extendedInfo.set("adc1", buf.readUnsignedShort() & 0x03ff);
+                    extendedInfo.set("adc2", buf.readUnsignedShort() & 0x03ff);
+                    extendedInfo.set("adc3", buf.readUnsignedShort() & 0x03ff);
+                    extendedInfo.set("adc4", buf.readUnsignedShort() & 0x03ff);
                 }
 
                 if (checkBit(flags, 6)) {
-                    extendedInfo.append("<temperature>");
-                    extendedInfo.append(buf.readByte());
-                    extendedInfo.append("</temperature>");
+                    extendedInfo.set("temperature", buf.readByte());
                     buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
-                    extendedInfo.append("<sensor>");
-                    extendedInfo.append(buf.readUnsignedShort() & 0x0fff);
-                    extendedInfo.append("</sensor>");
+                    extendedInfo.set("sensor", buf.readUnsignedShort() & 0x0fff);
                     buf.readUnsignedShort(); // old sensor state (& 0x0fff)
                 }
 
                 if (checkBit(flags, 7)) {
-                    extendedInfo.append("<battery>");
-                    extendedInfo.append(buf.getUnsignedByte(buf.readerIndex()) >> 2);
-                    extendedInfo.append("</battery>");
+                    extendedInfo.set("battery", buf.getUnsignedByte(buf.readerIndex()) >> 2);
                     position.setPower((double) (buf.readUnsignedShort() & 0x03ff));
                     buf.readByte(); // microcontroller temperature
 
-                    extendedInfo.append("<gsm>");
-                    extendedInfo.append((buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
-                    extendedInfo.append("</gsm>");
+                    extendedInfo.set("gsm", (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
 
                     int satellites = buf.readUnsignedByte() & 0x0f;
                     position.setValid(satellites >= 3);
-                    extendedInfo.append("<satellites>").append(satellites).append("</satellites>");
+                    extendedInfo.set("satellites", satellites);
                 }
 
                 position.setExtendedInfo(extendedInfo.toString());
@@ -220,7 +211,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     private Position parseFormatA1(ChannelBuffer buf, long deviceId) {
         Position position = new Position();
         position.setDeviceId(deviceId);
-        StringBuilder extendedInfo = new StringBuilder("<protocol>mta6can</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("mta6");
 
         short flags = buf.readUnsignedByte();
 
@@ -246,56 +237,46 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude((double) buf.readUnsignedShort());
             position.setSpeed((double) buf.readUnsignedByte());
             position.setCourse((double) buf.readByte());
-            extendedInfo.append("<milage>");
-            extendedInfo.append(new FloatReader().readFloat(buf));
-            extendedInfo.append("</milage>");
+            extendedInfo.set("milage", new FloatReader().readFloat(buf));
         }
 
         if (checkBit(flags, 1)) {
             new FloatReader().readFloat(buf); // fuel consumtion
-            extendedInfo.append("<hours>").append(new FloatReader().readFloat(buf)).append("</hours>");
-            extendedInfo.append("<tank>").append(buf.readUnsignedByte() * 0.4).append("</tank>");
+            extendedInfo.set("hours", new FloatReader().readFloat(buf));
+            extendedInfo.set("tank", buf.readUnsignedByte() * 0.4);
         }
 
         if (checkBit(flags, 2)) {
-            extendedInfo.append("<engine>").append(buf.readUnsignedShort() * 0.125).append("</engine>");
-            extendedInfo.append("<pedals>").append(buf.readUnsignedByte()).append("</pedals>");
-            extendedInfo.append("<temperature>").append(buf.readUnsignedByte() - 40).append("</temperature>");
+            extendedInfo.set("engine", buf.readUnsignedShort() * 0.125);
+            extendedInfo.set("pedals", buf.readUnsignedByte());
+            extendedInfo.set("temperature", buf.readUnsignedByte() - 40);
             buf.readUnsignedShort(); // service milage
         }
 
         if (checkBit(flags, 3)) {
-            extendedInfo.append("<fuel>").append(buf.readUnsignedShort()).append("</fuel>");
-            extendedInfo.append("<adc2>").append(buf.readUnsignedShort()).append("</adc2>");
-            extendedInfo.append("<adc3>").append(buf.readUnsignedShort()).append("</adc3>");
-            extendedInfo.append("<adc4>").append(buf.readUnsignedShort()).append("</adc4>");
+            extendedInfo.set("fuel", buf.readUnsignedShort());
+            extendedInfo.set("adc2", buf.readUnsignedShort());
+            extendedInfo.set("adc3", buf.readUnsignedShort());
+            extendedInfo.set("adc4", buf.readUnsignedShort());
         }
 
         if (checkBit(flags, 4)) {
-            extendedInfo.append("<temperature>");
-            extendedInfo.append(buf.readByte());
-            extendedInfo.append("</temperature>");
+            extendedInfo.set("temperature", buf.readByte());
             buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
-            extendedInfo.append("<sensor>");
-            extendedInfo.append(buf.readUnsignedShort() & 0x0fff);
-            extendedInfo.append("</sensor>");
+            extendedInfo.set("sensor", buf.readUnsignedShort() & 0x0fff);
             buf.readUnsignedShort(); // old sensor state (& 0x0fff)
         }
 
         if (checkBit(flags, 5)) {
-            extendedInfo.append("<battery>");
-            extendedInfo.append(buf.getUnsignedByte(buf.readerIndex()) >> 2);
-            extendedInfo.append("</battery>");
+            extendedInfo.set("battery", buf.getUnsignedByte(buf.readerIndex()) >> 2);
             position.setPower((double) (buf.readUnsignedShort() & 0x03ff));
             buf.readByte(); // microcontroller temperature
 
-            extendedInfo.append("<gsm>");
-            extendedInfo.append(buf.getUnsignedByte(buf.readerIndex()) >> 5);
-            extendedInfo.append("</gsm>");
+            extendedInfo.set("gsm", buf.getUnsignedByte(buf.readerIndex()) >> 5);
 
             int satellites = buf.readUnsignedByte() & 0x1f;
             position.setValid(satellites >= 3);
-            extendedInfo.append("<satellites>").append(satellites).append("</satellites>");
+            extendedInfo.set("satellites", satellites);
         }
         
         // TODO: process other data

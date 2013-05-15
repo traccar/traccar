@@ -25,24 +25,15 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * PT502 tracker protocol decoder
- */
 public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Pt502ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
-    //$POS,6094,205523.000,A,1013.6223,N,06728.4248,W,0.0,99.3,011112,,,A/00000,00000/0/23895000//
     static private Pattern pattern = Pattern.compile(
             "\\$POS," +                         // Data Frame start
             "(\\d+)," +                         // Id
@@ -57,9 +48,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date
             ".*");
 
-    /*
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -75,7 +64,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>pt502</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("pt502");
 
         Integer index = 1;
 

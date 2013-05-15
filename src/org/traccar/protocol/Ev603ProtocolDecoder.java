@@ -25,28 +25,17 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * Ev603 Protocol Decoder
- */
 public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
-    /**
-     * Device ID
-     */
     private Long deviceId;
 
-    /**
-     * Initialize
-     */
     public Ev603ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "!A," +                           // Type
             "(\\d{2})\\/(\\d{2})\\/(\\d{2})," + // Date dd/mm/YY
@@ -57,9 +46,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
             "(\\d+\\.?\\d+)," +               // Course
             ".*");
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -87,7 +74,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            StringBuilder extendedInfo = new StringBuilder("<protocol>ev603</protocol>");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("ev603");
             Integer index = 1;
 
             // Date

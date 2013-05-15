@@ -29,6 +29,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
@@ -98,7 +99,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        StringBuilder extendedInfo = new StringBuilder("<protocol>galileo</protocol>");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("galileo");
         
         while (buf.readerIndex() < length) {
             int tag = buf.readUnsignedByte();
@@ -134,9 +135,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                     
                 case TAG_STATUS:
-                    extendedInfo.append("<status>");
-                    extendedInfo.append(buf.readUnsignedShort());
-                    extendedInfo.append("</status>");
+                    extendedInfo.set("status", buf.readUnsignedShort());
                     break;
                     
                 case TAG_POWER:
@@ -144,15 +143,11 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                     
                 case TAG_BATTERY:
-                    extendedInfo.append("<battery>");
-                    extendedInfo.append(buf.readUnsignedShort());
-                    extendedInfo.append("</battery>");
+                    extendedInfo.set("battery", buf.readUnsignedShort());
                     break;
                     
                 case TAG_MILAGE:
-                    extendedInfo.append("<milage>");
-                    extendedInfo.append(buf.readUnsignedInt());
-                    extendedInfo.append("</milage>");
+                    extendedInfo.set("milage", buf.readUnsignedInt());
                     break;
                     
                 default:

@@ -27,47 +27,47 @@ import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-public class WondexProtocolDecoder extends BaseProtocolDecoder {
+public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
-    public WondexProtocolDecoder(ServerManager serverManager) {
+    public IntellitracProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
     static private Pattern pattern = Pattern.compile(
-            "[^\\d]*" +                    // Header
-            "(\\d+)," +                    // Device Identifier
+            "(?:.+,)?(\\d+)," +            // Device Identifier
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
             "(-?\\d+\\.\\d+)," +           // Longitude
             "(-?\\d+\\.\\d+)," +           // Latitude
-            "(\\d+)," +                    // Speed
-            "(\\d+)," +                    // Course
-            "(\\d+)," +                    // Altitude
+            "(\\d+\\.?\\d*)," +            // Speed
+            "(\\d+\\.?\\d*)," +            // Course
+            "(\\d+\\.?\\d*)," +            // Altitude
             "(\\d+)," +                    // Satellites
-            "(\\d+),?" +                   // Event
-            "(\\d+\\.\\d+)?,?" +           // Milage
-            "(\\d+)?,?" +                  // Input
+            "(\\d+)," +                    // Report Identifier
+            "(\\d+)," +                    // Input
+            "(\\d+),?" +                   // Output
             "(\\d+\\.\\d+)?,?" +           // ADC1
-            "(\\d+\\.\\d+)?,?" +           // ADC2
-            "(\\d+)?");                    // Output
+            "(\\d+\\.\\d+)?");             // ADC2
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
 
+        String sentence = (String) msg;
+        
         // Parse message
-        Matcher parser = pattern.matcher((String) msg);
+        Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("wondex");
-        int index = 1;
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("intellitrac");
+        Integer index = 1;
 
-        // Device identifier
+        // Detect device
         String id = parser.group(index++);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
@@ -75,8 +75,8 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             Log.warning("Unknown device - " + id);
             return null;
         }
-
-        // Time
+        
+        // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
@@ -86,34 +86,39 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-
-        // Position data
+        
+        // Location data
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setLatitude(Double.valueOf(parser.group(index++)));
-        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
+        position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
-
+        
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
         extendedInfo.set("satellites", satellites);
         
-        // Event
-        extendedInfo.set("event", parser.group(index++));
-        
-        // Milage
-        extendedInfo.set("milage", parser.group(index++));
-        
+        // Report identifier
+        position.setId(Long.valueOf(parser.group(index++)));
+
         // Input
         extendedInfo.set("input", parser.group(index++));
-        
-        // ADC
-        extendedInfo.set("adc1", parser.group(index++));
-        extendedInfo.set("adc2", parser.group(index++));
-        
+
         // Output
         extendedInfo.set("output", parser.group(index++));
+
+        // ADC1
+        String adc1 = parser.group(index++);
+        if (adc1 != null) {
+            extendedInfo.set("adc1", adc1);
+        }
+
+        // ADC2
+        String adc2 = parser.group(index++);
+        if (adc2 != null) {
+            extendedInfo.set("adc2", adc2);
+        }
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;

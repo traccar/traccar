@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
@@ -27,56 +29,66 @@ import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-public class H02ProtocolDecoder extends BaseProtocolDecoder {
+public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
-    public H02ProtocolDecoder(ServerManager serverManager) {
+    public Xt7ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
-    	    "\\*HQ," +
-            "(\\d+)," +                         // IMEI
-            "V\\d," +                           // Version?
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
+            "\\$GPRMC," +
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
-            "(\\d+)(\\d{2}.\\d{4})," +          // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)," +        // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d+)(\\d{2}.\\d{4})," +          // Longitude (DDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d+)," +        // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+.\\d+)," +                    // Speed
-            "(\\d+.\\d+)?," +                   // Course
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            ".*");
+            "(\\d+\\.?\\d*)?," +                // Course
+            "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
+            "[^\\*]+\\*[0-9a-fA-F]{2}," +
+            "(\\d+,\\d+)," +                    // IMSI
+            "([0-9a-fA-F]+,[0-9a-fA-F]+)," +    // Cell
+            "(\\d+)," +                         // Signal quality
+            "(\\d+)," +                         // Battery
+            "([01]{4})," +                      // Flags
+            "([01]{4})," +                      // Sensors
+            "(\\d+)," +                         // Fuel
+            "(.+)?");                           // Alarm
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
+        
+        ChannelBuffer buf = (ChannelBuffer) msg;
+        
+        buf.skipBytes(3); // STX
 
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("xt7");
+        
+        // Get device by id
+        String id = buf.readBytes(16).toString(Charset.defaultCharset()).trim();
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+            return null;
+        }
+        
+        buf.readUnsignedByte(); // command
+        int length = buf.readUnsignedByte();
+        
         // Parse message
-        String sentence = (String) msg;
+        String sentence = buf.readBytes(length).toString(Charset.defaultCharset());
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }
-
-        // Create new position
-        Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("h02");
-
+        
         Integer index = 1;
-
-        // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
-            return null;
-        }
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -84,6 +96,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
@@ -116,6 +129,30 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
+
+        // IMSI
+        extendedInfo.set("imsi", parser.group(index++));
+
+        // Cell
+        extendedInfo.set("cell", parser.group(index++));
+
+        // GSM signal quality
+        extendedInfo.set("gsm", parser.group(index++));
+        
+        // Battery
+        position.setPower(Double.valueOf(parser.group(index++)));
+        
+        // Flags
+        extendedInfo.set("flags", parser.group(index++));
+
+        // Sensors
+        extendedInfo.set("sensors", parser.group(index++));
+
+        // Fuel
+        extendedInfo.set("fuel", parser.group(index++));
+
+        // Alarm
+        extendedInfo.set("alarm", parser.group(index++));
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
