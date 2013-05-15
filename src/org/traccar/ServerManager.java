@@ -147,6 +147,7 @@ public class ServerManager {
         initXt7Server("xt7");
         initWialonServer("wialon");
         initCarscopServer("carscop");
+        initApelServer("apel");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -839,6 +840,20 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new CarscopProtocolDecoder(ServerManager.this));
                 }
             });
+        }
+    }
+
+    private void initApelServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
+                    pipeline.addLast("objectDecoder", new ApelProtocolDecoder(ServerManager.this));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
