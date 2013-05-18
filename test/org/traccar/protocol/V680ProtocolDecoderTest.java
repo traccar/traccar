@@ -22,9 +22,6 @@ public class V680ProtocolDecoderTest {
                 "#356823033219838#1000#0#1478#AUT#1#66830FFB#03855.6628,E,4716.6821,N,001.41,259#130812#143905"));
 
         assertNotNull(decoder.decode(null, null,
-                "356823033219838#1000#0#1478#AUT#1#66830FFB#03855.6628,E,4716.6821,N,001.41,259#130812#143905"));
-
-        assertNotNull(decoder.decode(null, null,
                 "#353588102019155##1#0000#AUT#01#7240060be7873f#4849.079800,W,2614.458200,S,0.00,0.00#130413#182110.000"));
         
         assertNotNull(decoder.decode(null, null,
@@ -32,6 +29,12 @@ public class V680ProtocolDecoderTest {
         
         assertNotNull(decoder.decode(null, null,
                 "#352897045085282##0#0000#AUT#1#72400510730208,00d36307,10734fc4#4647.8922,W,2339.1956,S,2.60,63.74#200413#094310.000"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "#356823033537791##0#0000#AUT#1#V#03610.2179,E,5004.5796,N,000.01,349#180513#073758"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "#356823031236214##0#0000#AUT#1#V#01904.5491,E,6941.0085,N,000.09,248#170513#160140"));
 
     }
 

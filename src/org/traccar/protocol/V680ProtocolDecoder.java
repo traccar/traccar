@@ -29,14 +29,15 @@ import org.traccar.model.Position;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
+    private Long deviceId;
+
     public V680ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
     static private Pattern pattern = Pattern.compile(
-            "#?" +
-            "(\\d+)#" +                    // IMEI
-            "([^#]*)#" +                   // User
+            "(?:#(\\d+)#" +                // IMEI
+            "([^#]*)#)?" +                 // User
             "([01])#" +                    // Fix
             "([^#]+)#" +                   // Password
             "[^#]+#" +
@@ -59,78 +60,97 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
+        
+        // Detect device ID
+        if (sentence.length() == 16) {
+            String imei = sentence.substring(1, sentence.length());
+            try {
+                deviceId = getDataManager().getDeviceByImei(imei).getId();
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + imei);
+            }
+        } else {
 
-        // Parse message
-        Matcher parser = pattern.matcher(sentence);
-        if (!parser.matches()) {
-            return null;
+            // Parse message
+            Matcher parser = pattern.matcher(sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            // Create new position
+            Position position = new Position();
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("v680");
+            Integer index = 1;
+
+            // Get device by IMEI
+            String imei = parser.group(index++);
+            if (imei != null) {
+                try {
+                    deviceId = getDataManager().getDeviceByImei(imei).getId();
+                } catch(Exception error) {
+                    Log.warning("Unknown device - " + imei);
+                    return null;
+                }
+            }
+            if (deviceId == null) {
+                return null;
+            }
+            position.setDeviceId(deviceId);
+
+            // User
+            extendedInfo.set("user", parser.group(index++));
+
+            // Validity
+            position.setValid(parser.group(index++).compareTo("1") == 0 ? true : false);
+
+            // Password
+            extendedInfo.set("password", parser.group(index++));
+
+            // Packet number
+            extendedInfo.set("packet", parser.group(index++));
+
+            // GSM base station
+            extendedInfo.set("gsm", parser.group(index++));
+
+            // Longitude
+            Double lonlitude = Double.valueOf(parser.group(index++));
+            lonlitude += Double.valueOf(parser.group(index++)) / 60;
+            if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
+            position.setLongitude(lonlitude);
+
+            // Latitude
+            Double latitude = Double.valueOf(parser.group(index++));
+            latitude += Double.valueOf(parser.group(index++)) / 60;
+            if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
+            position.setLatitude(latitude);
+
+            // Altitude
+            position.setAltitude(0.0);
+
+            // Speed and Course
+            position.setSpeed(Double.valueOf(parser.group(index++)));
+            position.setCourse(Double.valueOf(parser.group(index++)));
+
+            // Date
+            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            time.clear();
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+
+            // Time
+            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+            position.setTime(time.getTime());
+
+            // Extended info
+            position.setExtendedInfo(extendedInfo.toString());
+
+            return position;
         }
-
-        // Create new position
-        Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("v680");
-        Integer index = 1;
-
-        // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
-            return null;
-        }
-
-        // User
-        extendedInfo.set("user", parser.group(index++));
-
-        // Validity
-        position.setValid(parser.group(index++).compareTo("1") == 0 ? true : false);
-
-        // Password
-        extendedInfo.set("password", parser.group(index++));
-
-        // Packet number
-        extendedInfo.set("packet", parser.group(index++));
-
-        // GSM base station
-        extendedInfo.set("gsm", parser.group(index++));
-
-        // Longitude
-        Double lonlitude = Double.valueOf(parser.group(index++));
-        lonlitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
-        position.setLongitude(lonlitude);
-
-        // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
-
-        // Altitude
-        position.setAltitude(0.0);
-
-        // Speed and Course
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(Double.valueOf(parser.group(index++)));
-
-        // Date
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-
-        // Time
-        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
-
-        return position;
+        
+        return null;
     }
 
 }
