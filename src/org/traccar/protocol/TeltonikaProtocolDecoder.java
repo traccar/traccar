@@ -83,7 +83,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(satellites != 0);
             
-            position.setSpeed((double) buf.readUnsignedShort());
+            position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
             extendedInfo.set("event", buf.readUnsignedByte());
             
