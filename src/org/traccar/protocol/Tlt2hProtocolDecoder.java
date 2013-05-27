@@ -40,9 +40,9 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
-            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+\\.\\d{2})?," +          // Speed
             "(\\d+\\.\\d{2})?," +          // Course
