@@ -153,7 +153,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         else if (type == MSG_TYPE_LAST_LOG_INDEX) {
             long index = buf.readUnsignedInt();
             if (index > 0) {
-                newIndex = index - 1;
+                newIndex = index;
                 requestArchive(channel);
             }
         }
@@ -173,16 +173,18 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(deviceId);
 
                 // Message index
+                int subtype = type;
                 if (type == MSG_TYPE_LOG_RECORDS) {
                     extendedInfo.set("archive", true);
-                    lastIndex = buf.readUnsignedInt();
+                    lastIndex = buf.readUnsignedInt() + 1;
                     position.setId(lastIndex);
 
-                    int subtype = buf.readUnsignedShort();
-                    if (subtype != MSG_TYPE_CURRENT_GPS_DATA) {
+                    subtype = buf.readUnsignedShort();
+                    if (subtype != MSG_TYPE_CURRENT_GPS_DATA && subtype != MSG_TYPE_STATE_FULL_INFO_T104) {
                         buf.skipBytes(buf.readUnsignedShort());
                         continue;
                     }
+                    buf.readUnsignedShort(); // length
                 }
 
                 // Time
@@ -198,7 +200,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 position.setLongitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
 
                 // Speed and Validity
-                if (type == MSG_TYPE_STATE_FULL_INFO_T104) {
+                if (subtype == MSG_TYPE_STATE_FULL_INFO_T104) {
                     int speed = buf.readUnsignedByte();
                     position.setValid(speed != 255);
                     position.setSpeed(speed * 0.539957);
@@ -215,7 +217,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 // Altitude
                 position.setAltitude((double) buf.readShort());
 
-                if (type == MSG_TYPE_STATE_FULL_INFO_T104) {
+                if (subtype == MSG_TYPE_STATE_FULL_INFO_T104) {
 
                     // Satellites
                     extendedInfo.set("satellites", buf.readUnsignedByte());
