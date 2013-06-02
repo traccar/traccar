@@ -17,6 +17,7 @@ package org.traccar.helper;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.zip.CRC32;
 
 /**
  * CRC functions
@@ -126,6 +127,14 @@ public class Crc {
 
     public static int crc16CcittSeed(ByteBuffer buf, int seed) {
         return crc16Reflected(buf, seed, crc16CcittTableReverse) ^ crc16CcittXorout;
+    }
+
+    public static int crc32(ByteBuffer buf) {
+        CRC32 checksum = new CRC32();
+        for (int i = 0; i < buf.remaining(); i++) {
+            checksum.update(buf.get(i));
+        }
+        return (int) checksum.getValue();
     }
     
     public static String nmeaChecksum(String msg) {
