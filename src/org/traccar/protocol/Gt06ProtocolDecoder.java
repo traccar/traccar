@@ -134,7 +134,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
 
             // Speed
-            position.setSpeed((double) buf.readUnsignedByte());
+            position.setSpeed(buf.readUnsignedByte() * 0.539957);
 
             // Course and flags
             int union = buf.readUnsignedShort();
