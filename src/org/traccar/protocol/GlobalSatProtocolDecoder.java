@@ -39,16 +39,16 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
 
         // Initialize format strings
-        Properties p = getServerManager().getProperties();
-        if (p.contains("globalsat.format0")) {
-            format0 = p.getProperty("globalsat.format0");
-        } else {
-            format0 = "TSPRXAB27GHKLMnaicz*U!";
-        }
-        if (p.contains("globalsat.format1")) {
-            format1 = p.getProperty("globalsat.format1");
-        } else {
-            format1 = "SARY*U!";
+        format0 = "TSPRXAB27GHKLMnaicz*U!";
+        format1 = "SARY*U!";
+        if (getServerManager() != null) {
+            Properties p = getServerManager().getProperties();
+            if (p.contains("globalsat.format0")) {
+                format0 = p.getProperty("globalsat.format0");
+            }
+            if (p.contains("globalsat.format1")) {
+                format1 = p.getProperty("globalsat.format1");
+            }
         }
     }
 
