@@ -20,13 +20,16 @@ public class Jt600ProtocolDecoderTest {
         assertNotNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf2)));
 
         byte[] buf3 = {0x24,0x31,0x20,(byte)0x82,0x00,0x29,0x11,0x00,0x1B,0x17,0x10,0x12,0x05,0x33,0x05,0x24,0x38,0x09,(byte)0x97,0x02,0x55,0x33,0x58,0x45,0x00,0x04,0x06,0x1E,0x00,0x03,(byte)0xEE,0x00,0x00,0x00,0x00,0x0C,0x00};
-        assertNotNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf2)));
+        assertNotNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf3)));
 
         assertNotNull(decoder.decode(null, null,
                 ChannelBuffers.copiedBuffer("(3110312099,W01,11404.6204,E,2232.9961,N,A,040511,063736,4,7,100,4,17,1,1,company)", Charset.defaultCharset())));
 
         assertNotNull(decoder.decode(null, null,
                 ChannelBuffers.copiedBuffer("(3120820029,W01,02553.3555,E,2438.0997,S,A,171012,053339,0,8,20,6,31,5,20,20)", Charset.defaultCharset())));
+        
+        /*assertNotNull(decoder.decode(null, null,
+                ChannelBuffers.copiedBuffer("(6221107674,2,U09,129,2,A,280513113036,E,02711.0500,S,1721.0876,A,030613171243,E,02756.7618,S,2300.0325,3491,538200,14400,1)", Charset.defaultCharset())));*/
 
     }
 
