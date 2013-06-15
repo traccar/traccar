@@ -24,7 +24,13 @@ public class H02ProtocolDecoderTest {
         assertNotNull(decoder.decode(null, null,
                 "*HQ,354188045498669,V1,195200,A,701.8915,S,3450.3399,W,0.00,205.70,050213,ffffffff,000243,000000,000000"));
         
-
+        assertNotNull(decoder.decode(null, null,
+                "*HQ,2705171109,V1,213324,A,5002.5849,N,01433.7822,E,0.00,000,140613,FFFFFFFF"));
+        
+        // binary?
+        // 2427051711092133391406135002584900014337822e000000ffffffffff0000
+        // 2427051711092134091406135002584900014337822e000000ffffffffff0000
+        
     }
 
 }
