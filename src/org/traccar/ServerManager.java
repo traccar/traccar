@@ -150,6 +150,7 @@ public class ServerManager {
         initApelServer("apel");
         initManPowerServer("manpower");
         initGlobalSatServer("globalsat");
+        initAtrackServer("atrack");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -886,6 +887,18 @@ public class ServerManager {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new GlobalSatProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initAtrackServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 4, 2, 6, 0));
+                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(ServerManager.this));
                 }
             });
         }
