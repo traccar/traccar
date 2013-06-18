@@ -35,6 +35,9 @@ public class V680ProtocolDecoderTest {
         
         assertNotNull(decoder.decode(null, null,
                 "#356823031236214##0#0000#AUT#1#V#01904.5491,E,6941.0085,N,000.09,248#170513#160140"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "#353588550032869##1#0000#AUT#01#72400401cd01a5#00000.0000,E,0000.0000,N,0.00,#000000#000000.000"));
 
     }
 

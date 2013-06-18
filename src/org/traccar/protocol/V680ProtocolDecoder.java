@@ -49,7 +49,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d+\\.\\d+)," +             // Speed
-            "(\\d+\\.?\\d*)#" +            // Course
+            "(\\d+\\.?\\d*)?#" +           // Course
             "(\\d{2})(\\d{2})(\\d{2})#" +  // Date (DDMMYY)
             "(\\d{2})(\\d{2})(\\d{2})" +   // Time (HHMMSS)
             ".*");
@@ -129,7 +129,12 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
             // Speed and Course
             position.setSpeed(Double.valueOf(parser.group(index++)));
-            position.setCourse(Double.valueOf(parser.group(index++)));
+            String course = parser.group(index++);
+            if (course != null) {
+                position.setCourse(Double.valueOf(course));
+            } else {
+                position.setCourse(0.0);
+            }
 
             // Date
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
