@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,43 +26,27 @@ import org.traccar.ServerManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * GL200 tracker protocol decoder
- */
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Gl200ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
             "[0-9a-fA-F]{6}," +                 // Protocol version
-            "(\\d{15})," +                      // IMEI
-            "[^,]*," +                          // Device name
-            "(?:(?:\\d," +                      // Report ID / Geo mode
-            "\\d*," +                           // Report type / Geo radius
-            "\\d*)|" +                          // Number / Geo check interval
-            "(?:[^,]*))," +                     // Call number
+            "(\\d{15}),.*," +                   // IMEI
             "(\\d*)," +                         // GPS accuracy
             "(\\d+.\\d)," +                     // Speed
             "(\\d+)," +                         // Course
-            "(-?\\d+.\\d)," +                   // Altitude
-            "(-?\\d+.\\d+)," +                  // Longitude
-            "(-?\\d+.\\d+)," +                  // Latitude
+            "(-?\\d+\\.\\d)," +                 // Altitude
+            "(-?\\d+\\.\\d+)," +                // Longitude
+            "(-?\\d+\\.\\d+)," +                // Latitude
             "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             ".*");
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
