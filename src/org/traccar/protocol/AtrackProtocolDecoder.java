@@ -15,15 +15,15 @@
  */
 package org.traccar.protocol;
 
-import java.util.Calendar;
-import java.util.TimeZone;
+import java.nio.charset.Charset;
+import java.util.Date;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
@@ -57,74 +57,73 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // prefix
         buf.readUnsignedShort(); // checksum
         buf.readUnsignedShort(); // length
+        buf.readUnsignedShort(); // sequence
 
-        // Zero for location messages
-        buf.readByte(); // voltage
-        buf.readByte(); // gsm signal
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("atrack");
 
-        String imei = readImei(buf);
-        long index = buf.readUnsignedShort();
-        int type = buf.readUnsignedByte();
-
-        if (type == MSG_HEARTBEAT) {
-            if (channel != null) {
-                byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(ChannelBuffers.wrappedBuffer(response));
-            }
+        // Get device id
+        String id = String.valueOf(buf.readLong());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
         }
 
-        else if (type == MSG_DATA) {
+        // Date and time
+        position.setTime(new Date(buf.readUnsignedInt() * 1000)); // gps time
+        buf.readUnsignedInt(); // rtc time
+        buf.readUnsignedInt(); // send time
 
-            // Create new position
-            Position position = new Position();
-            position.setId(index);
+        // Coordinates
+        position.setLongitude(buf.readInt() * 0.000001);
+        position.setLatitude(buf.readInt() * 0.000001);
 
-            // Get device id
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
+        // Course
+        position.setCourse((double) buf.readUnsignedShort());
+        
+        // Report type
+        extendedInfo.set("type", buf.readUnsignedByte());
+        
+        // Milage
+        extendedInfo.set("milage", buf.readUnsignedInt() * 0.1);
+        
+        // Accuracy
+        extendedInfo.set("hdop", buf.readUnsignedShort() * 0.1);
+        
+        // Input
+        extendedInfo.set("input", buf.readUnsignedByte());
 
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.HOUR, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
-            position.setTime(time.getTime());
+        // Speed
+        position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
-            // Latitude
-            double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
+        // Output
+        extendedInfo.set("output", buf.readUnsignedByte());
 
-            // Longitude
-            double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
+        // ADC
+        extendedInfo.set("adc", buf.readUnsignedShort() * 0.001);
 
-            // Speed
-            position.setSpeed((double) buf.readUnsignedByte());
-
-            // Course
-            position.setCourse((double) buf.readUnsignedShort());
-
-            buf.skipBytes(3); // reserved
-
-            // Flags
-            long flags = buf.readUnsignedInt();
-            position.setValid((flags & 0x1) == 0x1);
-            if ((flags & 0x2) == 0) latitude = -latitude;
-            if ((flags & 0x4) == 0) longitude = -longitude;
-
-            position.setLatitude(latitude);
-            position.setLongitude(longitude);
-            position.setAltitude(0.0);
-
-            return position;
+        // Driver
+        int length = 0;
+        while (buf.getByte(buf.readerIndex() + length) != 0) {
+            length += 1;
         }
+        if (length != 0) {
+            extendedInfo.set("driver",
+                    buf.toString(buf.readerIndex(), length, Charset.defaultCharset()));
+            buf.skipBytes(length);
+        }
+        buf.readByte();
+        
+        // Temperature
+        extendedInfo.set("temperature1", buf.readShort() * 0.1);
+        extendedInfo.set("temperature2", buf.readShort() * 0.1);
+        
+        // TODO: text message
 
-        return null;
+        position.setExtendedInfo(extendedInfo.toString());
+        return position;
     }
 
 }
