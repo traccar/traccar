@@ -61,7 +61,7 @@ public class CellocatorFrameDecoder extends FrameDecoder {
 
         // Read packet
         if (length > 0 && available >= length) {
-            return buf.readBytes(length + 2);
+            return buf.readBytes(length);
         }
         
         return null;
