@@ -55,13 +55,21 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response);
         }
     }
+
+    private static boolean checkBit(long mask, int bit) {
+        long checkMask = 1 << bit;
+        return (mask & checkMask) == checkMask;
+    }
+
+    private static final int CODEC_GH3000 = 0x07;
+    private static final int CODEC_FM4X00 = 0x08;
     
     private List<Position> parseLocation(Channel channel, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<Position>();
         
         buf.skipBytes(4); // marker
         buf.readUnsignedInt(); // data length
-        buf.readUnsignedByte(); // codec
+        int codec = buf.readUnsignedByte(); // codec
         int count = buf.readUnsignedByte();
         
         for (int i = 0; i < count; i++) {
@@ -69,48 +77,113 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("teltonika");
             
             position.setDeviceId(deviceId);
-            position.setTime(new Date(buf.readLong()));
-
-            extendedInfo.set("priority", buf.readUnsignedByte());
-
-            position.setLongitude(buf.readInt() / 10000000.0);
-            position.setLatitude(buf.readInt() / 10000000.0);
-            position.setAltitude((double) buf.readUnsignedShort());
-            position.setCourse((double) buf.readUnsignedShort());
             
-            int satellites = buf.readUnsignedByte();
-            extendedInfo.set("satellites", satellites);
-
-            position.setValid(satellites != 0);
+            int globalMask = 0x0f;
             
-            position.setSpeed(buf.readUnsignedShort() * 0.539957);
+            if (codec == CODEC_GH3000) {
 
-            extendedInfo.set("event", buf.readUnsignedByte());
-            
-            buf.readUnsignedByte(); // total IO data records
+                long time = buf.readUnsignedInt() & 0x3fffffff;
+                time += 1199145600; // 2008-01-01 00:00:00
+                position.setTime(new Date(time * 1000));
+                
+                globalMask = buf.readUnsignedByte();
+                if (!checkBit(globalMask, 0)) {
+                    return null;
+                }
+                
+                int locationMask = buf.readUnsignedByte();
+                
+                if (checkBit(locationMask, 0)) {
+                    position.setLatitude(Double.valueOf(buf.readFloat()));
+                    position.setLongitude(Double.valueOf(buf.readFloat()));
+                }
+                
+                if (checkBit(locationMask, 1)) {
+                    position.setAltitude((double) buf.readUnsignedShort());
+                }
+                
+                if (checkBit(locationMask, 2)) {
+                    position.setCourse(buf.readUnsignedByte() * 360.0 / 256);
+                }
+                
+                if (checkBit(locationMask, 3)) {
+                    position.setSpeed((double) buf.readUnsignedByte());
+                }
+                
+                if (checkBit(locationMask, 4)) {
+                    int satellites = buf.readUnsignedByte();
+                    extendedInfo.set("satellites", satellites);
+                    position.setValid(satellites >= 3);
+                }
+                
+                if (checkBit(locationMask, 5)) {
+                    extendedInfo.set("area", buf.readUnsignedShort());
+                    extendedInfo.set("cell", buf.readUnsignedShort());
+                }
+                
+                if (checkBit(locationMask, 6)) {
+                    extendedInfo.set("gsm", buf.readUnsignedByte());
+                }
+                
+                if (checkBit(locationMask, 7)) {
+                    extendedInfo.set("operator", buf.readUnsignedInt());
+                }
 
-            // Read 1 byte data
-            int cnt = buf.readUnsignedByte();
-            for (int j = 0; j < cnt; j++) {
-                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedByte());
+            } else {
+
+                position.setTime(new Date(buf.readLong()));
+
+                extendedInfo.set("priority", buf.readUnsignedByte());
+
+                position.setLongitude(buf.readInt() / 10000000.0);
+                position.setLatitude(buf.readInt() / 10000000.0);
+                position.setAltitude((double) buf.readUnsignedShort());
+                position.setCourse((double) buf.readUnsignedShort());
+
+                int satellites = buf.readUnsignedByte();
+                extendedInfo.set("satellites", satellites);
+
+                position.setValid(satellites != 0);
+
+                position.setSpeed(buf.readUnsignedShort() * 0.539957);
+
+                extendedInfo.set("event", buf.readUnsignedByte());
+
+                buf.readUnsignedByte(); // total IO data records
+
             }
             
+            // Read 1 byte data
+            if (checkBit(globalMask, 1)) {
+                int cnt = buf.readUnsignedByte();
+                for (int j = 0; j < cnt; j++) {
+                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedByte());
+                }
+            }
+
+            
             // Read 2 byte data
-            cnt = buf.readUnsignedByte();
-            for (int j = 0; j < cnt; j++) {
-                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+            if (checkBit(globalMask, 2)) {
+                int cnt = buf.readUnsignedByte();
+                for (int j = 0; j < cnt; j++) {
+                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+                }
             }
 
             // Read 4 byte data
-            cnt = buf.readUnsignedByte();
-            for (int j = 0; j < cnt; j++) {
-                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+            if (checkBit(globalMask, 3)) {
+                int cnt = buf.readUnsignedByte();
+                for (int j = 0; j < cnt; j++) {
+                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+                }
             }
 
             // Read 8 byte data
-            cnt = buf.readUnsignedByte();
-            for (int j = 0; j < cnt; j++) {
-                extendedInfo.set("io" + buf.readUnsignedByte(), buf.readLong());
+            if (codec == CODEC_FM4X00) {
+                int cnt = buf.readUnsignedByte();
+                for (int j = 0; j < cnt; j++) {
+                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readLong());
+                }
             }
         
             position.setExtendedInfo(extendedInfo.toString());

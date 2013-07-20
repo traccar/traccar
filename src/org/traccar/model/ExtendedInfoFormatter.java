@@ -40,8 +40,7 @@ public class ExtendedInfoFormatter {
 
     @Override
     public String toString() {
-        data.append("</").append(rootNode).append(">");
-        return data.toString();
+        return data.toString() + "</" + rootNode + ">";
     }
 
 }
