@@ -107,7 +107,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 
                 if (checkBit(locationMask, 3)) {
-                    position.setSpeed((double) buf.readUnsignedByte());
+                    position.setSpeed(buf.readUnsignedByte() * 0.539957);
                 }
                 
                 if (checkBit(locationMask, 4)) {
