@@ -28,6 +28,9 @@ public class Tk103ProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 "\n\n\n(088045133878BR00130228A5124.5526N00117.7152W000.0233614352.2200000000L01B0CF1C"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "(008600410203BP05000008600410203130721A4152.5790N01239.2770E000.0145238173.870100000AL0000000"));
 
     }
 
