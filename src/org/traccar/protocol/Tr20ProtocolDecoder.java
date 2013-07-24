@@ -119,7 +119,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(lonlitude * hemisphere);
 
             // Speed
-            position.setSpeed(Double.valueOf(parser.group(index++)));
+            position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
 
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
