@@ -151,6 +151,7 @@ public class ServerManager {
         initManPowerServer("manpower");
         initGlobalSatServer("globalsat");
         initAtrackServer("atrack");
+        initPt3000Server("pt3000");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -899,6 +900,20 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 4, 2, 6, 0));
                     pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initPt3000Server(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Pt3000ProtocolDecoder(ServerManager.this));
                 }
             });
         }
