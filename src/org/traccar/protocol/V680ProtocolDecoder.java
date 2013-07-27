@@ -38,7 +38,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
     static private Pattern pattern = Pattern.compile(
             "(?:#(\\d+)#" +                // IMEI
             "([^#]*)#)?" +                 // User
-            "([01])#" +                    // Fix
+            "(\\d+)#" +                    // Fix
             "([^#]+)#" +                   // Password
             "[^#]+#" +
             "(\\d+)#" +                    // Packet number
@@ -101,7 +101,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("user", parser.group(index++));
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("1") == 0 ? true : false);
+            position.setValid(Integer.valueOf(parser.group(index++)) > 0 ? true : false);
 
             // Password
             extendedInfo.set("password", parser.group(index++));
