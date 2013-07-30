@@ -64,7 +64,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         // Send response #1
         if (sentence.contains("##")) {
             if (channel != null) {
-                channel.write("LOAD");
+                if (channel.isConnected())
+                    channel.write("LOAD");
             }
             return null;
         }
@@ -72,7 +73,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         // Send response #2
         if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
             if (channel != null) {
-                channel.write("ON");
+                if (channel.isConnected())
+                    channel.write("ON");
             }
             return null;
         }

@@ -252,6 +252,14 @@ public class ServerManager {
         }
         return false;
     }
+    
+    private boolean isUDPEnabledForProtocol(Properties properties, String protocol) {
+        String enabled = properties.getProperty(protocol + ".udp");
+        if (enabled != null) {
+            return Boolean.valueOf(enabled);
+        }
+        return false;
+    }
 
     private void initXexunServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
@@ -268,33 +276,61 @@ public class ServerManager {
 
     private void initGps103Server(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) ';' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this));
-                }
-            });
+            if (isUDPEnabledForProtocol(properties, protocol)) {
+                serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                    @Override
+                    protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                        byte delimiter[] = { (byte) ';' };
+                        pipeline.addLast("frameDecoder",
+                                new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("stringEncoder", new StringEncoder());
+                        pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this));
+                    }
+                });
+            } else {
+                serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                    @Override
+                    protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                        byte delimiter[] = { (byte) ';' };
+                        pipeline.addLast("frameDecoder",
+                                new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("stringEncoder", new StringEncoder());
+                        pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this));
+                    }
+                });
+            }
         }
     }
 
     private void initTk103Server(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) ')' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(ServerManager.this));
-                }
-            });
+            if (isUDPEnabledForProtocol(properties, protocol)) {
+                serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                    @Override
+                    protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                        byte delimiter[] = { (byte) ')' };
+                        pipeline.addLast("frameDecoder",
+                                new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("stringEncoder", new StringEncoder());
+                        pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(ServerManager.this));
+                    }
+                });
+            } else {
+                serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                    @Override
+                    protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                        byte delimiter[] = { (byte) ')' };
+                        pipeline.addLast("frameDecoder",
+                                new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("stringEncoder", new StringEncoder());
+                        pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(ServerManager.this));
+                    }
+                });
+            }
         }
     }
 
