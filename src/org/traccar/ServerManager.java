@@ -89,9 +89,6 @@ public class ServerManager {
         return  properties;
     }
 
-    /**
-     * Initialize
-     */
     public void init(String[] arguments)
             throws IOException, ClassNotFoundException, SQLException {
 
@@ -103,7 +100,7 @@ public class ServerManager {
 
         dataManager = new DatabaseDataManager(properties);
 
-        initLogger(properties);
+        Log.setupLogger(properties);
         initGeocoder(properties);
 
         initXexunServer("xexun");
@@ -159,9 +156,6 @@ public class ServerManager {
         }
     }
 
-    /**
-     * Start
-     */
     public void start() {
         if (webServer != null) {
             webServer.start();
@@ -171,9 +165,6 @@ public class ServerManager {
         }
     }
 
-    /**
-     * Stop
-     */
     public void stop() {
         for (Object server: serverList) {
             ((TrackerServer) server).stop();
@@ -188,55 +179,8 @@ public class ServerManager {
         }
     }
 
-    /**
-     * Destroy
-     */
     public void destroy() {
         serverList.clear();
-    }
-
-    /**
-     * Initialize logger
-     */
-    private void initLogger(Properties properties) throws IOException {
-
-        loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
-
-        if (loggerEnabled) {
-
-            String fileName = properties.getProperty("logger.file");
-            if (fileName != null) {
-
-                FileHandler file = new FileHandler(fileName, true);
-
-                // Simple formatter
-                file.setFormatter(new Formatter() {
-                    private final String LINE_SEPARATOR =
-                            System.getProperty("line.separator", "\n");
-
-                    private final DateFormat dateFormat =
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-                    @Override
-                    public String format(LogRecord record) {
-                        StringBuffer line = new StringBuffer();
-                        dateFormat.format(new Date(record.getMillis()), line, new FieldPosition(0));
-                        line.append(" ");
-                        line.append(record.getSourceClassName());
-                        line.append(".");
-                        line.append(record.getSourceMethodName());
-                        line.append(" ");
-                        line.append(record.getLevel().getName());
-                        line.append(": ");
-                        line.append(formatMessage(record));
-                        line.append(LINE_SEPARATOR);
-                        return line.toString();
-                    }
-                });
-
-                Log.getLogger().addHandler(file);
-            }
-        }
     }
 
     private void initGeocoder(Properties properties) throws IOException {

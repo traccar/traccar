@@ -107,6 +107,7 @@ sed -i 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
 sed -i 's/@app.name@/traccar/g' out/conf/wrapper.conf
 sed -i 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
 sed -i 's/@app.description@/traccar/g' out/conf/wrapper.conf
+sed -i 's/wrapper.logfile=..\/logs\/wrapper.log/wrapper.logfile=..\/logs\/wrapper.log.YYYYMMDD\nwrapper.logfile.rollmode=DATE/g' out/conf/wrapper.conf
 
 # linux 32
 
@@ -152,7 +153,7 @@ makeself out traccar.run "traccar" "mkdir -p $app; cp -rf * $app; $app/bin/tracc
 zip -j traccar-macosx-64.zip traccar.run macosx/README.txt
 
 rm traccar.run
-rm -rf out
+#rm -rf out
 
 # GENERAL CLEANUP
 

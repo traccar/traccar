@@ -41,19 +41,14 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
 
     private void processSinglePosition(Position position) {
         if (position == null) {
-            Log.info("null message");
+            Log.info("processSinglePosition null message");
         } else {
-            Log.info(
-                    "id: " + position.getId() +
-                    ", deviceId: " + position.getDeviceId() +
-                    ", valid: " + position.getValid() +
-                    ", time: " + position.getTime() +
-                    ", latitude: " + position.getLatitude() +
-                    ", longitude: " + position.getLongitude() +
-                    ", altitude: " + position.getAltitude() +
-                    ", speed: " + position.getSpeed() +
-                    ", course: " + position.getCourse() +
-                    ", power: " + position.getPower());
+            StringBuilder s = new StringBuilder();
+            s.append("device: ").append(position.getDeviceId()).append(", ");
+            s.append("time: ").append(position.getTime()).append(", ");
+            s.append("lat: ").append(position.getLatitude()).append(", ");
+            s.append("lon: ").append(position.getLongitude());
+            Log.info(s.toString());
         }
 
         // Write position to database
@@ -63,8 +58,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
                 dataManager.updateLatestPosition(position.getDeviceId(), id);
             }
         } catch (Exception error) {
-            Log.info("Exception during query execution");
-            Log.warning(error.getMessage());
+            Log.warning(error);
         }
     }
 

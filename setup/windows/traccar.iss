@@ -56,6 +56,7 @@ begin
   StringChangeEx(S, '@app.name@', 'Traccar', true);
   StringChangeEx(S, '@app.long.name@', 'Traccar', true);
   StringChangeEx(S, '@app.description@', 'Traccar', true);
+  StringChangeEx(S, 'wrapper.logfile=../logs/wrapper.log', 'wrapper.logfile=../logs/wrapper.log.YYYYMMDD' + #13#10 + 'wrapper.logfile.rollmode=DATE', true);
   SaveStringToFile(ExpandConstant(CurrentFileName), S, false);
 end;
 

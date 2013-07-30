@@ -615,10 +615,10 @@ public class St210ProtocolDecoder extends BaseProtocolDecoder {
 
         try{
             position = decodeMsg(sentence);
-            Log.info("MESSAGE DECODED WITH SUCCESS!");
+            Log.info("Message decoded with success");
         }
         catch(Exception e){
-            Log.severe("ERROR WHILE DECODING MESSAGE: " + e.getMessage());
+            Log.warning(e);
         }
 
         return position;

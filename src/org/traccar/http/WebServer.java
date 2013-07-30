@@ -61,7 +61,7 @@ public class WebServer {
             context.bind("java:/DefaultDS", ds);
 
         } catch (Exception error) {
-            Log.warning(error.getMessage());
+            Log.warning(error);
         }
     }
 
@@ -86,7 +86,7 @@ public class WebServer {
         try {
             server.start();
         } catch (Exception error) {
-            Log.warning(error.getMessage());
+            Log.warning(error);
         }
     }
 
@@ -94,7 +94,7 @@ public class WebServer {
         try {
             server.stop();
         } catch (Exception error) {
-            Log.warning(error.getMessage());
+            Log.warning(error);
         }
     }
 

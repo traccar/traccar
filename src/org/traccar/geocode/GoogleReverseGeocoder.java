@@ -55,7 +55,7 @@ public class GoogleReverseGeocoder implements ReverseGeocoder {
             reader.close();
 
         } catch(Exception error) {
-            Log.warning(error.getMessage());
+            Log.warning(error);
         }
 
         return null;
