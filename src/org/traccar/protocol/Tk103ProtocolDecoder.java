@@ -33,8 +33,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    //(008600410203 BP05 000008600410203 130721 A4152.5790N01239.2770E000.0 145238 173.8 70100000A L 000000D8
-    
     static private Pattern pattern = Pattern.compile(
             "(\\d{12})" +                // Device ID
             ".{4}" +                     // Command
@@ -47,7 +45,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             "([EW])" +
             "(\\d+\\.\\d)" +             // Speed
             "(\\d{2})(\\d{2})(\\d{2})" + // Time (HHMMSS)
-            "(\\d+\\.\\d+)" +            // Course
+            "(\\d+\\.?\\d+)" +           // Course
             "([0-9a-fA-F]{8})" +         // State
             "L([0-9a-fA-F]+)");          // Milage
 
