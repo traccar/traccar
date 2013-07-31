@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,21 +29,12 @@ import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-/**
- * JT600 protocol decoder
- */
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Jt600ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Decode regular message
-     */
     private Position decodeNormalMessage(ChannelBuffer buf) throws Exception {
 
         Position position = new Position();
@@ -56,7 +47,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
-            return null;
+            //return null;
         }
 
         buf.readByte(); // protocol version + data type
@@ -122,9 +113,6 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    /**
-     * Alert message pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "\\(" +
             "([\\d]+)," +                // Id
@@ -144,9 +132,6 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                  // Alert Type
             ".*\\)");
 
-    /**
-     * Decode alert message
-     */
     private Position decodeAlertMessage(ChannelBuffer buf) throws Exception {
 
         String message = buf.toString(Charset.defaultCharset());
@@ -208,9 +193,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,25 +24,30 @@ import org.traccar.helper.ChannelBufferTools;
 
 public class Jt600FrameDecoder extends FrameDecoder {
 
-    private static int MESSAGE_LENGTH = 37;
-
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
 
+        // Check minimum length
+        int available = buf.readableBytes();
+        if (available < 10) {
+            return null;
+        }
+        
         // Message identifier
-        char first = (char) buf.getByte(0);
-        int length = buf.readableBytes();
+        char first = (char) buf.getByte(buf.readerIndex());
         
         if (first == '$') {
             // Check length
-            if (length >= MESSAGE_LENGTH) {
-                return buf.readBytes(MESSAGE_LENGTH);
+            int length = buf.getUnsignedShort(buf.readerIndex() + 7) + 10;
+            if (length >= available) {
+                return buf.readBytes(length);
             }
         } else if (first == '(') {
             // Find ending
-            Integer endIndex = ChannelBufferTools.find(buf, 0, length, ")");
+            Integer endIndex = ChannelBufferTools.find(buf, buf.readerIndex(), available, ")");
             if (endIndex != null) {
                 return buf.readBytes(endIndex + 1);
             }
