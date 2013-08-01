@@ -36,16 +36,16 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     static private Pattern pattern = Pattern.compile(
-            "\\[\\=\\d{10}.\\(.{3}" +
+            "\\[.\\d{10}.\\(\\p{Upper}+" +
             "(\\d{2})(\\d{2})(\\d{2})" +   // Time (HHMMSS)
             "([AV])" +                     // Validity
             "(\\d{2})(\\d{2}\\.\\d{4})" +  // Latitude (DDMM.MMMM)
             "([NS])" +
             "(\\d{3})(\\d{2}\\.\\d{4})" +  // Longitude (DDDMM.MMMM)
             "([EW])" +
-            "(\\d{3}\\.\\d{3})" +           // Speed
+            "(\\d{3}\\.\\d{3})" +          // Speed
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
-            ".+");
+            "\\d+\\)");
 
     @Override
     protected Object decode(
@@ -65,7 +65,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Parse message
-        else if (sentence.startsWith("[=") && deviceId != null) {
+        else if (deviceId != null) {
 
             // Parse message
             Matcher parser = pattern.matcher(sentence);
