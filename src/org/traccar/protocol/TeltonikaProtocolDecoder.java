@@ -83,7 +83,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (codec == CODEC_GH3000) {
 
                 long time = buf.readUnsignedInt() & 0x3fffffff;
-                time += 1199145600; // 2008-01-01 00:00:00
+                time += 1167609600; // 2007-01-01 00:00:00
                 position.setTime(new Date(time * 1000));
                 
                 globalMask = buf.readUnsignedByte();
