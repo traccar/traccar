@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
  */
 package org.traccar.model;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.*;
 import java.util.*;
 import org.traccar.helper.AdvancedConnection;
+import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.NamedParameterStatement;
 
 /**
@@ -25,8 +29,7 @@ import org.traccar.helper.NamedParameterStatement;
  */
 public class DatabaseDataManager implements DataManager {
 
-    public DatabaseDataManager(Properties properties)
-            throws ClassNotFoundException, SQLException {
+    public DatabaseDataManager(Properties properties) throws Exception {
         initDatabase(properties);
     }
 
@@ -40,13 +43,21 @@ public class DatabaseDataManager implements DataManager {
     /**
      * Initialize database
      */
-    private void initDatabase(Properties properties)
-            throws ClassNotFoundException, SQLException {
+    private void initDatabase(Properties properties) throws Exception {
 
         // Load driver
         String driver = properties.getProperty("database.driver");
         if (driver != null) {
-            Class.forName(driver);
+            String driverFile = properties.getProperty("database.driverFile");
+
+            if (driverFile != null) {
+                URL url = new URL("jar:file:" + new File(driverFile).getAbsolutePath() + "!/");
+                URLClassLoader cl = new URLClassLoader(new URL[] { url });
+                Driver d = (Driver) Class.forName(driver, true, cl).newInstance();
+                DriverManager.registerDriver(new DriverDelegate(d));
+            } else {
+                Class.forName(driver);
+            }
         }
 
         // Refresh delay

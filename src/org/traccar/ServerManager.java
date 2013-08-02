@@ -89,8 +89,7 @@ public class ServerManager {
         return  properties;
     }
 
-    public void init(String[] arguments)
-            throws IOException, ClassNotFoundException, SQLException {
+    public void init(String[] arguments) throws Exception {
 
         // Load properties
         properties = new Properties();
