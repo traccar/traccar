@@ -27,6 +27,8 @@ import org.apache.log4j.PatternLayout;
 
 public class Log {
     
+    private static final String LOGGER_NAME = "traccar";
+    
     private static Logger logger = null;
     
     public static void setupLogger(Properties properties) throws IOException {
@@ -39,7 +41,7 @@ public class Log {
                     layout, properties.getProperty("logger.file"), "'.'yyyyMMdd");
 
             LogManager.resetConfiguration();
-            logger = Logger.getRootLogger();
+            logger = Logger.getLogger(LOGGER_NAME);
             logger.addAppender(appender);
             logger.setLevel(Level.DEBUG);
         }
@@ -47,7 +49,7 @@ public class Log {
 
     public static Logger getLogger() {
         if (logger == null) {
-            logger = Logger.getRootLogger();
+            logger = Logger.getLogger(LOGGER_NAME);
             logger.setLevel(Level.OFF);
         }
         return logger;
