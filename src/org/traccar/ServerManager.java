@@ -19,16 +19,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -113,7 +106,7 @@ public class ServerManager {
         initEnforaServer("enfora");
         initMeiligaoServer("meiligao");
         initMaxonServer("maxon");
-        initST210Server("st210");
+        initSuntechServer("suntech");
         initProgressServer("progress");
         initH02Server("h02");
         initJt600Server("jt600");
@@ -359,7 +352,7 @@ public class ServerManager {
         }
     }
 
-    private void initST210Server(String protocol) throws SQLException {
+    private void initSuntechServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
@@ -368,7 +361,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new St210ProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(ServerManager.this));
                 }
             });
         }
