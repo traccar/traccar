@@ -142,6 +142,7 @@ public class ServerManager {
         initAtrackServer("atrack");
         initPt3000Server("pt3000");
         initRuptelaServer("ruptela");
+        initTopflytechServer("topflytech");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -865,6 +866,21 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
                     pipeline.addLast("objectDecoder", new RuptelaProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initTopflytechServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) ')' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new TopflytechProtocolDecoder(ServerManager.this));
                 }
             });
         }
