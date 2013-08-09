@@ -56,72 +56,63 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Detect device identifier
-        if (sentence.startsWith("[!")) {
-        }
-
         // Parse message
-        else if (deviceId != null) {
-
-            // Parse message
-            Matcher parser = pattern.matcher(sentence);
-            if (!parser.matches()) {
-                return null;
-            }
-
-            // Create new position
-            Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("topflytech");
-            Integer index = 1;
-
-            // Identifier
-            String imei = parser.group(index++);
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
-
-            // Time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-            position.setTime(time.getTime());
-
-            // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
-
-            // Latitude
-            Double latitude = Double.valueOf(parser.group(index++));
-            latitude += Double.valueOf(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-            position.setLatitude(latitude);
-
-            // Longitude
-            Double lonlitude = Double.valueOf(parser.group(index++));
-            lonlitude += Double.valueOf(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
-            position.setLongitude(lonlitude);
-
-            // Speed
-            position.setSpeed(Double.valueOf(parser.group(index++)));
-
-            // Course
-            position.setCourse(Double.valueOf(parser.group(index++)));
-
-            // Altitude
-            position.setAltitude(0.0);
-
-            position.setExtendedInfo(extendedInfo.toString());
-            return position;
+        Matcher parser = pattern.matcher(sentence);
+        if (!parser.matches()) {
+            return null;
         }
 
-        return null;
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("topflytech");
+        Integer index = 1;
+
+        // Identifier
+        String imei = parser.group(index++);
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + imei);
+            return null;
+        }
+
+        // Time
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.clear();
+        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        position.setTime(time.getTime());
+
+        // Validity
+        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+
+        // Latitude
+        Double latitude = Double.valueOf(parser.group(index++));
+        latitude += Double.valueOf(parser.group(index++)) / 60;
+        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
+        position.setLatitude(latitude);
+
+        // Longitude
+        Double lonlitude = Double.valueOf(parser.group(index++));
+        lonlitude += Double.valueOf(parser.group(index++)) / 60;
+        if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
+        position.setLongitude(lonlitude);
+
+        // Speed
+        position.setSpeed(Double.valueOf(parser.group(index++)));
+
+        // Course
+        position.setCourse(Double.valueOf(parser.group(index++)));
+
+        // Altitude
+        position.setAltitude(0.0);
+
+        position.setExtendedInfo(extendedInfo.toString());
+        return position;
     }
 
 }
