@@ -143,6 +143,8 @@ public class ServerManager {
         initPt3000Server("pt3000");
         initRuptelaServer("ruptela");
         initTopflytechServer("topflytech");
+        //initLaipacServer("laipac");
+        initAplicomServer("aplicom");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -754,7 +756,7 @@ public class ServerManager {
             });
         }
     }
-    
+
     private void initWialonServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
@@ -881,6 +883,32 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new TopflytechProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    /*private void initLaipacServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new LaipacProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }*/
+
+    private void initAplicomServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new AplicomFrameDecoder());
+                    pipeline.addLast("objectDecoder", new AplicomProtocolDecoder(ServerManager.this));
                 }
             });
         }
