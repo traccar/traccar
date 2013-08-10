@@ -97,4 +97,15 @@ public class ChannelBufferTools {
         
         return result.toString();
     }
+
+    /**
+     * Convert integer array to byte array
+     */
+    public static byte[] convertArray(int[] in) {
+        byte[] out = new byte[in.length];
+        for (int i = 0; i < in.length; i++) {
+            out[i] = (byte) in[i];
+        }
+        return out;
+    }
 }
