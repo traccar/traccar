@@ -229,10 +229,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Longitude
         String hemisphere = parser.group(index++);
-        Double lonlitude = Double.valueOf(parser.group(index++));
-        lonlitude += Double.valueOf(parser.group(index++)) / 60;
-        if (hemisphere.compareTo("W") == 0) lonlitude = -lonlitude;
-        position.setLongitude(lonlitude);
+        Double longitude = Double.valueOf(parser.group(index++));
+        longitude += Double.valueOf(parser.group(index++)) / 60;
+        if (hemisphere.compareTo("W") == 0) longitude = -longitude;
+        position.setLongitude(longitude);
 
         // Latitude
         hemisphere = parser.group(index++);

@@ -173,10 +173,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(latitude);
 
         // Longitude
-        Double lonlitude = Double.valueOf(parser.group(index++));
-        lonlitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
-        position.setLongitude(lonlitude);
+        Double longitude = Double.valueOf(parser.group(index++));
+        longitude += Double.valueOf(parser.group(index++)) / 60;
+        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
+        position.setLongitude(longitude);
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));

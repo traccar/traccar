@@ -113,10 +113,10 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("gsm", parser.group(index++));
 
             // Longitude
-            Double lonlitude = Double.valueOf(parser.group(index++));
-            lonlitude += Double.valueOf(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("W") == 0) lonlitude = -lonlitude;
-            position.setLongitude(lonlitude);
+            Double longitude = Double.valueOf(parser.group(index++));
+            longitude += Double.valueOf(parser.group(index++)) / 60;
+            if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
+            position.setLongitude(longitude);
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));

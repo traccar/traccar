@@ -141,13 +141,13 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(latitude);
 
         // Longitude
-        Double lonlitude = Double.valueOf(parser.group(index++));
-        lonlitude += Double.valueOf(parser.group(index++)) / 60;
+        Double longitude = Double.valueOf(parser.group(index++));
+        longitude += Double.valueOf(parser.group(index++)) / 60;
         String hemisphere = parser.group(index++);
         if (hemisphere != null) {
-            if (hemisphere.compareTo("W") == 0) lonlitude = -lonlitude;
+            if (hemisphere.compareTo("W") == 0) longitude = -longitude;
         }
-        position.setLongitude(lonlitude);
+        position.setLongitude(longitude);
 
         // Altitude
         position.setAltitude(0.0);
