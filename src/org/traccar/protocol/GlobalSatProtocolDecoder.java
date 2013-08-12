@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -25,9 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
-import org.traccar.helper.AdvancedConnection;
 import org.traccar.helper.Log;
-import org.traccar.helper.NamedParameterStatement;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
@@ -52,14 +49,9 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             }
         }
     }
+    
+    private Position decodeOriginal(Channel channel, String sentence) {
 
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
-            throws Exception {
-
-        String sentence = (String) msg;
-        
         // Send acknowledgement
         if (channel != null) {
             channel.write("ACK\r");
@@ -180,6 +172,108 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
+    }
+    
+    static private Pattern pattern = Pattern.compile(
+            "\\$" +
+            "(\\d+)," +                    // IMEI
+            "\\d+," +                      // mode
+            "(\\d)," +                     // Fix
+            "(\\d{2})(\\d{2})(\\d{2})," +  // Date (DDMMYY)
+            "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
+            "([EW])" +
+            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
+            "([NS])" +
+            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
+            "(\\d+\\.?\\d*)," +            // Altitude
+            "(\\d+\\.?\\d*)," +            // Speed
+            "(\\d+)," +                    // Course
+            "(\\d+)," +                    // Satellites
+            "(\\d+\\.?\\d*)");             // HDOP
+    
+    private Position decodeAlternative(Channel channel, String sentence) {
+
+        // Parse message
+        Matcher parser = pattern.matcher(sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("globalsat");
+        Integer index = 1;
+
+        // Identification
+        String imei = parser.group(index++);
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + imei);
+            return null;
+        }
+
+        // Validity
+        position.setValid(parser.group(index++).compareTo("1") != 0 ? true : false);
+        
+        // Time
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.clear();
+        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        position.setTime(time.getTime());
+
+        // Longitude
+        String hemisphere = parser.group(index++);
+        Double lonlitude = Double.valueOf(parser.group(index++));
+        lonlitude += Double.valueOf(parser.group(index++)) / 60;
+        if (hemisphere.compareTo("W") == 0) lonlitude = -lonlitude;
+        position.setLongitude(lonlitude);
+
+        // Latitude
+        hemisphere = parser.group(index++);
+        Double latitude = Double.valueOf(parser.group(index++));
+        latitude += Double.valueOf(parser.group(index++)) / 60;
+        if (hemisphere.compareTo("S") == 0) latitude = -latitude;
+        position.setLatitude(latitude);
+
+        // Altitude
+        position.setAltitude(Double.valueOf(parser.group(index++)));
+
+        // Speed
+        position.setSpeed(Double.valueOf(parser.group(index++)));
+
+        // Course
+        position.setCourse(Double.valueOf(parser.group(index++)));
+
+        // Satellites
+        extendedInfo.set("satellites", Integer.valueOf(parser.group(index++)));
+
+        // HDOP
+        extendedInfo.set("hdop", parser.group(index++));
+
+        position.setExtendedInfo(extendedInfo.toString());
+        return position;
+    }
+
+    @Override
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, Object msg)
+            throws Exception {
+
+        String sentence = (String) msg;
+        
+        if (sentence.startsWith("GS")) {
+            return decodeOriginal(channel, sentence);
+        } else if (sentence.startsWith("$")) {
+            return decodeAlternative(channel, sentence);
+        }
+        
+        return null;
     }
 
 }
