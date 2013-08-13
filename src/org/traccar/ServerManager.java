@@ -143,7 +143,7 @@ public class ServerManager {
         initPt3000Server("pt3000");
         initRuptelaServer("ruptela");
         initTopflytechServer("topflytech");
-        //initLaipacServer("laipac");
+        initLaipacServer("laipac");
         initAplicomServer("aplicom");
         initGotopServer("gotop");
 
@@ -889,7 +889,7 @@ public class ServerManager {
         }
     }
 
-    /*private void initLaipacServer(String protocol) throws SQLException {
+    private void initLaipacServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
@@ -901,7 +901,7 @@ public class ServerManager {
                 }
             });
         }
-    }*/
+    }
 
     private void initAplicomServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
