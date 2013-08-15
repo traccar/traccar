@@ -11,6 +11,9 @@ public class H02ProtocolDecoderTest {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
+        
+        assertNull(decoder.decode(null, null,
+                "*HQ,353588020068342,V1,000000,V,0.0000,0,0.0000,0,0.00,0.00,000000,ffffffff,000106,000002,000203,004c87,16"));
 
         assertNotNull(decoder.decode(null, null,
                 "*HQ,3800008786,V1,062507,V,3048.2437,N,03058.5617,E,000.00,000,250413,FFFFFBFF"));
