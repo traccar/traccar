@@ -33,9 +33,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
-            "STX," +
-            "[^,]+," +                     // Identifier (not IMEI)
+    static private Pattern patternGPRMC = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.\\d+," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -43,10 +41,12 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +
             "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+\\.\\d{2})?," +          // Speed
-            "(\\d+\\.\\d{2})?," +          // Course
+            "(\\d+\\.\\d+)?," +            // Speed
+            "(\\d+\\.\\d+)?," +            // Course
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
-            "[^\\*]+\\*[0-9a-fA-F]{2}," +  // Checksumm
+            "[^\\*]+\\*[0-9a-fA-F]{2}");   // Checksum
+
+    static private Pattern patternSimple = Pattern.compile(
             "[FL]," +                      // Flag
             "([^,]*)," +                   // Alarm
             "imei:(\\d+)," +               // IMEI
@@ -56,25 +56,32 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d)?," +                    // Charger
             "(\\d+)," +                    // MCC
             "(\\d+)," +                    // MNC
-            "([0-9a-fA-F]+,[0-9a-fA-F]+);" + // Location code
-            ".+");                         // Checksumm
+            "(\\p{XDigit}{4},\\p{XDigit}{4});" + // Location code
+            ".+");                         // Checksum
 
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
-            throws Exception {
+    static private Pattern patternAlternative = Pattern.compile(
+            "(\\d+)," +                    // MCC
+            "(\\d+)," +                    // MNC
+            "(\\p{XDigit}{4},\\p{XDigit}{4})," + // Location code
+            "(\\d+)," +                    // GSM signal
+            "(\\d+)," +                    // Battery
+            "(\\d+)," +                    // Flags
+            "(\\d+)," +                    // Inputs
+            "(\\d+)," +                    // Outputs
+            "(\\d\\.\\d{2})," +            // ADC 1
+            "(\\d\\.\\d{2})," +            // ADC 2
+            "(\\d\\.\\d{2})," +            // ADC 3
+            "([^;]+);" +                   // Alarm
+            ".+");                         // Checksum
 
-        String sentence = (String) msg;
-
+    private boolean parseGPRMC(String gprmc, Position position) {
+        
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = patternGPRMC.matcher(gprmc);
         if (!parser.matches()) {
-            return null;
+            return false;
         }
 
-        // Create new position
-        Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("megastek");
         int index = 1;
 
         // Time
@@ -119,50 +126,146 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-        position.setTime(time.getTime());
+        position.setTime(time.getTime());        
 
-        // Alarm
-        extendedInfo.set("alarm", parser.group(index++));
+        return true;
+    }
+    
+    @Override
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, Object msg)
+            throws Exception {
 
-        // IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        String sentence = (String) msg;
+
+        // Detect type
+        boolean simple = (sentence.charAt(3) == ',');
+
+        // Split message
+        String id;
+        String gprmc;
+        String status;
+        if (simple) {
+
+            int beginIndex = 4;
+            int endIndex = sentence.indexOf(',', beginIndex);
+            id = sentence.substring(beginIndex, endIndex);
+
+            beginIndex = endIndex + 1;
+            endIndex = sentence.indexOf('*', beginIndex) + 3;
+            gprmc = sentence.substring(beginIndex, endIndex);
+
+            beginIndex = endIndex + 1;
+            status = sentence.substring(beginIndex);
+        
+        } else {
+
+            int beginIndex = 3;
+            int endIndex = beginIndex + 16;
+            id = sentence.substring(beginIndex, endIndex).trim();
+
+            beginIndex = endIndex + 2;
+            endIndex = sentence.indexOf('*', beginIndex) + 3;
+            gprmc = sentence.substring(beginIndex, endIndex);
+
+            beginIndex = endIndex + 1;
+            status = sentence.substring(beginIndex);
+        
+        }
+
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("megastek");
+
+        // Parse location data
+        if (!parseGPRMC(gprmc, position)) {
             return null;
         }
+        
+        if (simple) {
 
-        // Satellites
-        String satellites = parser.group(index++);
-        if (satellites != null) {
-            extendedInfo.set("satellites", satellites);
+            // Parse status
+            Matcher parser = patternSimple.matcher(status);
+            if (!parser.matches()) {
+                return null;
+            }
+            
+            int index = 1;
+
+            // Alarm
+            extendedInfo.set("alarm", parser.group(index++));
+
+            // IMEI
+            String imei = parser.group(index++);
+            try {
+                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+            } catch(Exception firstError) {
+                try {
+                    position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+                } catch(Exception secondError) {
+                    Log.warning("Unknown device - " + imei + "(id - " + id + ")");
+                    return null;
+                }
+            }
+
+            // Satellites
+            String satellites = parser.group(index++);
+            if (satellites != null) {
+                extendedInfo.set("satellites", satellites);
+            }
+
+            // Altitude
+            position.setAltitude(Double.valueOf(parser.group(index++)));
+
+            // Battery
+            position.setPower(Double.valueOf(parser.group(index++)));
+
+            // Charger
+            String charger = parser.group(index++);
+            if (charger != null) {
+                extendedInfo.set("charger", Integer.valueOf(charger) == 1);
+            }
+
+            extendedInfo.set("mcc", parser.group(index++));
+            extendedInfo.set("mnc", parser.group(index++));
+            extendedInfo.set("lac", parser.group(index++));
+            
+        } else {
+
+            // Parse status
+            Matcher parser = patternAlternative.matcher(status);
+            if (!parser.matches()) {
+                return null;
+            }
+            
+            int index = 1;
+            
+            try {
+                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + id);
+                return null;
+            }
+
+            extendedInfo.set("mcc", parser.group(index++));
+            extendedInfo.set("mnc", parser.group(index++));
+            extendedInfo.set("lac", parser.group(index++));
+            extendedInfo.set("gsm", parser.group(index++));
+
+            // Battery
+            position.setPower(Double.valueOf(parser.group(index++)));
+            
+            extendedInfo.set("flags", parser.group(index++));
+            extendedInfo.set("input", parser.group(index++));
+            extendedInfo.set("output", parser.group(index++));
+            extendedInfo.set("adc1", parser.group(index++));
+            extendedInfo.set("adc2", parser.group(index++));
+            extendedInfo.set("adc3", parser.group(index++));
+            extendedInfo.set("alarm", parser.group(index++));
+            
         }
 
-        // Altitude
-        position.setAltitude(Double.valueOf(parser.group(index++)));
-
-        // Battery
-        position.setPower(Double.valueOf(parser.group(index++)));
-
-        // Charger
-        String charger = parser.group(index++);
-        if (charger != null) {
-            extendedInfo.set("charger", Integer.valueOf(charger) == 1);
-        }
-
-        // MCC
-        extendedInfo.set("mcc", parser.group(index++));
-
-        // MNC
-        extendedInfo.set("mnc", parser.group(index++));
-
-        // LAC
-        extendedInfo.set("lac", parser.group(index++));
-
-        // Extended info
         position.setExtendedInfo(extendedInfo.toString());
-
         return position;
     }
 
