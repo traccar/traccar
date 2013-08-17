@@ -147,6 +147,7 @@ public class ServerManager {
         initAplicomServer("aplicom");
         initGotopServer("gotop");
         initTotemServer("totem");
+        initGatorServer("gator");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -939,6 +940,17 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new TotemProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initGatorServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("objectDecoder", new GatorProtocolDecoder(ServerManager.this));
                 }
             });
         }
