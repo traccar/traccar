@@ -61,12 +61,12 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-        time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-        time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-        time.set(Calendar.HOUR, buf.readUnsignedByte());
-        time.set(Calendar.MINUTE, buf.readUnsignedByte());
-        time.set(Calendar.SECOND, buf.readUnsignedByte());
+        time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
+        time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.HOUR, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
         position.setTime(time.getTime());
 
         // Coordinates
@@ -88,7 +88,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed((double) buf.readUnsignedByte());
+        position.setSpeed((double) ChannelBufferTools.readHexInteger(buf, 2));
 
         // Course
         position.setCourse(buf.readUnsignedByte() * 2.0);
