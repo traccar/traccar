@@ -148,6 +148,7 @@ public class ServerManager {
         initGotopServer("gotop");
         initTotemServer("totem");
         initGatorServer("gator");
+        initNoranServer("noran");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -951,6 +952,17 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new GatorProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initNoranServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("objectDecoder", new NoranProtocolDecoder(ServerManager.this));
                 }
             });
         }
