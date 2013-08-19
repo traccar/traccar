@@ -27,6 +27,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
+import org.jboss.netty.handler.codec.frame.FixedLengthFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
@@ -149,6 +150,7 @@ public class ServerManager {
         initTotemServer("totem");
         initGatorServer("gator");
         initNoranServer("noran");
+        initM2mServer("m2m");
 
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -963,6 +965,18 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new NoranProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initM2mServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(23));
+                    pipeline.addLast("objectDecoder", new M2mProtocolDecoder(ServerManager.this));
                 }
             });
         }
