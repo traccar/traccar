@@ -123,8 +123,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
+        int year = 0;
         if (!first) {
-            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            year = Integer.valueOf(parser.group(index++));
+            time.set(Calendar.YEAR, 2000 + year);
             time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
         }
@@ -165,9 +167,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         // Date
         if (first) {
-            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            year = Integer.valueOf(parser.group(index++));
+            time.set(Calendar.YEAR, 2000 + year);
             time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+        }
+        if (year == 0) {
+            return null; // ignore invalid data
         }
         position.setTime(time.getTime());
 
