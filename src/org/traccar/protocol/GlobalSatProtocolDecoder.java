@@ -121,13 +121,13 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case '1':
                     double longitude = Double.valueOf(value.substring(1));
-                    if (value.charAt(0) == 'E') longitude = -longitude;
+                    if (value.charAt(0) == 'W') longitude = -longitude;
                     position.setLongitude(longitude);
                     break;
                 case '2':
                     longitude = Double.valueOf(value.substring(4)) / 60;
                     longitude += Integer.valueOf(value.substring(1, 4));
-                    if (value.charAt(0) == 'E') longitude = -longitude;
+                    if (value.charAt(0) == 'W') longitude = -longitude;
                     position.setLongitude(longitude);
                     break;
                 case '3':
