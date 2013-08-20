@@ -93,7 +93,12 @@ public class ServerManager {
 
         dataManager = new DatabaseDataManager(properties);
 
-        Log.setupLogger(properties);
+        // Init logger
+        loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
+        if (loggerEnabled) {
+            Log.setupLogger(properties);
+        }
+
         initGeocoder(properties);
 
         initXexunServer("xexun");
@@ -151,7 +156,7 @@ public class ServerManager {
         initGatorServer("gator");
         initNoranServer("noran");
         initM2mServer("m2m");
-
+        
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
             webServer = new WebServer(properties);

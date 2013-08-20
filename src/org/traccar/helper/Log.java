@@ -32,19 +32,16 @@ public class Log {
     private static Logger logger = null;
     
     public static void setupLogger(Properties properties) throws IOException {
-        if (Boolean.valueOf(properties.getProperty("logger.enable"))) {
 
-            Layout layout = new PatternLayout(
-                    "%d{yyyy-MM-dd HH:mm:ss} %5p: %m%n");
+        Layout layout = new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %5p: %m%n");
 
-            Appender appender = new DailyRollingFileAppender(
-                    layout, properties.getProperty("logger.file"), "'.'yyyyMMdd");
+        Appender appender = new DailyRollingFileAppender(
+                layout, properties.getProperty("logger.file"), "'.'yyyyMMdd");
 
-            LogManager.resetConfiguration();
-            logger = Logger.getLogger(LOGGER_NAME);
-            logger.addAppender(appender);
-            logger.setLevel(Level.DEBUG);
-        }
+        LogManager.resetConfiguration();
+        logger = Logger.getLogger(LOGGER_NAME);
+        logger.addAppender(appender);
+        logger.setLevel(Level.ALL);
     }
 
     public static Logger getLogger() {
