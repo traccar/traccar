@@ -15,14 +15,17 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -32,14 +35,83 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     public H02ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
+    
+    private static double readCoordinate(ChannelBuffer buf, boolean lon) {
+        
+        int degrees = ChannelBufferTools.readHexInteger(buf, 2);
+        if (lon) {
+            degrees = degrees * 10 + (buf.getByte(buf.readerIndex()) >> 4);
+        }
+        
+        double result = 0;
+        if (lon) {
+            result = buf.readUnsignedByte() & 0x0f;
+        }
+        result = result * 10 + ChannelBufferTools.readHexInteger(buf, lon ? 5 : 6) * 0.0001;
+        
+        result /= 60;
+        result += degrees;
 
-    /**
-     * Regular expressions pattern
-     */
+        return result;
+    }
+    
+    private Position decodeBinary(ChannelBuffer buf) {
+        
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("h02");
+        
+        buf.readByte(); // marker
+
+        // Identification
+        String id = String.valueOf(
+                (buf.readUnsignedInt() << 8) + buf.readUnsignedByte());
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+            return null;
+        }
+        
+        // Time
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.clear();
+        time.set(Calendar.HOUR, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
+        time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
+        position.setTime(time.getTime());
+        
+        // Location
+        double latitude = readCoordinate(buf, false);
+        int x = buf.readByte(); // reserved
+        double longitude = readCoordinate(buf, true);
+        int flags = buf.readUnsignedByte() & 0x0f;
+        position.setValid((flags & 0x02) != 0);
+        if ((flags & 0x04) == 0) latitude = -latitude;
+        if ((flags & 0x08) == 0) longitude = -longitude;
+        position.setLatitude(latitude);
+        position.setLongitude(longitude);
+        position.setAltitude(0.0);
+
+        // Speed and course
+        position.setSpeed((double) ChannelBufferTools.readHexInteger(buf, 3));
+        position.setCourse((buf.readUnsignedByte() & 0x0f) * 100.0 + ChannelBufferTools.readHexInteger(buf, 2));
+        
+        // Status
+        extendedInfo.set("status", ChannelBufferTools.readHexString(buf, 8));
+        
+        position.setExtendedInfo(extendedInfo.toString());
+        return position;
+    }
+
     static private Pattern pattern = Pattern.compile(
-    	    "\\*HQ," +
+    	    "\\*..," +                          // Manufacturer
             "(\\d+)," +                         // IMEI
             "V\\d," +                           // Version?
+            ".*" +
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             "([AV])," +                         // Validity
             "(\\d+)(\\d{2}.\\d{4})," +          // Latitude (DDMM.MMMM)
@@ -49,15 +121,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+.\\d+)," +                    // Speed
             "(\\d+.\\d+)?," +                   // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
+            "(\\p{XDigit}{8})" +                // Status
             ".*");
-
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
-            throws Exception {
+    
+    private Position decodeText(String sentence) {
 
         // Parse message
-        String sentence = (String) msg;
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
@@ -119,11 +188,31 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
+        
+        // Status
+        extendedInfo.set("status", parser.group(index++));
 
-        // Extended info
         position.setExtendedInfo(extendedInfo.toString());
-
         return position;
+    }
+
+    @Override
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, Object msg)
+            throws Exception {
+        
+        ChannelBuffer buf = (ChannelBuffer) msg;
+        String marker = buf.toString(0, 1, Charset.defaultCharset());
+        
+        // TODO X mode?
+
+        if (marker.equals("*")) {
+            return decodeText(buf.toString(Charset.defaultCharset()));
+        } else if (marker.equals("$")) {
+            return decodeBinary(buf);
+        }
+
+        return null;
     }
 
 }
