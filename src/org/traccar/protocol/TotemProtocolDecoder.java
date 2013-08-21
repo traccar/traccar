@@ -45,13 +45,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+\\.\\d+)?," +                 // Speed
-            "(\\d+\\.\\d+)?," +                 // Course
+            "(\\d+\\.?\\d*)?," +                // Speed
+            "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
             "[^\\*]+\\*\\p{XDigit}{2}\\|" +     // Checksum
-            "\\d+.\\d\\|" +                     // PDOP
-            "(\\d+.\\d)\\|" +                   // HDOP
-            "\\d+.\\d\\|" +                     // VDOP
+            "\\d+\\.\\d+\\|" +                  // PDOP
+            "(\\d+\\.\\d+)\\|" +                // HDOP
+            "\\d+\\.\\d+\\|" +                  // VDOP
             "(\\d+)\\|" +                       // IO Status
             "\\d+\\|" +                         // Time
             "\\d" +                             // Charged
@@ -78,7 +78,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "([EW])\\|" +
             "(\\d+\\.\\d+)?\\|" +               // Speed
             "(\\d+)?\\|" +                      // Course
-            "(\\d+.\\d+)\\|" +                  // HDOP
+            "(\\d+\\.\\d+)\\|" +                // HDOP
             "(\\d+)\\|" +                       // IO Status
             "\\d" +                             // Charged
             "(\\d{2})" +                        // Battery
