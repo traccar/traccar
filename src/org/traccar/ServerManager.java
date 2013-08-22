@@ -156,6 +156,7 @@ public class ServerManager {
         initGatorServer("gator");
         initNoranServer("noran");
         initM2mServer("m2m");
+        initOsmAndServer("osmand");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -979,6 +980,19 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(23));
                     pipeline.addLast("objectDecoder", new M2mProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+    
+    private void initOsmAndServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("httpDecoder", new HttpRequestDecoder());
+                    pipeline.addLast("httpEncoder", new HttpResponseEncoder());
+                    pipeline.addLast("objectDecoder", new OsmAndProtocolDecoder(ServerManager.this));
                 }
             });
         }
