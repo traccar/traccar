@@ -35,7 +35,14 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    static private Pattern patternHeader = Pattern.compile(
+            "#(\\d+)#" +                   // IMEI
+            "[^#]+#" +
+            "\\d+#" +
+            "([^#]+)#" +                   // Status
+            "\\d+");                       // Number of records
+
+    static private Pattern patternPosition = Pattern.compile(
             "#([0-9a-f]+)?" +              // Cell info
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
@@ -56,8 +63,15 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
+        // Decode header
+        String header = sentence.substring(0, sentence.indexOf('\r'));
+        Matcher parser = patternHeader.matcher(header);
+        if (!parser.matches()) {
+            return null;
+        }
+
         // Get device identifier
-        String imei = sentence.substring(1, sentence.indexOf('#', 1));
+        String imei = parser.group(1);
         long deviceId;
         try {
             deviceId = getDataManager().getDeviceByImei(imei).getId();
@@ -66,11 +80,14 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         
+        // Get status
+        String status = parser.group(2);
+        
         String[] messages = sentence.substring(sentence.indexOf('\n') + 1).split("\r\n");
         List<Position> positions = new LinkedList<Position>();
         
         for (String message : messages) {
-            Matcher parser = pattern.matcher(message);
+            parser = patternPosition.matcher(message);
             if (parser.matches()) {
                 Position position = new Position();
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tlt2h");
@@ -128,6 +145,9 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
                 // Altitude
                 position.setAltitude(0.0);
+                
+                // Status
+                extendedInfo.set("status", status);
                 
                 position.setExtendedInfo(extendedInfo.toString());
                 positions.add(position);
