@@ -125,10 +125,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         time.clear();
         int year = 0;
         if (!first) {
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             year = Integer.valueOf(parser.group(index++));
             time.set(Calendar.YEAR, 2000 + year);
-            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
         }
         time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
@@ -167,10 +167,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         // Date
         if (first) {
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             year = Integer.valueOf(parser.group(index++));
             time.set(Calendar.YEAR, 2000 + year);
-            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
         }
         if (year == 0) {
             return null; // ignore invalid data
