@@ -157,6 +157,7 @@ public class ServerManager {
         initNoranServer("noran");
         initM2mServer("m2m");
         initOsmAndServer("osmand");
+        initEasyTrackServer("easytrack");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -998,4 +999,19 @@ public class ServerManager {
         }
     }
 
+    private void initEasyTrackServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '#' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new EasyTrackProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+    
 }
