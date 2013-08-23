@@ -20,8 +20,6 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.util.Locale;
-import org.jboss.netty.logging.InternalLoggerFactory;
-import org.jboss.netty.logging.Log4JLoggerFactory;
 import org.traccar.helper.Log;
 
 public class Main {
@@ -47,13 +45,6 @@ public class Main {
         } catch (Exception e) {
             Log.warning("Failed to get system info");
         }
-    }
-
-    /**
-     * Workaround for "Bug 745866 - (EDG-45) Possible netty logging config problem"
-     */
-    static {
-        InternalLoggerFactory.setDefaultFactory(new Log4JLoggerFactory());
     }
 
     public static void main(String[] args) throws Exception {

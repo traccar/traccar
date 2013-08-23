@@ -91,13 +91,13 @@ public class ServerManager {
             properties.loadFromXML(new FileInputStream(arguments[0]));
         }
 
-        dataManager = new DatabaseDataManager(properties);
-
         // Init logger
         loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
         if (loggerEnabled) {
             Log.setupLogger(properties);
         }
+
+        dataManager = new DatabaseDataManager(properties);
 
         initGeocoder(properties);
 
