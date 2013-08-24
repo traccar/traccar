@@ -54,14 +54,24 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Detect device identifier
+        // Login
         if (sentence.startsWith("[!")) {
             String imei = sentence.substring(14, 14 + 15);
             try {
                 deviceId = getDataManager().getDeviceByImei(imei).getId();
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
+                return null;
             }
+
+            if (channel != null) {
+                channel.write("[”0000000001" + sentence.substring(13) + "]");
+            }
+        }
+
+        // Quit
+        else if (sentence.startsWith("[#")) {
+            // TODO: Send response
         }
 
         // Parse message
