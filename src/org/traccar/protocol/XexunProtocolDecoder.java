@@ -33,13 +33,9 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
-    //GPRMC,043435.000,A,811.299200,S,11339.9500,E,0.93,29.52,160313,00,0000.0,A*65,F,,imei:359585014597923,
     static private Pattern pattern = Pattern.compile(
             "GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2}).(\\d{3})," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2}).(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
             "([NS])," +

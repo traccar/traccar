@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.helper.ChannelBufferTools;
 
 public class XexunFrameDecoder extends FrameDecoder {
 
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
@@ -30,7 +31,7 @@ public class XexunFrameDecoder extends FrameDecoder {
 
         // Check minimum length
         int length = buf.readableBytes();
-        if (length < 100) {
+        if (length < 80) {
             return null;
         }
 
