@@ -33,9 +33,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "imei:" +
             "(\\d+)," +                         // IMEI
@@ -46,9 +43,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "[FL]," +                           // F - full / L - low
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time UTC (HHMMSS.SSS)
             "([AV])," +                         // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})," +      // Latitude (DDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d{4})," +      // Longitude (DDDMM.MMMM)
+            "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])?," +
             "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+\\.\\d+)?" +                  // Course
@@ -80,7 +77,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
-            Log.info("Parsing error");
             return null;
         }
 
