@@ -33,6 +33,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    //ET,358155100003016,HB,A,0d081e,07381e,8038ee09,03d2e9be,004f,0000,40c00000,0f,100,0000,00037c,29
     static private Pattern pattern = Pattern.compile(
             "\\*..," +                          // Manufacturer
             "(\\d+)," +                         // IMEI
@@ -51,7 +52,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}{4})," +               // Speed
             "(\\p{XDigit}{4})," +               // Course
             "(\\p{XDigit}{8})," +               // Status
-            "(\\d+)," +                         // Signal
+            "(\\p{XDigit}+)," +                 // Signal
             "(\\d+)," +                         // Power
             "(\\p{XDigit}{4})," +               // Oil
             "(\\p{XDigit}+),?" +                // Milage
@@ -112,8 +113,8 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(
                 hemisphere * Integer.parseInt(parser.group(index++), 16) / 600000.0);
         
-        position.setSpeed(Integer.parseInt(parser.group(index++), 16) / 600000.0);
-        position.setCourse(Integer.parseInt(parser.group(index++), 16) / 600000.0);
+        position.setSpeed(Integer.parseInt(parser.group(index++), 16) / 100.0);
+        position.setCourse(Integer.parseInt(parser.group(index++), 16) / 100.0);
 
         // Status
         extendedInfo.set("status", parser.group(index++));
