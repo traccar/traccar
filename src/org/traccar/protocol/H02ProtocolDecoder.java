@@ -64,8 +64,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         buf.readByte(); // marker
 
         // Identification
-        String id = String.valueOf(
-                (buf.readUnsignedInt() << 8) + buf.readUnsignedByte());
+        String id = ChannelBufferTools.readHexString(buf, 10);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
