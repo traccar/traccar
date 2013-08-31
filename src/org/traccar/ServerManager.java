@@ -224,9 +224,13 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) ';' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    byte delimiter1[] = { (byte) '\r', (byte) '\n' };
+                    byte delimiter2[] = { (byte) '\n' };
+                    byte delimiter3[] = { (byte) ';' };
+                    pipeline.addLast("frameDecoder", new DelimiterBasedFrameDecoder(1024,
+                            ChannelBuffers.wrappedBuffer(delimiter1),
+                            ChannelBuffers.wrappedBuffer(delimiter2),
+                            ChannelBuffers.wrappedBuffer(delimiter3)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this));
