@@ -137,7 +137,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
                 position.setLongitude(buf.readInt() / 10000000.0);
                 position.setLatitude(buf.readInt() / 10000000.0);
-                position.setAltitude((double) buf.readUnsignedShort());
+                position.setAltitude((double) buf.readShort());
                 position.setCourse((double) buf.readUnsignedShort());
 
                 int satellites = buf.readUnsignedByte();
