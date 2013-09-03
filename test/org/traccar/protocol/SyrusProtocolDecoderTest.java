@@ -19,6 +19,9 @@ public class SyrusProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 ">REV481599462982+2578391-0802945201228512;ID=Test"));
+        
+        assertNotNull(decoder.decode(null, null,
+                ">REV131756153215+3359479-0075299001031332;VO=10568798;IO=310;SV=10;BL=4190;CV09=0;AD=0;AL=+47;ID=356612021059680"));
 
     }
 
