@@ -67,12 +67,12 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Battery
             "(\\d+)," +                    // Flags
             "(\\d+)," +                    // Inputs
-            "(\\d+)," +                    // Outputs
-            "(\\d\\.\\d{2})," +            // ADC 1
-            "(\\d\\.\\d{2})," +            // ADC 2
-            "(\\d\\.\\d{2})," +            // ADC 3
+            "(?:(\\d+),)?" +               // Outputs
+            "(\\d\\.?\\d*)," +             // ADC 1
+            "(?:(\\d\\.\\d{2})," +         // ADC 2
+            "(\\d\\.\\d{2}),)?" +          // ADC 3
             "([^;]+);" +                   // Alarm
-            ".+");                         // Checksum
+            ".*");                         // Checksum
 
     private boolean parseGPRMC(String gprmc, Position position) {
         

@@ -26,6 +26,9 @@ public class MegastekProtocolDecoderTest {
         assertNotNull(decoder.decode(null, null,
                 "STX123456            $GPRMC,063709.000,A,2238.1998,N,11401.9670,E,0.00,,250313,,,A*7F,460,01,2531,647E,11,87,1000,001001,0000,0.00,0.02,0.00,Timer;4A"));
 
+        assertNotNull(decoder.decode(null, null,
+                "STX260475            $GPRMC,104032.001,A,4022.1119,N,01811.4081,E,000.0,000.0,060913,,,A*67,222,01,815A,D455,11,99,0000,0001,0,Timer;"));
+        
     }
 
 }
