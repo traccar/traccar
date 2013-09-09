@@ -15,29 +15,17 @@
  */
 package org.traccar.http;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.Iterator;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
 
 /**
  * Integrated HTTP server
@@ -51,14 +39,29 @@ public class WebServer {
 
             Context context = new InitialContext();
 
-            Class clazz = Class.forName(properties.getProperty("database.dataSource"));
+            String dataSourceClass = properties.getProperty("database.dataSource");
+            if (dataSourceClass != null) {
 
-            DataSource ds = (DataSource) clazz.newInstance();
-            clazz.getMethod("setURL", String.class).invoke(ds, properties.getProperty("database.url"));
-            clazz.getMethod("setUser", String.class).invoke(ds, properties.getProperty("database.user"));
-            clazz.getMethod("setPassword", String.class).invoke(ds, properties.getProperty("database.password"));
+                Class clazz;
+                
+                String driverFile = properties.getProperty("database.driverFile");
+                if (driverFile != null) {
+                    URL url = new URL("jar:file:" + new File(driverFile).getAbsolutePath() + "!/");
+                    URLClassLoader cl = new URLClassLoader(new URL[] { url });
+                    clazz = Class.forName(dataSourceClass, true, cl);
+                } else {
+                    clazz = Class.forName(dataSourceClass);
+                }
+                
+                if (clazz != null) {
+                    DataSource ds = (DataSource) clazz.newInstance();
+                    clazz.getMethod("setUrl", String.class).invoke(ds, properties.getProperty("database.url"));
+                    clazz.getMethod("setUser", String.class).invoke(ds, properties.getProperty("database.user"));
+                    clazz.getMethod("setPassword", String.class).invoke(ds, properties.getProperty("database.password"));
 
-            context.bind("java:/DefaultDS", ds);
+                    context.bind("java:/DefaultDS", ds);
+                }
+            }
 
         } catch (Exception error) {
             Log.warning(error);
