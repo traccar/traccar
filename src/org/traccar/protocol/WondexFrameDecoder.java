@@ -23,7 +23,7 @@ import org.traccar.helper.ChannelBufferTools;
 
 public class WondexFrameDecoder extends FrameDecoder {
     
-    private static final int KEEP_ALIVE_LENGTH = 6;
+    private static final int KEEP_ALIVE_LENGTH = 8;
 
     @Override
     protected Object decode(
