@@ -55,7 +55,7 @@ public class WebServer {
                 
                 if (clazz != null) {
                     DataSource ds = (DataSource) clazz.newInstance();
-                    clazz.getMethod("setUrl", String.class).invoke(ds, properties.getProperty("database.url"));
+                    clazz.getMethod("setURL", String.class).invoke(ds, properties.getProperty("database.url"));
                     clazz.getMethod("setUser", String.class).invoke(ds, properties.getProperty("database.user"));
                     clazz.getMethod("setPassword", String.class).invoke(ds, properties.getProperty("database.password"));
 

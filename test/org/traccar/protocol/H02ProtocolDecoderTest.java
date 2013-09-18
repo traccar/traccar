@@ -20,6 +20,9 @@ public class H02ProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "*HQ,3800008786,V1,062507,V,3048.2437,N,03058.5617,E,000.00,000,250413,FFFFFBFF#", Charset.defaultCharset())));
+        
+        assertNotNull(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "*HQ,4300256455,V1,111817,A,1935.5128,N,04656.3243,E,0.00,100,170913,FFE7FBFF#", Charset.defaultCharset())));
 
         assertNotNull(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "*HQ,123456789012345,V1,155850,A,5214.5346,N,2117.4683,E,0.00,270.90,131012,ffffffff,000000,000000,000000,000000#", Charset.defaultCharset())));
