@@ -187,7 +187,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "(\\d+\\.?\\d*)," +            // Altitude
             "(\\d+\\.?\\d*)," +            // Speed
-            "(\\d+)," +                    // Course
+            "(\\d+\\.?\\d*)," +            // Course
             "(\\d+)," +                    // Satellites
             "(\\d+\\.?\\d*)");             // HDOP
     
