@@ -38,7 +38,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                         // IMEI
             "([^,]+)," +                        // Alarm
             "(\\d{2})/?(\\d{2})/?(\\d{2})\\s?" + // Local Date
-            "(\\d{2}):?(\\d{2})," +             // Local Time
+            "(\\d{2}):?(\\d{2})(?:\\d{2})?," +  // Local Time
             "[^,]*," +
             "[FL]," +                           // F - full / L - low
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time UTC (HHMMSS.SSS)
@@ -48,7 +48,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])?," +
             "(\\d+\\.?\\d*)," +                 // Speed
-            "(\\d+\\.\\d+)?" +                  // Course
+            "(\\d+\\.?\\d*)?(?:," +             // Course
+            "(\\d+\\.?\\d*)?)?" +               // Altitude
             ".*");
 
     @Override
@@ -145,9 +146,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setLongitude(longitude);
 
-        // Altitude
-        position.setAltitude(0.0);
-
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
 
@@ -157,6 +155,14 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(Double.valueOf(course));
         } else {
             position.setCourse(0.0);
+        }
+
+        // Altitude
+        String altitude = parser.group(index++);
+        if (altitude != null) {
+            position.setAltitude(Double.valueOf(altitude));
+        } else {
+            position.setAltitude(0.0);
         }
 
         // Extended info
