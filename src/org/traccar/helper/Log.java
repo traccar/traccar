@@ -16,6 +16,10 @@
 package org.traccar.helper;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.management.RuntimeMXBean;
 import java.util.Properties;
 import org.apache.log4j.Appender;
 import org.apache.log4j.DailyRollingFileAppender;
@@ -61,6 +65,29 @@ public class Log {
             logger.setLevel(Level.OFF);
         }
         return logger;
+    }
+    
+    public static void logSystemInfo() {
+        try {
+            OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
+            Log.info("Operating System" +
+                " name: " + operatingSystemBean.getName() +
+                " version: " + operatingSystemBean.getVersion() +
+                " architecture: " + operatingSystemBean.getArch());
+
+            RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
+            Log.info("Java Runtime" +
+                " name: " + runtimeBean.getVmName() +
+                " vendor: " + runtimeBean.getVmVendor() +
+                " version: " + runtimeBean.getVmVersion());
+
+            MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+            Log.info("Memory Limit" +
+                " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb" +
+                " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
+        } catch (Exception e) {
+            Log.warning("Failed to get system info");
+        }
     }
     
     public static void error(String msg) {

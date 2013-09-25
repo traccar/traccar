@@ -15,38 +15,11 @@
  */
 package org.traccar;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
 import java.util.Locale;
 import org.traccar.helper.Log;
 
 public class Main {
     
-    private static void printSystemInfo() {
-        try {
-            OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
-            Log.info("Operating System" +
-                " name: " + operatingSystemBean.getName() +
-                " version: " + operatingSystemBean.getVersion() +
-                " architecture: " + operatingSystemBean.getArch());
-
-            RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-            Log.info("Java Runtime" +
-                " name: " + runtimeBean.getVmName() +
-                " vendor: " + runtimeBean.getVmVendor() +
-                " version: " + runtimeBean.getVmVersion());
-
-            MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-            Log.info("Memory Limit" +
-                " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb" +
-                " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
-        } catch (Exception e) {
-            Log.warning("Failed to get system info");
-        }
-    }
-
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ENGLISH);
 
@@ -54,7 +27,7 @@ public class Main {
         service.init(args);
 
         Log.info("Starting server...");
-        printSystemInfo();
+        Log.logSystemInfo();
 
         service.start();
 

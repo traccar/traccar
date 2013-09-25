@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,11 @@ import java.nio.charset.Charset;
 
 import org.traccar.helper.Log;
 
-/**
- * Reverse geocoder implementation using Google
- */
 public class GoogleReverseGeocoder implements ReverseGeocoder {
 
     private final static String MARKER = "\"formatted_address\" : \"";
 
-    /**
-     * Get address string by coordinates
-     */
+    @Override
     public String getAddress(double latitude, double longitude) {
 
         try {
