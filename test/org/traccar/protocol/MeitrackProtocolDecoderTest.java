@@ -28,6 +28,9 @@ public class MeitrackProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 "$$A141,012896005334567,AAA,35,-33.866543,151.190148,121209081758,A,6,27,0,16,1,48,65551,152784,505|2|0B5F|D9D3,0000,0000|0000|0000|0A39|0000,,*5B"));
+        
+        assertNotNull(decoder.decode(null, null,
+                "$$_128,861074020109479,AAA,34,22.512618,114.057065,090215000318,V,0,31,0,0,0,0,0,733,302|720|3EE4|BBB5,0000,0006|0006||028C|0000,*E3"));
 
 
     }
