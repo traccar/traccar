@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,33 +20,7 @@ import java.util.Date;
 /**
  * Position information
  */
-public class Position {
-
-    /**
-     * Id
-     */
-    private Long id;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Device
-     */
-    private Long deviceId;
-
-    public Long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
-    }
+public class Position extends Data {
 
     /**
      * Time (UTC)
@@ -150,19 +124,6 @@ public class Position {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    /**
-     * Extended information in XML format
-     */
-    private String extendedInfo;
-
-    public String getExtendedInfo() {
-        return extendedInfo;
-    }
-
-    public void setExtendedInfo(String extendedInfo) {
-        this.extendedInfo = extendedInfo;
     }
 
 }
