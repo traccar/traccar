@@ -126,7 +126,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("oil", buf.readUnsignedShort() / 10.0);
 
             // Power
-            position.setPower(buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
+            extendedInfo.set("power", buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
 
             // Milage
             extendedInfo.set("milage", buf.readUnsignedInt());

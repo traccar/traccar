@@ -83,7 +83,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
 
         position.setValid(true);
-        position.setId((long) sequenceNumber);
+        extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
         
         buf.readUnsignedShort(); // report trigger
@@ -102,8 +102,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         buf.readUnsignedInt(); // distance
         buf.readUnsignedInt(); // delta distance
-        
-        position.setPower(buf.readUnsignedShort() * 0.001);
+
+        extendedInfo.set("battery", buf.readUnsignedShort() * 0.001);
         
         buf.readUnsignedShort(); // battery charger status
         
@@ -120,7 +120,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
 
         position.setValid(true);
-        position.setId((long) sequenceNumber);
+        extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
         
         buf.readUnsignedShort(); // report trigger
@@ -146,7 +146,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // VSAUT1 voltage
         buf.readUnsignedShort(); // VSAUT2 voltage
         buf.readUnsignedShort(); // solar voltage
-        position.setPower(buf.readUnsignedShort() * 0.001); // battery voltage
+        extendedInfo.set("battery", buf.readUnsignedShort() * 0.001);
         
         // TODO: a lot of other stuff
 
@@ -158,7 +158,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
 
-        position.setId((long) sequenceNumber);
+        extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
         position.setTime(convertTimestamp(timestamp));
         
@@ -182,7 +182,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
 
-        position.setId((long) sequenceNumber);
+        extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
         position.setTime(convertTimestamp(timestamp));
         
@@ -209,7 +209,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
 
-        position.setId((long) sequenceNumber);
+        extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
 
         buf.readUnsignedByte(); // report trigger
@@ -238,7 +238,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // supply voltage 1
         buf.readUnsignedByte(); // supply voltage 2
-        position.setPower(buf.readUnsignedByte() * 0.01 + 2.5); // battery voltage
+        extendedInfo.set("battery", buf.readUnsignedShort() * 0.001);
 
         // TODO: a lot of other stuff
 
@@ -250,7 +250,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
 
-        position.setId((long) sequenceNumber);
+        extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
         position.setTime(convertTimestamp(timestamp));
 
@@ -270,7 +270,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // satellites in fix
         
-        position.setPower(buf.readUnsignedByte() * 0.005 + 3.0); // battery voltage
+        extendedInfo.set("battery", buf.readUnsignedShort() * 0.001);
         
         buf.readUnsignedInt(); // distance
 

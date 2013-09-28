@@ -140,19 +140,6 @@ public class Position {
     }
 
     /**
-     * Power
-     */
-    private Double power;
-
-    public Double getPower() {
-        return power;
-    }
-
-    public void setPower(Double power) {
-        this.power = power;
-    }
-
-    /**
      * Address
      */
     private String address;

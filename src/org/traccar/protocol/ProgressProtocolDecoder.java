@@ -155,7 +155,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                         break; // workaround for device bug
                     }
                     lastIndex = buf.readUnsignedInt();
-                    position.setId(lastIndex);
+                    extendedInfo.set("index", lastIndex);
                 } else {
                     newIndex = buf.readUnsignedInt();
                 }

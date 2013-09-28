@@ -207,7 +207,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Battery level
             if (checkBit(mask, 24)) {
-                position.setPower(buf.readUnsignedShort() / 1000.0);
+                extendedInfo.set("power", buf.readUnsignedShort() / 1000.0);
             }
 
             // GPS overspeed
@@ -222,7 +222,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Sequence number
             if (checkBit(mask, 28)) {
-                position.setId((long) buf.readUnsignedShort());
+                extendedInfo.set("index", buf.readUnsignedShort());
             }
 
             // Extended info

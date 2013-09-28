@@ -157,7 +157,7 @@ public class Avl08ProtocolDecoder extends BaseProtocolDecoder {
 
         // Voltage
         String voltage = parser.group(index++);
-        position.setPower(Double.valueOf(voltage.substring(1, 4)) / 100);
+        extendedInfo.set("power", Double.valueOf(voltage.substring(1, 4)) / 100);
         extendedInfo.set("voltage", voltage);
 
         // ADC

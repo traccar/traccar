@@ -62,8 +62,26 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
         return false;
     }
+    
+    private class ParseResult {
+        private long id;
+        private Position position;
 
-    private Position parsePosition(ChannelBuffer buf) {
+        public ParseResult(long id, Position position) {
+            this.id = id;
+            this.position = position;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public Position getPosition() {
+            return position;
+        }
+    }
+
+    private ParseResult parsePosition(ChannelBuffer buf) {
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navis");
 
@@ -79,7 +97,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
         extendedInfo.set("format", format);
 
-        position.setId(buf.readUnsignedInt()); // sequence number
+        long index = buf.readUnsignedInt();
+        extendedInfo.set("index", index);
 
         // Event type
         extendedInfo.set("event", buf.readUnsignedShort());
@@ -118,7 +137,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("input", buf.readUnsignedByte());
         }
 
-        position.setPower(buf.readUnsignedShort() / 1000.0); // power
+        extendedInfo.set("power", buf.readUnsignedShort() / 1000.0);
 
         // Battery power
         extendedInfo.set("battery", buf.readUnsignedShort());
@@ -195,23 +214,23 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
 
-        return position;
+        return new ParseResult(index, position);
     }
 
     private Object processSingle(Channel channel, ChannelBuffer buf) {
-        Position position = parsePosition(buf);
+        ParseResult result = parsePosition(buf);
 
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
         response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<T", charset));
-        response.writeInt(position.getId().intValue());
+        response.writeInt((int) result.getId());
         sendReply(channel, response);
 
         // No location data
-        if (position.getValid() == null) {
+        if (result.getPosition().getValid() == null) {
             return null;
         }
 
-        return position;
+        return result.getPosition();
     }
 
     private Object processArray(Channel channel, ChannelBuffer buf) {
@@ -219,7 +238,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         int count = buf.readUnsignedByte();
 
         for (int i = 0; i < count; i++) {
-            Position position = parsePosition(buf);
+            Position position = parsePosition(buf).getPosition();
             if (position.getValid() != null) {
                 positions.add(position);
             }

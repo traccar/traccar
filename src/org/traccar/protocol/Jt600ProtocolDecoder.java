@@ -98,7 +98,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("satellites", buf.readUnsignedByte());
 
             // Power
-            position.setPower((double) buf.readUnsignedByte());
+            extendedInfo.set("power", buf.readUnsignedByte());
 
             buf.readByte(); // other flags and sensors
 
@@ -204,7 +204,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Power
-        position.setPower(Double.valueOf(parser.group(index++)));
+        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;

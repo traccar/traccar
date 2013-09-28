@@ -100,7 +100,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("satellites", satellites);
         
         // Report identifier
-        position.setId(Long.valueOf(parser.group(index++)));
+        extendedInfo.set("index", Long.valueOf(parser.group(index++)));
 
         // Input
         extendedInfo.set("input", parser.group(index++));

@@ -33,7 +33,6 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    //130725134142,,GPRMC,134142.591,A,3845.6283,N,00909.8876,W,2.08,287.33,250713,,,A*71,F,, imei:013227000526784,03,-50.7,L:3.69V,0,128,65337,268,03,177A,119F
     static private Pattern pattern = Pattern.compile(
             "[\r\n]*" +
             "(\\d+)," +                         // Serial
@@ -150,7 +149,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Power
-        position.setPower(Double.valueOf(parser.group(index++)));
+        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());

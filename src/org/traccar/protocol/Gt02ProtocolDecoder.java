@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
@@ -76,7 +77,8 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setId(index);
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt02");
+            extendedInfo.set("index", index);
 
             // Get device id
             try {
@@ -120,6 +122,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
             position.setAltitude(0.0);
 
+            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 

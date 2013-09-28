@@ -123,7 +123,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("signal", parser.group(index++));
 
         // Power
-        position.setPower(Double.valueOf(parser.group(index++)));
+        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
 
         // Oil
         extendedInfo.set("oil", Integer.parseInt(parser.group(index++), 16));

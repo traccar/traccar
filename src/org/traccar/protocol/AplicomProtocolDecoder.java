@@ -181,7 +181,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Power
         if ((selector & 0x8000) != 0) {
-            position.setPower(buf.readUnsignedShort() / 1000.0);
+            extendedInfo.set("power", buf.readUnsignedShort() / 1000.0);
             extendedInfo.set("battery", buf.readUnsignedShort());
         }
         

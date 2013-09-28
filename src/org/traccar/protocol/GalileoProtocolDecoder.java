@@ -137,7 +137,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                     
                 case TAG_POWER:
-                    position.setPower((double) buf.readUnsignedShort());
+                    extendedInfo.set("power", buf.readUnsignedShort());
                     break;
                     
                 case TAG_BATTERY:

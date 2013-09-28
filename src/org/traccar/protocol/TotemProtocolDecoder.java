@@ -241,7 +241,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             // Power
             extendedInfo.set("battery", parser.group(index++));
-            position.setPower(Double.valueOf(parser.group(index++)));
+            extendedInfo.set("power", Double.valueOf(parser.group(index++)));
 
             // ADC
             extendedInfo.set("adc", parser.group(index++));
@@ -273,7 +273,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             // Power
             extendedInfo.set("battery", Double.valueOf(parser.group(index++)) / 10);
-            position.setPower(Double.valueOf(parser.group(index++)));
+            extendedInfo.set("power", Double.valueOf(parser.group(index++)));
 
             // ADC
             extendedInfo.set("adc1", parser.group(index++));

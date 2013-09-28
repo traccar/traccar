@@ -140,7 +140,7 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("gsm", parser.group(index++));
         
         // Battery
-        position.setPower(Double.valueOf(parser.group(index++)));
+        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
         
         // Flags
         extendedInfo.set("flags", parser.group(index++));

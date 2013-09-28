@@ -177,7 +177,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_TYPE_LOG_RECORDS) {
                     extendedInfo.set("archive", true);
                     lastIndex = buf.readUnsignedInt() + 1;
-                    position.setId(lastIndex);
+                    extendedInfo.set("index", lastIndex);
 
                     subtype = buf.readUnsignedShort();
                     if (subtype != MSG_TYPE_CURRENT_GPS_DATA && subtype != MSG_TYPE_STATE_FULL_INFO_T104) {

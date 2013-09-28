@@ -189,7 +189,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
                 if (checkBit(flags, 7)) {
                     extendedInfo.set("battery", buf.getUnsignedByte(buf.readerIndex()) >> 2);
-                    position.setPower((double) (buf.readUnsignedShort() & 0x03ff));
+                    extendedInfo.set("power", buf.readUnsignedShort() & 0x03ff);
                     buf.readByte(); // microcontroller temperature
 
                     extendedInfo.set("gsm", (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
@@ -269,7 +269,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         if (checkBit(flags, 5)) {
             extendedInfo.set("battery", buf.getUnsignedByte(buf.readerIndex()) >> 2);
-            position.setPower((double) (buf.readUnsignedShort() & 0x03ff));
+            extendedInfo.set("power", buf.readUnsignedShort() & 0x03ff);
             buf.readByte(); // microcontroller temperature
 
             extendedInfo.set("gsm", buf.getUnsignedByte(buf.readerIndex()) >> 5);
