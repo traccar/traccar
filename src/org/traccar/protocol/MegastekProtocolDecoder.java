@@ -203,7 +203,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 try {
                     position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
                 } catch(Exception secondError) {
-                    Log.warning("Unknown device - " + imei + "(id - " + id + ")");
+                    Log.warning("Unknown device - " + imei + " (id - " + id + ")");
                     return null;
                 }
             }
