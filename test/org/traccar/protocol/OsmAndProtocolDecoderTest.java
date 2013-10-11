@@ -19,6 +19,9 @@ public class OsmAndProtocolDecoderTest {
         
         assertNotNull(decoder.decode(null, null, new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
                 "/?id=123456&timestamp=1377177267&lat=60.0&lon=30.0")));
+        
+        assertNotNull(decoder.decode(null, null, new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
+                "/?lat=60.0&lon=30.0&speed=0.0&heading=0.0&vacc=0&hacc=0&altitude=0&deviceid=123456")));
 
     }
 

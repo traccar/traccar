@@ -53,7 +53,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("osmand");
 
         // Identification
-        String id = params.get("id").get(0);
+        String id = params.get(params.containsKey("id") ? "id" : "deviceid").get(0);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
@@ -62,7 +62,11 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
         // Decode position
         position.setValid(true);
-        position.setTime(new Date(Long.valueOf(params.get("timestamp").get(0)) * 1000));
+        if (params.containsKey("timestamp")) {
+            position.setTime(new Date(Long.valueOf(params.get("timestamp").get(0)) * 1000));
+        } else {
+            position.setTime(new Date());
+        }
         position.setLatitude(Double.valueOf(params.get("lat").get(0)));
         position.setLongitude(Double.valueOf(params.get("lon").get(0)));
 
@@ -74,6 +78,8 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
         if (params.containsKey("bearing")) {
             position.setCourse(Double.valueOf(params.get("bearing").get(0)));
+        } else if (params.containsKey("heading")) {
+            position.setCourse(Double.valueOf(params.get("heading").get(0)));
         } else {
             position.setCourse(0.0);
         }
@@ -84,6 +90,12 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
         if (params.containsKey("hdop")) {
             extendedInfo.set("hdop", params.get("hdop").get(0));
+        }
+        if (params.containsKey("vacc")) {
+            extendedInfo.set("vacc", params.get("vacc").get(0));
+        }
+        if (params.containsKey("hacc")) {
+            extendedInfo.set("hacc", params.get("hacc").get(0));
         }
 
         position.setExtendedInfo(extendedInfo.toString());
