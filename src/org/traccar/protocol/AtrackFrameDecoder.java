@@ -35,7 +35,7 @@ public class AtrackFrameDecoder extends LengthFieldBasedFrameDecoder {
             ChannelBuffer buf) throws Exception {
         
         // Keep alive message
-        if (buf.readableBytes() >= KEEPALIVE_LENGTH ||
+        if (buf.readableBytes() >= KEEPALIVE_LENGTH &&
             buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
             channel.write(buf.readBytes(KEEPALIVE_LENGTH));
         }
