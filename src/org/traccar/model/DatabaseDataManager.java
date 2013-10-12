@@ -175,8 +175,10 @@ public class DatabaseDataManager implements DataManager {
                 } else {
                     queryAddPosition.setLong("power", null);
                 }
-            } catch (XPathExpressionException ex) {
-                Log.warning(ex);
+            } catch (XPathExpressionException e) {
+                Log.warning("Error in XML: " + position.getExtendedInfo(), e);
+                queryAddPosition.setLong("id", null);
+                queryAddPosition.setLong("power", null);
             }
 
             queryAddPosition.executeUpdate();
