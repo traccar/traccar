@@ -23,7 +23,9 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.traccar.helper.AdvancedConnection;
@@ -161,14 +163,15 @@ public class DatabaseDataManager implements DataManager {
             
             // DELME: Temporary compatibility support
             XPath xpath = XPathFactory.newInstance().newXPath();
-            InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
             try {
+                InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
                 String index = xpath.evaluate("/info/index", source);
                 if (!index.isEmpty()) {
                     queryAddPosition.setLong("id", Long.valueOf(index));
                 } else {
                     queryAddPosition.setLong("id", null);
                 }
+                source = new InputSource(new StringReader(position.getExtendedInfo()));
                 String power = xpath.evaluate("/info/power", source);
                 if (!power.isEmpty()) {
                     queryAddPosition.setDouble("power", Double.valueOf(power));
