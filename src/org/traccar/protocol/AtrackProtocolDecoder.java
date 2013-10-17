@@ -77,8 +77,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedInt(); // send time
 
         // Coordinates
+        position.setValid(true);
         position.setLongitude(buf.readInt() * 0.000001);
         position.setLatitude(buf.readInt() * 0.000001);
+        position.setAltitude(0.0);
 
         // Course
         position.setCourse((double) buf.readUnsignedShort());
