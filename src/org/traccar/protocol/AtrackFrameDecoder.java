@@ -25,7 +25,7 @@ public class AtrackFrameDecoder extends LengthFieldBasedFrameDecoder {
     private static final int KEEPALIVE_LENGTH = 12;
     
     public AtrackFrameDecoder() {
-        super(1024, 4, 2, 6, 0);
+        super(1024, 4, 2);
     }
     
     @Override

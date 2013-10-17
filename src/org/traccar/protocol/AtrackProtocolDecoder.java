@@ -69,6 +69,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
+            return null;
         }
 
         // Date and time
