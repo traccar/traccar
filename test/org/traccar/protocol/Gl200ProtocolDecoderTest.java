@@ -1,6 +1,7 @@
 package org.traccar.protocol;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 public class Gl200ProtocolDecoderTest {
@@ -37,6 +38,9 @@ public class Gl200ProtocolDecoderTest {
 
         assertNotNull(decoder.decode(null, null,
                 "+RESP:GTFRI,07000D,868487001005941,,0,0,1,1,0.0,0,46.3,-77.039627,38.907573,20120731175232,0310,0260,B44B,EBC9,0015e96913a7,-58,,100,20120731175244,0114"));
+
+        assertNull(decoder.decode(null, null,
+                "+RESP:GTINF,359464030073766,8938003990320469804f,18,99,100,1,0,+2.00,0,20131018084015,00EE,0103090402"));
 
     }
 
