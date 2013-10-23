@@ -106,19 +106,19 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
     	    "\\*..," +                          // Manufacturer
             "(\\d+)," +                         // IMEI
             "V\\d," +                           // Version?
             ".*" +
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             "([AV])," +                         // Validity
-            "(\\d+)(\\d{2}.\\d{4})," +          // Latitude (DDMM.MMMM)
+            "(\\d+)(\\d{2}.\\d+)," +            // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d+)(\\d{2}.\\d{4})," +          // Longitude (DDMM.MMMM)
+            "(\\d+)(\\d{2}.\\d+)," +            // Longitude (DDMM.MMMM)
             "([EW])," +
-            "(\\d+.\\d+)," +                    // Speed
-            "(\\d+.\\d+)?," +                   // Course
+            "(\\d+.?\\d*)," +                   // Speed
+            "(\\d+.?\\d*)?," +                  // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             "(\\p{XDigit}{8})" +                // Status
             ".*");

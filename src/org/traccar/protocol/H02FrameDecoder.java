@@ -33,6 +33,12 @@ public class H02FrameDecoder extends FrameDecoder {
             ChannelBuffer buf) throws Exception {
         
         String marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
+
+        while ((marker.equals(" ") || marker.equals("\r") || marker.equals("\n")) && buf.readableBytes() > 0) {
+            buf.skipBytes(1);
+            marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
+        }
+        
         if (marker.equals("*")) {
 
             // Return text message
