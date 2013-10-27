@@ -18,10 +18,12 @@ package org.traccar.protocol;
 import java.nio.charset.Charset;
 import java.util.Date;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -47,6 +49,16 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_HEARTBEAT = 0x1A;
     private static final int MSG_DATA = 0x10;
 
+    private static void sendResponse(Channel channel, long rawId, int index) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.directBuffer(12);
+            response.writeShort(0xfe02);
+            response.writeLong(rawId);
+            response.writeShort(index);
+            channel.write(response);
+        }
+    }
+    
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -57,20 +69,24 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // prefix
         buf.readUnsignedShort(); // checksum
         buf.readUnsignedShort(); // length
-        buf.readUnsignedShort(); // sequence
+        int index = buf.readUnsignedShort();
 
         // Create new position
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("atrack");
 
         // Get device id
-        String id = String.valueOf(buf.readLong());
+        long rawId = buf.readLong();
+        String id = String.valueOf(rawId);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
             return null;
         }
+        
+        // Send acknowledgement
+        sendResponse(channel, rawId, index);
 
         // Date and time
         position.setTime(new Date(buf.readUnsignedInt() * 1000)); // gps time
