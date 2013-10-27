@@ -276,9 +276,12 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) '$' };
+                    byte delimiter1[] = { (byte) '$' };
+                    byte delimiter2[] = { (byte) '\0' };
                     pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                            new DelimiterBasedFrameDecoder(1024,
+                                    ChannelBuffers.wrappedBuffer(delimiter1),
+                                    ChannelBuffers.wrappedBuffer(delimiter2)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(ServerManager.this));
