@@ -158,6 +158,7 @@ public class ServerManager {
         initM2mServer("m2m");
         initOsmAndServer("osmand");
         initEasyTrackServer("easytrack");
+        initSanavServer("sanav");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1017,5 +1018,18 @@ public class ServerManager {
             });
         }
     }
-    
+
+    private void initSanavServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new SanavProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
 }
