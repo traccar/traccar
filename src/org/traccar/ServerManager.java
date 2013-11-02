@@ -152,12 +152,12 @@ public class ServerManager {
         initLaipacServer("laipac");
         initAplicomServer("aplicom");
         initGotopServer("gotop");
+        initSanavServer("sanav");
         initGatorServer("gator");
         initNoranServer("noran");
         initM2mServer("m2m");
         initOsmAndServer("osmand");
         initEasyTrackServer("easytrack");
-        initSanavServer("sanav");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -941,6 +941,21 @@ public class ServerManager {
         }
     }
 
+    private void initSanavServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '*' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new SanavProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
     private void initGatorServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
@@ -998,21 +1013,6 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new EasyTrackProtocolDecoder(ServerManager.this));
-                }
-            });
-        }
-    }
-
-    private void initSanavServer(String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) '*' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SanavProtocolDecoder(ServerManager.this));
                 }
             });
         }
