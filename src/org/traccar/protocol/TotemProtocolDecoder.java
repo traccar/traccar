@@ -33,7 +33,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern patternFirst = Pattern.compile(
+    private static final Pattern patternFirst = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -62,9 +62,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)\\|" +                       // Temperature
             "(\\d+.\\d+)\\|" +                  // Milage
             "\\d+\\|" +                         // Serial Number
+            ".*\\|?" +
             "\\p{XDigit}{4}");                  // Checksum
             
-    static private Pattern patternSecond = Pattern.compile(
+    private static final Pattern patternSecond = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -90,7 +91,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\d+\\|" +                         // Serial Number
             "\\p{XDigit}{4}");                  // Checksum
 
-    static private Pattern patternThird = Pattern.compile(
+    private static final Pattern patternThird = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -188,7 +189,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));

@@ -108,7 +108,7 @@ public class ServerManager {
         initGl200Server("gl200");
         initT55Server("t55");
         initXexun2Server("xexun2");
-        initAvl08Server("avl08");
+        initTotemServer("totem");
         initEnforaServer("enfora");
         initMeiligaoServer("meiligao");
         initMaxonServer("maxon");
@@ -152,7 +152,6 @@ public class ServerManager {
         initLaipacServer("laipac");
         initAplicomServer("aplicom");
         initGotopServer("gotop");
-        initTotemServer("totem");
         initGatorServer("gator");
         initNoranServer("noran");
         initM2mServer("m2m");
@@ -322,16 +321,14 @@ public class ServerManager {
         }
     }
 
-    private void initAvl08Server(String protocol) throws SQLException {
+    private void initTotemServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("frameDecoder", new TotemFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Avl08ProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("objectDecoder", new TotemProtocolDecoder(ServerManager.this));
                 }
             });
         }
@@ -939,19 +936,6 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new GotopProtocolDecoder(ServerManager.this));
-                }
-            });
-        }
-    }
-
-    private void initTotemServer(String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new TotemFrameDecoder());
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new TotemProtocolDecoder(ServerManager.this));
                 }
             });
         }
