@@ -1,6 +1,7 @@
 package org.traccar.protocol;
 
-import static org.junit.Assert.assertNotNull;
+import org.traccar.helper.TestDataManager;
+import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
@@ -26,13 +27,13 @@ public class Tk102ProtocolDecoderTest {
         assertNull(decoder.decode(null, null,
                 "[#0000000004\u0018(062100000000000600-0-0)"));
 
-        assertNotNull(decoder.decode(null, null,
+        verify(decoder.decode(null, null,
                 "[=00000000836(ITV013939A4913.8317N02824.9241E000.90018031310010000)"));
         
-        assertNotNull(decoder.decode(null, null,
+        verify(decoder.decode(null, null,
                 "[=00000000366(ITV012209A4913.8281N02824.9258E000.32018031310010000)"));
         
-        assertNotNull(decoder.decode(null, null,
+        verify(decoder.decode(null, null,
                 "[;00000000106(ONE200834A5952.8114N01046.0832E003.93212071305010000)"));
 
     }

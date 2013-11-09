@@ -35,6 +35,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    //#359094025419110#bigfriend#0#1234#AUTO#1##04632.8846,W,2327.2264,S,0.00,0.00#220913#234808##
     private static final Pattern pattern = Pattern.compile(
             "(?:#(\\d+)#" +                // IMEI
             "([^#]*)#)?" +                 // User
@@ -42,7 +43,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             "([^#]+)#" +                   // Password
             "[^#]+#" +
             "(\\d+)#" +                    // Packet number
-            "([^#]+)#" +                   // GSM base station
+            "([^#]+)?#?" +                 // GSM base station
             "(?:[^#]+#)?" +
             "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
             "([EW])," +
@@ -139,8 +140,13 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             // Date
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
-            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            int day = Integer.valueOf(parser.group(index++));
+            int month = Integer.valueOf(parser.group(index++));
+            if (day == 0 && month == 0) {
+                return null; // invalid date
+            }
+            time.set(Calendar.DAY_OF_MONTH, day);
+            time.set(Calendar.MONTH, month - 1);
             time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
 
             // Time
@@ -149,9 +155,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
 
-            // Extended info
             position.setExtendedInfo(extendedInfo.toString());
-
             return position;
         }
         

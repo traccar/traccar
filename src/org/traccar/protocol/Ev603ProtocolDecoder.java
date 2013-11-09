@@ -1,6 +1,6 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
- *                Luis Parada (luis.parada@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ *                       Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "!A," +                           // Type
             "(\\d{2})\\/(\\d{2})\\/(\\d{2})," + // Date dd/mm/YY
             "(\\d{2}):(\\d{2}):(\\d{2})," +   // Time hh:mm:ss
@@ -67,7 +67,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
         else if (sentence.startsWith("!A,")) {
             // Parse message
             Matcher parser = pattern.matcher(sentence);
-            if (!parser.matches()) {
+            if (deviceId == null || !parser.matches()) {
                 return null;
             }
 
@@ -105,10 +105,11 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
+            if (position.getCourse() > 360) {
+                position.setCourse(0.0);
+            }
 
-            // Extended info
             position.setExtendedInfo(extendedInfo.toString());
-
             return position;
         }
 

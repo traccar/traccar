@@ -1,4 +1,4 @@
-package org.traccar.protocol;
+package org.traccar.helper;
 
 import java.util.List;
 import org.traccar.model.DataManager;

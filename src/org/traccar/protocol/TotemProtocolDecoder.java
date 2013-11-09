@@ -288,7 +288,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("lac", parser.group(index++));
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Satellites
             extendedInfo.set("satellites", parser.group(index++));
@@ -298,6 +298,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             // Speed
             position.setSpeed(Double.valueOf(parser.group(index++)));
+
+            // Altitude
+            position.setAltitude(0.0);
 
             // PDOP
             extendedInfo.set("pdop", parser.group(index++));

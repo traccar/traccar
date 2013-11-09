@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
@@ -61,6 +62,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gl200");
 
         Integer index = 1;
 
@@ -96,6 +98,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
+        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

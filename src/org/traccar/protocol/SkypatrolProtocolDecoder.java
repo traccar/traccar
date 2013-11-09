@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,8 @@ import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * T55 tracker protocol decoder
- */
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public SkypatrolProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
@@ -57,9 +51,6 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
         return sign * degrees;
     }
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -177,7 +168,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Altitude
             if (checkBit(mask, 15)) {
-                buf.skipBytes(3);
+                position.setAltitude((double) buf.readMedium());
             }
 
             // Satellites

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,24 +27,16 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * Enfora protocol decoder
- */
 public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public EnforaProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2}).(\\d{2})," + // Time (HHMMSS.SS)
             "([AV])," +                  // Validity
@@ -59,9 +51,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int IMEI_LENGTH = 15;
 
-    /**
-     * Decode message
-     */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -104,6 +94,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("enfora");
         Integer index = 1;
 
         // Get device by IMEI
@@ -123,7 +114,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)) * 10);
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
@@ -157,6 +148,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
+        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

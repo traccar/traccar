@@ -35,7 +35,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern patternGPRMC = Pattern.compile(
+    private static final Pattern patternGPRMC = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -48,7 +48,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");
 
-    static private Pattern patternGPGGA = Pattern.compile(
+    private static final Pattern patternGPGGA = Pattern.compile(
             "\\$GPGGA," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude
@@ -57,7 +57,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "([EW])," +
             ".+");
 
-    static private Pattern patternGPRMA = Pattern.compile(
+    private static final Pattern patternGPRMA = Pattern.compile(
             "\\$GPRMA," +
             "([AV])," +                    // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude
@@ -124,7 +124,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));
@@ -205,6 +205,12 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             longitude += Double.valueOf(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
+            
+            // Speed
+            position.setSpeed(0.0);
+            
+            // Course
+            position.setCourse(0.0);
 
             // Altitude
             position.setAltitude(0.0);

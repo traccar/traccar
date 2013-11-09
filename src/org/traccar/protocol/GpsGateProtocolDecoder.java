@@ -25,6 +25,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
@@ -38,7 +39,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Regular expressions pattern
      */
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -103,6 +104,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gpsgate");
             position.setDeviceId(deviceId);
 
             Integer index = 1;
@@ -116,7 +118,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // Skip milliseconds
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));
@@ -155,6 +157,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             // Altitude
             position.setAltitude(0.0);
 
+            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 

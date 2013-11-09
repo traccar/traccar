@@ -239,6 +239,9 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
             
             int index = 1;
+
+            // Altitude
+            position.setAltitude(0.0);
             
             try {
                 position.setDeviceId(getDataManager().getDeviceByImei(id).getId());

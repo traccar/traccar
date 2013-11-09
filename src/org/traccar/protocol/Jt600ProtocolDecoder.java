@@ -127,7 +127,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\(" +
             "([\\d]+)," +                // Id
             "W01," +                     // Type
@@ -184,7 +184,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(latitude);
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -202,6 +202,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
+        
+        // Altitude
+        position.setAltitude(0.0);
 
         // Power
         extendedInfo.set("power", Double.valueOf(parser.group(index++)));

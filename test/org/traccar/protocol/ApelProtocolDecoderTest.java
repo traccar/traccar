@@ -1,8 +1,9 @@
 package org.traccar.protocol;
 
+import org.traccar.helper.TestDataManager;
 import java.nio.ByteOrder;
 import org.jboss.netty.buffer.ChannelBuffers;
-import static org.junit.Assert.assertNotNull;
+import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 

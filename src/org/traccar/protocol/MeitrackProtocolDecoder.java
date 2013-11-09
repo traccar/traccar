@@ -33,7 +33,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\$\\$." +                         // Flag
             "\\d+," +                           // Length
             "(\\d+)," +                         // IMEI
@@ -48,7 +48,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                         // GSM Signal
             "(\\d+)," +                         // Speed
             "(\\d+)," +                         // Course
-            "(\\d+.?\\d*)," +                   // HDOP
+            "(\\d+\\.?\\d*)," +                   // HDOP
             "(\\d+)," +                         // Altitude
             "(\\d+)," +                         // Milage
             ".*"); // TODO: parse other stuff
@@ -99,7 +99,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Satellites
         extendedInfo.set("satellites", parser.group(index++));

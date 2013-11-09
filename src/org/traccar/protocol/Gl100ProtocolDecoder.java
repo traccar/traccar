@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.Log;
+import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 /**
@@ -41,7 +42,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Regular expressions pattern
      */
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
             "(\\d{15})," +                      // IMEI
             "(?:(?:\\d+," +                     // Number
@@ -62,6 +63,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Decode message
      */
+    @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -84,6 +86,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gl100");
 
         Integer index = 1;
 
@@ -97,7 +100,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Validity
-        position.setValid(Integer.valueOf(parser.group(index++)) == 0 ? false : true);
+        position.setValid(Integer.valueOf(parser.group(index++)) == 0);
 
         // Position info
         position.setSpeed(Double.valueOf(parser.group(index++)));
@@ -119,6 +122,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
+        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 
