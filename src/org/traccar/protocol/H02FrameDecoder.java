@@ -34,7 +34,7 @@ public class H02FrameDecoder extends FrameDecoder {
         
         String marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
 
-        while ((marker.equals(" ") || marker.equals("\r") || marker.equals("\n")) && buf.readableBytes() > 0) {
+        while (!marker.equals("*") && !marker.equals("$") && buf.readableBytes() > 0) {
             buf.skipBytes(1);
             marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
         }
