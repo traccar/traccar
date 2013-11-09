@@ -33,7 +33,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
             "[0-9a-fA-F]{6}," +                 // Protocol version
             "(\\d{15}),.*," +                   // IMEI
@@ -76,7 +76,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Validity
-        position.setValid(Integer.valueOf(parser.group(index++)) == 0 ? false : true);
+        position.setValid(Integer.valueOf(parser.group(index++)) == 0);
 
         // Position info
         position.setSpeed(Double.valueOf(parser.group(index++)));

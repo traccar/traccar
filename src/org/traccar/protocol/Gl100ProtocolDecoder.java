@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,21 +27,12 @@ import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * GL200 tracker protocol decoder
- */
 public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Initialize
-     */
     public Gl100ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     private static final Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
             "(\\d{15})," +                      // IMEI
@@ -60,9 +51,6 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             ".*");
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -71,7 +59,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Send response
-        if (sentence.contains("AT+GTHBD=")) {
+        if (sentence.contains("AT+GTHBD=") && channel != null) {
             String response = "+RESP:GTHBD,GPRS ACTIVE,";
             response += sentence.substring(9, sentence.lastIndexOf(','));
             response += '\0';

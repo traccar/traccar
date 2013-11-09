@@ -13,6 +13,9 @@ public class Gl200ProtocolDecoderTest {
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
 
+        assertNull(decoder.decode(null, null,
+                "+RESP:GTINF,359464030073766,8938003990320469804f,18,99,100,1,0,+2.00,0,20131018084015,00EE,0103090402"));
+
         verify(decoder.decode(null, null,
                 "+RESP:GTFRI,04040C,359231038939904,,,10,1,2,0.0,117,346.0,8.924243,50.798077,20130618122040,0262,0002,0299,109C,00,0.0,,,,,,,,,20130618122045,00F6"));
         
@@ -39,9 +42,6 @@ public class Gl200ProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 "+RESP:GTFRI,07000D,868487001005941,,0,0,1,1,0.0,0,46.3,-77.039627,38.907573,20120731175232,0310,0260,B44B,EBC9,0015e96913a7,-58,,100,20120731175244,0114"));
-
-        assertNull(decoder.decode(null, null,
-                "+RESP:GTINF,359464030073766,8938003990320469804f,18,99,100,1,0,+2.00,0,20131018084015,00EE,0103090402"));
         
         verify(decoder.decode(null, null,
                 "+RESP:GTTOW,0F0100,135790246811220,,,10,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$"));
@@ -75,7 +75,7 @@ public class Gl200ProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 "+RESP:GTHBM,0F0100,135790246811220,,,11,1,1,24.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,2000.0,20090214093254,11F0$"));
-
+        
     }
 
 }
