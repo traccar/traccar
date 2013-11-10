@@ -33,7 +33,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "(\\d{12})" +                // Device ID
             ".{4}" +                     // Command
             "\\d*" +                     // IMEI (?)
@@ -61,9 +61,18 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         if (beginIndex != -1) {
             sentence = sentence.substring(beginIndex + 1);
         }
-
-        // TODO: Send answer?
-        //(090411121854AP05)
+        
+        // Send response
+        if (channel != null) {
+            String id = sentence.substring(0, 12);
+            String type = sentence.substring(12, 16);
+            if (type.equals("BP00")) {
+                String content = sentence.substring(sentence.length() - 3);
+                channel.write("(" + id + "AP01" + content + ")");
+            } else if (type.equals("BP05")) {
+                channel.write("(" + id + "AP05)");
+            }
+        }
 
         // Parse message
         Matcher parser = pattern.matcher(sentence);
@@ -98,7 +107,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
