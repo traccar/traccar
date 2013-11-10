@@ -93,6 +93,9 @@ cp wrapper/src/bin/sh.script.in out/bin/traccar
 cp wrapper/lib/wrapper.jar out/lib
 cp wrapper/src/conf/wrapper.conf.in out/conf/wrapper.conf
 
+sed -i 's/tail -1/tail -n 1/g' out/bin/traccar
+chmod +x out/bin/traccar
+
 cp ../target/tracker-server.jar out
 cp ../target/lib/* out/lib
 cp traccar-web.war out
@@ -113,7 +116,6 @@ sed -i 's/wrapper.logfile=..\/logs\/wrapper.log/wrapper.logfile=..\/logs\/wrappe
 
 cp wrapper/bin/wrapper-linux-x86-32 out/bin/wrapper
 cp wrapper/lib/libwrapper-linux-x86-32.so out/lib/libwrapper.so
-chmod +x out/bin/traccar
 
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
 zip -j traccar-linux-32.zip traccar.run linux/README.txt
@@ -122,18 +124,19 @@ zip -j traccar-linux-32.zip traccar.run linux/README.txt
 
 cp wrapper/bin/wrapper-linux-x86-64 out/bin/wrapper
 cp wrapper/lib/libwrapper-linux-x86-64.so out/lib/libwrapper.so
-chmod +x out/bin/traccar
 
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
 zip -j traccar-linux-64.zip traccar.run linux/README.txt
 
 # linux arm
 
+rm out/bin/wrapper
+rm out/lib/libwrapper.so
+
 cp wrapper/bin/wrapper-linux-armel-32 out/bin/
 cp wrapper/bin/wrapper-linux-armhf-32 out/bin/
 cp wrapper/lib/libwrapper-linux-armel-32.so out/lib/
 cp wrapper/lib/libwrapper-linux-armhf-32.so out/lib/
-chmod +x out/bin/traccar
 
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ]; then mv $app/bin/wrapper-linux-armel-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armel-32.so $app/lib/libwrapper.so; else mv $app/bin/wrapper-linux-armhf-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armhf-32.so $app/lib/libwrapper.so; fi; $app/bin/traccar install"
 zip -j traccar-linux-arm.zip traccar.run linux/README.txt
@@ -141,19 +144,21 @@ zip -j traccar-linux-arm.zip traccar.run linux/README.txt
 # MACOSX PACKAGE
 
 rm out/conf/traccar.cfg
-rm out/lib/libwrapper.so
+rm out/bin/wrapper-linux-armel-32
+rm out/bin/wrapper-linux-armhf-32
+rm out/lib/libwrapper-linux-armel-32.so
+rm out/lib/libwrapper-linux-armhf-32.so
 
 cp macosx/traccar.cfg out/conf
 
 cp wrapper/bin/wrapper-macosx-universal-64 out/bin/wrapper
 cp wrapper/lib/libwrapper-macosx-universal-64.jnilib out/lib/libwrapper.jnilib
-chmod +x out/bin/traccar
 
 makeself out traccar.run "traccar" "mkdir -p $app; cp -rf * $app; $app/bin/traccar install"
 zip -j traccar-macosx-64.zip traccar.run macosx/README.txt
 
 rm traccar.run
-#rm -rf out
+rm -rf out
 
 # GENERAL CLEANUP
 
