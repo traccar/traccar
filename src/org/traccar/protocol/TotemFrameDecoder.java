@@ -41,7 +41,7 @@ public class TotemFrameDecoder extends FrameDecoder {
 
         // Read message
         int length = Integer.parseInt(buf.toString(2, 2, Charset.defaultCharset()), 16);
-        if (length >= buf.readableBytes()) {
+        if (length <= buf.readableBytes()) {
             return buf.readBytes(length);
         }
 
