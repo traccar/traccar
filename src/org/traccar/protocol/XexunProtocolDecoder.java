@@ -34,7 +34,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2}).(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -45,7 +45,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.\\d+)," +                  // Speed
             "(\\d+\\.\\d+)?," +                 // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            ".*imei:" +
+            ".*\r?\n?.*imei:" +
             "(\\d+),");                         // IMEI
 
     @Override
