@@ -33,7 +33,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "(?:.+,)?(\\d+)," +            // Device Identifier
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
@@ -47,7 +47,8 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Input
             "(\\d+),?" +                   // Output
             "(\\d+\\.\\d+)?,?" +           // ADC1
-            "(\\d+\\.\\d+)?");             // ADC2
+            "(\\d+\\.\\d+)?" +             // ADC2
+            ".*");
 
     @Override
     protected Object decode(
