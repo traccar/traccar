@@ -45,7 +45,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+.\\d+)," +                    // Speed
+            "(\\d+\\.?\\d*)?," +                // Speed
             "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
             "(?:[^\\|]*\\|(\\d+\\.\\d+)\\|" +   // Dilution of precision
@@ -164,7 +164,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
@@ -179,7 +179,12 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        String speed = parser.group(index++);
+        if (speed != null) {
+            position.setSpeed(Double.valueOf(speed));
+        } else {
+            position.setSpeed(0.0);
+        }
 
         // Course
         String course = parser.group(index++);
