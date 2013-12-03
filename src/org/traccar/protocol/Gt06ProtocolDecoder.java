@@ -74,9 +74,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    /**
-     * Decode message
-     */
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -165,8 +162,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 // Status
                 if (type == MSG_GPS_LBS_STATUS) {
-                    int flags = buf.readUnsignedByte(); // TODO parse flags
                     extendedInfo.set("alarm", true);
+                    
+                    int flags = buf.readUnsignedByte();
+                    extendedInfo.set("acc", (flags & 0x2) != 0);
+                    // TODO parse other flags
 
                     // Voltage
                     extendedInfo.set("power", buf.readUnsignedByte());
