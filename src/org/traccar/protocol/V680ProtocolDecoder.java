@@ -35,7 +35,6 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    //#359094025419110#bigfriend#0#1234#AUTO#1##04632.8846,W,2327.2264,S,0.00,0.00#220913#234808##
     private static final Pattern pattern = Pattern.compile(
             "(?:#(\\d+)#" +                // IMEI
             "([^#]*)#)?" +                 // User

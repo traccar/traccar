@@ -57,6 +57,9 @@ public class V680ProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "#359094025419110#bigfriend#0#1234#AUTO#1##04632.8846,W,2327.2264,S,0.00,0.00#220913#234808##"));
+        
+        verify(decoder.decode(null, null,
+                "#353588102031599##1#0000#AUT#01#41300304843fc1#7955.124400,E,642.095500,N,5.28,95.21#041213#074431.000##"));
 
     }
 
