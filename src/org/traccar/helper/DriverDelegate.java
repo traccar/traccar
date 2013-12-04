@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class DriverDelegate implements Driver {
     
-    private Driver driver;
+    private final Driver driver;
     
     public DriverDelegate(Driver driver) {
         this.driver = driver;
@@ -64,9 +64,8 @@ public class DriverDelegate implements Driver {
         return driver.jdbcCompliant();
     }
 
-    @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return driver.getParentLogger();
+        throw new SQLFeatureNotSupportedException();
     }
     
 }
