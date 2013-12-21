@@ -45,6 +45,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+\\.\\d+)," +                // Latitude
             "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
+            "(\\d{4})," +                       // MCC
+            "(\\d{4})," +                       // MNC
+            "(\\p{XDigit}{4})," +               // LAC
+            "(\\p{XDigit}{4})," +               // Cell
+            "(?:.*,(\\d{1,3}),\\d{14},)?" +     // Battery
             ".*");
 
     @Override
@@ -97,6 +102,18 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
+
+        // Cell information
+        extendedInfo.set("mcc", parser.group(index++));
+        extendedInfo.set("mnc", parser.group(index++));
+        extendedInfo.set("lac", parser.group(index++));
+        extendedInfo.set("cell", parser.group(index++));
+
+        // Battery
+        String battery = parser.group(index++);
+        if (battery != null) {
+            extendedInfo.set("battery", Integer.valueOf(battery));
+        }
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
