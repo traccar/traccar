@@ -54,7 +54,6 @@ public class IntellitracProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "1003269480,20131126100258,10.32989,49.93836,0,304,217,6,2,0,0,0.000,0.000,20131126100258,0,0,0,-40,0,0,-273,0,0,0,0"));
 
-
     }
 
 }

@@ -47,7 +47,18 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Input
             "(\\d+),?" +                   // Output
             "(\\d+\\.\\d+)?,?" +           // ADC1
-            "(\\d+\\.\\d+)?" +             // ADC2
+            "(\\d+\\.\\d+)?,?" +           // ADC2
+            "(?:\\d{14},\\d+," +
+            "(\\d+)," +                    // VSS
+            "(\\d+)," +                    // RPM
+            "(-?\\d+)," +                  // Coolant
+            "(\\d+)," +                    // Fuel
+            "(\\d+)," +                    // Fuel Consumption
+            "(-?\\d+)," +                  // Fuel Temperature
+            "(\\d+)," +                    // Charger Pressure
+            "(\\d+)," +                    // TPL
+            "(\\d+)," +                    // Axle Weight
+            "(\\d+))?" +                   // Milage
             ".*");
 
     @Override
@@ -110,17 +121,23 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("output", parser.group(index++));
 
         // ADC1
-        String adc1 = parser.group(index++);
-        if (adc1 != null) {
-            extendedInfo.set("adc1", adc1);
-        }
+        extendedInfo.set("adc1", parser.group(index++));
 
         // ADC2
-        String adc2 = parser.group(index++);
-        if (adc2 != null) {
-            extendedInfo.set("adc2", adc2);
-        }
+        extendedInfo.set("adc2", parser.group(index++));
 
+        // J1939 data
+        extendedInfo.set("vss", parser.group(index++));
+        extendedInfo.set("rpm", parser.group(index++));
+        extendedInfo.set("coolant", parser.group(index++));
+        extendedInfo.set("fuel", parser.group(index++));
+        extendedInfo.set("consumption", parser.group(index++));
+        extendedInfo.set("temperature", parser.group(index++));
+        extendedInfo.set("charger", parser.group(index++));
+        extendedInfo.set("tpl", parser.group(index++));
+        extendedInfo.set("axle", parser.group(index++));
+        extendedInfo.set("milage", parser.group(index++));
+        
         position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
