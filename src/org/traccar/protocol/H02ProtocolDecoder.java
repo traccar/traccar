@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         
         int degrees = ChannelBufferTools.readHexInteger(buf, 2);
         if (lon) {
-            degrees = degrees * 10 + (buf.getByte(buf.readerIndex()) >> 4);
+            degrees = degrees * 10 + (buf.getUnsignedByte(buf.readerIndex()) >> 4);
         }
         
         double result = 0;
@@ -154,7 +154,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
