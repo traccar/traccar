@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,19 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "([EW]),,," +
             "(\\d+\\.?\\d*)?," +           // Speed
             "(\\d+\\.?\\d*)?," +           // Course
+            ".+");
+    
+    private static final Pattern patternTRCCR = Pattern.compile(
+            "\\$TRCCR," +
+            "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
+            "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time (HHMMSS.SSS)
+            "([AV])," +                    // Validity
+            "(-?\\d+\\.\\d+)," +           // Latitude
+            "(-?\\d+\\.\\d+)," +           // Longitude
+            "(\\d+\\.\\d+)," +             // Speed
+            "(\\d+\\.\\d+)," +             // Course
+            "(-?\\d+\\.\\d+)," +           // Altitude
+            "(\\d+\\.\\d+)," +             // Battery
             ".+");
     
     @Override
@@ -239,7 +252,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime());
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));
@@ -275,7 +288,51 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
-            
+
+        // Location
+        else if (sentence.startsWith("$TRCCR") && deviceId != null) {
+
+            // Parse message
+            Matcher parser = patternTRCCR.matcher(sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            // Create new position
+            Position position = new Position();
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("t55");
+            position.setDeviceId(deviceId);
+
+            Integer index = 1;
+
+            // Time
+            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            time.clear();
+            time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+            position.setTime(time.getTime());
+
+            // Validity
+            position.setValid(parser.group(index++).compareTo("A") == 0);
+
+            // Location
+            position.setLatitude(Double.valueOf(parser.group(index++)));
+            position.setLongitude(Double.valueOf(parser.group(index++)));
+            position.setSpeed(Double.valueOf(parser.group(index++)));
+            position.setCourse(Double.valueOf(parser.group(index++)));
+            position.setAltitude(Double.valueOf(parser.group(index++)));
+
+            // Battery
+            extendedInfo.set("battery", parser.group(index++));
+
+            position.setExtendedInfo(extendedInfo.toString());
+            return position;
+        }
+
         return null;
     }
 
