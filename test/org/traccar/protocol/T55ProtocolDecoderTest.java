@@ -37,6 +37,9 @@ public class T55ProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "$TRCCR,20140101001122.333,V,60.0,-100.0,1.1,2.2,3.3,4.4,*00"));
+        
+        verify(decoder.decode(null, null,
+                "$TRCCR,20140111000000.000,A,60.000000,60.000000,0.00,0.00,0.00,50,*3a"));
 
     }
 

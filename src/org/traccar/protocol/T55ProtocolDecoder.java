@@ -78,7 +78,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.\\d+)," +             // Speed
             "(\\d+\\.\\d+)," +             // Course
             "(-?\\d+\\.\\d+)," +           // Altitude
-            "(\\d+\\.\\d+)," +             // Battery
+            "(\\d+\\.?\\d*)," +            // Battery
             ".+");
     
     @Override
