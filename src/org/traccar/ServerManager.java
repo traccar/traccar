@@ -1024,6 +1024,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this));
                 }
             });
