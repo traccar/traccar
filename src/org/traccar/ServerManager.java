@@ -665,7 +665,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this, true));
                 }
             });
         }
@@ -1025,7 +1025,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this));
+                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this, false));
                 }
             });
         }

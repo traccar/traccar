@@ -29,9 +29,12 @@ import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class SyrusProtocolDecoder extends BaseProtocolDecoder {
+    
+    boolean sendResponse;
 
-    public SyrusProtocolDecoder(ServerManager serverManager) {
+    public SyrusProtocolDecoder(ServerManager serverManager, boolean sendResponse) {
         super(serverManager);
+        this.sendResponse = sendResponse;
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -112,7 +115,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
             }
             
             // Send response
-            if (channel != null) {
+            if (sendResponse && channel != null) {
                 channel.write(id);
             }
         }

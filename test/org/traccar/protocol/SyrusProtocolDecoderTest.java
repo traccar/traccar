@@ -9,7 +9,7 @@ public class SyrusProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(null);
+        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(null, false);
         decoder.setDataManager(new TestDataManager());
 
         verify(decoder.decode(null, null,
