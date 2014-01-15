@@ -108,7 +108,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("gsm", parser.group(index++));
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
