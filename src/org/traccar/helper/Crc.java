@@ -136,6 +136,14 @@ public class Crc {
         }
         return (int) checksum.getValue();
     }
+
+    public static int xorChecksum(ByteBuffer buf) {
+        int checksum = 0;
+        for (int i = 0; i < buf.remaining(); i++) {
+            checksum ^= buf.get(i);
+        }
+        return checksum;
+    }
     
     public static String nmeaChecksum(String msg) {
         int checksum = 0;

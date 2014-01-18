@@ -159,6 +159,7 @@ public class ServerManager {
         initOsmAndServer("osmand");
         initEasyTrackServer("easytrack");
         initTaipServer("taip");
+        initKhdServer("khd");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1026,6 +1027,18 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this, false));
+                }
+            });
+        }
+    }
+
+    private void initKhdServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 3, 2));
+                    pipeline.addLast("objectDecoder", new KhdProtocolDecoder(ServerManager.this));
                 }
             });
         }

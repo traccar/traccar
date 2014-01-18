@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,57 +18,65 @@ package org.traccar.protocol;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-public class GatorProtocolDecoder extends BaseProtocolDecoder {
+public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
-    public GatorProtocolDecoder(ServerManager serverManager) {
+    public KhdProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
-    private static final int PACKET_HEARTBEAT = 0x21;
-    private static final int PACKET_POSITION_DATA = 0x80;
-    private static final int PACKET_ROLLCALL_RESPONSE = 0x81;
-    private static final int PACKET_ALARM_DATA = 0x82;
-    private static final int PACKET_TERMINAL_STATUS = 0x83;
-    private static final int PACKET_MESSAGE = 0x84;
-    private static final int PACKET_TERMINAL_ANSWER = 0x85;
-    private static final int PACKET_BLIND_AREA = 0x8E;
-    private static final int PACKET_PICTURE_FRAME = 0x54;
-    private static final int PACKET_CAMERA_RESPONSE = 0x56;
-    private static final int PACKET_PICTURE_DATA = 0x57;
-    
+    private String readSerialNumber(ChannelBuffer buf) {
+        int b1 = buf.readUnsignedByte();
+        int b2 = buf.readUnsignedByte(); if (b2 > 0x80) b2 -= 0x80;
+        int b3 = buf.readUnsignedByte(); if (b3 > 0x80) b3 -= 0x80;
+        int b4 = buf.readUnsignedByte();
+        String serialNumber = String.format("%02d%02d%02d%02d", b1, b2, b3, b4);
+        return String.valueOf(Integer.valueOf(serialNumber));
+    }
+
+    private static final int MSG_LOGIN = 0xB1;
+    private static final int MSG_CONFIRMATION = 0x21;
+    private static final int MSG_ON_DEMAND = 0x81;
+    private static final int MSG_POSITION_UPLOAD = 0x80;
+    private static final int MSG_POSITION_REUPLOAD = 0x8E;
+    private static final int MSG_ALARM = 0x82;
+    private static final int MSG_REPLY = 0x85;
+    private static final int MSG_PERIPHERAL = 0xA3;
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
-        
+
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte();
-        buf.readUnsignedShort(); // length
+        buf.readUnsignedShort(); // size
 
-        // Pseudo IP address
-        String id = String.valueOf(buf.readUnsignedInt());
-        
-        if (type == PACKET_POSITION_DATA ||
-            type == PACKET_ROLLCALL_RESPONSE ||
-            type == PACKET_ALARM_DATA ||
-            type == PACKET_BLIND_AREA) {
-            
+        if (type == MSG_ON_DEMAND ||
+            type == MSG_POSITION_UPLOAD ||
+            type == MSG_POSITION_REUPLOAD ||
+            type == MSG_ALARM ||
+            type == MSG_REPLY ||
+            type == MSG_PERIPHERAL) {
+
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gator");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("khd");
 
-            // Identification
+            // Device identification
+            String id = readSerialNumber(buf);
             try {
                 position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
             } catch(Exception error) {
@@ -96,27 +104,48 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             // Flags
             int flags = buf.readUnsignedByte();
             position.setValid((flags & 0x80) != 0);
-            extendedInfo.set("satellites", flags & 0x0f);
+            
+            if (type == MSG_ALARM) {
+                
+                buf.skipBytes(2);
 
-            // Status
-            extendedInfo.set("status", buf.readUnsignedByte());
+            } else {
 
-            // Key switch
-            extendedInfo.set("key", buf.readUnsignedByte());
+                // Milage
+                extendedInfo.set("milage", buf.readUnsignedMedium());
+            
+                // Status
+                buf.skipBytes(4);
+                
+                // Other
+                buf.skipBytes(8);
 
-            // Oil
-            extendedInfo.set("oil", buf.readUnsignedShort() / 10.0);
-
-            // Power
-            extendedInfo.set("power", buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
-
-            // Milage
-            extendedInfo.set("milage", buf.readUnsignedInt());
+            }
+            
+            // TODO: parse extra data
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 
+        else if (type == MSG_LOGIN && channel != null) {
+            
+            buf.skipBytes(4); // serial number
+            buf.readByte(); // reserved
+            
+            ChannelBuffer response = ChannelBuffers.directBuffer(10);
+            response.writeByte(0x29); response.writeByte(0x29); // header
+            response.writeByte(MSG_CONFIRMATION);
+            response.writeShort(5); // size
+            response.writeByte(buf.readUnsignedByte());
+            response.writeByte(type);
+            response.writeByte(0); // reserved
+            response.writeByte(Crc.xorChecksum(response.toByteBuffer(0, 8)));
+            response.writeByte(0x0D); // ending
+            channel.write(response);
+
+        }
+        
         return null;
     }
 

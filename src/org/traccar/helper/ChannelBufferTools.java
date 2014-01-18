@@ -97,6 +97,28 @@ public class ChannelBufferTools {
         
         return result.toString();
     }
+    
+    /**
+     * Read BCD coded coordinate (first byte has sign bit)
+     */
+    public static double readCoordinate(ChannelBuffer buf) {
+        int b1 = buf.readUnsignedByte();
+        int b2 = buf.readUnsignedByte();
+        int b3 = buf.readUnsignedByte();
+        int b4 = buf.readUnsignedByte();
+        
+        double value = (b2 & 0xf) * 10 + (b3 >> 4);
+        value += (((b3 & 0xf) * 10 + (b4 >> 4)) * 10 + (b4 & 0xf)) / 1000.0;
+        value /= 60;
+        value += ((b1 >> 4 & 0x7) * 10 + (b1 & 0xf)) * 10 + (b2 >> 4);
+        
+        if ((b1 & 0x80) != 0) {
+            value = -value;
+        }
+        
+        return value;
+    }
+
 
     /**
      * Convert integer array to byte array
