@@ -160,6 +160,7 @@ public class ServerManager {
         initEasyTrackServer("easytrack");
         initTaipServer("taip");
         initKhdServer("khd");
+        initPiligrimServer("piligrim");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1039,6 +1040,19 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 3, 2));
                     pipeline.addLast("objectDecoder", new KhdProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+    
+    private void initPiligrimServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("httpDecoder", new HttpRequestDecoder());
+                    pipeline.addLast("httpEncoder", new HttpResponseEncoder());
+                    pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(ServerManager.this));
                 }
             });
         }
