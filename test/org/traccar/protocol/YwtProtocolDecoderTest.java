@@ -12,6 +12,9 @@ public class YwtProtocolDecoderTest {
 
         YwtProtocolDecoder decoder = new YwtProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
+        
+        assertNull(decoder.decode(null, null,
+                "%SN,0417061042:0,0,140117041203,404"));
 
         verify(decoder.decode(null, null,
                 "%GP,3000012345:0,090723182813,E114.602345,N22.069725,,30,160,4,0,00,,2794-10FF-46000,3>0-0"));

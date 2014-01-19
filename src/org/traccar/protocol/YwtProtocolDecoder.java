@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "%(..)," +                     // Type
             "(\\d+):" +                    // Unit identifier
             "\\d+," +                      // Subtype
@@ -57,6 +57,21 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
+
+        // Synchronization
+        if (sentence.startsWith("%SN") && channel != null) {
+            int start = sentence.indexOf(':');
+            int end = start;
+            for (int i = 0; i < 4; i++) {
+                end = sentence.indexOf(',', end + 1);
+            }
+            if (end == -1) {
+                end = sentence.length();
+            }
+            
+            channel.write("%AT+SN=" + sentence.substring(start, end));
+            return null;
+        }
         
         // Parse message
         Matcher parser = pattern.matcher(sentence);
