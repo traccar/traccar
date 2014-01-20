@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import java.util.List;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
@@ -22,15 +23,9 @@ import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.model.Position;
 
-/**
- * Reverse geocoding channel event handler
- */
 public class ReverseGeocoderHandler extends OneToOneDecoder {
 
-    /**
-     * Geocoder object
-     */
-    private ReverseGeocoder geocoder;
+    private final ReverseGeocoder geocoder;
 
     public ReverseGeocoderHandler(ReverseGeocoder geocoder) {
         this.geocoder = geocoder;
@@ -40,12 +35,18 @@ public class ReverseGeocoderHandler extends OneToOneDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
-
-        if (msg instanceof Position) {
-            Position position = (Position) msg;
-            if (geocoder != null) {
+        
+        if (geocoder != null) {
+            if (msg instanceof Position) {
+                Position position = (Position) msg;
                 position.setAddress(geocoder.getAddress(
                         position.getLatitude(), position.getLongitude()));
+            } else if (msg instanceof List) {
+                List<Position> positions = (List<Position>) msg;
+                for (Position position : positions) {
+                    position.setAddress(geocoder.getAddress(
+                            position.getLatitude(), position.getLongitude()));
+                }
             }
         }
 
