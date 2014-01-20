@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,10 +60,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(?:\\|([0-9a-fA-F]+))?" +          // Milage
             ".*"); // TODO: parse ADC
 
-    /**
-     * Parse device id
-     */
-    private String getId(ChannelBuffer buf) {
+    private String getImei(ChannelBuffer buf) {
         String id = "";
 
         for (int i = 0; i < 7; i++) {
@@ -80,7 +77,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             id += d2;
         }
 
-        return id;
+        return id + Crc.luhnChecksum(id);
     }
 
     @Override
@@ -135,11 +132,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get device by id
-        String id = getId(buf);
+        String imei = getImei(buf);
         try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
         } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+            Log.warning("Unknown device - " + imei);
             return null;
         }
 
