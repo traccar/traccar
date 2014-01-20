@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "#S?D#" +
             "(\\d{2})(\\d{2})(\\d{2});" +  // Date (DDMMYY)
             "(\\d{2})(\\d{2})(\\d{2});" +  // Time (HHMMSS)
@@ -43,9 +43,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             "([NS]);" +
             "(\\d{3})(\\d{2}\\.\\d+);" +   // Longitude (DDDMM.MMMM)
             "([EW]);" +
-            "(\\d+);" +                    // Speed
-            "(\\d+);" +                    // Course
-            "(\\d+);" +                    // Altitude
+            "(\\d+\\.?\\d*);" +            // Speed
+            "(\\d+\\.?\\d*);" +            // Course
+            "(\\d+\\.?\\d*);" +            // Altitude
             "(\\d+)" +                     // Satellites
             ".*");                         // Full format
 
