@@ -18,10 +18,8 @@ package org.traccar.protocol;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -35,7 +33,6 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -53,96 +50,6 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                 ByteOrder.BIG_ENDIAN, message, Charset.defaultCharset()));
         channel.write(response);
     }
-
-    /*private List<Position> parseFormatA(ChannelBuffer buf, long deviceId) {
-        List<Position> positions = new LinkedList<Position>();
-        
-        FloatReader latitudeReader = new FloatReader();
-        FloatReader longitudeReader = new FloatReader();
-        TimeReader timeReader = new TimeReader();
-        
-        try {
-            while (buf.readable()) {
-                Position position = new Position();
-                position.setDeviceId(deviceId);
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("mta6");
-
-                short flags = buf.readUnsignedByte();
-
-                // Skip events
-                short event = buf.readUnsignedByte();
-                if (checkBit(event, 7)) {
-                    if (checkBit(event, 6)) {
-                        buf.skipBytes(8);
-                    } else {
-                        while (checkBit(event, 7)) {
-                            event = buf.readUnsignedByte();
-                        }
-                    }
-                }
-
-                position.setLatitude(latitudeReader.readFloat(buf) / Math.PI * 180);
-                position.setLongitude(longitudeReader.readFloat(buf) / Math.PI * 180);
-                position.setTime(timeReader.readTime(buf));
-
-                if (checkBit(flags, 0)) {
-                    buf.readUnsignedByte(); // status
-                }
-
-                if (checkBit(flags, 1)) {
-                    position.setAltitude((double) buf.readUnsignedShort());
-                }
-
-                if (checkBit(flags, 2)) {
-                    position.setSpeed((double) (buf.readUnsignedShort() & 0x03ff));
-                    position.setCourse((double) buf.readUnsignedByte());
-                }
-
-                if (checkBit(flags, 3)) {
-                    extendedInfo.set("milage", buf.readUnsignedShort());
-                }
-
-                if (checkBit(flags, 4)) {
-                    extendedInfo.set("fuel1", buf.readUnsignedInt());
-                    extendedInfo.set("fuel2", buf.readUnsignedInt());
-                    extendedInfo.set("hours1", buf.readUnsignedShort());
-                    extendedInfo.set("hours2", buf.readUnsignedShort());
-                }
-
-                if (checkBit(flags, 5)) {
-                    extendedInfo.set("adc1", buf.readUnsignedShort() & 0x03ff);
-                    extendedInfo.set("adc2", buf.readUnsignedShort() & 0x03ff);
-                    extendedInfo.set("adc3", buf.readUnsignedShort() & 0x03ff);
-                    extendedInfo.set("adc4", buf.readUnsignedShort() & 0x03ff);
-                }
-
-                if (checkBit(flags, 6)) {
-                    extendedInfo.set("temperature", buf.readByte());
-                    buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
-                    extendedInfo.set("sensor", buf.readUnsignedShort() & 0x0fff);
-                    buf.readUnsignedShort(); // old sensor state (& 0x0fff)
-                }
-
-                if (checkBit(flags, 7)) {
-                    extendedInfo.set("battery", buf.getUnsignedByte(buf.readerIndex()) >> 2);
-                    extendedInfo.set("power", buf.readUnsignedShort() & 0x03ff);
-                    buf.readByte(); // microcontroller temperature
-
-                    extendedInfo.set("gsm", (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
-
-                    int satellites = buf.readUnsignedByte() & 0x0f;
-                    position.setValid(satellites >= 3);
-                    extendedInfo.set("satellites", satellites);
-                }
-
-                position.setExtendedInfo(extendedInfo.toString());
-                positions.add(position);
-            }
-        } catch (IndexOutOfBoundsException error) {
-        }
-        
-        return positions;
-    }*/
 
     private static final int MSG_GPS = 0xF1;
     private static final int MSG_GPS_SENSORS = 0xF2;
@@ -173,7 +80,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, "BINGPS: OK");
             
             // Identification
-            long deviceId = 0;/*
+            long deviceId;
             QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
             String imei = decoder.getParameters().get("imei").get(0);
             try {
@@ -181,7 +88,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
                 return null;
-            }*/
+            }
 
             List<Position> positions = new LinkedList<Position>();
             ChannelBuffer buf = request.getContent();
