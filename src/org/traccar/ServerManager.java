@@ -30,6 +30,7 @@ import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.FixedLengthFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
+import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
@@ -1051,6 +1052,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
+                    pipeline.addLast("httpAggregator", new HttpChunkAggregator(16384));
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
                     pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(ServerManager.this));
                 }
