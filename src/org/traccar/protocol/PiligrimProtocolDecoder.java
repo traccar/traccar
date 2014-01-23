@@ -44,11 +44,13 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void sendResponse(Channel channel, String message) {
-        HttpResponse response = new DefaultHttpResponse(
-                HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.setContent(ChannelBuffers.copiedBuffer(
-                ByteOrder.BIG_ENDIAN, message, Charset.defaultCharset()));
-        channel.write(response);
+        if (channel != null) {
+            HttpResponse response = new DefaultHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            response.setContent(ChannelBuffers.copiedBuffer(
+                    ByteOrder.BIG_ENDIAN, message, Charset.defaultCharset()));
+            channel.write(response);
+        }
     }
 
     private static final int MSG_GPS = 0xF1;
@@ -97,7 +99,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedByte(); // header
                 int type = buf.readUnsignedByte();
-                buf.readUnsignedShort(); // length
+                buf.readUnsignedByte(); // length
                 
                 if (type == MSG_GPS || type == MSG_GPS_SENSORS) {
                     
@@ -109,8 +111,8 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                     time.clear();
                     time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-                    time.set(Calendar.MONTH, buf.getByte(buf.readerIndex()) & 0x0f);
-                    time.set(Calendar.YEAR, 2000 + (buf.readUnsignedByte() >> 4));
+                    time.set(Calendar.MONTH, (buf.getByte(buf.readerIndex()) & 0x0f) - 1);
+                    time.set(Calendar.YEAR, 2010 + (buf.readUnsignedByte() >> 4));
                     time.set(Calendar.HOUR, buf.readUnsignedByte());
                     time.set(Calendar.MINUTE, buf.readUnsignedByte());
                     time.set(Calendar.SECOND, buf.readUnsignedByte());
@@ -137,7 +139,9 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(0.0);
                     
                     // Satellites
-                    extendedInfo.set("satellites", buf.readUnsignedByte());
+                    int satellites = buf.readUnsignedByte();
+                    extendedInfo.set("satellites", satellites);
+                    position.setValid(satellites >= 3);
                     
                     // Speed
                     position.setSpeed((double) buf.readUnsignedByte());
