@@ -77,7 +77,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             id += d2;
         }
 
-        return id + Crc.luhnChecksum(id);
+        if (id.length() == 14) {
+            id += Crc.luhnChecksum(id); // IMEI checksum
+        }
+        return id;
     }
 
     @Override
