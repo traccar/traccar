@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern patternGPRMC = Pattern.compile(
+    private static final Pattern patternGPRMC = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.\\d+," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -46,11 +46,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             "[^\\*]+\\*[0-9a-fA-F]{2}");   // Checksum
 
-    static private Pattern patternSimple = Pattern.compile(
+    private static final Pattern patternSimple = Pattern.compile(
             "[FL]," +                      // Flag
             "([^,]*)," +                   // Alarm
             "imei:(\\d+)," +               // IMEI
-            "(\\d+)?," +                   // Satellites
+            "(\\d+/?\\d*)?," +             // Satellites
             "(\\d+\\.\\d+)," +             // Altitude
             "Battery=(\\d+)%,," +          // Battery
             "(\\d)?," +                    // Charger
@@ -59,7 +59,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}{4},\\p{XDigit}{4});" + // Location code
             ".+");                         // Checksum
 
-    static private Pattern patternAlternative = Pattern.compile(
+    private static final Pattern patternAlternative = Pattern.compile(
             "(\\d+)," +                    // MCC
             "(\\d+)," +                    // MNC
             "(\\p{XDigit}{4},\\p{XDigit}{4})," + // Location code
@@ -92,7 +92,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
@@ -209,10 +209,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Satellites
-            String satellites = parser.group(index++);
-            if (satellites != null) {
-                extendedInfo.set("satellites", satellites);
-            }
+            extendedInfo.set("satellites", parser.group(index++));
 
             // Altitude
             position.setAltitude(Double.valueOf(parser.group(index++)));
