@@ -107,6 +107,15 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning("Unknown device - " + id);
             }
         }
+        
+        // Identification
+        else if (Character.isDigit(sentence.charAt(0)) & sentence.length() == 15) {
+            try {
+                deviceId = getDataManager().getDeviceByImei(sentence).getId();
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + sentence);
+            }
+        }
 
         // Location
         else if (sentence.startsWith("$GPRMC") && deviceId != null) {
