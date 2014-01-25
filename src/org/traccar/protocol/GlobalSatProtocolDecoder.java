@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         format1 = "SARY*U!";
         if (getServerManager() != null) {
             Properties p = getServerManager().getProperties();
-            if (p.contains("globalsat.format0")) {
+            if (p.containsKey("globalsat.format0")) {
                 format0 = p.getProperty("globalsat.format0");
             }
-            if (p.contains("globalsat.format1")) {
+            if (p.containsKey("globalsat.format1")) {
                 format1 = p.getProperty("globalsat.format1");
             }
         }
@@ -174,7 +174,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
     
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\$" +
             "(\\d+)," +                    // IMEI
             "\\d+," +                      // mode
@@ -214,7 +214,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("1") != 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("1") != 0);
         
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

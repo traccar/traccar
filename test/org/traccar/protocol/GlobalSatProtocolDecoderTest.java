@@ -15,6 +15,10 @@ public class GlobalSatProtocolDecoderTest {
 
         assertNull(decoder.decode(null, null, "GSh,131826789036289,3,M,ea04*3d"));
 
+        //SORPZAB27GHKLMN*U!
+        /*verify(decoder.decode(null, null,
+                "GSr,011412001878820,4,5,00,,1,250114,105316,E00610.2925,N4612.1824,0,0.02,0,1,0.0,64*51!"));*/
+
         //TSPRXAB27GHKLMnaicz
         verify(decoder.decode(null, null,
                 "GSr,1,135785412249986,01,I,EA02,3,230410,153318,E12129.2839,N2459.8570,0,1.17,212,8,1.0,12.3V*55"));
