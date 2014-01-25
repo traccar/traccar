@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    //353327020412763,CMD-F,V,DATE:140125,TIME:183636,LAT:51.6384466N,LOT:000.2863866E,Speed:000.0,61-19,
+    private static final Pattern pattern = Pattern.compile(
             "(\\d+)," +                         // IMEI
             "[^,]+," +                          // Type
             "([AV])," +                         // Validity
@@ -43,7 +44,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             "LOT:(\\d+.\\d+)([EW])," +          // Longitude
             "Speed:(\\d+.\\d+)," +              // Speed
             "([^,]+)," +                        // Status
-            "(\\d+)" +                          // Course
+            "(\\d+)?" +                         // Course
             ".*");
 
     @Override
@@ -73,7 +74,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -106,7 +107,12 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("status", parser.group(index++));
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        String course = parser.group(index++);
+        if (course != null) {
+            position.setCourse(Double.valueOf(course));
+        } else {
+            position.setCourse(0.0);
+        }
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
