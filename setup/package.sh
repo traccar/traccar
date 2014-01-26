@@ -66,7 +66,7 @@ zip -j tracker-server.zip ../target/tracker-server.jar universal/README.txt
 # WINDOWS PACKAGE
 
 innoextract isetup-*.exe
-echo "NOTE: if you got any errors here try isetup version 5.4.3 (or check what versions are supported by 'innoextract -v')"
+echo "NOTE: if you got any errors here try isetup version 5.5.0 (or check what versions are supported by 'innoextract -v')"
 
 wine app/ISCC.exe windows/traccar.iss
 
