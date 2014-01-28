@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
-import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
