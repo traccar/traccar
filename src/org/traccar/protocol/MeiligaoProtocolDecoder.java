@@ -63,7 +63,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     private String getImei(ChannelBuffer buf) {
         String id = "";
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 4; i < 4 + 7; i++) {
             int b = buf.getUnsignedByte(i);
 
             // First digit
@@ -89,7 +89,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
         
         ChannelBuffer buf = (ChannelBuffer) msg;
-        int command = buf.getUnsignedShort(7);
+        int command = buf.getUnsignedShort(4 + 7);
 
         // Login confirmation
         if (command == 0x5000) {
@@ -112,7 +112,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Payload offset
-        int offset = 7 + 2;
+        int offset = 4 + 7 + 2;
 
         // Create new position
         Position position = new Position();
