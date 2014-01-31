@@ -19,6 +19,9 @@ public class IntellitracProtocolDecoderTest {
                 "1010000002,20030217132813,121.646060,25.061725,20,157,133,7,0,11,15,0.096,0.000"));
 
         verify(decoder.decode(null, null,
+                "1010000002,20030217132813,121.646060,25.061725,20,157,-133,7,0,11,15,0.096,0.000"));
+
+        verify(decoder.decode(null, null,
                 "1001070919,20130405084206,37.903730,48.011377,0,0,235,10,2,2,0,20.211,0.153"));
         
         verify(decoder.decode(null, null,

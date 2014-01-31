@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+\\.\\d+)," +           // Latitude
             "(\\d+\\.?\\d*)," +            // Speed
             "(\\d+\\.?\\d*)," +            // Course
-            "(\\d+\\.?\\d*)," +            // Altitude
+            "(-?\\d+\\.?\\d*)," +          // Altitude
             "(\\d+)," +                    // Satellites
             "(\\d+)," +                    // Report Identifier
             "(\\d+)," +                    // Input

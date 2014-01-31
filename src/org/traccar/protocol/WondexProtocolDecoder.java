@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "[^\\d]*" +                    // Header
             "(\\d+)," +                    // Device Identifier
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
@@ -42,7 +42,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+\\.\\d+)," +           // Latitude
             "(\\d+)," +                    // Speed
             "(\\d+)," +                    // Course
-            "(\\d+)," +                    // Altitude
+            "(-?\\d+)," +                  // Altitude
             "(\\d+)," +                    // Satellites
             "(\\d+),?" +                   // Event
             "(\\d+\\.\\d+)?,?" +           // Milage
