@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
-            ".." +                              // Alarm Type
+            "(..)" +                            // Alarm Type
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.\\d+," + // Time (HHMMSS.SS)
             "([AV])," +                         // Validity
@@ -69,7 +69,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
-            ".." +                              // Alarm Type
+            "(..)" +                            // Alarm Type
             "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
             "(\\d{2})(\\d{2})(\\d{2})\\|" +     // Time (HHMMSS)
             "([AV])\\|" +                       // Validity
@@ -95,7 +95,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
-            ".." +                              // Alarm Type
+            "(..)" +                            // Alarm Type
             "(\\d{2})(\\d{2})(\\d{2})" +        // Date (YYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})" +        // Time (HHMMSS)
             "(\\p{XDigit}{4})" +                // IO Status
@@ -171,6 +171,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             Log.warning("Unknown device - " + imei);
             return null;
         }
+        
+        // Alarm type
+        extendedInfo.set("alarm", parser.group(index++));
         
         if (format == MessageFormat.first || format == MessageFormat.second) {
 
