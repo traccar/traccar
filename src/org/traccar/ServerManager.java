@@ -162,6 +162,7 @@ public class ServerManager {
         initTaipServer("taip");
         initKhdServer("khd");
         initPiligrimServer("piligrim");
+        initStl060Server("stl060");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1055,6 +1056,19 @@ public class ServerManager {
                     pipeline.addLast("httpAggregator", new HttpChunkAggregator(16384));
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
                     pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initStl060Server(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new Stl060FrameDecoder(1024));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(ServerManager.this));
                 }
             });
         }
