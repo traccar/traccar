@@ -173,10 +173,17 @@ public class AspicoreProtocolDecoder extends BaseProtocolDecoder {
 
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            Integer day   = time.get(Calendar.DAY_OF_MONTH);
+            Integer month = time.get(Calendar.MONTH);
+            Integer year  = time.get(Calendar.YEAR);
+            time.clear();
             time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.MILLISECOND, 0);
+            time.set(Calendar.DAY_OF_MONTH, day);
+            time.set(Calendar.MONTH, month);
+            time.set(Calendar.YEAR, year);
             position.setTime(time.getTime());
 
             // Latitude
