@@ -16,6 +16,8 @@ public class T55ProtocolDecoderTest {
         assertNull(decoder.decode(null, null, "$PGID,359853000144328*0F"));
 
         assertNull(decoder.decode(null, null, "$PCPTI,CradlePoint Test,184453,184453.0,6F*57"));
+        
+        assertNull(decoder.decode(null, null, "IMEI 351467108700000"));
 
         verify(decoder.decode(null, null,
                 "$GPRMC,094907.000,A,6000.5332,N,03020.5192,E,1.17,60.26,091111,,*33"));
@@ -40,6 +42,12 @@ public class T55ProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "$TRCCR,20140111000000.000,A,60.000000,60.000000,0.00,0.00,0.00,50,*3a"));
+        
+        verify(decoder.decode(null, null,
+                "$GPRMC,125735.000,A,6010.34349,N,02445.72838,E,1.0,101.7,050509,6.9,W,A*1F"));
+
+        verify(decoder.decode(null, null,
+                "$GPGGA,000000.000,6010.34349,N,02445.72838,E,1,05,1.7,0.9,M,35.1,M,,*59"));
 
     }
 

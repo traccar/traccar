@@ -107,6 +107,16 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning("Unknown device - " + id);
             }
         }
+
+        // Identification
+        else if (sentence.startsWith("IMEI")) {
+            String id = sentence.substring(5, sentence.length());
+            try {
+                deviceId = getDataManager().getDeviceByImei(id).getId();
+            } catch(Exception error) {
+                Log.warning("Unknown device - " + id);
+            }
+        }
         
         // Identification
         else if (Character.isDigit(sentence.charAt(0)) & sentence.length() == 15) {
