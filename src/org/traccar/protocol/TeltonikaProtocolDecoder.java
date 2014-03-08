@@ -63,6 +63,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int CODEC_GH3000 = 0x07;
     private static final int CODEC_FM4X00 = 0x08;
+    private static final int CODEC_12 = 0x0C;
     
     private List<Position> parseLocation(Channel channel, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<Position>();
@@ -70,6 +71,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(4); // marker
         buf.readUnsignedInt(); // data length
         int codec = buf.readUnsignedByte(); // codec
+        
+        if (codec == CODEC_12) {
+            // TODO: decode serial port data
+            return null;
+        }
+        
         int count = buf.readUnsignedByte();
         
         for (int i = 0; i < count; i++) {
