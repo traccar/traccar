@@ -35,18 +35,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    private String readImei(ChannelBuffer buf) {
-        int b = buf.readUnsignedByte();
-        StringBuilder imei = new StringBuilder();
-        imei.append(b & 0x0F);
-        for (int i = 0; i < 7; i++) {
-            b = buf.readUnsignedByte();
-            imei.append((b & 0xF0) >> 4);
-            imei.append(b & 0x0F);
-        }
-        return imei.toString();
-    }
-
     private static final int MSG_HEARTBEAT = 0x1A;
     private static final int MSG_DATA = 0x10;
 
@@ -60,22 +48,35 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
     
+    private static String readString(ChannelBuffer buf) {
+        
+        int length = 0;
+        while (buf.getByte(buf.readerIndex() + length) != 0) {
+            length += 1;
+        }
+        if (length != 0) {
+            String result = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
+            buf.skipBytes(length);
+            return result;
+        }
+        buf.readByte();
+        
+        return null;
+    }
+    
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
-		
-        List<Position> positions = new LinkedList<Position>();
 
         ChannelBuffer buf = (ChannelBuffer) msg;
         buf.skipBytes(2); // prefix
         buf.readUnsignedShort(); // checksum
-		
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedShort();
 
         // Get device id
-		long deviceId;
+        long deviceId;
         long rawId = buf.readLong();
         String id = String.valueOf(rawId);
         try {
@@ -88,9 +89,11 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         // Send acknowledgement
         sendResponse(channel, rawId, index);
 
-		while (buf.readable()) {
-		
-			// Create new position
+        List<Position> positions = new LinkedList<Position>();
+
+        while (buf.readable()) {
+
+            // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("atrack");
@@ -131,32 +134,14 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("adc", buf.readUnsignedShort() * 0.001);
 
             // Driver
-            int length = 0;
-            while (buf.getByte(buf.readerIndex() + length) != 0) {
-                length += 1;
-            }
-            if (length != 0) {
-                extendedInfo.set("driver",
-                    buf.toString(buf.readerIndex(), length, Charset.defaultCharset()));
-                buf.skipBytes(length);
-            }
-            buf.readByte();
+            extendedInfo.set("driver", readString(buf));
 
             // Temperature
             extendedInfo.set("temperature1", buf.readShort() * 0.1);
             extendedInfo.set("temperature2", buf.readShort() * 0.1);
 
             // Text Message
-            length = 0;
-            while (buf.getByte(buf.readerIndex() + length) != 0) {
-                length += 1;
-            }
-            if (length != 0) {
-                extendedInfo.set("textmessage",
-                        buf.toString(buf.readerIndex(), length, Charset.defaultCharset()));
-                buf.skipBytes(length);
-            }
-            buf.readByte();
+            extendedInfo.set("message", readString(buf));
 
             // With AT$FORM Command you can extend atrack protocol.
             // For example adding AT$FORM %FC /Fuel used you can add the line in this position:
@@ -165,9 +150,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setExtendedInfo(extendedInfo.toString());
             positions.add(position);
         }
-		
+
         return positions;
-		
     }
 
 }
