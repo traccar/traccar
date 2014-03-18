@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -62,23 +64,22 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
+		
+        List<Position> positions = new LinkedList<Position>();
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-
         buf.skipBytes(2); // prefix
         buf.readUnsignedShort(); // checksum
+		
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedShort();
 
-        // Create new position
-        Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("atrack");
-
         // Get device id
+		long deviceId;
         long rawId = buf.readLong();
         String id = String.valueOf(rawId);
         try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
+            deviceId = getDataManager().getDeviceByImei(id).getId();
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
             return null;
@@ -87,61 +88,86 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         // Send acknowledgement
         sendResponse(channel, rawId, index);
 
-        // Date and time
-        position.setTime(new Date(buf.readUnsignedInt() * 1000)); // gps time
-        buf.readUnsignedInt(); // rtc time
-        buf.readUnsignedInt(); // send time
+		while (buf.readable()) {
+		
+			// Create new position
+            Position position = new Position();
+            position.setDeviceId(deviceId);
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("atrack");
 
-        // Coordinates
-        position.setValid(true);
-        position.setLongitude(buf.readInt() * 0.000001);
-        position.setLatitude(buf.readInt() * 0.000001);
-        position.setAltitude(0.0);
+            // Date and time
+            position.setTime(new Date(buf.readUnsignedInt() * 1000)); // gps time
+            buf.readUnsignedInt(); // rtc time
+            buf.readUnsignedInt(); // send time
 
-        // Course
-        position.setCourse((double) buf.readUnsignedShort());
-        
-        // Report type
-        extendedInfo.set("type", buf.readUnsignedByte());
-        
-        // Milage
-        extendedInfo.set("milage", buf.readUnsignedInt() * 0.1);
-        
-        // Accuracy
-        extendedInfo.set("hdop", buf.readUnsignedShort() * 0.1);
-        
-        // Input
-        extendedInfo.set("input", buf.readUnsignedByte());
+            // Coordinates
+            position.setValid(true);
+            position.setLongitude(buf.readInt() * 0.000001);
+            position.setLatitude(buf.readInt() * 0.000001);
+            position.setAltitude(0.0);
 
-        // Speed
-        position.setSpeed(buf.readUnsignedShort() * 0.539957);
+            // Course
+            position.setCourse((double) buf.readUnsignedShort());
 
-        // Output
-        extendedInfo.set("output", buf.readUnsignedByte());
+            // Report type
+            extendedInfo.set("type", buf.readUnsignedByte());
 
-        // ADC
-        extendedInfo.set("adc", buf.readUnsignedShort() * 0.001);
+            // Milage
+            extendedInfo.set("milage", buf.readUnsignedInt() * 0.1);
 
-        // Driver
-        int length = 0;
-        while (buf.getByte(buf.readerIndex() + length) != 0) {
-            length += 1;
-        }
-        if (length != 0) {
-            extendedInfo.set("driver",
+            // Accuracy
+            extendedInfo.set("hdop", buf.readUnsignedShort() * 0.1);
+
+            // Input
+            extendedInfo.set("input", buf.readUnsignedByte());
+
+            // Speed
+            position.setSpeed(buf.readUnsignedShort() * 0.539957);
+
+            // Output
+            extendedInfo.set("output", buf.readUnsignedByte());
+
+            // ADC
+            extendedInfo.set("adc", buf.readUnsignedShort() * 0.001);
+
+            // Driver
+            int length = 0;
+            while (buf.getByte(buf.readerIndex() + length) != 0) {
+                length += 1;
+            }
+            if (length != 0) {
+                extendedInfo.set("driver",
                     buf.toString(buf.readerIndex(), length, Charset.defaultCharset()));
-            buf.skipBytes(length);
-        }
-        buf.readByte();
-        
-        // Temperature
-        extendedInfo.set("temperature1", buf.readShort() * 0.1);
-        extendedInfo.set("temperature2", buf.readShort() * 0.1);
-        
-        // TODO: text message
+                buf.skipBytes(length);
+            }
+            buf.readByte();
 
-        position.setExtendedInfo(extendedInfo.toString());
-        return position;
+            // Temperature
+            extendedInfo.set("temperature1", buf.readShort() * 0.1);
+            extendedInfo.set("temperature2", buf.readShort() * 0.1);
+
+            // Text Message
+            length = 0;
+            while (buf.getByte(buf.readerIndex() + length) != 0) {
+                length += 1;
+            }
+            if (length != 0) {
+                extendedInfo.set("textmessage",
+                        buf.toString(buf.readerIndex(), length, Charset.defaultCharset()));
+                buf.skipBytes(length);
+            }
+            buf.readByte();
+
+            // With AT$FORM Command you can extend atrack protocol.
+            // For example adding AT$FORM %FC /Fuel used you can add the line in this position:
+            // extendedInfo.set("fuelused", buf.readUnsignedInt() * 0.1);
+
+            position.setExtendedInfo(extendedInfo.toString());
+            positions.add(position);
+        }
+		
+        return positions;
+		
     }
 
 }
