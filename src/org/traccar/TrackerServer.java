@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
  */
 public abstract class TrackerServer {
 
-    private ServerManager serverManager;
-    private Bootstrap bootstrap;
-    private String protocol;
+    private final ServerManager serverManager;
+    private final Bootstrap bootstrap;
+    private final String protocol;
 
     public String getProtocol() {
         return protocol;
@@ -97,13 +97,14 @@ public abstract class TrackerServer {
      * Set endianness
      */
     void setEndianness(ByteOrder byteOrder) {
+        bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(byteOrder));
         bootstrap.setOption("child.bufferFactory", new HeapChannelBufferFactory(byteOrder));
     }
 
     /**
      * Opened channels
      */
-    private ChannelGroup allChannels = new DefaultChannelGroup();
+    private final ChannelGroup allChannels = new DefaultChannelGroup();
 
     public ChannelGroup getChannelGroup() {
         return allChannels;

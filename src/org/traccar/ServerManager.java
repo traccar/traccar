@@ -974,12 +974,14 @@ public class ServerManager {
 
     private void initNoranServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+            TrackerServer server = new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new NoranProtocolDecoder(ServerManager.this));
                 }
-            });
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 

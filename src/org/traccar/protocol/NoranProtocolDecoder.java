@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  */
 package org.traccar.protocol;
 
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
@@ -33,22 +35,11 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    private String readImei(ChannelBuffer buf) {
-        int b = buf.readUnsignedByte();
-        StringBuilder imei = new StringBuilder();
-        imei.append(b & 0x0F);
-        for (int i = 0; i < 7; i++) {
-            b = buf.readUnsignedByte();
-            imei.append((b & 0xF0) >> 4);
-            imei.append(b & 0x0F);
-        }
-        return imei.toString();
-    }
-
     private static final int MSG_UPLOAD_POSITION = 0x0008;
     private static final int MSG_CONTROL_RESPONSE = 0x8009;
     private static final int MSG_ALARM = 0x0003;
     private static final int MSG_SHAKE_HAND = 0x0000;
+    private static final int MSG_SHAKE_HAND_RESPONSE = 0x8000;
     private static final int MSG_IMAGE_SIZE = 0x0200;
     private static final int MSG_IMAGE_PACKET = 0x0201;
 
@@ -62,8 +53,17 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
         int type = buf.readUnsignedShort();
         
-        if (type == MSG_SHAKE_HAND) {
-            // TODO send response
+        if (type == MSG_SHAKE_HAND && channel != null) {
+            
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 13);
+            response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", Charset.defaultCharset()));
+            response.writeByte(0);
+            response.writeShort(response.capacity());
+            response.writeShort(MSG_SHAKE_HAND_RESPONSE);
+            response.writeByte(1); // status
+            response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
+            
+            channel.write(response);
         }
         
         else if (type == MSG_UPLOAD_POSITION ||
@@ -91,6 +91,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse((double) buf.readUnsignedShort());
             position.setLongitude((double) buf.readFloat());
             position.setLatitude((double) buf.readFloat());
+            position.setAltitude(0.0);
 
             // Time
             long timeValue = buf.readUnsignedInt();
