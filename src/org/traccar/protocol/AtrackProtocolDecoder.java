@@ -80,7 +80,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         long rawId = buf.readLong();
         String id = String.valueOf(rawId);
         try {
-            deviceId = 1;//getDataManager().getDeviceByImei(id).getId();
+            deviceId = getDataManager().getDeviceByImei(id).getId();
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
             return null;
