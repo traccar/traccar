@@ -50,18 +50,18 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     
     private static String readString(ChannelBuffer buf) {
         
+        String result = null;
         int length = 0;
         while (buf.getByte(buf.readerIndex() + length) != 0) {
             length += 1;
         }
         if (length != 0) {
-            String result = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
+            result = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
             buf.skipBytes(length);
-            return result;
         }
         buf.readByte();
         
-        return null;
+        return result;
     }
     
     @Override
@@ -80,7 +80,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         long rawId = buf.readLong();
         String id = String.valueOf(rawId);
         try {
-            deviceId = getDataManager().getDeviceByImei(id).getId();
+            deviceId = 1;//getDataManager().getDeviceByImei(id).getId();
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
             return null;
