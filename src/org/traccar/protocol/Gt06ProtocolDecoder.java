@@ -61,6 +61,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_LBS_EXTEND = 0x18;
     private static final int MSG_LBS_STATUS = 0x19;
     private static final int MSG_GPS_PHONE = 0x1A;
+    private static final int MSG_GPS_LBS_EXTEND = 0x1E;
 
     private static void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
@@ -116,7 +117,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         else if (type == MSG_GPS ||
                  type == MSG_GPS_LBS ||
                  type == MSG_GPS_LBS_STATUS ||
-                 type == MSG_GPS_PHONE) {
+                 type == MSG_GPS_PHONE ||
+                 type == MSG_GPS_LBS_EXTEND) {
 
             // Create new position
             Position position = new Position();
