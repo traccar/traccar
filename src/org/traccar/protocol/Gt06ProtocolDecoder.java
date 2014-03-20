@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.traccar.model.Position;
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
+    private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
     public Gt06ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
@@ -88,7 +89,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         
         if (type == MSG_LOGIN) {
+
             String imei = readImei(buf);
+            buf.readUnsignedShort(); // type
+
+            // Timezone offset
+            if (dataLength > 10) {
+                int extensionBits = buf.readUnsignedShort();
+                int offset = (extensionBits >> 4) * 36000;
+                if ((extensionBits & 0x8) != 0) {
+                    offset = -offset;
+                }
+                timeZone.setRawOffset(offset);
+            }
+            
             try {
                 deviceId = getDataManager().getDeviceByImei(imei).getId();
                 buf.skipBytes(dataLength - 8);
@@ -96,6 +110,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
             }
+            
         }
 
         else if (type == MSG_GPS ||
@@ -109,7 +124,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt06");
 
             // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            Calendar time = Calendar.getInstance(timeZone);
             time.clear();
             time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
             time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
