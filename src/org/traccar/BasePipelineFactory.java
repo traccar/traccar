@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -66,6 +67,12 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
                 msg.append("[").append(((InetSocketAddress) e.getChannel().getLocalAddress()).getPort());
                 msg.append((e instanceof DownstreamMessageEvent) ? " -> " : " <- ");
+
+                event.getRemoteAddress().hashCode();
+                //InetSocketAddress a = (InetSocketAddress) event.getRemoteAddress();
+                //InetAddress b = a.getAddress();
+                //String s = b.getHostAddress();
+                
                 msg.append(((InetSocketAddress) event.getRemoteAddress()).getAddress().getHostAddress()).append("]");
 
                 // Append hex message

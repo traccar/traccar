@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
@@ -45,11 +46,11 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
         
         ChannelBuffer buf = (ChannelBuffer) msg;
-
+        
         buf.readUnsignedShort(); // length
         int type = buf.readUnsignedShort();
         
@@ -63,7 +64,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(1); // status
             response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
             
-            channel.write(response);
+            channel.write(response, remoteAddress);
         }
         
         else if (type == MSG_UPLOAD_POSITION ||
@@ -111,6 +112,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
             } catch(Exception error) {
                 Log.warning("Unknown device - " + id);
+                return null;
             }
             
             // IO status

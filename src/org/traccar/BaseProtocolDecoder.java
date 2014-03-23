@@ -15,6 +15,12 @@
  */
 package org.traccar;
 
+import java.net.SocketAddress;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import static org.jboss.netty.channel.Channels.fireMessageReceived;
+import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.model.DataManager;
 
@@ -50,6 +56,39 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
             this.serverManager = serverManager;
             dataManager = serverManager.getDataManager();
         }
+    }
+    
+    @Override
+    public void handleUpstream(
+            ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
+        if (!(evt instanceof MessageEvent)) {
+            ctx.sendUpstream(evt);
+            return;
+        }
+
+        MessageEvent e = (MessageEvent) evt;
+        Object originalMessage = e.getMessage();
+        Object decodedMessage = decode(ctx, e.getChannel(), e.getRemoteAddress(), originalMessage);
+        if (originalMessage == decodedMessage) {
+            ctx.sendUpstream(evt);
+        } else if (decodedMessage != null) {
+            fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
+        }
+    }
+    
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+        
+        return decode(ctx, channel, msg);
+        
+    }
+    
+    @Override
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
+        
+        return null; // default implementation
+        
     }
 
 }
