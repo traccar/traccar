@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "imei:" +
             "(\\d+)," +                         // IMEI
             "([^,]+)," +                        // Alarm
@@ -48,8 +48,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])?," +
             "(\\d+\\.?\\d*)," +                 // Speed
-            "(\\d+\\.?\\d*)?(?:," +             // Course
-            "(\\d+\\.?\\d*)?)?" +               // Altitude
+            "(\\d+\\.?\\d*)?,?" +               // Course
+            "(\\d+\\.?\\d*)?,?" +               // Altitude
+            "([^,]+)?,?" +
+            "([^,]+)?,?" +
+            "([^,]+)?,?" +
+            "([^,]+)?,?" +
             ".*");
 
     @Override
@@ -129,7 +133,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
@@ -164,6 +168,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         } else {
             position.setAltitude(0.0);
         }
+
+        // Additional data
+        extendedInfo.set("io1", parser.group(index++));
+        extendedInfo.set("io2", parser.group(index++));
+        extendedInfo.set("io3", parser.group(index++));
+        extendedInfo.set("io4", parser.group(index++));
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
