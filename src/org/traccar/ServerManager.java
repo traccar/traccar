@@ -36,6 +36,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
+import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.http.WebServer;
@@ -199,7 +200,13 @@ public class ServerManager {
 
     private void initGeocoder(Properties properties) throws IOException {
         if (Boolean.parseBoolean(properties.getProperty("geocoder.enable"))) {
-            reverseGeocoder = new GoogleReverseGeocoder();
+            String type = properties.getProperty("geocoder.type");
+            if (type != null && type.equals("nominatim")) {
+                reverseGeocoder = new NominatimReverseGeocoder(
+                        getProperties().getProperty("geocoder.url"));
+            } else {
+                reverseGeocoder = new GoogleReverseGeocoder();
+            }
         }
     }
 
