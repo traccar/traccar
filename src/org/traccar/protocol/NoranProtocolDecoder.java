@@ -107,7 +107,12 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
 
             // Identification
-            String id = buf.readBytes(11).toString(Charset.defaultCharset());
+            ChannelBuffer rawId = buf.readBytes(11);
+            int index = 0;
+            while (rawId.readable() && rawId.readByte() != 0) {
+                index += 1;
+            }
+            String id = rawId.toString(0, index, Charset.defaultCharset());
             try {
                 position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
             } catch(Exception error) {
