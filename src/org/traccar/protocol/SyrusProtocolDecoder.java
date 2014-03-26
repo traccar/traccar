@@ -118,6 +118,8 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
             if (sendResponse && channel != null) {
                 channel.write(id);
             }
+        } else {
+            return null;
         }
 
         // Parse message
