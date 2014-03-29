@@ -45,6 +45,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+)," +                  // Altitude
             "(\\d+)," +                    // Satellites
             "(\\d+),?" +                   // Event
+            "(?:(\\d+\\.\\d+)V,)?" +       // Battery
             "(\\d+\\.\\d+)?,?" +           // Milage
             "(\\d+)?,?" +                  // Input
             "(\\d+\\.\\d+)?,?" +           // ADC1
@@ -101,6 +102,9 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         
         // Event
         extendedInfo.set("event", parser.group(index++));
+        
+        // Battery
+        extendedInfo.set("battery", parser.group(index++));
         
         // Milage
         extendedInfo.set("milage", parser.group(index++));
