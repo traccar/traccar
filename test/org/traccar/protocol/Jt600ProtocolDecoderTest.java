@@ -31,6 +31,9 @@ public class Jt600ProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 ChannelBuffers.copiedBuffer("(3120820029,W01,02553.3555,E,2438.0997,S,A,171012,053339,0,8,20,6,31,5,20,20)", Charset.defaultCharset())));
+
+        /*verify(decoder.decode(null, null,
+                ChannelBuffers.copiedBuffer("(3330104377,U01,010100,010228,F,00.000000,N,000.000000,E,0,0,0,0%,00001000000000,741,14,22,0,206)", Charset.defaultCharset())));*/
         
         /*verify(decoder.decode(null, null,
                 ChannelBuffers.copiedBuffer("(6221107674,2,U09,129,2,A,280513113036,E,02711.0500,S,1721.0876,A,030613171243,E,02756.7618,S,2300.0325,3491,538200,14400,1)", Charset.defaultCharset())));*/
