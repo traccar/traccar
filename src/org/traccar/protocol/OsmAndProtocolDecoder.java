@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,11 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         HttpRequest request = (HttpRequest) msg;
         QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
         Map<String, List<String>> params = decoder.getParameters();
+        if (params.isEmpty()) {
+            decoder = new QueryStringDecoder(
+                    request.getContent().toString(Charset.defaultCharset()), false);
+            params = decoder.getParameters();
+        }
 
         // Create new position
         Position position = new Position();
@@ -58,6 +64,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
+            return null;
         }
 
         // Decode position
