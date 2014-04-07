@@ -8,8 +8,13 @@ GENERAL SETUP:
 NOTE: Linux Dependencies:
 - wine
 - innoextract
+- makeself
 
 Get innoextract on Ubuntu:
 - sudo add-apt-repository ppa:arx/release
 - sudo apt-get update
 - sudo apt-get install innoextract
+
+Get makeself on Ubuntu:
+- sudo apt-get update
+- sudo apt-get install makeself
