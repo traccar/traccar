@@ -83,7 +83,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        buf.skipBytes(2); // header
+        // Check header
+        if (buf.readByte() != 0x78 || buf.readByte() != 0x78) {
+            return null;
+        }
+        
         int length = buf.readByte(); // size
         int dataLength = length - 5;
 
