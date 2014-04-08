@@ -77,6 +77,8 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         
         if (diff > 12 * 60 * 60 * 1000) {
             millis += 24 * 60 * 60 * 1000;
+        } else if (diff < -12 * 60 * 60 * 1000) {
+            millis -= 24 * 60 * 60 * 1000;
         }
 
         return new Date(millis);
