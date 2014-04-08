@@ -73,6 +73,9 @@ public class H02ProtocolDecoderTest {
         verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "*HQ,353505220903211,V1,140817,A,5239.3538,N,01003.5292,E,21.03,312,221013,FFFBFFFF,106,14, 203,1cd#", Charset.defaultCharset())));
         
+        verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "*HQ,356823035368767,V1,083618,A,0955.6392,N,07809.0796,E,0.00,0,070414,FFFBFFFF,194,3b5,  71,c9a9#", Charset.defaultCharset())));
+
         int[] buf1 = {0x24,0x27,0x05,0x17,0x11,0x09,0x21,0x33,0x39,0x14,0x06,0x13,0x50,0x02,0x58,0x49,0x00,0x01,0x43,0x37,0x82,0x2e,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0x00,0x00};
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(buf1))));
         
