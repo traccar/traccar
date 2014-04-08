@@ -117,7 +117,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         int utcMinutes = Integer.valueOf(parser.group(index++));
 
         // Time
-        time.set(Calendar.HOUR, localHours);
+        time.set(Calendar.HOUR_OF_DAY, localHours);
         time.set(Calendar.MINUTE, localMinutes);
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));

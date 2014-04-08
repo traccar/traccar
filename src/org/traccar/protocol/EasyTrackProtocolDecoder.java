@@ -99,7 +99,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++), 16));
         time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++), 16) - 1);
         time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++), 16));
-        time.set(Calendar.HOUR, Integer.parseInt(parser.group(index++), 16));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++), 16));
         time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++), 16));
         time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++), 16));
         position.setTime(time.getTime());

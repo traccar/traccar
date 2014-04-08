@@ -93,7 +93,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
-            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 

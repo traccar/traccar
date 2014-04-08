@@ -159,7 +159,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Time
             if (checkBit(mask, 14)) {
-                time.set(Calendar.HOUR, buf.readUnsignedByte());
+                time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
                 time.set(Calendar.MINUTE, buf.readUnsignedByte());
                 time.set(Calendar.SECOND, buf.readUnsignedByte());
             }

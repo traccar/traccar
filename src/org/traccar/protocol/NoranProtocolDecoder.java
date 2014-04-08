@@ -101,7 +101,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.YEAR, 2000 + (int) (timeValue >> 26));
             time.set(Calendar.MONTH, (int) (timeValue >> 22 & 0x0f) - 1);
             time.set(Calendar.DAY_OF_MONTH, (int) (timeValue >> 17 & 0x1f));
-            time.set(Calendar.HOUR, (int) (timeValue >> 12 & 0x1f));
+            time.set(Calendar.HOUR_OF_DAY, (int) (timeValue >> 12 & 0x1f));
             time.set(Calendar.MINUTE, (int) (timeValue >> 6 & 0x3f));
             time.set(Calendar.SECOND, (int) (timeValue & 0x3f));
             position.setTime(time.getTime());

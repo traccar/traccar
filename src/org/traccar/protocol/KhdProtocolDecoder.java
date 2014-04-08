@@ -89,7 +89,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
             time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
             time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.HOUR, ChannelBufferTools.readHexInteger(buf, 2));
+            time.set(Calendar.HOUR_OF_DAY, ChannelBufferTools.readHexInteger(buf, 2));
             time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
             time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
             position.setTime(time.getTime());

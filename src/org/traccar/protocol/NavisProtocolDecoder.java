@@ -106,7 +106,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         // Event time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.HOUR, buf.readUnsignedByte());
+        time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
         time.set(Calendar.MINUTE, buf.readUnsignedByte());
         time.set(Calendar.SECOND, buf.readUnsignedByte());
         time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
@@ -165,7 +165,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
             // Location time
             time.clear();
-            time.set(Calendar.HOUR, buf.readUnsignedByte());
+            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
             time.set(Calendar.MINUTE, buf.readUnsignedByte());
             time.set(Calendar.SECOND, buf.readUnsignedByte());
             time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());

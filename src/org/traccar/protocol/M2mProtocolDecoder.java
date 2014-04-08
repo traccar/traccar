@@ -84,7 +84,7 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte() & 0x3f);
             time.set(Calendar.MONTH, (buf.readUnsignedByte() & 0x3f) - 1);
             time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            time.set(Calendar.HOUR, buf.readUnsignedByte() & 0x3f);
+            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte() & 0x3f);
             time.set(Calendar.MINUTE, buf.readUnsignedByte() & 0x7f);
             time.set(Calendar.SECOND, buf.readUnsignedByte() & 0x7f);
             position.setTime(time.getTime());

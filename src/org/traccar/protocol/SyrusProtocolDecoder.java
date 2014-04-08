@@ -66,7 +66,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
     
     private Date getTime(long seconds) {
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.set(Calendar.HOUR, 0);
+        time.set(Calendar.HOUR_OF_DAY, 0);
         time.set(Calendar.MINUTE, 0);
         time.set(Calendar.SECOND, 0);
         time.set(Calendar.MILLISECOND, 0);

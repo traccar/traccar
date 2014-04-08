@@ -75,7 +75,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.HOUR, ChannelBufferTools.readHexInteger(buf, 2));
+        time.set(Calendar.HOUR_OF_DAY, ChannelBufferTools.readHexInteger(buf, 2));
         time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
         time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
         time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
@@ -149,7 +149,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 

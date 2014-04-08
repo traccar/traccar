@@ -131,7 +131,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
             time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
             time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.HOUR, buf.readUnsignedByte());
+            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
             time.set(Calendar.MINUTE, buf.readUnsignedByte());
             time.set(Calendar.SECOND, buf.readUnsignedByte());
             position.setTime(time.getTime());

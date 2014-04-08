@@ -113,7 +113,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
                     time.set(Calendar.MONTH, (buf.getByte(buf.readerIndex()) & 0x0f) - 1);
                     time.set(Calendar.YEAR, 2010 + (buf.readUnsignedByte() >> 4));
-                    time.set(Calendar.HOUR, buf.readUnsignedByte());
+                    time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
                     time.set(Calendar.MINUTE, buf.readUnsignedByte());
                     time.set(Calendar.SECOND, buf.readUnsignedByte());
                     position.setTime(time.getTime());

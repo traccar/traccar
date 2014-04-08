@@ -149,7 +149,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
 
             // Time
-            time.set(Calendar.HOUR, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
