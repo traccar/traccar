@@ -559,7 +559,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
+                    pipeline.addLast("frameDecoder", new Gt06FrameDecoder());
                     pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(ServerManager.this));
                 }
             });
