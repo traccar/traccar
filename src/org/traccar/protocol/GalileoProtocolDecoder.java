@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,11 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -51,18 +55,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         return tagLengthMap.get(tag);
     }
 
-    private String readImei(ChannelBuffer buf) {
-        int b = buf.readUnsignedByte();
-        StringBuilder imei = new StringBuilder();
-        imei.append(b & 0x0F);
-        for (int i = 0; i < 7; i++) {
-            b = buf.readUnsignedByte();
-            imei.append((b & 0xF0) >> 4);
-            imei.append(b & 0x0F);
-        }
-        return imei.toString();
-    }
-
     private static final int TAG_IMEI = 0x03;
     private static final int TAG_DATE = 0x20;
     private static final int TAG_COORDINATES = 0x30;
@@ -73,7 +65,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_BATTERY = 0x42;
     private static final int TAG_MILAGE = 0xd4;
 
-    
     private void sendReply(Channel channel, int checksum) {
         ChannelBuffer reply = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 3);
         reply.writeByte(0x02);
@@ -95,12 +86,24 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // header
         int length = (buf.readUnsignedShort() & 0x7fff) + 3;
         
-        // Create new position
+        List<Position> positions = new LinkedList<Position>();
+        Set<Integer> tags = new HashSet<Integer>();
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("galileo");
         
         while (buf.readerIndex() < length) {
+
+            // Check if new message started
             int tag = buf.readUnsignedByte();
+            if (tags.contains(tag)) {
+                position.setExtendedInfo(extendedInfo.toString());
+                positions.add(position);
+                tags.clear();
+                position = new Position();
+                extendedInfo = new ExtendedInfoFormatter("galileo");
+            }
+            tags.add(tag);
+            
             switch (tag) {
 
                 case TAG_IMEI:
@@ -155,24 +158,32 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        position.setExtendedInfo(extendedInfo.toString());
+        positions.add(position);
+        
         if (deviceId == null) {
             Log.warning("Unknown device");
             return null;
         }
-        
-        position.setDeviceId(deviceId);
-        sendReply(channel, buf.readUnsignedShort());
 
-        if (position.getValid() == null || position.getTime() == null || position.getSpeed() == null) {
+        sendReply(channel, buf.readUnsignedShort());
+        
+        for (Position p : positions) {
+            p.setDeviceId(deviceId);
+
+            if (p.getAltitude() == null) {
+                p.setAltitude(0.0);
+            }
+
+            if (p.getValid() == null || p.getTime() == null || p.getSpeed() == null) {
+                positions.remove(p);
+            }
+        }
+        
+        if (positions.isEmpty()) {
             return null;
         }
-
-        if (position.getAltitude() == null) {
-            position.setAltitude(0.0);
-        }
-        
-        position.setExtendedInfo(extendedInfo.toString());
-        return position;
+        return positions;
     }
 
 }
