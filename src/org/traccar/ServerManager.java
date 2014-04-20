@@ -164,6 +164,7 @@ public class ServerManager {
         initKhdServer("khd");
         initPiligrimServer("piligrim");
         initStl060Server("stl060");
+        initCarTrackServer("cartrack");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1078,6 +1079,21 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder", new Stl060FrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initCarTrackServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '#', (byte) '#' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new CarTrackProtocolDecoder(ServerManager.this));
                 }
             });
         }
