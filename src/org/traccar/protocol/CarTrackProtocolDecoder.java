@@ -130,7 +130,18 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         
         // State
         extendedInfo.set("io", parser.group(index++));
-        extendedInfo.set("milage", parser.group(index++));
+        /* Start : Added By Rohit Singhal, Decode Milage Data*/
+        // Prepare Mile Meter Data
+        String milage = parser.group(index++);
+        milage = milage.replace(":", "A");
+        milage = milage.replace(";", "B");
+        milage = milage.replace("<", "C");
+        milage = milage.replace("=", "D");
+        milage = milage.replace(">", "E");
+        milage = milage.replace("?", "F");
+        extendedInfo.set("milage", Integer.parseInt(milage, 16));
+        /* Commented By Rohit extendedInfo.set("milage", parser.group(index++)); */
+        /*End : Added By Rohit Singhal, Decode Milage Data*/
         extendedInfo.set("alarm", parser.group(index++));
         extendedInfo.set("ad", parser.group(index++));
 
