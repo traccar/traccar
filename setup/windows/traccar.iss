@@ -1,6 +1,6 @@
 [Setup]
 AppName=Traccar
-AppVersion=2.7
+AppVersion=2.8
 DefaultDirName={pf}\Traccar
 AlwaysRestart=yes
 
