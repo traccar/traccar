@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.traccar.helper.AdvancedConnection;
@@ -68,14 +64,6 @@ public class DatabaseDataManager implements DataManager {
             } else {
                 Class.forName(driver);
             }
-        }
-
-        // Refresh delay
-        String refreshDelay = properties.getProperty("database.refreshDelay");
-        if (refreshDelay != null) {
-            devicesRefreshDelay = Long.valueOf(refreshDelay) * 1000;
-        } else {
-            devicesRefreshDelay = new Long(300) * 1000; // Magic number
         }
 
         // Connect database
@@ -126,19 +114,15 @@ public class DatabaseDataManager implements DataManager {
      * Devices cache
      */
     private Map<String, Device> devices;
-    private Calendar devicesLastUpdate;
-    private Long devicesRefreshDelay;
 
     @Override
     public Device getDeviceByImei(String imei) throws SQLException {
 
-        if ((devices == null) || (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesRefreshDelay)) {
-            List<Device> list = getDevices();
+        if (devices == null || !devices.containsKey(imei)) {
             devices = new HashMap<String, Device>();
-            for (Device device: list) {
+            for (Device device: getDevices()) {
                 devices.put(device.getImei(), device);
             }
-            devicesLastUpdate = Calendar.getInstance();
         }
 
         return devices.get(imei);
