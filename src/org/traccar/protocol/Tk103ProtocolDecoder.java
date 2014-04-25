@@ -34,20 +34,20 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "(\\d{12})" +                // Device ID
-            ".{4}" +                     // Command
-            "\\d*" +                     // IMEI (?)
-            "(\\d{2})(\\d{2})(\\d{2})" + // Date (YYMMDD)
-            "([AV])" +                   // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})" + // Latitude (DDMM.MMMM)
-            "([NS])" +
-            "(\\d{3})(\\d{2}\\.\\d{4})" + // Longitude (DDDMM.MMMM)
-            "([EW])" +
-            "(\\d+\\.\\d)" +             // Speed
-            "(\\d{2})(\\d{2})(\\d{2})" + // Time (HHMMSS)
-            "(\\d+\\.?\\d+)" +           // Course
-            "([0-9a-fA-F]{8})" +         // State
-            "L([0-9a-fA-F]+)");          // Milage
+            "(\\d+)(,)?" +                 // Device ID
+            ".{4},?" +                     // Command
+            "\\d*" +                       // IMEI (?)
+            "(\\d{2})(\\d{2})(\\d{2}),?" + // Date (YYMMDD)
+            "([AV]),?" +                   // Validity
+            "(\\d{2})(\\d{2}\\.\\d{4})" +  // Latitude (DDMM.MMMM)
+            "([NS]),?" +
+            "(\\d{3})(\\d{2}\\.\\d{4})" +  // Longitude (DDDMM.MMMM)
+            "([EW]),?" +
+            "(\\d+\\.\\d)(?:\\d*,)?" +     // Speed
+            "(\\d{2})(\\d{2})(\\d{2}),?" + // Time (HHMMSS)
+            "(\\d+\\.?\\d+)" +             // Course
+            "([0-9a-fA-F]{8})?" +          // State
+            "(?:L([0-9a-fA-F]+))?");       // Milage
 
     @Override
     protected Object decode(
@@ -102,9 +102,15 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+        if (parser.group(index++) == null) {
+            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+        } else {
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        }
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);
@@ -140,7 +146,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("state", parser.group(index++));
 
         // Milage
-        extendedInfo.set("milage", Integer.parseInt(parser.group(index++), 16));
+        String milage = parser.group(index++);
+        if (milage != null) {
+            extendedInfo.set("milage", Integer.parseInt(milage, 16));
+        }
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
