@@ -165,6 +165,7 @@ public class ServerManager {
         initPiligrimServer("piligrim");
         initStl060Server("stl060");
         initCarTrackServer("cartrack");
+        initMiniFinderServer("minifinder");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1094,6 +1095,21 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new CarTrackProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initMiniFinderServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) ';' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(ServerManager.this));
                 }
             });
         }
