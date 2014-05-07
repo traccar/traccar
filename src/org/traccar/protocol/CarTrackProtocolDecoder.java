@@ -46,7 +46,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +                                     // N/S
             "(\\d{3})(\\d{2}\\.\\d{4})," +                  // Long : YYYMM.DDDD
             "([EW])," +                                     // E/W
-            "(\\d+.\\d*)," +                                // Speed in Knots
+            "(\\d+.\\d*)?," +                               // Speed in Knots
             "(\\d+.\\d*)?," +                               // Heading
             "(\\d{2})(\\d{2})(\\d{2})" +                    // DDMMYY
             ".*" +
