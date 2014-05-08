@@ -46,7 +46,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +                                     // N/S
             "(\\d{3})(\\d{2}\\.\\d{4})," +                  // Long : YYYMM.DDDD
             "([EW])," +                                     // E/W
-            "(\\d+.\\d*)," +                                // Speed in Knots
+            "(\\d+.\\d*)?," +                               // Speed in Knots
             "(\\d+.\\d*)?," +                               // Heading
             "(\\d{2})(\\d{2})(\\d{2})" +                    // DDMMYY
             ".*" +
@@ -109,7 +109,12 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        String speed = parser.group(index++);
+        if(speed != null){
+            position.setSpeed(Double.valueOf(speed));
+        } else {
+            position.setSpeed(0.0);
+        }
 
         // Course
         String course = parser.group(index++);
