@@ -110,7 +110,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Speed
         String speed = parser.group(index++);
-        if(speed != null){
+        if (speed != null) {
             position.setSpeed(Double.valueOf(speed));
         } else {
             position.setSpeed(0.0);
