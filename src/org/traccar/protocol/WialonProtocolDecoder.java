@@ -123,7 +123,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
 
             // Speed
-            position.setSpeed(Double.valueOf(parser.group(index++)));
+            position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
 
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
