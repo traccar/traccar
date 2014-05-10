@@ -37,7 +37,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "\\$\\$." +                         // Flag
             "\\d+," +                           // Length
             "(\\d+)," +                         // IMEI
-            "[0-9a-fA-F]{3}," +                 // Command
+            "\\p{XDigit}{3}," +                 // Command
             "(\\d+)," +                         // Event
             "(-?\\d+\\.\\d+)," +                // Latitude
             "(-?\\d+\\.\\d+)," +                // Longitude
@@ -51,6 +51,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)," +                 // HDOP
             "(-?\\d+)," +                       // Altitude
             "(\\d+)," +                         // Milage
+            "(\\d+)," +                         // Runtime
+            "(\\d+\\|\\d+\\|\\p{XDigit}+\\|\\p{XDigit}+)," + // Cell
+            "(\\p{XDigit}+)," +                 // State
+            "(\\p{XDigit}+)\\|" +               // ADC1
+            "(\\p{XDigit}+)\\|" +               // ADC2
+            "(\\p{XDigit}+)?\\|" +              // ADC3
+            "(\\p{XDigit}+)\\|" +               // Battery
+            "(\\p{XDigit}+)," +                 // Power
             ".*"); // TODO: parse other stuff
 
     @Override
@@ -119,9 +127,22 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         // Altitude
         position.setAltitude(Double.valueOf(parser.group(index++)));
 
-        // Milage
+        // Other
         extendedInfo.set("milage", parser.group(index++));
-
+        extendedInfo.set("runtime", parser.group(index++));
+        extendedInfo.set("cell", parser.group(index++));
+        extendedInfo.set("state", parser.group(index++));
+        
+        // ADC
+        extendedInfo.set("adc1", Integer.parseInt(parser.group(index++), 16));
+        extendedInfo.set("adc2", Integer.parseInt(parser.group(index++), 16));
+        String adc3 = parser.group(index++);
+        if (adc3 != null) {
+            extendedInfo.set("adc3", Integer.parseInt(adc3, 16));
+        }
+        extendedInfo.set("battery", Integer.parseInt(parser.group(index++), 16));
+        extendedInfo.set("power", Integer.parseInt(parser.group(index++), 16));
+        
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
 
