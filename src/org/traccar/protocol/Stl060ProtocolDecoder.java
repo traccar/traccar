@@ -40,8 +40,8 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             "[^,]*," +                          // Vehicle
             "(\\d{2})/(\\d{2})/(\\d{2})," +     // Date
             "(\\d{2}):(\\d{2}):(\\d{2})," +     // Time
-            "(\\d{2})(\\d+)([NS])," +           // Latitude
-            "(\\d{3})(\\d+)([EW])," +           // Longitude
+            "(\\d{2})(\\d{2})\\.?(\\d+)([NS])," + // Latitude
+            "(\\d{3})(\\d{2})\\.?(\\d+)([EW])," + // Longitude
             "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+\\.?\\d*)," +                 // Course
             "(\\d+)," +                         // Milage
@@ -95,13 +95,13 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 600000;
+        latitude += Double.valueOf(parser.group(index++) + parser.group(index++)) / 600000;
         if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
         Double longitude = Double.valueOf(parser.group(index++));
-        longitude += Double.valueOf(parser.group(index++)) / 600000;
+        longitude += Double.valueOf(parser.group(index++) + parser.group(index++)) / 600000;
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
         
