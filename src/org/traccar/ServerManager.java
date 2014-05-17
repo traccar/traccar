@@ -519,17 +519,15 @@ public class ServerManager {
 
     private void initMeitrackServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    byte delimiter[] = { (byte) '\r', (byte) '\n' };
-                    pipeline.addLast("frameDecoder",
-                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
                     pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(ServerManager.this));
                 }
-            });
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 

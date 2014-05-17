@@ -15,14 +15,20 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.Charset;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -61,13 +67,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}+)," +                 // Power
             ".*"); // TODO: parse other stuff
 
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
-            throws Exception {
+    private Position decodeRegularMessage(ChannelBuffer buf) {
 
         // Parse message
-        String sentence = (String) msg;
+        String sentence = buf.toString(Charset.defaultCharset());
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
@@ -79,7 +82,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         Integer index = 1;
 
-        // Get device by IMEI
+        // Identification
         String imei = parser.group(index++);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
@@ -147,6 +150,101 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setExtendedInfo(extendedInfo.toString());
 
         return position;
+    }
+
+    private List<Position> decodeBinaryMessage(ChannelBuffer buf) {
+        List<Position> positions = new LinkedList<Position>();
+        
+        Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
+        
+        // Identification
+        long deviceId;
+        String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
+        try {
+            deviceId = getDataManager().getDeviceByImei(imei).getId();
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + imei);
+            return null;
+        }
+        
+        buf.skipBytes(index + 1 + 15 + 1 + 3 + 1 + 2 + 2 + 4);
+        
+        while (buf.readableBytes() >= 0x34) {
+            
+            Position position = new Position();
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meitrack");
+            position.setDeviceId(deviceId);
+            
+            // Event
+            extendedInfo.set("event", buf.readUnsignedByte());
+            
+            // Location
+            position.setLatitude(buf.readInt() * 0.000001);
+            position.setLongitude(buf.readInt() * 0.000001);
+            
+            // Time (946684800 - timestamp for 2000-01-01)
+            position.setTime(new Date((946684800 + buf.readUnsignedInt()) * 1000));
+
+            // Validity
+            position.setValid(buf.readUnsignedByte() == 1);
+
+            // Satellites
+            extendedInfo.set("satellites", buf.readUnsignedByte());
+            
+            // GSM Signal
+            extendedInfo.set("gsm", buf.readUnsignedByte());
+
+            // Speed
+            position.setSpeed(buf.readUnsignedShort() * 0.539957);
+
+            // Course
+            position.setCourse((double) buf.readUnsignedShort());
+
+            // HDOP
+            extendedInfo.set("hdop", buf.readUnsignedShort() * 0.1);
+
+            // Altitude
+            position.setAltitude((double) buf.readUnsignedShort());
+
+            // Other
+            extendedInfo.set("milage", buf.readUnsignedInt());
+            extendedInfo.set("runtime", buf.readUnsignedInt());
+            extendedInfo.set("cell",
+                    buf.readUnsignedShort() + "|" + buf.readUnsignedShort() + "|" +
+                    buf.readUnsignedShort() + "|" + buf.readUnsignedShort());
+            extendedInfo.set("state", buf.readUnsignedShort());
+        
+            // ADC
+            extendedInfo.set("adc1", buf.readUnsignedShort());
+            extendedInfo.set("battery", buf.readUnsignedShort() * 0.01);
+            extendedInfo.set("power", buf.readUnsignedShort());
+            
+            buf.readUnsignedInt(); // geo-fence
+            
+            position.setExtendedInfo(extendedInfo.toString());
+            positions.add(position);
+        }
+        
+        return positions;
+    }
+    
+    @Override
+    protected Object decode(
+            ChannelHandlerContext ctx, Channel channel, Object msg)
+            throws Exception {
+        
+        ChannelBuffer buf = (ChannelBuffer) msg;
+        
+        // Find type
+        Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
+        index = ChannelBufferTools.find(buf, index + 1, buf.readableBytes(), ",");
+        
+        String type = buf.toString(index + 1, 3, Charset.defaultCharset());
+        if (type.equals("CCC")) {
+            return decodeBinaryMessage(buf);
+        } else {
+            return decodeRegularMessage(buf);
+        }
     }
 
 }
