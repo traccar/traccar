@@ -65,7 +65,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}+)?\\|" +              // ADC3
             "(\\p{XDigit}+)\\|" +               // Battery
             "(\\p{XDigit}+)," +                 // Power
-            ".*"); // TODO: parse other stuff
+            ".*(\r\n)?");
 
     private Position decodeRegularMessage(ChannelBuffer buf) {
 
