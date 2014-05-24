@@ -141,16 +141,16 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             case MSG_LOGIN:
                 response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
                 sendResponse(channel, id, MSG_LOGIN_RESPONSE, response);
-                break;
+                return null;
             case MSG_HEARTBEAT:
                 response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
                 sendResponse(channel, id, MSG_HEARTBEAT, response);
-                break;
+                return null;
             case MSG_SERVER:
                 response = ChannelBuffers.copiedBuffer(
                         getMeiligaoServer(channel), Charset.defaultCharset());
                 sendResponse(channel, id, MSG_SERVER, response);
-                break;
+                return null;
             case MSG_POSITION:
             case MSG_POSITION_LOGGED:
             case MSG_ALARM:
