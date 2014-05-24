@@ -524,6 +524,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(ServerManager.this));
                 }
             };

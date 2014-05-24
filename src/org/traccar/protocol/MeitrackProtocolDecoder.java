@@ -29,6 +29,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -67,7 +68,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}+)," +                 // Power
             ".*(\r\n)?");
 
-    private Position decodeRegularMessage(ChannelBuffer buf) {
+    private Position decodeRegularMessage(Channel channel, ChannelBuffer buf) {
 
         // Parse message
         String sentence = buf.toString(Charset.defaultCharset());
@@ -152,7 +153,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private List<Position> decodeBinaryMessage(ChannelBuffer buf) {
+    private List<Position> decodeBinaryMessage(Channel channel, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<Position>();
         
         Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
@@ -225,6 +226,16 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
         
+        // Delete recorded data
+        if (channel != null) {
+            StringBuilder command = new StringBuilder("@@W28,");
+            command.append(imei).append(",CCC,").append(positions.size()).append("*");
+            int checksum = 0;
+            for (int i = 0; i < command.length(); i += 1) checksum += command.charAt(i);
+            command.append(String.format("%02x\r\n", checksum & 0xff).toUpperCase());
+            channel.write(command.toString());
+        }
+        
         return positions;
     }
     
@@ -241,9 +252,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         
         String type = buf.toString(index + 1, 3, Charset.defaultCharset());
         if (type.equals("CCC")) {
-            return decodeBinaryMessage(buf);
+            return decodeBinaryMessage(channel, buf);
         } else {
-            return decodeRegularMessage(buf);
+            return decodeRegularMessage(channel, buf);
         }
     }
 
