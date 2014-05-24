@@ -15,14 +15,14 @@
  */
 package org.traccar.protocol;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.HeapChannelBufferFactory;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
@@ -60,11 +60,21 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(?:\\|([0-9a-fA-F]+))?" +          // Milage
             ".*"); // TODO: parse ADC
 
+    
+    private static final int MSG_HEARTBEAT = 0x0001;
+    private static final int MSG_SERVER = 0x0002;
+    private static final int MSG_LOGIN = 0x5000;
+    private static final int MSG_LOGIN_RESPONSE = 0x5000;
+    
+    private static final int MSG_POSITION = 0x9955;
+    private static final int MSG_POSITION_LOGGED = 0x9016;
+    private static final int MSG_ALARM = 0x9999;
+    
     private String getImei(ChannelBuffer buf) {
         String id = "";
 
-        for (int i = 4; i < 4 + 7; i++) {
-            int b = buf.getUnsignedByte(i);
+        for (int i = 0; i < 7; i++) {
+            int b = buf.readUnsignedByte();
 
             // First digit
             int d1 = (b & 0xf0) >> 4;
@@ -82,6 +92,38 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
         return id;
     }
+    
+    private static void sendResponse(
+            Channel channel, ChannelBuffer id, int type, ChannelBuffer msg) {
+        
+        if (channel != null) {
+            ChannelBuffer buf = ChannelBuffers.buffer(
+                    2 + 2 + id.readableBytes() + 2 + msg.readableBytes() + 2 + 2);
+            
+            buf.writeByte('@');
+            buf.writeByte('@');
+            buf.writeShort(buf.capacity());
+            buf.writeBytes(id);
+            buf.writeShort(type);
+            buf.writeBytes(msg);
+            buf.writeShort(Crc.crc16X25Ccitt(buf.toByteBuffer()));
+            buf.writeByte('\r');
+            buf.writeByte('\n');
+
+            channel.write(buf);
+        }
+    }
+    
+    private String getMeiligaoServer(Channel channel) {
+        
+        if (getServerManager() != null &&
+            getServerManager().getProperties().contains("meiligao.server")) {
+            return getServerManager().getProperties().getProperty("meiligao.server");
+        } else {
+            InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
+            return address.getAddress().getHostAddress() + ":" + address.getPort();
+        }
+    }
 
     @Override
     protected Object decode(
@@ -89,53 +131,47 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
         
         ChannelBuffer buf = (ChannelBuffer) msg;
-        int command = buf.getUnsignedShort(4 + 7);
-
-        // Login confirmation
-        if (command == 0x5000) {
-            ChannelBuffer sendBuf = HeapChannelBufferFactory.getInstance().getBuffer(18);
-            sendBuf.writeByte('@');
-            sendBuf.writeByte('@');
-            sendBuf.writeShort(sendBuf.capacity());
-            byte[] array = new byte[7];
-            buf.getBytes(0, array);
-            sendBuf.writeBytes(array);
-            sendBuf.writeShort(0x4000);
-            sendBuf.writeByte(0x01);
-            sendBuf.writeShort(Crc.crc16X25Ccitt(sendBuf.toByteBuffer()));
-            sendBuf.writeByte('\r');
-            sendBuf.writeByte('\n');
-            if (channel != null) {
-                channel.write(sendBuf);
-            }
-            return null;
+        buf.skipBytes(2); // header
+        buf.readShort(); // length
+        ChannelBuffer id = buf.readBytes(7);
+        int command = buf.readUnsignedShort();
+        ChannelBuffer response;
+        
+        switch (command) {
+            case MSG_LOGIN:
+                response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
+                sendResponse(channel, id, MSG_LOGIN_RESPONSE, response);
+                break;
+            case MSG_HEARTBEAT:
+                response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
+                sendResponse(channel, id, MSG_HEARTBEAT, response);
+                break;
+            case MSG_SERVER:
+                response = ChannelBuffers.copiedBuffer(
+                        getMeiligaoServer(channel), Charset.defaultCharset());
+                sendResponse(channel, id, MSG_SERVER, response);
+                break;
+            case MSG_POSITION:
+            case MSG_POSITION_LOGGED:
+            case MSG_ALARM:
+                break;
+            default:
+                return null;
         }
-
-        // Payload offset
-        int offset = 4 + 7 + 2;
 
         // Create new position
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meiligao");
 
-        // Alarm
-        if (command == 0x9999) {
-            extendedInfo.set("alarm", buf.getUnsignedByte(offset));
-        }
-
-        // Data offset
-        if (command == 0x9955) {
-            offset += 0;
-        } else if (command == 0x9016) {
-            offset += 6;
-        } else if (command == 0x9999) {
-            offset += 1;
-        } else {
-            return null;
+        // Custom data
+        if (command == MSG_ALARM) {
+            extendedInfo.set("alarm", buf.readUnsignedByte());
+        } else if (command == MSG_POSITION_LOGGED) {
+            buf.skipBytes(6);
         }
 
         // Get device by id
-        String imei = getImei(buf);
+        String imei = getImei(id);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
         } catch(Exception error) {
@@ -144,10 +180,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Parse message
-        String sentence = buf.toString(offset, buf.readableBytes() - offset - 4, Charset.defaultCharset());
+        String sentence = buf.toString(
+                buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset());
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
-            throw new ParseException(null, 0);
+            return null;
         }
 
         Integer index = 1;
