@@ -117,7 +117,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     private String getMeiligaoServer(Channel channel) {
         
         if (getServerManager() != null &&
-            getServerManager().getProperties().contains("meiligao.server")) {
+            getServerManager().getProperties().containsKey("meiligao.server")) {
             return getServerManager().getProperties().getProperty("meiligao.server");
         } else {
             InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
