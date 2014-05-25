@@ -167,6 +167,7 @@ public class ServerManager {
         initCarTrackServer("cartrack");
         initMiniFinderServer("minifinder");
         initHaicomServer("haicom");
+        initEelinkServer("eelink");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1125,6 +1126,18 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new HaicomProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initEelinkServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
+                    pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(ServerManager.this));
                 }
             });
         }
