@@ -111,7 +111,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             // Location
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1800000.0);
-            position.setLatitude(buf.readInt() / 1800000.0);
+            position.setLongitude(buf.readInt() / 1800000.0);
             position.setSpeed(buf.readUnsignedByte() * 0.539957);
             position.setCourse((double) buf.readUnsignedShort());
             position.setAltitude(0.0);
@@ -130,6 +130,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
                 extendedInfo.set("status", buf.readUnsignedByte());
             }
             
+            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 
