@@ -29,7 +29,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -156,7 +155,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     private List<Position> decodeBinaryMessage(Channel channel, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<Position>();
         
-        Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
+        String flag = buf.toString(2, 1, Charset.defaultCharset());
+        int index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
         
         // Identification
         long deviceId;
@@ -228,7 +228,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         
         // Delete recorded data
         if (channel != null) {
-            StringBuilder command = new StringBuilder("@@W28,");
+            StringBuilder command = new StringBuilder("@@");
+            command.append(flag).append(27 + positions.size() / 10).append(",");
             command.append(imei).append(",CCC,").append(positions.size()).append("*");
             int checksum = 0;
             for (int i = 0; i < command.length(); i += 1) checksum += command.charAt(i);
