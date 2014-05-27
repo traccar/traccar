@@ -41,7 +41,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2}):?(\\d{2})(?:\\d{2})?," +  // Local Time
             "[^,]*," +
             "[FL]," +                           // F - full / L - low
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time UTC (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time UTC (HHMMSS.SSS)
             "([AV])," +                         // Validity
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
             "([NS])," +
