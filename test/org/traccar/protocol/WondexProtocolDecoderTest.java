@@ -29,6 +29,9 @@ public class WondexProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "3997324533,20140326074908,28.797603,47.041635,0,48,0,6,2,3.90V,0"));
+        
+        verify(decoder.decode(null, null,
+                "2000000001,20140529213210,-63.179111,9.781493,0,0,54.0,8,2,0.0,0,0.01,0.01,0,0,0,0"));
 
     }
 

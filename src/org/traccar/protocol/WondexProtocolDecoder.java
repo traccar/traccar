@@ -42,7 +42,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+\\.\\d+)," +           // Latitude
             "(\\d+)," +                    // Speed
             "(\\d+)," +                    // Course
-            "(-?\\d+)," +                  // Altitude
+            "(-?\\d+\\.?\\d*)," +          // Altitude
             "(\\d+)," +                    // Satellites
             "(\\d+),?" +                   // Event
             "(?:(\\d+\\.\\d+)V,)?" +       // Battery
@@ -50,7 +50,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)?,?" +                  // Input
             "(\\d+\\.\\d+)?,?" +           // ADC1
             "(\\d+\\.\\d+)?,?" +           // ADC2
-            "(\\d+)?");                    // Output
+            "(\\d+)?.*");                  // Output
 
     @Override
     protected Object decode(
