@@ -60,7 +60,8 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+        sentence = sentence.trim();
+       
         // Detect device ID
         if (sentence.length() == 16) {
             String imei = sentence.substring(1, sentence.length());
