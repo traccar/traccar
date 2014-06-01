@@ -53,7 +53,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
             "\\&C(.*)" +                                    // IO Port Data
             "\\&D(.*)" +                                    // Mile Meter Data
             "\\&E(.*)" +                                    // Alarm Data
-            "\\&Y(.*)");                                    // AD Input Data
+            "(?:\\&Y)?(.*)");                               // AD Input Data
 
     @Override
     protected Object decode(
