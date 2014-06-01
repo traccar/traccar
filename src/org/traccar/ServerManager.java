@@ -168,6 +168,7 @@ public class ServerManager {
         initMiniFinderServer("minifinder");
         initHaicomServer("haicom");
         initEelinkServer("eelink");
+        initBoxServer("box");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1138,6 +1139,21 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
                     pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initBoxServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    byte delimiter[] = { (byte) '\r' };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new BoxProtocolDecoder(ServerManager.this));
                 }
             });
         }
