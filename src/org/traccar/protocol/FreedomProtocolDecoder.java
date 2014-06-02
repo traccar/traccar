@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,23 +27,20 @@ import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-public class GotopProtocolDecoder extends BaseProtocolDecoder {
+public class FreedomProtocolDecoder extends BaseProtocolDecoder {
 
-    public GotopProtocolDecoder(ServerManager serverManager) {
+    public FreedomProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "(\\d+)," +                         // IMEI
-            "[^,]+," +                          // Type
-            "([AV])," +                         // Validity
-            "DATE:(\\d{2})(\\d{2})(\\d{2})," +  // Date (YYMMDD)
-            "TIME:(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
-            "LAT:(\\d+.\\d+)([NS])," +          // Latitude
-            "LOT:(\\d+.\\d+)([EW])," +          // Longitude
-            "Speed:(\\d+.\\d+)," +              // Speed
-            "([^,]+)," +                        // Status
-            "(\\d+)?" +                         // Course
+            "IMEI," +
+            "(\\d+)," +                           // IMEI
+            "(\\d{4}).(\\d{2}).(\\d{2}), " +      // Date
+            "(\\d{2}):(\\d{2}):(\\d{2}), " +      // Time
+            "([NS]), Lat:(\\d{2})(\\d+.\\d+), " + // Latitude
+            "([EW]), Lon:(\\d{3})(\\d+.\\d+), " + // Longitude
+            "Spd:(\\d+.\\d+)" +                   // Speed
             ".*");
 
     @Override
@@ -52,18 +49,17 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         // Parse message
-        String sentence = (String) msg;
-        Matcher parser = pattern.matcher(sentence);
-        if (sentence.isEmpty() || !parser.matches()) {
+        Matcher parser = pattern.matcher((String) msg);
+        if (!parser.matches()) {
             return null;
         }
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gotop");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("freedom");
         Integer index = 1;
 
-        // Get device by IMEI
+        // Identification
         String imei = parser.group(index++);
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
@@ -71,14 +67,14 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             Log.warning("Unknown device - " + imei);
             return null;
         }
-
+        
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        position.setValid(true);
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
@@ -87,31 +83,27 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Latitude
+        String hemisphere = parser.group(index++);
         Double latitude = Double.valueOf(parser.group(index++));
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
+        latitude += Double.valueOf(parser.group(index++)) / 60;
+        if (hemisphere.compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
+        hemisphere = parser.group(index++);
         Double longitude = Double.valueOf(parser.group(index++));
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
+        longitude += Double.valueOf(parser.group(index++)) / 60;
+        if (hemisphere.compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
         
         // Altitude
         position.setAltitude(0.0);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
-        
-        // Status
-        extendedInfo.set("status", parser.group(index++));
+        position.setSpeed(Double.valueOf(parser.group(index++)));
 
         // Course
-        String course = parser.group(index++);
-        if (course != null) {
-            position.setCourse(Double.valueOf(course));
-        } else {
-            position.setCourse(0.0);
-        }
+        position.setCourse(0.0);
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
