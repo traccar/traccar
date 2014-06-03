@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
     static private Pattern pattern = Pattern.compile(
             "[\r\n]*" +
             "(\\d+)," +                         // Serial
-            "(\\+?\\d+)?," +                    // Number
+            "([^,]+)?," +                       // Number
             "GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
