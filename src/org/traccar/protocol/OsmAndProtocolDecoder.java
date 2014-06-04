@@ -16,6 +16,8 @@
 package org.traccar.protocol;
 
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +72,12 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         // Decode position
         position.setValid(true);
         if (params.containsKey("timestamp")) {
-            position.setTime(new Date(Long.valueOf(params.get("timestamp").get(0)) * 1000));
+            try {
+                position.setTime(new Date(Long.valueOf(params.get("timestamp").get(0)) * 1000));
+            } catch (NumberFormatException error) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                position.setTime(dateFormat.parse(params.get("timestamp").get(0)));
+            }
         } else {
             position.setTime(new Date());
         }
