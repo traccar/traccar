@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(0.0);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
 
         // Time
         time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
