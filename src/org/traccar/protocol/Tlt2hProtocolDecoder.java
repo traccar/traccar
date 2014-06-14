@@ -35,14 +35,14 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern patternHeader = Pattern.compile(
+    private static final Pattern patternHeader = Pattern.compile(
             "#(\\d+)#" +                   // IMEI
             "[^#]+#" +
             "\\d+#" +
             "([^#]+)#" +                   // Status
             "\\d+");                       // Number of records
 
-    static private Pattern patternPosition = Pattern.compile(
+    private static final Pattern patternPosition = Pattern.compile(
             "#([0-9a-f]+)?" +              // Cell info
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
@@ -51,8 +51,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +
             "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+\\.\\d{2})?," +          // Speed
-            "(\\d+\\.\\d{2})?," +          // Course
+            "(\\d+\\.\\d+)?," +            // Speed
+            "(\\d+\\.\\d+)?," +            // Course
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");                         // Other (Checksumm)
 
@@ -107,7 +107,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 index += 1; // Skip milliseconds
 
                 // Validity
-                position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+                position.setValid(parser.group(index++).compareTo("A") == 0);
 
                 // Latitude
                 Double latitude = Double.valueOf(parser.group(index++));
