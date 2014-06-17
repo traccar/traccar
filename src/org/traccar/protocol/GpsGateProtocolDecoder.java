@@ -41,7 +41,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
      */
     private static final Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.?(\\d+)?," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +

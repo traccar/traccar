@@ -18,9 +18,14 @@ public class GpsGateProtocolDecoderTest {
         assertNull(decoder.decode(null, null, "$FRLIN,,354503026292842,VGZTHKT*0C"));
 
         assertNull(decoder.decode(null, null, "$FRLIN,IMEI,1234123412341234,*7B"));
+        
+        assertNull(decoder.decode(null, null, "$FRLIN,,saab93_device,KLRFBGIVDJ*28"));
 
         verify(decoder.decode(null, null,
                 "$GPRMC,154403.000,A,6311.64120,N,01438.02740,E,0.000,0.0,270707,,*0A"));
+        
+        verify(decoder.decode(null, null,
+                "$GPRMC,074524,A,5553.73701,N,03728.90491,E,10.39,226.5,160614,0.0,E*75"));
 
     }
 
