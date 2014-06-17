@@ -48,6 +48,12 @@ public class T55ProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 "$GPGGA,000000.000,6010.34349,N,02445.72838,E,1,05,1.7,0.9,M,35.1,M,,*59"));
+        
+        verify(decoder.decode(null, null,
+                "123456789$GPGGA,000000.000,4610.1676,N,00606.4586,E,0,00,4.3,0.0,M,50.7,M,,0000*59"));
+        
+        verify(decoder.decode(null, null,
+                "123456789$GPRMC,155708.252,V,4610.1676,N,00606.4586,E,000.0,000.0,060214,,,N*76"));
 
     }
 

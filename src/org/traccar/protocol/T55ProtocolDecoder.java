@@ -81,50 +81,45 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)," +            // Battery
             ".+");
     
+    private void identify(String id) {
+        try {
+            deviceId = getDataManager().getDeviceByImei(id).getId();
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+        }
+    }
+    
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
 
         String sentence = (String) msg;
+        
+        if (!sentence.startsWith("$") && sentence.contains("$")) {
+            int index = sentence.indexOf("$");
+            identify(sentence.substring(0, index));
+            sentence = sentence.substring(index);
+        }
 
         // Identification
         if (sentence.startsWith("$PGID")) {
-            String imei = sentence.substring(6, sentence.length() - 3);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
+            identify(sentence.substring(6, sentence.length() - 3));
         }
 
         // Identification
         else if (sentence.startsWith("$PCPTI")) {
-            String id = sentence.substring(7, sentence.indexOf(",", 7));
-            try {
-                deviceId = getDataManager().getDeviceByImei(id).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
-            }
+            identify(sentence.substring(7, sentence.indexOf(",", 7)));
         }
 
         // Identification
         else if (sentence.startsWith("IMEI")) {
-            String id = sentence.substring(5, sentence.length());
-            try {
-                deviceId = getDataManager().getDeviceByImei(id).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
-            }
+            identify(sentence.substring(5, sentence.length()));
         }
         
         // Identification
         else if (Character.isDigit(sentence.charAt(0)) & sentence.length() == 15) {
-            try {
-                deviceId = getDataManager().getDeviceByImei(sentence).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + sentence);
-            }
+            identify(sentence);
         }
 
         // Location
