@@ -62,6 +62,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
+        sentence = sentence.trim();
 
         // Decode header
         String header = sentence.substring(0, sentence.indexOf('\r'));
