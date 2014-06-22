@@ -171,6 +171,7 @@ public class ServerManager {
         initBoxServer("box");
         initFreedomServer("freedom");
         initTelikServer("telik");
+        initTrackboxServer("trackbox");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1184,6 +1185,20 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new TelikProtocolDecoder(ServerManager.this));
+                }
+            });
+        }
+    }
+
+    private void initTrackboxServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new TrackboxProtocolDecoder(ServerManager.this));
                 }
             });
         }
