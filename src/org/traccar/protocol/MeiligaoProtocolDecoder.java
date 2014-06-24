@@ -58,8 +58,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(?:\\|([0-9a-fA-F]+))?" +          // Cell
             "(?:\\|([0-9a-fA-F]+))?" +          // Signal
             "(?:\\|([0-9a-fA-F]+))?" +          // Milage
-            ".*"); // TODO: parse ADC
-
+            ".*");
     
     private static final int MSG_HEARTBEAT = 0x0001;
     private static final int MSG_SERVER = 0x0002;
