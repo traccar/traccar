@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\$AVRMC," +
-            "(\\d+)," +                    // Identifier
+            "([^,]+)," +                   // Identifier
             "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
-            "([AVavr])," +                 // Validity
+            "([AVRavr])," +                // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
@@ -58,10 +58,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Heartbeat
-        if (sentence.startsWith("$ECHK")) {
-            if (channel != null) {
-                channel.write(sentence + "\r\n");
-            }
+        if (sentence.startsWith("$ECHK") && channel != null) {
+            channel.write(sentence + "\r\n");
             return null;
         }
         
@@ -93,7 +91,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         // Validity
         String status = parser.group(index++);
-        position.setValid(status.compareToIgnoreCase("A") == 0 ? true : false);
+        position.setValid(status.compareToIgnoreCase("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
