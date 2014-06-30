@@ -79,6 +79,12 @@ public class LaipacProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 "$AVRMC,MSG00002,125517,R,5053.0442,N,00557.8694,E,0.00,0.00,240614,H,4076,167,1,0,0,0D7AB913,020408*75"));
+        
+        /*verify(decoder.decode(null, null,
+                "$AVRMC,MSG00002,043104,p,5114.4664,N,00534.3308,E,0.00,0.00,280614,0,4115,495,1,0,0,0D48C3DC,020408*52"));
+        
+        verify(decoder.decode(null, null,
+                "$AVRMC,MSG00002,050601,P,5114.4751,N,00534.3175,E,0.00,0.00,280614,0,4115,495,1,0,0,0D48C3DC,020408*7D"));*/
 
     }
 
