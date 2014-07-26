@@ -118,11 +118,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             
         }
 
-        else if (type == MSG_GPS ||
+        else if (deviceId != null && (
+                 type == MSG_GPS ||
                  type == MSG_GPS_LBS ||
                  type == MSG_GPS_LBS_STATUS ||
                  type == MSG_GPS_PHONE ||
-                 type == MSG_GPS_LBS_EXTEND) {
+                 type == MSG_GPS_LBS_EXTEND)) {
 
             // Create new position
             Position position = new Position();
