@@ -61,7 +61,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\|\\d+\\|\\p{XDigit}+\\|\\p{XDigit}+)," + // Cell
             "(\\p{XDigit}+)," +                 // State
             "(\\p{XDigit}+)\\|" +               // ADC1
-            "(\\p{XDigit}+)\\|" +               // ADC2
+            "(\\p{XDigit}+)?\\|" +              // ADC2
             "(\\p{XDigit}+)?\\|" +              // ADC3
             "(\\p{XDigit}+)\\|" +               // Battery
             "(\\p{XDigit}+)," +                 // Power
@@ -138,7 +138,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         
         // ADC
         extendedInfo.set("adc1", Integer.parseInt(parser.group(index++), 16));
-        extendedInfo.set("adc2", Integer.parseInt(parser.group(index++), 16));
+        String adc2 = parser.group(index++);
+        if (adc2 != null) {
+            extendedInfo.set("adc2", Integer.parseInt(adc2, 16));
+        }
         String adc3 = parser.group(index++);
         if (adc3 != null) {
             extendedInfo.set("adc3", Integer.parseInt(adc3, 16));
