@@ -1,6 +1,6 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
- *                Luis Parada (luis.parada@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ *                       Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
-    static private Pattern pattern = Pattern.compile(
-            "\\$POS," +                         // Data Frame start
+    private static final Pattern pattern = Pattern.compile(
+            ".*\\$POS," +                       // Data Frame start
             "(\\d+)," +                         // Id
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -86,7 +86,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
