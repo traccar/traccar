@@ -165,6 +165,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(latitude);
             position.setLongitude(longitude);
             position.setAltitude(0.0);
+            
+            if ((union & 0x4000) != 0) {
+                extendedInfo.set("acc", (union & 0x8000) != 0);
+            }
 
             buf.skipBytes(gpsLength - 12); // skip reserved
 
