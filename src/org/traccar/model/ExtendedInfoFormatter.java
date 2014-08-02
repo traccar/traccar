@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package org.traccar.model;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Format extended tracker status
  */
@@ -22,12 +25,11 @@ public class ExtendedInfoFormatter {
 
     private static final String rootNode = "info";
     
-    private StringBuilder data;
-
+    private final Map<String, Object> data;
+    
     public ExtendedInfoFormatter(String protocol) {
-        data = new StringBuilder();
-        data.append("<").append(rootNode).append(">");
-        data.append("<protocol>").append(protocol).append("</protocol>");
+        data = new LinkedHashMap<String, Object>();
+        data.put("protocol", protocol);
     }
 
     public void set(String key, Object value) {
@@ -37,15 +39,26 @@ public class ExtendedInfoFormatter {
                 return;
             }
             
-            data.append("<").append(key).append(">");
-            data.append(value);
-            data.append("</").append(key).append(">");
+            data.put(key, value);
         }
     }
 
     @Override
     public String toString() {
-        return data.toString() + "</" + rootNode + ">";
+        StringBuilder result = new StringBuilder();
+        
+        result.append("<").append(rootNode).append(">");
+        
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+         
+            result.append("<").append(entry.getKey()).append(">");
+            result.append(entry.getValue());
+            result.append("</").append(entry.getKey()).append(">");
+        }
+
+        result.append("</").append(rootNode).append(">");
+        
+        return result.toString();
     }
 
 }
