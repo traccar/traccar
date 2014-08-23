@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,14 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern pattern = Pattern.compile(
             "GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2}).(\\d{2})," + // Time (HHMMSS.SS)
+            "(\\d{2})(\\d{2})(\\d{2}).(\\d+)," + // Time (HHMMSS.SS)
             "([AV])," +                  // Validity
-            "(\\d{2})(\\d{2}.\\d{6})," + // Latitude (DDMM.MMMMMM)
+            "(\\d{2})(\\d{2}.\\d+)," +   // Latitude (DDMM.MMMMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}.\\d{6})," + // Longitude (DDDMM.MMMMMM)
+            "(\\d{3})(\\d{2}.\\d+)," +   // Longitude (DDDMM.MMMMMM)
             "([EW])," +
-            "(\\d+.\\d)?," +             // Speed
-            "(\\d+.\\d)?," +             // Course
+            "(\\d+.\\d+)?," +            // Speed
+            "(\\d+.\\d+)?," +            // Course
             "(\\d{2})(\\d{2})(\\d{2})," + // Date (DDMMYY)
             ".*[\r\n\u0000]*");
 
