@@ -173,6 +173,7 @@ public class ServerManager {
         initTelikServer("telik");
         initTrackboxServer("trackbox");
         initVisiontekServer("visiontek");
+        initOrionServer("orion");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1217,6 +1218,20 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new VisiontekProtocolDecoder(ServerManager.this));
                 }
             });
+        }
+    }
+
+    private void initOrionServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            TrackerServer server = new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new OrionFrameDecoder());
+                    pipeline.addLast("objectDecoder", new OrionProtocolDecoder(ServerManager.this));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
