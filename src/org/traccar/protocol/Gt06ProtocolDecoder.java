@@ -62,6 +62,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_LBS_STATUS = 0x19;
     private static final int MSG_GPS_PHONE = 0x1A;
     private static final int MSG_GPS_LBS_EXTEND = 0x1E;
+    private static final int MSG_COMMAND_0 = 0x80;
+    private static final int MSG_COMMAND_1 = 0x81;
+    private static final int MSG_COMMAND_2 = 0x82;
 
     private static void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
@@ -88,7 +91,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         
-        int length = buf.readByte(); // size
+        int length = buf.readUnsignedByte(); // size
         int dataLength = length - 5;
 
         int type = buf.readUnsignedByte();
@@ -213,10 +216,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
-
+        
         else {
             buf.skipBytes(dataLength);
-            sendResponse(channel, type, buf.readUnsignedShort());
+            if (type != MSG_COMMAND_0 && type != MSG_COMMAND_1 && type != MSG_COMMAND_2) {
+                sendResponse(channel, type, buf.readUnsignedShort());
+            }
         }
 
         return null;
