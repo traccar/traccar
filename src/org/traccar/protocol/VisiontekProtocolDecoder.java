@@ -36,24 +36,24 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern pattern = Pattern.compile(
             "\\$1," +
             "([^,]+)," +                        // Identifier
-            "(\\d+)," +                         // IMEI
+            "(?:(\\d+),)?" +                    // IMEI
             "(\\d{2}),(\\d{2}),(\\d{2})," +     // Date
             "(\\d{2}),(\\d{2}),(\\d{2})," +     // Time
             "(\\d{2})(\\d{6})([NS])," +         // Latitude
             "(\\d{3})(\\d{6})([EW])," +         // Longitude
             "(\\d+\\.\\d+)," +                  // Speed
             "(\\d+)," +                         // Course
-            "(\\d+)," +                         // Altitude
-            "(\\d+)," +                         // Satellites
+            "(?:(\\d+)," +                      // Altitude
+            "(\\d+),)?" +                       // Satellites
             "(\\d+)," +                         // Milage
-            "(\\d)," +                          // Ignition
+            "(?:(\\d)," +                       // Ignition
             "(\\d)," +                          // Input 1
             "(\\d)," +                          // Input 2
             "(\\d)," +                          // Immobilizer
             "(\\d)," +                          // External Battery Status
-            "(\\d+)," +                         // GSM
-            "([AV])," +                         // Validity
-            "(\\d+)" +                          // RFID
+            "(\\d+),)?" +                       // GSM
+            "([AV]),?" +                        // Validity
+            "(\\d+)?" +                         // RFID
             ".*");
 
     @Override
@@ -81,9 +81,14 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
         } catch(Exception error) {
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            } catch(Exception error2) {
+            if (imei != null) {
+                try {
+                    position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+                } catch(Exception error2) {
+                    Log.warning("Unknown device - " + id);
+                    return null;
+                }
+            } else {
                 Log.warning("Unknown device - " + id);
                 return null;
             }
@@ -119,7 +124,12 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Altitude
-        position.setAltitude(Double.valueOf(parser.group(index++)));
+        String altitude = parser.group(index++);
+        if (altitude != null) {
+            position.setAltitude(Double.valueOf(altitude));
+        } else {
+            position.setAltitude(0.0);
+        }
 
         // Additional data
         extendedInfo.set("satellites", parser.group(index++));
