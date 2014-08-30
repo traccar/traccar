@@ -21,6 +21,9 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class OrionFrameDecoder extends FrameDecoder {
+    
+    private static final int TYPE_USERLOG = 0;
+    private static final int TYPE_SYSLOG = 3;
 
     @Override
     protected Object decode(
@@ -28,22 +31,41 @@ public class OrionFrameDecoder extends FrameDecoder {
             Channel channel,
             ChannelBuffer buf) throws Exception {
         
-        // Check minimum length
-        if (buf.readableBytes() < 5) {
-            return null;
-        }
+        int length = 6;
         
-        int length = 2 + 2; // head and tail
-        
-        if (buf.getByte(buf.readerIndex()) == 0x78) {
-            length += 1 + buf.getByte(buf.readerIndex() + 2);
-        } else {
-            length += 2 + buf.getShort(buf.readerIndex() + 2);
-        }
-        
-        // Check length and return buffer
         if (buf.readableBytes() >= length) {
-            return buf.readBytes(length);
+        
+            int type = buf.getUnsignedByte(buf.readerIndex() + 2) & 0x0f;
+            
+            if (type == TYPE_USERLOG) {
+                if (buf.readableBytes() >= length + 5) {
+                
+                    int index = buf.readerIndex() + 3;
+                    int count = buf.getUnsignedByte(index) & 0x0f;
+                    index += 5;
+                    length += 5;
+
+                    for (int i = 0; i < count; i++) {
+                        if (buf.readableBytes() < length) {
+                            return null;
+                        }
+                        int logLength = buf.getUnsignedByte(index + 1);
+                        index += logLength;
+                        length += logLength;
+                    }
+                
+                    if (buf.readableBytes() >= length) {
+                        return buf.readBytes(length);
+                    }
+                }
+            } else if (type == TYPE_SYSLOG) {
+                if (buf.readableBytes() >= length + 12) {
+                    length += buf.getUnsignedShort(buf.readerIndex() + 8);
+                    if (buf.readableBytes() >= length) {
+                        return buf.readBytes(length);
+                    }
+                }
+            }
         }
 
         return null;

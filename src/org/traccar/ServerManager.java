@@ -1223,7 +1223,7 @@ public class ServerManager {
 
     private void initOrionServer(String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new OrionFrameDecoder());
