@@ -25,7 +25,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
-import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -47,6 +46,12 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(buf.getUnsignedByte(buf.writerIndex() - 3));
             channel.write(response);
         }
+    }
+    
+    private static double convertCoordinate(int value) {
+        double degrees = value / 1000000;
+        double minutes = (Math.abs(value) % 1000000) / 10000.0;
+        return degrees + minutes / 60;
     }
     
     @Override
@@ -91,8 +96,8 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 extendedInfo.set("flag2", buf.readUnsignedByte());
                 
                 // Location
-                position.setLatitude(buf.readInt() / 10000.0);
-                position.setLongitude(buf.readInt() / 10000.0);
+                position.setLatitude(convertCoordinate(buf.readInt()));
+                position.setLongitude(convertCoordinate(buf.readInt()));
                 position.setAltitude(buf.readShort()/ 10.0);
                 position.setCourse((double) buf.readUnsignedShort());
                 position.setSpeed(buf.readUnsignedShort() * 0.0539957);
