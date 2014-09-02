@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -31,18 +30,19 @@ import org.traccar.model.DataManager;
   */
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
-    private TrackerServer server;
-    private DataManager dataManager;
-    private Boolean loggerEnabled;
+    private final TrackerServer server;
+    private final DataManager dataManager;
+    private final Boolean loggerEnabled;
+    private final ReverseGeocoder reverseGeocoder;
+    private FilterHandler filterHandler;
     private Integer resetDelay;
-    private ReverseGeocoder reverseGeocoder;
 
     /**
      * Open channel handler
      */
     protected class OpenChannelHandler extends SimpleChannelHandler {
 
-        private TrackerServer server;
+        private final TrackerServer server;
 
         public OpenChannelHandler(TrackerServer server) {
             this.server = server;
@@ -95,6 +95,11 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (resetDelayProperty != null) {
             resetDelay = Integer.valueOf(resetDelayProperty);
         }
+
+        String enableFilter = serverManager.getProperties().getProperty("filter.enable");
+        if (enableFilter != null && Boolean.valueOf(enableFilter)) {
+            filterHandler = new FilterHandler(serverManager);
+        }
     }
 
     protected DataManager getDataManager() {
@@ -114,6 +119,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("logger", new StandardLoggingHandler());
         }
         addSpecificHandlers(pipeline);
+        if (filterHandler != null) {
+            pipeline.addLast("filter", filterHandler);
+        }
         if (reverseGeocoder != null) {
             pipeline.addLast("geocoder", new ReverseGeocoderHandler(reverseGeocoder));
         }
