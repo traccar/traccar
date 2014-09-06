@@ -274,6 +274,14 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(ServerManager.this));
                 }
             });
+            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(ServerManager.this));
+                }
+            });
         }
     }
 

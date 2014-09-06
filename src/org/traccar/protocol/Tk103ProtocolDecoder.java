@@ -47,7 +47,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2}),?" + // Time (HHMMSS)
             "(\\d+\\.?\\d+),?" +           // Course
             "([0-9a-fA-F]{8})?,?" +        // State
-            "(?:L([0-9a-fA-F]+))?");       // Milage
+            "(?:L([0-9a-fA-F]+))?\\)?");   // Milage
 
     @Override
     protected Object decode(
