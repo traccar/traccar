@@ -116,7 +116,12 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         else if (sentence.startsWith("IMEI")) {
             identify(sentence.substring(5, sentence.length()));
         }
-        
+
+        // Identification
+        else if (sentence.startsWith("$GPFID")) {
+            identify(sentence.substring(6, sentence.length()));
+        }
+
         // Identification
         else if (Character.isDigit(sentence.charAt(0)) & sentence.length() == 15) {
             identify(sentence);

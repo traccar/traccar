@@ -12,6 +12,8 @@ public class T55ProtocolDecoderTest {
 
         T55ProtocolDecoder decoder = new T55ProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
+        
+        assertNull(decoder.decode(null, null, "$GPFID,ID123456ABC"));
 
         assertNull(decoder.decode(null, null, "$PGID,359853000144328*0F"));
 
