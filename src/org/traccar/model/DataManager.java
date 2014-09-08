@@ -27,11 +27,12 @@ public interface DataManager {
      */
     public List<Device> getDevices() throws Exception;
     public Device getDeviceByImei(String imei) throws Exception;
+    public Device getDeviceById(Long id) throws Exception;
 
     /**
      * Manage positions
      */
     public Long addPosition(Position position) throws Exception;
-    public void updateLatestPosition(Long deviceId, Long positionId) throws Exception;
+    public void updateLatestPosition(Position position, Long positionId) throws Exception;
 
 }

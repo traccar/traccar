@@ -45,6 +45,9 @@ public class DatabaseDataManager implements DataManager {
     private NamedParameterStatement queryGetDevices;
     private NamedParameterStatement queryAddPosition;
     private NamedParameterStatement queryUpdateLatestPosition;
+    private String queryAddPositionTemplate;
+    private String queryUpdateLatestPositionTemplate;
+    private AdvancedConnection globalConnection;
 
     /**
      * Initialize database
@@ -58,7 +61,7 @@ public class DatabaseDataManager implements DataManager {
 
             if (driverFile != null) {
                 URL url = new URL("jar:file:" + new File(driverFile).getAbsolutePath() + "!/");
-                URLClassLoader cl = new URLClassLoader(new URL[] { url });
+                URLClassLoader cl = new URLClassLoader(new URL[]{url});
                 Driver d = (Driver) Class.forName(driver, true, cl).newInstance();
                 DriverManager.registerDriver(new DriverDelegate(d));
             } else {
@@ -71,7 +74,7 @@ public class DatabaseDataManager implements DataManager {
         String user = properties.getProperty("database.user");
         String password = properties.getProperty("database.password");
         AdvancedConnection connection = new AdvancedConnection(url, user, password);
-
+        globalConnection = connection;
         // Load statements from configuration
         String query;
 
@@ -81,11 +84,13 @@ public class DatabaseDataManager implements DataManager {
         }
 
         query = properties.getProperty("database.insertPosition");
+        queryAddPositionTemplate = query;
         if (query != null) {
             queryAddPosition = new NamedParameterStatement(connection, query);
         }
 
         query = properties.getProperty("database.updateLatestPosition");
+        queryUpdateLatestPositionTemplate = query;
         if (query != null) {
             queryUpdateLatestPosition = new NamedParameterStatement(connection, query);
         }
@@ -103,6 +108,7 @@ public class DatabaseDataManager implements DataManager {
                 Device device = new Device();
                 device.setId(result.getLong("id"));
                 device.setImei(result.getString("imei"));
+                device.setDatabase(result.getString("database"));
                 deviceList.add(device);
             }
         }
@@ -114,13 +120,14 @@ public class DatabaseDataManager implements DataManager {
      * Devices cache
      */
     private Map<String, Device> devices;
+    private Map<Long, Device> devices_id;
 
     @Override
     public Device getDeviceByImei(String imei) throws SQLException {
 
         if (devices == null || !devices.containsKey(imei)) {
             devices = new HashMap<String, Device>();
-            for (Device device: getDevices()) {
+            for (Device device : getDevices()) {
                 devices.put(device.getImei(), device);
             }
         }
@@ -129,7 +136,27 @@ public class DatabaseDataManager implements DataManager {
     }
 
     @Override
+    public Device getDeviceById(Long id) throws SQLException {
+
+        if (devices_id == null || !devices_id.containsKey(id)) {
+            devices_id = new HashMap<Long, Device>();
+            for (Device device : getDevices()) {
+                devices_id.put(device.getId(), device);
+            }
+        }
+
+        return devices_id.get(id);
+    }
+
+    @Override
     public synchronized Long addPosition(Position position) throws SQLException {
+        if (queryAddPositionTemplate.contains("_database_")) {
+            String query = queryAddPositionTemplate;
+            query = query.replace("_database_", this.getDeviceById(position.getDeviceId()).getDatabase());
+            if (query != null) {
+                queryAddPosition = new NamedParameterStatement(globalConnection, query);
+            }
+        }
 
         if (queryAddPosition != null) {
             queryAddPosition.prepare(Statement.RETURN_GENERATED_KEYS);
@@ -144,7 +171,7 @@ public class DatabaseDataManager implements DataManager {
             queryAddPosition.setDouble("course", position.getCourse());
             queryAddPosition.setString("address", position.getAddress());
             queryAddPosition.setString("extended_info", position.getExtendedInfo());
-            
+
             // DELME: Temporary compatibility support
             XPath xpath = XPathFactory.newInstance().newXPath();
             try {
@@ -180,13 +207,52 @@ public class DatabaseDataManager implements DataManager {
     }
 
     @Override
-    public void updateLatestPosition(Long deviceId, Long positionId) throws SQLException {
-        
+    public void updateLatestPosition(Position position, Long positionId ) throws SQLException {
+        if (queryUpdateLatestPositionTemplate.contains("_database_")) {
+            String query = queryUpdateLatestPositionTemplate;
+            query = query.replace("_database_", this.getDeviceById(position.getDeviceId()).getDatabase());
+            if (query != null) {
+                queryAddPosition = new NamedParameterStatement(globalConnection, query);
+            }
+        }
+
         if (queryUpdateLatestPosition != null) {
             queryUpdateLatestPosition.prepare();
 
-            queryUpdateLatestPosition.setLong("device_id", deviceId);
+            queryUpdateLatestPosition.setLong("device_id", position.getDeviceId());
             queryUpdateLatestPosition.setLong("id", positionId);
+            queryUpdateLatestPosition.setTimestamp("time", position.getTime());
+            queryUpdateLatestPosition.setBoolean("valid", position.getValid());
+            queryUpdateLatestPosition.setDouble("altitude", position.getAltitude());
+            queryUpdateLatestPosition.setDouble("latitude", position.getLatitude());
+            queryUpdateLatestPosition.setDouble("longitude", position.getLongitude());
+            queryUpdateLatestPosition.setDouble("speed", position.getSpeed());
+            queryUpdateLatestPosition.setDouble("course", position.getCourse());
+            queryUpdateLatestPosition.setString("address", position.getAddress());
+            queryUpdateLatestPosition.setString("extended_info", position.getExtendedInfo());
+
+            // DELME: Temporary compatibility support
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            try {
+                InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
+                String index = xpath.evaluate("/info/index", source);
+                if (!index.isEmpty()) {
+                    queryUpdateLatestPosition.setLong("id", Long.valueOf(index));
+                } else {
+                    queryUpdateLatestPosition.setLong("id", null);
+                }
+                source = new InputSource(new StringReader(position.getExtendedInfo()));
+                String power = xpath.evaluate("/info/power", source);
+                if (!power.isEmpty()) {
+                    queryUpdateLatestPosition.setDouble("power", Double.valueOf(power));
+                } else {
+                    queryUpdateLatestPosition.setLong("power", null);
+                }
+            } catch (XPathExpressionException e) {
+                Log.warning("Error in XML: " + position.getExtendedInfo(), e);
+                queryUpdateLatestPosition.setLong("id", null);
+                queryUpdateLatestPosition.setLong("power", null);
+            }
 
             queryUpdateLatestPosition.executeUpdate();
         }

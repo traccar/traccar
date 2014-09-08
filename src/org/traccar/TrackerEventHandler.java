@@ -39,7 +39,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         dataManager = newDataManager;
     }
 
-    private void processSinglePosition(Position position) {
+    private Long processSinglePosition(Position position) {
         if (position == null) {
             Log.info("processSinglePosition null message");
         } else {
@@ -52,24 +52,34 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         }
 
         // Write position to database
+        Long id = null;
         try {
-            Long id = dataManager.addPosition(position);
-            if (id != null) {
-                dataManager.updateLatestPosition(position.getDeviceId(), id);
-            }
+            id = dataManager.addPosition(position);
         } catch (Exception error) {
             Log.warning(error);
         }
+        return id;
     }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+        Long id = null;
+        Position lastPostition = null;
         if (e.getMessage() instanceof Position) {
-            processSinglePosition((Position) e.getMessage());
+            id = processSinglePosition((Position) e.getMessage());
+            lastPostition = (Position) e.getMessage();
         } else if (e.getMessage() instanceof List) {
             List<Position> positions = (List<Position>) e.getMessage();
             for (Position position : positions) {
-                processSinglePosition(position);
+                id = processSinglePosition(position);
+                lastPostition = position;
+            }
+        }
+        if (id != null) {
+            try {
+                dataManager.updateLatestPosition(lastPostition, id);
+            } catch (Exception error) {
+                Log.warning(error);
             }
         }
     }
