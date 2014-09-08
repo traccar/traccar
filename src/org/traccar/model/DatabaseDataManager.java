@@ -212,7 +212,7 @@ public class DatabaseDataManager implements DataManager {
             String query = queryUpdateLatestPositionTemplate;
             query = query.replace("_database_", this.getDeviceById(position.getDeviceId()).getDatabase());
             if (query != null) {
-                queryAddPosition = new NamedParameterStatement(globalConnection, query);
+                queryUpdateLatestPosition = new NamedParameterStatement(globalConnection, query);
             }
         }
 
