@@ -72,17 +72,4 @@ public class Device {
         this.uniqueId = uniqueId;
     }
 
-    /**
-     * Database (for multi-database systems)
-     */
-    private String database;
-
-    public String getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(String database) {
-        this.database = database;
-    }
-
 }

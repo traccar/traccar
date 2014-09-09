@@ -19,13 +19,6 @@ public class TestDataManager implements DataManager {
         return device;
     }
     @Override
-    public Device getDeviceById(Long id) {
-        Device device = new Device();
-        device.setId(new Long(1));
-        device.setImei("123456789012345");
-        return device;
-    }
-    @Override
     public Long addPosition(Position position) {
         return null;
     }
