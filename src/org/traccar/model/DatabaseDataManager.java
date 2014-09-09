@@ -134,39 +134,7 @@ public class DatabaseDataManager implements DataManager {
         if (queryAddPosition != null) {
             queryAddPosition.prepare(Statement.RETURN_GENERATED_KEYS);
 
-            queryAddPosition.setLong("device_id", position.getDeviceId());
-            queryAddPosition.setTimestamp("time", position.getTime());
-            queryAddPosition.setBoolean("valid", position.getValid());
-            queryAddPosition.setDouble("altitude", position.getAltitude());
-            queryAddPosition.setDouble("latitude", position.getLatitude());
-            queryAddPosition.setDouble("longitude", position.getLongitude());
-            queryAddPosition.setDouble("speed", position.getSpeed());
-            queryAddPosition.setDouble("course", position.getCourse());
-            queryAddPosition.setString("address", position.getAddress());
-            queryAddPosition.setString("extended_info", position.getExtendedInfo());
-
-            // DELME: Temporary compatibility support
-            XPath xpath = XPathFactory.newInstance().newXPath();
-            try {
-                InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
-                String index = xpath.evaluate("/info/index", source);
-                if (!index.isEmpty()) {
-                    queryAddPosition.setLong("id", Long.valueOf(index));
-                } else {
-                    queryAddPosition.setLong("id", null);
-                }
-                source = new InputSource(new StringReader(position.getExtendedInfo()));
-                String power = xpath.evaluate("/info/power", source);
-                if (!power.isEmpty()) {
-                    queryAddPosition.setDouble("power", Double.valueOf(power));
-                } else {
-                    queryAddPosition.setLong("power", null);
-                }
-            } catch (XPathExpressionException e) {
-                Log.warning("Error in XML: " + position.getExtendedInfo(), e);
-                queryAddPosition.setLong("id", null);
-                queryAddPosition.setLong("power", null);
-            }
+            queryAddPosition = assignVariables(queryAddPosition, position);
 
             queryAddPosition.executeUpdate();
 
@@ -181,40 +149,54 @@ public class DatabaseDataManager implements DataManager {
 
     @Override
     public void updateLatestPosition(Position position, Long positionId) throws SQLException {
-
         if (queryUpdateLatestPosition != null) {
             queryUpdateLatestPosition.prepare();
-
-            queryUpdateLatestPosition.setLong("device_id", position.getDeviceId());
+            
+            queryUpdateLatestPosition = assignVariables(queryUpdateLatestPosition, position);
             queryUpdateLatestPosition.setLong("id", positionId);
-            queryUpdateLatestPosition.setTimestamp("time", position.getTime());
-            queryUpdateLatestPosition.setBoolean("valid", position.getValid());
-            queryUpdateLatestPosition.setDouble("altitude", position.getAltitude());
-            queryUpdateLatestPosition.setDouble("latitude", position.getLatitude());
-            queryUpdateLatestPosition.setDouble("longitude", position.getLongitude());
-            queryUpdateLatestPosition.setDouble("speed", position.getSpeed());
-            queryUpdateLatestPosition.setDouble("course", position.getCourse());
-            queryUpdateLatestPosition.setString("address", position.getAddress());
-            queryUpdateLatestPosition.setString("extended_info", position.getExtendedInfo());
-
-            // DELME: Temporary compatibility support
-            XPath xpath = XPathFactory.newInstance().newXPath();
-            try {
-                InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
-                source = new InputSource(new StringReader(position.getExtendedInfo()));
-                String power = xpath.evaluate("/info/power", source);
-                if (!power.isEmpty()) {
-                    queryUpdateLatestPosition.setDouble("power", Double.valueOf(power));
-                } else {
-                    queryUpdateLatestPosition.setLong("power", null);
-                }
-            } catch (XPathExpressionException e) {
-                Log.warning("Error in XML: " + position.getExtendedInfo(), e);
-                queryUpdateLatestPosition.setLong("power", null);
-            }
-
+            
             queryUpdateLatestPosition.executeUpdate();
         }
+    }
+
+    private NamedParameterStatement assignVariables(NamedParameterStatement preparedStatement, Position position) throws SQLException {
+
+        preparedStatement.setLong("device_id", position.getDeviceId());
+        preparedStatement.setTimestamp("time", position.getTime());
+        preparedStatement.setBoolean("valid", position.getValid());
+        preparedStatement.setDouble("altitude", position.getAltitude());
+        preparedStatement.setDouble("latitude", position.getLatitude());
+        preparedStatement.setDouble("longitude", position.getLongitude());
+        preparedStatement.setDouble("speed", position.getSpeed());
+        preparedStatement.setDouble("course", position.getCourse());
+        preparedStatement.setString("address", position.getAddress());
+        preparedStatement.setString("extended_info", position.getExtendedInfo());
+
+        // DELME: Temporary compatibility support
+        XPath xpath = XPathFactory.newInstance().newXPath();
+        try {
+            InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
+            String index = xpath.evaluate("/info/index", source);
+            if (!index.isEmpty()) {
+                preparedStatement.setLong("id", Long.valueOf(index));
+            } else {
+                preparedStatement.setLong("id", null);
+            }
+            source = new InputSource(new StringReader(position.getExtendedInfo()));
+            String power = xpath.evaluate("/info/power", source);
+            if (!power.isEmpty()) {
+                preparedStatement.setDouble("power", Double.valueOf(power));
+            } else {
+                preparedStatement.setLong("power", null);
+            }
+        } catch (XPathExpressionException e) {
+            Log.warning("Error in XML: " + position.getExtendedInfo(), e);
+            preparedStatement.setLong("id", null);
+            preparedStatement.setLong("power", null);
+        }
+
+        return preparedStatement;
+
     }
 
 }
