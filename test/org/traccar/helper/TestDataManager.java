@@ -23,6 +23,6 @@ public class TestDataManager implements DataManager {
         return null;
     }
     @Override
-    public void updateLatestPosition(Long deviceId, Long positionId) throws Exception {
+    public void updateLatestPosition(Position position, Long positionId) throws Exception {
     }
 }
