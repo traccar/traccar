@@ -174,6 +174,7 @@ public class ServerManager {
         initTrackboxServer("trackbox");
         initVisiontekServer("visiontek");
         initOrionServer("orion");
+        initRitiServer("riti");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1244,6 +1245,20 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new OrionFrameDecoder());
                     pipeline.addLast("objectDecoder", new OrionProtocolDecoder(ServerManager.this));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
+        }
+    }
+
+    private void initRitiServer(String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 105, 2, 3, 0));
+                    pipeline.addLast("objectDecoder", new RitiProtocolDecoder(ServerManager.this));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
