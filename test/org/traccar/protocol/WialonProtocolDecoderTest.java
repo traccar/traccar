@@ -30,6 +30,9 @@ public class WialonProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 "#B#080914;073235;5027.50625;N;03026.19321;E;0.700;0.000;NA;4;NA;NA;NA;;NA;Батарея:3:100 %|080914;073420;5027.50845;N;03026.18854;E;1.996;292.540;NA;4;NA;NA;NA;;NA;Батарея:3:100 %"));
+        
+        verify(decoder.decode(null, null,
+                "#B#110914;102132;5027.50728;N;03026.20369;E;1.979;288.170;NA;NA;NA;NA;NA;;NA;Батарея:3:100 %"));
 
     }
 

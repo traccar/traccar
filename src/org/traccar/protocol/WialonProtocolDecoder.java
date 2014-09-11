@@ -47,7 +47,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*);" +            // Speed
             "(\\d+\\.?\\d*);" +            // Course
             "(?:(\\d+\\.?\\d*)|NA);" +     // Altitude
-            "(\\d+)" +                     // Satellites
+            "(?:(\\d+)|NA)" +              // Satellites
             ".*");                         // Full format
 
     private void sendResponse(Channel channel, String prefix, Integer number) {
@@ -62,7 +62,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     }
     
     private Position decodePosition(String substring) {
-
+        
         // Parse message
         Matcher parser = pattern.matcher(substring);
         if (deviceId == null || !parser.matches()) {
@@ -114,9 +114,13 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Satellites
-        int satellites = Integer.valueOf(parser.group(index++));
-        position.setValid(satellites >= 3);
-        extendedInfo.set("satellites", satellites);
+        String satellites = parser.group(index++);
+        if (satellites != null) {
+            position.setValid(Integer.valueOf(satellites) >= 3);
+            extendedInfo.set("satellites", satellites);
+        } else {
+            position.setValid(false);
+        }
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
