@@ -63,7 +63,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_HEARTBEAT = 0x0001;
     private static final int MSG_SERVER = 0x0002;
     private static final int MSG_LOGIN = 0x5000;
-    private static final int MSG_LOGIN_RESPONSE = 0x5000;
+    private static final int MSG_LOGIN_RESPONSE = 0x4000;
     
     private static final int MSG_POSITION = 0x9955;
     private static final int MSG_POSITION_LOGGED = 0x9016;
