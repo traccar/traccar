@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -35,6 +36,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     public Gt06ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
+        
+        if (serverManager != null) {
+            Properties p = getServerManager().getProperties();
+            if (p.contains("gt06.timezone")) {
+                timeZone.setRawOffset(
+                        Integer.valueOf(p.getProperty("gt06.timezone")) * 1000);
+            }
+        }
     }
 
     private String readImei(ChannelBuffer buf) {
