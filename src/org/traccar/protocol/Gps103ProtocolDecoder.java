@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -58,7 +59,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         String sentence = (String) msg;
@@ -66,7 +67,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         // Send response #1
         if (sentence.contains("##")) {
             if (channel != null) {
-                channel.write("LOAD");
+                channel.write("LOAD", remoteAddress);
             }
             return null;
         }
@@ -74,7 +75,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         // Send response #2
         if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
             if (channel != null) {
-                channel.write("ON");
+                channel.write("ON", remoteAddress);
             }
             return null;
         }
