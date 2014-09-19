@@ -41,9 +41,9 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+\\.\\d+)," +                  // Speed
-            "(\\d+\\.\\d+)?," +                 // Course
+            "([EW])?," +
+            "(\\d+\\.?\\d*)," +                 // Speed
+            "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             ".*\r?\n?.*imei:" +
             "(\\d+),");                         // IMEI
@@ -86,7 +86,10 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         // Longitude
         Double longitude = Double.valueOf(parser.group(index++));
         longitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
+        String hemisphere = parser.group(index++);
+        if (hemisphere != null) {
+            if (hemisphere.compareTo("W") == 0) longitude = -longitude;
+        }
         position.setLongitude(longitude);
 
         // Altitude

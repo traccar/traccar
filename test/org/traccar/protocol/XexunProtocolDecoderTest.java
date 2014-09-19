@@ -30,6 +30,9 @@ public class XexunProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "GPRMC,014623.000,A,4710.8260,N,1948.1220,E,0.11,105.40,111212,00,0000.0,A*49,F,,imei:357713002048962,"));
 
+        verify(decoder.decode(null, null,
+                "GPRMC,220828.678,A,5206.1446,N,02038.2403,,0,0,160912,,,E*23,L,imei:358948012501019,"));
+        
     }
 
 }
