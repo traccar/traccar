@@ -81,7 +81,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Validity
-        position.setValid(Integer.valueOf(parser.group(index++)) == 0);
+        position.setValid(Integer.valueOf(parser.group(index++)) < 20);
 
         // Position info
         position.setSpeed(Double.valueOf(parser.group(index++)));
