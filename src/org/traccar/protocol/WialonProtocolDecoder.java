@@ -176,7 +176,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (!positions.isEmpty()) {
-                sendResponse(channel, "#AB#", positions.size());
+                sendResponse(channel, "#AB#", messages.length);
                 return positions;
             }
         }
