@@ -12,6 +12,9 @@ public class Gl200ProtocolDecoderTest {
 
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(null);
         decoder.setDataManager(new TestDataManager());
+        
+        verify(decoder.decode(null, null,
+                "+RESP:GTFRI,02010D,867844001675407,,0,0,1,2,0.0,0,28.9,8.591011,56.476397,20140915213209,0238,0001,03CB,2871,,97,20140915213459,009A"));
 
         assertNull(decoder.decode(null, null,
                 "+RESP:GTINF,359464030073766,8938003990320469804f,18,99,100,1,0,+2.00,0,20131018084015,00EE,0103090402"));
