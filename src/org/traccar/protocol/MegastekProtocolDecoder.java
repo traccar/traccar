@@ -46,16 +46,17 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             "[^\\*]+\\*[0-9a-fA-F]{2}");   // Checksum
 
+    //F,,imei:123456789012345,0/6,,Battery=100%,,0,,,5856,78A3;24
     private static final Pattern patternSimple = Pattern.compile(
             "[FL]," +                      // Flag
             "([^,]*)," +                   // Alarm
             "imei:(\\d+)," +               // IMEI
             "(\\d+/?\\d*)?," +             // Satellites
-            "(\\d+\\.\\d+)," +             // Altitude
+            "(\\d+\\.\\d+)?," +            // Altitude
             "Battery=(\\d+)%,," +          // Battery
             "(\\d)?," +                    // Charger
-            "(\\d+)," +                    // MCC
-            "(\\d+)," +                    // MNC
+            "(\\d+)?," +                   // MCC
+            "(\\d+)?," +                   // MNC
             "(\\p{XDigit}{4},\\p{XDigit}{4});" + // Location code
             ".+");                         // Checksum
 
@@ -139,7 +140,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Detect type
-        boolean simple = (sentence.charAt(3) == ',');
+        boolean simple = (sentence.charAt(3) == ',' || sentence.charAt(6) == ',');
 
         // Split message
         String id;
@@ -147,7 +148,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         String status;
         if (simple) {
 
-            int beginIndex = 4;
+            int beginIndex = sentence.indexOf(',') + 1;
             int endIndex = sentence.indexOf(',', beginIndex);
             id = sentence.substring(beginIndex, endIndex);
 
@@ -212,7 +213,12 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("satellites", parser.group(index++));
 
             // Altitude
-            position.setAltitude(Double.valueOf(parser.group(index++)));
+            String altitude = parser.group(index++);
+            if (altitude != null) {
+                position.setAltitude(Double.valueOf(altitude));
+            } else {
+                position.setAltitude(0.0);
+            }
 
             // Battery
             extendedInfo.set("power", Double.valueOf(parser.group(index++)));
