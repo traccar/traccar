@@ -1,8 +1,9 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestDataManager;
-import static org.traccar.helper.DecoderVerifier.verify;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
+import org.traccar.helper.TestDataManager;
 
 public class MegastekProtocolDecoderTest {
 
@@ -32,6 +33,15 @@ public class MegastekProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 "STX260475            $GPRMC,104032.001,A,4022.1119,N,01811.4081,E,000.0,000.0,060913,,,A*67,222,01,815A,D455,11,99,0000,0001,0,Timer;"));
+        
+        assertNull(decoder.decode(null, null,
+                "LOGSTX,123456789012345,$GPRMC,225419.000,A,3841.82201,N,09494.73357,W,12.46,135.33,270914,,,A*47,F,,imei:123456789012345,0/6,,Battery=100%,,0,,,5856,78A3;24"));
+
+        assertNull(decoder.decode(null, null,
+                "LOGSTX,123456789012345,$GPRMC,230551.000,A,3841.81956,N,09494.45403,W,0.00,0.00,270914,,,A*7C,L,,imei:123456789012345,0/7,269.7,Battery=100%,,0,,,5856,78A3;83"));
+
+        assertNull(decoder.decode(null, null,
+                "LOGSTX,123456789012345,$GPRMC,230739.000,A,3841.81895,N,09494.12409,W,0.00,0.00,270914,,,A*70,L,,imei:123456789012345,0/7,269.7,Battery=100%,,0,,,5856,78A3;78"));
         
     }
 
