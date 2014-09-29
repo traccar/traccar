@@ -39,11 +39,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    //$$J163,123123123123123,AFF,0004,35,58.588926,16.180473,140928192856,A,10,27,0,161,1.2,19
+    //,1648894,435695,240|24|88B9|E435,0000,|||0A22|0000,00000001,,50,,,,,,,,,,,,,*70\r\n
     private static final Pattern pattern = Pattern.compile(
             "\\$\\$." +                         // Flag
             "\\d+," +                           // Length
             "(\\d+)," +                         // IMEI
             "\\p{XDigit}{3}," +                 // Command
+            "(?:\\d+,)?" +
             "(\\d+)," +                         // Event
             "(-?\\d+\\.\\d+)," +                // Latitude
             "(-?\\d+\\.\\d+)," +                // Longitude
@@ -60,11 +63,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                         // Runtime
             "(\\d+\\|\\d+\\|\\p{XDigit}+\\|\\p{XDigit}+)," + // Cell
             "(\\p{XDigit}+)," +                 // State
-            "(\\p{XDigit}+)\\|" +               // ADC1
+            "(\\p{XDigit}+)?\\|" +              // ADC1
             "(\\p{XDigit}+)?\\|" +              // ADC2
             "(\\p{XDigit}+)?\\|" +              // ADC3
             "(\\p{XDigit}+)\\|" +               // Battery
-            "(\\p{XDigit}+)," +                 // Power
+            "(\\p{XDigit}+)," +                 // Power*/
             ".*(\r\n)?");
 
     private Position decodeRegularMessage(Channel channel, ChannelBuffer buf) {
@@ -137,7 +140,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("state", parser.group(index++));
         
         // ADC
-        extendedInfo.set("adc1", Integer.parseInt(parser.group(index++), 16));
+        String adc1 = parser.group(index++);
+        if (adc1 != null) {
+            extendedInfo.set("adc1", Integer.parseInt(adc1, 16));
+        }
         String adc2 = parser.group(index++);
         if (adc2 != null) {
             extendedInfo.set("adc2", Integer.parseInt(adc2, 16));
