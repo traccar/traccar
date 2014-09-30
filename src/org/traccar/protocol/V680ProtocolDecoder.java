@@ -40,7 +40,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             "([^#]*)#)?" +                 // User
             "(\\d+)#" +                    // Fix
             "([^#]+)#" +                   // Password
-            "[^#]+#" +
+            "([^#]+)#" +                   // Event
             "(\\d+)#" +                    // Packet number
             "([^#]+)?#?" +                 // GSM base station
             "(?:[^#]+#)?" +
@@ -106,6 +106,9 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
             // Password
             extendedInfo.set("password", parser.group(index++));
+
+            // Event
+            extendedInfo.set("event", parser.group(index++));
 
             // Packet number
             extendedInfo.set("packet", parser.group(index++));
