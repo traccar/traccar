@@ -61,11 +61,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_LOGIN = 0x01;
     private static final int MSG_GPS = 0x10;
     private static final int MSG_LBS = 0x11;
-    private static final int MSG_GPS_LBS = 0x12;
+    private static final int MSG_GPS_LBS_1 = 0x12;
+    private static final int MSG_GPS_LBS_2 = 0x22;
     private static final int MSG_STATUS = 0x13;
     private static final int MSG_SATELLITE = 0x14;
     private static final int MSG_STRING = 0x15;
-    private static final int MSG_GPS_LBS_STATUS = 0x16;
+    private static final int MSG_GPS_LBS_STATUS_1 = 0x16;
+    private static final int MSG_GPS_LBS_STATUS_2 = 0x26;
     private static final int MSG_LBS_PHONE = 0x17;
     private static final int MSG_LBS_EXTEND = 0x18;
     private static final int MSG_LBS_STATUS = 0x19;
@@ -130,10 +132,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             
         }
 
-        else if (/*deviceId != null && */(
+        else if (deviceId != null && (
                  type == MSG_GPS ||
-                 type == MSG_GPS_LBS ||
-                 type == MSG_GPS_LBS_STATUS ||
+                 type == MSG_GPS_LBS_1 ||
+                 type == MSG_GPS_LBS_2 ||
+                 type == MSG_GPS_LBS_STATUS_1 ||
+                 type == MSG_GPS_LBS_STATUS_2 ||
                  type == MSG_GPS_PHONE ||
                  type == MSG_GPS_LBS_EXTEND)) {
 
@@ -184,10 +188,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.skipBytes(gpsLength - 12); // skip reserved
 
-            if (type == MSG_GPS_LBS || type == MSG_GPS_LBS_STATUS) {
+            if (type == MSG_GPS_LBS_1 || type == MSG_GPS_LBS_2 ||
+                type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2) {
 
                 int lbsLength = 0;
-                if (type == MSG_GPS_LBS_STATUS) {
+                if (type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2) {
                     lbsLength = buf.readUnsignedByte();
                 }
 
@@ -199,7 +204,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(lbsLength - 9);
 
                 // Status
-                if (type == MSG_GPS_LBS_STATUS) {
+                if (type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2) {
                     extendedInfo.set("alarm", true);
                     
                     int flags = buf.readUnsignedByte();
