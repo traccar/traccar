@@ -33,6 +33,7 @@ public class FilterHandler extends OneToOneDecoder {
     private boolean filterZero;
     private boolean filterDuplicate;
     private int filterDistance;
+    private long filterLimit;
     
     private final Map<Long, Position> lastPositions = new HashMap<Long, Position>();
     
@@ -50,6 +51,9 @@ public class FilterHandler extends OneToOneDecoder {
 
         value = properties.getProperty("filter.distance");
         if (value != null) filterDistance = Integer.valueOf(value);
+
+        value = properties.getProperty("filter.limit");
+        if (value != null) filterLimit = Long.valueOf(value) * 1000;
     }
     
     private boolean filterInvalid(Position position) {
@@ -91,6 +95,19 @@ public class FilterHandler extends OneToOneDecoder {
         }
     }
     
+    private boolean filterLimit(Position position) {
+        if (filterLimit != 0) {
+            Position last = lastPositions.get(position.getDeviceId());
+            if (last != null) {
+                return (position.getTime().getTime() - last.getTime().getTime()) > filterLimit;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    
     private boolean filter(Position p) {
         
         boolean result =
@@ -98,6 +115,10 @@ public class FilterHandler extends OneToOneDecoder {
                 filterZero(p) ||
                 filterDuplicate(p) ||
                 filterDistance(p);
+        
+        if (filterLimit(p)) {
+            result = false;
+        }
         
         if (!result) {
             lastPositions.put(p.getDeviceId(), p);
