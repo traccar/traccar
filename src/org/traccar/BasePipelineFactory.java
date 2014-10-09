@@ -23,7 +23,7 @@ import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
+import org.traccar.database.DataManager;
 
 /**
   * Base pipeline factory

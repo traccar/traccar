@@ -22,7 +22,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import static org.jboss.netty.channel.Channels.fireMessageReceived;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-import org.traccar.model.DataManager;
+import org.traccar.database.DataManager;
 
 /**
  * Base class for protocol decoders

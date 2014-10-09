@@ -20,7 +20,7 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
-import org.traccar.model.DataManager;
+import org.traccar.database.DataManager;
 import org.traccar.model.Position;
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -29,10 +27,8 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
-import org.traccar.helper.AdvancedConnection;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
-import org.traccar.helper.NamedParameterStatement;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
@@ -77,7 +73,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
     private static final String HEX_CHARS = "0123456789ABCDEF";
 
     private void loadLastIndex() {
-        try {
+        /*try {
             Properties p = getServerManager().getProperties();
             if (p.contains("database.selectLastIndex")) {
                 AdvancedConnection connection = new AdvancedConnection(
@@ -91,7 +87,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         } catch(Exception error) {
-        }
+        }*/
     }
 
     private void sendSimpleMessage(Channel channel, short type) {

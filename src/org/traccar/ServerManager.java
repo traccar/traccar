@@ -40,8 +40,7 @@ import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.http.WebServer;
-import org.traccar.model.DataManager;
-import org.traccar.model.DatabaseDataManager;
+import org.traccar.database.DataManager;
 import org.traccar.protocol.*;
 
 /**
@@ -99,7 +98,7 @@ public class ServerManager {
             Log.setupLogger(properties);
         }
 
-        dataManager = new DatabaseDataManager(properties);
+        dataManager = new DataManager(properties);
 
         initGeocoder(properties);
 
@@ -178,7 +177,7 @@ public class ServerManager {
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
-            webServer = new WebServer(properties);
+            webServer = new WebServer(properties, dataManager.getDataSource());
         }
     }
 
