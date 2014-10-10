@@ -48,7 +48,7 @@ public class Log {
         LogManager.resetConfiguration();
         logger = Logger.getLogger(LOGGER_NAME);
         logger.addAppender(appender);
-        logger.setLevel(Level.ALL);
+        logger.setLevel(Level.toLevel(properties.getProperty("logger.level"), Level.ALL));
 
         // Workaround for "Bug 745866 - (EDG-45) Possible netty logging config problem"
         InternalLoggerFactory.setDefaultFactory(new InternalLoggerFactory() {
