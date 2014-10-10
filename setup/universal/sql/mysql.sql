@@ -31,7 +31,7 @@ CREATE TABLE positions (
     course REAL,
     latitude REAL,
     longitude REAL,
-    other VARCHAR(255) DEFAULT NULL,
+    other VARCHAR(1024) DEFAULT NULL,
     power REAL,
     speed REAL,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
