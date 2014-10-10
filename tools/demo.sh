@@ -1,3 +1,13 @@
+#
+# This test data assumes device "123456789012345" exists.
+#
+#     INSERT INTO device ( name, uniqueid )
+#         VALUES ( 'Test Device 1', 123456789012345 );
+#
+# Note: Not all shells support "echo -e" (e.g., dash, the default on Ubuntu).
+#       This will cause an unknown device error for "-e".  bash works.
+#
+
 (echo -n -e "\
 \$PGID,123456789012345*06\r\n\
 \$GPRMC,184332.07,A,1929.459,S,02410.381,E,74.00,16.78,210410,0.0,E,A*2B\r\n\
@@ -21,5 +31,4 @@
 \$GPRMC,184444.08,A,1928.041,S,02410.809,E,74.00,16.78,210410,0.0,E,A*25\r\n\
 \$GPRMC,184448.08,A,1927.962,S,02410.832,E,74.00,16.78,210410,0.0,E,A*26\r\n\
 ";) | nc -v localhost 5005
-
 
