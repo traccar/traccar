@@ -36,6 +36,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     public GlobalSatProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
 
+	// This is now only called by test classes.
+	// This will be deleted in the next commit.
+	assert (serverManager == null);
+
         // Initialize format strings
         format0 = "TSPRXAB27GHKLMnaicz*U!";
         format1 = "SARY*U!";
@@ -46,6 +50,23 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             }
             if (p.containsKey("globalsat.format1")) {
                 format1 = p.getProperty("globalsat.format1");
+            }
+        }
+    }
+
+    public GlobalSatProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+
+        // Initialize format strings
+        format0 = "TSPRXAB27GHKLMnaicz*U!";
+        format1 = "SARY*U!";
+        if (getServerManager() != null) {
+            Properties p = getServerManager().getProperties();
+            if (p.containsKey(protocol + ".format0")) {
+                format0 = p.getProperty(protocol + ".format0");
+            }
+            if (p.containsKey(protocol + ".format1")) {
+                format1 = p.getProperty(protocol + ".format1");
             }
         }
     }
@@ -83,7 +104,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse data
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("globalsat");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length() && valueIndex < values.length; formatIndex++) {
             String value = values[valueIndex];
@@ -204,7 +225,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("globalsat");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Identification

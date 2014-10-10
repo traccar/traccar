@@ -41,6 +41,10 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
     public OsmAndProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
+
+    public OsmAndProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
     
     @Override
     protected Object decode(
@@ -58,7 +62,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("osmand");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         // Identification
         String id = params.get(params.containsKey("id") ? "id" : "deviceid").get(0);

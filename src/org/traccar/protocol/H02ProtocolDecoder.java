@@ -35,6 +35,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     public H02ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
+
+    public H02ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
     
     private static double readCoordinate(ChannelBuffer buf, boolean lon) {
         
@@ -59,7 +63,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("h02");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         
         buf.readByte(); // marker
 
@@ -133,7 +137,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("h02");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

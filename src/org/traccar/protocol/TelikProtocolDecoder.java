@@ -33,6 +33,10 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public TelikProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\d{4}" +
             "(\\d{6})" +                  // Device ID
@@ -62,7 +66,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("telik");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

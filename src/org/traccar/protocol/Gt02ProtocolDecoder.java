@@ -33,6 +33,10 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Gt02ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private String readImei(ChannelBuffer buf) {
         int b = buf.readUnsignedByte();
         StringBuilder imei = new StringBuilder();
@@ -77,7 +81,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt02");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             extendedInfo.set("index", index);
 
             // Get device id

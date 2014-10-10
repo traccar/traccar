@@ -36,10 +36,14 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Jt600ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private Position decodeNormalMessage(ChannelBuffer buf) throws Exception {
 
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("jt600");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         buf.readByte(); // header
 
@@ -158,7 +162,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("jt600");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         extendedInfo.set("alert", "true");
         Integer index = 1;
 

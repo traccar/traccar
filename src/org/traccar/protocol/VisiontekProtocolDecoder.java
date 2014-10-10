@@ -33,6 +33,10 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public VisiontekProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\$1," +
             "([^,]+)," +                        // Identifier
@@ -71,7 +75,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("visiontek");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

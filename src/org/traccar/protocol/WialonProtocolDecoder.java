@@ -37,6 +37,10 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public WialonProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2});" +  // Date (DDMMYY)
             "(\\d{2})(\\d{2})(\\d{2});" +  // Time (HHMMSS)
@@ -71,7 +75,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("wialon");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         position.setDeviceId(deviceId);
 
         Integer index = 1;

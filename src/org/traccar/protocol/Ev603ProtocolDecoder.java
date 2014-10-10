@@ -36,6 +36,10 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
         super(serverManager);
     }
 
+    public Ev603ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "!A," +                           // Type
             "(\\d{2})\\/(\\d{2})\\/(\\d{2})," + // Date dd/mm/YY
@@ -74,7 +78,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("ev603");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             Integer index = 1;
 
             // Date

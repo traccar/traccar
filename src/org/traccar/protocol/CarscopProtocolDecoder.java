@@ -35,6 +35,10 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public CarscopProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     // Very similar to TK103 protocol
     static private Pattern pattern = Pattern.compile(
             "\\*.*" +
@@ -80,7 +84,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         position.setDeviceId(deviceId);
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("carscop");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         index = 1;
 
         // Time

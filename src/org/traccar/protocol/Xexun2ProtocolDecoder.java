@@ -33,6 +33,10 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Xexun2ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     static private Pattern pattern = Pattern.compile(
             "[\r\n]*" +
             "(\\d+)," +                         // Serial
@@ -72,7 +76,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("xexun2");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

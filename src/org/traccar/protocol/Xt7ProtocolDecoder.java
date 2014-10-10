@@ -35,6 +35,10 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Xt7ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
@@ -67,7 +71,7 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("xt7");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         
         // Get device by id
         String id = buf.readBytes(16).toString(Charset.defaultCharset()).trim();

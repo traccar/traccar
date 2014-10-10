@@ -33,6 +33,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public TotemProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern patternFirst = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
@@ -159,7 +163,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("totem");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

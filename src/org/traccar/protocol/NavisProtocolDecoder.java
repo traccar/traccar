@@ -45,6 +45,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public NavisProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     // Format types
     public static final int F10 = 0x01;
     public static final int F20 = 0x02;
@@ -83,7 +87,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private ParseResult parsePosition(ChannelBuffer buf) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navis");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         position.setDeviceId(databaseDeviceId);
         position.setAltitude(0.0);

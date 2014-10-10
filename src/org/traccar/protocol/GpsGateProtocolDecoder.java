@@ -36,6 +36,10 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public GpsGateProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     /**
      * Regular expressions pattern
      */
@@ -104,7 +108,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gpsgate");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             Integer index = 1;

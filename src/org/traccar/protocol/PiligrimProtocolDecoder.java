@@ -43,6 +43,10 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public PiligrimProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private void sendResponse(Channel channel, String message) {
         if (channel != null) {
             HttpResponse response = new DefaultHttpResponse(
@@ -104,7 +108,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_GPS || type == MSG_GPS_SENSORS) {
                     
                     Position position = new Position();
-                    ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("piligrim");
+                    ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                     position.setDeviceId(deviceId);
                     
                     // Time

@@ -37,6 +37,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public TeltonikaProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private void parseIdentification(Channel channel, ChannelBuffer buf) {
         boolean result = false;
 
@@ -81,7 +85,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         
         for (int i = 0; i < count; i++) {
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("teltonika");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             
             position.setDeviceId(deviceId);
             

@@ -31,6 +31,10 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
     public M2mProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
+
+    public M2mProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
     
     private boolean firstPacket = true;
     private Long deviceId;
@@ -75,7 +79,7 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("m2m");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             // Date and time

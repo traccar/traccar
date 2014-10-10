@@ -33,6 +33,10 @@ public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Pt3000ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     static private Pattern pattern = Pattern.compile(
             "\\%(\\d+)," +                 // IMEI
             "\\$GPRMC," +
@@ -62,7 +66,7 @@ public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("pt3000");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

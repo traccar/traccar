@@ -33,6 +33,10 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public YwtProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "%(..)," +                     // Type
             "(\\d+):" +                    // Unit identifier
@@ -81,7 +85,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("ywt");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
         String type = parser.group(index++);
 

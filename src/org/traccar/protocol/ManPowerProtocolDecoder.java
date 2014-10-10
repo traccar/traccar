@@ -33,6 +33,10 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public ManPowerProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     static private Pattern pattern = Pattern.compile(
             "simei:" +
             "(\\d+)," +                         // IMEI
@@ -64,7 +68,7 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("manpower");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

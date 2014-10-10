@@ -36,6 +36,10 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public EnforaProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2}).(\\d+)," + // Time (HHMMSS.SS)
@@ -94,7 +98,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("enfora");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Get device by IMEI

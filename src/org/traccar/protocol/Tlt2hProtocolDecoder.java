@@ -35,6 +35,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Tlt2hProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern patternHeader = Pattern.compile(
             "#(\\d+)#" +                   // IMEI
             "[^#]+#" +
@@ -91,7 +95,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             parser = patternPosition.matcher(message);
             if (parser.matches()) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tlt2h");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 position.setDeviceId(deviceId);
 
                 Integer index = 1;

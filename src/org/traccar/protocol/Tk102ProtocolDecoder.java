@@ -35,6 +35,10 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Tk102ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     static private Pattern pattern = Pattern.compile(
             "\\[.\\d{10}.\\(\\p{Upper}+" +
             "(\\d{2})(\\d{2})(\\d{2})" +   // Time (HHMMSS)
@@ -85,7 +89,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tk102");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             Integer index = 1;

@@ -35,6 +35,10 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public TopflytechProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     static private Pattern pattern = Pattern.compile(
             "\\(" +
             "(\\d+)" +                     // IMEI
@@ -64,7 +68,7 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("topflytech");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Identifier

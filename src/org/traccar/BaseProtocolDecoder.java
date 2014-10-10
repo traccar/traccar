@@ -31,6 +31,7 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
     private ServerManager serverManager;
     private DataManager dataManager;
+    private final String protocol;
 
     public final void setDataManager(DataManager dataManager) {
         this.dataManager = dataManager;
@@ -48,14 +49,38 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
         return serverManager;
     }
 
+    public final String getProtocol() {
+        return protocol;
+    }
+
     public BaseProtocolDecoder() {
+        protocol = null;
     }
 
     public BaseProtocolDecoder(ServerManager serverManager) {
+        //  Only used by test classes now
+	assert	(serverManager == null) :
+		"BaseProtocolDecoder() initialized with non-NULL serverManager";
+
         if (serverManager != null) {
             this.serverManager = serverManager;
             dataManager = serverManager.getDataManager();
         }
+
+        protocol = null;
+    }
+
+    public BaseProtocolDecoder(ServerManager serverManager, String protocol) {
+        assert	(serverManager != null) :
+		"BaseProtocolDecoder() initialized with NULL serverManager";
+
+        assert	(protocol != null) :
+		"BaseProtocolDecoder() initialized with NULL protocol";
+
+        this.serverManager = serverManager;
+        this.protocol = protocol;
+
+        dataManager = serverManager.getDataManager();
     }
     
     @Override

@@ -36,6 +36,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public EelinkProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private String readImei(ChannelBuffer buf) {
         int b = buf.readUnsignedByte();
         StringBuilder imei = new StringBuilder();
@@ -105,7 +109,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setDeviceId(deviceId);
             
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("eelink");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             extendedInfo.set("index", index);
             
             // Location

@@ -33,6 +33,10 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Stl060ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             ".*\\$1," +
             "(\\d+)," +                         // IMEI
@@ -67,7 +71,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("stl060");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

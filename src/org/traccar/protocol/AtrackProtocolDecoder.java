@@ -35,6 +35,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public AtrackProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final int MSG_HEARTBEAT = 0x1A;
     private static final int MSG_DATA = 0x10;
 
@@ -96,7 +100,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("atrack");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Date and time
             position.setTime(new Date(buf.readUnsignedInt() * 1000)); // gps time

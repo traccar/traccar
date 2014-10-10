@@ -34,6 +34,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Gps103ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "imei:" +
             "(\\d+)," +                         // IMEI
@@ -88,7 +92,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gps103");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

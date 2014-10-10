@@ -33,6 +33,10 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public GatorProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final int PACKET_HEARTBEAT = 0x21;
     private static final int PACKET_POSITION_DATA = 0x80;
     private static final int PACKET_ROLLCALL_RESPONSE = 0x81;
@@ -66,7 +70,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gator");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Identification
             try {

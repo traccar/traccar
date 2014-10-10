@@ -34,6 +34,10 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
     public OrionProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
     }
+
+    public OrionProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
     
     private static final int TYPE_USERLOG = 0;
     private static final int TYPE_SYSLOG = 3;
@@ -88,7 +92,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 // Create new position
                 Position position = new Position();
                 position.setDeviceId(deviceId);
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("orion");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 
                 extendedInfo.set("event", buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length

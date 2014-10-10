@@ -42,6 +42,10 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public ApelProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     /*
      * Message types
      */
@@ -165,7 +169,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("apel");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 position.setDeviceId(deviceId);
 
                 // Message index

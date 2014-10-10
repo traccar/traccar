@@ -36,12 +36,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     public Gt06ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
+    }
+
+    public Gt06ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
         
         if (serverManager != null) {
             Properties p = getServerManager().getProperties();
-            if (p.containsKey("gt06.timezone")) {
+            if (p.containsKey(protocol + ".timezone")) {
                 timeZone.setRawOffset(
-                        Integer.valueOf(p.getProperty("gt06.timezone")) * 1000);
+                        Integer.valueOf(p.getProperty(protocol + ".timezone")) * 1000);
             }
         }
     }
@@ -144,7 +148,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt06");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Date and time
             Calendar time = Calendar.getInstance(timeZone);

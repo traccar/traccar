@@ -37,6 +37,11 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         this.sendResponse = sendResponse;
     }
 
+    public SyrusProtocolDecoder(ServerManager serverManager, String protocol, boolean sendResponse) {
+        super(serverManager, protocol);
+        this.sendResponse = sendResponse;
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "R[EP]V" +                     // Type
             "(?:\\d{2}" +                  // Event index
@@ -132,7 +137,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("syrus");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         position.setDeviceId(deviceId);
 
         Integer index = 1;

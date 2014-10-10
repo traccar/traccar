@@ -47,6 +47,10 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public MaxonProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     /**
      * Regular expressions pattern
      */

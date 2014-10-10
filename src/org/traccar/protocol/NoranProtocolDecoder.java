@@ -36,6 +36,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public NoranProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final int MSG_UPLOAD_POSITION = 0x0008;
     private static final int MSG_CONTROL_RESPONSE = 0x8009;
     private static final int MSG_ALARM = 0x0003;
@@ -73,7 +77,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("noran");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             
             if (type == MSG_CONTROL_RESPONSE) {
                 buf.readUnsignedInt(); // GIS ip

@@ -33,6 +33,10 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Tr20ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     static private Pattern patternPing = Pattern.compile(
             "\\%\\%[^,]+,(\\d+)");
 
@@ -77,7 +81,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tr20");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             Integer index = 1;
 

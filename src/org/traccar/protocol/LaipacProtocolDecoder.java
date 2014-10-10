@@ -34,6 +34,10 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public LaipacProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\$AVRMC," +
             "([^,]+)," +                   // Identifier
@@ -71,7 +75,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("laipac");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Identification

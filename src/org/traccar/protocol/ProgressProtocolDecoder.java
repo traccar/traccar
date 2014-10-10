@@ -44,6 +44,10 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public ProgressProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     /*
      * Message types
      */
@@ -128,7 +132,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("progress");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 position.setDeviceId(deviceId);
 
                 // Message index

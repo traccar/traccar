@@ -33,6 +33,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Tk103ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "(\\d+)(,)?" +                 // Device ID
             ".{4},?" +                     // Command
@@ -82,7 +86,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("tk103");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Get device by IMEI

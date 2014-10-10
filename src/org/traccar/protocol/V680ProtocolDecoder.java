@@ -35,6 +35,10 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public V680ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "(?:#(\\d+)#" +                // IMEI
             "([^#]*)#)?" +                 // User
@@ -80,7 +84,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("v680");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             Integer index = 1;
 
             // Get device by IMEI

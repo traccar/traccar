@@ -41,8 +41,12 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
     private boolean simple;
 
-    public Mta6ProtocolDecoder(ServerManager serverManager, boolean simple) {
+    public Mta6ProtocolDecoder(ServerManager serverManager) {
         super(serverManager);
+    }
+
+    public Mta6ProtocolDecoder(ServerManager serverManager, String protocol, boolean simple) {
+        super(serverManager, protocol);
         this.simple = simple;
     }
 
@@ -129,7 +133,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readable()) {
                 Position position = new Position();
                 position.setDeviceId(deviceId);
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("mta6");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
                 short flags = buf.readUnsignedByte();
 
@@ -211,7 +215,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     private Position parseFormatA1(ChannelBuffer buf, long deviceId) {
         Position position = new Position();
         position.setDeviceId(deviceId);
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("mta6");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         short flags = buf.readUnsignedByte();
 

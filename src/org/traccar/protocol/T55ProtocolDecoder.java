@@ -35,6 +35,10 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public T55ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern patternGPRMC = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time (HHMMSS.SSS)
@@ -143,7 +147,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("t55");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             Integer index = 1;
@@ -210,7 +214,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("t55");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             Integer index = 1;
@@ -262,7 +266,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("t55");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             Integer index = 1;
@@ -319,7 +323,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("t55");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             Integer index = 1;

@@ -33,6 +33,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Gl200ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\+(?:RESP|BUFF):GT...," +
             "[0-9a-fA-F]{6}," +                 // Protocol version
@@ -67,7 +71,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gl200");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

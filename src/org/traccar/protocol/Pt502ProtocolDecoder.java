@@ -34,6 +34,10 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Pt502ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             ".*\\$POS," +                       // Data Frame start
             "(\\d+)," +                         // Id
@@ -63,7 +67,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("pt502");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

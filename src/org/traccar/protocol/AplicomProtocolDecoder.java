@@ -31,6 +31,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public AplicomProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final long IMEI_BASE_TC65_V20 = 0x1437207000000L;
     private static final long IMEI_BASE_TC65_V28 = 358244010000000L;
     private static final long IMEI_BASE_TC65I_V11 = 0x14143B4000000L;
@@ -124,7 +128,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("aplicom");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         try {
             position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
         } catch(Exception error) {

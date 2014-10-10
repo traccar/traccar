@@ -40,6 +40,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public GalileoProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final int TAG_IMEI = 0x03;
     private static final int TAG_DATE = 0x20;
     private static final int TAG_COORDINATES = 0x30;
@@ -97,7 +101,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<Position>();
         Set<Integer> tags = new HashSet<Integer>();
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("galileo");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         
         while (buf.readerIndex() < length) {
 
@@ -108,7 +112,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 positions.add(position);
                 tags.clear();
                 position = new Position();
-                extendedInfo = new ExtendedInfoFormatter("galileo");
+                extendedInfo = new ExtendedInfoFormatter(getProtocol());
             }
             tags.add(tag);
             

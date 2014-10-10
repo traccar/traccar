@@ -33,6 +33,10 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public SkypatrolProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static boolean checkBit(long mask, int bit) {
         long checkMask = 1 << bit;
         return (mask & checkMask) == checkMask;
@@ -76,7 +80,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("skypatrol");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Status code
             if (checkBit(mask, 1)) {

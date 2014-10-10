@@ -33,6 +33,10 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public WondexProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "[^\\d]*" +                    // Header
             "(\\d+)," +                    // Device Identifier
@@ -65,7 +69,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("wondex");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         int index = 1;
 
         // Device identifier

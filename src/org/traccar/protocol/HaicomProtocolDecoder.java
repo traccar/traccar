@@ -33,6 +33,10 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public HaicomProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\$GPRS" +
             "(\\d+)," +                   // IMEI
@@ -67,7 +71,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("haicom");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

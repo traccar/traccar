@@ -34,6 +34,10 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public CarTrackProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\$\\$" +                                      // Header
             "(\\d+)\\?*" +                                  // Device ID
@@ -70,7 +74,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("cartrack");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Get device by unique identifier

@@ -33,6 +33,10 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public IntellitracProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "(?:.+,)?(\\d+)," +            // Device Identifier
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
@@ -76,7 +80,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("intellitrac");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Detect device

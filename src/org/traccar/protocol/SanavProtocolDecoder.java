@@ -33,6 +33,10 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public SanavProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             ".*imei[:=]" +
             "(\\d+)" +                          // IMEI
@@ -62,7 +66,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("sanav");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Identification

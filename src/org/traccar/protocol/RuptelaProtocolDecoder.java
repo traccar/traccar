@@ -34,6 +34,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public RuptelaProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final int COMMAND_RECORDS = 0x01;
     
     @Override
@@ -64,7 +68,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < count; i++) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("ruptela");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 position.setDeviceId(deviceId);
 
                 // Time

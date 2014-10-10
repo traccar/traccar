@@ -33,6 +33,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public SuntechProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     static private Pattern pattern = Pattern.compile(
             "S.\\d{3}(?:\\w{3})?;" +       // Header
             "(?:[^;]+;)?" +
@@ -62,7 +66,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("suntech");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         int index = 1;
 
         // Identifier

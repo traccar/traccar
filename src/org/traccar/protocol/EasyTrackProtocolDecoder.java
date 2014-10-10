@@ -33,6 +33,10 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public EasyTrackProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     //ET,358155100003016,HB,A,0d081e,07381e,8038ee09,03d2e9be,004f,0000,40c00000,0f,100,0000,00037c,29
     static private Pattern pattern = Pattern.compile(
             "\\*..," +                          // Manufacturer
@@ -74,7 +78,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("easytrack");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

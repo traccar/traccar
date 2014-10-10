@@ -38,6 +38,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public MeiligaoProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.?(\\d+)?," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -116,8 +120,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     private String getMeiligaoServer(Channel channel) {
         
         if (getServerManager() != null &&
-            getServerManager().getProperties().containsKey("meiligao.server")) {
-            return getServerManager().getProperties().getProperty("meiligao.server");
+            getServerManager().getProperties().containsKey(getProtocol() + ".server")) {
+            return getServerManager().getProperties().getProperty(getProtocol() + ".server");
         } else {
             InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
             return address.getAddress().getHostAddress() + ":" + address.getPort();
@@ -160,7 +164,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meiligao");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         // Custom data
         if (command == MSG_ALARM) {

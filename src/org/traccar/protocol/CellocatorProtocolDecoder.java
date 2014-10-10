@@ -34,6 +34,10 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public CellocatorProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private String readImei(ChannelBuffer buf) {
         int b = buf.readUnsignedByte();
         StringBuilder imei = new StringBuilder();
@@ -103,7 +107,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         // Parse location
         if (type == MSG_CLIENT_STATUS) {
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("cellocator");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             
             // Device identifier
             try {

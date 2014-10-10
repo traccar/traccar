@@ -39,6 +39,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public MeitrackProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     //$$J163,123123123123123,AFF,0004,35,58.588926,16.180473,140928192856,A,10,27,0,161,1.2,19
     //,1648894,435695,240|24|88B9|E435,0000,|||0A22|0000,00000001,,50,,,,,,,,,,,,,*70\r\n
     private static final Pattern pattern = Pattern.compile(
@@ -81,7 +85,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meitrack");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 
@@ -182,7 +186,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() >= 0x34) {
             
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meitrack");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
             
             // Event

@@ -35,6 +35,10 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public BoxProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "L," +
             "(\\d{2})(\\d{2})(\\d{2})" +  // Date
@@ -79,7 +83,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("box");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             Integer index = 1;
 

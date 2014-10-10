@@ -33,6 +33,10 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public Gl100ProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\+RESP:GT...," +
             "(\\d{15})," +                      // IMEI
@@ -74,7 +78,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gl100");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         Integer index = 1;
 

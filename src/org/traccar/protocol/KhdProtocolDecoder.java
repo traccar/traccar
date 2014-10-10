@@ -35,6 +35,10 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public KhdProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private String readSerialNumber(ChannelBuffer buf) {
         int b1 = buf.readUnsignedByte();
         int b2 = buf.readUnsignedByte(); if (b2 > 0x80) b2 -= 0x80;
@@ -73,7 +77,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("khd");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Device identification
             String id = readSerialNumber(buf);

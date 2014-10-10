@@ -35,6 +35,10 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public MiniFinderProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "\\!D," +
             "(\\d+)/(\\d+)/(\\d+)," +      // Date
@@ -78,7 +82,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("minifinder");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
 
             Integer index = 1;

@@ -33,6 +33,10 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public GotopProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "(\\d+)," +                         // IMEI
             "[^,]+," +                          // Type
@@ -60,7 +64,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gotop");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Get device by IMEI

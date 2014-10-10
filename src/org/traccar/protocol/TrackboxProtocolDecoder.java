@@ -35,6 +35,10 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public TrackboxProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern pattern = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time
             "(\\d{2})(\\d{2}\\.\\d{4})([NS])," + // Latitude (DDMM.MMMM)
@@ -82,7 +86,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("trackbox");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             Integer index = 1;
 

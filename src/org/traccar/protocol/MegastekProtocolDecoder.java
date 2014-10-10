@@ -33,6 +33,10 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         super(serverManager);
     }
 
+    public MegastekProtocolDecoder(ServerManager serverManager, String protocol) {
+        super(serverManager, protocol);
+    }
+
     private static final Pattern patternGPRMC = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.\\d+," + // Time (HHMMSS.SSS)
@@ -176,7 +180,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("megastek");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         // Parse location data
         if (!parseGPRMC(gprmc, position)) {
