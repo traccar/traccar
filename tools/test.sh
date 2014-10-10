@@ -1,4 +1,15 @@
 
+#
+# This test data assumes three devices exist:
+#
+#     INSERT INTO device ( name, uniqueid ) VALUES
+#         ( 'Test Device 1', 123456789012345 ),
+#         ( 'Test Device 2', 123456789012 ),
+#         ( 'Test Device 3', 123456 );
+#
+# Note: Not all shells support "echo -e" (e.g., dash, the default on Ubuntu).
+#       This will cause an unknown device error for "-e".  bash works.
+
 # testing data:
 # ids - 123456789012345 (32), 123456789012 (1), 123456 (2)
 # time - 12:00 + X min (where X is protocol number)
