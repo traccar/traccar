@@ -91,45 +91,36 @@ public class DataManager {
 
         query = properties.getProperty("database.selectDevice");
         if (query != null) {
-            queryGetDevices = new NamedParameterStatement(query);
+            queryGetDevices = new NamedParameterStatement(query, dataSource);
         }
 
         query = properties.getProperty("database.insertPosition");
         if (query != null) {
-            queryAddPosition = new NamedParameterStatement(query);
+            queryAddPosition = new NamedParameterStatement(query, dataSource, Statement.RETURN_GENERATED_KEYS);
         }
 
         query = properties.getProperty("database.updateLatestPosition");
         if (query != null) {
-            queryUpdateLatestPosition = new NamedParameterStatement(query);
+            queryUpdateLatestPosition = new NamedParameterStatement(query, dataSource);
         }
     }
 
-    public synchronized List<Device> getDevices() throws SQLException {
-
-        List<Device> deviceList = new LinkedList<Device>();
-
-        if (queryGetDevices != null) {
-            Connection connection = dataSource.getConnection();
-            try {
-                PreparedStatement statement = queryGetDevices.prepare(connection);
-                try {
-                    ResultSet result = statement.executeQuery();
-                    while (result.next()) {
-                        Device device = new Device();
-                        device.setId(result.getLong("id"));
-                        device.setImei(result.getString("imei"));
-                        deviceList.add(device);
-                    }
-                } finally {
-                    statement.close();
-                }
-            } finally {
-                connection.close();
-            }
+    private final NamedParameterStatement.ResultSetProcessor<Device> deviceResultSetProcessor = new NamedParameterStatement.ResultSetProcessor<Device>() {
+        @Override
+        public Device processNextRow(ResultSet rs) throws SQLException {
+            Device device = new Device();
+            device.setId(rs.getLong("id"));
+            device.setImei(rs.getString("imei"));
+            return device;
         }
+    };
 
-        return deviceList;
+    public List<Device> getDevices() throws SQLException {
+        if (queryGetDevices != null) {
+            return queryGetDevices.prepare().executeQuery(deviceResultSetProcessor);
+        } else {
+            return new LinkedList<Device>();
+        }
     }
 
     /**
@@ -149,61 +140,41 @@ public class DataManager {
         return devices.get(imei);
     }
 
+    private NamedParameterStatement.ResultSetProcessor<Long> generatedKeysResultSetProcessor = new NamedParameterStatement.ResultSetProcessor<Long>() {
+        @Override
+        public Long processNextRow(ResultSet rs) throws SQLException {
+            return rs.getLong(1);
+        }
+    };
+
     public synchronized Long addPosition(Position position) throws SQLException {
-
         if (queryAddPosition != null) {
-            Connection connection = dataSource.getConnection();
-            try {
-                PreparedStatement statement = queryAddPosition.prepare(connection, Statement.RETURN_GENERATED_KEYS);
-                try {
-                    assignVariables(queryAddPosition, statement, position);
-                    statement.executeUpdate();
-
-                    ResultSet result = statement.getGeneratedKeys();
-                    if (result != null && result.next()) {
-                        return result.getLong(1);
-                    }
-                } finally {
-                    statement.close();
-                }
-            } finally {
-                connection.close();
+            List<Long> result = assignVariables(queryAddPosition.prepare(), position).executeUpdate(generatedKeysResultSetProcessor);
+            if (result != null && !result.isEmpty()) {
+                return result.iterator().next();
             }
         }
-
         return null;
     }
 
     public void updateLatestPosition(Position position, Long positionId) throws SQLException {
         if (queryUpdateLatestPosition != null) {
-            Connection connection = dataSource.getConnection();
-            try {
-                PreparedStatement statement = queryUpdateLatestPosition.prepare(connection);
-                try {
-                    assignVariables(queryUpdateLatestPosition, statement, position);
-                    queryUpdateLatestPosition.setLong(statement, "id", positionId);
-                    statement.executeUpdate();
-                } finally {
-                    statement.close();
-                }
-            } finally {
-                connection.close();
-            }
+            assignVariables(queryUpdateLatestPosition.prepare(), position).setLong("id", positionId).executeUpdate();
         }
     }
 
-    private void assignVariables(NamedParameterStatement nps, PreparedStatement ps, Position position) throws SQLException {
+    private NamedParameterStatement.Params assignVariables(NamedParameterStatement.Params params, Position position) throws SQLException {
 
-        nps.setLong(ps, "device_id", position.getDeviceId());
-        nps.setTimestamp(ps, "time", position.getTime());
-        nps.setBoolean(ps, "valid", position.getValid());
-        nps.setDouble(ps, "altitude", position.getAltitude());
-        nps.setDouble(ps, "latitude", position.getLatitude());
-        nps.setDouble(ps, "longitude", position.getLongitude());
-        nps.setDouble(ps, "speed", position.getSpeed());
-        nps.setDouble(ps, "course", position.getCourse());
-        nps.setString(ps, "address", position.getAddress());
-        nps.setString(ps, "extended_info", position.getExtendedInfo());
+        params.setLong("device_id", position.getDeviceId());
+        params.setTimestamp("time", position.getTime());
+        params.setBoolean("valid", position.getValid());
+        params.setDouble("altitude", position.getAltitude());
+        params.setDouble("latitude", position.getLatitude());
+        params.setDouble("longitude", position.getLongitude());
+        params.setDouble("speed", position.getSpeed());
+        params.setDouble("course", position.getCourse());
+        params.setString("address", position.getAddress());
+        params.setString("extended_info", position.getExtendedInfo());
 
         // DELME: Temporary compatibility support
         XPath xpath = XPathFactory.newInstance().newXPath();
@@ -211,22 +182,24 @@ public class DataManager {
             InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
             String index = xpath.evaluate("/info/index", source);
             if (!index.isEmpty()) {
-                nps.setLong(ps, "id", Long.valueOf(index));
+                params.setLong("id", Long.valueOf(index));
             } else {
-                nps.setLong(ps, "id", null);
+                params.setLong("id", null);
             }
             source = new InputSource(new StringReader(position.getExtendedInfo()));
             String power = xpath.evaluate("/info/power", source);
             if (!power.isEmpty()) {
-                nps.setDouble(ps, "power", Double.valueOf(power));
+                params.setDouble("power", Double.valueOf(power));
             } else {
-                nps.setLong(ps, "power", null);
+                params.setLong("power", null);
             }
         } catch (XPathExpressionException e) {
             Log.warning("Error in XML: " + position.getExtendedInfo(), e);
-            nps.setLong(ps, "id", null);
-            nps.setLong(ps, "power", null);
+            params.setLong("id", null);
+            params.setLong("power", null);
         }
+
+        return params;
     }
 
 }
