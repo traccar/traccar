@@ -10,8 +10,7 @@ public class VisiontekProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        VisiontekProtocolDecoder decoder = new VisiontekProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        VisiontekProtocolDecoder decoder = new VisiontekProtocolDecoder(new TestDataManager());
 
         verify(decoder.decode(null, null,
                 "$1,AP09BU9397,861785006462448,20,06,14,15,03,28,17267339N,078279407E,060.0,073,0550,11,0,1,0,0,1,1,26,A,0000000000"));

@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -34,8 +35,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private Long deviceId;
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
-    public Gt06ProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public Gt06ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public Gt06ProtocolDecoder(ServerManager serverManager, String protocol) {

@@ -12,8 +12,7 @@ public class EelinkProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(new TestDataManager());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(
                 new int[] {0x67,0x67,0x01,0x00,0x0b,0x00,0x1b,0x03,0x54,0x18,0x80,0x46,0x61,0x83,0x49,0x01}))));

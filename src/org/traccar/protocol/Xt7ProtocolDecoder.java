@@ -25,14 +25,15 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xt7ProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public Xt7ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public Xt7ProtocolDecoder(ServerManager serverManager, String protocol) {

@@ -23,6 +23,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -30,8 +31,8 @@ import org.traccar.model.Position;
 
 public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
-    public LaipacProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public LaipacProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public LaipacProtocolDecoder(ServerManager serverManager, String protocol) {

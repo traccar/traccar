@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -41,8 +42,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private String imei;
     private Long databaseDeviceId;
 
-    public NavisProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public NavisProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public NavisProtocolDecoder(ServerManager serverManager, String protocol) {

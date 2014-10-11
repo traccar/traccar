@@ -23,14 +23,15 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
-    public SuntechProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public SuntechProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public SuntechProtocolDecoder(ServerManager serverManager, String protocol) {

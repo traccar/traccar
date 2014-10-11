@@ -24,42 +24,23 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
-    private String format0;
-    private String format1;
+    private String format0 = "TSPRXAB27GHKLMnaicz*U!";
+    private String format1 = "SARY*U!";
 
-    public GlobalSatProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
-
-	// This is now only called by test classes.
-	// This will be deleted in the next commit.
-	assert (serverManager == null);
-
-        // Initialize format strings
-        format0 = "TSPRXAB27GHKLMnaicz*U!";
-        format1 = "SARY*U!";
-        if (getServerManager() != null) {
-            Properties p = getServerManager().getProperties();
-            if (p.containsKey("globalsat.format0")) {
-                format0 = p.getProperty("globalsat.format0");
-            }
-            if (p.containsKey("globalsat.format1")) {
-                format1 = p.getProperty("globalsat.format1");
-            }
-        }
+    public GlobalSatProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public GlobalSatProtocolDecoder(ServerManager serverManager, String protocol) {
         super(serverManager, protocol);
 
-        // Initialize format strings
-        format0 = "TSPRXAB27GHKLMnaicz*U!";
-        format1 = "SARY*U!";
         if (getServerManager() != null) {
             Properties p = getServerManager().getProperties();
             if (p.containsKey(protocol + ".format0")) {

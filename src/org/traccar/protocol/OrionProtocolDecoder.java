@@ -25,14 +25,15 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
-    public OrionProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public OrionProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public OrionProtocolDecoder(ServerManager serverManager, String protocol) {

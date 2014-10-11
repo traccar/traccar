@@ -29,20 +29,12 @@ import org.traccar.database.DataManager;
  */
 public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
-    private ServerManager serverManager;
-    private DataManager dataManager;
+    private final ServerManager serverManager;
+    private final DataManager dataManager;
     private final String protocol;
-
-    public final void setDataManager(DataManager dataManager) {
-        this.dataManager = dataManager;
-    }
 
     public final DataManager getDataManager() {
         return dataManager;
-    }
-
-    public final void setServerManager(ServerManager serverManager) {
-        this.serverManager = serverManager;
     }
 
     public final ServerManager getServerManager() {
@@ -53,21 +45,17 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
         return protocol;
     }
 
-    public BaseProtocolDecoder() {
+    public BaseProtocolDecoder(DataManager dataManager) {
+        //  This constructor must only be used by test classes.
+        //  There should be a way to check this at compile time.
+        
+	assert	(dataManager != null) :
+		"BaseProtocolDecoder() initialized with NULL dataManager";
+
+        serverManager = null;
         protocol = null;
-    }
-
-    public BaseProtocolDecoder(ServerManager serverManager) {
-        //  Only used by test classes now
-	assert	(serverManager == null) :
-		"BaseProtocolDecoder() initialized with non-NULL serverManager";
-
-        if (serverManager != null) {
-            this.serverManager = serverManager;
-            dataManager = serverManager.getDataManager();
-        }
-
-        protocol = null;
+        
+        this.dataManager = dataManager;
     }
 
     public BaseProtocolDecoder(ServerManager serverManager, String protocol) {

@@ -32,6 +32,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -41,8 +42,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
     private boolean simple;
 
-    public Mta6ProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public Mta6ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public Mta6ProtocolDecoder(ServerManager serverManager, String protocol, boolean simple) {

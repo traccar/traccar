@@ -23,14 +23,15 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
-    public TotemProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public TotemProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public TotemProtocolDecoder(ServerManager serverManager, String protocol) {

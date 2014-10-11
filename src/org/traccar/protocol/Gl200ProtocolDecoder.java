@@ -23,14 +23,15 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gl200ProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public Gl200ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public Gl200ProtocolDecoder(ServerManager serverManager, String protocol) {

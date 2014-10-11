@@ -9,8 +9,7 @@ public class SanavProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        SanavProtocolDecoder decoder = new SanavProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        SanavProtocolDecoder decoder = new SanavProtocolDecoder(new TestDataManager());
         
         verify(decoder.decode(null, null,
                 "imei=352024028982787&rmc=$GPRMC,103048.000,A,4735.0399,N,01905.2895,E,0.00,0.00,171013,,*05,AUTO-4095mv"));

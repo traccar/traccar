@@ -12,8 +12,7 @@ public class NavigilProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        NavigilProtocolDecoder decoder = new NavigilProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        NavigilProtocolDecoder decoder = new NavigilProtocolDecoder(new TestDataManager());
 
         byte[] buf1 = {0x01,0x00,0x43,0x00,0x04,0x00,0x20,0x00,0x00,0x00,(byte)0xf6,0x02,0x03,0x08,0x02,0x00,(byte)0xe7,(byte)0xcd,0x0f,0x51,0x0c,0x00,0x00,0x00,0x3b,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, buf1)));

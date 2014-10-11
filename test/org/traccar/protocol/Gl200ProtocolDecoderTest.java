@@ -10,8 +10,7 @@ public class Gl200ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new TestDataManager());
         
         verify(decoder.decode(null, null,
                 "+RESP:GTFRI,02010D,867844001675407,,0,0,1,2,0.0,0,28.9,8.591011,56.476397,20140915213209,0238,0001,03CB,2871,,97,20140915213459,009A"));

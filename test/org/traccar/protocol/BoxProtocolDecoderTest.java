@@ -10,8 +10,7 @@ public class BoxProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        BoxProtocolDecoder decoder = new BoxProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        BoxProtocolDecoder decoder = new BoxProtocolDecoder(new TestDataManager());
         
         assertNull(decoder.decode(null, null,
                 "H,BT,358281002435893,081028142432,F5813D19,6D6E6DC2"));

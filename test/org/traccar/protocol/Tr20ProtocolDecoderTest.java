@@ -10,8 +10,7 @@ public class Tr20ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tr20ProtocolDecoder decoder = new Tr20ProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        Tr20ProtocolDecoder decoder = new Tr20ProtocolDecoder(new TestDataManager());
 
         assertNull(decoder.decode(null, null, "%%TRACKPRO01,1"));
 

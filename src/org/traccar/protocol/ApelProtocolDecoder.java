@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -38,8 +39,8 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
     private long lastIndex;
     private long newIndex;
 
-    public ApelProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public ApelProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public ApelProtocolDecoder(ServerManager serverManager, String protocol) {

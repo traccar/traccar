@@ -23,14 +23,15 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tk103ProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public Tk103ProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public Tk103ProtocolDecoder(ServerManager serverManager, String protocol) {

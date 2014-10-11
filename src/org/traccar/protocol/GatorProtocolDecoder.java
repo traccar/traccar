@@ -22,6 +22,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -29,8 +30,8 @@ import org.traccar.model.Position;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public GatorProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public GatorProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public GatorProtocolDecoder(ServerManager serverManager, String protocol) {

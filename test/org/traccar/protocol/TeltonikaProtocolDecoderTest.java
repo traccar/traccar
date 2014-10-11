@@ -12,8 +12,7 @@ public class TeltonikaProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(new TestDataManager());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(
                 new int[] {0x00,0x0F,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x30,0x31,0x32,0x33,0x34,0x35}))));

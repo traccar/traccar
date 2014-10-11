@@ -33,14 +33,15 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
     
-    public PiligrimProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public PiligrimProtocolDecoder(DataManager dataManager) {
+        super(dataManager);
     }
 
     public PiligrimProtocolDecoder(ServerManager serverManager, String protocol) {
