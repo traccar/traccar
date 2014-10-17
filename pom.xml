@@ -13,6 +13,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -40,25 +41,20 @@
             <version>0.9.2.1</version>
         </dependency>
         <dependency>
-            <groupId>com.mchange</groupId>
-            <artifactId>mchange-commons-java</artifactId>
-            <version>0.2.3.4</version>
-        </dependency>
-        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
             <version>3.9.2.Final</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <!-- Don't change version because it requires Java 7 -->
-            <version>3.0.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jetty.aggregate</groupId>
             <artifactId>jetty-all-server</artifactId>
             <version>8.1.15.v20140411</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.jetty.orbit</groupId>
+                    <artifactId>javax.mail.glassfish</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -88,8 +84,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                            <excludeArtifactIds>junit</excludeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
+                            <includeScope>runtime</includeScope>
                         </configuration>
                     </execution>
                 </executions>
