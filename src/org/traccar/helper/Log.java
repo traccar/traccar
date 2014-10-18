@@ -28,6 +28,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.varia.NullAppender;
 import org.jboss.netty.logging.AbstractInternalLogger;
 import org.jboss.netty.logging.InternalLogger;
 import org.jboss.netty.logging.InternalLoggerFactory;
@@ -46,6 +47,8 @@ public class Log {
                 layout, properties.getProperty("logger.file"), "'.'yyyyMMdd");
 
         LogManager.resetConfiguration();
+        LogManager.getRootLogger().addAppender(new NullAppender());
+        
         logger = Logger.getLogger(LOGGER_NAME);
         logger.addAppender(appender);
         logger.setLevel(Level.toLevel(properties.getProperty("logger.level"), Level.ALL));
