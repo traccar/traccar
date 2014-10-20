@@ -58,7 +58,6 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
-            Log.info("Parsing error");
             return null;
         }
 
