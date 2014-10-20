@@ -34,21 +34,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "\\+RESP:GT...," +
+            "\\+(?:RESP|BUFF):GT...," +
             "[0-9a-fA-F]{6}," +                 // Protocol version
             "(\\d{15}),.*," +                   // IMEI
             "(\\d*)," +                         // GPS accuracy
-            "(\\d+.\\d)," +                     // Speed
-            "(\\d+)," +                         // Course
-            "(-?\\d+\\.\\d)," +                 // Altitude
+            "(\\d+.\\d)?," +                    // Speed
+            "(\\d+)?," +                        // Course
+            "(-?\\d+\\.\\d)?," +                // Altitude
             "(-?\\d+\\.\\d+)," +                // Longitude
             "(-?\\d+\\.\\d+)," +                // Latitude
             "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
-            "(\\d{4})," +                       // MCC
-            "(\\d{4})," +                       // MNC
-            "(\\p{XDigit}{4})," +               // LAC
-            "(\\p{XDigit}{4})," +               // Cell
+            "(\\d{4})?," +                      // MCC
+            "(\\d{4})?," +                      // MNC
+            "(\\p{XDigit}{4})?," +              // LAC
+            "(\\p{XDigit}{4})?," +              // Cell
             "(?:.*,(\\d{1,3}),\\d{14},)?" +     // Battery
             ".*");
 
@@ -83,10 +83,31 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         // Validity
         position.setValid(Integer.valueOf(parser.group(index++)) < 20);
 
-        // Position info
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(Double.valueOf(parser.group(index++)));
-        position.setAltitude(Double.valueOf(parser.group(index++)));
+        // Speed
+        String speed = parser.group(index++);
+        if (speed != null) {
+            position.setSpeed(Double.valueOf(speed));
+        } else {
+            position.setSpeed(0.0);
+        }
+
+        // Course
+        String course = parser.group(index++);
+        if (speed != null) {
+            position.setCourse(Double.valueOf(course));
+        } else {
+            position.setCourse(0.0);
+        }
+
+        // Altitude
+        String altitude = parser.group(index++);
+        if (speed != null) {
+            position.setAltitude(Double.valueOf(altitude));
+        } else {
+            position.setAltitude(0.0);
+        }
+
+        // Coordinates
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setLatitude(Double.valueOf(parser.group(index++)));
 
