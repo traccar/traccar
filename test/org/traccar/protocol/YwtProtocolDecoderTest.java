@@ -10,8 +10,7 @@ public class YwtProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        YwtProtocolDecoder decoder = new YwtProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        YwtProtocolDecoder decoder = new YwtProtocolDecoder(new TestDataManager(), null, null);
         
         assertNull(decoder.decode(null, null,
                 "%SN,0417061042:0,0,140117041203,404"));

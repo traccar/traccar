@@ -17,13 +17,16 @@ package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.Properties;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -34,14 +37,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private Long deviceId;
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
-    public Gt06ProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public Gt06ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
         
-        if (serverManager != null) {
-            Properties p = getServerManager().getProperties();
-            if (p.containsKey("gt06.timezone")) {
+        if (properties != null) {
+            if (properties.containsKey(protocol + ".timezone")) {
                 timeZone.setRawOffset(
-                        Integer.valueOf(p.getProperty("gt06.timezone")) * 1000);
+                        Integer.valueOf(properties.getProperty(protocol + ".timezone")) * 1000);
             }
         }
     }
@@ -144,7 +146,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(deviceId);
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt06");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Date and time
             Calendar time = Calendar.getInstance(timeZone);

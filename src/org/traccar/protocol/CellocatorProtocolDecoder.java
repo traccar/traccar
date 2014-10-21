@@ -17,21 +17,24 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public CellocatorProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public CellocatorProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private String readImei(ChannelBuffer buf) {
@@ -103,7 +106,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         // Parse location
         if (type == MSG_CLIENT_STATUS) {
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("cellocator");
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             
             // Device identifier
             try {

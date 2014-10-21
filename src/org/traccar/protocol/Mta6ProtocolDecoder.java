@@ -20,7 +20,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -30,8 +32,9 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -41,8 +44,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
     private boolean simple;
 
-    public Mta6ProtocolDecoder(ServerManager serverManager, boolean simple) {
-        super(serverManager);
+    public Mta6ProtocolDecoder(DataManager dataManager, String protocol, Properties properties, boolean simple) {
+        super(dataManager, protocol, properties);
         this.simple = simple;
     }
 
@@ -129,7 +132,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readable()) {
                 Position position = new Position();
                 position.setDeviceId(deviceId);
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("mta6");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
                 short flags = buf.readUnsignedByte();
 
@@ -211,7 +214,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     private Position parseFormatA1(ChannelBuffer buf, long deviceId) {
         Position position = new Position();
         position.setDeviceId(deviceId);
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("mta6");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         short flags = buf.readUnsignedByte();
 

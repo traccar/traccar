@@ -14,8 +14,7 @@ public class EnforaProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(new TestDataManager(), null, null);
         ChannelBufferFactory factory = new HeapChannelBufferFactory();
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(

@@ -10,8 +10,7 @@ public class FreedomProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        FreedomProtocolDecoder decoder = new FreedomProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        FreedomProtocolDecoder decoder = new FreedomProtocolDecoder(new TestDataManager(), null, null);
 
         verify(decoder.decode(null, null,
                 "IMEI,353358011714362,2014/05/22, 20:49:32, N, Lat:4725.9624, E, Lon:01912.5483, Spd:5.05"));

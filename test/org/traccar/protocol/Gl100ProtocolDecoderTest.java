@@ -10,8 +10,7 @@ public class Gl100ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gl100ProtocolDecoder decoder = new Gl100ProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        Gl100ProtocolDecoder decoder = new Gl100ProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null,
                 "AT+GTHBD=HeartBeat,359231030000010,20090101000000,11F0,0102120204"));

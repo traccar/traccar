@@ -10,8 +10,7 @@ public class TotemProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        TotemProtocolDecoder decoder = new TotemProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        TotemProtocolDecoder decoder = new TotemProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null,
                 "$$BB862170017856731|AA$GPRMC,000000.00,V,0000.0000,N,00000.0000,E,000.0,000.0,000000,,,A*73|00.0|00.0|00.0|000000001000|20000000000000|13790000|00000000|00000000|00000000|0.0000|0007|8C23"));

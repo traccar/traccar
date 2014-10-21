@@ -12,8 +12,7 @@ public class MeiligaoProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(
                 new int[]{0x24,0x24,0x00,0x00,0x12,0x34,0x56,0xFF,0xFF,0xFF,0xFF,0x50,0x00,0x8B,0x9B,0x0D,0x0A}))));

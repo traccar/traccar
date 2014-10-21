@@ -18,21 +18,24 @@ package org.traccar.protocol;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
-    public OrionProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public OrionProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
     
     private static final int TYPE_USERLOG = 0;
@@ -88,7 +91,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 // Create new position
                 Position position = new Position();
                 position.setDeviceId(deviceId);
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("orion");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 
                 extendedInfo.set("event", buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length

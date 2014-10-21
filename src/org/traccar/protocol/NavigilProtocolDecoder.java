@@ -17,12 +17,15 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.util.Date;
+import java.util.Properties;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -30,8 +33,8 @@ import org.traccar.model.Position;
 
 public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
-    public NavigilProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public NavigilProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
     
     private static final int LEAP_SECONDS_DELTA = 25;
@@ -80,7 +83,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseUnitReport(ChannelBuffer buf, long deviceId, int sequenceNumber) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         position.setValid(true);
         extendedInfo.set("index", sequenceNumber);
@@ -117,7 +120,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseTg2Report(ChannelBuffer buf, long deviceId, int sequenceNumber) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         position.setValid(true);
         extendedInfo.set("index", sequenceNumber);
@@ -156,7 +159,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parsePositionReport(ChannelBuffer buf, long deviceId, int sequenceNumber, long timestamp) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
@@ -180,7 +183,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parsePositionReport2(ChannelBuffer buf, long deviceId, int sequenceNumber, long timestamp) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
@@ -207,7 +210,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseSnapshot4(ChannelBuffer buf, long deviceId, int sequenceNumber) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);
@@ -248,7 +251,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseTrackingData(ChannelBuffer buf, long deviceId, int sequenceNumber, long timestamp) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("navigil");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         extendedInfo.set("index", sequenceNumber);
         position.setDeviceId(deviceId);

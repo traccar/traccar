@@ -9,8 +9,7 @@ public class WondexProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        WondexProtocolDecoder decoder = new WondexProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        WondexProtocolDecoder decoder = new WondexProtocolDecoder(new TestDataManager(), null, null);
         
         verify(decoder.decode(null, null,
                 "1044989601,20130323074605,0.000000,90.000000,0,000,0,0,2"));

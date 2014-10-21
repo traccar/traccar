@@ -18,20 +18,23 @@ package org.traccar.protocol;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     
-    public RuptelaProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public RuptelaProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private static final int COMMAND_RECORDS = 0x01;
@@ -64,7 +67,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < count; i++) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("ruptela");
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 position.setDeviceId(deviceId);
 
                 // Time

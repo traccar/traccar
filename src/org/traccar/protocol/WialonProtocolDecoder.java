@@ -18,13 +18,16 @@ package org.traccar.protocol;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
@@ -33,8 +36,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
 
-    public WialonProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public WialonProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -71,7 +74,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("wialon");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         position.setDeviceId(deviceId);
 
         Integer index = 1;

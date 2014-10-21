@@ -13,8 +13,7 @@ public class MeitrackProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(new TestDataManager(), null, null);
         
         verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "$$X138,862170010187175,AAA,35,-29.960365,-51.655455,130507201625,A,8,9,0,107,0.9,7,169322,126582,724|6|0547|132B,0000,0009|000A||0278|0000,*BE", Charset.defaultCharset())));

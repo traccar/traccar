@@ -10,8 +10,7 @@ public class Ev603ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Ev603ProtocolDecoder decoder = new Ev603ProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        Ev603ProtocolDecoder decoder = new Ev603ProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, "!1,123456789012345"));
 

@@ -13,8 +13,7 @@ public class NoranProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        NoranProtocolDecoder decoder = new NoranProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        NoranProtocolDecoder decoder = new NoranProtocolDecoder(new TestDataManager(), null, null);
 
         int[] buf1 = {0x0f,0x00,0x00,0x00,0x4e,0x52,0x30,0x39,0x46,0x30,0x34,0x31,0x35,0x35,0x00};
         assertNull(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertArray(buf1))));

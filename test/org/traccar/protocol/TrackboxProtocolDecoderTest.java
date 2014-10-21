@@ -10,8 +10,7 @@ public class TrackboxProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        TrackboxProtocolDecoder decoder = new TrackboxProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        TrackboxProtocolDecoder decoder = new TrackboxProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, "a=connect&v=11&i=111111111111111"));
 

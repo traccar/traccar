@@ -20,32 +20,31 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
-    private String format0;
-    private String format1;
+    // Default values
+    private String format0 = "TSPRXAB27GHKLMnaicz*U!";
+    private String format1 = "SARY*U!";
 
-    public GlobalSatProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public GlobalSatProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
 
-        // Initialize format strings
-        format0 = "TSPRXAB27GHKLMnaicz*U!";
-        format1 = "SARY*U!";
-        if (getServerManager() != null) {
-            Properties p = getServerManager().getProperties();
-            if (p.containsKey("globalsat.format0")) {
-                format0 = p.getProperty("globalsat.format0");
+        if (properties != null) {
+            if (properties.containsKey(protocol + ".format0")) {
+                format0 = properties.getProperty(protocol + ".format0");
             }
-            if (p.containsKey("globalsat.format1")) {
-                format1 = p.getProperty("globalsat.format1");
+            if (properties.containsKey(protocol + ".format1")) {
+                format1 = properties.getProperty(protocol + ".format1");
             }
         }
     }
@@ -83,7 +82,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse data
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("globalsat");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length() && valueIndex < values.length; formatIndex++) {
             String value = values[valueIndex];
@@ -204,7 +203,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("globalsat");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         Integer index = 1;
 
         // Identification

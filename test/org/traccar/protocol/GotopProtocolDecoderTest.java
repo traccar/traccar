@@ -10,8 +10,7 @@ public class GotopProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        GotopProtocolDecoder decoder = new GotopProtocolDecoder(null);
-        decoder.setDataManager(new TestDataManager());
+        GotopProtocolDecoder decoder = new GotopProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, ""));
         

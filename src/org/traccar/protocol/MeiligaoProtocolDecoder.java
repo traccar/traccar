@@ -18,15 +18,18 @@ package org.traccar.protocol;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -34,8 +37,8 @@ import org.traccar.model.Position;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
-    public MeiligaoProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public MeiligaoProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -114,10 +117,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
     
     private String getMeiligaoServer(Channel channel) {
+        Properties p = getProperties();
         
-        if (getServerManager() != null &&
-            getServerManager().getProperties().containsKey("meiligao.server")) {
-            return getServerManager().getProperties().getProperty("meiligao.server");
+        if (p != null && p.containsKey(getProtocol() + ".server")) {
+            return p.getProperty(getProtocol() + ".server");
         } else {
             InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
             return address.getAddress().getHostAddress() + ":" + address.getPort();
@@ -160,7 +163,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("meiligao");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         // Custom data
         if (command == MSG_ALARM) {

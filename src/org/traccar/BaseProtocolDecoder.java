@@ -16,12 +16,15 @@
 package org.traccar;
 
 import java.net.SocketAddress;
+import java.util.Properties;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import static org.jboss.netty.channel.Channels.fireMessageReceived;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+
 import org.traccar.database.DataManager;
 
 /**
@@ -29,33 +32,27 @@ import org.traccar.database.DataManager;
  */
 public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
-    private ServerManager serverManager;
-    private DataManager dataManager;
-
-    public final void setDataManager(DataManager dataManager) {
-        this.dataManager = dataManager;
-    }
+    private final DataManager dataManager;
+    private final String protocol;
+    private final Properties properties;
 
     public final DataManager getDataManager() {
         return dataManager;
     }
 
-    public final void setServerManager(ServerManager serverManager) {
-        this.serverManager = serverManager;
+    public final String getProtocol() {
+        return protocol;
+    }
+    
+    public final Properties getProperties() {
+        return properties;
     }
 
-    public final ServerManager getServerManager() {
-        return serverManager;
-    }
-
-    public BaseProtocolDecoder() {
-    }
-
-    public BaseProtocolDecoder(ServerManager serverManager) {
-        if (serverManager != null) {
-            this.serverManager = serverManager;
-            dataManager = serverManager.getDataManager();
-        }
+    
+    public BaseProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        this.dataManager = dataManager;
+        this.protocol = protocol;
+        this.properties = properties;
     }
     
     @Override

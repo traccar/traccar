@@ -23,21 +23,24 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
-    public GalileoProtocolDecoder(ServerManager serverManager) {
-        super(serverManager);
+    public GalileoProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private static final int TAG_IMEI = 0x03;
@@ -97,7 +100,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<Position>();
         Set<Integer> tags = new HashSet<Integer>();
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("galileo");
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         
         while (buf.readerIndex() < length) {
 
@@ -108,7 +111,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 positions.add(position);
                 tags.clear();
                 position = new Position();
-                extendedInfo = new ExtendedInfoFormatter("galileo");
+                extendedInfo = new ExtendedInfoFormatter(getProtocol());
             }
             tags.add(tag);
             
