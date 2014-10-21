@@ -40,6 +40,14 @@ public class DataManager {
     public DataManager(Properties properties) throws Exception {
         if (properties != null) {
             initDatabase(properties);
+            
+            // Refresh delay
+            String refreshDelay = properties.getProperty("database.refreshDelay");
+            if (refreshDelay != null) {
+                devicesRefreshDelay = Long.valueOf(refreshDelay) * 1000;
+            } else {
+                devicesRefreshDelay = DEFAULT_REFRESH_DELAY * 1000;
+            }
         }
     }
     
@@ -127,14 +135,19 @@ public class DataManager {
      * Devices cache
      */
     private Map<String, Device> devices;
+    private Calendar devicesLastUpdate;
+    private long devicesRefreshDelay;
+    private static final long DEFAULT_REFRESH_DELAY = 300;
 
     public Device getDeviceByImei(String imei) throws SQLException {
 
-        if (devices == null || !devices.containsKey(imei)) {
+        if (devices == null || !devices.containsKey(imei) ||
+                (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesRefreshDelay)) {
             devices = new HashMap<String, Device>();
             for (Device device : getDevices()) {
                 devices.put(device.getImei(), device);
             }
+            devicesLastUpdate = Calendar.getInstance();
         }
 
         return devices.get(imei);
