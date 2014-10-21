@@ -13,7 +13,7 @@ public class H02ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        H02ProtocolDecoder decoder = new H02ProtocolDecoder(new TestDataManager());
+        H02ProtocolDecoder decoder = new H02ProtocolDecoder(new TestDataManager(), null, null);
         
         assertNull(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "*HQ,353588020068342,V1,000000,V,0.0000,0,0.0000,0,0.00,0.00,000000,ffffffff,000106,000002,000203,004c87,16#", Charset.defaultCharset())));

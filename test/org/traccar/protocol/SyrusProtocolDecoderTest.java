@@ -10,7 +10,7 @@ public class SyrusProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(new TestDataManager(), false);
+        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(new TestDataManager(), null, null, false);
 
         assertNotNull(decoder.decode(null, null,
                 ">RPV00000+3739438-1220384601512612;ID=1234;*7F"));

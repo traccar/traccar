@@ -12,7 +12,7 @@ public class KhdProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        KhdProtocolDecoder decoder = new KhdProtocolDecoder(new TestDataManager());
+        KhdProtocolDecoder decoder = new KhdProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(
                 new int[] {0x29,0x29,0xb1,0x00,0x06,0x05,0x16,0x29,0x35,0xb8,0x0d}))));

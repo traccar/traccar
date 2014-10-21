@@ -16,13 +16,15 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -30,12 +32,8 @@ import org.traccar.model.Position;
 
 public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public EasyTrackProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public EasyTrackProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public EasyTrackProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     //ET,358155100003016,HB,A,0d081e,07381e,8038ee09,03d2e9be,004f,0000,40c00000,0f,100,0000,00037c,29

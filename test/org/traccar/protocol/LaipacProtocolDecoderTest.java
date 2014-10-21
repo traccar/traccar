@@ -10,7 +10,7 @@ public class LaipacProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        LaipacProtocolDecoder decoder = new LaipacProtocolDecoder(new TestDataManager());
+        LaipacProtocolDecoder decoder = new LaipacProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, "$AVSYS,99999999,V1.50,SN0000103,32768*15"));
         

@@ -17,13 +17,15 @@ package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Crc;
@@ -33,12 +35,8 @@ import org.traccar.model.Position;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
-    public EelinkProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public EelinkProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public EelinkProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private String readImei(ChannelBuffer buf) {

@@ -21,6 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -30,8 +32,8 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -39,12 +41,8 @@ import org.traccar.model.Position;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
     
-    public OsmAndProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public OsmAndProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public OsmAndProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
     
     @Override

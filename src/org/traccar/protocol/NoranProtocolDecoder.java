@@ -19,13 +19,15 @@ import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -33,12 +35,8 @@ import org.traccar.model.Position;
 
 public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
-    public NoranProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public NoranProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public NoranProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private static final int MSG_UPLOAD_POSITION = 0x0008;

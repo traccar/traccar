@@ -16,12 +16,15 @@
 package org.traccar;
 
 import java.net.SocketAddress;
+import java.util.Properties;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import static org.jboss.netty.channel.Channels.fireMessageReceived;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+
 import org.traccar.database.DataManager;
 
 /**
@@ -29,46 +32,27 @@ import org.traccar.database.DataManager;
  */
 public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
-    private final ServerManager serverManager;
     private final DataManager dataManager;
     private final String protocol;
+    private final Properties properties;
 
     public final DataManager getDataManager() {
         return dataManager;
     }
 
-    public final ServerManager getServerManager() {
-        return serverManager;
-    }
-
     public final String getProtocol() {
         return protocol;
     }
-
-    public BaseProtocolDecoder(DataManager dataManager) {
-        //  This constructor must only be used by test classes.
-        //  There should be a way to check this at compile time.
-        
-	assert	(dataManager != null) :
-		"BaseProtocolDecoder() initialized with NULL dataManager";
-
-        serverManager = null;
-        protocol = null;
-        
-        this.dataManager = dataManager;
+    
+    public final Properties getProperties() {
+        return properties;
     }
 
-    public BaseProtocolDecoder(ServerManager serverManager, String protocol) {
-        assert	(serverManager != null) :
-		"BaseProtocolDecoder() initialized with NULL serverManager";
-
-        assert	(protocol != null) :
-		"BaseProtocolDecoder() initialized with NULL protocol";
-
-        this.serverManager = serverManager;
+    
+    public BaseProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        this.dataManager = dataManager;
         this.protocol = protocol;
-
-        dataManager = serverManager.getDataManager();
+        this.properties = properties;
     }
     
     @Override

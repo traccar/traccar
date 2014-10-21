@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -35,6 +36,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
+
 import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
@@ -235,7 +237,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new XexunFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new XexunProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new XexunProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -255,7 +257,7 @@ public class ServerManager {
                             ChannelBuffers.wrappedBuffer(delimiter3)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
             serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
@@ -263,7 +265,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -279,7 +281,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
             serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
@@ -287,7 +289,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -303,7 +305,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gl100ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Gl100ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -322,7 +324,7 @@ public class ServerManager {
                                     ChannelBuffers.wrappedBuffer(delimiter2)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -338,7 +340,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new T55ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new T55ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -353,7 +355,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -366,7 +368,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TotemFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new TotemProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new TotemProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -378,7 +380,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
-                    pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -390,7 +392,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
-                    pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -406,7 +408,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new MaxonProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new MaxonProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -421,7 +423,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -433,7 +435,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
-                    pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -447,7 +449,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new H02FrameDecoder());
-                    pipeline.addLast("objectDecoder", new H02ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new H02ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -459,7 +461,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Jt600FrameDecoder());
-                    pipeline.addLast("objectDecoder", new Jt600ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Jt600ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -474,7 +476,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Ev603ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Ev603ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -489,7 +491,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new V680ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new V680ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -502,7 +504,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Pt502FrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Pt502ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Pt502ProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -520,7 +522,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tr20ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Tr20ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -532,7 +534,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
-                    pipeline.addLast("objectDecoder", new NavisProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new NavisProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -547,7 +549,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -560,7 +562,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new SkypatrolProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new SkypatrolProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -572,7 +574,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
-                    pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -584,7 +586,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Gt06FrameDecoder());
-                    pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -598,7 +600,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new MegastekProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new MegastekProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -610,7 +612,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new NavigilFrameDecoder());
-                    pipeline.addLast("objectDecoder", new NavigilProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new NavigilProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -628,7 +630,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new GpsGateProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new GpsGateProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -640,7 +642,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
-                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -653,7 +655,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this, protocol, false));
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(dataManager, protocol, properties, false));
                 }
             });
         }
@@ -666,7 +668,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(ServerManager.this, protocol, true));
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(dataManager, protocol, properties, true));
                 }
             });
         }
@@ -682,7 +684,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(32 * 1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -698,7 +700,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this, protocol, true));
+                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(dataManager, protocol, properties, true));
                 }
             });
         }
@@ -711,7 +713,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new WondexFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new WondexProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new WondexProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -723,7 +725,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
-                    pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -737,7 +739,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new GalileoFrameDecoder());
-                    pipeline.addLast("objectDecoder", new GalileoProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new GalileoProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -755,7 +757,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new YwtProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new YwtProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -771,7 +773,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tk102ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Tk102ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -785,7 +787,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder", new IntellitracFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new IntellitracProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new IntellitracProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -797,7 +799,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 20, 1, 5, 0));
-                    pipeline.addLast("objectDecoder", new Xt7ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Xt7ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -811,7 +813,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new WialonProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new WialonProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -827,7 +829,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new CarscopProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new CarscopProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -839,7 +841,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
-                    pipeline.addLast("objectDecoder", new ApelProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new ApelProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -857,7 +859,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new ManPowerProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new ManPowerProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -873,7 +875,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new GlobalSatProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new GlobalSatProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -885,7 +887,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AtrackFrameDecoder());
-                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -901,7 +903,7 @@ public class ServerManager {
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Pt3000ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Pt3000ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -913,7 +915,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
-                    pipeline.addLast("objectDecoder", new RuptelaProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new RuptelaProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -928,7 +930,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new TopflytechProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new TopflytechProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -942,7 +944,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new LaipacProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new LaipacProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -954,7 +956,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AplicomFrameDecoder());
-                    pipeline.addLast("objectDecoder", new AplicomProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new AplicomProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -969,7 +971,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new GotopProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new GotopProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -984,7 +986,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SanavProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new SanavProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -995,7 +997,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new GatorProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new GatorProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1006,7 +1008,7 @@ public class ServerManager {
             TrackerServer server = new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new NoranProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new NoranProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -1020,7 +1022,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(23));
-                    pipeline.addLast("objectDecoder", new M2mProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new M2mProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1033,7 +1035,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new OsmAndProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new OsmAndProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1048,7 +1050,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new EasyTrackProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new EasyTrackProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1060,7 +1062,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(ServerManager.this, protocol, false));
+                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(dataManager, protocol, properties, false));
                 }
             });
         }
@@ -1072,7 +1074,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 3, 2));
-                    pipeline.addLast("objectDecoder", new KhdProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new KhdProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1086,7 +1088,7 @@ public class ServerManager {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpAggregator", new HttpChunkAggregator(16384));
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1099,7 +1101,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Stl060FrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1114,7 +1116,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new CarTrackProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new CarTrackProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1129,7 +1131,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1144,7 +1146,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new HaicomProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new HaicomProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1156,7 +1158,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
-                    pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1171,7 +1173,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new BoxProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new BoxProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1184,7 +1186,7 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new FreedomProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new FreedomProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1199,7 +1201,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new TelikProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new TelikProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1213,7 +1215,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new TrackboxProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new TrackboxProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1228,7 +1230,7 @@ public class ServerManager {
                     pipeline.addLast("frameDecoder",
                             new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new VisiontekProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new VisiontekProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
@@ -1240,7 +1242,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new OrionFrameDecoder());
-                    pipeline.addLast("objectDecoder", new OrionProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new OrionProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -1254,7 +1256,7 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 105, 2, 3, 0));
-                    pipeline.addLast("objectDecoder", new RitiProtocolDecoder(ServerManager.this, protocol));
+                    pipeline.addLast("objectDecoder", new RitiProtocolDecoder(dataManager, protocol, properties));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);

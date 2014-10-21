@@ -10,7 +10,7 @@ public class V680ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        V680ProtocolDecoder decoder = new V680ProtocolDecoder(new TestDataManager());
+        V680ProtocolDecoder decoder = new V680ProtocolDecoder(new TestDataManager(), null, null);
         
         assertNull(decoder.decode(null, null,
                 "#353588102019155"));

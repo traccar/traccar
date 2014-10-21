@@ -10,7 +10,7 @@ public class TelikProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        TelikProtocolDecoder decoder = new TelikProtocolDecoder(new TestDataManager());
+        TelikProtocolDecoder decoder = new TelikProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null,
                 "0026436729|232|01|003002030"));

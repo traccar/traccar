@@ -17,12 +17,14 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.util.Date;
+import java.util.Properties;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
@@ -31,12 +33,8 @@ import org.traccar.model.Position;
 
 public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
-    public NavigilProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public NavigilProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public NavigilProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
     
     private static final int LEAP_SECONDS_DELTA = 25;

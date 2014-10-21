@@ -20,14 +20,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
@@ -36,12 +38,8 @@ import org.traccar.model.Position;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public MeitrackProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public MeitrackProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public MeitrackProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     //$$J163,123123123123123,AFF,0004,35,58.588926,16.180473,140928192856,A,10,27,0,161,1.2,19

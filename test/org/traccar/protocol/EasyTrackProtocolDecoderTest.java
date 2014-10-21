@@ -10,7 +10,7 @@ public class EasyTrackProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(new TestDataManager());
+        EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, "*ET,135790246811221,GZ,0001,0005"));
 

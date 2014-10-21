@@ -17,13 +17,15 @@ package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.Properties;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
@@ -35,18 +37,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private Long deviceId;
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
-    public Gt06ProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public Gt06ProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public Gt06ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
         
-        if (serverManager != null) {
-            Properties p = getServerManager().getProperties();
-            if (p.containsKey(protocol + ".timezone")) {
+        if (properties != null) {
+            if (properties.containsKey(protocol + ".timezone")) {
                 timeZone.setRawOffset(
-                        Integer.valueOf(p.getProperty(protocol + ".timezone")) * 1000);
+                        Integer.valueOf(properties.getProperty(protocol + ".timezone")) * 1000);
             }
         }
     }

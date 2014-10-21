@@ -16,11 +16,13 @@
 package org.traccar.protocol;
 
 import java.util.Date;
+import java.util.Properties;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -28,12 +30,8 @@ import org.traccar.model.Position;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
-    public AplicomProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public AplicomProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public AplicomProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     private static final long IMEI_BASE_TC65_V20 = 0x1437207000000L;

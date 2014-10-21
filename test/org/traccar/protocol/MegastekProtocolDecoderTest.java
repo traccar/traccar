@@ -9,7 +9,7 @@ public class MegastekProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(new TestDataManager());
+        MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(new TestDataManager(), null, null);
 
         verify(decoder.decode(null, null,
                 "STX,GerAL22,$GPRMC,174752.000,A,3637.060059,S,6416.2354,W,0.00,0.00,030812,,,A*55,F,,imei:861785000249353,05,180.6,Battery=100%,,1,722,310,0FA6,39D0;8F"));

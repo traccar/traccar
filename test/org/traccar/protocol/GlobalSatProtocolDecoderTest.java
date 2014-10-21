@@ -10,7 +10,7 @@ public class GlobalSatProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        GlobalSatProtocolDecoder decoder = new GlobalSatProtocolDecoder(new TestDataManager());
+        GlobalSatProtocolDecoder decoder = new GlobalSatProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, "GSh,131826789036289,3,M,ea04*3d"));
 

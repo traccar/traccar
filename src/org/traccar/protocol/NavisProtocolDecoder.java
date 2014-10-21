@@ -20,13 +20,15 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.TimeZone;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -42,12 +44,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private String imei;
     private Long databaseDeviceId;
 
-    public NavisProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
-
-    public NavisProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
+    public NavisProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
     }
 
     // Format types

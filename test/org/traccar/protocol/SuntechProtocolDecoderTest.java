@@ -10,7 +10,7 @@ public class SuntechProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new TestDataManager());
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new TestDataManager(), null, null);
         
         assertNull(decoder.decode(null, null, "SA200ALV;317652"));
 

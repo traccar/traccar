@@ -17,13 +17,15 @@ package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -33,13 +35,9 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
     
     boolean sendResponse;
 
-    public SyrusProtocolDecoder(DataManager dataManager, boolean sendResponse) {
-        super(dataManager);
-        this.sendResponse = sendResponse;
-    }
 
-    public SyrusProtocolDecoder(ServerManager serverManager, String protocol, boolean sendResponse) {
-        super(serverManager, protocol);
+    public SyrusProtocolDecoder(DataManager dataManager, String protocol, Properties properties, boolean sendResponse) {
+        super(dataManager, protocol, properties);
         this.sendResponse = sendResponse;
     }
 

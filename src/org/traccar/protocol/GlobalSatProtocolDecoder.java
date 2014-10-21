@@ -20,10 +20,11 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.ServerManager;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -31,23 +32,19 @@ import org.traccar.model.Position;
 
 public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
+    // Default values
     private String format0 = "TSPRXAB27GHKLMnaicz*U!";
     private String format1 = "SARY*U!";
 
-    public GlobalSatProtocolDecoder(DataManager dataManager) {
-        super(dataManager);
-    }
+    public GlobalSatProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
+        super(dataManager, protocol, properties);
 
-    public GlobalSatProtocolDecoder(ServerManager serverManager, String protocol) {
-        super(serverManager, protocol);
-
-        if (getServerManager() != null) {
-            Properties p = getServerManager().getProperties();
-            if (p.containsKey(protocol + ".format0")) {
-                format0 = p.getProperty(protocol + ".format0");
+        if (properties != null) {
+            if (properties.containsKey(protocol + ".format0")) {
+                format0 = properties.getProperty(protocol + ".format0");
             }
-            if (p.containsKey(protocol + ".format1")) {
-                format1 = p.getProperty(protocol + ".format1");
+            if (properties.containsKey(protocol + ".format1")) {
+                format1 = properties.getProperty(protocol + ".format1");
             }
         }
     }

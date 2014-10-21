@@ -10,7 +10,7 @@ public class WialonProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        WialonProtocolDecoder decoder = new WialonProtocolDecoder(new TestDataManager());
+        WialonProtocolDecoder decoder = new WialonProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, "#L#123456789012345;test"));
         

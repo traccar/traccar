@@ -12,7 +12,7 @@ public class M2mProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        M2mProtocolDecoder decoder = new M2mProtocolDecoder(new TestDataManager());
+        M2mProtocolDecoder decoder = new M2mProtocolDecoder(new TestDataManager(), null, null);
 
         int[] buf1 = {0x23,0x5A,0x3C,0x2A,0x26,0x24,0x21,0x5C,0x28,0x7D,0x70,0x21,0x2A,0x21,0x25,0x4C,0x7C,0x64,0x21,0x22,0x0B,0x0B,0x0B};
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(buf1))));
