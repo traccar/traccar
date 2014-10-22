@@ -1,5 +1,6 @@
 package org.traccar.protocol;
 
+import static org.junit.Assert.assertNull;
 import org.traccar.helper.TestDataManager;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
@@ -10,6 +11,9 @@ public class Xexun2ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         Xexun2ProtocolDecoder decoder = new Xexun2ProtocolDecoder(new TestDataManager(), null, null);
+        
+        assertNull(decoder.decode(null, null,
+                ",+48606717068,,L,, imei:012207005047292,,,F:4.28V,1,52,11565,247,01,000E,1FC5"));
 
         verify(decoder.decode(null, null,
                 "130302125349,+79604870506,GPRMC,085349.000,A,4503.2392,N,03858.5660,E,6.95,154.65,020313,,,A*6C,F,, imei:012207007744243,03,-1.5,F:4.15V,1,139,28048,250,01,278A,5072"));
