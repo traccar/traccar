@@ -47,9 +47,12 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             sign = -1;
             coordinate = 0xffffffffl - coordinate;
         }
-
-        double degrees = coordinate / 1000000;
-        degrees += (coordinate % 1000000) / 600000.0;
+        
+        double coordinateDouble = coordinate;
+        double degrees = coordinateDouble / 1000000;
+        
+        //TODO REMOVE THIS LINE
+        //degrees += (coordinate % 1000000) / 600000.0;
 
         return sign * degrees;
     }
