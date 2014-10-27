@@ -123,8 +123,6 @@
                     <archive>
                         <manifest>
                             <mainClass>org.traccar.Main</mainClass>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
                     </archive>
                 </configuration>
