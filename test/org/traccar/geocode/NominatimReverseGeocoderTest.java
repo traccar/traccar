@@ -9,6 +9,7 @@ public class NominatimReverseGeocoderTest {
     public void testGetAddress() {
 
         ReverseGeocoder reverseGeocoder = new NominatimReverseGeocoder("http://nominatim.openstreetmap.org/reverse");
+        assertEquals("Budapest Alkotás utca 15", reverseGeocoder.getAddress(47.4981623,19.0236603));
         
         /*assertEquals(
                 "ulitsa Morskiye dubki, 2, Lisy Nos, Saint Petersburg, Russia, 197755",
