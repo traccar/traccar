@@ -62,11 +62,13 @@ public class NominatimReverseGeocoder implements ReverseGeocoder {
 			if (ap != null) {
 				if (ap.getCity() != null) {
 					sb.append(ap.getCity());
-				} else if (ap.getTown() != null) {
+                                        sb.append(", ");
+                                } else if (ap.getTown() != null) {
 					sb.append(ap.getTown());
-				}
+                                        sb.append(", ");
+                                }
 
-				sb.append(" ");
+				
 				if (ap.getRoad() != null) {
 					sb.append(ap.getRoad());
 				} else if (ap.getPedestrian() != null) {
@@ -75,9 +77,11 @@ public class NominatimReverseGeocoder implements ReverseGeocoder {
 					sb.append(ap.getStreet());
 				}
 
-				sb.append(" ");
+
 				if (ap.getHouse_number() != null) {
-					sb.append(ap.getHouse_number());
+                                    sb.append(" ");
+                                    sb.append(ap.getHouse_number());
+                                    sb.append(".");
 				}
 
 			}
