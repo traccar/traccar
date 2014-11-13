@@ -48,12 +48,12 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                   // Speed
             "(\\d+)," +                   // Course
             "(\\d+)," +                   // Status
-            "(\\d*)," +                   // GPRS counting value
-            "(\\d*)," +                   // GPS power saving counting value
+            "(\\d+)?," +                  // GPRS counting value
+            "(\\d+)?," +                  // GPS power saving counting value
             "(\\d+)," +                   // Switch status
             "(\\d+)" +                    // Relay status
-            "[LH]{0,2}" +                   // Power status
-            "\\#V(\\d+)");                // Battery
+            "(?:[LH]{2})?" +              // Power status
+            "\\#V(\\d+).*");              // Battery
 
     @Override
     protected Object decode(
