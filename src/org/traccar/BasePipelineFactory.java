@@ -36,6 +36,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private final ReverseGeocoder reverseGeocoder;
     private FilterHandler filterHandler;
     private Integer resetDelay;
+    private Boolean processInvalidPositions;
 
     /**
      * Open channel handler
@@ -100,6 +101,12 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (enableFilter != null && Boolean.valueOf(enableFilter)) {
             filterHandler = new FilterHandler(serverManager);
         }
+
+        if (reverseGeocoder != null) {
+            // Default behavior is to process invalid positions (i.e., the "null" case)
+            String invalidPositions = serverManager.getProperties().getProperty("geocode.processInvalidPositions");
+            processInvalidPositions = (invalidPositions == null || Boolean.valueOf(invalidPositions));
+        }
     }
 
     protected DataManager getDataManager() {
@@ -123,7 +130,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("filter", filterHandler);
         }
         if (reverseGeocoder != null) {
-            pipeline.addLast("geocoder", new ReverseGeocoderHandler(reverseGeocoder));
+            pipeline.addLast("geocoder", new ReverseGeocoderHandler(reverseGeocoder, processInvalidPositions));
         }
         pipeline.addLast("handler", new TrackerEventHandler(dataManager));
         return pipeline;
