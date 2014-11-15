@@ -18,7 +18,6 @@ package org.traccar;
 import java.util.List;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.model.Position;
