@@ -18,7 +18,6 @@ package org.traccar;
 import java.util.List;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.model.Position;
@@ -26,9 +25,11 @@ import org.traccar.model.Position;
 public class ReverseGeocoderHandler extends OneToOneDecoder {
 
     private final ReverseGeocoder geocoder;
+    private final boolean processInvalidPositions;
 
-    public ReverseGeocoderHandler(ReverseGeocoder geocoder) {
+    public ReverseGeocoderHandler(ReverseGeocoder geocoder, boolean processInvalidPositions ) {
         this.geocoder = geocoder;
+        this.processInvalidPositions = processInvalidPositions;
     }
 
     @Override
@@ -39,13 +40,18 @@ public class ReverseGeocoderHandler extends OneToOneDecoder {
         if (geocoder != null) {
             if (msg instanceof Position) {
                 Position position = (Position) msg;
-                position.setAddress(geocoder.getAddress(
-                        position.getLatitude(), position.getLongitude()));
+                
+                if (processInvalidPositions || position.getValid()) {
+                    position.setAddress(geocoder.getAddress(
+                            position.getLatitude(), position.getLongitude()));
+                }
             } else if (msg instanceof List) {
                 List<Position> positions = (List<Position>) msg;
                 for (Position position : positions) {
-                    position.setAddress(geocoder.getAddress(
-                            position.getLatitude(), position.getLongitude()));
+                    if (processInvalidPositions || position.getValid()) {
+                        position.setAddress(geocoder.getAddress(
+                                position.getLatitude(), position.getLongitude()));
+                    }
                 }
             }
         }
