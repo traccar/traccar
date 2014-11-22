@@ -126,7 +126,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             
             try {
                 deviceId = getDataManager().getDeviceByImei(imei).getId();
-                buf.skipBytes(dataLength - 8);
+                buf.skipBytes(buf.readableBytes() - 6);
                 sendResponse(channel, type, buf.readUnsignedShort());
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
