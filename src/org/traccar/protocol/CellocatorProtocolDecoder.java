@@ -71,7 +71,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         reply.writeInt(0); // authentication code
         reply.writeByte(0);
         reply.writeByte(packetNumber);
-        reply.writeZero(10);
+        reply.writeZero(11);
 
         byte checksum = 0;
         for (int i = 4; i < 27; i++) {
