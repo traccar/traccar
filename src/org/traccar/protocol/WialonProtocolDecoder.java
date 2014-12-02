@@ -47,8 +47,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             "([NS]);" +
             "(\\d{3})(\\d{2}\\.\\d+);" +   // Longitude (DDDMM.MMMM)
             "([EW]);" +
-            "(\\d+\\.?\\d*);" +            // Speed
-            "(\\d+\\.?\\d*);" +            // Course
+            "(\\d+\\.?\\d*)?;" +           // Speed
+            "(\\d+\\.?\\d*)?;" +           // Course
             "(?:(\\d+\\.?\\d*)|NA);" +     // Altitude
             "(?:(\\d+)|NA)" +              // Satellites
             ".*");                         // Full format
@@ -103,10 +103,20 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
+        String speed = parser.group(index++);
+        if (speed != null) {
+            position.setSpeed(Double.valueOf(speed) * 0.539957);
+        } else {
+            position.setSpeed(0.0);
+        }
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        String course = parser.group(index++);
+        if (course != null) {
+            position.setCourse(Double.valueOf(course));
+        } else {
+            position.setCourse(0.0);
+        }
 
         // Altitude
         String altitude = parser.group(index++);
