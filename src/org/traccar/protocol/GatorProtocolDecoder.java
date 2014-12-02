@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,10 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
 
         // Pseudo IP address
-        String id = String.valueOf(buf.readUnsignedInt());
+        String id = String.format("%02d%02d%02d%02d",
+                buf.readUnsignedByte(), buf.readUnsignedByte(),
+                buf.readUnsignedByte(), buf.readUnsignedByte());
+        id = id.replaceFirst("^0+(?!$)", "");
         
         if (type == PACKET_POSITION_DATA ||
             type == PACKET_ROLLCALL_RESPONSE ||
