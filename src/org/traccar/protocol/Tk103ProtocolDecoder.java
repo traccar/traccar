@@ -42,9 +42,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             "\\d*" +                       // IMEI (?)
             "(\\d{2})(\\d{2})(\\d{2}),?" + // Date (YYMMDD)
             "([AV]),?" +                   // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})" +  // Latitude (DDMM.MMMM)
+            "(\\d{2})(\\d{2}\\.\\d+)" +    // Latitude (DDMM.MMMM)
             "([NS]),?" +
-            "(\\d{3})(\\d{2}\\.\\d{4})" +  // Longitude (DDDMM.MMMM)
+            "(\\d{3})(\\d{2}\\.\\d+)" +    // Longitude (DDDMM.MMMM)
             "([EW]),?" +
             "(\\d+\\.\\d)(?:\\d*,)?" +     // Speed
             "(\\d{2})(\\d{2})(\\d{2}),?" + // Time (HHMMSS)

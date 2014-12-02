@@ -49,6 +49,9 @@ public class Tk103ProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "(013632782450,BP05,101201,A,2234.0297N,11405.9101E,000.0,040137,178.48,00000000,L00000000"));
+        
+        verify(decoder.decode(null, null,
+                "(864768010009188,BP05,271114,V,4012.19376N,00824.05638E,000.0,154436,000.0"));
 
     }
 
