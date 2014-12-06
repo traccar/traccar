@@ -890,6 +890,13 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(dataManager, protocol, properties));
                 }
             });
+            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+
         }
     }
 
