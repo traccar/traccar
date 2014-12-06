@@ -42,8 +42,6 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         super(dataManager, protocol, properties);
     }
 
-    //$$J163,123123123123123,AFF,0004,35,58.588926,16.180473,140928192856,A,10,27,0,161,1.2,19
-    //,1648894,435695,240|24|88B9|E435,0000,|||0A22|0000,00000001,,50,,,,,,,,,,,,,*70\r\n
     private static final Pattern pattern = Pattern.compile(
             "\\$\\$." +                         // Flag
             "\\d+," +                           // Length
