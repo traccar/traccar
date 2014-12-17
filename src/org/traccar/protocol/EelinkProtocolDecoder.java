@@ -99,10 +99,11 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         
-        else if (type == MSG_GPS ||
+        else if (deviceId != null &&
+                (type == MSG_GPS ||
                  type == MSG_ALARM ||
                  type == MSG_STATE ||
-                 type == MSG_SMS) {
+                 type == MSG_SMS)) {
             
             // Create new position
             Position position = new Position();
