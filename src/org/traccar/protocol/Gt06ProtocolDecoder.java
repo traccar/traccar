@@ -133,13 +133,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             
         } else if (deviceId != null && (
                 type == MSG_GPS ||
-                        type == MSG_GPS_LBS_1 ||
-                        type == MSG_GPS_LBS_2 ||
-                        type == MSG_GPS_LBS_STATUS_1 ||
-                        type == MSG_GPS_LBS_STATUS_2 ||
-                        type == MSG_GPS_LBS_STATUS_3 ||
-                        type == MSG_GPS_PHONE ||
-                        type == MSG_GPS_LBS_EXTEND)) {
+                type == MSG_GPS_LBS_1 ||
+                type == MSG_GPS_LBS_2 ||
+                type == MSG_GPS_LBS_STATUS_1 ||
+                type == MSG_GPS_LBS_STATUS_2 ||
+                type == MSG_GPS_LBS_STATUS_3 ||
+                type == MSG_GPS_PHONE ||
+                type == MSG_GPS_LBS_EXTEND)) {
 
             // Create new position
             Position position = new Position();
@@ -206,22 +206,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 // Status
                 if (type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3) {
 
-                    int flags = buf.readUnsignedByte();
-                    String binaryAlarm = Integer.toBinaryString(flags);
-                    Log.debug("Binary of Flags" + binaryAlarm);
-
-                    String alarm = binaryAlarm.substring(1, 4);
-
-
-                    if(alarm.equals("100")) {
-                        Log.debug("SOS ALARM");
-                        extendedInfo.set("sos", true);
-                    } else if(alarm.equals("011")){
-                        Log.debug("LOW BATTERY ALARM");
-                        extendedInfo.set("sos", true);
-                    }
-
                     extendedInfo.set("alarm", true);
+
+                    int flags = buf.readUnsignedByte();
 
                     extendedInfo.set("acc", (flags & 0x2) != 0);
                     // TODO parse other flags
