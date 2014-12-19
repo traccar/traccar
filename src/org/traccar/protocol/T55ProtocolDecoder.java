@@ -101,7 +101,11 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         
         if (!sentence.startsWith("$") && sentence.contains("$")) {
             int index = sentence.indexOf("$");
-            identify(sentence.substring(0, index));
+            String id = sentence.substring(0, index);
+            if (id.endsWith(",")) {
+                id = id.substring(0, id.length() - 1);
+            }
+            identify(id);
             sentence = sentence.substring(index);
         }
 

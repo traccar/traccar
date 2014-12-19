@@ -55,6 +55,9 @@ public class T55ProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "123456789$GPRMC,155708.252,V,4610.1676,N,00606.4586,E,000.0,000.0,060214,,,N*76"));
+        
+        verify(decoder.decode(null, null,
+                "990000561287964,$GPRMC,213516.0,A,4337.216791,N,11611.995877,W,0.0,335.4,181214,,,A * 72"));
 
     }
 
