@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class AtrackFrameDecoder extends LengthFieldBasedFrameDecoder {
         // Keep alive message
         if (buf.readableBytes() >= KEEPALIVE_LENGTH &&
             buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
-            channel.write(buf.readBytes(KEEPALIVE_LENGTH));
+            return buf.readBytes(KEEPALIVE_LENGTH);
         }
 
         return super.decode(ctx, channel, buf);

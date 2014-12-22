@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.LinkedList;
@@ -41,13 +42,13 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_HEARTBEAT = 0x1A;
     private static final int MSG_DATA = 0x10;
 
-    private static void sendResponse(Channel channel, long rawId, int index) {
+    private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(12);
             response.writeShort(0xfe02);
             response.writeLong(rawId);
             response.writeShort(index);
-            channel.write(response);
+            channel.write(response, remoteAddress);
         }
     }
     
@@ -69,10 +70,19 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
+
+        // Keep alive message
+        if (buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
+            if (channel != null) {
+                channel.write(buf, remoteAddress);
+            }
+            return null;
+        }
+        
         buf.skipBytes(2); // prefix
         buf.readUnsignedShort(); // checksum
         buf.readUnsignedShort(); // length
@@ -90,7 +100,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         }
         
         // Send acknowledgement
-        sendResponse(channel, rawId, index);
+        sendResponse(channel, remoteAddress, rawId, index);
 
         List<Position> positions = new LinkedList<Position>();
 
