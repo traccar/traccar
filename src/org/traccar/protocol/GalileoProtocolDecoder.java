@@ -17,14 +17,7 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -178,8 +171,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         sendReply(channel, buf.readUnsignedShort());
-        
-        for (Position p : positions) {
+
+        for (Iterator<Position> i = positions.iterator(); i.hasNext(); ) {
+            Position p = i.next();
+
             p.setDeviceId(deviceId);
 
             if (p.getAltitude() == null) {
@@ -187,10 +182,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (p.getValid() == null || p.getTime() == null || p.getSpeed() == null) {
-                positions.remove(p);
+                i.remove();
             }
         }
-        
+
         if (positions.isEmpty()) {
             return null;
         }
