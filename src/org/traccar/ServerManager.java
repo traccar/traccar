@@ -176,6 +176,7 @@ public class ServerManager {
         initVisiontekServer("visiontek");
         initOrionServer("orion");
         initRitiServer("riti");
+        initUlbotechServer("ulbotech");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1268,6 +1269,18 @@ public class ServerManager {
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             serverList.add(server);
+        }
+    }
+
+    private void initUlbotechServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 1, 2, 0));
+                    pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
         }
     }
 
