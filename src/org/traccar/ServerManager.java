@@ -177,6 +177,8 @@ public class ServerManager {
         initOrionServer("orion");
         initRitiServer("riti");
         initUlbotechServer("ulbotech");
+
+        initEsky610Server("esky610");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1281,6 +1283,20 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(dataManager, protocol, properties));
                 }
             });
+        }
+    }
+
+    private void initEsky610Server(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new Esky610FrameDecoder());
+                    pipeline.addLast("objectDecoder", new Esky610ProtocolDecoder(dataManager, protocol, properties, false));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
