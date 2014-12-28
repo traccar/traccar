@@ -123,10 +123,6 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
         private byte networkSignalStrength;
         private byte battLevel;
 
-        private long getId() {
-            return new Random().nextLong();
-        }
-
         private long getDeviceId() {
             return byteUtils.bytesToLong(phoneNumber);
         }
@@ -173,7 +169,6 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
         private Position getPosition() {
             Position position = new Position();
-            position.setId(getId());
             position.setDeviceId(getDeviceId());
             position.setServerTime(new Date());
             position.setExtendedInfo(getExtendedInfo());
