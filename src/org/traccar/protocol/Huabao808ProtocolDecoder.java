@@ -98,6 +98,12 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
         private int messageId;
         private byte deviceId[];
         private int serialId;
+        private int province;
+        private int country;
+        private byte manufacturerId[];
+        private byte terminalType[];
+        private byte terminalId[];
+        private byte plateColor;
         private int messageHash;
         private byte calibration;
         private int messageProperty;
@@ -193,7 +199,12 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
             messageHash = buf.readUnsignedShort();
             deviceId = buf.readBytes(6).array();
             serialId = buf.readUnsignedShort();
-            buf.readBytes(37);
+            province = buf.readUnsignedShort();
+            country = buf.readUnsignedShort();
+            manufacturerId = buf.readBytes(5).array();
+            terminalType = buf.readBytes(8).array();
+            terminalId = buf.readBytes(7).array();
+            plateColor = buf.readByte();
             calibration = buf.readByte();
         }
 
