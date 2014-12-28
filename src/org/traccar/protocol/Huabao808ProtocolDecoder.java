@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-import java.util.Random;
 
 public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -42,18 +41,18 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
             int type = buf.readUnsignedShort();
 
-            if (type == PLATFORM_AUTHENTICATION) {
+            if (type == PLATFORM_AUTHENTICATION && buf.capacity() >= 40) {
 
                 huabao808.register(buf, PLATFORM_AUTHENTICATION);
                 huabao808.responsePlatformAuthentication(channel);
 
 
-            } else if (type == TERMINAL_AUTHENTICATION) {
+            } else if (type == TERMINAL_AUTHENTICATION && buf.capacity() >= 31) {
 
                 huabao808.register(buf, TERMINAL_AUTHENTICATION);
                 huabao808.responseTerminalAuthentication(channel);
 
-            } else if (type == LOCATION_REPORT) {
+            } else if (type == LOCATION_REPORT && buf.capacity() >= 61) {
 
                 Position position = huabao808.extractLocationInformation(buf);
                 huabao808.responseLocation(channel, LOCATION_REPORT);
@@ -222,7 +221,6 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(calibration);
             response.writeByte(MESSAGE_END);
             channel.write(response);
-
         }
 
         public void responseTerminalAuthentication(Channel channel) throws IOException {
