@@ -177,6 +177,7 @@ public class ServerManager {
         initOrionServer("orion");
         initRitiServer("riti");
         initUlbotechServer("ulbotech");
+        initHuabaoServer("huabao");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1284,4 +1285,15 @@ public class ServerManager {
         }
     }
 
+    private void initHuabaoServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new Huabao808FrameDecoder());
+                    pipeline.addLast("objectDecoder", new Huabao808ProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
 }
