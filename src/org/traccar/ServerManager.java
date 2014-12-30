@@ -177,6 +177,7 @@ public class ServerManager {
         initOrionServer("orion");
         initRitiServer("riti");
         initUlbotechServer("ulbotech");
+        initTramigoServer("tramigo");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1273,12 +1274,27 @@ public class ServerManager {
     }
 
     private void initUlbotechServer(final String protocol) throws SQLException {
+
+        // TODO: Waiting for feedback from manufacturer
+
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 1, 2, 0));
                     pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
+
+    private void initTramigoServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 6, 2, -8, 0));
+                    pipeline.addLast("objectDecoder", new TramigoProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }

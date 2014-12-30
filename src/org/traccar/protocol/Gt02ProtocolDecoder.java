@@ -88,6 +88,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
+                return null;
             }
 
             // Date and time
