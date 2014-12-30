@@ -53,7 +53,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
     
     private static double convertCoordinate(int value) {
         double degrees = value / 1000000;
-        double minutes = (Math.abs(value) % 1000000) / 10000.0;
+        double minutes = (value % 1000000) / 10000.0;
         return degrees + minutes / 60;
     }
     
