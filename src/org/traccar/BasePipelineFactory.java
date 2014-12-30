@@ -99,7 +99,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         String enableFilter = serverManager.getProperties().getProperty("filter.enable");
         if (enableFilter != null && Boolean.valueOf(enableFilter)) {
-            filterHandler = new FilterHandler(serverManager);
+            filterHandler = new FilterHandler(serverManager.getProperties());
         }
 
         if (reverseGeocoder != null) {

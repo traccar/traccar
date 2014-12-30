@@ -22,6 +22,30 @@ import java.util.Date;
  */
 public class Position extends Data {
 
+    public Position() {
+    }
+
+    public Position(
+            long deviceId,
+            Date time,
+            boolean valid,
+            double latitude,
+            double longitude,
+            double altitude,
+            double speed,
+            double course) {
+
+        setDeviceId(deviceId);
+        setTime(time);
+        setValid(valid);
+        setLatitude(latitude);
+        setLongitude(longitude);
+        setAltitude(altitude);
+        setSpeed(speed);
+        setCourse(course);
+    }
+
+
     /**
      * Time (UTC)
      */

@@ -36,9 +36,22 @@ public class FilterHandler extends OneToOneDecoder {
     private long filterLimit;
     
     private final Map<Long, Position> lastPositions = new HashMap<Long, Position>();
+
+    public FilterHandler(
+            boolean filterInvalid,
+            boolean filterZero,
+            boolean filterDuplicate,
+            int filterDistance,
+            long filterLimit) {
+
+        this.filterInvalid = filterInvalid;
+        this.filterZero = filterZero;
+        this.filterDuplicate = filterDuplicate;
+        this.filterDistance = filterDistance;
+        this.filterLimit = filterLimit;
+    }
     
-    public FilterHandler(ServerManager serverManager) {
-        Properties properties = serverManager.getProperties();
+    public FilterHandler(Properties properties) {
 
         String value = properties.getProperty("filter.invalid");
         if (value != null) filterInvalid = Boolean.valueOf(value);
