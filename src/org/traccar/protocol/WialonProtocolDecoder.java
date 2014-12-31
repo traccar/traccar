@@ -29,12 +29,16 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
+    private String deviceImei;
+    private String dataBase;
+    
 
     public WialonProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
         super(dataManager, protocol, properties);
@@ -76,6 +80,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         position.setDeviceId(deviceId);
+        position.setDataBase(dataBase);
+        position.setImei(deviceImei);
 
         Integer index = 1;
 
@@ -152,7 +158,10 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.startsWith("#L#")) {
             String imei = sentence.substring(3, sentence.indexOf(';'));
             try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
+                Device device = getDataManager().getDeviceByImei(imei);
+                deviceImei = imei;
+                deviceId = device.getId();
+                dataBase = device.getDataBase();
                 sendResponse(channel, "#AL#", 1);
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);

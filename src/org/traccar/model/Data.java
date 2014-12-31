@@ -87,4 +87,17 @@ public class Data {
         this.dataBase = dataBase;
     }
 
+    
+    /**
+     * Device IMEI
+     */
+    private String imei;
+
+    public String getImei() {
+        return imei;
+    }
+
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
 }

@@ -78,8 +78,8 @@ public class Device {
      */
     private String dataBase;
 
-    public String getDataBase() {
-        return dataBase;
+    public String getDataBase() {        
+        return ((dataBase != null && !dataBase.isEmpty())?dataBase:"");
     }
 
     public void setDataBase(String dataBase) {

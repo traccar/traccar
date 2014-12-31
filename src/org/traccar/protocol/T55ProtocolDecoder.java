@@ -27,12 +27,15 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
+    private String deviceImei;
+    private String dataBase;
 
     public T55ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
         super(dataManager, protocol, properties);
@@ -86,7 +89,11 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     
     private void identify(String id) {
         try {
-            deviceId = getDataManager().getDeviceByImei(id).getId();
+            Device device = getDataManager().getDeviceByImei(id);
+            deviceImei = id;
+            deviceId = device.getId();
+            dataBase = device.getDataBase();
+            
         } catch(Exception error) {
             Log.warning("Unknown device - " + id);
         }
@@ -152,6 +159,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
+            position.setDataBase(dataBase);
+            position.setImei(deviceImei);
 
             Integer index = 1;
 

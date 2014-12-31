@@ -201,8 +201,9 @@ public class DataManager {
         params.setDouble("speed", position.getSpeed());
         params.setDouble("course", position.getCourse());
         params.setString("address", position.getAddress());
-        params.setString("extended_info", position.getExtendedInfo());        
-        //params.setString("imei", position.getDataBase());
+        params.setString("extended_info", position.getExtendedInfo());  
+        
+        params.setString("imei", position.getImei());
         params.setString("database", position.getDataBase());
         params.setTimestamp("systemtime", position.getServerTime());
         
