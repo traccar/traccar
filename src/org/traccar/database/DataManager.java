@@ -119,6 +119,20 @@ public class DataManager {
             Device device = new Device();
             device.setId(rs.getLong("id"));
             device.setImei(rs.getString("imei"));
+            
+            //Уникальный ID - не использую       
+            try{
+                device.setUniqueId(rs.getString("uniqueid"));
+            } catch (SQLException e) {
+                
+            }
+            //Имя базы для вставки/обновления позиции
+            try{
+                device.setDataBase(rs.getString("database")+".");
+            } catch (SQLException e) {
+                
+            }
+            //
             return device;
         }
     };
@@ -187,7 +201,11 @@ public class DataManager {
         params.setDouble("speed", position.getSpeed());
         params.setDouble("course", position.getCourse());
         params.setString("address", position.getAddress());
-        params.setString("extended_info", position.getExtendedInfo());
+        params.setString("extended_info", position.getExtendedInfo());        
+        //params.setString("imei", position.getDataBase());
+        params.setString("database", position.getDataBase());
+        params.setTimestamp("systemtime", position.getServerTime());
+        
 
         // DELME: Temporary compatibility support
         XPath xpath = XPathFactory.newInstance().newXPath();

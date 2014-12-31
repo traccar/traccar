@@ -73,5 +73,18 @@ public class Data {
     public void setExtendedInfo(String extendedInfo) {
         this.extendedInfo = extendedInfo;
     }
+    
+    /**
+     * DataBase for position insert/update
+     */
+    private String dataBase;
+
+    public String getDataBase() {
+        return dataBase;
+    }
+
+    public void setDataBase(String dataBase) {
+        this.dataBase = dataBase;
+    }
 
 }
