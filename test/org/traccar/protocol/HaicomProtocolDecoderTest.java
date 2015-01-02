@@ -16,6 +16,9 @@ public class HaicomProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "$GPRS123456789012345,T100001,141112,090751,7240649312041079,0002,1530,000001,,,1,00#V039*"));
+        
+        verify(decoder.decode(null, null,
+                "$GPRS012497007101250,T100001,141231,152235,7503733600305643,0000,2285,000001,,,1,00#V041*"));
 
     }
 
