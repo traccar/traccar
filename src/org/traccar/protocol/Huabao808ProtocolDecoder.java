@@ -9,16 +9,20 @@ import org.traccar.database.DataManager;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
 public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final int PLATFORM_AUTHENTICATION = 256;
-    private static final int TERMINAL_AUTHENTICATION = 258;
-    private static final int LOCATION_REPORT = 512;
+    private static final int PLATFORM_AUTHENTICATION = 256; // Hex: 100
+    private static final int TERMINAL_AUTHENTICATION = 258; // Hex: 102
+    private static final int LOCATION_REPORT = 512; // Hex: 200
+    private Huabao808 huabao808;
+
     public Huabao808ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
         super(dataManager, protocol, properties);
     }
@@ -30,82 +34,56 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        if (buf == null)
-            return null;
+        buf.skipBytes(1);
 
-        byte head = buf.readByte();
+        int type = buf.readUnsignedShort();
 
-        if (head != -1) {
+        huabao808 = new Huabao808();
 
-            Huabao808 huabao808 = new Huabao808();
+        if (type == PLATFORM_AUTHENTICATION) {
 
-            int type = buf.readUnsignedShort();
+            huabao808.register(buf);
+            response(huabao808.responsePlatformAuthentication(), channel);
 
-            if (type == PLATFORM_AUTHENTICATION && buf.capacity() >= 40) {
+        } else if (type == TERMINAL_AUTHENTICATION) {
 
-                huabao808.register(buf, PLATFORM_AUTHENTICATION);
-                huabao808.responsePlatformAuthentication(channel);
+            huabao808.register(buf);
+            response(huabao808.responseTerminalAuthentication(), channel);
 
+        } else if (type == LOCATION_REPORT) {
 
-            } else if (type == TERMINAL_AUTHENTICATION && buf.capacity() >= 31) {
+            Position position = huabao808.extractLocationInformation(buf);
+            huabao808.responseLocation(channel, LOCATION_REPORT);
 
-                huabao808.register(buf, TERMINAL_AUTHENTICATION);
-                huabao808.responseTerminalAuthentication(channel);
-
-            } else if (type == LOCATION_REPORT && buf.capacity() >= 61) {
-
-                Position position = huabao808.extractLocationInformation(buf);
-                huabao808.responseLocation(channel, LOCATION_REPORT);
-
-                return position;
-            }
+            return position;
         }
 
         return null;
     }
 
-    class ByteUtils {
+    private void response(byte[] response, Channel channel) {
 
-        public String bytesToString(byte[] bytes) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bytes.length; i++) {
-                byte b = bytes[i];
-                sb.append(String.format("%02X", b));
-            }
-            return sb.toString();
-        }
+        if (channel == null) return;
+        ChannelBuffer buffer = ChannelBuffers.directBuffer(response.length);
+        buffer.writeBytes(response);
+        channel.write(buffer);
 
-        public long bytesToLong(byte[] bytes) {
-            return Long.parseLong(bytesToString(bytes));
-        }
     }
 
     class Huabao808 {
 
-        private static final byte MESSAGE_HEAD = 126;
-        private static final byte MESSAGE_END = 126;
-        private static final int REGISTER_RESPONSE = 33024;
+        private static final byte MESSAGE_HEAD = 126; //Hex: 7e
+        private static final byte MESSAGE_END = 126; //Hex: 7e
+        private static final int REGISTER_RESPONSE = 33024; //Hex: 8100
+        private static final int REGISTER_RESPONSE_MSG = 19; //Hex: 13
         private static final int REGISTER_TERMINAL_RESPONSE = 32769;
-        private static final int REGISTER_TERMINAL_SERIAL_ID = 136;
-        private static final int REGISTER_SERIAL_ID = 133;
-        private static final byte REGISTER_SUCCESS = 00;
+        private static final byte REGISTER_ZERO = 00;
         private static final int LOCATION_RESPONSE = 33024;
         private static final int LOCATION_MSG = 5;
         private static final int LOCATION_SUCCESS = 217;
         private static final int LOCATION_SERIAL_ID = 133;
-        private ByteUtils byteUtils = new ByteUtils();
-        private int messageId;
         private byte deviceId[];
         private int serialId;
-        private int province;
-        private int country;
-        private byte manufacturerId[];
-        private byte terminalType[];
-        private byte terminalId[];
-        private byte plateColor;
-        private int messageHash;
-        private byte calibration;
-        private int messageProperty;
         private byte phoneNumber[];
         private int messageSerialNumber;
         private long alarmWord;
@@ -116,20 +94,13 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
         private short speed;
         private short direction;
         private byte time[];
-        private byte additionalDataIdTime;
-        private byte additionalDataLengthTime;
         private int mileage;
-        private byte additionalDataIdMileage;
-        private byte additionalDataLengthMileage;
-        private long mccCode;
-        private byte mncCode;
-        private short lac;
         private short cellID;
         private byte networkSignalStrength;
         private byte battLevel;
 
         private long getDeviceId() {
-            return byteUtils.bytesToLong(phoneNumber);
+            return bytesToLong(phoneNumber);
         }
 
         private double getLatitude() {
@@ -152,9 +123,6 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
             return direction;
         }
 
-        private String getAddress() {
-            return "";
-        }
 
         private String getExtendedInfo() {
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
@@ -184,7 +152,6 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(getAltitude());
             position.setSpeed(getSpeed());
             position.setCourse(getCourse());
-            position.setAddress(getAddress());
             return position;
         }
 
@@ -193,55 +160,63 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
             return dateFormat.format(new Date());
         }
 
-        public void register(ChannelBuffer buf, int messageId) {
-            this.messageId = messageId;
-            messageHash = buf.readUnsignedShort();
+        public void register(ChannelBuffer buf) {
+            buf.skipBytes(2);
             deviceId = buf.readBytes(6).array();
             serialId = buf.readUnsignedShort();
-            province = buf.readUnsignedShort();
-            country = buf.readUnsignedShort();
-            manufacturerId = buf.readBytes(5).array();
-            terminalType = buf.readBytes(8).array();
-            terminalId = buf.readBytes(7).array();
-            plateColor = buf.readByte();
-            calibration = buf.readByte();
         }
 
-        public void responsePlatformAuthentication(Channel channel) throws IOException {
-            ChannelBuffer response = ChannelBuffers.directBuffer(34);
-            response.writeByte(MESSAGE_HEAD);
-            response.writeShort(REGISTER_RESPONSE);
-            response.writeByte(REGISTER_SUCCESS);
-            response.writeByte(Byte.valueOf(calibration).intValue() ^ messageHash);
-            response.writeBytes(deviceId);
-            response.writeShort(REGISTER_SERIAL_ID);
-            response.writeShort(serialId);
-            response.writeByte(REGISTER_SUCCESS);
-            response.writeBytes(getCurrentDate().getBytes());
-            response.writeByte(calibration);
-            response.writeByte(MESSAGE_END);
-            channel.write(response);
+
+        public byte[] responsePlatformAuthentication() throws IOException {
+
+            ByteArrayOutputStream response = new ByteArrayOutputStream();
+
+            response.write(MESSAGE_HEAD);
+            response.write(BigInteger.valueOf(REGISTER_RESPONSE).toByteArray()[1]);
+            response.write(REGISTER_ZERO);
+            response.write(REGISTER_ZERO);
+            response.write(REGISTER_RESPONSE_MSG);
+            response.write(deviceId);
+            response.write(REGISTER_ZERO);
+            response.write(LOCATION_SERIAL_ID);
+            response.write(REGISTER_ZERO);
+            response.write(serialId);
+            response.write(REGISTER_ZERO);
+            response.write(getCurrentDate().getBytes());
+            response.write(hash(response.toByteArray()));
+            response.write(MESSAGE_END);
+
+            return response.toByteArray();
+
         }
 
-        public void responseTerminalAuthentication(Channel channel) throws IOException {
-            ChannelBuffer response = ChannelBuffers.directBuffer(20);
-            response.writeByte(MESSAGE_HEAD);
-            response.writeShort(REGISTER_TERMINAL_RESPONSE);
-            response.writeByte(REGISTER_SUCCESS);
-            response.writeByte(Byte.valueOf(calibration).intValue() ^ messageHash);
-            response.writeBytes(deviceId);
-            response.writeShort(REGISTER_TERMINAL_SERIAL_ID);
-            response.writeShort(serialId);
-            response.writeShort(messageId);
-            response.writeByte(REGISTER_SUCCESS);
-            response.writeByte(calibration);
-            response.writeByte(MESSAGE_END);
-            channel.write(response);
+
+        public byte[] responseTerminalAuthentication() throws IOException {
+
+            ByteArrayOutputStream response = new ByteArrayOutputStream();
+
+            response.write(MESSAGE_HEAD);
+            response.write(BigInteger.valueOf(REGISTER_TERMINAL_RESPONSE).toByteArray()[1]);
+            response.write(1);
+            response.write(REGISTER_ZERO);
+            response.write(5);
+            response.write(deviceId);
+            response.write(REGISTER_ZERO);
+            response.write(136);
+            response.write(REGISTER_ZERO);
+            response.write(serialId);
+            response.write(1);
+            response.write(2);
+            response.write(REGISTER_ZERO);
+            response.write(hash(response.toByteArray()));
+            response.write(MESSAGE_END);
+            return response.toByteArray();
+
         }
 
         public Position extractLocationInformation(ChannelBuffer buf) {
 
-            messageProperty = buf.readUnsignedShort();
+            buf.skipBytes(2);
             phoneNumber = buf.readBytes(6).array();
             messageSerialNumber = buf.readUnsignedShort();
             alarmWord = buf.readUnsignedInt();
@@ -252,35 +227,74 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
             speed = buf.readShort();
             direction = buf.readShort();
             time = buf.readBytes(6).array();
-            additionalDataIdTime = buf.readByte();
-            additionalDataLengthTime = buf.readByte();
+            buf.skipBytes(2);
             mileage = buf.readInt();
-            additionalDataIdMileage = buf.readByte();
-            additionalDataLengthMileage = buf.readByte();
-            mccCode = buf.readUnsignedMedium();
-            mncCode = buf.readByte();
-            lac = buf.readShort();
+            buf.skipBytes(8);
             cellID = buf.readShort();
             networkSignalStrength = buf.readByte();
             battLevel = buf.readByte();
-            calibration = buf.readByte();
 
             return getPosition();
+
         }
 
         public void responseLocation(Channel channel, int messageId) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(20);
-            response.writeByte(MESSAGE_HEAD);
-            response.writeShort(LOCATION_RESPONSE);
-            response.writeShort(LOCATION_MSG);
-            response.writeBytes(phoneNumber);
-            response.writeShort(LOCATION_SERIAL_ID);
-            response.writeShort(messageSerialNumber);
-            response.writeShort(messageId);
-            response.writeShort(LOCATION_SUCCESS);
-            response.writeByte(MESSAGE_END);
-            channel.write(response);
+
+            ByteArrayOutputStream response = new ByteArrayOutputStream();
+
+            response.write(MESSAGE_HEAD);
+            response.write(BigInteger.valueOf(REGISTER_TERMINAL_RESPONSE).toByteArray()[1]);
+            response.write(1);
+            response.write(LOCATION_RESPONSE);
+            response.write(LOCATION_MSG);
+            try {
+                response.write(phoneNumber);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            response.write(REGISTER_ZERO);
+            response.write(LOCATION_SERIAL_ID);
+            response.write(REGISTER_ZERO);
+            response.write(messageSerialNumber);
+            response.write(2);
+            response.write(REGISTER_ZERO);
+            response.write(messageId);
+            response.write(LOCATION_SUCCESS);
+            response.write(MESSAGE_END);
+
+            response(response.toByteArray(), channel);
+
         }
 
+        public String bytesToString(byte[] bytes) {
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < bytes.length; i++) {
+                byte b = bytes[i];
+                sb.append(String.format("%02X", b));
+            }
+
+            return sb.toString();
+
+        }
+
+        public long bytesToLong(byte[] bytes) {
+
+            return Long.parseLong(bytesToString(bytes));
+
+        }
+
+        public  byte hash(byte[] response) {
+
+            byte result = response[1];
+
+            for (int i = 2; i < response.length; i++) {
+                result = (byte) (result ^ response[i]);
+            }
+
+            return result;
+
+        }
     }
 }
