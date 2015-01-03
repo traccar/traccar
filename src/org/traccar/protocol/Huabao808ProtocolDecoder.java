@@ -34,6 +34,9 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
+        if (buf.readByte() == -1)
+            return null;
+
         buf.skipBytes(1);
 
         int type = buf.readUnsignedShort();
