@@ -2,9 +2,9 @@ package org.traccar.protocol;
 
 
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.helper.TestDataManager;
+
 import static org.junit.Assert.assertEquals;
 
 public class Huabao808ProtocolDecoderTest {
@@ -19,6 +19,18 @@ public class Huabao808ProtocolDecoderTest {
         return data;
     }
 
+    public static String bytesToString(byte[] bytes) {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < bytes.length; i++) {
+            byte b = bytes[i];
+            sb.append(String.format("%02X", b));
+        }
+
+        return sb.toString();
+    }
+
     @Test
     public void testTerminalAuthentication() throws Exception {
 
@@ -27,10 +39,10 @@ public class Huabao808ProtocolDecoderTest {
         String msg = "7E010200100940278494700084323031313131303831313333323139369F7E";
         String response = "7E8001000509402784947000880084010200857E";
 
+
         decoder.decode(null, null, ChannelBuffers.wrappedBuffer(hexStringToByteArray(msg)));
 
-        //assertEquals(response,bytesToString(decoder.getTerminalResponse()));
-
+        assertEquals(response,bytesToString(decoder.responseTerminalAuthentication()));
     }
 
     @Test
@@ -43,8 +55,7 @@ public class Huabao808ProtocolDecoderTest {
 
         decoder.decode(null, null, ChannelBuffers.wrappedBuffer(hexStringToByteArray(msg)));
 
-        //assertEquals(response,bytesToString(decoder.getPlatformResponse()));
-
+        assertEquals(response.substring(0,32), bytesToString(decoder.responsePlatformAuthentication()).substring(0,32));
     }
 
     @Test
@@ -57,6 +68,7 @@ public class Huabao808ProtocolDecoderTest {
 
         decoder.decode(null, null, ChannelBuffers.wrappedBuffer(hexStringToByteArray(msg)));
 
+        assertEquals(response, bytesToString(decoder.responseLocation()));
     }
 
 }
