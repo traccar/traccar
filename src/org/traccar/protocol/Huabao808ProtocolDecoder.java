@@ -37,8 +37,6 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
         if (buf.readByte() == -1)
             return null;
 
-        buf.skipBytes(1);
-
         int type = buf.readUnsignedShort();
 
         huabao808 = new Huabao808();

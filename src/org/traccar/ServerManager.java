@@ -1290,7 +1290,9 @@ public class ServerManager {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new Huabao808FrameDecoder());
+                    byte delimiter[] = { (byte) 126, (byte) 126 };
+                    pipeline.addLast("frameDecoder",
+                            new DelimiterBasedFrameDecoder(1024, ChannelBuffers.wrappedBuffer(delimiter)));
                     pipeline.addLast("objectDecoder", new Huabao808ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
