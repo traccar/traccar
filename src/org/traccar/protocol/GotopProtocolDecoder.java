@@ -116,7 +116,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(0.0);
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

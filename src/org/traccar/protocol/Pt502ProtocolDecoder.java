@@ -132,7 +132,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

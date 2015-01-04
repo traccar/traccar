@@ -153,7 +153,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("alarm", parser.group(index++));
         extendedInfo.set("ad", parser.group(index++));
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

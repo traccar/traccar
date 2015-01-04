@@ -126,7 +126,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         }
         
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 
@@ -212,7 +212,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         // Power
         extendedInfo.set("power", Double.valueOf(parser.group(index++)));
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

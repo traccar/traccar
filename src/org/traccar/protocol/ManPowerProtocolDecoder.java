@@ -119,7 +119,7 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(0.0);
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

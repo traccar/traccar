@@ -143,7 +143,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response + "\r\n");
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

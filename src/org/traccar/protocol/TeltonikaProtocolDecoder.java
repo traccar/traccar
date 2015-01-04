@@ -205,7 +205,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             positions.add(position);
         }
         

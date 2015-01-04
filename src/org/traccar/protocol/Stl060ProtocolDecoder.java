@@ -128,7 +128,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

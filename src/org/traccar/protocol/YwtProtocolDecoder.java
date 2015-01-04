@@ -152,7 +152,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

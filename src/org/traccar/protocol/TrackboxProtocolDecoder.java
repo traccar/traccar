@@ -137,7 +137,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("satellites", parser.group(index++));
 
             // Extended info
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
             return position;
         }

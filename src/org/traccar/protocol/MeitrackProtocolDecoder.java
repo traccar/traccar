@@ -157,7 +157,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("power", Integer.parseInt(parser.group(index++), 16));
         
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }
@@ -232,7 +232,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             
             buf.readUnsignedInt(); // geo-fence
             
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             positions.add(position);
         }
         

@@ -124,7 +124,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             // Fuel
             extendedInfo.set("fuel", buf.readUnsignedByte());
             
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 

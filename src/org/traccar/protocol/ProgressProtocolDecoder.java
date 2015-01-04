@@ -232,7 +232,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedInt();
 
                 // Extended info
-                position.setExtendedInfo(extendedInfo.toString());
+                position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
                 positions.add(position);
             }

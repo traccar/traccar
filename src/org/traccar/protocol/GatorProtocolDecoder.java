@@ -119,7 +119,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             // Milage
             extendedInfo.set("milage", buf.readUnsignedInt());
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 

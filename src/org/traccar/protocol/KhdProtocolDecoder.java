@@ -127,7 +127,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             
             // TODO: parse extra data
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 

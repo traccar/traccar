@@ -139,7 +139,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("battery", Integer.valueOf(battery));
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

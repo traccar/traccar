@@ -114,7 +114,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         // TODO: a lot of other stuff
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
     
@@ -153,7 +153,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         // TODO: a lot of other stuff
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
     
@@ -177,7 +177,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         buf.readUnsignedByte(); // reserved
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
     
@@ -204,7 +204,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         int x = buf.readUnsignedByte(); // satellites in fix
         buf.readUnsignedInt(); // distance
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
     
@@ -245,7 +245,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         // TODO: a lot of other stuff
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
     
@@ -277,7 +277,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         buf.readUnsignedInt(); // distance
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
     

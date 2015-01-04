@@ -145,7 +145,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("axle", parser.group(index++));
         extendedInfo.set("milage", parser.group(index++));
         
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

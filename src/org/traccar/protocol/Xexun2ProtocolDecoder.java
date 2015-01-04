@@ -155,7 +155,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("power", Double.valueOf(parser.group(index++)));
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

@@ -124,7 +124,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

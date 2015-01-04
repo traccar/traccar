@@ -153,7 +153,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 // Status
                 extendedInfo.set("status", status);
                 
-                position.setExtendedInfo(extendedInfo.toString());
+                position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
                 positions.add(position);
             }
         }

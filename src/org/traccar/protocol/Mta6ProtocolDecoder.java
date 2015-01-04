@@ -202,7 +202,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                     extendedInfo.set("satellites", satellites);
                 }
 
-                position.setExtendedInfo(extendedInfo.toString());
+                position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
                 positions.add(position);
             }
         } catch (IndexOutOfBoundsException error) {
@@ -284,7 +284,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         
         // TODO: process other data
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         
         return position;
     }

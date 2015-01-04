@@ -211,7 +211,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Altitude
             position.setAltitude(0.0);
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 
@@ -263,7 +263,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Altitude
             position.setAltitude(0.0);
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 
@@ -320,7 +320,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Altitude
             position.setAltitude(0.0);
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 
@@ -364,7 +364,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Battery
             extendedInfo.set("battery", parser.group(index++));
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 

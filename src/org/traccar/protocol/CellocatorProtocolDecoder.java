@@ -164,7 +164,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.YEAR, buf.readUnsignedShort());
             position.setTime(time.getTime());
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 

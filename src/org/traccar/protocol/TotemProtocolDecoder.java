@@ -329,7 +329,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

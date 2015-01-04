@@ -229,7 +229,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("index", index);
             sendResponse(channel, type, index);
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
         

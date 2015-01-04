@@ -132,7 +132,7 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
 
             // TODO decode everything else
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
 
         }

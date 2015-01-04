@@ -154,7 +154,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("milage", Integer.parseInt(milage, 16));
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

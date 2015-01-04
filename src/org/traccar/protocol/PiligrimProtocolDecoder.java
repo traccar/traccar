@@ -172,7 +172,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                         
                     }
                     
-                    position.setExtendedInfo(extendedInfo.toString());
+                    position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
                     positions.add(position);
                     
                 } else if (type == MSG_EVENTS) {
