@@ -205,13 +205,13 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         private double getLatitude() {
-            double result = latitude / (60.0 * 30000.0);
+            double result =  latitude / (double)1000000;
             if ((direction & 0x0400) == 0) result = -result;
             return result;
         }
 
         private double getLongitude() {
-            double result = longitude / (60.0 * 30000.0);
+            double result =  longitude / (double)1000000;
             if ((direction & 0x0800) == 0) result = -result;
             return result;
         }
