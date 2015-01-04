@@ -71,4 +71,14 @@ public class Huabao808ProtocolDecoderTest {
         assertEquals(response, bytesToString(decoder.responseLocation()));
     }
 
+    @Test
+    public void testLocation1() throws Exception {
+
+        Huabao808ProtocolDecoder decoder = new Huabao808ProtocolDecoder(new TestDataManager(), null, null);
+
+        String msg ="7e020000220014012499170007000000000000400e012af16f02cbd2ba000000000000150101194257010400000077a97e";
+
+        decoder.decode(null, null, ChannelBuffers.wrappedBuffer(hexStringToByteArray(msg)));
+    }
+
 }

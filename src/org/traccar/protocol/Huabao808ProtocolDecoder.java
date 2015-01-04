@@ -205,11 +205,15 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         private double getLatitude() {
-            return latitude / (60.0 * 30000.0);
+            double result = latitude / (60.0 * 30000.0);
+            if ((direction & 0x0400) == 0) result = -result;
+            return result;
         }
 
         private double getLongitude() {
-            return longitude / (60.0 * 30000.0);
+            double result = longitude / (60.0 * 30000.0);
+            if ((direction & 0x0800) == 0) result = -result;
+            return result;
         }
 
         private double getAltitude() {
@@ -321,23 +325,25 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
         public Position extractLocationInformation(ChannelBuffer buf) {
 
-            buf.skipBytes(2);
-            phoneNumber = buf.readBytes(6).array();
-            messageSerialNumber = buf.readUnsignedShort();
-            alarmWord = buf.readUnsignedInt();
-            stateWord = buf.readUnsignedInt();
-            longitude = buf.readUnsignedInt();
-            latitude = buf.readUnsignedInt();
-            altitude = buf.readShort();
-            speed = buf.readShort();
-            direction = buf.readShort();
-            time = buf.readBytes(6).array();
-            buf.skipBytes(2);
-            mileage = buf.readInt();
-            buf.skipBytes(8);
-            cellID = buf.readShort();
-            networkSignalStrength = buf.readByte();
-            battLevel = buf.readByte();
+                buf.skipBytes(2);
+                phoneNumber = buf.readBytes(6).array();
+                messageSerialNumber = buf.readUnsignedShort();
+                alarmWord = buf.readUnsignedInt();
+                stateWord = buf.readUnsignedInt();
+                latitude = buf.readUnsignedInt();
+                longitude = buf.readUnsignedInt();
+                altitude = buf.readShort();
+                speed = buf.readShort();
+                direction = buf.readShort();
+                time = buf.readBytes(6).array();
+                buf.skipBytes(2);
+                mileage = buf.readInt();
+                if(buf.array().length >=61) {
+                    buf.skipBytes(8);
+                    cellID = buf.readShort();
+                    networkSignalStrength = buf.readByte();
+                    battLevel = buf.readByte();
+                }
 
             return getPosition();
         }
