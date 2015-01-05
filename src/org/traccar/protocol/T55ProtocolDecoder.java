@@ -228,6 +228,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
+            position.setDataBase(dataBase);
+            position.setImei(deviceImei);
 
             Integer index = 1;
 
@@ -280,6 +282,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
+            position.setDataBase(dataBase);
+            position.setImei(deviceImei);
 
             Integer index = 1;
 
@@ -337,6 +341,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             position.setDeviceId(deviceId);
+            position.setDataBase(dataBase);
+            position.setImei(deviceImei);
 
             Integer index = 1;
 

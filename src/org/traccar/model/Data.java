@@ -54,7 +54,7 @@ public class Data {
     private Date serverTime;
 
     public Date getServerTime() {
-        return serverTime;
+        return (serverTime!=null?serverTime:new Date());
     }
 
     public void setServerTime(Date serverTime) {

@@ -110,7 +110,7 @@ public class DataManager {
         }
 
         query = properties.getProperty("database.updateLatestPosition");
-        if (query != null) {
+        if ((query != null) && (!query.isEmpty())) {
             queryUpdateLatestPosition = new NamedParameterStatement(query, dataSource);
         }
         
@@ -136,7 +136,7 @@ public class DataManager {
             }
             //Имя базы для вставки/обновления позиции
             try{
-                device.setDataBase(rs.getString("database")+".");
+                device.setDataBase(rs.getString("database"));
             } catch (SQLException e) {
                 
             }
@@ -188,6 +188,8 @@ public class DataManager {
 
     public synchronized Long addPosition(Position position) throws SQLException {
         if (queryAddPosition != null) {
+            
+            
             List<Long> result = assignVariables(queryAddPosition.prepare(), position).executeUpdate(generatedKeysResultSetProcessor);
             if (result != null && !result.isEmpty()) {
                 return result.iterator().next();
@@ -203,7 +205,7 @@ public class DataManager {
     }
 
     private NamedParameterStatement.Params assignVariables(NamedParameterStatement.Params params, Position position) throws SQLException {
-
+       
         params.setLong("device_id", position.getDeviceId());
         params.setTimestamp("time", position.getTime());
         params.setBoolean("valid", position.getValid());
@@ -216,8 +218,9 @@ public class DataManager {
         params.setString("extended_info", position.getExtendedInfo());  
         
         params.setString("imei", position.getImei());
-        params.setString("database", position.getDataBase());
         params.setTimestamp("systemtime", position.getServerTime());
+        
+        params.setDataBase(position.getDataBase());
         
         if(this.getStyleInfo().equals("xml")){
 

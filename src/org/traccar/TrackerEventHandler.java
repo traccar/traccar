@@ -57,6 +57,9 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
             id = dataManager.addPosition(position);
         } catch (Exception error) {
             Log.warning(error);
+            //Log.warning("IMEI: "+position.getImei());
+            //Log.warning("DataBase: "+position.getDataBase());
+            //Log.warning("ExtendedInfo: "+position.getExtendedInfo());
         }
         return id;
     }
