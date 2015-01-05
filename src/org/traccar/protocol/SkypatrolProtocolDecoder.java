@@ -220,7 +220,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Extended info
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
             return position;
         }

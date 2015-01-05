@@ -161,7 +161,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
         

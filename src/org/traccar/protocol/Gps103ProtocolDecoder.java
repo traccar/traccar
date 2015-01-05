@@ -180,7 +180,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("io4", parser.group(index++));
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

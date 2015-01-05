@@ -117,7 +117,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     extendedInfo.set("io" + buf.readUnsignedByte(), buf.readLong());
                 }
 
-                position.setExtendedInfo(extendedInfo.toString());
+                position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
                 positions.add(position);
             }
 

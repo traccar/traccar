@@ -142,7 +142,7 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         // Altitude
         position.setAltitude(0.0);
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

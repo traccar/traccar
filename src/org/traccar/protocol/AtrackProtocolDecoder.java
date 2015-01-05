@@ -160,7 +160,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             // For example adding AT$FORM %FC /Fuel used you can add the line in this position:
             // extendedInfo.set("fuelused", buf.readUnsignedInt() * 0.1);
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             positions.add(position);
         }
 

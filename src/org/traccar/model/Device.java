@@ -72,4 +72,18 @@ public class Device {
         this.uniqueId = uniqueId;
     }
 
+    
+    /**
+     * DataBase имя базы для вставки и обновлений координат
+     */
+    private String dataBase;
+
+    public String getDataBase() {        
+        return ((dataBase != null && !dataBase.isEmpty())?dataBase:"");
+    }
+
+    public void setDataBase(String dataBase) {
+        this.dataBase = dataBase;
+    }
+    
 }

@@ -63,6 +63,8 @@ public class DataManager {
     private NamedParameterStatement queryGetDevices;
     private NamedParameterStatement queryAddPosition;
     private NamedParameterStatement queryUpdateLatestPosition;
+    
+    private String infoStyle;
 
     /**
      * Initialize database
@@ -108,9 +110,15 @@ public class DataManager {
         }
 
         query = properties.getProperty("database.updateLatestPosition");
-        if (query != null) {
+        if ((query != null) && (!query.isEmpty())) {
             queryUpdateLatestPosition = new NamedParameterStatement(query, dataSource);
         }
+        
+        //Initialization info style
+        infoStyle = properties.getProperty("database.infoStyle");
+        if (infoStyle == null) {
+            infoStyle="xml";
+        }       
     }
 
     private final NamedParameterStatement.ResultSetProcessor<Device> deviceResultSetProcessor = new NamedParameterStatement.ResultSetProcessor<Device>() {
@@ -119,6 +127,20 @@ public class DataManager {
             Device device = new Device();
             device.setId(rs.getLong("id"));
             device.setImei(rs.getString("imei"));
+            
+            //Уникальный ID - не использую       
+            try{
+                device.setUniqueId(rs.getString("uniqueid"));
+            } catch (SQLException e) {
+                
+            }
+            //Имя базы для вставки/обновления позиции
+            try{
+                device.setDataBase(rs.getString("database"));
+            } catch (SQLException e) {
+                
+            }
+            //
             return device;
         }
     };
@@ -131,6 +153,10 @@ public class DataManager {
         }
     }
 
+    public String getStyleInfo(){
+        return infoStyle;
+    }
+    
     /**
      * Devices cache
      */
@@ -162,6 +188,8 @@ public class DataManager {
 
     public synchronized Long addPosition(Position position) throws SQLException {
         if (queryAddPosition != null) {
+            
+            
             List<Long> result = assignVariables(queryAddPosition.prepare(), position).executeUpdate(generatedKeysResultSetProcessor);
             if (result != null && !result.isEmpty()) {
                 return result.iterator().next();
@@ -177,7 +205,7 @@ public class DataManager {
     }
 
     private NamedParameterStatement.Params assignVariables(NamedParameterStatement.Params params, Position position) throws SQLException {
-
+       
         params.setLong("device_id", position.getDeviceId());
         params.setTimestamp("time", position.getTime());
         params.setBoolean("valid", position.getValid());
@@ -187,31 +215,71 @@ public class DataManager {
         params.setDouble("speed", position.getSpeed());
         params.setDouble("course", position.getCourse());
         params.setString("address", position.getAddress());
-        params.setString("extended_info", position.getExtendedInfo());
+        params.setString("extended_info", position.getExtendedInfo());  
+        
+        params.setString("imei", position.getImei());
+        params.setTimestamp("systemtime", position.getServerTime());
+        
+        params.setDataBase(position.getDataBase());
+        
+        if(this.getStyleInfo().equals("xml")){
 
-        // DELME: Temporary compatibility support
-        XPath xpath = XPathFactory.newInstance().newXPath();
-        try {
-            InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
-            String index = xpath.evaluate("/info/index", source);
-            if (!index.isEmpty()) {
-                params.setLong("id", Long.valueOf(index));
-            } else {
+            // DELME: Temporary compatibility support
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            try {
+                InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
+                String index = xpath.evaluate("/info/index", source);
+                if (!index.isEmpty()) {
+                    params.setLong("id", Long.valueOf(index));
+                } else {
+                    params.setLong("id", null);
+                }
+                source = new InputSource(new StringReader(position.getExtendedInfo()));
+                String power = xpath.evaluate("/info/power", source);
+                if (!power.isEmpty()) {
+                    params.setDouble("power", Double.valueOf(power));
+                } else {
+                    params.setLong("power", null);
+                }
+            } catch (XPathExpressionException e) {
+                Log.warning("Error in XML: " + position.getExtendedInfo(), e);
                 params.setLong("id", null);
-            }
-            source = new InputSource(new StringReader(position.getExtendedInfo()));
-            String power = xpath.evaluate("/info/power", source);
-            if (!power.isEmpty()) {
-                params.setDouble("power", Double.valueOf(power));
-            } else {
                 params.setLong("power", null);
             }
-        } catch (XPathExpressionException e) {
-            Log.warning("Error in XML: " + position.getExtendedInfo(), e);
-            params.setLong("id", null);
-            params.setLong("power", null);
         }
-
+        else if(this.getStyleInfo().equals("quant")){
+            String info = position.getExtendedInfo();
+            try{
+                int start = info.indexOf("index=");
+                if(start>=0){
+                    String index = info.substring(start+6, info.indexOf(";",start+6));
+                    params.setLong("id", Long.valueOf(index));
+                }
+                else{
+                    params.setLong("id", null);
+                }
+            }
+            catch(Exception e){
+                Log.warning("Error in parse ExtendedInfo: " + position.getExtendedInfo(), e);
+                params.setLong("id", null);
+            }
+            
+            try{
+                int start = info.indexOf("power=");
+                if(start>=0){
+                    String power = info.substring(start+6, info.indexOf(";",start+6));
+                    params.setLong("power", Long.valueOf(power));
+                }
+                else{
+                    params.setLong("power", null);
+                }
+            }
+            catch(Exception e){
+                Log.warning("Error in parse ExtendedInfo: " + position.getExtendedInfo(), e);
+                params.setLong("power", null);
+            }
+        }
+        
         return params;
     }
 

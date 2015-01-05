@@ -122,7 +122,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         // Output
         extendedInfo.set("output", parser.group(index++));
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

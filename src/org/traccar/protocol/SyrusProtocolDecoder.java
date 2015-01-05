@@ -171,7 +171,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         // Validity
         position.setValid(Integer.valueOf(parser.group(index++)) == 2);
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

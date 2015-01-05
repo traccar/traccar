@@ -151,7 +151,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("rfid", parser.group(index++));
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

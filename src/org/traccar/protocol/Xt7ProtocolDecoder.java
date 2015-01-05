@@ -161,7 +161,7 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("alarm", parser.group(index++));
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

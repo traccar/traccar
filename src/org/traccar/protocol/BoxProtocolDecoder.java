@@ -115,7 +115,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.setValid((status & 0x04) == 0);
             extendedInfo.set("status", status);
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
         

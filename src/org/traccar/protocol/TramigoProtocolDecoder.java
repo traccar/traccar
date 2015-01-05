@@ -97,7 +97,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             // TODO: parse other data
 
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             return position;
         }
 

@@ -121,7 +121,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 extendedInfo.set("satellites", satellites);
                 position.setValid(satellites >= 3);
                 
-                position.setExtendedInfo(extendedInfo.toString());
+                position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
                 positions.add(position);
             }
             

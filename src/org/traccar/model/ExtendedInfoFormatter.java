@@ -60,5 +60,19 @@ public class ExtendedInfoFormatter {
         
         return result.toString();
     }
-
+    
+    
+    public String getStyle(String format){
+        if(format.toLowerCase().trim().equals("xml")){
+            return this.toString();
+        }
+        else if(format.toLowerCase().trim().equals("quant")){
+            StringBuilder result = new StringBuilder();
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                result.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
+            }            
+            return result.toString();
+        }
+        return "";
+    }
 }

@@ -118,7 +118,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("battery", params.get("batt").get(0));
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         
         // Send response
         if (channel != null) {

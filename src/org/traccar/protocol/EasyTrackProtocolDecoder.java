@@ -142,7 +142,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(0.0);
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

@@ -100,7 +100,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             // Check if new message started
             int tag = buf.readUnsignedByte();
             if (tags.contains(tag)) {
-                position.setExtendedInfo(extendedInfo.toString());
+                position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
                 positions.add(position);
                 tags.clear();
                 position = new Position();
@@ -162,7 +162,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         positions.add(position);
         
         if (deviceId == null) {

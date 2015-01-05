@@ -131,7 +131,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("battery", Double.valueOf(parser.group(index++)) / 10);
 
         // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
 
         return position;
     }

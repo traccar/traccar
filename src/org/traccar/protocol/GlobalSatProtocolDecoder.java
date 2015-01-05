@@ -172,7 +172,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             valueIndex += 1;
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
     
@@ -258,7 +258,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         // HDOP
         extendedInfo.set("hdop", parser.group(index++));
 
-        position.setExtendedInfo(extendedInfo.toString());
+        position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
         return position;
     }
 

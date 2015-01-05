@@ -29,12 +29,15 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     
     private long deviceId;
+    private String deviceImei;
+    private String dataBase;
 
     public TeltonikaProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
         super(dataManager, protocol, properties);
@@ -46,7 +49,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
         try {
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
+            Device device = getDataManager().getDeviceByImei(imei);
+            deviceImei = imei;
+            deviceId = device.getId();
+            dataBase = device.getDataBase();
+            
             result = true;
         } catch(Exception error) {
             Log.warning("Unknown device - " + imei);
@@ -87,6 +94,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             
             position.setDeviceId(deviceId);
+            position.setDataBase(dataBase);
+            position.setImei(deviceImei);
             
             int globalMask = 0x0f;
             
@@ -196,7 +205,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         
-            position.setExtendedInfo(extendedInfo.toString());
+            position.setExtendedInfo(extendedInfo.getStyle(getDataManager().getStyleInfo()));
             positions.add(position);
         }
         

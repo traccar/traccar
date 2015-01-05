@@ -54,7 +54,7 @@ public class Data {
     private Date serverTime;
 
     public Date getServerTime() {
-        return serverTime;
+        return (serverTime!=null?serverTime:new Date());
     }
 
     public void setServerTime(Date serverTime) {
@@ -73,5 +73,31 @@ public class Data {
     public void setExtendedInfo(String extendedInfo) {
         this.extendedInfo = extendedInfo;
     }
+    
+    /**
+     * DataBase for position insert/update
+     */
+    private String dataBase;
 
+    public String getDataBase() {
+        return dataBase;
+    }
+
+    public void setDataBase(String dataBase) {
+        this.dataBase = dataBase;
+    }
+
+    
+    /**
+     * Device IMEI
+     */
+    private String imei;
+
+    public String getImei() {
+        return imei;
+    }
+
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
 }
