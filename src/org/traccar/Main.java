@@ -28,6 +28,8 @@ public class Main {
 
         Log.info("Starting server...");
         Log.logSystemInfo();
+        
+        Log.info("Version: " + Main.class.getPackage().getImplementationVersion());
 
         service.start();
 
