@@ -31,4 +31,10 @@ public class ChannelBufferToolsTest {
         result = Long.valueOf(result).toString();
         assertEquals("1903", result);
     }
+
+    @Test
+    public void convertHexStringTest() {
+        assertArrayEquals(ChannelBufferTools.convertHexString("1234"), new byte[] {0x12,0x34});
+    }
+
 }

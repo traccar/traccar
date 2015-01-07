@@ -17,6 +17,7 @@ package org.traccar.helper;
 
 import java.util.Formatter;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.traccar.protocol.IntellitracFrameDecoder;
 
 /**
  * ChannelBuffer helper methods
@@ -130,4 +131,17 @@ public class ChannelBufferTools {
         }
         return out;
     }
+
+    /**
+     * Convert hex string to byte array
+     */
+    public static byte[] convertHexString(String in) {
+        int count = in.length() / 2;
+        byte[] out = new byte[count];
+        for (int i = 0; i < count; i++) {
+            out[i] = Integer.valueOf(in.substring(i * 2, (i + 1) * 2), 16).byteValue();
+        }
+        return out;
+    }
+
 }
