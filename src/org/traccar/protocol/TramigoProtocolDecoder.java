@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
@@ -24,8 +25,15 @@ import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
+import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -43,10 +51,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        if (buf.readUnsignedByte() != 1) {
-            return null; // wrong protocol version
-        }
-
+        int protocol = buf.readUnsignedByte();
         buf.readUnsignedByte(); // version id
         int index = buf.readUnsignedShort();
         int type = buf.readUnsignedShort();
@@ -56,25 +61,27 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         long id = buf.readUnsignedInt();
         buf.readUnsignedInt(); // time
 
-        if (type == MSG_COMPACT || type == MSG_FULL) {
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        extendedInfo.set("index", index);
+        position.setValid(true);
 
-            // Create new position
-            Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            extendedInfo.set("index", index);
+        // Get device id
+        try {
+            position.setDeviceId(getDataManager().getDeviceByImei(String.valueOf(id)).getId());
+        } catch(Exception error) {
+            Log.warning("Unknown device - " + id);
+            return null;
+        }
 
-            // Get device id
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(String.valueOf(id)).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
-                return null;
-            }
+        if (protocol == 0x01 && (type == MSG_COMPACT || type == MSG_FULL)) {
+
+            // TODO: send ack
 
             buf.readUnsignedShort(); // report trigger
             buf.readUnsignedShort(); // state flag
 
-            position.setValid(true);
             position.setLatitude(buf.readUnsignedInt() * 0.0000001);
             position.setLongitude(buf.readUnsignedInt() * 0.0000001);
             position.setAltitude(0.0);
@@ -99,6 +106,48 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
+
+        } else if (protocol == 0x80) {
+
+            if (channel != null) {
+                channel.write(ChannelBuffers.copiedBuffer("gprs,ack," + index, Charset.defaultCharset()));
+            }
+
+            String sentence = buf.toString(Charset.defaultCharset());
+
+            // Coordinates
+            Pattern pattern = Pattern.compile("(-?\\d+\\.\\d+), (-?\\d+\\.\\d+)");
+            Matcher matcher = pattern.matcher(sentence);
+            if (!matcher.find()) {
+                return null;
+            }
+            position.setLatitude(Double.valueOf(matcher.group(1)));
+            position.setLongitude(Double.valueOf(matcher.group(2)));
+            position.setAltitude(0.0);
+
+            // Speed and Course
+            pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
+            matcher = pattern.matcher(sentence);
+            if (matcher.find()) {
+                position.setSpeed(Double.valueOf(matcher.group(2)) * 0.539957);
+                position.setCourse(0.0); // matcher.group(1) for course
+            } else {
+                position.setSpeed(0.0);
+                position.setCourse(0.0);
+            }
+
+            // Time
+            pattern = Pattern.compile("(\\d{1,2}:\\d{2} \\w{3} \\d{1,2})");
+            matcher = pattern.matcher(sentence);
+            if (!matcher.find()) {
+                return null;
+            }
+            DateFormat dateFormat = new SimpleDateFormat("HH:mm MMM d yyyy");
+            position.setTime(dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR)));
+
+            position.setExtendedInfo(extendedInfo.toString());
+            return position;
+
         }
 
         return null;

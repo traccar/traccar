@@ -1290,13 +1290,15 @@ public class ServerManager {
 
     private void initTramigoServer(final String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 6, 2, -8, 0));
+                    pipeline.addLast("frameDecoder", new TramigoFrameDecoder());
                     pipeline.addLast("objectDecoder", new TramigoProtocolDecoder(dataManager, protocol, properties));
                 }
-            });
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
