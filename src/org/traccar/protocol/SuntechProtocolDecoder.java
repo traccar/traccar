@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     static private Pattern pattern = Pattern.compile(
             "S.\\d{3}(?:\\w{3})?;" +       // Header
             "(?:[^;]+;)?" +
-            "(\\d{6});" +                  // Device ID
+            "(\\d{6,});" +                 // Device ID
+            "(?:\\d+;)?" +
             "(\\d+);" +                    // Version
             "(\\d{4})(\\d{2})(\\d{2});" +  // Date (YYYYMMDD)
             "(\\d{2}):(\\d{2}):(\\d{2});" + // Time (HH:MM:SS)

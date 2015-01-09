@@ -41,6 +41,9 @@ public class SuntechProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "ST910;Location;344506;017;20130727;14:10:00;-25.398714;-049.296818;000.187;000.00;1;4.32;1;1;0001"));
 
+        verify(decoder.decode(null, null,
+                "ST300STT;205027329;03;374;20150108;17:54:42;177b38;-23.566052;-046.477588;000.000;000.00;0;0;0;12.11;000000;1;0312"));
+
     }
 
 }
