@@ -14,12 +14,18 @@ public class UlbotechProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(new TestDataManager(), null, null);
-        
-        //verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(
-        //        new int[] {0xF8,0x01,0x01,0x08,0x63,0x07,0x00,0x18,0x98,0x72,0x98,0x72,0x96,0x19,0x02,0x27,0x01,0xCC,0x00,0x00,0x28,0x55,0x34,0xBA,0x4F,0x28,0x55,0x3A,0xB1,0x4C,0x28,0x55,0xBC,0x9C,0x57,0x28,0x55,0xBC,0x9D,0x5B,0x28,0x55,0x3A,0xB2,0x5C,0x28,0x55,0x44,0x58,0x61,0x28,0x55,0x44,0x58,0x63,0x03,0x04,0x00,0x00,0x00,0x00,0x04,0x04,0x00,0x00,0x07,0x6F,0x05,0x08,0x03,0x3A,0x18,0xCF,0x22,0x0D,0x3D,0xE6,0xA6,0x38,0xF8}))));
 
-        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertArray(
-                new int[] {0xF8,0x01,0x01,0x03,0x57,0x85,0x20,0x34,0x57,0x28,0x94,0x95,0xD6,0x02,0x35,0x01,0x0E,0x01,0x61,0x75,0xA5,0x06,0xC2,0xC8,0x38,0x00,0x00,0x00,0x00,0x00,0x64}))));
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "F80101035785203457289495D60235010E016175A506C2C838000000000064"))));
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "F8010108621060211481299C4247FA010E015EE1D606BDE797000301370081030402420000040400523CAF050603921743220706080000000000000000071131058E410C0E30310D48312F8E4131046A080402C8F2545445F8"))));
+        
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "F8010108621060211481299C4249FA010E015EE27506BDE80900020000008F030402420000040400523CAF05060392173F220706080000000000000000071131058E410C0E40310D48312F8E41310884080402CA60E43872F8"))));
+        
+        //verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+        //        "F801010863070018987298729619022701CC0000285534BA4F28553AB14C2855BC9C572855BC9D5B28553AB25C2855445861285544586303040000000004040000076F0508033A18CF220D3DE6A638F8"))));
 
     }
 
