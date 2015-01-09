@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.nio.ByteOrder;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -43,7 +44,7 @@ public class TramigoFrameDecoder extends LengthFieldBasedFrameDecoder {
             int length = buf.readableBytes();
             byte bytes[] = new byte[length];
             buf.getBytes(buf.readerIndex(), bytes);
-            buf = ChannelBuffers.wrappedBuffer(bytes);
+            buf = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes);
         }
 
         return decode(ctx, channel, buf);
