@@ -44,10 +44,16 @@ public class TramigoFrameDecoder extends LengthFieldBasedFrameDecoder {
             int length = buf.readableBytes();
             byte bytes[] = new byte[length];
             buf.getBytes(buf.readerIndex(), bytes);
-            buf = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes);
+            
+            ChannelBuffer result = (ChannelBuffer) super.decode(
+                    ctx, channel, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes));
+            if (result != null) {
+                buf.skipBytes(result.readableBytes());
+            }
+            return result;
         }
 
-        return decode(ctx, channel, buf);
+        return super.decode(ctx, channel, buf);
     }
 
 }
