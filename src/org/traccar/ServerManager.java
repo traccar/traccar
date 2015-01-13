@@ -1274,14 +1274,11 @@ public class ServerManager {
     }
 
     private void initUlbotechServer(final String protocol) throws SQLException {
-
-        // TODO: Waiting for feedback from manufacturer
-
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 1, 2, 0));
+                    pipeline.addLast("frameDecoder", new UlbotechFrameDecoder());
                     pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(dataManager, protocol, properties));
                 }
             });
