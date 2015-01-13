@@ -167,11 +167,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (checkBit(globalMask, 1)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    int ioID=buf.readUnsignedByte();
-                    if(ioID==1)
+                    int id = buf.readUnsignedByte();
+                    if (id == 1) {
                         extendedInfo.set("power", buf.readUnsignedByte());
-                    else
-                        extendedInfo.set("io" + ioID, buf.readUnsignedByte());
+                    } else {
+                        extendedInfo.set("io" + id, buf.readUnsignedByte());
+                    }
                 }
             }
 
