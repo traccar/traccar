@@ -178,7 +178,8 @@ public class ServerManager {
         initRitiServer("riti");
         initUlbotechServer("ulbotech");
         initTramigoServer("tramigo");
-        initTramigoServer("tr900");
+        initTr900Server("tr900");
+        initArdi01Server("ardi01");
         
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
@@ -1242,6 +1243,19 @@ public class ServerManager {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new Tr900ProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
+
+    private void initArdi01Server(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new Ardi01ProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
