@@ -104,13 +104,12 @@ public class ServerManager {
 
         initGeocoder(properties);
 
-        initXexunServer("xexun");
         initGps103Server("gps103");
         initTk103Server("tk103");
         initGl100Server("gl100");
         initGl200Server("gl200");
         initT55Server("t55");
-        initXexun2Server("xexun2");
+        initXexunServer("xexun");
         initTotemServer("totem");
         initEnforaServer("enfora");
         initMeiligaoServer("meiligao");
@@ -234,19 +233,6 @@ public class ServerManager {
         return false;
     }
 
-    private void initXexunServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new XexunFrameDecoder());
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new XexunProtocolDecoder(dataManager, protocol, properties));
-                }
-            });
-        }
-    }
-
     private void initGps103Server(final String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
@@ -333,14 +319,20 @@ public class ServerManager {
         }
     }
 
-    private void initXexun2Server(final String protocol) throws SQLException {
+    private void initXexunServer(final String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024)); // tracker bug \n\r
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(dataManager, protocol, properties));
+                    if (Boolean.valueOf(properties.containsKey(protocol + ".extended"))) {
+                        pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024)); // tracker bug \n\r
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(dataManager, protocol, properties));
+                    } else {
+                        pipeline.addLast("frameDecoder", new XexunFrameDecoder());
+                        pipeline.addLast("stringDecoder", new StringDecoder());
+                        pipeline.addLast("objectDecoder", new XexunProtocolDecoder(dataManager, protocol, properties));
+                    }
                 }
             });
         }
