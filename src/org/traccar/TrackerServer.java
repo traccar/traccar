@@ -114,6 +114,10 @@ public abstract class TrackerServer {
         bootstrap.setPipelineFactory(pipelineFactory);
     }
 
+    public ChannelPipelineFactory getPipelineFactory() {
+        return bootstrap.getPipelineFactory();
+    }
+
     /**
      * Start server
      */

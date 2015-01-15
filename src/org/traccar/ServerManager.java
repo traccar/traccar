@@ -179,7 +179,9 @@ public class ServerManager {
         initTramigoServer("tramigo");
         initTr900Server("tr900");
         initArdi01Server("ardi01");
-        
+
+        initProtocolDetector();
+
         // Initialize web server
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
             webServer = new WebServer(properties, dataManager.getDataSource());
@@ -233,6 +235,23 @@ public class ServerManager {
         return false;
     }
 
+    private void initProtocolDetector() throws SQLException {
+        String protocol = "detector";
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
+                }
+            });
+            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
+                }
+            });
+        }
+    }
     private void initGps103Server(final String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
             serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
