@@ -18,6 +18,8 @@ package org.traccar;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
+import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.database.DataManager;
@@ -25,6 +27,8 @@ import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.lang.reflect.Method;
+import java.net.SocketAddress;
 import java.util.List;
 
 public class DetectorHandler extends SimpleChannelHandler {
@@ -35,6 +39,62 @@ public class DetectorHandler extends SimpleChannelHandler {
         this.serverList = serverList;
     }
 
+    public static void checkPipeline(String protocol, ChannelPipeline pipeline, ChannelBuffer buf) throws Exception {
+        Object tmp = buf.duplicate();
+
+        // Frame decoder
+        FrameDecoder frameDecoder = (FrameDecoder) pipeline.get("frameDecoder");
+        if (frameDecoder != null) {
+            try {
+                Method method = frameDecoder.getClass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, ChannelBuffer.class);
+                method.setAccessible(true);
+                tmp = method.invoke(frameDecoder, null, null, tmp);
+            } catch (NoSuchMethodException error) {
+                Method method = frameDecoder.getClass().getSuperclass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, ChannelBuffer.class);
+                method.setAccessible(true);
+                tmp = method.invoke(frameDecoder, null, null, tmp);
+            }
+        }
+
+        // String decoder
+        if (pipeline.get("stringDecoder") != null) {
+            StringDecoder stringDecoder = new StringDecoder();
+            if (tmp != null) {
+                try {
+                    Method method = stringDecoder.getClass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, Object.class);
+                    method.setAccessible(true);
+                    tmp = method.invoke(stringDecoder, null, null, tmp);
+                } catch (NoSuchMethodException error) {
+                    Method method = stringDecoder.getClass().getSuperclass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, Object.class);
+                    method.setAccessible(true);
+                    tmp = method.invoke(stringDecoder, null, null, tmp);
+                }
+            }
+        }
+
+        // Protocol decoder
+        BaseProtocolDecoder protocolDecoder = (BaseProtocolDecoder) pipeline.get("objectDecoder");
+        if (tmp != null) {
+            try {
+                Method method = protocolDecoder.getClass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, SocketAddress.class, Object.class);
+                method.setAccessible(true);
+                tmp = method.invoke(protocolDecoder, null, null, null, tmp);
+            } catch (NoSuchMethodException error) {
+                Method method = protocolDecoder.getClass().getSuperclass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, SocketAddress.class, Object.class);
+                method.setAccessible(true);
+                tmp = method.invoke(protocolDecoder, null, null, null, tmp);
+            }
+        }
+
+        if (tmp != null) {
+            Log.info("Protocol " + protocol + " possible match");
+            System.out.println("Protocol " + protocol + " possible match");
+        } else {
+            Log.info("Protocol " + protocol + " no match");
+            System.out.println("Protocol " + protocol + " no match");
+        }
+    }
+
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
 
@@ -43,21 +103,12 @@ public class DetectorHandler extends SimpleChannelHandler {
 
             for (TrackerServer server : serverList) {
                 try {
-                    ChannelPipeline pipeline = server.getPipelineFactory().getPipeline();
-
-                    if (pipeline.get("stringDecoder") != null) {
-
-                        /*ChannelBuffer tmp = buf.duplicate();
-                        FrameDecoder frameDecoder = (FrameDecoder) pipeline.get("frameDecoder");
-                        if (frameDecoder != null) {
-                            tmp = frameDecoder.
-                        }*/
-
-
-
+                    if (!server.getProtocol().equals("detector")) {
+                        checkPipeline(server.getProtocol(), server.getPipelineFactory().getPipeline(), buf);
                     }
                 } catch(Exception error) {
-                    Log.warning(error);
+                    Log.info("Protocol " + server.getProtocol() + " error");
+                    System.out.println("Protocol " + server.getProtocol() + " error");
                 }
             }
         }
