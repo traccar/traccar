@@ -11,13 +11,10 @@
 #       This will cause an unknown device error for "-e".  bash works.
 
 # testing data:
-# ids - 123456789012345 (32), 123456789012 (1), 123456 (2)
+# ids - 123456789012345 (31), 123456789012 (1), 123456 (2)
 # time - 12:00 + X min (where X is protocol number)
 
 # to verify test check database entries
-
-echo "0. xexun"
-(echo -n -e "111111120009,+436763737552,GPRMC,120000.000,A,6000.0000,N,13000.0000,E,0.0,0.0,010112,,,A*76,F,imei:123456789012345,04,481.2,F:4.15V,0,139,2689,232,03,2725,0576";) | nc -v localhost 5000
 
 echo "1. gps103"
 (echo -n -e "imei:123456789012345,help me,1201011201,,F,120100.000,A,6000.0000,N,13000.0000,E,0.00,;";) | nc -v localhost 5001
@@ -34,7 +31,7 @@ echo "4. gl200"
 echo "5. t55"
 (echo -n -e "\$PGID,123456789012345*0F\r\n\$GPRMC,120500.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,*33\r\n";) | nc -v localhost 5005
 
-echo "6. xexun2"
+echo "6. xexun"
 (echo -n -e "111111120009,+436763737552,GPRMC,120600.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,,A*68,F,, imei:123456789012345,04,481.2,F:4.15V,0,139,2689,232,03,2725,0576\n";) | nc -v localhost 5006
 
 echo "7. totem"
