@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ $# -eq 0 ]; then
+    echo "Version number is not provided"
+    exit 0
+fi
+
 # GENERAL REQUIREMENTS
 
 # Check web application
@@ -61,7 +66,7 @@ mv wrapper-delta-pack-*/ wrapper/
 
 # UNIVERSAL PACKAGE
 
-zip -j tracker-server.zip ../target/tracker-server.jar universal/README.txt
+zip -j tracker-server-$1.zip ../target/tracker-server.jar universal/README.txt
 
 # WINDOWS PACKAGE
 
@@ -70,7 +75,7 @@ echo "NOTE: if you got any errors here try isetup version 5.5.0 (or check what v
 
 wine app/ISCC.exe windows/traccar.iss
 
-zip -j traccar-windows-32.zip windows/Output/setup.exe windows/README.txt
+zip -j traccar-windows-32-$1.zip windows/Output/setup.exe windows/README.txt
 
 rm -rf windows/Output/
 rm -rf tmp/
@@ -118,7 +123,7 @@ cp wrapper/bin/wrapper-linux-x86-32 out/bin/wrapper
 cp wrapper/lib/libwrapper-linux-x86-32.so out/lib/libwrapper.so
 
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
-zip -j traccar-linux-32.zip traccar.run linux/README.txt
+zip -j traccar-linux-32-$1.zip traccar.run linux/README.txt
 
 # linux 64
 
@@ -126,7 +131,7 @@ cp wrapper/bin/wrapper-linux-x86-64 out/bin/wrapper
 cp wrapper/lib/libwrapper-linux-x86-64.so out/lib/libwrapper.so
 
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
-zip -j traccar-linux-64.zip traccar.run linux/README.txt
+zip -j traccar-linux-64-$1.zip traccar.run linux/README.txt
 
 # linux arm
 
@@ -139,7 +144,7 @@ cp wrapper/lib/libwrapper-linux-armel-32.so out/lib/
 cp wrapper/lib/libwrapper-linux-armhf-32.so out/lib/
 
 makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ]; then mv $app/bin/wrapper-linux-armel-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armel-32.so $app/lib/libwrapper.so; else mv $app/bin/wrapper-linux-armhf-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armhf-32.so $app/lib/libwrapper.so; fi; $app/bin/traccar install"
-zip -j traccar-linux-arm.zip traccar.run linux/README.txt
+zip -j traccar-linux-arm-$1.zip traccar.run linux/README.txt
 
 # MACOSX PACKAGE
 
@@ -155,7 +160,7 @@ cp wrapper/bin/wrapper-macosx-universal-64 out/bin/wrapper
 cp wrapper/lib/libwrapper-macosx-universal-64.jnilib out/lib/libwrapper.jnilib
 
 makeself out traccar.run "traccar" "mkdir -p $app; cp -rf * $app; $app/bin/traccar install"
-zip -j traccar-macosx-64.zip traccar.run macosx/README.txt
+zip -j traccar-macosx-64-$1.zip traccar.run macosx/README.txt
 
 rm traccar.run
 rm -rf out
