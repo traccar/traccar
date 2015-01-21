@@ -21,13 +21,12 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.database.DataManager;
+import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-import java.util.Calendar;
-import java.util.Properties;
-import java.util.TimeZone;
+import java.util.*;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
@@ -39,6 +38,80 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_LOCATION = 0x11;
     private static final int MSG_HISTORY = 0x12;
 
+    private long deviceId;
+
+    private static double convertCoordinate(int raw) {
+        double result = raw / 1000000;
+        result += (raw % 1000000) / 600000.0;
+        return result;
+    }
+
+    private Position decodePosition(ChannelBuffer buf, boolean history) {
+
+        // Create new position
+        Position position = new Position();
+        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setDeviceId(deviceId);
+
+        if (!history) {
+            buf.readUnsignedByte(); // interval
+            buf.skipBytes(8); // settings
+        }
+        buf.readUnsignedByte(); // status
+        if (!history) {
+            buf.readUnsignedShort();
+        }
+        extendedInfo.set("battery", buf.readUnsignedByte());
+        buf.skipBytes(6); // time
+
+        // Timers
+        if (!history) {
+            for (int i = 0; i < 2; i++) {
+                buf.skipBytes(5); // time
+                buf.readUnsignedShort(); // interval
+                buf.skipBytes(5); // mode
+            }
+        }
+
+        extendedInfo.set("temperature", buf.readByte());
+        extendedInfo.set("gsm", buf.readUnsignedByte());
+        buf.readUnsignedShort(); // mcc
+        buf.readUnsignedShort(); // mnc
+        buf.readUnsignedShort(); // lac
+        buf.readUnsignedShort(); // cid
+
+        // GPS status
+        int valid = buf.readUnsignedByte();
+        position.setValid((valid & 0xc0) != 0);
+        extendedInfo.set("satellites", valid & 0x3f);
+
+        // Date and time
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.clear();
+        time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
+        time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
+        time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
+        time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
+        time.set(Calendar.MINUTE, buf.readUnsignedByte());
+        time.set(Calendar.SECOND, buf.readUnsignedByte());
+        position.setTime(time.getTime());
+
+        // Location
+        position.setLatitude(convertCoordinate(buf.readInt()));
+        position.setLongitude(convertCoordinate(buf.readInt()));
+        position.setAltitude((double) buf.readShort());
+        position.setSpeed((double) buf.readUnsignedByte());
+        position.setCourse(buf.readUnsignedByte() * 2.0);
+
+        extendedInfo.set("hdop", buf.readUnsignedShort());
+
+        buf.readUnsignedShort(); // reserved
+        buf.readUnsignedByte(); // checksum
+
+        position.setExtendedInfo(extendedInfo.toString());
+        return position;
+    }
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -46,77 +119,43 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        /*buf.skipBytes(2); // header
-        buf.readByte(); // size
-
-        // Zero for location messages
-        buf.readByte(); // voltage
-        buf.readByte(); // gsm signal
-
-        String imei = readImei(buf);
-        long index = buf.readUnsignedShort();
         int type = buf.readUnsignedByte();
 
-        if (type == MSG_HEARTBEAT) {
-            if (channel != null) {
-                byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(ChannelBuffers.wrappedBuffer(response));
-            }
-        }
+        if (type == MSG_LOGIN) {
 
-        else if (type == MSG_DATA) {
+            buf.readUnsignedByte(); // hardware version
+            buf.readUnsignedByte(); // software version
 
-            // Create new position
-            Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            extendedInfo.set("index", index);
-
-            // Get device id
+            String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
             try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
+                deviceId = getDataManager().getDeviceByImei(imei).getId();
             } catch(Exception error) {
                 Log.warning("Unknown device - " + imei);
                 return null;
             }
 
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
-            position.setTime(time.getTime());
+            // Send response
+            if (channel != null) {
+                channel.write(ChannelBuffers.wrappedBuffer(new byte[] { buf.readByte() }));
+            }
 
-            // Latitude
-            double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
+        } else if (type == MSG_LOCATION) {
 
-            // Longitude
-            double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
+            return decodePosition(buf, false);
 
-            // Speed
-            position.setSpeed((double) buf.readUnsignedByte());
+        } else if (type == MSG_HISTORY) {
 
-            // Course
-            position.setCourse((double) buf.readUnsignedShort());
+            int count = buf.readUnsignedByte() & 0x0f;
+            buf.readUnsignedShort(); // total count
+            List<Position> positions = new LinkedList<Position>();
 
-            buf.skipBytes(3); // reserved
+            for (int i = 0; i < count; i++) {
+                positions.add(decodePosition(buf, true));
+            }
 
-            // Flags
-            long flags = buf.readUnsignedInt();
-            position.setValid((flags & 0x1) == 0x1);
-            if ((flags & 0x2) == 0) latitude = -latitude;
-            if ((flags & 0x4) == 0) longitude = -longitude;
+            return positions;
 
-            position.setLatitude(latitude);
-            position.setLongitude(longitude);
-            position.setAltitude(0.0);
-
-            position.setExtendedInfo(extendedInfo.toString());
-            return position;
-        }*/
+        }
 
         return null;
     }
