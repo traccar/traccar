@@ -1,5 +1,6 @@
 package org.traccar.protocol;
 
+import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.TestDataManager;
 import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -13,29 +14,29 @@ public class Jt600ProtocolDecoderTest {
 
         Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(new TestDataManager(), null, null);
 
-        byte[] buf1 = {0x24,0x31,0x10,0x21,0x60,0x01,0x11,0x00,0x1B,0x16,0x02,0x11,0x05,0x59,0x10,0x22,0x32,(byte)0x98,0x62,0x11,0x40,0x46,0x22,0x7B,0x05,(byte)0x98,0x09,0x50,(byte)0x80,0x01,0x23,0x27,(byte)0x95,0x14,0x35,0x16,0x1F};
-        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf1)));
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "24311021600111001B16021105591022329862114046227B0598095080012327951435161F"))));
 
-        byte[] buf2 = {0x24,0x31,0x20,(byte)0x82,0x00,0x29,0x11,0x00,0x1B,0x17,0x10,0x12,0x05,0x28,0x31,0x24,0x38,0x10,0x12,0x02,0x55,0x33,0x64,0x25,0x00,0x19,0x07,0x19,0x00,0x03,(byte)0xFD,0x2B,(byte)0x91,0x04,0x4D,0x1F,(byte)0xA0};
-        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf2)));
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "24312082002911001B171012052831243810120255336425001907190003FD2B91044D1FA0"))));
 
-        byte[] buf3 = {0x24,0x31,0x20,(byte)0x82,0x00,0x29,0x11,0x00,0x1B,0x17,0x10,0x12,0x05,0x33,0x05,0x24,0x38,0x09,(byte)0x97,0x02,0x55,0x33,0x58,0x45,0x00,0x04,0x06,0x1E,0x00,0x03,(byte)0xEE,0x00,0x00,0x00,0x00,0x0C,0x00};
-        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf3)));
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "24312082002911001B1710120533052438099702553358450004061E0003EE000000000C00"))));
 
-        byte[] buf4 = {0x24,0x60,(byte)0x81,0x11,(byte)0x88,(byte)0x88,0x21,0x00,0x1B,0x09,0x06,0x09,0x08,0x04,0x53,0x22,0x56,0x40,0x25,0x11,0x32,0x42,0x32,(byte)0x9F,0x05,(byte)0x98,0x00,0x00,0x01,0x00,0x3F,0x00,0x00,0x00,0x2D,0x00,(byte)0xAB};
-        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(buf4)));
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "24608111888821001B09060908045322564025113242329F0598000001003F0000002D00AB"))));
 
-        verify(decoder.decode(null, null,
-                ChannelBuffers.copiedBuffer("(3110312099,W01,11404.6204,E,2232.9961,N,A,040511,063736,4,7,100,4,17,1,1,company)", Charset.defaultCharset())));
+        verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "(3110312099,W01,11404.6204,E,2232.9961,N,A,040511,063736,4,7,100,4,17,1,1,company)", Charset.defaultCharset())));
 
-        verify(decoder.decode(null, null,
-                ChannelBuffers.copiedBuffer("(3120820029,W01,02553.3555,E,2438.0997,S,A,171012,053339,0,8,20,6,31,5,20,20)", Charset.defaultCharset())));
+        verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "(3120820029,W01,02553.3555,E,2438.0997,S,A,171012,053339,0,8,20,6,31,5,20,20)", Charset.defaultCharset())));
 
-        /*verify(decoder.decode(null, null,
-                ChannelBuffers.copiedBuffer("(3330104377,U01,010100,010228,F,00.000000,N,000.000000,E,0,0,0,0%,00001000000000,741,14,22,0,206)", Charset.defaultCharset())));*/
-        
-        /*verify(decoder.decode(null, null,
-                ChannelBuffers.copiedBuffer("(6221107674,2,U09,129,2,A,280513113036,E,02711.0500,S,1721.0876,A,030613171243,E,02756.7618,S,2300.0325,3491,538200,14400,1)", Charset.defaultCharset())));*/
+        /*verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "(3330104377,U01,010100,010228,F,00.000000,N,000.000000,E,0,0,0,0%,00001000000000,741,14,22,0,206)", Charset.defaultCharset())));
+
+        verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "(6221107674,2,U09,129,2,A,280513113036,E,02711.0500,S,1721.0876,A,030613171243,E,02756.7618,S,2300.0325,3491,538200,14400,1)", Charset.defaultCharset())));*/
 
     }
 

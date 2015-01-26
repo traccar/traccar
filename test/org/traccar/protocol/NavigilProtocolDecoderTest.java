@@ -14,12 +14,12 @@ public class NavigilProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         NavigilProtocolDecoder decoder = new NavigilProtocolDecoder(new TestDataManager(), null, null);
-        
-        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertArray(
-                new int[] {0x01,0x00,0x43,0x00,0x04,0x00,0x20,0x00,0x00,0x00,0xf6,0x02,0x03,0x08,0x02,0x00,0xe7,0xcd,0x0f,0x51,0x0c,0x00,0x00,0x00,0x3b,0x00,0x00,0x00,0x00,0x00,0x00,0x00}))));
-        
-        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertArray(
-                new int[] {0x01,0x00,0xb3,0x00,0x0f,0x00,0x24,0x00,0x00,0x00,0xf4,0xa8,0x03,0x08,0x02,0x00,0xca,0x0c,0x11,0x51,0xef,0x88,0x85,0xf0,0xb8,0x2e,0x6d,0x13,0x04,0x00,0xc0,0x04,0x03,0x00,0x00,0x00}))));
+
+        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
+                "01004300040020000000f60203080200e7cd0f510c0000003b00000000000000"))));
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
+                "0100b3000f0024000000f4a803080200ca0c1151ef8885f0b82e6d130400c00403000000"))));
 
     }
 
