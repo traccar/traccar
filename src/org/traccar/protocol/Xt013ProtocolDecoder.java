@@ -37,6 +37,7 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
+            "(?:HI,\\d+)?" +
             "TK," +
             "(\\d+)," +                         // IMEI
             "(\\d{2})(\\d{2})(\\d{2})" +        // Date (YYMMDD)
