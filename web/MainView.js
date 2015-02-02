@@ -32,7 +32,7 @@ Ext.define('MainView', {
     items: [{
         region:'west',
         xtype: 'device-view',
-        width: styles.device_width
+        width: Styles.device_width
     }, {
         region: 'center',
         xtype: 'map-view',

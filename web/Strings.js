@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-var strings = {
+Ext.define('Strings', {
+    singleton: true,
 
     login_title: 'Login',
     login_user: 'User',
@@ -26,4 +27,4 @@ var strings = {
 
     map_title: 'Map'
 
-};
+});

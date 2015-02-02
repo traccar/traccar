@@ -18,24 +18,24 @@ Ext.define('MapView', {
     extend: 'Ext.form.Panel',
     xtype: 'map-view',
 
-    title: strings.map_title,
+    title: Strings.map_title,
     layout: 'fit',
 
     listeners: {
         afterrender: function() {
 
-            /*var layer = new ol.layer.Tile({source: new ol.source.BingMaps({
+            /*var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
                 key: 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F',
                 imagerySet: 'Road'
             })});*/
 
-            var layer = new ol.layer.Tile({source: new ol.source.OSM({
+            var layer = new ol.layer.Tile({ source: new ol.source.OSM({
             })});
 
             var view = new ol.View({
-                center: ol.proj.transform(styles.map_center, 'EPSG:4326', 'EPSG:3857'),
-                zoom: styles.map_zoom,
-                maxZoom: styles.map_max_zoom
+                center: ol.proj.transform(Styles.map_center, 'EPSG:4326', 'EPSG:3857'),
+                zoom: Styles.map_zoom,
+                maxZoom: Styles.map_max_zoom
             });
 
             this.map = new ol.Map({

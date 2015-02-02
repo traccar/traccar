@@ -17,6 +17,8 @@
 Ext.application({
     name: 'Traccar',
     requires: [
+        'Strings',
+        'Styles',
         'Login',
         'MainView'
     ],

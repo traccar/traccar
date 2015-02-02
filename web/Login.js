@@ -19,31 +19,31 @@ Ext.define('LoginForm', {
     xtype: 'login-form',
 
     defaultType: 'textfield',
-    bodyPadding: styles.panel_padding,
+    bodyPadding: Styles.panel_padding,
 
     defaults: { anchor: '100%' },
 
     items: [{
         allowBlank: false,
-        fieldLabel: strings.login_user,
+        fieldLabel: Strings.login_user,
         name: 'user'
     }, {
         allowBlank: false,
-        fieldLabel: strings.login_password,
+        fieldLabel: Strings.login_password,
         name: 'password',
         inputType: 'password'
     }],
 
     buttons: [
-        { text: strings.login_register },
-        { text: strings.login_login }
+        { text: Strings.login_register },
+        { text: Strings.login_login }
     ]
 });
 
 Ext.define('Login', {
     extend: 'Ext.window.Window',
 
-    title: strings.login_title,
+    title: Strings.login_title,
 
     items: [{ xtype: 'login-form' }]
 });

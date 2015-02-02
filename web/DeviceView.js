@@ -18,5 +18,5 @@ Ext.define('DeviceView', {
     extend: 'Ext.form.Panel',
     xtype: 'device-view',
 
-    title: strings.device_title
+    title: Strings.device_title
 });

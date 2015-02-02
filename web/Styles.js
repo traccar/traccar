@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-var styles = {
+Ext.define('Styles', {
+    singleton: true,
 
     panel_padding: 10,
 
@@ -24,4 +25,4 @@ var styles = {
     map_zoom: 6,
     map_max_zoom: 16
 
-};
+});
