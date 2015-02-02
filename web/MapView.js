@@ -23,9 +23,14 @@ Ext.define('MapView', {
 
     listeners: {
         afterrender: function() {
-            var osm = new ol.layer.Tile({
-                source: new ol.source.OSM({})
-            });
+
+            /*var layer = new ol.layer.Tile({source: new ol.source.BingMaps({
+                key: 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F',
+                imagerySet: 'Road'
+            })});*/
+
+            var layer = new ol.layer.Tile({source: new ol.source.OSM({
+            })});
 
             var view = new ol.View({
                 center: ol.proj.transform(styles.map_center, 'EPSG:4326', 'EPSG:3857'),
@@ -35,7 +40,7 @@ Ext.define('MapView', {
 
             this.map = new ol.Map({
                 target: this.body.dom.id,
-                layers: [ osm ],
+                layers: [ layer ],
                 view: view
             });
         },
