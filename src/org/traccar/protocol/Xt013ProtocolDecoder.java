@@ -44,10 +44,10 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             "([+-]\\d+\\.\\d+)," +              // Latitude
             "([+-]\\d+\\.\\d+)," +              // Longitude
-            "(\\d+)," +                         // Altitude
-            "(\\d+)," +                         // Course
             "(\\d+)," +                         // Speed
+            "(\\d+)," +                         // Course
             "\\d+," +
+            "(\\d+)," +                         // Altitude
             "([FL])," +                         // GPS fix
             "\\d+," +
             "(\\d+)," +                         // GPS level
@@ -100,9 +100,9 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         // Location
         position.setLatitude(Double.valueOf(parser.group(index++)));
         position.setLongitude(Double.valueOf(parser.group(index++)));
-        position.setAltitude(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
         position.setCourse(Double.valueOf(parser.group(index++)));
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setAltitude(Double.valueOf(parser.group(index++)));
         position.setValid(parser.group(index++).equals("F"));
 
         // Other
