@@ -94,6 +94,8 @@ public class DataManager {
         ds.setTestConnectionOnCheckin(true);
         dataSource = ds;
 
+        //createDatabaseSchema();
+
         // Load statements from configuration
         String query;
 
@@ -213,6 +215,28 @@ public class DataManager {
         }
 
         return params;
+    }
+
+    private void createDatabaseSchema() throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            Statement statement = connection.createStatement();
+            try {
+
+                statement.execute(
+                        "CREATE TABLE users_new (" +
+                        "id INT PRIMARY KEY AUTO_INCREMENT," +
+                        "name VARCHAR(1024) NOT NULL UNIQUE," +
+                        "password VARCHAR(1024) NOT NULL," +
+                        "admin BOOLEAN NOT NULL)");
+
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
     }
 
 }
