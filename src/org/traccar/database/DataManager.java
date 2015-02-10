@@ -225,11 +225,39 @@ public class DataManager {
             try {
 
                 statement.execute(
-                        "CREATE TABLE users_new (" +
+                        "CREATE TABLE IF NOT EXISTS users (" +
                         "id INT PRIMARY KEY AUTO_INCREMENT," +
                         "name VARCHAR(1024) NOT NULL UNIQUE," +
                         "password VARCHAR(1024) NOT NULL," +
-                        "admin BOOLEAN NOT NULL)");
+                        "admin BOOLEAN NOT NULL);");
+
+                statement.execute(
+                        "CREATE TABLE IF NOT EXISTS devices (" +
+                        "id INT PRIMARY KEY AUTO_INCREMENT," +
+                        "name VARCHAR(1024) NOT NULL," +
+                        "uniqueId VARCHAR(1024) NOT NULL UNIQUE);");
+
+                statement.execute(
+                        "CREATE TABLE IF NOT EXISTS users_devices (" +
+                        "userId INT NOT NULL," +
+                        "deviceId INT NOT NULL," +
+                        "FOREIGN KEY (userId) REFERENCES users(id)," +
+                        "FOREIGN KEY (deviceId) REFERENCES devices(id));");
+
+                statement.execute(
+                        "CREATE TABLE IF NOT EXISTS positions (" +
+                        "id INT PRIMARY KEY AUTO_INCREMENT," +
+                        "deviceId INT NOT NULL," +
+                        "time TIMESTAMP NOT NULL," +
+                        "valid BOOLEAN NOT NULL," +
+                        "latitude DOUBLE NOT NULL," +
+                        "longitude DOUBLE NOT NULL," +
+                        "altitude DOUBLE NOT NULL," +
+                        "speed DOUBLE NOT NULL," +
+                        "course DOUBLE NOT NULL," +
+                        "address VARCHAR(1024) NOT NULL," +
+                        "other VARCHAR(8192) NOT NULL," +
+                        "FOREIGN KEY (deviceId) REFERENCES devices(id));");
 
             } finally {
                 statement.close();
