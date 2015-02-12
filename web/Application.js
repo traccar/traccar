@@ -19,12 +19,10 @@ Ext.application({
     requires: [
         'Strings',
         'Styles',
-        'Login',
-        'MainView'
+        'Login'
     ],
 
     launch: function() {
-        //Ext.create('Login').show();
-        Ext.create('MainView', { renderTo: document.body });
+        Ext.create('Login').show();
     }
 });

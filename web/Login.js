@@ -23,10 +23,12 @@ Ext.define('LoginForm', {
 
     defaults: { anchor: '100%' },
 
+    url: '/api/login',
+
     items: [{
         allowBlank: false,
         fieldLabel: Strings.login_user,
-        name: 'user'
+        name: 'name'
     }, {
         allowBlank: false,
         fieldLabel: Strings.login_password,
@@ -34,16 +36,34 @@ Ext.define('LoginForm', {
         inputType: 'password'
     }],
 
-    buttons: [
-        { text: Strings.login_register },
-        { text: Strings.login_login }
-    ]
+    buttons: [{
+        text: Strings.login_register
+    }, {
+        text: Strings.login_login,
+        handler: function() {
+            var win = this.up('window');
+            var form = this.up('form').getForm();
+            if (form.isValid()) {
+                form.submit({
+                    success: function(form, action) {
+                        win.close();
+                        Ext.create('MainView', { renderTo: document.body });
+                    },
+                    failure: function(form, action) {
+                        Ext.Msg.alert(Strings.login_title, Strings.login_failed);
+                    }
+                });
+            }
+        }
+    }]
 });
 
 Ext.define('Login', {
     extend: 'Ext.window.Window',
+    requires: [ 'MainView' ],
 
     title: Strings.login_title,
+    closable: false,
 
     items: [{ xtype: 'login-form' }]
 });

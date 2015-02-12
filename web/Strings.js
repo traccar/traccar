@@ -22,6 +22,7 @@ Ext.define('Strings', {
     login_password: 'Password',
     login_register: 'Register',
     login_login: 'Login',
+    login_failed: 'Incorrect user name or password.',
 
     device_title: 'Devices',
 
