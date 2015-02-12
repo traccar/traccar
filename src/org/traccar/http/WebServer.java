@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 
 /**
@@ -44,7 +45,7 @@ public class WebServer {
 
     private Server server;
 
-    public WebServer(Properties properties, DataSource dataSource) {
+    public WebServer(Properties properties, DataManager dataManager) {
         String address = properties.getProperty("http.address");
         Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
         if (address == null) {
@@ -57,13 +58,7 @@ public class WebServer {
 
             ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
             servletHandler.setContextPath("/api");
-            servletHandler.addServlet(new ServletHolder(new HttpServlet() {
-                @Override
-                protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-                    PrintWriter out = resp.getWriter();
-                    out.println("<html><body>api</body></html>");
-                }
-            }), "/*");
+            servletHandler.addServlet(new ServletHolder(new MainServlet(dataManager)), "/*");
 
             ResourceHandler resourceHandler = new ResourceHandler();
             resourceHandler.setResourceBase(properties.getProperty("http.path"));
@@ -78,7 +73,7 @@ public class WebServer {
 
             try {
                 Context context = new InitialContext();
-                context.bind("java:/DefaultDS", dataSource);
+                context.bind("java:/DefaultDS", dataManager.getDataSource());
             } catch (Exception error) {
                 Log.warning(error);
             }
