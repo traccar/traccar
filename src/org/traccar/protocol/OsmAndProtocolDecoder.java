@@ -117,6 +117,9 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         if (params.containsKey("batt")) {
             extendedInfo.set("battery", params.get("batt").get(0));
         }
+        if (params.containsKey("desc")) {
+            extendedInfo.set("description", params.get("desc").get(0));
+        }
 
         position.setExtendedInfo(extendedInfo.toString());
         
