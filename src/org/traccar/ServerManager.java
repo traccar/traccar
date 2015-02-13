@@ -178,6 +178,7 @@ public class ServerManager {
         initArdi01Server("ardi01");
         initXt013Server("xt013");
         initAutoFonServer("autofon");
+        initGoSafeServer("gosafe");
 
         initProtocolDetector();
 
@@ -1291,6 +1292,19 @@ public class ServerManager {
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AutoFonFrameDecoder());
                     pipeline.addLast("objectDecoder", new AutoFonProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
+
+    private void initGoSafeServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("objectDecoder", new GoSafeProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
