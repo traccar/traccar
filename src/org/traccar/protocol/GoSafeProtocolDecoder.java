@@ -47,6 +47,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             "\\d+;" +
             "([NS])(\\d+\\.\\d+);" +            // Latitude
             "([EW])(\\d+\\.\\d+);" +            // Longitude
+            "(\\d+);" +                         // Speed
+            "(\\d+);" +                         // Course
+            "(\\d+);" +                         // Altitude
+            "(\\d+\\.\\d+)" +                   // HDOP
             ".*");
 
     @Override
@@ -104,9 +108,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Other
-        position.setSpeed(0.0);
-        position.setCourse(0.0);
-        position.setAltitude(0.0);
+        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setAltitude(Double.valueOf(parser.group(index++)));
+        extendedInfo.set("hdop", parser.group(index++));
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
