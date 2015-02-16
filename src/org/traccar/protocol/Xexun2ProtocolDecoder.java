@@ -40,7 +40,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             "[\r\n]*" +
             "(\\d+)," +                         // Serial
             "([^,]+)?," +                       // Number
-            "GPRMC," +
+            "G[PN]RMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +        // Latitude (DDMM.MMMM)

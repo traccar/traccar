@@ -38,7 +38,10 @@ public class XexunFrameDecoder extends FrameDecoder {
         // Find start
         Integer beginIndex = ChannelBufferTools.find(buf, 0, length, "GPRMC");
         if (beginIndex == null) {
-            return null;
+            beginIndex = ChannelBufferTools.find(buf, 0, length, "GNRMC");
+            if (beginIndex == null) {
+                return null;
+            }
         }
 
         // Find identifier
