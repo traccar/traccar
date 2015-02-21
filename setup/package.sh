@@ -81,12 +81,30 @@ zip -j tracker-server-$1.zip ../target/tracker-server.jar universal/README.txt
 innoextract isetup-*.exe
 echo "NOTE: if you got any errors here try isetup version 5.5.0 (or check what versions are supported by 'innoextract -v')"
 
+# windows 32
+
 wine app/ISCC.exe windows/traccar.iss
 
 zip -j traccar-windows-32-$1.zip windows/Output/setup.exe windows/README.txt
 
 rm -rf windows/Output/
 rm -rf tmp/
+
+# windows 64
+
+unzip wrapper-windows-x86-64-*.zip
+cp wrapper_*_src/bin/wrapper.exe wrapper/bin/wrapper-windows-x86-32.exe
+cp wrapper_*_src/lib/wrapper.dll wrapper/lib/wrapper-windows-x86-32.dll
+cp wrapper_*_src/lib/wrapper.jar wrapper/lib/wrapper.jar
+rm -rf wrapper_*_src
+
+wine app/ISCC.exe windows/traccar.iss
+
+zip -j traccar-windows-64-$1.zip windows/Output/setup.exe windows/README.txt
+
+rm -rf windows/Output/
+rm -rf tmp/
+
 rm -rf app/
 
 # LINIX PACKAGE

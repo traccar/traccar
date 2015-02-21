@@ -32,9 +32,21 @@ Filename: "{app}\bin\InstallTraccar-NT.bat"
 Filename: "{app}\bin\UninstallTraccar-NT.bat"
 
 [Code]
+function GetLocalMachine(): Integer;
+begin
+  if IsWin64 then
+  begin
+    Result := HKLM64;
+  end
+  else
+  begin
+    Result := HKEY_LOCAL_MACHINE;
+  end;
+end;
+
 function InitializeSetup(): Boolean;
 begin
-  if  RegKeyExists(HKEY_LOCAL_MACHINE, 'SOFTWARE\JavaSoft\Java Runtime Environment') then
+  if RegKeyExists(GetLocalMachine(), 'SOFTWARE\JavaSoft\Java Runtime Environment') then
   begin
     Result := true;
   end
