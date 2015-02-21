@@ -27,7 +27,7 @@ fi
 if ls wrapper-windows-x86-64-*.zip 1> /dev/null 2>&1; then
     echo "Java wrapper package found"
 else
-    echo "Put wrapper-windows-x86-64-*.zip into this directory"
+    echo "Put wrapper-windows-x86-64-*.zip (from http://www.krenger.ch/blog/tag/java-service-wrapper/) into this directory"
     exit 0
 fi
 
