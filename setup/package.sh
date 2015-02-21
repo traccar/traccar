@@ -16,17 +16,25 @@ else
 fi
 
 # Check wrapper
-if ls wrapper-delta-pack-*.tar.gz &> /dev/null; then
+if ls wrapper-delta-pack-*.tar.gz 1> /dev/null 2>&1; then
     echo "Java wrapper package found"
 else
     echo "Put wrapper-delta-pack-*.tar.gz into this directory"
     exit 0
 fi
 
+# Check Windows x64 wrapper
+if ls wrapper-windows-x86-64-*.zip 1> /dev/null 2>&1; then
+    echo "Java wrapper package found"
+else
+    echo "Put wrapper-windows-x86-64-*.zip into this directory"
+    exit 0
+fi
+
 # WINDOWS REQUIREMENTS
 
 # Check inno setup
-if ls isetup-*.exe &> /dev/null; then
+if ls isetup-*.exe 1> /dev/null 2>&1; then
     echo "Inno setup installer found"
 else
     echo "Put isetup-*.exe into this directory"
