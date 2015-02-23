@@ -179,6 +179,7 @@ public class ServerManager {
         initXt013Server("xt013");
         initAutoFonServer("autofon");
         initGoSafeServer("gosafe");
+        initAutoFon45Server("autofon45");
 
         initProtocolDetector();
 
@@ -1310,4 +1311,15 @@ public class ServerManager {
         }
     }
 
+    private void initAutoFon45Server(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new AutoFon45FrameDecoder());
+                    pipeline.addLast("objectDecoder", new AutoFon45ProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
 }
