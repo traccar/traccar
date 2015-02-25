@@ -50,14 +50,14 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.\\d+)," +                  // Speed
             "(\\d+\\.\\d+)?," +                 // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            "[^,]*,[^,]*,.\\*..," +             // Checksum
+            "[^\\*]*\\*..,"       +             // Checksum
             "([FL])," +                         // Signal
             "(?:([^,]*),)?" +                   // Alarm
             ".*imei:" +
             "(\\d+)," +                         // IMEI
             "(\\d+)," +                         // Satellites
             "(-?\\d+\\.\\d+)?," +               // Altitude
-            "[FL]:(\\d+\\.\\d+)V," +            // Power
+            "[FL]:(\\d+\\.\\d+)V" +             // Power
             ".*" +
             "[\r\n]*");
 
