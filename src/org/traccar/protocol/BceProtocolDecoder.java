@@ -36,8 +36,11 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         super(dataManager, protocol, properties);
     }
 
-    private static final int MSG_HEARTBEAT = 0x1A;
-    private static final int MSG_DATA = 0x10;
+    private static final int MSG_ASYNC_STACK = 0xA5;
+    private static final int MSG_STACK_COFIRM = 0x19;
+    private static final int MSG_TIME_TRIGGERED = 0xA0;
+    private static final int MSG_OUTPUT_CONTROL = 0x41;
+    private static final int MSG_OUTPUT_CONTROL_ACK = 0xC1;
 
     @Override
     protected Object decode(
@@ -45,6 +48,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
+        
+        String imei = String.format("%015d", buf.readLong());
+        
 
         /*buf.skipBytes(2); // header
         buf.readByte(); // size
