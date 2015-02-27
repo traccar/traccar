@@ -27,7 +27,7 @@ public class BceFrameDecoder extends LengthFieldBasedFrameDecoder {
     private boolean header = true;
     
     public BceFrameDecoder() {
-        super(1024, 8, 2);
+        super(1024, 8, 2, 8 + 2 + 1, 0);
     }
     
     @Override
