@@ -45,7 +45,7 @@ public class WondexFrameDecoder extends FrameDecoder {
 
         } else {
 
-            Integer index = ChannelBufferTools.find(buf, buf.readerIndex(), buf.readableBytes(), "\r\n");
+            Integer index = ChannelBufferTools.find(buf, buf.readerIndex(), buf.writerIndex(), "\r\n");
             if (index != null) {
                 ChannelBuffer frame = buf.readBytes(index - buf.readerIndex());
                 buf.skipBytes(2);

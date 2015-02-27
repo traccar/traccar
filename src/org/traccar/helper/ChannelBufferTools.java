@@ -30,13 +30,13 @@ public class ChannelBufferTools {
     public static Integer find(
             ChannelBuffer buf,
             Integer start,
-            Integer length,
+            Integer finish,
             String subString) {
 
         int index = start;
         boolean match;
 
-        for (; index < length; index++) {
+        for (; index < finish; index++) {
             match = true;
 
             for (int i = 0; i < subString.length(); i++) {
