@@ -1326,13 +1326,15 @@ public class ServerManager {
 
     private void initBceServer(final String protocol) throws SQLException {
         if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new BceFrameDecoder());
                     pipeline.addLast("objectDecoder", new BceProtocolDecoder(dataManager, protocol, properties));
                 }
-            });
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
         }
     }
 
