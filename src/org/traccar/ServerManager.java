@@ -181,6 +181,7 @@ public class ServerManager {
         initGoSafeServer("gosafe");
         initAutoFon45Server("autofon45");
         initBceServer("bce");
+        initXirgoServer("xirgo");
 
         initProtocolDetector();
 
@@ -1335,6 +1336,20 @@ public class ServerManager {
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             serverList.add(server);
+        }
+    }
+    
+    private void initXirgoServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new XirgoProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
         }
     }
 
