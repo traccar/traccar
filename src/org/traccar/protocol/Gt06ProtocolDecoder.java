@@ -33,6 +33,7 @@ import java.util.TimeZone;
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
+    private boolean forceTimeZone = false;
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
     public Gt06ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
@@ -40,6 +41,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         
         if (properties != null) {
             if (properties.containsKey(protocol + ".timezone")) {
+                forceTimeZone = true;
                 timeZone.setRawOffset(
                         Integer.valueOf(properties.getProperty(protocol + ".timezone")) * 1000);
             }
@@ -120,7 +122,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 if ((extensionBits & 0x8) != 0) {
                     offset = -offset;
                 }
-                timeZone.setRawOffset(offset);
+                if (!forceTimeZone) {
+                    timeZone.setRawOffset(offset);
+                }
             }
             
             try {
