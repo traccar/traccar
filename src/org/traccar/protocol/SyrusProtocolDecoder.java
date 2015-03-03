@@ -53,7 +53,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{3})" +                   // Course
             "\\d" +                        // Fix mode
             "(\\d)" +                      // Fix age
-            ".*");
+            ".*\r?\n?");
 
     private Date getTime(long week, long day, long seconds) {
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
