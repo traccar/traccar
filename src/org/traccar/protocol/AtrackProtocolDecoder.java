@@ -42,6 +42,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_HEARTBEAT = 0x1A;
     private static final int MSG_DATA = 0x10;
 
+    private static final int MIN_DATA_LENGTH = 40;
+
     private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(12);
@@ -104,7 +106,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         List<Position> positions = new LinkedList<Position>();
 
-        while (buf.readable()) {
+        while (buf.readableBytes() >= MIN_DATA_LENGTH) {
 
             // Create new position
             Position position = new Position();
