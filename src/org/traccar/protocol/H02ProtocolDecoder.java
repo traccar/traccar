@@ -116,9 +116,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             ".*" +
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             "([AV])," +                         // Validity
-            "(\\d+)(\\d{2}.\\d+)," +            // Latitude (DDMM.MMMM)
+            "-?(\\d+)-?(\\d{2}.\\d+)," +        // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d+)(\\d{2}.\\d+)," +            // Longitude (DDMM.MMMM)
+            "-?(\\d+)-?(\\d{2}.\\d+)," +        // Longitude (DDMM.MMMM)
             "([EW])," +
             "(\\d+.?\\d*)," +                   // Speed
             "(\\d+.?\\d*)?," +                  // Course
