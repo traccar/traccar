@@ -56,7 +56,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "([AV])," +                         // Validity
             "(\\d+)," +                         // Satellites
             "(\\d+)," +                         // GSM Signal
-            "(\\d+)," +                         // Speed
+            "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+)," +                         // Course
             "(\\d+\\.?\\d*)," +                 // HDOP
             "(-?\\d+)," +                       // Altitude
@@ -68,7 +68,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}+)?\\|" +              // ADC2
             "(\\p{XDigit}+)?\\|" +              // ADC3
             "(\\p{XDigit}+)\\|" +               // Battery
-            "(\\p{XDigit}+)," +                 // Power*/
+            "(\\p{XDigit}+)," +                 // Power
             ".*(\r\n)?");
 
     private Position decodeRegularMessage(Channel channel, ChannelBuffer buf) {
