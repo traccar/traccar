@@ -51,7 +51,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])?," +
-            "(\\d+\\.?\\d*)," +                 // Speed
+            "(\\d+\\.?\\d*)?,?" +                 // Speed
             "(\\d+\\.?\\d*)?,?" +               // Course
             "(\\d+\\.?\\d*)?,?" +               // Altitude
             "([^,]+)?,?" +
@@ -155,8 +155,13 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-
+        String speed = parser.group(index++);        
+        if (speed != null) {
+        	position.setSpeed(Double.valueOf(speed));
+        } else {
+        	position.setSpeed(0.0);
+        }
+        
         // Course
         String course = parser.group(index++);
         if (course != null) {
