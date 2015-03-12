@@ -51,7 +51,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "([NS])," +
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])?," +
-            "(\\d+\\.?\\d*)?,?" +                 // Speed
+            "(\\d+\\.?\\d*)?,?" +               // Speed
             "(\\d+\\.?\\d*)?,?" +               // Course
             "(\\d+\\.?\\d*)?,?" +               // Altitude
             "([^,]+)?,?" +
