@@ -49,9 +49,16 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             "([EW]);" +
             "(\\d+\\.?\\d*)?;" +           // Speed
             "(\\d+\\.?\\d*)?;" +           // Course
-            "(?:(\\d+\\.?\\d*)|NA);" +     // Altitude
-            "(?:(\\d+)|NA)" +              // Satellites
-            ".*");                         // Full format
+            "(?:NA|(\\d+\\.?\\d*));" +     // Altitude
+            "(?:NA|(\\d+))" +              // Satellites
+            "(?:;" +
+            "(?:NA|(\\d+\\.?\\d*));" +     // hdop
+            "(?:NA|(\\d+));" +             // inputs
+            "(?:NA|(\\d+));" +             // outputs
+            "(?:NA|([^;]*));" +            // adc
+            "(?:NA|([^;]*));" +            // ibutton
+            "(?:NA|(.*))" +                // params
+            ")?");
 
     private void sendResponse(Channel channel, String prefix, Integer number) {
         if (channel != null) {
@@ -133,6 +140,35 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("satellites", satellites);
         } else {
             position.setValid(false);
+        }
+
+        // Other
+        extendedInfo.set("hdop", parser.group(index++));
+        extendedInfo.set("inputs", parser.group(index++));
+        extendedInfo.set("outputs", parser.group(index++));
+
+        // ADC
+        String adc = parser.group(index++);
+        if (adc != null) {
+            String[] values = adc.split(",");
+            for (int i = 0; i < values.length; i++) {
+                extendedInfo.set("adc" + (i + 1), values[i]);
+            }
+        }
+
+        // iButton
+        extendedInfo.set("ibutton", parser.group(index++));
+
+        // Params
+        String params = parser.group(index);
+        if (params != null) {
+            String[] values = params.split(",");
+            for (String param : values) {
+                Matcher paramParser = Pattern.compile( "(.*):[1-3]:(.*)").matcher(param);
+                if (paramParser.matches()) {
+                    extendedInfo.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                }
+            }
         }
 
         // Extended info
