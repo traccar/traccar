@@ -60,7 +60,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\d" +                             // Charged
             "(\\d{3})" +                        // Battery
             "(\\d{4})\\|" +                     // External Power
-            "(\\d+)\\|" +                       // ADC
+            "(?:(\\d+)\\|)?" +                  // ADC
             "(\\p{XDigit}{8})\\|" +             // Location Code
             "(\\d+)\\|" +                       // Temperature
             "(\\d+.\\d+)\\|" +                  // Milage
