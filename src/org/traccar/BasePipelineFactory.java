@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 MessageEvent event = (MessageEvent) e;
                 StringBuilder msg = new StringBuilder();
 
-                msg.append("[").append(e.getChannel().getId()).append(" : ");
+                msg.append("[").append(String.format("%08X", e.getChannel().getId())).append(": ");
                 msg.append(((InetSocketAddress) e.getChannel().getLocalAddress()).getPort());
                 msg.append((e instanceof DownstreamMessageEvent) ? " -> " : " <- ");
 
