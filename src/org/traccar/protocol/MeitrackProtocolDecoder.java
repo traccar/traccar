@@ -69,7 +69,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}+)?\\|" +              // ADC3
             "(\\p{XDigit}+)\\|" +               // Battery
             "(\\p{XDigit}+)," +                 // Power
-            ".*(\r\n)?");
+            "(?:([^,]+)?," +                    // Event Specific
+            "[^,]*," +                          // Reserved
+            "\\d*," +                           // Protocol
+            "(\\p{XDigit}{4})?)?" +              // Fuel
+            ".*\\*\\p{XDigit}{2}(?:\r\n)?");
 
     private Position decodeRegularMessage(Channel channel, ChannelBuffer buf) {
 
@@ -96,7 +100,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Event
-        extendedInfo.set("event", parser.group(index++));
+        int event = Integer.valueOf(parser.group(index++));
+        extendedInfo.set("event", event);
 
         // Coordinates
         position.setLatitude(Double.valueOf(parser.group(index++)));
@@ -155,7 +160,24 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
         extendedInfo.set("battery", Integer.parseInt(parser.group(index++), 16));
         extendedInfo.set("power", Integer.parseInt(parser.group(index++), 16));
-        
+
+        // Event specific
+        String data = parser.group(index++);
+        if (data != null && !data.isEmpty()) {
+            switch (event) {
+                case 37:
+                    extendedInfo.set("rfid", data);
+                    break;
+            }
+        }
+
+        // Fuel
+        String fuel = parser.group(index++);
+        if (fuel != null) {
+            extendedInfo.set("fuel",
+                    Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
+        }
+
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());
 
