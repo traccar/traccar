@@ -48,7 +48,15 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             }
         }
     }
-    
+
+    public void setFormat0(String format) {
+        format0 = format;
+    }
+
+    public void setFormat1(String format) {
+        format1 = format;
+    }
+
     private Position decodeOriginal(Channel channel, String sentence) {
 
         // Send acknowledgement
