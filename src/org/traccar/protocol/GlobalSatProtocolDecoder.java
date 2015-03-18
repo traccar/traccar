@@ -170,7 +170,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Double.valueOf(value));
                     break;
                 case 'N':
-                    extendedInfo.set("battery", Double.valueOf(value));
+                    extendedInfo.set("battery", value);
                     break;
                 default:
                     // Unsupported

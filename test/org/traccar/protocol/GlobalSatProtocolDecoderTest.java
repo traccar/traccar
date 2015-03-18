@@ -19,13 +19,13 @@ public class GlobalSatProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "GSr,011412001878820,4,5,00,,1,250114,105316,E00610.2925,N4612.1824,0,0.02,0,1,0.0,64*51!"));
 
+        verify(decoder.decode(null, null,
+                "GSr,357938020310710,,4,04,,1,170315,060657,E00000.0000,N0000.0000,148,0.00,0,0,0.0,11991mV*6c!"));
+
         decoder.setFormat0("TSPRXAB27GHKLMnaicz*U!");
 
         verify(decoder.decode(null, null,
                 "GSr,1,135785412249986,01,I,EA02,3,230410,153318,E12129.2839,N2459.8570,0,1.17,212,8,1.0,12.3V*55"));
-
-        verify(decoder.decode(null, null,
-                "GSr,357938020310710,,4,04,,1,170315,060657,E00000.0000,N0000.0000,148,0.00,0,0,0.0,11991mV*6c!"));
 
         verify(decoder.decode(null, null,
                 "GSr,GTR-128,012896009148443,0040,5,0080,3,190813,185812,W11203.3661,N3330.2104,344,0.24,78,9,0.8,60%,0,0,12,\"310,410,0bdd,050d,02,21\",\"310,410,0bdd,0639,24,7\"*79"));
