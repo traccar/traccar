@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
                 lastPostition = position;
             }
         }
-        if (id != null && lastPostition != null) {
+        if (lastPostition != null) {
             try {
                 dataManager.updateLatestPosition(lastPostition, id);
             } catch (Exception error) {
