@@ -15,15 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.util.Calendar;
+import java.nio.ByteOrder;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
-import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
@@ -36,11 +37,17 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         super(dataManager, protocol, properties);
     }
 
+    private static final int DATA_TYPE = 7;
+
     private static final int MSG_ASYNC_STACK = 0xA5;
     private static final int MSG_STACK_COFIRM = 0x19;
     private static final int MSG_TIME_TRIGGERED = 0xA0;
     private static final int MSG_OUTPUT_CONTROL = 0x41;
     private static final int MSG_OUTPUT_CONTROL_ACK = 0xC1;
+
+    private static boolean checkBit(int mask, int bit) {
+        return (mask & (1 << bit)) != 0;
+    }
 
     @Override
     protected Object decode(
@@ -50,81 +57,116 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
         
         String imei = String.format("%015d", buf.readLong());
-        
+        long deviceId;
+        try {
+            deviceId = getDataManager().getDeviceByImei(imei).getId();
+        } catch (Exception error) {
+            Log.warning("Unknown device - " + imei);
+            return null;
+        }
 
-        /*buf.skipBytes(2); // header
-        buf.readByte(); // size
+        List<Position> positions = new LinkedList<Position>();
 
-        // Zero for location messages
-        buf.readByte(); // voltage
-        buf.readByte(); // gsm signal
+        while (buf.readableBytes() > 1) {
 
-        String imei = readImei(buf);
-        long index = buf.readUnsignedShort();
-        int type = buf.readUnsignedByte();
+            int dataEnd = buf.readUnsignedShort() + buf.readerIndex();
+            int type = buf.readUnsignedByte();
+            int confirmKey = buf.readUnsignedByte();
 
-        if (type == MSG_HEARTBEAT) {
-            if (channel != null) {
-                byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(ChannelBuffers.wrappedBuffer(response));
+            while (buf.readerIndex() < dataEnd) {
+
+                Position position = new Position();
+                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                position.setDeviceId(deviceId);
+
+                int structEnd = buf.readUnsignedByte() + buf.readerIndex();
+
+                long time = buf.readUnsignedInt();
+                if ((time & 0x0f) == DATA_TYPE) {
+
+                    time = time >> 4 << 1;
+                    time += 0x47798280; // 01/01/2008
+                    position.setTime(new Date(time * 1000));
+
+                    // Read masks
+                    int mask;
+                    List<Integer> masks = new LinkedList<Integer>();
+                    do {
+                        mask = buf.readUnsignedShort();
+                        masks.add(mask);
+                    } while (checkBit(mask, 15));
+
+                    mask = masks.get(0);
+
+                    if (checkBit(mask, 0)) {
+                        position.setValid(true);
+                        position.setLongitude((double) buf.readFloat());
+                        position.setLatitude((double) buf.readFloat());
+                        position.setSpeed((double) buf.readUnsignedByte());
+
+                        int gps = buf.readUnsignedByte();
+                        extendedInfo.set("satellites", gps & 0xf);
+                        extendedInfo.set("hdop", gps >> 4);
+
+                        position.setCourse((double) buf.readUnsignedByte());
+                        position.setAltitude((double) buf.readUnsignedShort());
+
+                        extendedInfo.set("milage", buf.readUnsignedInt());
+
+                        position.setExtendedInfo(extendedInfo.toString());
+                    }
+
+                    if (checkBit(mask, 1)) {
+                        extendedInfo.set("input", buf.readUnsignedShort());
+                    }
+
+                    for (int i = 1; i <= 8; i++) {
+                        if (checkBit(mask, i + 1)) {
+                            extendedInfo.set("adc" + i, buf.readUnsignedShort());
+                        }
+                    }
+
+                    if (checkBit(mask, 10)) buf.skipBytes(4);
+                    if (checkBit(mask, 11)) buf.skipBytes(4);
+                    if (checkBit(mask, 12)) buf.skipBytes(2);
+                    if (checkBit(mask, 13)) buf.skipBytes(2);
+
+                    if (checkBit(mask, 14)) {
+                        extendedInfo.set("mcc", buf.readUnsignedShort());
+                        extendedInfo.set("mnc", buf.readUnsignedByte());
+                        extendedInfo.set("lac", buf.readUnsignedShort());
+                        extendedInfo.set("cell", buf.readUnsignedShort());
+                        extendedInfo.set("gsm", buf.readUnsignedByte());
+                        buf.readUnsignedByte();
+                    }
+
+                    if (position.getValid() != null) {
+                        positions.add(position);
+                    }
+                }
+
+                buf.readerIndex(structEnd);
+            }
+
+            // Send response
+            if (type == MSG_ASYNC_STACK && channel != null) {
+                ChannelBuffer response = ChannelBuffers.buffer(ByteOrder.LITTLE_ENDIAN, 8 + 2 + 2 + 1);
+                response.writeLong(Long.valueOf(imei));
+                response.writeShort(2);
+                response.writeByte(MSG_STACK_COFIRM);
+                response.writeByte(confirmKey);
+
+                int checksum = 0;
+                for (int i = 0; i < response.writerIndex(); i++) {
+                    checksum += response.getUnsignedByte(i);
+                }
+                response.writeByte(checksum);
+
+                channel.write(response);
             }
         }
 
-        else if (type == MSG_DATA) {
-
-            // Create new position
-            Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            extendedInfo.set("index", index);
-
-            // Get device id
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-                return null;
-            }
-
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
-            position.setTime(time.getTime());
-
-            // Latitude
-            double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-
-            // Longitude
-            double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-
-            // Speed
-            position.setSpeed((double) buf.readUnsignedByte());
-
-            // Course
-            position.setCourse((double) buf.readUnsignedShort());
-
-            buf.skipBytes(3); // reserved
-
-            // Flags
-            long flags = buf.readUnsignedInt();
-            position.setValid((flags & 0x1) == 0x1);
-            if ((flags & 0x2) == 0) latitude = -latitude;
-            if ((flags & 0x4) == 0) longitude = -longitude;
-
-            position.setLatitude(latitude);
-            position.setLongitude(longitude);
-            position.setAltitude(0.0);
-
-            position.setExtendedInfo(extendedInfo.toString());
-            return position;
-        }*/
-
-        return null;
+        return positions;
     }
 
 }
