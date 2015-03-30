@@ -52,7 +52,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{4})?," +                      // MNC
             "(\\p{XDigit}{4})?," +              // LAC
             "(\\p{XDigit}{4})?," +              // Cell
-            "(?:.*,(\\d{1,3}),\\d{14},)?" +     // Battery
+            "(?:(\\d+\\.\\d)?," +               // Milage
+            "(\\d{1,3})?)?" +                   // Battery
             ".*");
 
     @Override
@@ -133,11 +134,12 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("lac", parser.group(index++));
         extendedInfo.set("cell", parser.group(index++));
 
-        // Battery
-        String battery = parser.group(index++);
-        if (battery != null) {
-            extendedInfo.set("battery", Integer.valueOf(battery));
+        // Other
+        String milage = parser.group(index++);
+        if (milage != null && Double.valueOf(milage) != 0) {
+            extendedInfo.set("milage", milage);
         }
+        extendedInfo.set("battery", parser.group(index++));
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;
