@@ -37,8 +37,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "\\+(?:RESP|BUFF):GT...," +
-            "[0-9a-fA-F]{6}," +                 // Protocol version
+            "(?:(?:\\+(?:RESP|BUFF):)|" +
+            "(?:\\x00\\x04,\\p{XDigit}{4},[01],))" +
+            "GT...," +
+            "(?:[0-9a-fA-F]{6})?," +            // Protocol version
             "(\\d{15}),.*," +                   // IMEI
             "(\\d*)," +                         // GPS accuracy
             "(\\d+.\\d)?," +                    // Speed
