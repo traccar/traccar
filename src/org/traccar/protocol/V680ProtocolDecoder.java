@@ -47,9 +47,9 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)#" +                    // Packet number
             "([^#]+)?#?" +                 // GSM base station
             "(?:[^#]+#)?" +
-            "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
+            "(\\d+)?(\\d{2}\\.\\d+)," +    // Longitude (DDDMM.MMMM)
             "([EW])," +
-            "(\\d+)(\\d{2}\\.\\d+)," +     // Latitude (DDMM.MMMM)
+            "(\\d+)?(\\d{2}\\.\\d+)," +    // Latitude (DDMM.MMMM)
             "([NS])," +
             "(\\d+\\.\\d+)," +             // Speed
             "(\\d+\\.?\\d*)?#" +           // Course
@@ -120,13 +120,15 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("gsm", parser.group(index++));
 
             // Longitude
-            Double longitude = Double.valueOf(parser.group(index++));
+            String lon = parser.group(index++);
+            Double longitude = (lon != null) ? Double.valueOf(lon) : 0.0;
             longitude += Double.valueOf(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
 
             // Latitude
-            Double latitude = Double.valueOf(parser.group(index++));
+            String lat = parser.group(index++);
+            Double latitude = (lat != null) ? Double.valueOf(lat) : 0.0;
             latitude += Double.valueOf(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
             position.setLatitude(latitude);
