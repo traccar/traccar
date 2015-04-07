@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2}):?(\\d{2})(?:\\d{2})?," +  // Local Time
             "[^,]*," +
             "[FL]," +                           // F - full / L - low
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time UTC (HHMMSS.SSS)
+            "(?:(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)|" + // Time UTC (HHMMSS.SSS)
+            "(?:\\d{1,5}\\.\\d+))," +
             "([AV])," +                         // Validity
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
             "([NS])," +
@@ -117,23 +118,32 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         int localHours = Integer.valueOf(parser.group(index++));
         int localMinutes = Integer.valueOf(parser.group(index++));
         
-        int utcHours = Integer.valueOf(parser.group(index++));
-        int utcMinutes = Integer.valueOf(parser.group(index++));
+        String utcHours = parser.group(index++);
+        String utcMinutes = parser.group(index++);
 
         // Time
         time.set(Calendar.HOUR_OF_DAY, localHours);
         time.set(Calendar.MINUTE, localMinutes);
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
+        String seconds = parser.group(index++);
+        if (seconds != null) {
+            time.set(Calendar.SECOND, Integer.valueOf(seconds));
+        }
+        String milliseconds = parser.group(index++);
+        if (milliseconds != null) {
+            time.set(Calendar.MILLISECOND, Integer.valueOf(milliseconds));
+        }
         
         // Timezone calculation
-        int deltaMinutes = (localHours - utcHours) * 60 + localMinutes - utcMinutes;
-        if (deltaMinutes <= -12 * 60) {
-            deltaMinutes += 24 * 60;
-        } else if (deltaMinutes > 12 * 60) {
-            deltaMinutes -= 24 * 60;
+        if (utcHours != null && utcMinutes != null) {
+            int deltaMinutes = (localHours - Integer.valueOf(utcHours)) * 60;
+            deltaMinutes += localMinutes - Integer.valueOf(utcMinutes);
+            if (deltaMinutes <= -12 * 60) {
+                deltaMinutes += 24 * 60;
+            } else if (deltaMinutes > 12 * 60) {
+                deltaMinutes -= 24 * 60;
+            }
+            time.add(Calendar.MINUTE, -deltaMinutes);
         }
-        time.add(Calendar.MINUTE, -deltaMinutes);
         position.setTime(time.getTime());
 
         // Validity
