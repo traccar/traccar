@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern pattern = Pattern.compile(
             "(?:(?:\\+(?:RESP|BUFF):)|" +
-            "(?:\\x00\\x04,\\p{XDigit}{4},[01],))" +
+            "(?:\\x00?\\x04,\\p{XDigit}{4},[01],))" +
             "GT...," +
             "(?:[0-9a-fA-F]{6})?," +            // Protocol version
             "(\\d{15}),.*," +                   // IMEI
