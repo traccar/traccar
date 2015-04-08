@@ -206,7 +206,7 @@ public class Huabao808ProtocolDecoder extends BaseProtocolDecoder {
 
         private double getLatitude() {
             double result =  latitude / (double)1000000;
-            if ((direction & 0x0400) == 0) result = -result;
+            // if ((direction & 0x0400) == 0) result = -result;
             return result;
         }
 
