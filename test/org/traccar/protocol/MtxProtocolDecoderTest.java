@@ -1,0 +1,20 @@
+package org.traccar.protocol;
+
+import org.traccar.helper.TestDataManager;
+import static org.traccar.helper.DecoderVerifier.verify;
+import static org.junit.Assert.assertNull;
+import org.junit.Test;
+
+public class MtxProtocolDecoderTest {
+
+    @Test
+    public void testDecode() throws Exception {
+
+        MtxProtocolDecoder decoder = new MtxProtocolDecoder(new TestDataManager(), null, null);
+
+        verify(decoder.decode(null, null,
+                "#MTX,353815011138124,20101226,195550,41.6296399,002.3611174,000,035,000000.00,X,X,1111,000,0,0"));
+
+    }
+
+}

@@ -183,6 +183,7 @@ public class ServerManager {
         initBceServer("bce");
         initXirgoServer("xirgo");
         initCalAmpServer("calamp");
+        initMtxServer("mtx");
 
         initProtocolDetector();
 
@@ -1365,4 +1366,18 @@ public class ServerManager {
         }
     }
     
+    private void initMtxServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new MtxProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
+
 }
