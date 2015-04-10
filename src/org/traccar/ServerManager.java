@@ -182,6 +182,7 @@ public class ServerManager {
         initAutoFon45Server("autofon45");
         initBceServer("bce");
         initXirgoServer("xirgo");
+        initCalAmpServer("calamp");
 
         initProtocolDetector();
 
@@ -1353,4 +1354,15 @@ public class ServerManager {
         }
     }
 
+    private void initCalAmpServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("objectDecoder", new CalAmpProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
+    
 }
