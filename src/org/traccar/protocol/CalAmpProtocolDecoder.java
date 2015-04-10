@@ -212,13 +212,15 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
             // Event code and status
             if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
-                extendedInfo.set("event", buf.readUnsignedByte());
+                extendedInfo.set("event", buf.readUnsignedByte() + " - " + buf.readUnsignedByte());
             }
 
             // Accumulators
-            /*int accCount = buf.readUnsignedByte();
+            int accCount = buf.readUnsignedByte();
             int accType = accCount >> 6;
             accCount &= 0x3f;
+            
+            buf.readUnsignedByte(); // reserved
 
             if (accType == 1) {
                 buf.readUnsignedInt(); // threshold
@@ -227,7 +229,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < accCount; i++) {
                 extendedInfo.set("acc" + i, buf.readUnsignedInt());
-            }*/
+            }
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
