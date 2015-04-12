@@ -15,6 +15,7 @@
  */
 package org.traccar.model;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -42,9 +43,8 @@ public class ExtendedInfoFormatter {
             data.put(key, value);
         }
     }
-
-    @Override
-    public String toString() {
+    
+    private String toXmlString() {
         StringBuilder result = new StringBuilder();
         
         result.append("<").append(rootNode).append(">");
@@ -59,6 +59,35 @@ public class ExtendedInfoFormatter {
         result.append("</").append(rootNode).append(">");
         
         return result.toString();
+    }
+    
+    private String toJsonString() {
+        StringBuilder result = new StringBuilder();
+        
+        result.append("{");
+        
+        Iterator<Map.Entry<String, Object> > i = data.entrySet().iterator();
+        
+        while (i.hasNext()) {
+            Map.Entry<String, Object> entry = i.next();
+            
+            result.append('"').append(entry.getKey()).append('"');
+            result.append(':');
+            result.append('"').append(entry.getValue()).append('"');
+            
+            if (i.hasNext()) {
+                result.append(',');
+            }
+        }
+
+        result.append("}");
+        
+        return result.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toXmlString();
     }
 
 }
