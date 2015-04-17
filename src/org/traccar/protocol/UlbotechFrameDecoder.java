@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.traccar.helper.ChannelBufferTools;
 
 public class UlbotechFrameDecoder extends FrameDecoder {
 
@@ -36,9 +35,9 @@ public class UlbotechFrameDecoder extends FrameDecoder {
 
         int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) 0xF8);
         if (index != -1) {
-            ChannelBuffer result = ChannelBuffers.buffer(index - buf.readerIndex());
+            ChannelBuffer result = ChannelBuffers.buffer(index + 1 - buf.readerIndex());
 
-            while (buf.readerIndex() < index) {
+            while (buf.readerIndex() <= index) {
                 int b = buf.readUnsignedByte();
                 if (b == 0xF7) {
                     int ext = buf.readUnsignedByte();
