@@ -184,6 +184,7 @@ public class ServerManager {
         initXirgoServer("xirgo");
         initCalAmpServer("calamp");
         initMtxServer("mtx");
+        initTytanServer("tytan");
 
         initProtocolDetector();
 
@@ -1375,6 +1376,17 @@ public class ServerManager {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new MtxProtocolDecoder(dataManager, protocol, properties));
+                }
+            });
+        }
+    }
+
+    private void initTytanServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(properties, protocol)) {
+            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("objectDecoder", new TytanProtocolDecoder(dataManager, protocol, properties));
                 }
             });
         }
