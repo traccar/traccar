@@ -18,6 +18,9 @@ public class MeiligaoProtocolDecoderTest {
                 "24240000123456FFFFFFFF50008B9B0D0A"))));
         
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "242400722015032700004299553134313131352e3030302c412c353031312e343335342c4e2c30303834332e373039322c452c3030302e302c3034342e362c3134303431352c2c2c412a36437c322e317c39392e347c303030307c303030302c303030307c3030303032343730350e480d0a"))));
+        
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "2424006e241120141fffff99553039333931302e30302c412c313931342e37373736352c4e2c30373235302e36383037322c452c302e3035312c2c3230313231342c2c2c442a37357c302e38327c322e387c303030307c303030302c303030307c3031303833373433311d170d0a"))));
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
