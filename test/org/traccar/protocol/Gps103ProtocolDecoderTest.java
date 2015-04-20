@@ -112,6 +112,12 @@ public class Gps103ProtocolDecoderTest {
         
         verify(decoder.decode(null, null, null,
                 "imei:353552045375005,tracker,150401165832,61.0,F,31.0,A,1050.73696,N,10636.49489,E,8.0,,22.0,"));
+        
+        verify(decoder.decode(null, null, null,
+                "imei:353552045403597,tracker,150420050648,53.0,F,0.0,A,N,5306.64155,E,00700.77848,0.0,,1.0,;"));
+        
+        verify(decoder.decode(null, null, null,
+                "imei:353552045403597,tracker,150420051153,53.0,F,0.0,A,5306.64155,N,00700.77848,E,0.0,,1.0,;"));
 
     }
 

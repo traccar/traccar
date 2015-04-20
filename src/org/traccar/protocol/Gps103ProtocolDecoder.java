@@ -48,10 +48,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "(?:(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)|" + // Time UTC (HHMMSS.SSS)
             "(?:\\d{1,5}\\.\\d+))," +
             "([AV])," +                         // Validity
+            "(?:([NS]),)?" +
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
-            "([NS])," +
+            "(?:([NS]),)?" +
+            "(?:([EW]),)?" +
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
-            "([EW])?," +
+            "(?:([EW])?,)?" +
             "(\\d+\\.?\\d*)?,?" +               // Speed
             "(\\d+\\.?\\d*)?,?" +               // Course
             "(\\d+\\.?\\d*)?,?" +               // Altitude
@@ -150,17 +152,28 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
+        String hemisphere = parser.group(index++);
         Double latitude = Double.valueOf(parser.group(index++));
         latitude += Double.valueOf(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
+        if (parser.group(index) != null) {
+            hemisphere = parser.group(index);
+        }
+        index++;
+        if (hemisphere.compareTo("S") == 0) {
+            latitude = -latitude;
+        }
         position.setLatitude(latitude);
 
         // Longitude
+        hemisphere = parser.group(index++);
         Double longitude = Double.valueOf(parser.group(index++));
         longitude += Double.valueOf(parser.group(index++)) / 60;
-        String hemisphere = parser.group(index++);
-        if (hemisphere != null) {
-            if (hemisphere.compareTo("W") == 0) longitude = -longitude;
+        if (parser.group(index) != null) {
+            hemisphere = parser.group(index);
+        }
+        index++;
+        if (hemisphere != null && hemisphere.compareTo("W") == 0) {
+            longitude = -longitude;
         }
         position.setLongitude(longitude);
 
