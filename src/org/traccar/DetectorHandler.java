@@ -18,14 +18,8 @@ package org.traccar;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
-import org.jboss.netty.handler.timeout.IdleStateEvent;
-import org.traccar.database.DataManager;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
-import org.traccar.model.Position;
 
 import java.lang.reflect.Method;
 import java.net.SocketAddress;
@@ -34,12 +28,14 @@ import java.util.List;
 public class DetectorHandler extends SimpleChannelHandler {
 
     private List<TrackerServer> serverList;
+    
+    private boolean showFailed;
 
     DetectorHandler(List<TrackerServer> serverList) {
         this.serverList = serverList;
     }
 
-    public static void checkPipeline(String protocol, ChannelPipeline pipeline, ChannelBuffer buf) throws Exception {
+    public void checkPipeline(String protocol, ChannelPipeline pipeline, ChannelBuffer buf) throws Exception {
         Object tmp = buf.duplicate();
 
         // Frame decoder
@@ -88,10 +84,8 @@ public class DetectorHandler extends SimpleChannelHandler {
 
         if (tmp != null) {
             Log.info("Protocol " + protocol + " possible match");
-            System.out.println("Protocol " + protocol + " possible match");
-        } else {
+        } else if (showFailed) {
             Log.info("Protocol " + protocol + " no match");
-            System.out.println("Protocol " + protocol + " no match");
         }
     }
 
@@ -107,8 +101,9 @@ public class DetectorHandler extends SimpleChannelHandler {
                         checkPipeline(server.getProtocol(), server.getPipelineFactory().getPipeline(), buf);
                     }
                 } catch(Exception error) {
-                    Log.info("Protocol " + server.getProtocol() + " error");
-                    System.out.println("Protocol " + server.getProtocol() + " error");
+                    if (showFailed) {
+                        Log.info("Protocol " + server.getProtocol() + " error");
+                    }
                 }
             }
         }
