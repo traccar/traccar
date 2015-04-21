@@ -22,14 +22,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 
 public class MainServlet extends HttpServlet {
 
     private static final String USER_ID = "userId";
 
-    private DataManager dataManager;
+    private final DataManager dataManager;
 
     public MainServlet(DataManager dataManager) {
         this.dataManager = dataManager;

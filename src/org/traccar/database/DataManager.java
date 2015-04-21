@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,41 +223,88 @@ public class DataManager {
         try {
             Statement statement = connection.createStatement();
             try {
+                
+                ResultSet result = connection.getMetaData().getTables(
+                        connection.getCatalog(), null, null, null);
+                
+                boolean exist = false;
+                while (result.next()) {
+                    if (result.getString("TABLE_NAME").equalsIgnoreCase("traccar1")) {
+                        exist = true;
+                        break;
+                    }
+                }
+                
+                if (!exist) {
 
-                statement.execute(
-                        "CREATE TABLE IF NOT EXISTS users (" +
-                        "id INT PRIMARY KEY AUTO_INCREMENT," +
-                        "name VARCHAR(1024) NOT NULL UNIQUE," +
-                        "password VARCHAR(1024) NOT NULL," +
-                        "admin BOOLEAN NOT NULL);");
+                    statement.execute(
+                            "CREATE TABLE user (" +
+                            "id INT PRIMARY KEY AUTO_INCREMENT," +
+                            "name VARCHAR(1024) NOT NULL UNIQUE," +
+                            "password VARCHAR(1024) NOT NULL," +
+                            "salt VARCHAR(1024) NOT NULL," +
+                            "readonly BOOLEAN NOT NULL," +
+                            "admin BOOLEAN NOT NULL," +
+                            "language VARCHAR(1024) NOT NULL," +
+                            "latitude DOUBLE NOT NULL," +
+                            "longitude DOUBLE NOT NULL," +
+                            "zoom INT NOT NULL);" +
 
-                statement.execute(
-                        "CREATE TABLE IF NOT EXISTS devices (" +
-                        "id INT PRIMARY KEY AUTO_INCREMENT," +
-                        "name VARCHAR(1024) NOT NULL," +
-                        "uniqueId VARCHAR(1024) NOT NULL UNIQUE);");
+                            "CREATE TABLE device (" +
+                            "id INT PRIMARY KEY AUTO_INCREMENT," +
+                            "name VARCHAR(1024) NOT NULL," +
+                            "unique_id VARCHAR(1024) NOT NULL UNIQUE," +
+                            "position_id INT NOT NULL," +
+                            "data_id INT NOT NULL);" +
 
-                statement.execute(
-                        "CREATE TABLE IF NOT EXISTS users_devices (" +
-                        "userId INT NOT NULL," +
-                        "deviceId INT NOT NULL," +
-                        "FOREIGN KEY (userId) REFERENCES users(id)," +
-                        "FOREIGN KEY (deviceId) REFERENCES devices(id));");
+                            "CREATE TABLE user_device (" +
+                            "user_id INT NOT NULL," +
+                            "device_id INT NOT NULL," +
+                            "read BOOLEAN NOT NULL," +
+                            "write BOOLEAN NOT NULL," +
+                            "FOREIGN KEY (user_id) REFERENCES user(id)," +
+                            "FOREIGN KEY (device_id) REFERENCES device(id));" +
 
-                statement.execute(
-                        "CREATE TABLE IF NOT EXISTS positions (" +
-                        "id INT PRIMARY KEY AUTO_INCREMENT," +
-                        "deviceId INT NOT NULL," +
-                        "time TIMESTAMP NOT NULL," +
-                        "valid BOOLEAN NOT NULL," +
-                        "latitude DOUBLE NOT NULL," +
-                        "longitude DOUBLE NOT NULL," +
-                        "altitude DOUBLE NOT NULL," +
-                        "speed DOUBLE NOT NULL," +
-                        "course DOUBLE NOT NULL," +
-                        "address VARCHAR(1024) NOT NULL," +
-                        "other VARCHAR(8192) NOT NULL," +
-                        "FOREIGN KEY (deviceId) REFERENCES devices(id));");
+                            "CREATE TABLE position (" +
+                            "id INT PRIMARY KEY AUTO_INCREMENT," +
+                            "device_id INT NOT NULL," +
+                            "server_time TIMESTAMP NOT NULL," +
+                            "device_time TIMESTAMP NOT NULL," +
+                            "fix_time TIMESTAMP NOT NULL," +
+                            "valid BOOLEAN NOT NULL," +
+                            "latitude DOUBLE NOT NULL," +
+                            "longitude DOUBLE NOT NULL," +
+                            "altitude DOUBLE NOT NULL," +
+                            "speed DOUBLE NOT NULL," +
+                            "course DOUBLE NOT NULL," +
+                            "address VARCHAR(1024)," +
+                            "other VARCHAR(8192) NOT NULL," +
+                            "FOREIGN KEY (device_id) REFERENCES device(id));" +
+
+                            "CREATE TABLE data (" +
+                            "id INT PRIMARY KEY AUTO_INCREMENT," +
+                            "device_id INT NOT NULL," +
+                            "server_time TIMESTAMP NOT NULL," +
+                            "device_time TIMESTAMP NOT NULL," +
+                            "other VARCHAR(8192) NOT NULL," +
+                            "FOREIGN KEY (device_id) REFERENCES device(id));" +
+
+                            "ALTER TABLE device ADD " +
+                            "FOREIGN KEY (position_id) REFERENCES position(id);" +
+                                    
+                            "ALTER TABLE device ADD " +
+                            "FOREIGN KEY (data_id) REFERENCES data(id);" +
+                                    
+                            "CREATE TABLE server (" +
+                            "id INT PRIMARY KEY AUTO_INCREMENT," +
+                            "registration BOOLEAN NOT NULL," +
+                            "latitude DOUBLE NOT NULL," +
+                            "longitude DOUBLE NOT NULL," +
+                            "zoom INT NOT NULL);" +
+                                    
+                            "CREATE TABLE traccar1 (" +
+                            "id INT PRIMARY KEY AUTO_INCREMENT);");
+                }
 
             } finally {
                 statement.close();
