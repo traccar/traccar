@@ -53,6 +53,27 @@ public class Tk103ProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "(864768010009188,BP05,271114,V,4012.19376N,00824.05638E,000.0,154436,000.0"));
 
+        verify(decoder.decode(null, null,
+                "(013632651491,BP05,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
+
+        verify(decoder.decode(null, null,
+                "(013632651491,ZC07,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
+
+        verify(decoder.decode(null, null,
+                "(013632651491,ZC11,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
+
+        verify(decoder.decode(null, null,
+                "(013632651491,ZC12,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
+
+        verify(decoder.decode(null, null,
+                "(013632651491,ZC13,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
+
+        verify(decoder.decode(null, null,
+                "(013632651491,ZC17,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
+
+        assertNull(decoder.decode(null, null,
+                "(013632651491,ZC20,040613,040137,6,42,112,0)"));
+
     }
 
 }
