@@ -32,9 +32,6 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.xml.sax.InputSource;
 
-/**
- * Database abstraction class
- */
 public class DataManager {
 
     public DataManager(Properties properties) throws Exception {
@@ -57,17 +54,15 @@ public class DataManager {
         return dataSource;
     }
 
-    /**
-     * Database statements
-     */
     private NamedParameterStatement queryGetDevices;
     private NamedParameterStatement queryAddPosition;
     private NamedParameterStatement queryUpdateLatestPosition;
+    
+    private boolean useNewDatabase;
 
-    /**
-     * Initialize database
-     */
     private void initDatabase(Properties properties) throws Exception {
+        
+        useNewDatabase = Boolean.valueOf(properties.getProperty("http.new"));
 
         // Load driver
         String driver = properties.getProperty("database.driver");
@@ -93,8 +88,10 @@ public class DataManager {
         ds.setIdleConnectionTestPeriod(600);
         ds.setTestConnectionOnCheckin(true);
         dataSource = ds;
-
-        //createDatabaseSchema();
+        
+        if (useNewDatabase) {
+            createDatabaseSchema();
+        }
 
         // Load statements from configuration
         String query;
@@ -243,13 +240,15 @@ public class DataManager {
                             "name VARCHAR(1024) NOT NULL UNIQUE," +
                             "password VARCHAR(1024) NOT NULL," +
                             "salt VARCHAR(1024) NOT NULL," +
-                            "readonly BOOLEAN NOT NULL," +
-                            "admin BOOLEAN NOT NULL," +
-                            "language VARCHAR(1024) NOT NULL," +
-                            "latitude DOUBLE NOT NULL," +
-                            "longitude DOUBLE NOT NULL," +
-                            "zoom INT NOT NULL);" +
-
+                            "readonly BOOLEAN DEFAULT false NOT NULL," +
+                            "admin BOOLEAN DEFAULT false NOT NULL," +
+                            "language VARCHAR(1024) DEFAULT 'en' NOT NULL," +
+                            "distance_unit VARCHAR(1024) DEFAULT 'km' NOT NULL," +
+                            "speed_unit VARCHAR(1024) DEFAULT 'kmh' NOT NULL," +
+                            "latitude DOUBLE DEFAULT 0 NOT NULL," +
+                            "longitude DOUBLE DEFAULT 0 NOT NULL," +
+                            "zoom INT DEFAULT 0 NOT NULL);" +
+                                    
                             "CREATE TABLE device (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
                             "name VARCHAR(1024) NOT NULL," +
@@ -304,6 +303,8 @@ public class DataManager {
                                     
                             "CREATE TABLE traccar1 (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT);");
+                    
+                    createUser("admin", "admin", true);
                 }
 
             } finally {
@@ -319,7 +320,7 @@ public class DataManager {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "SELECT id FROM users WHERE name = ? AND password = ?;");
+                    "SELECT id FROM user WHERE name = ? AND password = CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR);");
             try {
                 statement.setString(1, name);
                 statement.setString(2, password);
@@ -327,6 +328,27 @@ public class DataManager {
                 ResultSet result = statement.executeQuery();
                 result.next();
                 return result.getLong("id");
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+
+    public void createUser(String name, String password, boolean admin) throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO user (name, password, salt, admin) " +
+                    "VALUES (?, CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR), '', ?);");
+            try {
+                statement.setString(1, name);
+                statement.setString(2, password);
+                statement.setBoolean(3, admin);
+                
+                statement.executeUpdate();
             } finally {
                 statement.close();
             }
