@@ -108,13 +108,6 @@ public class ServerManager {
 
         dataManager = new DataManager(properties);
         dataCache = new DataCache(dataManager);
-        
-        dataCache.addListener(Arrays.asList(1l), new DataCache.DataCacheListener() {
-            @Override
-            public void onUpdate(Position position) {
-                System.out.println("position: " + position.getLatitude() + ":" + position.getLongitude());
-            }
-        });
 
         initGeocoder(properties);
 
