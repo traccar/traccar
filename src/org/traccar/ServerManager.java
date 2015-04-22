@@ -15,6 +15,14 @@
  */
 package org.traccar;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.ByteOrder;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -26,21 +34,16 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
+import org.traccar.database.DataCache;
 import org.traccar.database.DataManager;
 import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.http.WebServer;
+import org.traccar.model.Position;
 import org.traccar.protocol.*;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.ByteOrder;
-import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * Server Manager
@@ -63,6 +66,12 @@ public class ServerManager {
 
     public DataManager getDataManager() {
         return dataManager;
+    }
+
+    private DataCache dataCache;
+
+    public DataCache getDataCache() {
+        return dataCache;
     }
 
     private ReverseGeocoder reverseGeocoder;
@@ -98,6 +107,14 @@ public class ServerManager {
         }
 
         dataManager = new DataManager(properties);
+        dataCache = new DataCache(dataManager);
+        
+        dataCache.addListener(Arrays.asList(1l), new DataCache.DataCacheListener() {
+            @Override
+            public void onUpdate(Position position) {
+                System.out.println("position: " + position.getLatitude() + ":" + position.getLongitude());
+            }
+        });
 
         initGeocoder(properties);
 

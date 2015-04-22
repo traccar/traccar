@@ -19,23 +19,20 @@ import java.util.List;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
+import org.traccar.database.DataCache;
 import org.traccar.helper.Log;
 import org.traccar.database.DataManager;
 import org.traccar.model.Position;
 
-/**
- * Tracker message handler
- */
 @ChannelHandler.Sharable
 public class TrackerEventHandler extends IdleStateAwareChannelHandler {
 
-    /**
-     * Data manager
-     */
-    private DataManager dataManager;
+    private final DataManager dataManager;
+    private final DataCache dataCache;
 
-    TrackerEventHandler(DataManager newDataManager) {
-        dataManager = newDataManager;
+    TrackerEventHandler(DataManager dataManager, DataCache dataCache) {
+        this.dataManager = dataManager;
+        this.dataCache = dataCache;
     }
 
     private Long processSinglePosition(Position position) {
@@ -77,6 +74,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         if (lastPostition != null) {
             try {
                 dataManager.updateLatestPosition(lastPostition, id);
+                dataCache.update(lastPostition);
             } catch (Exception error) {
                 Log.warning(error);
             }

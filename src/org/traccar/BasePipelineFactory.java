@@ -21,26 +21,22 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
+import org.traccar.database.DataCache;
+import org.traccar.database.DataManager;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
-import org.traccar.database.DataManager;
 
-/**
-  * Base pipeline factory
-  */
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
     private final DataManager dataManager;
+    private final DataCache dataCache;
     private final Boolean loggerEnabled;
     private final ReverseGeocoder reverseGeocoder;
     private FilterHandler filterHandler;
     private Integer resetDelay;
     private Boolean processInvalidPositions;
 
-    /**
-     * Open channel handler
-     */
     protected class OpenChannelHandler extends SimpleChannelHandler {
 
         private final TrackerServer server;
@@ -90,6 +86,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     public BasePipelineFactory(ServerManager serverManager, TrackerServer server, String protocol) {
         this.server = server;
         dataManager = serverManager.getDataManager();
+        dataCache = serverManager.getDataCache();
         loggerEnabled = serverManager.isLoggerEnabled();
         reverseGeocoder = serverManager.getReverseGeocoder();
 
@@ -133,7 +130,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (reverseGeocoder != null) {
             pipeline.addLast("geocoder", new ReverseGeocoderHandler(reverseGeocoder, processInvalidPositions));
         }
-        pipeline.addLast("handler", new TrackerEventHandler(dataManager));
+        pipeline.addLast("handler", new TrackerEventHandler(dataManager, dataCache));
         return pipeline;
     }
 
