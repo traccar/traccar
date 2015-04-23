@@ -14,6 +14,9 @@ public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(null);
+        
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "f8010103545500500179009ccb4b62010e00144db906310d3f0000000000cb0304000000000404000a8123050603211860221006080000000100000000ef97f8"))));
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "F80101035785203457289495D60235010E016175A506C2C838000000000064"))));

@@ -97,7 +97,11 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.setExtendedInfo(extendedInfo.toString());
-        return position;
+        
+        if (position.getValid() != null) {
+            return position;
+        }
+        return null;
     }
 
 }
