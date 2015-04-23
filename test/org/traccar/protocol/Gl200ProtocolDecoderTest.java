@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class Gl200ProtocolDecoderTest {
+public class Gl200ProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new TestDataManager(), null, null);
+        Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(null);
         
         verify(decoder.decode(null, null,
                 "+RESP:GTFRI,1A0200,860599000165464,CRI001,0,0,1,2,,41,,-71.153137,42.301634,20150328020301,,,,,280.3,55,20150327220351,320C"));

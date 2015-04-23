@@ -32,10 +32,8 @@ import org.traccar.model.Position;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
-    public V680ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public V680ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -68,11 +66,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         // Detect device ID
         if (sentence.length() == 16) {
             String imei = sentence.substring(1, sentence.length());
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
+            identify(imei);
         } else {
 
             // Parse message
@@ -89,17 +83,12 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             // Get device by IMEI
             String imei = parser.group(index++);
             if (imei != null) {
-                try {
-                    deviceId = getDataManager().getDeviceByImei(imei).getId();
-                } catch(Exception error) {
-                    Log.warning("Unknown device - " + imei);
-                    return null;
-                }
+                identify(imei);
             }
-            if (deviceId == null) {
+            if (!hasDeviceId()) {
                 return null;
             }
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             // User
             extendedInfo.set("user", parser.group(index++));

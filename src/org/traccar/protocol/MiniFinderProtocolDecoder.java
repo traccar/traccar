@@ -32,10 +32,8 @@ import org.traccar.model.Position;
 
 public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
-    public MiniFinderProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public MiniFinderProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -62,16 +60,11 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
         // Identification
         if (sentence.startsWith("!1")) {
-            String imei = sentence.substring(3, sentence.length());
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
+            identify(sentence.substring(3, sentence.length()));
         }
 
         // Location
-        else if (sentence.startsWith("!D") && deviceId != null) {
+        else if (sentence.startsWith("!D") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = pattern.matcher(sentence);
@@ -82,7 +75,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             Integer index = 1;
 

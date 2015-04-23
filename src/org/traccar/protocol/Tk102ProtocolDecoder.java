@@ -32,10 +32,8 @@ import org.traccar.model.Position;
 
 public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
-    public Tk102ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Tk102ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     static private Pattern pattern = Pattern.compile(
@@ -59,11 +57,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         // Login
         if (sentence.startsWith("[!")) {
-            String imei = sentence.substring(14, 14 + 15);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
+            if (!identify(sentence.substring(14, 14 + 15))) {
                 return null;
             }
 
@@ -78,7 +72,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Parse message
-        else if (deviceId != null) {
+        else if (hasDeviceId()) {
 
             // Parse message
             Matcher parser = pattern.matcher(sentence);
@@ -89,7 +83,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             Integer index = 1;
 
@@ -101,7 +95,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));

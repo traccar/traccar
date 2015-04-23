@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tk103ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Tk103ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -89,18 +89,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            // Compatibility mode (remove in future)
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei("000" + imei).getId());
-            } catch(Exception error2) {
-                Log.warning("Unknown device - " + imei);
-                return null;
-            }
+        if (!identify(parser.group(index++))) {
+            return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
-    public GalileoProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public GalileoProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int TAG_IMEI = 0x03;
@@ -77,9 +77,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             channel.write(reply);
         }
     }
-    
-    private Long deviceId;
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -113,11 +111,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 case TAG_IMEI:
                     String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
                     buf.skipBytes(imei.length());
-                    try {
-                        deviceId = getDataManager().getDeviceByImei(imei).getId();
-                    } catch(Exception error) {
-                        Log.warning("Unknown device - " + imei);
-                    }
+                    identify(imei);
                     break;
 
                 case TAG_DATE:
@@ -165,7 +159,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         position.setExtendedInfo(extendedInfo.toString());
         positions.add(position);
         
-        if (deviceId == null) {
+        if (!hasDeviceId()) {
             Log.warning("Unknown device");
             return null;
         }
@@ -175,7 +169,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         for (Iterator<Position> i = positions.iterator(); i.hasNext(); ) {
             Position p = i.next();
 
-            p.setDeviceId(deviceId);
+            p.setDeviceId(getDeviceId());
 
             if (p.getAltitude() == null) {
                 p.setAltitude(0.0);

@@ -8,12 +8,12 @@ import org.traccar.helper.TestDataManager;
 import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class UlbotechProtocolDecoderTest {
+public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(new TestDataManager(), null, null);
+        UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(null);
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "F80101035785203457289495D60235010E016175A506C2C838000000000064"))));

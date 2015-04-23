@@ -7,12 +7,12 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 
-public class OsmAndProtocolDecoderTest {
+public class OsmAndProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        OsmAndProtocolDecoder decoder = new OsmAndProtocolDecoder(new TestDataManager(), null, null);
+        OsmAndProtocolDecoder decoder = new OsmAndProtocolDecoder(null);
         
         verify(decoder.decode(null, null, new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
                 "/?lat=49.60688&lon=6.15788&timestamp=2014-06-04+09%3A10%3A11&altitude=384.7&speed=0.0&id=353861053849681")));

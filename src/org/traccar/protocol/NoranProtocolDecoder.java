@@ -35,8 +35,8 @@ import org.traccar.model.Position;
 
 public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
-    public NoranProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public NoranProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int MSG_UPLOAD_POSITION = 0x0008;
@@ -111,13 +111,11 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             // Identification
             String id = buf.readBytes(11).toString(Charset.defaultCharset()).replaceAll("[^\\p{Print}]", "");
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+            if (!identify(id)) {
                 return null;
             }
-            
+            position.setDeviceId(getDeviceId());
+
             // IO status
             extendedInfo.set("io", buf.readUnsignedByte());
             

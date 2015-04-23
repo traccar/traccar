@@ -8,12 +8,12 @@ import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class GalileoProtocolDecoderTest {
+public class GalileoProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        GalileoProtocolDecoder decoder = new GalileoProtocolDecoder(new TestDataManager(), null, null);
+        GalileoProtocolDecoder decoder = new GalileoProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "011380033836383230343030313534393038370432008590"))));

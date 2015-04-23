@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class GpsGateProtocolDecoderTest {
+public class GpsGateProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        GpsGateProtocolDecoder decoder = new GpsGateProtocolDecoder(new TestDataManager(), null, null);
+        GpsGateProtocolDecoder decoder = new GpsGateProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, "$FRLIN,,user1,8IVHF*7A"));
         

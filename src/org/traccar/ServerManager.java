@@ -15,14 +15,11 @@
  */
 package org.traccar;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.ByteOrder;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
+
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -34,82 +31,14 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
-import org.traccar.database.DataCache;
-import org.traccar.database.DataManager;
-import org.traccar.geocode.GoogleReverseGeocoder;
-import org.traccar.geocode.NominatimReverseGeocoder;
-import org.traccar.geocode.ReverseGeocoder;
-import org.traccar.helper.Log;
-import org.traccar.http.WebServer;
-import org.traccar.model.Position;
 import org.traccar.protocol.*;
 
 
-/**
- * Server Manager
- */
 public class ServerManager {
 
     private final List<TrackerServer> serverList = new LinkedList<TrackerServer>();
 
-    public void addTrackerServer(TrackerServer trackerServer) {
-        serverList.add(trackerServer);
-    }
-
-    private boolean loggerEnabled;
-
-    public boolean isLoggerEnabled() {
-        return loggerEnabled;
-    }
-
-    private DataManager dataManager;
-
-    public DataManager getDataManager() {
-        return dataManager;
-    }
-
-    private DataCache dataCache;
-
-    public DataCache getDataCache() {
-        return dataCache;
-    }
-
-    private ReverseGeocoder reverseGeocoder;
-
-    public ReverseGeocoder getReverseGeocoder() {
-        return reverseGeocoder;
-    }
-
-    private WebServer webServer;
-
-    public WebServer getWebServer() {
-        return webServer;
-    }
-
-    private Properties properties;
-
-    public Properties getProperties() {
-        return  properties;
-    }
-
-    public void init(String[] arguments) throws Exception {
-
-        // Load properties
-        properties = new Properties();
-        if (arguments.length > 0) {
-            properties.loadFromXML(new FileInputStream(arguments[0]));
-        }
-
-        // Init logger
-        loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
-        if (loggerEnabled) {
-            Log.setupLogger(properties);
-        }
-
-        dataManager = new DataManager(properties);
-        dataCache = new DataCache(dataManager);
-
-        initGeocoder(properties);
+    public void init() throws Exception {
 
         initGps103Server("gps103");
         initTk103Server("tk103");
@@ -197,17 +126,9 @@ public class ServerManager {
         initTytanServer("tytan");
 
         initProtocolDetector();
-
-        // Initialize web server
-        if (Boolean.valueOf(properties.getProperty("http.enable"))) {
-            webServer = new WebServer(properties, dataManager);
-        }
     }
 
     public void start() {
-        if (webServer != null) {
-            webServer.start();
-        }
         for (Object server: serverList) {
             ((TrackerServer) server).start();
         }
@@ -221,30 +142,10 @@ public class ServerManager {
         // Release resources
         GlobalChannelFactory.release();
         GlobalTimer.release();
-
-        if (webServer != null) {
-            webServer.stop();
-        }
     }
 
-    public void destroy() {
-        serverList.clear();
-    }
-
-    private void initGeocoder(Properties properties) throws IOException {
-        if (Boolean.parseBoolean(properties.getProperty("geocoder.enable"))) {
-            String type = properties.getProperty("geocoder.type");
-            if (type != null && type.equals("nominatim")) {
-                reverseGeocoder = new NominatimReverseGeocoder(
-                        getProperties().getProperty("geocoder.url"));
-            } else {
-                reverseGeocoder = new GoogleReverseGeocoder();
-            }
-        }
-    }
-
-    private boolean isProtocolEnabled(Properties properties, String protocol) {
-        String enabled = properties.getProperty(protocol + ".enable");
+    private boolean isProtocolEnabled(String protocol) {
+        String enabled = Context.getProps().getProperty(protocol + ".enable");
         if (enabled != null) {
             return Boolean.valueOf(enabled);
         }
@@ -253,14 +154,14 @@ public class ServerManager {
 
     private void initProtocolDetector() throws SQLException {
         String protocol = "detector";
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
                 }
             });
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
@@ -269,104 +170,104 @@ public class ServerManager {
         }
     }
     private void initGps103Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "\r\n", "\n", ";"));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(protocol));
                 }
             });
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTk103Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(protocol));
                 }
             });
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGl100Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\0'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gl100ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Gl100ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGl200Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "$", "\0"));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initT55Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new T55ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new T55ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initXexunServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    if (Boolean.valueOf(properties.getProperty(protocol + ".extended"))) {
+                    if (Boolean.valueOf(Context.getProps().getProperty(protocol + ".extended"))) {
                         pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024)); // tracker bug \n\r
                         pipeline.addLast("stringDecoder", new StringDecoder());
-                        pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(dataManager, protocol, properties));
+                        pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(protocol));
                     } else {
                         pipeline.addLast("frameDecoder", new XexunFrameDecoder());
                         pipeline.addLast("stringDecoder", new StringDecoder());
-                        pipeline.addLast("objectDecoder", new XexunProtocolDecoder(dataManager, protocol, properties));
+                        pipeline.addLast("objectDecoder", new XexunProtocolDecoder(protocol));
                     }
                 }
             });
@@ -374,76 +275,76 @@ public class ServerManager {
     }
 
     private void initTotemServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TotemFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new TotemProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new TotemProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initEnforaServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
-                    pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initMeiligaoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
-                    pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initMaxonServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new MaxonProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new MaxonProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initSuntechServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initProgressServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
-                    pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new ProgressProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -452,63 +353,63 @@ public class ServerManager {
     }
 
     private void initH02Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new H02FrameDecoder());
-                    pipeline.addLast("objectDecoder", new H02ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new H02ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initJt600Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Jt600FrameDecoder());
-                    pipeline.addLast("objectDecoder", new Jt600ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Jt600ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initEv603Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Ev603ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Ev603ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initV680Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new V680ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new V680ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initPt502Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Pt502FrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Pt502ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Pt502ProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -517,26 +418,26 @@ public class ServerManager {
     }
 
     private void initTr20Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tr20ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Tr20ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initNavisServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
-                    pipeline.addLast("objectDecoder", new NavisProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new NavisProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -545,13 +446,13 @@ public class ServerManager {
     }
 
     private void initMeitrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -560,61 +461,61 @@ public class ServerManager {
     }
 
     private void initSkypatrolServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new SkypatrolProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new SkypatrolProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGt02Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
-                    pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Gt02ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGt06Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Gt06FrameDecoder());
-                    pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initMegastekServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new MegastekProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new MegastekProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initNavigilServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new NavigilFrameDecoder());
-                    pipeline.addLast("objectDecoder", new NavigilProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new NavigilProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -623,105 +524,105 @@ public class ServerManager {
     }
 
     private void initGpsGateServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new GpsGateProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new GpsGateProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTeltonikaServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
-                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(protocol));
                 }
             });
         }
     }
     
     private void initMta6Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(dataManager, protocol, properties, false));
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(protocol, false));
                 }
             });
         }
     }
 
     private void initMta6CanServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(dataManager, protocol, properties, true));
+                    pipeline.addLast("objectDecoder", new Mta6ProtocolDecoder(protocol, true));
                 }
             });
         }
     }
     
     private void initTlt2hServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(32 * 1024, "##"));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(protocol));
                 }
             });
         }
     }
     
     private void initSyrusServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '<'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(dataManager, protocol, properties, true));
+                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(protocol, true));
                 }
             });
         }
     }
 
     private void initWondexServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new WondexFrameDecoder());
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new WondexProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new WondexProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initCellocatorServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
-                    pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -730,12 +631,12 @@ public class ServerManager {
     }
 
     private void initGalileoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new GalileoFrameDecoder());
-                    pipeline.addLast("objectDecoder", new GalileoProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new GalileoProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -744,94 +645,94 @@ public class ServerManager {
     }
 
     private void initYwtServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new YwtProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new YwtProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTk102Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ']'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tk102ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Tk102ProtocolDecoder(protocol));
                 }
             });
         }
     }
     
     private void initIntellitracServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new IntellitracFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new IntellitracProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new IntellitracProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initXt7Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 20, 1, 5, 0));
-                    pipeline.addLast("objectDecoder", new Xt7ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Xt7ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initWialonServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(4 * 1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new WialonProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new WialonProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initCarscopServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '^'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new CarscopProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new CarscopProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initApelServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
-                    pipeline.addLast("objectDecoder", new ApelProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new ApelProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -840,46 +741,46 @@ public class ServerManager {
     }
 
     private void initManPowerServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new ManPowerProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new ManPowerProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGlobalSatServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '!'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new GlobalSatProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new GlobalSatProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initAtrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AtrackFrameDecoder());
-                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(protocol));
                 }
             });
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(protocol));
                 }
             });
 
@@ -887,113 +788,113 @@ public class ServerManager {
     }
 
     private void initPt3000Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, 'd')); // probably wrong
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Pt3000ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Pt3000ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initRuptelaServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
-                    pipeline.addLast("objectDecoder", new RuptelaProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new RuptelaProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTopflytechServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new TopflytechProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new TopflytechProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initLaipacServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new LaipacProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new LaipacProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initAplicomServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AplicomFrameDecoder());
-                    pipeline.addLast("objectDecoder", new AplicomProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new AplicomProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGotopServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new GotopProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new GotopProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initSanavServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '*'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SanavProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new SanavProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGatorServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new GatorProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new GatorProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initNoranServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new NoranProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new NoranProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -1002,218 +903,218 @@ public class ServerManager {
     }
 
     private void initM2mServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(23));
-                    pipeline.addLast("objectDecoder", new M2mProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new M2mProtocolDecoder(protocol));
                 }
             });
         }
     }
     
     private void initOsmAndServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new OsmAndProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new OsmAndProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initEasyTrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new EasyTrackProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new EasyTrackProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTaipServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(dataManager, protocol, properties, false));
+                    pipeline.addLast("objectDecoder", new SyrusProtocolDecoder(protocol, false));
                 }
             });
         }
     }
 
     private void initKhdServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 3, 2));
-                    pipeline.addLast("objectDecoder", new KhdProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new KhdProtocolDecoder(protocol));
                 }
             });
         }
     }
     
     private void initPiligrimServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                     pipeline.addLast("httpAggregator", new HttpChunkAggregator(16384));
                     pipeline.addLast("httpEncoder", new HttpResponseEncoder());
-                    pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initStl060Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Stl060FrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initCarTrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new CarTrackProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new CarTrackProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initMiniFinderServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initHaicomServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '*'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new HaicomProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new HaicomProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initEelinkServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
-                    pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new EelinkProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initBoxServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new BoxProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new BoxProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initFreedomServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new FreedomProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new FreedomProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTelikServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\0'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new TelikProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new TelikProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTrackboxServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new TrackboxProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new TrackboxProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initVisiontekServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new VisiontekProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new VisiontekProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initOrionServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new OrionFrameDecoder());
-                    pipeline.addLast("objectDecoder", new OrionProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new OrionProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -1222,12 +1123,12 @@ public class ServerManager {
     }
 
     private void initRitiServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 105, 2, 3, 0));
-                    pipeline.addLast("objectDecoder", new RitiProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new RitiProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -1236,24 +1137,24 @@ public class ServerManager {
     }
 
     private void initUlbotechServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new UlbotechFrameDecoder());
-                    pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new UlbotechProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTramigoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TramigoFrameDecoder());
-                    pipeline.addLast("objectDecoder", new TramigoProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new TramigoProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -1262,89 +1163,89 @@ public class ServerManager {
     }
 
     private void initTr900Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '!'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new Tr900ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Tr900ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initArdi01Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Ardi01ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Ardi01ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initXt013Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Xt013ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new Xt013ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initAutoFonServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AutoFonFrameDecoder());
-                    pipeline.addLast("objectDecoder", new AutoFonProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new AutoFonProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initGoSafeServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
                     pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new GoSafeProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new GoSafeProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initAutoFon45Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AutoFon45FrameDecoder());
-                    pipeline.addLast("objectDecoder", new AutoFon45ProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new AutoFon45ProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initBceServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            TrackerServer server = new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new BceFrameDecoder());
-                    pipeline.addLast("objectDecoder", new BceProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new BceProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -1353,50 +1254,50 @@ public class ServerManager {
     }
     
     private void initXirgoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new XirgoProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new XirgoProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initCalAmpServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new CalAmpProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new CalAmpProtocolDecoder(protocol));
                 }
             });
         }
     }
     
     private void initMtxServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ServerBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
-                    pipeline.addLast("objectDecoder", new MtxProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new MtxProtocolDecoder(protocol));
                 }
             });
         }
     }
 
     private void initTytanServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(properties, protocol)) {
-            serverList.add(new TrackerServer(this, new ConnectionlessBootstrap(), protocol) {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new TytanProtocolDecoder(dataManager, protocol, properties));
+                    pipeline.addLast("objectDecoder", new TytanProtocolDecoder(protocol));
                 }
             });
         }

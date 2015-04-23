@@ -32,13 +32,10 @@ import org.traccar.model.Position;
 
 public class CarscopProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
-    public CarscopProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public CarscopProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
-    // Very similar to TK103 protocol
     static private Pattern pattern = Pattern.compile(
             "\\*.*" +
             "(\\d{2})(\\d{2})(\\d{2})" + // Time (HHMMSS)
@@ -64,13 +61,9 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         int index = sentence.indexOf("UB05");
         if (index != -1) {
             String imei = sentence.substring(index + 4, index + 4 + 15);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
+            identify(imei);
         }
-        if (deviceId == null) {
+        if (!hasDeviceId()) {
             return null;
         }
 
@@ -82,7 +75,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setDeviceId(deviceId);
+        position.setDeviceId(getDeviceId());
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         index = 1;
 

@@ -7,12 +7,12 @@ import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class Gt06ProtocolDecoderTest {
+public class Gt06ProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(new TestDataManager(), null, null);
+        Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "787811010123456789012345100B3201000171930D0A"))));

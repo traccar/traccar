@@ -29,6 +29,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
@@ -37,12 +38,11 @@ import org.traccar.model.Position;
 
 public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
-    private long deviceId;
     private long lastIndex;
     private long newIndex;
 
-    public ApelProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public ApelProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     /*
@@ -140,13 +140,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
-            String imei = buf.readBytes(length).toString(Charset.defaultCharset());
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-                loadLastIndex();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei + " (id - " + id + ")");
-            }
+            identify(buf.readBytes(length).toString(Charset.defaultCharset()));
         }
         
         else if (type == MSG_TYPE_LAST_LOG_INDEX) {
@@ -158,7 +152,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Position
-        else if (deviceId != 0 && (type == MSG_TYPE_CURRENT_GPS_DATA || type == MSG_TYPE_STATE_FULL_INFO_T104 || type == MSG_TYPE_LOG_RECORDS)) {
+        else if (hasDeviceId() && (type == MSG_TYPE_CURRENT_GPS_DATA || type == MSG_TYPE_STATE_FULL_INFO_T104 || type == MSG_TYPE_LOG_RECORDS)) {
             List<Position> positions = new LinkedList<Position>();
 
             int recordCount = 1;
@@ -169,7 +163,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-                position.setDeviceId(deviceId);
+                position.setDeviceId(getDeviceId());
 
                 // Message index
                 int subtype = type;

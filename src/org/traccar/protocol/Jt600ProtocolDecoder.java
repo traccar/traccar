@@ -35,8 +35,8 @@ import org.traccar.model.Position;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Jt600ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Jt600ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private Position decodeNormalMessage(ChannelBuffer buf) throws Exception {
@@ -48,12 +48,10 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device by identifier
         String id = Long.valueOf(ChannelBufferTools.readHexString(buf, 10)).toString();
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
-            //return null;
+        if (!identify(id)) {
+            return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Protocol and type
         int version = ChannelBufferTools.readHexInteger(buf, 1);
@@ -166,13 +164,10 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by identifier
-        String id = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Longitude
         Double longitude = Double.valueOf(parser.group(index++));

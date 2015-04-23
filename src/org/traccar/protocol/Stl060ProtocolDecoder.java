@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Stl060ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Stl060ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -75,13 +75,10 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Device identification
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
         
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

@@ -34,8 +34,8 @@ import org.traccar.model.Position;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
-    public OrionProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public OrionProtocolDecoder(String protocol) {
+        super(protocol);
     }
     
     private static final int TYPE_USERLOG = 0;
@@ -74,23 +74,18 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
             if ((header & 0x40) != 0) {
                 sendResponse(channel, buf);
             }
-            
-            String id = String.valueOf(buf.readUnsignedInt());
-            long deviceId;
-            try {
-                deviceId = getDataManager().getDeviceByImei(id).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+
+            if (!identify(String.valueOf(buf.readUnsignedInt()))) {
                 return null;
             }
-            
+
             List<Position> positions = new LinkedList<Position>();
             
             for (int i = 0; i < (header & 0x0f); i++) {
                 
                 // Create new position
                 Position position = new Position();
-                position.setDeviceId(deviceId);
+                position.setDeviceId(getDeviceId());
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
                 
                 extendedInfo.set("event", buf.readUnsignedByte());

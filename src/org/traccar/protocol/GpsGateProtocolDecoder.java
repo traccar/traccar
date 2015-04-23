@@ -33,15 +33,10 @@ import org.traccar.model.Position;
 
 public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
-    public GpsGateProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public GpsGateProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     private static final Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?(\\d+)?," + // Time (HHMMSS.SSS)
@@ -76,11 +71,11 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
                 int endIndex = sentence.indexOf(',', beginIndex);
                 if (endIndex != -1) {
                     String imei = sentence.substring(beginIndex, endIndex);
-                    try {
-                        deviceId = getDataManager().getDeviceByImei(imei).getId();
-                        send(channel, "$FRSES," + channel.getId());
-                    } catch(Exception error) {
-                        Log.warning("Unknown device - " + imei);
+                    if (identify(imei)) {
+                        if (channel != null) {
+                            send(channel, "$FRSES," + channel.getId());
+                        }
+                    } else {
                         send(channel, "$FRERR,AuthError,Unknown device");
                     }
                 } else {
@@ -97,7 +92,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Process data
-        else if (sentence.startsWith("$GPRMC,") && deviceId != null) {
+        else if (sentence.startsWith("$GPRMC,") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = pattern.matcher(sentence);
@@ -108,7 +103,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             Integer index = 1;
 

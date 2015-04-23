@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class Tk103ProtocolDecoderTest {
+public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new TestDataManager(), null, null);
+        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, "(090411121854BP0000001234567890HSO"));
 

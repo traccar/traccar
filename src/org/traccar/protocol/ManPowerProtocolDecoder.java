@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
 
-    public ManPowerProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public ManPowerProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     static private Pattern pattern = Pattern.compile(
@@ -72,13 +72,10 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Alarm message
         extendedInfo.set("status", parser.group(index++));
@@ -95,7 +92,7 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));

@@ -35,8 +35,8 @@ import org.traccar.model.Position;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
-    public H02ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public H02ProtocolDecoder(String protocol) {
+        super(protocol);
     }
     
     private static double readCoordinate(ChannelBuffer buf, boolean lon) {
@@ -67,14 +67,11 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         buf.readByte(); // marker
 
         // Identification
-        String id = ChannelBufferTools.readHexString(buf, 10);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(ChannelBufferTools.readHexString(buf, 10))) {
             return null;
         }
-        
+        position.setDeviceId(getDeviceId());
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -141,13 +138,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

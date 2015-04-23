@@ -44,8 +44,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
     private boolean simple;
 
-    public Mta6ProtocolDecoder(DataManager dataManager, String protocol, Properties properties, boolean simple) {
-        super(dataManager, protocol, properties);
+    public Mta6ProtocolDecoder(String protocol, boolean simple) {
+        super(protocol);
         this.simple = simple;
     }
 
@@ -121,7 +121,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         
     }
 
-    private List<Position> parseFormatA(ChannelBuffer buf, long deviceId) {
+    private List<Position> parseFormatA(ChannelBuffer buf) {
         List<Position> positions = new LinkedList<Position>();
         
         FloatReader latitudeReader = new FloatReader();
@@ -131,7 +131,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         try {
             while (buf.readable()) {
                 Position position = new Position();
-                position.setDeviceId(deviceId);
+                position.setDeviceId(getDeviceId());
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
                 short flags = buf.readUnsignedByte();
@@ -211,9 +211,9 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private Position parseFormatA1(ChannelBuffer buf, long deviceId) {
+    private Position parseFormatA1(ChannelBuffer buf) {
         Position position = new Position();
-        position.setDeviceId(deviceId);
+        position.setDeviceId(getDeviceId());
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         short flags = buf.readUnsignedByte();
@@ -303,11 +303,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes("id=".length());
         int index = ChannelBufferTools.find(buf, buf.readerIndex(), length, "&");
         String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), Charset.defaultCharset());
-        long deviceId;
-        try {
-            deviceId = getDataManager().getDeviceByImei(uniqueId).getId();
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + uniqueId);
+        if (!identify(uniqueId)) {
             return null;
         }
         buf.skipBytes(uniqueId.length());
@@ -330,9 +326,9 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         // Parse data
         if (packetId == 0x31 || packetId == 0x32 || packetId == 0x36) {
             if (simple) {
-                return parseFormatA1(buf, deviceId);
+                return parseFormatA1(buf);
             } else {
-                return parseFormatA(buf, deviceId);
+                return parseFormatA(buf);
             }
         } //else if (0x34 0x38 0x4F 0x59)
 

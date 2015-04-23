@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tr20ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Tr20ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     static private Pattern patternPing = Pattern.compile(
@@ -85,16 +85,13 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
             Integer index = 1;
 
             // Get device by id
-            String id = parser.group(index++);
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+            if (!identify(parser.group(index++))) {
                 return null;
             }
+            position.setDeviceId(getDeviceId());
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

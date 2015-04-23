@@ -5,12 +5,12 @@ import org.traccar.helper.TestDataManager;
 
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class Xt013ProtocolDecoderTest {
+public class Xt013ProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Xt013ProtocolDecoder decoder = new Xt013ProtocolDecoder(new TestDataManager(), null, null);
+        Xt013ProtocolDecoder decoder = new Xt013ProtocolDecoder(null);
         
         verify(decoder.decode(null, null,
                 "TK,862950021650364,150131090859,+53.267863,+5.767363,0,38,12,0,F,204,08,C94,336C,24,,4.09,1,,,,,,,,"));

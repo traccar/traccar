@@ -32,10 +32,8 @@ import org.traccar.model.Position;
 
 public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
     
-    private Long deviceId;
-
-    public TrackboxProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public TrackboxProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -66,11 +64,8 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("a=connect")) {
             String id = sentence.substring(sentence.indexOf("i=") + 2);
-            try {
-                deviceId = getDataManager().getDeviceByImei(id).getId();
+            if (identify(id)) {
                 sendResponse(channel);
-            } catch(Exception error) {
-              Log.warning("Unknown device - " + id);
             }
         }
         
@@ -84,7 +79,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             Integer index = 1;

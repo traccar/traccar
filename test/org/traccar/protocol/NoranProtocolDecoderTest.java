@@ -8,12 +8,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-public class NoranProtocolDecoderTest {
+public class NoranProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        NoranProtocolDecoder decoder = new NoranProtocolDecoder(new TestDataManager(), null, null);
+        NoranProtocolDecoder decoder = new NoranProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "0f0000004e52303946303431353500"))));

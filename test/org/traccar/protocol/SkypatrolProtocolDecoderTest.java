@@ -6,12 +6,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-public class SkypatrolProtocolDecoderTest {
+public class SkypatrolProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        SkypatrolProtocolDecoder decoder = new SkypatrolProtocolDecoder(new TestDataManager(), null, null);
+        SkypatrolProtocolDecoder decoder = new SkypatrolProtocolDecoder(null);
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "0005021004FFFFFFFF0000000D313134373735383300CB000000000E11070C010184D032FB3841370000000016072B000017050032000000000000024E0C071116072C105900050000000000050000000000050000000003100260B7363B6306C11A00B73637F206BF19B73637F106B50EB73638B106BB0BB7363B6106B80AB73637F306B709000000000000000000C"))));

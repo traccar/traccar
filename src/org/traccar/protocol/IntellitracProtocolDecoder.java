@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
-    public IntellitracProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public IntellitracProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -83,13 +83,10 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Detect device
-        String id = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
         
         // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

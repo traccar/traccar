@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
-    public TotemProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public TotemProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern patternFirst = Pattern.compile(
@@ -156,7 +156,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         } else if (format == MessageFormat.third) {
             parser = patternThird.matcher(sentence);
         }
-        if (parser == null || !parser.matches()) {
+        if (!parser.matches()) {
             return null;
         }
 
@@ -167,13 +167,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
         
         // Alarm type
         extendedInfo.set("alarm", parser.group(index++));

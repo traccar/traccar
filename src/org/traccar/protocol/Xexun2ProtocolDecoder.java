@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xexun2ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Xexun2ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     static private Pattern pattern = Pattern.compile(
@@ -94,7 +94,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
@@ -132,13 +132,10 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         extendedInfo.set("alarm", parser.group(index++));
 
         // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Satellites
         extendedInfo.set("satellites", parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));

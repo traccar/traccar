@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class GoSafeProtocolDecoderTest {
+public class GoSafeProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(new TestDataManager(), null, null);
+        GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, null,
                 "*GS16,351535058709775"));

@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class SuntechProtocolDecoderTest {
+public class SuntechProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new TestDataManager(), null, null);
+        SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(null);
         
         assertNull(decoder.decode(null, null, "SA200ALV;317652"));
 

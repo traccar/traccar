@@ -26,13 +26,11 @@ import org.traccar.database.DataManager;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 
+import javax.crypto.Cipher;
+
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
-    private final DataManager dataManager;
-    private final DataCache dataCache;
-    private final Boolean loggerEnabled;
-    private final ReverseGeocoder reverseGeocoder;
     private FilterHandler filterHandler;
     private Integer resetDelay;
     private Boolean processInvalidPositions;
@@ -83,32 +81,24 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     }
 
-    public BasePipelineFactory(ServerManager serverManager, TrackerServer server, String protocol) {
+    public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
-        dataManager = serverManager.getDataManager();
-        dataCache = serverManager.getDataCache();
-        loggerEnabled = serverManager.isLoggerEnabled();
-        reverseGeocoder = serverManager.getReverseGeocoder();
 
-        String resetDelayProperty = serverManager.getProperties().getProperty(protocol + ".resetDelay");
+        String resetDelayProperty = Context.getProps().getProperty(protocol + ".resetDelay");
         if (resetDelayProperty != null) {
             resetDelay = Integer.valueOf(resetDelayProperty);
         }
 
-        String enableFilter = serverManager.getProperties().getProperty("filter.enable");
+        String enableFilter = Context.getProps().getProperty("filter.enable");
         if (enableFilter != null && Boolean.valueOf(enableFilter)) {
-            filterHandler = new FilterHandler(serverManager.getProperties());
+            filterHandler = new FilterHandler();
         }
 
-        if (reverseGeocoder != null) {
+        if (Context.getReverseGeocoder() != null) {
             // Default behavior is to process invalid positions (i.e., the "null" case)
-            String invalidPositions = serverManager.getProperties().getProperty("geocode.processInvalidPositions");
+            String invalidPositions = Context.getProps().getProperty("geocode.processInvalidPositions");
             processInvalidPositions = (invalidPositions == null || Boolean.valueOf(invalidPositions));
         }
-    }
-
-    protected DataManager getDataManager() {
-        return dataManager;
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -120,17 +110,17 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), resetDelay, 0, 0));
         }
         pipeline.addLast("openHandler", new OpenChannelHandler(server));
-        if (loggerEnabled) {
+        if (Context.isLoggerEnabled()) {
             pipeline.addLast("logger", new StandardLoggingHandler());
         }
         addSpecificHandlers(pipeline);
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
         }
-        if (reverseGeocoder != null) {
-            pipeline.addLast("geocoder", new ReverseGeocoderHandler(reverseGeocoder, processInvalidPositions));
+        if (Context.getReverseGeocoder() != null) {
+            pipeline.addLast("geocoder", new ReverseGeocoderHandler(Context.getReverseGeocoder(), processInvalidPositions));
         }
-        pipeline.addLast("handler", new TrackerEventHandler(dataManager, dataCache));
+        pipeline.addLast("handler", new TrackerEventHandler());
         return pipeline;
     }
 

@@ -33,10 +33,8 @@ import org.traccar.model.Position;
 
 public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
-    private Long deviceId;
-
-    public Ev603ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Ev603ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -58,25 +56,19 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
         // Detect device ID
         if (sentence.startsWith("!1,")) {
-            String imei = sentence.substring(3);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-                return null;
-            }
+            identify(sentence.substring(3));
         }
 
         else if (sentence.startsWith("!A,")) {
             // Parse message
             Matcher parser = pattern.matcher(sentence);
-            if (deviceId == null || !parser.matches()) {
+            if (!hasDeviceId() || !parser.matches()) {
                 return null;
             }
 
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             Integer index = 1;
 

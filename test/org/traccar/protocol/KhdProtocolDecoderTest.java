@@ -7,12 +7,12 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-public class KhdProtocolDecoderTest {
+public class KhdProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        KhdProtocolDecoder decoder = new KhdProtocolDecoder(new TestDataManager(), null, null);
+        KhdProtocolDecoder decoder = new KhdProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "2929b1000605162935b80d"))));

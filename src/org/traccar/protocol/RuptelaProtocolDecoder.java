@@ -33,8 +33,8 @@ import org.traccar.model.Position;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     
-    public RuptelaProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public RuptelaProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int COMMAND_RECORDS = 0x01;
@@ -49,14 +49,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
         // Identify device
         String imei = String.format("%015d", buf.readLong());
-        long deviceId;
-        try {
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(imei)) {
             return null;
         }
-        
+
         int type = buf.readUnsignedByte();
         
         if (type == COMMAND_RECORDS) {
@@ -68,7 +64,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 0; i < count; i++) {
                 Position position = new Position();
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-                position.setDeviceId(deviceId);
+                position.setDeviceId(getDeviceId());
 
                 // Time
                 position.setTime(new Date(buf.readUnsignedInt() * 1000));

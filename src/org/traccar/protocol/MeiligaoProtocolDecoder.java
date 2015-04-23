@@ -29,6 +29,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
@@ -37,8 +38,8 @@ import org.traccar.model.Position;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
-    public MeiligaoProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public MeiligaoProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -117,7 +118,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
     
     private String getMeiligaoServer(Channel channel) {
-        Properties p = getProperties();
+        Properties p = Context.getProps();
         
         if (p != null && p.containsKey(getProtocol() + ".server")) {
             return p.getProperty(getProtocol() + ".server");
@@ -179,13 +180,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get device by id
-        String imei = getImei(id);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(getImei(id))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Parse message
         String sentence = buf.toString(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,33 +26,54 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 
 import org.traccar.database.DataManager;
+import org.traccar.helper.Log;
+import org.traccar.model.Device;
 
 /**
  * Base class for protocol decoders
  */
 public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
-    private final DataManager dataManager;
     private final String protocol;
-    private final Properties properties;
 
-    public final DataManager getDataManager() {
-        return dataManager;
-    }
-
-    public final String getProtocol() {
+    public String getProtocol() {
         return protocol;
     }
-    
-    public final Properties getProperties() {
-        return properties;
+
+    private long deviceId;
+
+    public boolean hasDeviceId() {
+        return (deviceId != 0);
     }
 
-    
-    public BaseProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        this.dataManager = dataManager;
+    public long getDeviceId() {
+        return deviceId;
+    }
+
+    public boolean identify(String uniqueId, boolean logWarning) {
+        try {
+            Device device = Context.getDataManager().getDeviceByUniqueId(uniqueId);
+            if (device != null) {
+                deviceId = device.getId();
+                return true;
+            } else {
+                if (logWarning) {
+                    Log.warning("Unknown device - " + uniqueId);
+                }
+                return false;
+            }
+        } catch (Exception error) {
+            Log.warning(error);
+            return false;
+        }
+    }
+
+    public boolean identify(String uniqueId) {
+        return identify(uniqueId, true);
+    }
+
+    public BaseProtocolDecoder(String protocol) {
         this.protocol = protocol;
-        this.properties = properties;
     }
     
     @Override
@@ -77,7 +98,6 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
             ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         
         return decode(ctx, channel, msg);
-        
     }
     
     @Override
@@ -85,7 +105,6 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
             ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
         
         return null; // default implementation
-        
     }
 
 }

@@ -10,12 +10,12 @@ import java.nio.ByteOrder;
 import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class TramigoProtocolDecoderTest {
+public class TramigoProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        TramigoProtocolDecoder decoder = new TramigoProtocolDecoder(new TestDataManager(), null, null);
+        TramigoProtocolDecoder decoder = new TramigoProtocolDecoder(null);
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "8000011bb0009e0001015b93032ef6f35994a9545472616d69676f3a204d6f76696e672c20302e3930206b6d205345206f66204372616e6562726f6f6b20466972652053746174696f6e2c2050656e726974682c205379646e65792c2041552c202d33332e37303732322c203135302e37313735392c2053452077697468207370656564203337206b6d2f682c2031393a3438204a616e20342020454f46"))));

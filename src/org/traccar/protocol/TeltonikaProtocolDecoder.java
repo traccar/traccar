@@ -36,8 +36,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     
     private long deviceId;
 
-    public TeltonikaProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public TeltonikaProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private void parseIdentification(Channel channel, ChannelBuffer buf) {
@@ -45,13 +45,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
-        try {
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
-            result = true;
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
-        }
-        
+        result = identify(imei);
+
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(1);
             response.writeByte(result ? 1 : 0);

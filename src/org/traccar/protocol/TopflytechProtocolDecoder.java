@@ -34,8 +34,8 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
 
-    public TopflytechProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public TopflytechProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     static private Pattern pattern = Pattern.compile(
@@ -71,13 +71,10 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identifier
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -91,7 +88,7 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));

@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class MiniFinderProtocolDecoderTest {
+public class MiniFinderProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        MiniFinderProtocolDecoder decoder = new MiniFinderProtocolDecoder(new TestDataManager(), null, null);
+        MiniFinderProtocolDecoder decoder = new MiniFinderProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, "!1,860719020212696"));
 

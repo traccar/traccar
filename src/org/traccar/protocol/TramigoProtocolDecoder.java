@@ -37,8 +37,8 @@ import java.util.regex.Pattern;
 
 public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
-    public TramigoProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public TramigoProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int MSG_COMPACT = 0x0100;
@@ -68,12 +68,10 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
 
         // Get device id
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(String.valueOf(id)).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(String.valueOf(id))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         if (protocol == 0x01 && (type == MSG_COMPACT || type == MSG_FULL)) {
 
@@ -147,7 +145,6 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
-
         }
 
         return null;

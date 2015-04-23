@@ -23,6 +23,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -30,8 +31,8 @@ import org.traccar.model.Position;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
-    public AplicomProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public AplicomProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final long IMEI_BASE_TC65_V20 = 0x1437207000000L;
@@ -128,12 +129,11 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(imei)) {
             return null;
         }
+
+        position.setDeviceId(getDeviceId());
 
         // Event
         extendedInfo.set("event", buf.readUnsignedByte());

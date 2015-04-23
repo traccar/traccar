@@ -35,9 +35,8 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
     
     boolean sendResponse;
 
-
-    public SyrusProtocolDecoder(DataManager dataManager, String protocol, Properties properties, boolean sendResponse) {
-        super(dataManager, protocol, properties);
+    public SyrusProtocolDecoder(String protocol, boolean sendResponse) {
+        super(protocol);
         this.sendResponse = sendResponse;
     }
 
@@ -102,7 +101,6 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Find device ID
-        Long deviceId = null;
         beginIndex = sentence.indexOf(";ID=");
         if (beginIndex != -1) {
             beginIndex += 4;
@@ -113,13 +111,10 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
 
             // Find device in database
             String id = sentence.substring(beginIndex, endIndex);
-            try {
-                deviceId = getDataManager().getDeviceByImei(id).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+            if (!identify(id)) {
                 return null;
             }
-            
+
             // Send response
             if (sendResponse && channel != null) {
                 channel.write(id);
@@ -137,7 +132,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-        position.setDeviceId(deviceId);
+        position.setDeviceId(getDeviceId());
 
         Integer index = 1;
         

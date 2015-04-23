@@ -4,12 +4,12 @@ import org.traccar.helper.TestDataManager;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 
-public class Tlt2hProtocolDecoderTest {
+public class Tlt2hProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(new TestDataManager(), null, null);
+        Tlt2hProtocolDecoder decoder = new Tlt2hProtocolDecoder(null);
 
         verify(decoder.decode(null, null,
                 "#357671030946351#V500#0000#AUTO#1\r\n" +

@@ -33,8 +33,8 @@ import org.traccar.model.Position;
 
 public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
-    public XexunProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public XexunProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -116,13 +116,10 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         position.setExtendedInfo(extendedInfo.toString());
         return position;

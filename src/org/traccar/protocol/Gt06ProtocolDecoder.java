@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
@@ -32,19 +33,16 @@ import java.util.TimeZone;
 
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
     private boolean forceTimeZone = false;
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
-    public Gt06ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
-        
-        if (properties != null) {
-            if (properties.containsKey(protocol + ".timezone")) {
-                forceTimeZone = true;
-                timeZone.setRawOffset(
-                        Integer.valueOf(properties.getProperty(protocol + ".timezone")) * 1000);
-            }
+    public Gt06ProtocolDecoder(String protocol) {
+        super(protocol);
+
+        Properties properties = Context.getProps();
+        if (properties != null && properties.containsKey(protocol + ".timezone")) {
+            forceTimeZone = true;
+            timeZone.setRawOffset(Integer.valueOf(properties.getProperty(protocol + ".timezone")) * 1000);
         }
     }
 
@@ -126,16 +124,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     timeZone.setRawOffset(offset);
                 }
             }
-            
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
+
+            if (identify(imei)) {
                 buf.skipBytes(buf.readableBytes() - 6);
                 sendResponse(channel, type, buf.readUnsignedShort());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
             }
-            
-        } else if (deviceId != null && (
+
+        } else if (hasDeviceId() && (
                 type == MSG_GPS ||
                 type == MSG_GPS_LBS_1 ||
                 type == MSG_GPS_LBS_2 ||
@@ -147,7 +142,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Date and time

@@ -23,22 +23,26 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(Locale.ENGLISH);
 
-        final ServerManager service = new ServerManager();
-        service.init(args);
+        Context.init(args);
 
         Log.info("Starting server...");
         Log.logSystemInfo();
-        
         Log.info("Version: " + Main.class.getPackage().getImplementationVersion());
 
-        service.start();
+        Context.getServerManager().start();
+        if (Context.getWebServer() != null) {
+            Context.getWebServer().start();
+        }
 
         // Shutdown server properly
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 Log.info("Shutting down server...");
-                service.stop();
+                if (Context.getWebServer() != null) {
+                    Context.getWebServer().stop();
+                }
+                Context.getServerManager().stop();
             }
         });
     }

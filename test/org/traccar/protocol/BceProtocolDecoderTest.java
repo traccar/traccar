@@ -9,12 +9,12 @@ import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.traccar.helper.TestDataManager;
 
-public class BceProtocolDecoderTest {
+public class BceProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        BceProtocolDecoder decoder = new BceProtocolDecoder(new TestDataManager(), null, null);
+        BceProtocolDecoder decoder = new BceProtocolDecoder(null);
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "be76619c834601004200a0003fd769c568ffc3db0079161d420683a9414918b1150000000000d102660167040000000000009f06357f0000a401042ea415e10232000000000000000000000051"))));

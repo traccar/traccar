@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 
 public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tr900ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Tr900ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -76,13 +76,10 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identification
-        String id = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") == 0);

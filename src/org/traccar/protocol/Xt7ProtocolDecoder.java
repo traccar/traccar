@@ -34,8 +34,8 @@ import org.traccar.model.Position;
 
 public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xt7ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Xt7ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -74,13 +74,11 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         
         // Get device by id
         String id = buf.readBytes(16).toString(Charset.defaultCharset()).trim();
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(id)) {
             return null;
         }
-        
+        position.setDeviceId(getDeviceId());
+
         buf.readUnsignedByte(); // command
         int length = buf.readUnsignedByte();
         

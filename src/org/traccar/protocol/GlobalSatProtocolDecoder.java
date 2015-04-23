@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
@@ -36,9 +37,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private String format0 = "TSPRXAB27GHKLMnaicz*U!";
     private String format1 = "SARY*U!";
 
-    public GlobalSatProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public GlobalSatProtocolDecoder(String protocol) {
+        super(protocol);
 
+        Properties properties = Context.getProps();
         if (properties != null) {
             if (properties.containsKey(protocol + ".format0")) {
                 format0 = properties.getProperty(protocol + ".format0");
@@ -97,12 +99,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
             switch(format.charAt(formatIndex)) {
                 case 'S':
-                    try {
-                        position.setDeviceId(getDataManager().getDeviceByImei(value).getId());
-                    } catch(Exception error) {
-                        Log.warning("Unknown device - " + value);
+                    if (!identify(value)) {
                         return null;
                     }
+                    position.setDeviceId(getDeviceId());
                     break;
                 case 'A':
                     if (value.isEmpty()) {
@@ -215,13 +215,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identification
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") != 0);

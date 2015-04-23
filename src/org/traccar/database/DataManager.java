@@ -138,10 +138,11 @@ public class DataManager {
     private long devicesRefreshDelay;
     private static final long DEFAULT_REFRESH_DELAY = 300;
 
-    public Device getDeviceByImei(String imei) throws SQLException {
+    public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
 
-        if (devices == null || !devices.containsKey(imei) ||
+        if (devices == null || !devices.containsKey(uniqueId) ||
                 (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesRefreshDelay)) {
+
             devices = new HashMap<String, Device>();
             for (Device device : getDevices()) {
                 devices.put(device.getImei(), device);
@@ -149,7 +150,7 @@ public class DataManager {
             devicesLastUpdate = Calendar.getInstance();
         }
 
-        return devices.get(imei);
+        return devices.get(uniqueId);
     }
 
     private NamedParameterStatement.ResultSetProcessor<Long> generatedKeysResultSetProcessor = new NamedParameterStatement.ResultSetProcessor<Long>() {

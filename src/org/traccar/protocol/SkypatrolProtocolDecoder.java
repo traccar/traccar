@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
-    public SkypatrolProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public SkypatrolProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static boolean checkBit(long mask, int bit) {
@@ -98,12 +98,10 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning("No device id field");
                 return null;
             }
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+            if (!identify(id)) {
                 return null;
             }
+            position.setDeviceId(getDeviceId());
 
             // IO data
             if (checkBit(mask, 3)) {

@@ -33,7 +33,6 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
  */
 public abstract class TrackerServer {
 
-    private final ServerManager serverManager;
     private final Bootstrap bootstrap;
     private final String protocol;
 
@@ -41,8 +40,7 @@ public abstract class TrackerServer {
         return protocol;
     }
 
-    public TrackerServer(ServerManager serverManager, Bootstrap bootstrap, String protocol) {
-        this.serverManager = serverManager;
+    public TrackerServer(Bootstrap bootstrap, String protocol) {
         this.bootstrap = bootstrap;
         this.protocol = protocol;
 
@@ -53,11 +51,11 @@ public abstract class TrackerServer {
             bootstrap.setFactory(GlobalChannelFactory.getDatagramFactory());
         }
 
-        address = serverManager.getProperties().getProperty(protocol + ".address");
-        String portProperty = serverManager.getProperties().getProperty(protocol + ".port");
+        address = Context.getProps().getProperty(protocol + ".address");
+        String portProperty = Context.getProps().getProperty(protocol + ".port");
         port = Integer.valueOf(portProperty);
 
-        bootstrap.setPipelineFactory(new BasePipelineFactory(serverManager, this, protocol) {
+        bootstrap.setPipelineFactory(new BasePipelineFactory(this, protocol) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 TrackerServer.this.addSpecificHandlers(pipeline);

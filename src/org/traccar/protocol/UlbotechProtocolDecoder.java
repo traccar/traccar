@@ -30,8 +30,8 @@ import java.util.Properties;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
-    public UlbotechProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public UlbotechProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final short DATA_GPS = 0x01;
@@ -63,11 +63,10 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device id
         String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(imei)) {
+            return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Time
         long seconds = buf.readUnsignedInt() & 0x7fffffffl;
@@ -82,7 +81,6 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             switch (type) {
 
                 case DATA_GPS:
-
                     position.setValid(true);
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
@@ -90,9 +88,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(buf.readUnsignedShort() * 0.539957);
                     position.setCourse((double) buf.readUnsignedShort());
                     extendedInfo.set("hdop", buf.readUnsignedShort());
-
                     break;
-
 
                 default:
                     buf.skipBytes(length);

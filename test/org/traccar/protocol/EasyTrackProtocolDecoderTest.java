@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class EasyTrackProtocolDecoderTest {
+public class EasyTrackProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(new TestDataManager(), null, null);
+        EasyTrackProtocolDecoder decoder = new EasyTrackProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, "*ET,135790246811221,GZ,0001,0005"));
 

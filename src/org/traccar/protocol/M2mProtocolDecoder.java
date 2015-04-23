@@ -31,12 +31,11 @@ import org.traccar.model.Position;
 
 public class M2mProtocolDecoder extends BaseProtocolDecoder {
 
-    public M2mProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public M2mProtocolDecoder(String protocol) {
+        super(protocol);
     }
     
     private boolean firstPacket = true;
-    private Long deviceId;
 
     @Override
     protected Object decode(
@@ -68,18 +67,14 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Identification
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei.toString()).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
-            
-        } else if (deviceId != null) {
+            identify(imei.toString());
+
+        } else if (hasDeviceId()) {
             
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

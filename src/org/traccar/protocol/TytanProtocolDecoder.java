@@ -34,12 +34,9 @@ import org.traccar.model.Position;
 
 public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
-    public TytanProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public TytanProtocolDecoder(String protocol) {
+        super(protocol);
     }
-
-    private static final int MSG_HEARTBEAT = 0x1A;
-    private static final int MSG_DATA = 0x10;
 
     @Override
     protected Object decode(
@@ -58,21 +55,17 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         }
         
         String id = String.valueOf(buf.readUnsignedInt());
-        long deviceId;
-        try {
-            deviceId = getDataManager().getDeviceByImei(id).getId();
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(id)) {
             return null;
         }
-        
+
         List<Position> positions = new LinkedList<Position>();
         
         while (buf.readable()) {
             
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             
             int end = buf.readerIndex() + buf.readUnsignedByte();
             

@@ -34,8 +34,8 @@ import org.traccar.model.Position;
 
 public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
-    public KhdProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public KhdProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private String readSerialNumber(ChannelBuffer buf) {
@@ -79,13 +79,11 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Device identification
-            String id = readSerialNumber(buf);
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+            if (!identify(readSerialNumber(buf))) {
+                return null;
             }
-            
+            position.setDeviceId(getDeviceId());
+
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();

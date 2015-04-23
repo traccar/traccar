@@ -7,12 +7,12 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-public class EelinkProtocolDecoderTest {
+public class EelinkProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(new TestDataManager(), null, null);
+        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "676701000b001b035418804661834901"))));

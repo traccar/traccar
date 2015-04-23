@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class WialonProtocolDecoderTest {
+public class WialonProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        WialonProtocolDecoder decoder = new WialonProtocolDecoder(new TestDataManager(), null, null);
+        WialonProtocolDecoder decoder = new WialonProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, "#L#123456789012345;test"));
         

@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
-    public VisiontekProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public VisiontekProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -81,22 +81,11 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         // Device identification
         String id = parser.group(index++);
         String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            if (imei != null) {
-                try {
-                    position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-                } catch(Exception error2) {
-                    Log.warning("Unknown device - " + id);
-                    return null;
-                }
-            } else {
-                Log.warning("Unknown device - " + id);
-                return null;
-            }
+        if (!identify(id, false) && !identify(imei)) {
+            return null;
         }
-        
+        position.setDeviceId(getDeviceId());
+
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();

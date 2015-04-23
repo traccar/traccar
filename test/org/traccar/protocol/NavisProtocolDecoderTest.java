@@ -8,12 +8,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class NavisProtocolDecoderTest {
+public class NavisProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        NavisProtocolDecoder decoder = new NavisProtocolDecoder(new TestDataManager(), null, null);
+        NavisProtocolDecoder decoder = new NavisProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "404E5443010000007B000000130044342A3E533A383631373835303035323035303739"))));

@@ -7,12 +7,12 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-public class AtrackProtocolDecoderTest {
+public class AtrackProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(new TestDataManager(), null, null);
+        AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "fe0200014104d8f196820001"))));

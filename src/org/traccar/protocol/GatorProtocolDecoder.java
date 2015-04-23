@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public GatorProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public GatorProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int PACKET_HEARTBEAT = 0x21;
@@ -75,12 +75,11 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Identification
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+            if (!identify(id)) {
+                return null;
             }
-            
+            position.setDeviceId(getDeviceId());
+
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();

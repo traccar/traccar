@@ -32,15 +32,14 @@ import org.traccar.model.Position;
 import java.util.*;
 
 public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
-    private long deviceId;
 
     private static double convertCoordinate(short degrees, int raw) {
         double seconds = (raw >> 4 & 0xffffff) / 600000.0;
         return (degrees + seconds) * ((raw & 0x0f) == 0 ? -1 : 1);
     }
 
-    public AutoFon45ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public AutoFon45ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     @Override
@@ -54,10 +53,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             buf.readBytes(bytes);
 
             String imei = ChannelBufferTools.readHexString(ChannelBuffers.wrappedBuffer(bytes, 1, 16), 16).substring(1);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
+            if (!identify(imei)) {
                 return null;
             }
 
@@ -74,7 +70,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             short status = buf.readUnsignedByte();
             extendedInfo.set("alarm", (status & 0x80) != 0);

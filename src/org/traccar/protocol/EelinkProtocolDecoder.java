@@ -35,8 +35,8 @@ import org.traccar.model.Position;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
-    public EelinkProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public EelinkProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private String readImei(ChannelBuffer buf) {
@@ -60,9 +60,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_OBD = 0x07;
     private static final int MSG_INTERACTIVE = 0x80;
     private static final int MSG_DATA = 0x81;
-    
-    private Long deviceId;
-    
+
     private void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.buffer(7);
@@ -91,15 +89,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
         
         if (type == MSG_LOGIN) {
-            String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
+            identify(ChannelBufferTools.readHexString(buf, 16).substring(1));
         }
         
-        else if (deviceId != null &&
+        else if (hasDeviceId() &&
                 (type == MSG_GPS ||
                  type == MSG_ALARM ||
                  type == MSG_STATE ||
@@ -107,7 +100,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             extendedInfo.set("index", index);

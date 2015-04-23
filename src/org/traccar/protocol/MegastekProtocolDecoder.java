@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
-    public MegastekProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public MegastekProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern patternGPRMC = Pattern.compile(
@@ -49,7 +49,6 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             "[^\\*]+\\*[0-9a-fA-F]{2}");   // Checksum
 
-    //F,,imei:123456789012345,0/6,,Battery=100%,,0,,,5856,78A3;24
     private static final Pattern patternSimple = Pattern.compile(
             "[FL]," +                      // Flag
             "([^,]*)," +                   // Alarm
@@ -200,17 +199,12 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("alarm", parser.group(index++));
 
             // IMEI
-            String imei = parser.group(index++);
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            } catch(Exception firstError) {
-                try {
-                    position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-                } catch(Exception secondError) {
-                    Log.warning("Unknown device - " + imei + " (id - " + id + ")");
+            if (!identify(parser.group(index++), false)) {
+                if (!identify(id)) {
                     return null;
                 }
             }
+            position.setDeviceId(getDeviceId());
 
             // Satellites
             extendedInfo.set("satellites", parser.group(index++));
@@ -248,13 +242,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
             // Altitude
             position.setAltitude(0.0);
-            
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
+
+            if (!identify(id)) {
                 return null;
             }
+            position.setDeviceId(getDeviceId());
 
             extendedInfo.set("mcc", parser.group(index++));
             extendedInfo.set("mnc", parser.group(index++));

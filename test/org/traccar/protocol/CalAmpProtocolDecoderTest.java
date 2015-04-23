@@ -8,12 +8,12 @@ import org.traccar.helper.TestDataManager;
 import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class CalAmpProtocolDecoderTest {
+public class CalAmpProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        CalAmpProtocolDecoder decoder = new CalAmpProtocolDecoder(new TestDataManager(), null, null);
+        CalAmpProtocolDecoder decoder = new CalAmpProtocolDecoder(null);
         
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "830545321041830101010300010000333862000023c301000000004532104183ffffff353816051610691f420040163953294fffffffffffffffff8996604211639032949f4f54413a317c303b302c317c343b302c34004f5441535441543a302c302c302c302c302c222200564255533a342c322e302e302c343533323130343138332c5630312e30332e30312e34302c5630312e30332e30312e33312c2c0056494e2d494e464f3a56494e3d31464d5a5537324539355a4137303032362c4445562d5245474e3d55532c535256522d5245474e3d555300")), null));

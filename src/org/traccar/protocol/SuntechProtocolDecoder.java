@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
-    public SuntechProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public SuntechProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     static private Pattern pattern = Pattern.compile(
@@ -70,13 +70,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         int index = 1;
 
         // Identifier
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
         
         // Version
         extendedInfo.set("version", parser.group(index++));

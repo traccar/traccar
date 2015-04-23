@@ -7,12 +7,12 @@ import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.traccar.helper.TestDataManager;
 
-public class TytanProtocolDecoderTest {
+public class TytanProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        TytanProtocolDecoder decoder = new TytanProtocolDecoder(new TestDataManager(), null, null);
+        TytanProtocolDecoder decoder = new TytanProtocolDecoder(null);
         
         verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "D56000000AF20E4FA7C77AFF3282C68D2F890800"))));

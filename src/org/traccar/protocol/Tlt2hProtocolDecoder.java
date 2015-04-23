@@ -34,8 +34,8 @@ import org.traccar.model.Position;
 
 public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tlt2hProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Tlt2hProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern patternHeader = Pattern.compile(
@@ -75,15 +75,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get device identifier
-        String imei = parser.group(1);
-        long deviceId;
-        try {
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(1))) {
             return null;
         }
-        
+
         // Get status
         String status = parser.group(2);
         
@@ -95,7 +90,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             if (parser.matches()) {
                 Position position = new Position();
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-                position.setDeviceId(deviceId);
+                position.setDeviceId(getDeviceId());
 
                 Integer index = 1;
                 

@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class TelikProtocolDecoderTest {
+public class TelikProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        TelikProtocolDecoder decoder = new TelikProtocolDecoder(new TestDataManager(), null, null);
+        TelikProtocolDecoder decoder = new TelikProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null,
                 "0026436729|232|01|003002030"));

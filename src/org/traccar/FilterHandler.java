@@ -51,7 +51,8 @@ public class FilterHandler extends OneToOneDecoder {
         this.filterLimit = filterLimit;
     }
     
-    public FilterHandler(Properties properties) {
+    public FilterHandler() {
+        Properties properties = Context.getProps();
 
         String value = properties.getProperty("filter.invalid");
         if (value != null) filterInvalid = Boolean.valueOf(value);

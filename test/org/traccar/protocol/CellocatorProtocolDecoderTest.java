@@ -7,12 +7,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-public class CellocatorProtocolDecoderTest {
+public class CellocatorProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        CellocatorProtocolDecoder decoder = new CellocatorProtocolDecoder(new TestDataManager(), null, null);
+        CellocatorProtocolDecoder decoder = new CellocatorProtocolDecoder(null);
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "4D4347500006000000081A02021204000000210062300000006B00E100000000000000000000E5A100040206614EA303181A57034E1200000000000000001525071403D60749"))));

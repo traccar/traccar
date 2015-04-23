@@ -35,8 +35,8 @@ import org.traccar.model.Position;
 
 public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
-    public RitiProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public RitiProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -66,13 +66,11 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
 
         // Get device id
-        String id = String.valueOf(buf.readUnsignedShort());
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(String.valueOf(buf.readUnsignedShort()))) {
+            return null;
         }
-        
+        position.setDeviceId(getDeviceId());
+
         extendedInfo.set("mode", buf.readUnsignedByte());
         extendedInfo.set("command", buf.readUnsignedByte());
         extendedInfo.set("power", buf.readUnsignedShort());

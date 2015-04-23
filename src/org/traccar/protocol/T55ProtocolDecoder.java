@@ -32,10 +32,8 @@ import org.traccar.model.Position;
 
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
-    public T55ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public T55ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern patternGPRMC = Pattern.compile(
@@ -83,15 +81,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+\\.\\d+)," +           // Altitude
             "(\\d+\\.?\\d*)," +            // Battery
             ".+");
-    
-    private void identify(String id) {
-        try {
-            deviceId = getDataManager().getDeviceByImei(id).getId();
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
-        }
-    }
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -135,7 +125,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Location
-        else if (sentence.startsWith("$GPRMC") && deviceId != null) {
+        else if (sentence.startsWith("$GPRMC") && hasDeviceId()) {
 
             // Send response
             if (channel != null) {
@@ -151,7 +141,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             Integer index = 1;
 
@@ -207,7 +197,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Location
-        else if (sentence.startsWith("$GPGGA") && deviceId != null) {
+        else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = patternGPGGA.matcher(sentence);
@@ -218,7 +208,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             Integer index = 1;
 
@@ -259,7 +249,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Location
-        else if (sentence.startsWith("$GPRMA") && deviceId != null) {
+        else if (sentence.startsWith("$GPRMA") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = patternGPRMA.matcher(sentence);
@@ -270,7 +260,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             Integer index = 1;
 
@@ -316,7 +306,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Location
-        else if (sentence.startsWith("$TRCCR") && deviceId != null) {
+        else if (sentence.startsWith("$TRCCR") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = patternTRCCR.matcher(sentence);
@@ -327,7 +317,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
 
             Integer index = 1;
 

@@ -33,8 +33,8 @@ import org.traccar.model.Position;
 
 public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
-    public CalAmpProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public CalAmpProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int MSG_NULL = 0;
@@ -91,8 +91,6 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        Long deviceId = null;
-
         // Check options header
         if ((buf.getByte(buf.readerIndex()) & 0x80) != 0) {
 
@@ -112,14 +110,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
 
-                // Find device in database
-                String stringId = String.valueOf(id);
-                try {
-                    deviceId = getDataManager().getDeviceByImei(stringId).getId();
-                } catch(Exception error) {
-                    Log.warning("Unknown device - " + stringId);
-                }
-
+                identify(String.valueOf(id));
             }
 
             // Identifier type
@@ -150,8 +141,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Unidentified device
-        if (deviceId == null) {
-            Log.warning("Unknown device");
+        if (!hasDeviceId()) {
             return null;
         }
 
@@ -170,8 +160,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("calamp");
+            position.setDeviceId(getDeviceId());
+            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Location data
             position.setTime(new Date(buf.readUnsignedInt() * 1000));

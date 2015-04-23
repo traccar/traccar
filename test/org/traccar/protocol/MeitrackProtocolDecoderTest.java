@@ -8,12 +8,12 @@ import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class MeitrackProtocolDecoderTest {
+public class MeitrackProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(new TestDataManager(), null, null);
+        MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(null);
 
         verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "$$I152,013949004569813,AAA,37,54.739468,25.273648,150208173414,A,5,24,0,73,1.5,165,74,3381,246|1|0065|118A,0000,0003|0003|0000|08D4|0002,006380DF,,1,0008*7C", Charset.defaultCharset())));

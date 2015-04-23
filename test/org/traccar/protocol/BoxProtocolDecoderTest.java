@@ -5,12 +5,12 @@ import org.traccar.helper.TestDataManager;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 
-public class BoxProtocolDecoderTest {
+public class BoxProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        BoxProtocolDecoder decoder = new BoxProtocolDecoder(new TestDataManager(), null, null);
+        BoxProtocolDecoder decoder = new BoxProtocolDecoder(null);
         
         assertNull(decoder.decode(null, null,
                 "H,BT,358281002435893,081028142432,F5813D19,6D6E6DC2"));

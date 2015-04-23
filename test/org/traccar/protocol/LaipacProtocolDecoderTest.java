@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class LaipacProtocolDecoderTest {
+public class LaipacProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        LaipacProtocolDecoder decoder = new LaipacProtocolDecoder(new TestDataManager(), null, null);
+        LaipacProtocolDecoder decoder = new LaipacProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, "$AVSYS,99999999,V1.50,SN0000103,32768*15"));
         

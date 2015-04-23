@@ -12,7 +12,7 @@ public class TestDataManager extends DataManager {
     }
 
     @Override
-    public Device getDeviceByImei(String imei) {
+    public Device getDeviceByUniqueId(String imei) {
         Device device = new Device();
         device.setId(new Long(1));
         device.setImei("123456789012345");

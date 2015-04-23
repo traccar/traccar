@@ -4,12 +4,12 @@ import org.traccar.helper.TestDataManager;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 
-public class XexunProtocolDecoderTest {
+public class XexunProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        XexunProtocolDecoder decoder = new XexunProtocolDecoder(new TestDataManager(), null, null);
+        XexunProtocolDecoder decoder = new XexunProtocolDecoder(null);
         
         verify(decoder.decode(null, null,
                 "GPRMC,043435.000,A,811.299200,S,11339.9500,E,0.93,29.52,160313,00,0000.0,A*65,F,,imei:359585014597923,"));

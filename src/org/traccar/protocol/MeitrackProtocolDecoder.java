@@ -38,8 +38,8 @@ import org.traccar.model.Position;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public MeitrackProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public MeitrackProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -91,13 +91,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identification
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Event
         int event = Integer.valueOf(parser.group(index++));
@@ -191,22 +188,18 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         int index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
         
         // Identification
-        long deviceId;
         String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
-        try {
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(imei)) {
             return null;
         }
-        
+
         buf.skipBytes(index + 1 + 15 + 1 + 3 + 1 + 2 + 2 + 4);
         
         while (buf.readableBytes() >= 0x34) {
             
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             
             // Event
             extendedInfo.set("event", buf.readUnsignedByte());

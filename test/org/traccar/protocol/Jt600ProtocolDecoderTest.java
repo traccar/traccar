@@ -7,12 +7,12 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 
-public class Jt600ProtocolDecoderTest {
+public class Jt600ProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(new TestDataManager(), null, null);
+        Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(null);
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "24311021600111001B16021105591022329862114046227B0598095080012327951435161F"))));

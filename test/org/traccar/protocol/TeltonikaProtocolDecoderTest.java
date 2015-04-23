@@ -7,12 +7,12 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-public class TeltonikaProtocolDecoderTest {
+public class TeltonikaProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(new TestDataManager(), null, null);
+        TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "000F313233343536373839303132333435"))));

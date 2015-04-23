@@ -37,15 +37,12 @@ import org.traccar.model.Position;
 public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private String prefix;
-    private long deviceId, serverId;
+    private long deviceUniqueId, serverId;
 
     private static final Charset charset = Charset.defaultCharset();
 
-    private String imei;
-    private Long databaseDeviceId;
-
-    public NavisProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public NavisProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     // Format types
@@ -88,7 +85,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
-        position.setDeviceId(databaseDeviceId);
+        position.setDeviceId(getDeviceId());
         position.setAltitude(0.0);
 
         // Format type
@@ -262,12 +259,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processHandshake(Channel channel, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
-        imei = buf.toString(Charset.defaultCharset());
-        try {
-            databaseDeviceId = getDataManager().getDeviceByImei(imei).getId();
+        if (identify(buf.toString(Charset.defaultCharset()))) {
             sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", charset));
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
         }
         return null;
     }
@@ -283,7 +276,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     private void sendReply(Channel channel, ChannelBuffer data) {
         ChannelBuffer header = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 16);
         header.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, prefix, charset));
-        header.writeInt((int) deviceId);
+        header.writeInt((int) deviceUniqueId);
         header.writeInt((int) serverId);
         header.writeShort(data.readableBytes());
         header.writeByte(checksum(data));
@@ -305,7 +298,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         prefix = buf.toString(buf.readerIndex(), 4, charset);
         buf.skipBytes(prefix.length()); // prefix @NTC by default
         serverId = buf.readUnsignedInt();
-        deviceId = buf.readUnsignedInt();
+        deviceUniqueId = buf.readUnsignedInt();
         int length = buf.readUnsignedShort();
         buf.skipBytes(2); // header and data XOR checksum
 

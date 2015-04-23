@@ -42,8 +42,8 @@ import org.traccar.model.Position;
 
 public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
     
-    public PiligrimProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public PiligrimProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private void sendResponse(Channel channel, String message) {
@@ -85,13 +85,8 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, "BINGPS: OK");
             
             // Identification
-            long deviceId;
             QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-            String imei = decoder.getParameters().get("imei").get(0);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
+            if (!identify(decoder.getParameters().get("imei").get(0))) {
                 return null;
             }
 
@@ -108,7 +103,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     
                     Position position = new Position();
                     ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-                    position.setDeviceId(deviceId);
+                    position.setDeviceId(getDeviceId());
                     
                     // Time
                     Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -178,9 +173,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                 } else if (type == MSG_EVENTS) {
                     
                     buf.skipBytes(13);
-                    
                 }
-                
             }
             
             return positions;

@@ -31,11 +31,9 @@ import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class BoxProtocolDecoder extends BaseProtocolDecoder {
-    
-    private Long deviceId;
 
-    public BoxProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public BoxProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -63,12 +61,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             
             int index = sentence.indexOf(',', 2) + 1;
             String id = sentence.substring(index, sentence.indexOf(',', index));
-
-            try {
-                deviceId = getDataManager().getDeviceByImei(id).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + id);
-            }
+            identify(id);
         }
         
         else if (sentence.startsWith("L,")) {
@@ -81,7 +74,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             Integer index = 1;

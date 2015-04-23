@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class IntellitracProtocolDecoderTest {
+public class IntellitracProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        IntellitracProtocolDecoder decoder = new IntellitracProtocolDecoder(new TestDataManager(), null, null);
+        IntellitracProtocolDecoder decoder = new IntellitracProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, "$OK:TRACKING"));
 

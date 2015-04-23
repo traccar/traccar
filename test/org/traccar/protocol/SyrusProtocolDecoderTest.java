@@ -5,12 +5,12 @@ import org.traccar.helper.TestDataManager;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 
-public class SyrusProtocolDecoderTest {
+public class SyrusProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(new TestDataManager(), null, null, false);
+        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(null, false);
 
         assertNotNull(decoder.decode(null, null,
                 ">RPV00000+3739438-1220384601512612;ID=1234;*7F"));

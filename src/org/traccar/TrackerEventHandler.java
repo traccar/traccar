@@ -27,14 +27,6 @@ import org.traccar.model.Position;
 @ChannelHandler.Sharable
 public class TrackerEventHandler extends IdleStateAwareChannelHandler {
 
-    private final DataManager dataManager;
-    private final DataCache dataCache;
-
-    TrackerEventHandler(DataManager dataManager, DataCache dataCache) {
-        this.dataManager = dataManager;
-        this.dataCache = dataCache;
-    }
-
     private Long processSinglePosition(Position position) {
         if (position == null) {
             Log.info("processSinglePosition null message");
@@ -50,7 +42,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         // Write position to database
         Long id = null;
         try {
-            id = dataManager.addPosition(position);
+            id = Context.getDataManager().addPosition(position);
         } catch (Exception error) {
             Log.warning(error);
         }
@@ -73,8 +65,8 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         }
         if (lastPostition != null) {
             try {
-                dataManager.updateLatestPosition(lastPostition, id);
-                dataCache.update(lastPostition);
+                Context.getDataManager().updateLatestPosition(lastPostition, id);
+                Context.getDataCache().update(lastPostition);
             } catch (Exception error) {
                 Log.warning(error);
             }

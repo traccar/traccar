@@ -32,8 +32,8 @@ import java.util.regex.Pattern;
 
 public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xt013ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Xt013ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -78,13 +78,10 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identify device
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

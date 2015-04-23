@@ -33,8 +33,8 @@ import org.traccar.model.Position;
 
 public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public CarTrackProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public CarTrackProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -77,13 +77,10 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by unique identifier
-        String id = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Command
         extendedInfo.set("command", parser.group(index++));

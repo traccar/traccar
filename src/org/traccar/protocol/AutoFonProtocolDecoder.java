@@ -30,15 +30,13 @@ import java.util.*;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
-    public AutoFonProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public AutoFonProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int MSG_LOGIN = 0x10;
     private static final int MSG_LOCATION = 0x11;
     private static final int MSG_HISTORY = 0x12;
-
-    private long deviceId;
 
     private static double convertCoordinate(int raw) {
         double result = raw / 1000000;
@@ -51,7 +49,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-        position.setDeviceId(deviceId);
+        position.setDeviceId(getDeviceId());
 
         if (!history) {
             buf.readUnsignedByte(); // interval
@@ -127,10 +125,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // software version
 
             String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
+            if (!identify(imei)) {
                 return null;
             }
 

@@ -34,10 +34,8 @@ import org.traccar.model.Position;
 
 public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
-    public WialonProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public WialonProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -75,14 +73,14 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         
         // Parse message
         Matcher parser = pattern.matcher(substring);
-        if (deviceId == null || !parser.matches()) {
+        if (!hasDeviceId() || !parser.matches()) {
             return null;
         }
 
         // Create new position
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-        position.setDeviceId(deviceId);
+        position.setDeviceId(getDeviceId());
 
         Integer index = 1;
 
@@ -187,11 +185,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         // Detect device ID
         if (sentence.startsWith("#L#")) {
             String imei = sentence.substring(3, sentence.indexOf(';'));
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
+            if (identify(imei)) {
                 sendResponse(channel, "#AL#", 1);
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
             }
         }
 

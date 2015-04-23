@@ -33,8 +33,8 @@ import org.traccar.model.Position;
 
 public class BceProtocolDecoder extends BaseProtocolDecoder {
 
-    public BceProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public BceProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int DATA_TYPE = 7;
@@ -57,11 +57,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
         
         String imei = String.format("%015d", buf.readLong());
-        long deviceId;
-        try {
-            deviceId = getDataManager().getDeviceByImei(imei).getId();
-        } catch (Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(imei)) {
             return null;
         }
 
@@ -77,7 +73,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                 Position position = new Position();
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-                position.setDeviceId(deviceId);
+                position.setDeviceId(getDeviceId());
 
                 int structEnd = buf.readUnsignedByte() + buf.readerIndex();
 

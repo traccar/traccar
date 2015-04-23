@@ -32,8 +32,8 @@ import org.traccar.model.Position;
 
 public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gt02ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Gt02ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private String readImei(ChannelBuffer buf) {
@@ -84,12 +84,10 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("index", index);
 
             // Get device id
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
+            if (!identify(imei)) {
                 return null;
             }
+            position.setDeviceId(getDeviceId());
 
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

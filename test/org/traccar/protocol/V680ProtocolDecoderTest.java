@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class V680ProtocolDecoderTest {
+public class V680ProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        V680ProtocolDecoder decoder = new V680ProtocolDecoder(new TestDataManager(), null, null);
+        V680ProtocolDecoder decoder = new V680ProtocolDecoder(null);
         
         assertNull(decoder.decode(null, null,
                 "#353588102019155"));

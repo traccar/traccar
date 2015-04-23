@@ -34,22 +34,15 @@ import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
-/**
- * Progress tracker protocol decoder
- */
 public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
-    private long deviceId;
     private long lastIndex;
     private long newIndex;
 
-    public ProgressProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public ProgressProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
-    /*
-     * Message types
-     */
     private static final int MSG_NULL = 0;
     private static final int MSG_IDENT = 1;
     private static final int MSG_IDENT_FULL = 2;
@@ -80,9 +73,6 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
         }*/
     }
 
-    /**
-     * Request archive messages
-     */
     private void requestArchive(Channel channel) {
         if (lastIndex == 0) {
             lastIndex = newIndex;
@@ -112,16 +102,13 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
-            try {
-                deviceId = getDataManager().getDeviceByImei(imei).getId();
+            if (identify(imei)) {
                 loadLastIndex();
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei + " (id - " + id + ")");
             }
         }
 
         // Position
-        else if (deviceId != 0 && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
+        else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
             List<Position> positions = new LinkedList<Position>();
 
             int recordCount = 1;
@@ -132,7 +119,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-                position.setDeviceId(deviceId);
+                position.setDeviceId(getDeviceId());
 
                 // Message index
                 if (type == MSG_LOGMSG) {

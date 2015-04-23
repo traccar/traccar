@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import java.util.concurrent.Executors;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.socket.DatagramChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;

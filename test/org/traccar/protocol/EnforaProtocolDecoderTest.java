@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
 
-public class EnforaProtocolDecoderTest {
+public class EnforaProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(new TestDataManager(), null, null);
+        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "000A08002020202020303131303730303030353730323637"))));

@@ -5,12 +5,12 @@ import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
-public class Gps103ProtocolDecoderTest {
+public class Gps103ProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new TestDataManager(), null, null);
+        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(null);
 
         // Log on request
         assertNull(decoder.decode(null, null, null, "##,imei:359586015829802,A"));

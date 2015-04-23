@@ -38,21 +38,12 @@ import org.traccar.model.Position;
  */
 public class MaxonProtocolDecoder extends BaseProtocolDecoder {
 
-    /**
-     * Device ID
-     */
     private Position position = null;
 
-    /**
-     * Initialize
-     */
-    public MaxonProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public MaxonProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
-    /**
-     * Regular expressions pattern
-     */
     static private Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{2})," + // Time (HHMMSS.SSS)
@@ -66,12 +57,8 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");                         // Other (Checksumm)
 
-    static private Pattern gpfidPattern = Pattern.compile(
-            "\\$GPFID,(\\d+)$");
+    static private Pattern gpfidPattern = Pattern.compile("\\$GPFID,(\\d+)$");
 
-    /**
-     * Decode message"
-     */
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
@@ -102,7 +89,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // Skip milliseconds
 
             // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+            position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));
@@ -145,13 +132,10 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             Matcher parser = gpfidPattern.matcher(sentence);
 
             if (parser.matches()) {
-                String imei = parser.group(1);
-                try {
-                    position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-                } catch(Exception error) {
-                    Log.warning("Unknown device - " + imei);
+                if (!identify(parser.group(1))) {
                     return null;
                 }
+                position.setDeviceId(getDeviceId());
                 return position;
             }
         }

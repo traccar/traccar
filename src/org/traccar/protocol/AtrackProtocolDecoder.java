@@ -35,8 +35,8 @@ import org.traccar.model.Position;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public AtrackProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public AtrackProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final int MSG_HEARTBEAT = 0x1A;
@@ -91,18 +91,13 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
 
         // Get device id
-        long deviceId;
-        long rawId = buf.readLong();
-        String id = String.valueOf(rawId);
-        try {
-            deviceId = getDataManager().getDeviceByImei(id).getId();
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        long id = buf.readLong();
+        if (!identify(String.valueOf(id))) {
             return null;
         }
-        
+
         // Send acknowledgement
-        sendResponse(channel, remoteAddress, rawId, index);
+        sendResponse(channel, remoteAddress, id, index);
 
         List<Position> positions = new LinkedList<Position>();
 
@@ -110,7 +105,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
             // Date and time

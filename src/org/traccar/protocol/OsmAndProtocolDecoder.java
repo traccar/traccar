@@ -41,8 +41,8 @@ import org.traccar.model.Position;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
     
-    public OsmAndProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public OsmAndProtocolDecoder(String protocol) {
+        super(protocol);
     }
     
     @Override
@@ -65,12 +65,10 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
         // Identification
         String id = params.get(params.containsKey("id") ? "id" : "deviceid").get(0);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(id).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + id);
+        if (!identify(id)) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Decode position
         position.setValid(true);

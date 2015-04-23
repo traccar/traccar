@@ -33,8 +33,8 @@ import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public CellocatorProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public CellocatorProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private String readImei(ChannelBuffer buf) {
@@ -93,7 +93,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(4); // system code
         int type = buf.readUnsignedByte();
-        long deviceId = buf.readUnsignedInt();
+        long deviceUniqueId = buf.readUnsignedInt();
         
         if (type != MSG_CLIENT_SERIAL) {
             buf.readUnsignedShort(); // communication control
@@ -101,7 +101,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         byte packetNumber = buf.readByte();
 
         // Send reply
-        sendReply(channel, deviceId, packetNumber);
+        sendReply(channel, deviceUniqueId, packetNumber);
 
         // Parse location
         if (type == MSG_CLIENT_STATUS) {
@@ -109,13 +109,11 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
             
             // Device identifier
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(String.valueOf(deviceId)).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + deviceId);
+            if (!identify(String.valueOf(deviceUniqueId))) {
                 return null;
             }
-            
+            position.setDeviceId(getDeviceId());
+
             buf.readUnsignedByte(); // hardware version
             buf.readUnsignedByte(); // software version
             buf.readUnsignedByte(); // protocol version

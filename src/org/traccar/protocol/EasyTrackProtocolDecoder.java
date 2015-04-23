@@ -32,11 +32,10 @@ import org.traccar.model.Position;
 
 public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public EasyTrackProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public EasyTrackProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
-    //ET,358155100003016,HB,A,0d081e,07381e,8038ee09,03d2e9be,004f,0000,40c00000,0f,100,0000,00037c,29
     static private Pattern pattern = Pattern.compile(
             "\\*..," +                          // Manufacturer
             "(\\d+)," +                         // IMEI
@@ -82,19 +81,16 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
+        position.setDeviceId(getDeviceId());
 
         // Command
         extendedInfo.set("command", parser.group(index++));
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0 ? true : false);
+        position.setValid(parser.group(index++).compareTo("A") == 0);
         
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

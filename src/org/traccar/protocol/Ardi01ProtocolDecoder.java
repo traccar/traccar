@@ -31,8 +31,8 @@ import java.util.regex.Pattern;
 
 public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Ardi01ProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public Ardi01ProtocolDecoder(String protocol) {
+        super(protocol);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -68,14 +68,11 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Detect device
-        String imei = parser.group(index++);
-        try {
-            position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-        } catch(Exception error) {
-            Log.warning("Unknown device - " + imei);
+        if (!identify(parser.group(index++))) {
             return null;
         }
-        
+        position.setDeviceId(getDeviceId());
+
         // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
