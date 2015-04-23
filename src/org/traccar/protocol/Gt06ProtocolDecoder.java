@@ -116,7 +116,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             // Timezone offset
             if (dataLength > 10) {
                 int extensionBits = buf.readUnsignedShort();
-                int offset = (extensionBits >> 4) * 36000;
+                int hours = (extensionBits >> 4) / 100;
+                int minutes = (extensionBits >> 4) % 100;
+                int offset = (hours * 60 + minutes) * 60;
                 if ((extensionBits & 0x8) != 0) {
                     offset = -offset;
                 }
