@@ -17,13 +17,14 @@ package org.traccar.http;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONObject;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 
@@ -72,19 +73,19 @@ public class MainServlet extends HttpServlet {
     
     private void device(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         
-        long userId = 1;//(Long) req.getSession().getAttribute(USER_ID);
+        long userId = (Long) req.getSession().getAttribute(USER_ID);
         
-        JSONObject result = new JSONObject();
+        JsonObjectBuilder result = Json.createObjectBuilder();
         
         try {
-            result.put("success", true);
-            result.put("data", Context.getDataManager().getDevices(userId));
+            result.add("success", true);
+            result.add("data", Context.getDataManager().getDevices(userId));
         } catch(SQLException error) {
-            result.put("success", false);
-            result.put("error", error.getMessage());
+            result.add("success", false);
+            result.add("error", error.getMessage());
         }
         
-        resp.getWriter().println(result.toString());
+        resp.getWriter().println(result.build().toString());
     }
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

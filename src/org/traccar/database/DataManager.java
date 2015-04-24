@@ -22,11 +22,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.*;
 import java.util.*;
+import javax.json.JsonArray;
 import javax.sql.DataSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import org.json.JSONArray;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -362,7 +362,7 @@ public class DataManager {
         }
     }
     
-    public JSONArray getDevices(long userId) throws SQLException {
+    public JsonArray getDevices(long userId) throws SQLException {
 
         Connection connection = dataSource.getConnection();
         try {
