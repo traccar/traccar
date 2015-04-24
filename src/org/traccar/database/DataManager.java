@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.json.JSONArray;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -254,16 +255,18 @@ public class DataManager {
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
                             "name VARCHAR(1024) NOT NULL," +
                             "unique_id VARCHAR(1024) NOT NULL UNIQUE," +
-                            "position_id INT NOT NULL," +
-                            "data_id INT NOT NULL);" +
+                            "position_id INT," +
+                            "data_id INT);" +
 
                             "CREATE TABLE user_device (" +
                             "user_id INT NOT NULL," +
                             "device_id INT NOT NULL," +
-                            "read BOOLEAN NOT NULL," +
-                            "write BOOLEAN NOT NULL," +
+                            "read BOOLEAN DEFAULT true NOT NULL," +
+                            "write BOOLEAN DEFAULT true NOT NULL," +
                             "FOREIGN KEY (user_id) REFERENCES user(id)," +
                             "FOREIGN KEY (device_id) REFERENCES device(id));" +
+
+                            "CREATE INDEX user_device_user_id ON user_device(user_id);" +
 
                             "CREATE TABLE position (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
@@ -321,7 +324,8 @@ public class DataManager {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "SELECT id FROM user WHERE name = ? AND password = CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR);");
+                    "SELECT id FROM user WHERE name = ? AND " +
+                    "password = CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR);");
             try {
                 statement.setString(1, name);
                 statement.setString(2, password);
@@ -350,6 +354,25 @@ public class DataManager {
                 statement.setBoolean(3, admin);
                 
                 statement.executeUpdate();
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+    
+    public JSONArray getDevices(long userId) throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT * FROM device WHERE id IN (" +
+                    "SELECT device_id FROM user_device WHERE user_id = ?);");
+            try {
+                statement.setLong(1, userId);
+                
+                return ResultSetConverter.convert(statement.executeQuery());
             } finally {
                 statement.close();
             }

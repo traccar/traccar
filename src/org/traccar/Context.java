@@ -95,7 +95,7 @@ public class Context {
         }
 
         if (Boolean.valueOf(properties.getProperty("http.enable"))) {
-            webServer = new WebServer(properties, dataManager);
+            webServer = new WebServer();
         }
 
         serverManager = new ServerManager();

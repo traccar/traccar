@@ -15,27 +15,18 @@
  */
 package org.traccar.http;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.util.Properties;
-import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.traccar.database.DataManager;
+import org.traccar.Context;
 import org.traccar.helper.Log;
 
 /**
@@ -45,7 +36,9 @@ public class WebServer {
 
     private Server server;
 
-    public WebServer(Properties properties, DataManager dataManager) {
+    public WebServer() {
+        Properties properties = Context.getProps();
+        
         String address = properties.getProperty("http.address");
         Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
         if (address == null) {
@@ -58,7 +51,7 @@ public class WebServer {
 
             ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
             servletHandler.setContextPath("/api");
-            servletHandler.addServlet(new ServletHolder(new MainServlet(dataManager)), "/*");
+            servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
 
             ResourceHandler resourceHandler = new ResourceHandler();
             resourceHandler.setResourceBase(properties.getProperty("http.path"));
@@ -72,8 +65,8 @@ public class WebServer {
         } else {
 
             try {
-                Context context = new InitialContext();
-                context.bind("java:/DefaultDS", dataManager.getDataSource());
+                javax.naming.Context context = new InitialContext();
+                context.bind("java:/DefaultDS", Context.getDataManager().getDataSource());
             } catch (Exception error) {
                 Log.warning(error);
             }

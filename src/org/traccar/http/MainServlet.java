@@ -23,18 +23,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.traccar.database.DataManager;
+import org.json.JSONObject;
+import org.traccar.Context;
 import org.traccar.helper.Log;
 
 public class MainServlet extends HttpServlet {
 
     private static final String USER_ID = "userId";
-
-    private final DataManager dataManager;
-
-    public MainServlet(DataManager dataManager) {
-        this.dataManager = dataManager;
-    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -43,6 +38,8 @@ public class MainServlet extends HttpServlet {
 
         if (command.equals("/async")) {
             async(req.startAsync());
+        } else if (command.startsWith("/device")) {
+            device(req, resp);
         } else if (command.equals("/login")) {
             login(req, resp);
         } else if (command.equals("/logout")) {
@@ -72,11 +69,28 @@ public class MainServlet extends HttpServlet {
             }
         });
     }
+    
+    private void device(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        
+        long userId = 1;//(Long) req.getSession().getAttribute(USER_ID);
+        
+        JSONObject result = new JSONObject();
+        
+        try {
+            result.put("success", true);
+            result.put("data", Context.getDataManager().getDevices(userId));
+        } catch(SQLException error) {
+            result.put("success", false);
+            result.put("error", error.getMessage());
+        }
+        
+        resp.getWriter().println(result.toString());
+    }
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             req.getSession().setAttribute(USER_ID,
-                    dataManager.login(req.getParameter("name"), req.getParameter("password")));
+                    Context.getDataManager().login(req.getParameter("name"), req.getParameter("password")));
             resp.getWriter().println("{ success: true }");
         } catch (SQLException e) {
             throw new ServletException(e);
