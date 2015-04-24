@@ -15,14 +15,16 @@
  */
 package org.traccar.http;
 
-import org.traccar.database.DataManager;
-
+import java.io.IOException;
+import java.sql.SQLException;
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.SQLException;
+import org.traccar.database.DataManager;
+import org.traccar.helper.Log;
 
 public class MainServlet extends HttpServlet {
 
@@ -39,13 +41,36 @@ public class MainServlet extends HttpServlet {
 
         String command = req.getPathInfo();
 
-        if (command.equals("/login")) {
+        if (command.equals("/async")) {
+            async(req.startAsync());
+        } else if (command.equals("/login")) {
             login(req, resp);
         } else if (command.equals("/logout")) {
             logout(req, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
+    }
+    
+    private void async(final AsyncContext context) {
+        context.start(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000); // DELME
+
+                    ServletResponse response = context.getResponse();
+                    response.getWriter().println("{ success: true, data: ["+
+                            "{ id: 1, device_id: 1, time: \"2012-04-23T18:25:43.511Z\", latitude: 60, longitude: 30, speed: 0, course: 0 }," +
+                            "{ id: 2, device_id: 2, time: \"2012-04-23T19:25:43.511Z\", latitude: 61, longitude: 31, speed: 0, course: 0 }" +
+                            "] }");
+                    context.complete();
+
+                } catch (Exception ex) {
+                    Log.warning(ex);
+                }
+            }
+        });
     }
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
