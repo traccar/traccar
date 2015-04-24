@@ -124,6 +124,7 @@ public class ServerManager {
         initCalAmpServer("calamp");
         initMtxServer("mtx");
         initTytanServer("tytan");
+        initAvl301Server("avl301");
 
         initProtocolDetector();
     }
@@ -1298,6 +1299,18 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new TytanProtocolDecoder(protocol));
+                }
+            });
+        }
+    }
+
+    private void initAvl301Server(final String protocol) throws SQLException {
+        if (isProtocolEnabled(protocol)) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
+                    pipeline.addLast("objectDecoder", new Avl301ProtocolDecoder(protocol));
                 }
             });
         }
