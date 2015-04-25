@@ -1309,7 +1309,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, -3, 0));
                     pipeline.addLast("objectDecoder", new Avl301ProtocolDecoder(protocol));
                 }
             });
