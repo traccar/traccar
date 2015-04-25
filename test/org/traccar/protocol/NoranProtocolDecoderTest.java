@@ -1,7 +1,6 @@
 package org.traccar.protocol;
 
 import java.nio.ByteOrder;
-import org.traccar.helper.TestDataManager;
 import org.jboss.netty.buffer.ChannelBuffers;
 import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
@@ -23,6 +22,9 @@ public class NoranProtocolDecoderTest extends ProtocolDecoderTest {
 
         verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "34000800010c0000000000001c4291251143388d17c24e523039423131303930000031342d31322d32352030303a33333a303700"))));
+        
+        verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
+                "34000800010c00000000000000006520944141bd07c24e523039423139323832000031352d30342d32352030303a30333a323200"))));
 
     }
 
