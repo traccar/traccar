@@ -14,15 +14,35 @@
  * limitations under the License.
  */
 
-Ext.application({
-    name: 'Traccar',
-    requires: [
-        'Strings',
-        'Styles',
-        'Login'
-    ],
+Ext.Loader.setConfig({
+    disableCaching: false
+});
 
-    launch: function() {
-        Ext.create('Login').show();
+Ext.Loader.loadScript({
+
+    url: function() {
+        var urlParams = document.URL.split("?");
+        var params = Ext.urlDecode(urlParams[urlParams.length - 1]);
+        
+        if (!params.lang) {
+            return "Strings.js";
+        } else {
+            return "Strings-" + params.lang + ".js";
+        }
+    }(),
+
+    onLoad: function() {
+
+        Ext.application({
+            name: 'Traccar',
+            requires: [
+                'Styles',
+                'Login'
+            ],
+
+            launch: function() {
+                Ext.create('Login').show();
+            }
+        });
     }
 });
