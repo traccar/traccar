@@ -25,7 +25,8 @@ Ext.define('Strings', {
     login_failed: 'Incorrect user name or password.',
 
     device_title: 'Devices',
+    device_name: 'Name',
+    device_identifier: 'Identifier',
 
     map_title: 'Map'
-
 });

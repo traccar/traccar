@@ -15,8 +15,33 @@
  */
 
 Ext.define('DeviceView', {
-    extend: 'Ext.form.Panel',
+    extend: 'Ext.grid.Panel',
     xtype: 'device-view',
 
-    title: Strings.device_title
+    title: Strings.device_title,
+    
+    store: {
+        proxy: {
+            type: 'ajax',
+            url: '/api/device',
+            reader: {
+                type: 'json',
+                rootProperty: 'data'
+            }
+        },
+        autoLoad: true,
+
+        fields:[
+            'id',
+            'name',
+            'unique_id',
+            'position_id',
+            'data_id'
+        ]
+    },
+    
+    columns: [
+        { text: Strings.device_name,  dataIndex: 'name', flex: 1 },
+        { text: Strings.device_identifier, dataIndex: 'unique_id', flex: 1 }
+    ]
 });
