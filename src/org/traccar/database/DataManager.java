@@ -362,6 +362,31 @@ public class DataManager {
         }
     }
     
+    public List<Long> getDeviceList(long userId) throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id FROM device WHERE id IN (" +
+                    "SELECT device_id FROM user_device WHERE user_id = ?);");
+            try {
+                statement.setLong(1, userId);
+
+                ResultSet resultSet = statement.executeQuery();
+                
+                List<Long> result = new LinkedList<Long>();
+                while (resultSet.next()) {
+                    result.add(resultSet.getLong(1));
+                }
+                return result;
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+    
     public JsonArray getDevices(long userId) throws SQLException {
 
         Connection connection = dataSource.getConnection();
