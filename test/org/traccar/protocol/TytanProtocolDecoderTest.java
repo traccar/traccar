@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
-import org.traccar.helper.TestDataManager;
 
 public class TytanProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -13,15 +12,15 @@ public class TytanProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         TytanProtocolDecoder decoder = new TytanProtocolDecoder(null);
+
+        verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "D5F0FF00001032552F9121D5325FCB8D11AFA0000205396504004C0602FB5B434118001765006603676B68006B80426C02E2C8206D2F9600"))));
         
         verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "D56000000AF20E4FA7C77AFF3282C68D2F890800"))));
 
         verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "D56000000AF20e552e248007375bee8c02b3c002"))));
-
-        verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-                "D5F0FF00001032552F9121D5325FCB8D11AFA0000205396504004C0602FB5B434118001765006603676B68006B80426C02E2C8206D2F9600"))));
 
         verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "D5C0FF00013D21552F9148D3325E8F8D11A80800060228816541061245FF674107C0001810130D21552F9148D3325E8F8D11A8080006022881654106121C46694107C0001810130D21552F9182D3325E8F8D11A8080006022881654106121C46694107C0001810140C"))));
