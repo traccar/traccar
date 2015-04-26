@@ -20,25 +20,27 @@ Ext.define('DeviceView', {
 
     title: Strings.device_title,
     
-    
-    initComponent: function() {
-
-        this.tbar = [{
-            text:'Add'
-        }, {
-            text:'Edit'
-        }, {
-            text:'Remove'
-        }, {
-            xtype: 'tbfill'
-        }, {
-            text:'Settings'
-        }, {
-            text:'Logout'
-        }];
-
-        this.callParent();
-    },
+    tbar: [{
+        text:'Add'
+    }, {
+        text:'Edit'
+    }, {
+        text:'Remove'
+    }, {
+        xtype: 'tbfill'
+    }, {
+        text:'Settings'
+    }, {
+        text:'Logout',
+        handler: function() {
+            Ext.Ajax.request({
+                url: '/api/logout',
+                success: function() {
+                    window.location.reload();
+                }
+            });
+        }
+    }],
     
     store: {
         proxy: {

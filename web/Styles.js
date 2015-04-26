@@ -19,10 +19,9 @@ Ext.define('Styles', {
 
     panel_padding: 10,
 
-    device_width: 400,
+    device_width: 350,
 
     map_center: [ -0.1275, 51.507222 ],
     map_zoom: 6,
     map_max_zoom: 16
-
 });
