@@ -244,6 +244,7 @@ public class DataManager {
                             "salt VARCHAR(1024) NOT NULL," +
                             "readonly BOOLEAN DEFAULT false NOT NULL," +
                             "admin BOOLEAN DEFAULT false NOT NULL," +
+                            "map VARCHAR(1024) DEFAULT 'osm' NOT NULL," +
                             "language VARCHAR(1024) DEFAULT 'en' NOT NULL," +
                             "distance_unit VARCHAR(1024) DEFAULT 'km' NOT NULL," +
                             "speed_unit VARCHAR(1024) DEFAULT 'kmh' NOT NULL," +
@@ -255,6 +256,8 @@ public class DataManager {
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
                             "name VARCHAR(1024) NOT NULL," +
                             "unique_id VARCHAR(1024) NOT NULL UNIQUE," +
+                            "status VARCHAR(1024)," +
+                            "last_update TIMESTAMP," +
                             "position_id INT," +
                             "data_id INT);" +
 
