@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 package org.traccar.protocol;
 
 import java.util.Date;
-import java.util.Properties;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
@@ -102,6 +98,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
     }
     
     private static final int DEFAULT_SELECTOR = 0x0002FC;
+    
+    private static final int EVENT_DATA = 119;
 
     @Override
     protected Object decode(

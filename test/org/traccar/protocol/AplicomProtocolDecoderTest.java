@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestDataManager;
 import org.jboss.netty.buffer.ChannelBuffers;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
