@@ -27,8 +27,8 @@ Ext.define('LoginForm', {
 
     items: [{
         allowBlank: false,
-        fieldLabel: Strings.login_user,
-        name: 'name'
+        fieldLabel: Strings.login_email,
+        name: 'email'
     }, {
         allowBlank: false,
         fieldLabel: Strings.login_password,

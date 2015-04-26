@@ -239,7 +239,7 @@ public class DataManager {
                     statement.execute(
                             "CREATE TABLE user (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
-                            "name VARCHAR(1024) NOT NULL UNIQUE," +
+                            "email VARCHAR(1024) NOT NULL UNIQUE," +
                             "password VARCHAR(1024) NOT NULL," +
                             "salt VARCHAR(1024) NOT NULL," +
                             "readonly BOOLEAN DEFAULT false NOT NULL," +
@@ -322,15 +322,15 @@ public class DataManager {
         }
     }
 
-    public long login(String name, String password) throws SQLException {
+    public long login(String email, String password) throws SQLException {
 
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "SELECT id FROM user WHERE name = ? AND " +
+                    "SELECT id FROM user WHERE email = ? AND " +
                     "password = CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR);");
             try {
-                statement.setString(1, name);
+                statement.setString(1, email);
                 statement.setString(2, password);
 
                 ResultSet result = statement.executeQuery();
@@ -344,15 +344,15 @@ public class DataManager {
         }
     }
 
-    public void addUser(String name, String password, boolean admin) throws SQLException {
+    public void addUser(String email, String password, boolean admin) throws SQLException {
 
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO user (name, password, salt, admin) " +
+                    "INSERT INTO user (email, password, salt, admin) " +
                     "VALUES (?, CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR), '', ?);");
             try {
-                statement.setString(1, name);
+                statement.setString(1, email);
                 statement.setString(2, password);
                 statement.setBoolean(3, admin);
                 

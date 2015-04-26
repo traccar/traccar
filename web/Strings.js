@@ -18,11 +18,11 @@ Ext.define('Strings', {
     singleton: true,
 
     login_title: 'Login',
-    login_user: 'User',
+    login_email: 'Email',
     login_password: 'Password',
     login_register: 'Register',
     login_login: 'Login',
-    login_failed: 'Incorrect user name or password.',
+    login_failed: 'Incorrect email address or password.',
 
     device_title: 'Devices',
     device_name: 'Name',

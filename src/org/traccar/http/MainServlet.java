@@ -240,7 +240,7 @@ public class MainServlet extends HttpServlet {
     private void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             req.getSession().setAttribute(USER_ID,
-                    Context.getDataManager().login(req.getParameter("name"), req.getParameter("password")));
+                    Context.getDataManager().login(req.getParameter("email"), req.getParameter("password")));
             resp.getWriter().println("{ success: true }");
         } catch (SQLException e) {
             throw new ServletException(e);
