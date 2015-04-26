@@ -311,7 +311,7 @@ public class DataManager {
                             "CREATE TABLE traccar1 (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT);");
                     
-                    createUser("admin", "admin", true);
+                    addUser("admin", "admin", true);
                 }
 
             } finally {
@@ -344,7 +344,7 @@ public class DataManager {
         }
     }
 
-    public void createUser(String name, String password, boolean admin) throws SQLException {
+    public void addUser(String name, String password, boolean admin) throws SQLException {
 
         Connection connection = dataSource.getConnection();
         try {
