@@ -118,7 +118,7 @@ public class DataManager {
         public Device processNextRow(ResultSet rs) throws SQLException {
             Device device = new Device();
             device.setId(rs.getLong("id"));
-            device.setImei(rs.getString("imei"));
+            device.setUniqueId(rs.getString("imei"));
             return device;
         }
     };
@@ -146,7 +146,7 @@ public class DataManager {
 
             devices = new HashMap<String, Device>();
             for (Device device : getDevices()) {
-                devices.put(device.getImei(), device);
+                devices.put(device.getUniqueId(), device);
             }
             devicesLastUpdate = Calendar.getInstance();
         }
@@ -285,7 +285,7 @@ public class DataManager {
                             "course DOUBLE NOT NULL," +
                             "address VARCHAR(1024)," +
                             "other VARCHAR(8192) NOT NULL," +
-                            "FOREIGN KEY (device_id) REFERENCES device(id));" +
+                            "FOREIGN KEY (device_id) REFERENCES device(id) ON DELETE CASCADE);" +
 
                             "CREATE TABLE data (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
@@ -297,17 +297,17 @@ public class DataManager {
 
                             "ALTER TABLE device ADD " +
                             "FOREIGN KEY (position_id) REFERENCES position(id);" +
-                                    
+
                             "ALTER TABLE device ADD " +
                             "FOREIGN KEY (data_id) REFERENCES data(id);" +
-                                    
+
                             "CREATE TABLE server (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
                             "registration BOOLEAN NOT NULL," +
                             "latitude DOUBLE NOT NULL," +
                             "longitude DOUBLE NOT NULL," +
                             "zoom INT NOT NULL);" +
-                                    
+
                             "CREATE TABLE traccar1 (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT);");
                     
@@ -401,6 +401,69 @@ public class DataManager {
                 statement.setLong(1, userId);
                 
                 return ResultSetConverter.convert(statement.executeQuery());
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+    
+    public void addDevice(Device device) throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO device (name, unique_id) VALUES (?, ?);",
+                    Statement.RETURN_GENERATED_KEYS);
+            try {
+                statement.setString(1, device.getName());
+                statement.setString(2, device.getUniqueId());
+                
+                statement.execute();
+                
+                ResultSet result = statement.getGeneratedKeys();
+                if (result.next()) {
+                    device.setId(result.getLong(1));
+                }
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+    
+    public void updateDevice(Device device) throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE device SET name = ?, unique_id = ? WHERE id = ?;");
+            try {
+                statement.setString(1, device.getName());
+                statement.setString(2, device.getUniqueId());
+                statement.setLong(3, device.getId());
+                
+                statement.execute();
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+    
+    public void removeDevice(Device device) throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "DELETE FROM device WHERE id = ?;");
+            try {
+                statement.setLong(1, device.getId());
+                
+                statement.execute();
             } finally {
                 statement.close();
             }

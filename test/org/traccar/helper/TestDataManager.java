@@ -15,7 +15,7 @@ public class TestDataManager extends DataManager {
     public Device getDeviceByUniqueId(String imei) {
         Device device = new Device();
         device.setId(new Long(1));
-        device.setImei("123456789012345");
+        device.setUniqueId("123456789012345");
         return device;
     }
 
