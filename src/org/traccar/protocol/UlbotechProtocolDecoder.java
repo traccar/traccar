@@ -19,14 +19,11 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.Date;
-import java.util.Properties;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
@@ -72,6 +69,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         long seconds = buf.readUnsignedInt() & 0x7fffffffl;
         seconds += 946684800l; // 2000-01-01 00:00
         position.setTime(new Date(seconds * 1000));
+        
+        boolean hasLocation = false;
 
         while (buf.readableBytes() > 3) {
 
@@ -81,10 +80,10 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             switch (type) {
 
                 case DATA_GPS:
+                    hasLocation = true;
                     position.setValid(true);
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
-                    position.setAltitude(0.0);
                     position.setSpeed(buf.readUnsignedShort() * 0.539957);
                     position.setCourse((double) buf.readUnsignedShort());
                     extendedInfo.set("hdop", buf.readUnsignedShort());
@@ -98,7 +97,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         position.setExtendedInfo(extendedInfo.toString());
         
-        if (position.getValid() != null) {
+        if (hasLocation) {
             return position;
         }
         return null;

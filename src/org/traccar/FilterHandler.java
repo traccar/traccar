@@ -84,7 +84,7 @@ public class FilterHandler extends OneToOneDecoder {
         if (filterDuplicate) {
             Position last = lastPositions.get(position.getDeviceId());
             if (last != null) {
-                return position.getTime().equals(last.getTime());
+                return position.getFixTime().equals(last.getFixTime());
             } else {
                 return false;
             }
@@ -113,7 +113,7 @@ public class FilterHandler extends OneToOneDecoder {
         if (filterLimit != 0) {
             Position last = lastPositions.get(position.getDeviceId());
             if (last != null) {
-                return (position.getTime().getTime() - last.getTime().getTime()) > filterLimit;
+                return (position.getFixTime().getTime() - last.getFixTime().getTime()) > filterLimit;
             } else {
                 return false;
             }

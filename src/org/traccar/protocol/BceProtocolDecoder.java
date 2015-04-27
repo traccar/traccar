@@ -136,7 +136,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedByte();
                     }
 
-                    if (position.getValid() != null) {
+                    if (checkBit(mask, 0)) {
                         positions.add(position);
                     }
                 }

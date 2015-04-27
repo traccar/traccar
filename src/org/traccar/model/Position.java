@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,137 +17,63 @@ package org.traccar.model;
 
 import java.util.Date;
 
-/**
- * Position information
- */
-public class Position extends Data {
+public class Position {
+    
+    private long id;
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public Position() {
-    }
+    private long deviceId;
+    public long getDeviceId() { return deviceId; }
+    public void setDeviceId(long deviceId) { this.deviceId = deviceId; }
 
-    public Position(
-            long deviceId,
-            Date time,
-            boolean valid,
-            double latitude,
-            double longitude,
-            double altitude,
-            double speed,
-            double course) {
+    private Date serverTime;
+    public Date getServerTime() { return serverTime; }
+    public void setServerTime(Date serverTime) { this.serverTime = serverTime; }
 
-        setDeviceId(deviceId);
-        setTime(time);
-        setValid(valid);
-        setLatitude(latitude);
-        setLongitude(longitude);
-        setAltitude(altitude);
-        setSpeed(speed);
-        setCourse(course);
-    }
+    private Date deviceTime;
+    public Date getDeviceTime() { return deviceTime; }
+    public void setDeviceTime(Date deviceTime) { this.deviceTime = deviceTime; }
 
-
-    /**
-     * Time (UTC)
-     */
-    private Date time;
-
-    public Date getTime() {
-        return time;
-    }
-
+    private Date fixTime;
+    public Date getFixTime() { return fixTime; }
+    public void setFixTime(Date fixTime) { this.fixTime = fixTime; }
+    
     public void setTime(Date time) {
-        this.time = time;
+        deviceTime = time;
+        fixTime = time;
     }
 
-    /**
-     * Validity flag
-     */
-    private Boolean valid;
+    private boolean valid;
+    public boolean getValid() { return valid; }
+    public void setValid(boolean valid) { this.valid = valid; }
 
-    public Boolean getValid() {
-        return valid;
-    }
+    private double latitude;
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
 
-    public void setValid(Boolean valid) {
-        this.valid = valid;
-    }
+    private double longitude;
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
-    /**
-     * Latitude
-     */
-    private Double latitude;
+    private double altitude;
+    public double getAltitude() { return altitude; }
+    public void setAltitude(double altitude) { this.altitude = altitude; }
 
-    public Double getLatitude() {
-        return latitude;
-    }
+    private double speed; // value in knots
+    public double getSpeed() { return speed; }
+    public void setSpeed(double speed) { this.speed = speed; }
 
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
+    private double course;
+    public double getCourse() { return course; }
+    public void setCourse(double course) { this.course = course; }
 
-    /**
-     * Longitude
-     */
-    private Double longitude;
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    /**
-     * Altitude
-     */
-    private Double altitude;
-
-    public Double getAltitude() {
-        return altitude;
-    }
-
-    public void setAltitude(Double altitude) {
-        this.altitude = altitude;
-    }
-
-    /**
-     * Speed (knots)
-     */
-    private Double speed;
-
-    public Double getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(Double speed) {
-        this.speed = speed;
-    }
-
-    /**
-     * Course
-     */
-    private Double course;
-
-    public Double getCourse() {
-        return course;
-    }
-
-    public void setCourse(Double course) {
-        this.course = course;
-    }
-
-    /**
-     * Address
-     */
     private String address;
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    private String extendedInfo;
+    public String getExtendedInfo() { return extendedInfo; }
+    public void setExtendedInfo(String extendedInfo) { this.extendedInfo = extendedInfo; }
 
 }

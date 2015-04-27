@@ -90,6 +90,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         
         List<Position> positions = new LinkedList<Position>();
         Set<Integer> tags = new HashSet<Integer>();
+        boolean hasLocation = false;
         Position position = new Position();
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
         
@@ -99,8 +100,11 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             int tag = buf.readUnsignedByte();
             if (tags.contains(tag)) {
                 position.setExtendedInfo(extendedInfo.toString());
-                positions.add(position);
+                if (hasLocation && position.getFixTime() != null) {
+                    positions.add(position);
+                }
                 tags.clear();
+                hasLocation = false;
                 position = new Position();
                 extendedInfo = new ExtendedInfoFormatter(getProtocol());
             }
@@ -119,6 +123,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                     
                 case TAG_COORDINATES:
+                    hasLocation = true;
                     position.setValid((buf.readUnsignedByte() & 0xf0) == 0x00);
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
@@ -157,7 +162,9 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.setExtendedInfo(extendedInfo.toString());
-        positions.add(position);
+        if (hasLocation && position.getFixTime() != null) {
+            positions.add(position);
+        }
         
         if (!hasDeviceId()) {
             Log.warning("Unknown device");
@@ -166,18 +173,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         sendReply(channel, buf.readUnsignedShort());
 
-        for (Iterator<Position> i = positions.iterator(); i.hasNext(); ) {
-            Position p = i.next();
-
+        for (Position p : positions) {
             p.setDeviceId(getDeviceId());
-
-            if (p.getAltitude() == null) {
-                p.setAltitude(0.0);
-            }
-
-            if (p.getValid() == null || p.getTime() == null || p.getSpeed() == null) {
-                i.remove();
-            }
         }
 
         if (positions.isEmpty()) {

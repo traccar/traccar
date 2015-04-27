@@ -33,7 +33,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         } else {
             StringBuilder s = new StringBuilder();
             s.append("device: ").append(position.getDeviceId()).append(", ");
-            s.append("time: ").append(position.getTime()).append(", ");
+            s.append("time: ").append(position.getFixTime()).append(", ");
             s.append("lat: ").append(position.getLatitude()).append(", ");
             s.append("lon: ").append(position.getLongitude());
             Log.info(s.toString());

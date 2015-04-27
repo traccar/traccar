@@ -36,7 +36,7 @@ public class ObjectConverter {
             JsonObjectBuilder object = Json.createObjectBuilder();
             
             //object.add("id", position.getId());
-            object.add("time", dateFormat.format(position.getTime()));
+            object.add("time", dateFormat.format(position.getFixTime()));
             object.add("valid", position.getValid());
             object.add("latitude", position.getLatitude());
             object.add("longitude", position.getLongitude());

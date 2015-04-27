@@ -11,9 +11,9 @@ public class DecoderVerifier {
         
         assertNotNull(position.getDeviceId());
         
-        assertNotNull(position.getTime());
-        assertTrue(position.getTime().after(new Date(946684800000L))); // 2000 year
-        assertTrue(position.getTime().getTime() < new Date().getTime() + 3600000); // 1 hour from now
+        assertNotNull(position.getFixTime());
+        assertTrue(position.getFixTime().after(new Date(946684800000L))); // 2000 year
+        assertTrue(position.getFixTime().getTime() < new Date().getTime() + 3600000); // 1 hour from now
 
         assertNotNull(position.getValid());
         

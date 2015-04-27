@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -29,8 +28,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
@@ -64,8 +61,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     }
     
     private class ParseResult {
-        private long id;
-        private Position position;
+        private final long id;
+        private final Position position;
 
         public ParseResult(long id, Position position) {
             this.id = id;
@@ -226,7 +223,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         sendReply(channel, response);
 
         // No location data
-        if (result.getPosition().getValid() == null) {
+        if (result.getPosition().getFixTime() == null) {
             return null;
         }
 
@@ -239,7 +236,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         for (int i = 0; i < count; i++) {
             Position position = parsePosition(buf).getPosition();
-            if (position.getValid() != null) {
+            if (position.getFixTime() != null) {
                 positions.add(position);
             }
         }
