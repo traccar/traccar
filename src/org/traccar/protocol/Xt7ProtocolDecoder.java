@@ -121,12 +121,7 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         String course = parser.group(index++);
         if (course != null) {
             position.setCourse(Double.valueOf(course));
-        } else {
-            position.setCourse(0.0);
         }
-        
-        // Altitude
-        position.setAltitude(0.0);
 
         // Date
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));

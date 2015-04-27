@@ -108,9 +108,6 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
 
-        // Altitude
-        position.setAltitude(0.0);
-
         position.setExtendedInfo(extendedInfo.toString());
         return position;
     }

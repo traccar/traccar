@@ -134,8 +134,6 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         String altitude = parser.group(index++);
         if (altitude != null) {
             position.setAltitude(Double.valueOf(altitude));
-        } else {
-            position.setAltitude(0.0);
         }
 
         position.setExtendedInfo(extendedInfo.toString());

@@ -171,16 +171,12 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             String speed = parser.group(index++);
             if (speed != null) {
                 position.setSpeed(Double.valueOf(speed));
-            } else {
-                position.setSpeed(0.0);
             }
 
             // Course
             String course = parser.group(index++);
             if (course != null) {
                 position.setCourse(Double.valueOf(course));
-            } else {
-                position.setCourse(0.0);
             }
 
             // Date
@@ -188,9 +184,6 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
-
-            // Altitude
-            position.setAltitude(0.0);
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
@@ -234,15 +227,6 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             longitude += Double.valueOf(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
-            
-            // Speed
-            position.setSpeed(0.0);
-            
-            // Course
-            position.setCourse(0.0);
-
-            // Altitude
-            position.setAltitude(0.0);
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
@@ -286,20 +270,13 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             String speed = parser.group(index++);
             if (speed != null) {
                 position.setSpeed(Double.valueOf(speed));
-            } else {
-                position.setSpeed(0.0);
             }
 
             // Course
             String course = parser.group(index++);
             if (course != null) {
                 position.setCourse(Double.valueOf(course));
-            } else {
-                position.setCourse(0.0);
             }
-
-            // Altitude
-            position.setAltitude(0.0);
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;

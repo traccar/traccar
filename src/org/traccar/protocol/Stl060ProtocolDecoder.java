@@ -104,9 +104,6 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         longitude += Double.valueOf(parser.group(index++) + parser.group(index++)) / 600000;
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
-        
-        // Altitude
-        position.setAltitude(0.0);
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));

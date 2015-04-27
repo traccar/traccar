@@ -82,7 +82,6 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(buf.readUnsignedInt() * 0.0000001);
             position.setLongitude(buf.readUnsignedInt() * 0.0000001);
-            position.setAltitude(0.0);
 
             buf.readUnsignedShort(); // GSM signal quality
             buf.readUnsignedShort(); // satellites in fix
@@ -121,17 +120,13 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setLatitude(Double.valueOf(matcher.group(1)));
             position.setLongitude(Double.valueOf(matcher.group(2)));
-            position.setAltitude(0.0);
 
             // Speed and Course
             pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
             matcher = pattern.matcher(sentence);
             if (matcher.find()) {
                 position.setSpeed(Double.valueOf(matcher.group(2)) * 0.539957);
-                position.setCourse(0.0); // matcher.group(1) for course
-            } else {
-                position.setSpeed(0.0);
-                position.setCourse(0.0);
+                position.setCourse(0); // matcher.group(1) for course
             }
 
             // Time

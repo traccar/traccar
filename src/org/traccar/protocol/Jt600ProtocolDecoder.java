@@ -112,8 +112,6 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (version == 2) {
 
-            position.setAltitude(0.0);
-
             int fuel = buf.readUnsignedByte() << 8;
 
             extendedInfo.set("status", buf.readUnsignedInt());
@@ -200,9 +198,6 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
-        
-        // Altitude
-        position.setAltitude(0.0);
 
         // Power
         extendedInfo.set("power", Double.valueOf(parser.group(index++)));

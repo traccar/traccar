@@ -118,9 +118,6 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
-        // Altitude
-        position.setAltitude(0.0);
-
         // Response
         String type = parser.group(index++);
         String checksum = parser.group(index++);

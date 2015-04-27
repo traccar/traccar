@@ -103,23 +103,16 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setLongitude(longitude);
 
-        // Altitude
-        position.setAltitude(0.0);
-
         // Speed
         String speed = parser.group(index++);
         if (speed != null) {
             position.setSpeed(Double.valueOf(speed));
-        } else {
-            position.setSpeed(0.0);
         }
 
         // Course
         String course = parser.group(index++);
         if (course != null) {
             position.setCourse(Double.valueOf(course));
-        } else {
-            position.setCourse(0.0);
         }
 
         // Date

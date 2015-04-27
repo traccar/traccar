@@ -92,7 +92,6 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         // Location
         position.setLongitude(Double.valueOf(parser.group(index++)) / 10000);
         position.setLatitude(Double.valueOf(parser.group(index++)) / 10000);
-        position.setAltitude(0.0);
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") != 0);

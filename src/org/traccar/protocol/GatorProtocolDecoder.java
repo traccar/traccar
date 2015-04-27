@@ -96,7 +96,6 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(ChannelBufferTools.readCoordinate(buf));
             position.setSpeed(ChannelBufferTools.readHexInteger(buf, 4) * 0.539957);
             position.setCourse((double) ChannelBufferTools.readHexInteger(buf, 4));
-            position.setAltitude(0.0);
 
             // Flags
             int flags = buf.readUnsignedByte();

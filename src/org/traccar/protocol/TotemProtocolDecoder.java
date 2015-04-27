@@ -210,16 +210,12 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             String speed = parser.group(index++);
             if (speed != null) {
                 position.setSpeed(Double.valueOf(speed));
-            } else {
-                position.setSpeed(0.0);
             }
 
             // Course
             String course = parser.group(index++);
             if (course != null) {
                 position.setCourse(Double.valueOf(course));
-            } else {
-                position.setCourse(0.0);
             }
 
             // Date
@@ -233,9 +229,6 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                 return null; // ignore invalid data
             }
             position.setTime(time.getTime());
-
-            // Altitude
-            position.setAltitude(0.0);
 
             // Accuracy
             extendedInfo.set("hdop", parser.group(index++));
@@ -301,9 +294,6 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             // Speed
             position.setSpeed(Double.valueOf(parser.group(index++)));
-
-            // Altitude
-            position.setAltitude(0.0);
 
             // PDOP
             extendedInfo.set("pdop", parser.group(index++));

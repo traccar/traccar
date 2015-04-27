@@ -88,33 +88,34 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         // Optional parameters
         if (params.containsKey("speed")) {
             position.setSpeed(Double.valueOf(params.get("speed").get(0)));
-        } else {
-            position.setSpeed(0.0);
         }
+
         if (params.containsKey("bearing")) {
             position.setCourse(Double.valueOf(params.get("bearing").get(0)));
         } else if (params.containsKey("heading")) {
             position.setCourse(Double.valueOf(params.get("heading").get(0)));
-        } else {
-            position.setCourse(0.0);
         }
+
         if (params.containsKey("altitude")) {
             position.setAltitude(Double.valueOf(params.get("altitude").get(0)));
-        } else {
-            position.setAltitude(0.0);
         }
+
         if (params.containsKey("hdop")) {
             extendedInfo.set("hdop", params.get("hdop").get(0));
         }
+
         if (params.containsKey("vacc")) {
             extendedInfo.set("vacc", params.get("vacc").get(0));
         }
+
         if (params.containsKey("hacc")) {
             extendedInfo.set("hacc", params.get("hacc").get(0));
         }
+
         if (params.containsKey("batt")) {
             extendedInfo.set("battery", params.get("batt").get(0));
         }
+
         if (params.containsKey("desc")) {
             extendedInfo.set("description", params.get("desc").get(0));
         }

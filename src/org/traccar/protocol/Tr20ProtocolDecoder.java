@@ -124,9 +124,6 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
 
-            // Altitude
-            position.setAltitude(0.0);
-
             // Extended info
             position.setExtendedInfo(extendedInfo.toString());
 

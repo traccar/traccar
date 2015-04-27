@@ -167,7 +167,6 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         position.setLatitude(buf.readMedium() * 0.00002);
         position.setLongitude(buf.readMedium() * 0.00002);
-        position.setAltitude(0.0);
         
         position.setSpeed(buf.readUnsignedByte() * 0.539957);
         position.setCourse(buf.readUnsignedByte() * 2.0);
@@ -191,12 +190,10 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         position.setLatitude(buf.readInt() * 0.0000001);
         position.setLongitude(buf.readInt() * 0.0000001);
-        position.setAltitude(0.0);
         
         buf.readUnsignedByte(); // report trigger
 
         position.setSpeed(buf.readUnsignedByte() * 0.539957);
-        position.setCourse(0.0);
         
         short flags = buf.readUnsignedByte();
         position.setValid((flags & 0x80) == 0x80 && (flags & 0x40) == 0x40);
@@ -266,7 +263,6 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(buf.readInt() * 0.0000001);
         position.setLongitude(buf.readInt() * 0.0000001);
-        position.setAltitude(0.0);
         
         position.setSpeed(buf.readUnsignedByte() * 0.539957);
         position.setCourse(buf.readUnsignedByte() * 2.0);

@@ -101,7 +101,6 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(Double.valueOf(parser.group(index++)));
-        position.setAltitude(0.0);
 
         // Other
         extendedInfo.set("milage", Double.valueOf(parser.group(index++)));

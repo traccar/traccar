@@ -115,8 +115,6 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         String course = parser.group(index++);
         if (course != null) {
             position.setCourse(Double.valueOf(course));
-        } else {
-            position.setCourse(0.0);
         }
 
         // Date
@@ -144,8 +142,6 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         String altitude = parser.group(index++);
         if (altitude != null) {
             position.setAltitude(Double.valueOf(altitude));
-        } else {
-            position.setAltitude(0.0);
         }
 
         // Power

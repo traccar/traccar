@@ -112,17 +112,11 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             // Speed
             position.setSpeed(Double.valueOf(parser.group(index++)));
 
-            // Course
-            position.setCourse(0.0);
-
             // Date
             time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
-
-            // Altitude
-            position.setAltitude(0.0);
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;

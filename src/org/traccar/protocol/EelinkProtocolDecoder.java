@@ -111,7 +111,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(buf.readInt() / 1800000.0);
             position.setSpeed(buf.readUnsignedByte() * 0.539957);
             position.setCourse((double) buf.readUnsignedShort());
-            position.setAltitude(0.0);
             
             // Cell
             extendedInfo.set("cell", ChannelBufferTools.readHexString(buf, 18));
@@ -186,7 +185,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(latitude);
             position.setLongitude(longitude);
-            position.setAltitude(0.0);
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;

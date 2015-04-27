@@ -115,9 +115,6 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)) / 10);
-
-        // Altitude
-        position.setAltitude(0.0);
         
         // Additional data
         extendedInfo.set("status", parser.group(index++));

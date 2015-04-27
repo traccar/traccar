@@ -162,9 +162,6 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(buf.readUnsignedByte() * 0.539957);
             buf.readUnsignedByte(); // maximum speed
             position.setCourse(buf.readUnsignedByte() * 2.0);
-        } else {
-            position.setSpeed(0.0);
-            position.setCourse(0.0);
         }
 
         // Input
@@ -226,8 +223,6 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         // Altitude
         if ((selector & 0x0800) != 0) {
             position.setAltitude((double) buf.readShort());
-        } else {
-            position.setAltitude(0.0);
         }
 
         position.setExtendedInfo(extendedInfo.toString());

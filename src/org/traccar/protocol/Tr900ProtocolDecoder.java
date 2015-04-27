@@ -109,9 +109,6 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
         if (hemisphere.compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
-        // Altitude
-        position.setAltitude(0.0);
-
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
 

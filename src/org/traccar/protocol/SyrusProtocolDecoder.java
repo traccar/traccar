@@ -155,9 +155,6 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         String longitude = parser.group(index) + '.' + parser.group(index + 1);
         index += 2;
         position.setLongitude(Double.valueOf(longitude));
-
-        // Altitude
-        position.setAltitude(0.0);
         
         // Speed and Course
         position.setSpeed(Double.valueOf(parser.group(index++)) * 0.868976);

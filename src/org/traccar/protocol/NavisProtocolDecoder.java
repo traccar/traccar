@@ -83,7 +83,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
 
         position.setDeviceId(getDeviceId());
-        position.setAltitude(0.0);
 
         // Format type
         int format;

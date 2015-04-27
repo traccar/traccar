@@ -93,7 +93,6 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if ((flags & 0x08) == 0) longitude = -longitude;
         position.setLatitude(latitude);
         position.setLongitude(longitude);
-        position.setAltitude(0.0);
 
         // Speed and course
         position.setSpeed((double) ChannelBufferTools.readHexInteger(buf, 3));
@@ -164,9 +163,6 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         longitude += Double.valueOf(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
-        
-        // Altitude
-        position.setAltitude(0.0);
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
@@ -175,8 +171,6 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         String course = parser.group(index++);
         if (course != null) {
             position.setCourse(Double.valueOf(course));
-        } else {
-            position.setCourse(0.0);
         }
 
         // Date

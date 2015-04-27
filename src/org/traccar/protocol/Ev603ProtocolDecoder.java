@@ -92,16 +92,13 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
             position.setLatitude(Double.valueOf(parser.group(index++)));
             position.setLongitude(Double.valueOf(parser.group(index++)));
 
-            // Altitude
-            position.setAltitude(0.0);
-
             // Speed
             position.setSpeed(Double.valueOf(parser.group(index++)));
 
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
             if (position.getCourse() > 360) {
-                position.setCourse(0.0);
+                position.setCourse(0);
             }
 
             position.setExtendedInfo(extendedInfo.toString());

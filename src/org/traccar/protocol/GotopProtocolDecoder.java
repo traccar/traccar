@@ -95,9 +95,6 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         Double longitude = Double.valueOf(parser.group(index++));
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
-        
-        // Altitude
-        position.setAltitude(0.0);
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
@@ -109,8 +106,6 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         String course = parser.group(index++);
         if (course != null) {
             position.setCourse(Double.valueOf(course));
-        } else {
-            position.setCourse(0.0);
         }
 
         position.setExtendedInfo(extendedInfo.toString());

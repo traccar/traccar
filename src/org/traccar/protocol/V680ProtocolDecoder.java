@@ -122,16 +122,11 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
             position.setLatitude(latitude);
 
-            // Altitude
-            position.setAltitude(0.0);
-
             // Speed and Course
             position.setSpeed(Double.valueOf(parser.group(index++)));
             String course = parser.group(index++);
             if (course != null) {
                 position.setCourse(Double.valueOf(course));
-            } else {
-                position.setCourse(0.0);
             }
 
             // Date

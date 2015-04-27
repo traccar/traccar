@@ -106,14 +106,8 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
-        // Altitude
-        position.setAltitude(0.0);
-
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
-
-        // Course
-        position.setCourse(0.0);
 
         // Extended info
         position.setExtendedInfo(extendedInfo.toString());

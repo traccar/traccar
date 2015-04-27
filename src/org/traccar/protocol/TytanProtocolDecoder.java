@@ -84,9 +84,6 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             lon = lon * 360 / 16777216 - 180;
             position.setLongitude(lon);
             
-            // Altitude
-            position.setAltitude(0.0);
-            
             // Course
             int course = (buf.readUnsignedByte() >> 5) * 45;
             course = (course + 180) % 360;
@@ -94,9 +91,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             
             // Speed
             int speed = buf.readUnsignedByte();
-            if (speed >= 250) {
-                position.setSpeed(0.0);
-            } else {
+            if (speed < 250) {
                 position.setSpeed(speed * 0.539957);
             }
             

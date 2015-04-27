@@ -134,7 +134,6 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     if ((flags & 0x02) != 0) longitude = -longitude;
                     position.setLatitude(latitude);
                     position.setLongitude(longitude);
-                    position.setAltitude(0.0);
                     
                     // Satellites
                     int satellites = buf.readUnsignedByte();

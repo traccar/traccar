@@ -95,7 +95,6 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse((double) buf.readUnsignedShort());
             position.setLongitude((double) buf.readFloat());
             position.setLatitude((double) buf.readFloat());
-            position.setAltitude(0.0);
 
             // Time
             long timeValue = buf.readUnsignedInt();

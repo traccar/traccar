@@ -122,7 +122,6 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(latitude);
             position.setLongitude(longitude);
-            position.setAltitude(0.0);
 
             position.setExtendedInfo(extendedInfo.toString());
             return position;
