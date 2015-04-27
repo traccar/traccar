@@ -40,9 +40,9 @@ import org.traccar.model.Position;
 
 public class MainServlet extends HttpServlet {
 
-    private static final long ASYNC_TIMEOUT = 120000;
+    public static final String USER_ID = "userId";
 
-    private static final String USER_ID = "userId";
+    private static final long ASYNC_TIMEOUT = 120000;
     
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

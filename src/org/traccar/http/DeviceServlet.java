@@ -26,10 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
 
 public class DeviceServlet extends HttpServlet {
-
-    private static final long ASYNC_TIMEOUT = 120000;
-
-    private static final String USER_ID = "userId";
     
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -53,7 +49,7 @@ public class DeviceServlet extends HttpServlet {
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         
-        long userId = (Long) req.getSession().getAttribute(USER_ID);
+        long userId = (Long) req.getSession().getAttribute(MainServlet.USER_ID);
         
         JsonObjectBuilder result = Json.createObjectBuilder();
         
