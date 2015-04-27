@@ -25,6 +25,7 @@ import org.traccar.http.WebServer;
 
 import java.io.FileInputStream;
 import java.util.Properties;
+import org.traccar.database.PermissionsManager;
 
 public class Context {
 
@@ -50,6 +51,12 @@ public class Context {
 
     public static DataCache getDataCache() {
         return dataCache;
+    }
+
+    private static PermissionsManager permissionsManager;
+
+    public static PermissionsManager getPermissionsManager() {
+        return permissionsManager;
     }
 
     private static ReverseGeocoder reverseGeocoder;
@@ -84,6 +91,7 @@ public class Context {
 
         dataManager = new DataManager(properties);
         dataCache = new DataCache(dataManager);
+        permissionsManager = new PermissionsManager();
 
         if (Boolean.parseBoolean(properties.getProperty("geocoder.enable"))) {
             String type = properties.getProperty("geocoder.type");

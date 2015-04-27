@@ -364,23 +364,23 @@ public class DataManager {
             connection.close();
         }
     }
-    
-    public List<Long> getDeviceList(long userId) throws SQLException {
+
+    public Collection<Map.Entry<Long, Long>> getPermissions() throws SQLException {
 
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
-                    "SELECT id FROM device WHERE id IN (" +
-                    "SELECT device_id FROM user_device WHERE user_id = ?);");
+                    "SELECT user_id, device_id FROM user_device;");
             try {
-                statement.setLong(1, userId);
-
-                ResultSet resultSet = statement.executeQuery();
+                statement.execute();
+                ResultSet resultSet = statement.getResultSet();
                 
-                List<Long> result = new LinkedList<Long>();
+                List<Map.Entry<Long, Long>> result = new LinkedList<Map.Entry<Long, Long>>();
                 while (resultSet.next()) {
-                    result.add(resultSet.getLong(1));
+                    result.add(new AbstractMap.SimpleEntry<Long, Long>(
+                            resultSet.getLong(1), resultSet.getLong(2)));
                 }
+                
                 return result;
             } finally {
                 statement.close();
@@ -389,7 +389,7 @@ public class DataManager {
             connection.close();
         }
     }
-    
+
     public JsonArray getDevices(long userId) throws SQLException {
 
         Connection connection = dataSource.getConnection();

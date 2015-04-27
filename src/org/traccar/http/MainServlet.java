@@ -16,6 +16,7 @@
 package org.traccar.http;
 
 import java.io.IOException;
+import java.security.Permission;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,7 +73,7 @@ public class MainServlet extends HttpServlet {
         
         private boolean destroyed;
         private final long userId;
-        private final List<Long> devices;
+        private final Collection<Long> devices;
         private Timeout sessionTimeout;
         private Timeout requestTimeout;
         private final Map<Long, Position> positions = new HashMap<Long, Position>();
@@ -84,10 +85,17 @@ public class MainServlet extends HttpServlet {
             }
         }
         
-        public AsyncSession(long userId, List<Long> devices) {
+        public AsyncSession(long userId, Collection<Long> devices) {
             logEvent("create userId: " + userId + " devices: " + devices.size());
             this.userId = userId;
             this.devices = devices;
+
+            Collection<Position> initialPositions = Context.getDataCache().getInitialState(devices);
+            for (Position position : initialPositions) {
+                positions.put(position.getDeviceId(), position);
+            }
+            
+            Context.getDataCache().addListener(devices, dataListener);
         }
 
         @Override
@@ -141,16 +149,6 @@ public class MainServlet extends HttpServlet {
                 }
             }
         };
-                
-        public synchronized void init() {
-            logEvent("init");
-            Collection<Position> initialPositions = Context.getDataCache().getInitialState(devices);
-            for (Position position : initialPositions) {
-                positions.put(position.getDeviceId(), position);
-            }
-            
-            Context.getDataCache().addListener(devices, dataListener);
-        }
         
         public synchronized void request(AsyncContext context) {
             logEvent("request context: " + context.hashCode());
@@ -207,13 +205,8 @@ public class MainServlet extends HttpServlet {
         synchronized (asyncSessions) {
             
             if (!asyncSessions.containsKey(userId)) {
-                try {
-                    List<Long> devices = Context.getDataManager().getDeviceList(userId);
-                    asyncSessions.put(userId, new AsyncSession(userId, devices));
-                } catch (SQLException error) {
-                    Log.warning(error);
-                }
-                asyncSessions.get(userId).init();
+                Collection<Long> devices = Context.getPermissionsManager().allowedDevices(userId);
+                asyncSessions.put(userId, new AsyncSession(userId, devices));
             }
             
             asyncSessions.get(userId).request(context);
