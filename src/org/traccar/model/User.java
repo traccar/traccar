@@ -15,7 +15,12 @@
  */
 package org.traccar.model;
 
-public class User {
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import org.traccar.database.JsonConvertable;
+
+public class User implements JsonConvertable {
 
     private long id;
     
@@ -31,14 +36,48 @@ public class User {
     
     private String language;
     
-    private String distance_unit;
+    private String distanceUnit;
     
-    private String speed_unit;
+    private String speedUnit;
     
     private double latitude;
     
     private double longitude;
     
     private int zoom;
+
+    @Override
+    public JsonObject toJson() {
+        JsonObjectBuilder json = Json.createObjectBuilder();
+        json.add("id", id);
+        json.add("email", email);
+        json.add("password", password);
+        json.add("readonly", readonly);
+        json.add("admin", admin);
+        json.add("map", map);
+        json.add("language", language);
+        json.add("distanceUnit", distanceUnit);
+        json.add("speedUnit", speedUnit);
+        json.add("latitude", latitude);
+        json.add("longitude", longitude);
+        json.add("zoom", zoom);
+        return json.build();
+    }
+
+    @Override
+    public void fromJson(JsonObject json) {
+        id = json.getJsonNumber("id").longValue();
+        email = json.getString("email");
+        password = json.getString("password");
+        readonly = json.getBoolean("readonly");
+        admin = json.getBoolean("admin");
+        map = json.getString("map");
+        language = json.getString("language");
+        distanceUnit = json.getString("distanceUnit");
+        speedUnit = json.getString("speedUnit");
+        latitude = json.getJsonNumber("latitude").doubleValue();
+        longitude = json.getJsonNumber("longitude").doubleValue();
+        zoom = json.getJsonNumber("zoom").intValue();
+    }
     
 }

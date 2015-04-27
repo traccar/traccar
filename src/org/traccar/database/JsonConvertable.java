@@ -15,22 +15,16 @@
  */
 package org.traccar.database;
 
-import java.util.Collection;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import javax.json.JsonObject;
 
-public class ObjectConverter {
+public interface JsonConvertable {
     
-    public static JsonArray convert(Collection<? extends JsonConvertable> collection) {
-        
-        JsonArrayBuilder array = Json.createArrayBuilder();
-        
-        for (JsonConvertable object : collection) {
-            array.add(object.toJson());
-        }
-        
-        return array.build();
-    }
+    public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+    
+    public JsonObject toJson();
+    
+    public void fromJson(JsonObject json) throws Exception;
     
 }

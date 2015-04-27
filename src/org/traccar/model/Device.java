@@ -15,9 +15,14 @@
  */
 package org.traccar.model;
 
+import java.text.ParseException;
 import java.util.Date;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import org.traccar.database.JsonConvertable;
 
-public class Device {
+public class Device implements JsonConvertable {
 
     private long id;
     public long getId() { return id; }
@@ -38,5 +43,29 @@ public class Device {
     private long positionId;
     
     private long dataId;
+
+    @Override
+    public JsonObject toJson() {
+        JsonObjectBuilder json = Json.createObjectBuilder();
+        json.add("id", id);
+        json.add("name", name);
+        json.add("uniqueId", uniqueId);
+        json.add("status", status);
+        json.add("lastUpdate", dateFormat.format(lastUpdate));
+        json.add("positionId", positionId);
+        json.add("dataId", dataId);
+        return json.build();
+    }
+
+    @Override
+    public void fromJson(JsonObject json) throws ParseException {
+        id = json.getJsonNumber("id").longValue();
+        name = json.getString("name");
+        uniqueId = json.getString("uniqueId");
+        status = json.getString("status");
+        lastUpdate = dateFormat.parse(json.getString("lastUpdate"));
+        positionId = json.getJsonNumber("positionId").longValue();
+        dataId = json.getJsonNumber("dataId").longValue();
+    }
 
 }

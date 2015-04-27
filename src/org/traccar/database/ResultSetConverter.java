@@ -26,8 +26,6 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
 public class ResultSetConverter {
-    
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
 
     public static JsonArray convert(ResultSet rs) throws SQLException {
 
@@ -66,10 +64,10 @@ public class ResultSetConverter {
                         obj.add(columnName, rs.getString(columnName));
                         break;
                     case java.sql.Types.DATE:
-                        obj.add(columnName, dateFormat.format(rs.getDate(columnName)));
+                        obj.add(columnName, JsonConvertable.dateFormat.format(rs.getDate(columnName)));
                         break;
                     case java.sql.Types.TIMESTAMP:
-                        obj.add(columnName, dateFormat.format(rs.getTimestamp(columnName)));
+                        obj.add(columnName, JsonConvertable.dateFormat.format(rs.getTimestamp(columnName)));
                         break;
                     default:
                         break;
