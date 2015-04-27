@@ -208,7 +208,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(buf.readShort() / 100.0);
 
                 // Altitude
-                position.setAltitude((double) buf.readShort());
+                position.setAltitude(buf.readShort());
 
                 if (subtype == MSG_TYPE_STATE_FULL_INFO_T104) {
 

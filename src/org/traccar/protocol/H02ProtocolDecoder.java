@@ -95,7 +95,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed and course
-        position.setSpeed((double) ChannelBufferTools.readHexInteger(buf, 3));
+        position.setSpeed(ChannelBufferTools.readHexInteger(buf, 3));
         position.setCourse((buf.readUnsignedByte() & 0x0f) * 100.0 + ChannelBufferTools.readHexInteger(buf, 2));
         
         // Status

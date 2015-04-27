@@ -99,7 +99,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(ChannelBufferTools.readCoordinate(buf));
             position.setLongitude(ChannelBufferTools.readCoordinate(buf));
             position.setSpeed(ChannelBufferTools.readHexInteger(buf, 4) * 0.539957);
-            position.setCourse((double) ChannelBufferTools.readHexInteger(buf, 4));
+            position.setCourse(ChannelBufferTools.readHexInteger(buf, 4));
 
             // Flags
             int flags = buf.readUnsignedByte();

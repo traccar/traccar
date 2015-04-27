@@ -85,7 +85,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
                     position.setSpeed(buf.readUnsignedShort() * 0.539957);
-                    position.setCourse((double) buf.readUnsignedShort());
+                    position.setCourse(buf.readUnsignedShort());
                     extendedInfo.set("hdop", buf.readUnsignedShort());
                     break;
 

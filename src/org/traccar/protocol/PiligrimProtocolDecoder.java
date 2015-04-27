@@ -141,7 +141,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     position.setValid(satellites >= 3);
                     
                     // Speed
-                    position.setSpeed((double) buf.readUnsignedByte());
+                    position.setSpeed(buf.readUnsignedByte());
                     
                     // Course
                     double course = buf.readUnsignedByte() << 1;

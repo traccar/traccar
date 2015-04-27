@@ -87,7 +87,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             // Course
             int course = (buf.readUnsignedByte() >> 5) * 45;
             course = (course + 180) % 360;
-            position.setCourse((double) course);
+            position.setCourse(course);
             
             // Speed
             int speed = buf.readUnsignedByte();

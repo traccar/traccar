@@ -157,12 +157,12 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (checkBit(flags, 1)) {
-                    position.setAltitude((double) buf.readUnsignedShort());
+                    position.setAltitude(buf.readUnsignedShort());
                 }
 
                 if (checkBit(flags, 2)) {
-                    position.setSpeed((double) (buf.readUnsignedShort() & 0x03ff));
-                    position.setCourse((double) buf.readUnsignedByte());
+                    position.setSpeed(buf.readUnsignedShort() & 0x03ff);
+                    position.setCourse(buf.readUnsignedByte());
                 }
 
                 if (checkBit(flags, 3)) {
@@ -237,9 +237,9 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // status
 
         if (checkBit(flags, 0)) {
-            position.setAltitude((double) buf.readUnsignedShort());
-            position.setSpeed((double) buf.readUnsignedByte());
-            position.setCourse((double) buf.readByte());
+            position.setAltitude(buf.readUnsignedShort());
+            position.setSpeed(buf.readUnsignedByte());
+            position.setCourse(buf.readByte());
             extendedInfo.set("milage", new FloatReader().readFloat(buf));
         }
 

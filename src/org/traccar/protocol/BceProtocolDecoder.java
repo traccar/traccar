@@ -96,16 +96,16 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     if (checkBit(mask, 0)) {
                         position.setValid(true);
-                        position.setLongitude((double) buf.readFloat());
-                        position.setLatitude((double) buf.readFloat());
-                        position.setSpeed((double) buf.readUnsignedByte());
+                        position.setLongitude(buf.readFloat());
+                        position.setLatitude(buf.readFloat());
+                        position.setSpeed(buf.readUnsignedByte());
 
                         int gps = buf.readUnsignedByte();
                         extendedInfo.set("satellites", gps & 0xf);
                         extendedInfo.set("hdop", gps >> 4);
 
-                        position.setCourse((double) buf.readUnsignedByte());
-                        position.setAltitude((double) buf.readUnsignedShort());
+                        position.setCourse(buf.readUnsignedByte());
+                        position.setAltitude(buf.readUnsignedShort());
 
                         extendedInfo.set("milage", buf.readUnsignedInt());
 

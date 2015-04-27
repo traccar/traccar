@@ -89,7 +89,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed((double) ChannelBufferTools.readHexInteger(buf, 2));
+        position.setSpeed(ChannelBufferTools.readHexInteger(buf, 2));
 
         // Course
         position.setCourse(buf.readUnsignedByte() * 2.0);
@@ -104,7 +104,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             buf.readByte(); // other flags and sensors
 
             // Altitude
-            position.setAltitude((double) buf.readUnsignedShort());
+            position.setAltitude(buf.readUnsignedShort());
 
             extendedInfo.set("cell", buf.readUnsignedShort());
             extendedInfo.set("lac", buf.readUnsignedShort());

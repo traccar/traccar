@@ -145,19 +145,19 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(time.getTime());
 
                 // Latitude
-                position.setLatitude(((double) buf.readInt()) / 0x7FFFFFFF * 180.0);
+                position.setLatitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
 
                 // Longitude
-                position.setLongitude(((double) buf.readInt()) / 0x7FFFFFFF * 180.0);
+                position.setLongitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
 
                 // Speed
-                position.setSpeed(((double) buf.readUnsignedInt()) / 100);
+                position.setSpeed(buf.readUnsignedInt() / 100);
 
                 // Course
-                position.setCourse(((double) buf.readUnsignedShort()) / 100);
+                position.setCourse(buf.readUnsignedShort() / 100);
 
                 // Altitude
-                position.setAltitude(((double) buf.readUnsignedShort()) / 100);
+                position.setAltitude(buf.readUnsignedShort() / 100);
 
                 // Satellites
                 int satellitesNumber = buf.readUnsignedByte();

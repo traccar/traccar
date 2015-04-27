@@ -222,7 +222,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         
         // Altitude
         if ((selector & 0x0800) != 0) {
-            position.setAltitude((double) buf.readShort());
+            position.setAltitude(buf.readShort());
         }
 
         position.setExtendedInfo(extendedInfo.toString());

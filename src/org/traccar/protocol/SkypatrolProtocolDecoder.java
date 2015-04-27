@@ -169,7 +169,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Altitude
             if (checkBit(mask, 15)) {
-                position.setAltitude((double) buf.readMedium());
+                position.setAltitude(buf.readMedium());
             }
 
             // Satellites

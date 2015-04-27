@@ -113,7 +113,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
             // Course and flags
             int union = buf.readUnsignedShort();
-            position.setCourse((double) (union & 0x03FF));
+            position.setCourse(union & 0x03FF);
             position.setValid((union & 0x1000) != 0);
             if ((union & 0x0400) != 0) latitude = -latitude;
             if ((union & 0x0800) != 0) longitude = -longitude;

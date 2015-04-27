@@ -104,7 +104,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 
                 if (checkBit(locationMask, 1)) {
-                    position.setAltitude((double) buf.readUnsignedShort());
+                    position.setAltitude(buf.readUnsignedShort());
                 }
                 
                 if (checkBit(locationMask, 2)) {
@@ -142,8 +142,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
                 position.setLongitude(buf.readInt() / 10000000.0);
                 position.setLatitude(buf.readInt() / 10000000.0);
-                position.setAltitude((double) buf.readShort());
-                position.setCourse((double) buf.readUnsignedShort());
+                position.setAltitude(buf.readShort());
+                position.setCourse(buf.readUnsignedShort());
 
                 int satellites = buf.readUnsignedByte();
                 extendedInfo.set("satellites", satellites);

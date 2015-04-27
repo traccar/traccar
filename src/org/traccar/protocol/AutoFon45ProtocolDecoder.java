@@ -108,8 +108,8 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             // Location
             position.setLatitude(convertCoordinate(buf.readUnsignedByte(), buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte()));
             position.setLongitude(convertCoordinate(buf.readUnsignedByte(), buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte()));
-            position.setSpeed((double) buf.readUnsignedByte());
-            position.setCourse((double) (buf.readUnsignedByte() << 8 | buf.readUnsignedByte()));
+            position.setSpeed(buf.readUnsignedByte());
+            position.setCourse(buf.readUnsignedByte() << 8 | buf.readUnsignedByte());
 
             buf.readUnsignedByte(); // checksum
 

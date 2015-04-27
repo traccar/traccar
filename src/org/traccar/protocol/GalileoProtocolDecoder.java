@@ -135,7 +135,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                     
                 case TAG_ALTITUDE:
-                    position.setAltitude((double) buf.readShort());
+                    position.setAltitude(buf.readShort());
                     break;
                     
                 case TAG_STATUS:

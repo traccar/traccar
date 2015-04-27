@@ -174,7 +174,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                 position.setAltitude(buf.readInt() * 0.01);
                 position.setSpeed(buf.readUnsignedInt() * 0.0194384449); // cm/s
             }
-            position.setCourse((double) buf.readShort());
+            position.setCourse(buf.readShort());
             if (type == MSG_MINI_EVENT_REPORT) {
                 position.setSpeed(buf.readUnsignedByte() * 0.539957); // km/h
             }

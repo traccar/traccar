@@ -119,7 +119,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(buf.readInt() * 0.000001);
 
             // Course
-            position.setCourse((double) buf.readUnsignedShort());
+            position.setCourse(buf.readUnsignedShort());
 
             // Report type
             extendedInfo.set("type", buf.readUnsignedByte());

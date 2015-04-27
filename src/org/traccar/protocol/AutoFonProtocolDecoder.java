@@ -97,8 +97,8 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         // Location
         position.setLatitude(convertCoordinate(buf.readInt()));
         position.setLongitude(convertCoordinate(buf.readInt()));
-        position.setAltitude((double) buf.readShort());
-        position.setSpeed((double) buf.readUnsignedByte());
+        position.setAltitude(buf.readShort());
+        position.setSpeed(buf.readUnsignedByte());
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
         extendedInfo.set("hdop", buf.readUnsignedShort());

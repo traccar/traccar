@@ -224,13 +224,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
             // Course
-            position.setCourse((double) buf.readUnsignedShort());
+            position.setCourse(buf.readUnsignedShort());
 
             // HDOP
             extendedInfo.set("hdop", buf.readUnsignedShort() * 0.1);
 
             // Altitude
-            position.setAltitude((double) buf.readUnsignedShort());
+            position.setAltitude(buf.readUnsignedShort());
 
             // Other
             extendedInfo.set("milage", buf.readUnsignedInt());

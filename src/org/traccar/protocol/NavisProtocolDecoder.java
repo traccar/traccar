@@ -172,8 +172,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             // Location data
             position.setLatitude(buf.readFloat() / Math.PI * 180);
             position.setLongitude(buf.readFloat() / Math.PI * 180);
-            position.setSpeed((double) buf.readFloat());
-            position.setCourse((double) buf.readUnsignedShort());
+            position.setSpeed(buf.readFloat());
+            position.setCourse(buf.readUnsignedShort());
 
             // Milage
             extendedInfo.set("milage", buf.readFloat());

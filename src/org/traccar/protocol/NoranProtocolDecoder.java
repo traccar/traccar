@@ -91,10 +91,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             extendedInfo.set("alarm", buf.readUnsignedByte());
 
             // Location
-            position.setSpeed((double) buf.readUnsignedByte());
-            position.setCourse((double) buf.readUnsignedShort());
-            position.setLongitude((double) buf.readFloat());
-            position.setLatitude((double) buf.readFloat());
+            position.setSpeed(buf.readUnsignedByte());
+            position.setCourse(buf.readUnsignedShort());
+            position.setLongitude(buf.readFloat());
+            position.setLatitude(buf.readFloat());
 
             // Time
             long timeValue = buf.readUnsignedInt();
