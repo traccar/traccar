@@ -16,11 +16,9 @@
 package org.traccar.http;
 
 import java.io.IOException;
-import java.security.Permission;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.json.Json;
@@ -53,8 +51,6 @@ public class MainServlet extends HttpServlet {
 
         if (command.equals("/async")) {
             async(req.startAsync());
-        } else if (command.startsWith("/device")) {
-            device(req, resp);
         } else if (command.equals("/login")) {
             login(req, resp);
         } else if (command.equals("/logout")) {
@@ -211,23 +207,6 @@ public class MainServlet extends HttpServlet {
             
             asyncSessions.get(userId).request(context);
         }
-    }
-    
-    private void device(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        
-        long userId = (Long) req.getSession().getAttribute(USER_ID);
-        
-        JsonObjectBuilder result = Json.createObjectBuilder();
-        
-        try {
-            result.add("success", true);
-            result.add("data", Context.getDataManager().getDevices(userId));
-        } catch(SQLException error) {
-            result.add("success", false);
-            result.add("error", error.getMessage());
-        }
-        
-        resp.getWriter().println(result.build().toString());
     }
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

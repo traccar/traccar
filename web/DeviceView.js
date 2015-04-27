@@ -45,7 +45,7 @@ Ext.define('DeviceView', {
     store: {
         proxy: {
             type: 'ajax',
-            url: '/api/device',
+            url: '/api/device/get',
             reader: {
                 type: 'json',
                 rootProperty: 'data'
