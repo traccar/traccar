@@ -49,7 +49,9 @@ public class MainServlet extends HttpServlet {
 
         String command = req.getPathInfo();
 
-        if (command.equals("/async")) {
+        if (command == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } else if (command.equals("/async")) {
             async(req.startAsync());
         } else if (command.equals("/login")) {
             login(req, resp);

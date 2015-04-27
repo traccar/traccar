@@ -36,7 +36,9 @@ public class DeviceServlet extends HttpServlet {
 
         String command = req.getPathInfo();
 
-        if (command.equals("/get")) {
+        if (command == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } else if (command.equals("/get")) {
             get(req, resp);
         } else if (command.equals("/add")) {
             add(req, resp);
@@ -44,6 +46,8 @@ public class DeviceServlet extends HttpServlet {
             update(req, resp);
         } else if (command.equals("/remove")) {
             remove(req, resp);
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
     
