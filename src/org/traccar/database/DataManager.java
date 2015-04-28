@@ -236,7 +236,7 @@ public class DataManager {
                 
                 if (!exist) {
 
-                    statement.execute(
+                    statement.executeUpdate(
                             "CREATE TABLE user (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
                             "email VARCHAR(1024) NOT NULL UNIQUE," +
@@ -372,9 +372,8 @@ public class DataManager {
             PreparedStatement statement = connection.prepareStatement(
                     "SELECT user_id, device_id FROM user_device;");
             try {
-                statement.execute();
-                ResultSet resultSet = statement.getResultSet();
-                
+                ResultSet resultSet = statement.executeQuery();
+
                 List<Map.Entry<Long, Long>> result = new LinkedList<Map.Entry<Long, Long>>();
                 while (resultSet.next()) {
                     result.add(new AbstractMap.SimpleEntry<Long, Long>(
@@ -428,7 +427,7 @@ public class DataManager {
                 statement.setString(1, device.getName());
                 statement.setString(2, device.getUniqueId());
                 
-                statement.execute();
+                statement.executeUpdate();
                 
                 ResultSet result = statement.getGeneratedKeys();
                 if (result.next()) {
@@ -453,7 +452,7 @@ public class DataManager {
                 statement.setString(2, device.getUniqueId());
                 statement.setLong(3, device.getId());
                 
-                statement.execute();
+                statement.executeUpdate();
             } finally {
                 statement.close();
             }
@@ -471,7 +470,7 @@ public class DataManager {
             try {
                 statement.setLong(1, device.getId());
                 
-                statement.execute();
+                statement.executeUpdate();
             } finally {
                 statement.close();
             }
@@ -490,7 +489,7 @@ public class DataManager {
                 statement.setLong(1, userId);
                 statement.setLong(2, deviceId);
                 
-                statement.execute();
+                statement.executeUpdate();
             } finally {
                 statement.close();
             }
