@@ -110,7 +110,11 @@ public class Context {
         serverManager.init();
     }
 
+    /**
+     * Initialize context for unit testing
+     */
     public static void init(DataManager dataManager) {
+        properties = new Properties();
         Context.dataManager = dataManager;
     }
 
