@@ -15,22 +15,113 @@
  */
 package org.traccar.database;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import org.traccar.helper.Log;
 
 public class ObjectConverter {
-    
-    public static JsonArray convert(Collection<? extends JsonConvertable> collection) {
+        
+    public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+
+    public static JsonArray arrayToJson(Collection<? extends Convertable> collection) {
         
         JsonArrayBuilder array = Json.createArrayBuilder();
         
-        for (JsonConvertable object : collection) {
+        for (Convertable object : collection) {
             array.add(object.toJson());
         }
         
         return array.build();
     }
     
+    private static String getColumnName(String key) {
+        return key.replaceAll("([A-Z])", "_$1").toLowerCase();
+    }
+    
+    private static boolean hasColumn(ResultSet resultSet, String columnName) throws SQLException {
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            if (columnName.equalsIgnoreCase(metaData.getColumnName(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static String getString(JsonObject json, String key) {
+        if (json.containsKey(key)) {
+            return json.getString(key);
+        }
+        return null;
+    }
+    
+    public static String getString(ResultSet record, String key) throws SQLException {
+        String column = getColumnName(key);
+        if (hasColumn(record, column)) {
+            return record.getString(column);
+        }
+        return null;
+    }
+    
+    public static void putString(JsonObjectBuilder json, String key, String value) {
+        if (value != null) {
+            json.add(key, value);
+        }
+    }
+    
+    public static long getLong(JsonObject json, String key) {
+        if (json.containsKey(key)) {
+            return json.getJsonNumber(key).longValue();
+        }
+        return 0;
+    }
+    
+    public static long getLong(ResultSet record, String key) throws SQLException {
+        String column = getColumnName(key);
+        if (hasColumn(record, column)) {
+            return record.getLong(column);
+        }
+        return 0;
+    }
+    
+    public static void putLong(JsonObjectBuilder json, String key, long value) {
+        json.add(key, value);
+    }
+
+    public static Date getDate(JsonObject json, String key) {
+        if (json.containsKey(key)) {
+            try {
+                return dateFormat.parse(json.getString(key));
+            } catch (ParseException error) {
+                Log.warning(error);
+            }
+        }
+        return null;
+    }
+    
+    public static Date getDate(ResultSet record, String key) throws SQLException {
+        String column = getColumnName(key);
+        if (hasColumn(record, column)) {
+            return record.getDate(column);
+        }
+        return null;
+    }
+    
+    public static void putDate(JsonObjectBuilder json, String key, Date value) {
+        if (value != null) {
+            json.add(key, dateFormat.format(value));
+        }
+    }
+
 }

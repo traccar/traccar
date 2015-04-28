@@ -18,8 +18,6 @@ package org.traccar.database;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -64,10 +62,10 @@ public class ResultSetConverter {
                         obj.add(columnName, rs.getString(columnName));
                         break;
                     case java.sql.Types.DATE:
-                        obj.add(columnName, JsonConvertable.dateFormat.format(rs.getDate(columnName)));
+                        obj.add(columnName, ObjectConverter.dateFormat.format(rs.getDate(columnName)));
                         break;
                     case java.sql.Types.TIMESTAMP:
-                        obj.add(columnName, JsonConvertable.dateFormat.format(rs.getTimestamp(columnName)));
+                        obj.add(columnName, ObjectConverter.dateFormat.format(rs.getTimestamp(columnName)));
                         break;
                     default:
                         break;

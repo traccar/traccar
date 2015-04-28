@@ -266,8 +266,8 @@ public class DataManager {
                             "device_id INT NOT NULL," +
                             "read BOOLEAN DEFAULT true NOT NULL," +
                             "write BOOLEAN DEFAULT true NOT NULL," +
-                            "FOREIGN KEY (user_id) REFERENCES user(id)," +
-                            "FOREIGN KEY (device_id) REFERENCES device(id));" +
+                            "FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE," +
+                            "FOREIGN KEY (device_id) REFERENCES device(id) ON DELETE CASCADE);" +
 
                             "CREATE INDEX user_device_user_id ON user_device(user_id);" +
 
@@ -391,7 +391,6 @@ public class DataManager {
     }
 
     public JsonArray getDevices(long userId) throws SQLException {
-
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement statement = connection.prepareStatement(
@@ -400,7 +399,16 @@ public class DataManager {
             try {
                 statement.setLong(1, userId);
                 
-                return ResultSetConverter.convert(statement.executeQuery());
+                ResultSet result = statement.executeQuery();
+                
+                List<Device> list = new LinkedList<Device>();
+                while (result.next()) {
+                    Device device = new Device();
+                    device.fromRecord(result);
+                    list.add(device);
+                }
+                
+                return ObjectConverter.arrayToJson(list);
             } finally {
                 statement.close();
             }
@@ -462,6 +470,25 @@ public class DataManager {
                     "DELETE FROM device WHERE id = ?;");
             try {
                 statement.setLong(1, device.getId());
+                
+                statement.execute();
+            } finally {
+                statement.close();
+            }
+        } finally {
+            connection.close();
+        }
+    }
+    
+    public void linkDevice(long userId, long deviceId) throws SQLException {
+
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO user_device (user_id, device_id) VALUES (?, ?);");
+            try {
+                statement.setLong(1, userId);
+                statement.setLong(2, deviceId);
                 
                 statement.execute();
             } finally {

@@ -15,12 +15,13 @@
  */
 package org.traccar.model;
 
+import java.sql.ResultSet;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.traccar.database.JsonConvertable;
+import org.traccar.database.Convertable;
 
-public class User implements JsonConvertable {
+public class User implements Convertable {
 
     private long id;
     
@@ -79,5 +80,9 @@ public class User implements JsonConvertable {
         longitude = json.getJsonNumber("longitude").doubleValue();
         zoom = json.getJsonNumber("zoom").intValue();
     }
-    
+
+    @Override
+    public void fromRecord(ResultSet record) {
+    }
+
 }

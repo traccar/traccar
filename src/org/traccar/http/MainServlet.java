@@ -173,7 +173,7 @@ public class MainServlet extends HttpServlet {
 
                 JsonObjectBuilder result = Json.createObjectBuilder();
                 result.add("success", true);
-                result.add("data", ObjectConverter.convert(positions.values()));
+                result.add("data", ObjectConverter.arrayToJson(positions.values()));
                 positions.clear();
 
                 try {

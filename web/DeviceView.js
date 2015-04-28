@@ -21,7 +21,22 @@ Ext.define('DeviceView', {
     title: Strings.device_title,
     
     tbar: [{
-        text:'Add'
+        text:'Add',
+        handler: function() {
+            
+            var device = {
+                name: "AjaxTest",
+                uniqueId: "UniqueId"
+            };
+            
+            Ext.Ajax.request({
+                url: '/api/device/add',
+                jsonData: Ext.encode(device),
+                success: function() {
+                    alert("success");
+                }
+            });
+        }
     }, {
         text:'Edit'
     }, {
@@ -56,14 +71,14 @@ Ext.define('DeviceView', {
         fields:[
             'id',
             'name',
-            'unique_id',
-            'position_id',
-            'data_id'
+            'uniqueId',
+            'positionId',
+            'dataId'
         ]
     },
     
     columns: [
         { text: Strings.device_name,  dataIndex: 'name', flex: 1 },
-        { text: Strings.device_identifier, dataIndex: 'unique_id', flex: 1 }
+        { text: Strings.device_identifier, dataIndex: 'uniqueId', flex: 1 }
     ]
 });

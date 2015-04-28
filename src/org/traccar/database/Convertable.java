@@ -15,16 +15,17 @@
  */
 package org.traccar.database;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.sql.ResultSet;
 import javax.json.JsonObject;
 
-public interface JsonConvertable {
-    
-    public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+public interface Convertable {
     
     public JsonObject toJson();
     
     public void fromJson(JsonObject json) throws Exception;
+    
+    //public void toRecord();
+    
+    public void fromRecord(ResultSet record);
     
 }

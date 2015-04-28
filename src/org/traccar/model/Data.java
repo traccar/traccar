@@ -15,15 +15,16 @@
  */
 package org.traccar.model;
 
+import java.sql.ResultSet;
 import java.text.ParseException;
 import java.util.Date;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.traccar.database.JsonConvertable;
-import static org.traccar.database.JsonConvertable.dateFormat;
+import org.traccar.database.Convertable;
+import org.traccar.database.ObjectConverter;
 
-public class Data implements JsonConvertable {
+public class Data implements Convertable {
 
     private long id;
     public long getId() { return id; }
@@ -50,8 +51,8 @@ public class Data implements JsonConvertable {
         JsonObjectBuilder json = Json.createObjectBuilder();
         json.add("id", id);
         json.add("deviceId", deviceId);
-        json.add("serverTime", dateFormat.format(serverTime));
-        json.add("deviceTime", dateFormat.format(deviceTime));
+        json.add("serverTime", ObjectConverter.dateFormat.format(serverTime));
+        json.add("deviceTime", ObjectConverter.dateFormat.format(deviceTime));
         //json.add("extendedInfo", extendedInfo);
         return json.build();
     }
@@ -60,9 +61,13 @@ public class Data implements JsonConvertable {
     public void fromJson(JsonObject json) throws ParseException {
         id = json.getJsonNumber("id").longValue();
         deviceId = json.getJsonNumber("deviceId").longValue();
-        serverTime = dateFormat.parse(json.getString("serverTime"));
-        deviceTime = dateFormat.parse(json.getString("deviceTime"));
+        serverTime = ObjectConverter.dateFormat.parse(json.getString("serverTime"));
+        deviceTime = ObjectConverter.dateFormat.parse(json.getString("deviceTime"));
         //extendedInfo = json.getString("extendedInfo");
+    }
+
+    @Override
+    public void fromRecord(ResultSet record) {
     }
 
 }

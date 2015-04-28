@@ -15,15 +15,16 @@
  */
 package org.traccar.model;
 
+import java.sql.ResultSet;
 import java.text.ParseException;
 import java.util.Date;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.traccar.database.JsonConvertable;
-import static org.traccar.database.JsonConvertable.dateFormat;
+import org.traccar.database.Convertable;
+import org.traccar.database.ObjectConverter;
 
-public class Position implements JsonConvertable {
+public class Position implements Convertable {
     
     private long id;
     public long getId() { return id; }
@@ -87,9 +88,9 @@ public class Position implements JsonConvertable {
         JsonObjectBuilder json = Json.createObjectBuilder();
         json.add("id", id);
         json.add("deviceId", deviceId);
-        json.add("serverTime", dateFormat.format(serverTime));
-        json.add("deviceTime", dateFormat.format(deviceTime));
-        json.add("fixTime", dateFormat.format(fixTime));
+        json.add("serverTime", ObjectConverter.dateFormat.format(serverTime));
+        json.add("deviceTime", ObjectConverter.dateFormat.format(deviceTime));
+        json.add("fixTime", ObjectConverter.dateFormat.format(fixTime));
         json.add("valid", valid);
         json.add("latitude", latitude);
         json.add("longitude", longitude);
@@ -105,9 +106,9 @@ public class Position implements JsonConvertable {
     public void fromJson(JsonObject json) throws ParseException {
         id = json.getJsonNumber("id").longValue();
         deviceId = json.getJsonNumber("deviceId").longValue();
-        serverTime = dateFormat.parse(json.getString("serverTime"));
-        deviceTime = dateFormat.parse(json.getString("deviceTime"));
-        fixTime = dateFormat.parse(json.getString("fixTime"));
+        serverTime = ObjectConverter.dateFormat.parse(json.getString("serverTime"));
+        deviceTime = ObjectConverter.dateFormat.parse(json.getString("deviceTime"));
+        fixTime = ObjectConverter.dateFormat.parse(json.getString("fixTime"));
         valid = json.getBoolean("valid");
         latitude = json.getJsonNumber("latitude").doubleValue();
         longitude = json.getJsonNumber("longitude").doubleValue();
@@ -116,6 +117,10 @@ public class Position implements JsonConvertable {
         course = json.getJsonNumber("course").doubleValue();
         address = json.getString("address");
         //extendedInfo = json.getString("extendedInfo");
+    }
+
+    @Override
+    public void fromRecord(ResultSet record) {
     }
 
 }

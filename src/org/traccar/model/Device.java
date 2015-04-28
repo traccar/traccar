@@ -15,21 +15,25 @@
  */
 package org.traccar.model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.traccar.database.JsonConvertable;
+import org.traccar.database.Convertable;
+import org.traccar.database.ObjectConverter;
+import org.traccar.helper.Log;
 
-public class Device implements JsonConvertable {
+public class Device implements Convertable {
 
     private long id;
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
     
     private String name;
-    public String getName() { return uniqueId; }
+    public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
     private String uniqueId;
@@ -47,25 +51,40 @@ public class Device implements JsonConvertable {
     @Override
     public JsonObject toJson() {
         JsonObjectBuilder json = Json.createObjectBuilder();
-        json.add("id", id);
-        json.add("name", name);
-        json.add("uniqueId", uniqueId);
-        json.add("status", status);
-        json.add("lastUpdate", dateFormat.format(lastUpdate));
-        json.add("positionId", positionId);
-        json.add("dataId", dataId);
+        ObjectConverter.putLong(json, "id", id);
+        ObjectConverter.putString(json, "name", name);
+        ObjectConverter.putString(json, "uniqueId", uniqueId);
+        ObjectConverter.putString(json, "status", status);
+        ObjectConverter.putDate(json, "lastUpdate", lastUpdate);
+        ObjectConverter.putLong(json, "positionId", positionId);
+        ObjectConverter.putLong(json, "dataId", dataId);
         return json.build();
     }
 
     @Override
     public void fromJson(JsonObject json) throws ParseException {
-        id = json.getJsonNumber("id").longValue();
-        name = json.getString("name");
-        uniqueId = json.getString("uniqueId");
-        status = json.getString("status");
-        lastUpdate = dateFormat.parse(json.getString("lastUpdate"));
-        positionId = json.getJsonNumber("positionId").longValue();
-        dataId = json.getJsonNumber("dataId").longValue();
+        id = ObjectConverter.getLong(json, "id");
+        name = ObjectConverter.getString(json, "name");
+        uniqueId = ObjectConverter.getString(json, "uniqueId");
+        status = ObjectConverter.getString(json, "status");
+        lastUpdate = ObjectConverter.getDate(json, "lastUpdate");
+        positionId = ObjectConverter.getLong(json, "positionId");
+        dataId = ObjectConverter.getLong(json, "dataId");
+    }
+
+    @Override
+    public void fromRecord(ResultSet record) {
+        try {
+            id = ObjectConverter.getLong(record, "id");
+            name = ObjectConverter.getString(record, "name");
+            uniqueId = ObjectConverter.getString(record, "uniqueId");
+            status = ObjectConverter.getString(record, "status");
+            lastUpdate = ObjectConverter.getDate(record, "lastUpdate");
+            positionId = ObjectConverter.getLong(record, "positionId");
+            dataId = ObjectConverter.getLong(record, "dataId");
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
     }
 
 }
