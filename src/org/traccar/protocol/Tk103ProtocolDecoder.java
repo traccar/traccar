@@ -140,7 +140,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         // Milage
         String milage = parser.group(index++);
         if (milage != null) {
-            extendedInfo.set("milage", Integer.parseInt(milage, 16));
+            extendedInfo.set("milage", Long.parseLong(milage, 16));
         }
 
         position.setExtendedInfo(extendedInfo.toString());

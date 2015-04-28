@@ -15,6 +15,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
         assertNull(decoder.decode(null, null, "(090411121854BP0000001234567890HSO"));
 
         verify(decoder.decode(null, null,
+                "(01029131573BR00150428A3801.6382N02351.0159E000.0080729278.7800000000LEF9ECB9C)"));
+
+        verify(decoder.decode(null, null,
                 "(035988863964BP05000035988863964110524A4241.7977N02318.7561E000.0123536356.5100000000L000946BB"));
 
         verify(decoder.decode(null, null,
