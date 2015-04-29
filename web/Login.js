@@ -41,21 +41,20 @@ Ext.define('LoginForm', {
     }, {
         text: Strings.login_login,
         handler: function() {
-            var win = this.up('window');
-            var form = this.up('form').getForm();
-            if (form.isValid()) {
-                form.submit({
-                    success: function(form, action) {
-                        win.close();
-                        Ext.create('MainView', { renderTo: document.body });
-                    },
-                    failure: function(form, action) {
-                        Ext.Msg.alert(Strings.login_title, Strings.login_failed);
-                    }
-                });
-            }
+            this.up('window').submit();
         }
-    }]
+    }],
+
+    listeners: {
+        afterRender: function(){
+            this.keyNav = Ext.create('Ext.util.KeyNav', this.el, {
+                enter: function() {
+                    this.up('window').submit();
+                },
+                scope: this
+            });
+        }
+    }
 });
 
 Ext.define('Login', {
@@ -65,5 +64,21 @@ Ext.define('Login', {
     title: Strings.login_title,
     closable: false,
 
-    items: [{ xtype: 'login-form' }]
+    items: [{ xtype: 'login-form' }],
+    
+    submit: function() {
+        var win = this;
+        var form = this.down('form').getForm();
+        if (form.isValid()) {
+            form.submit({
+                success: function() {
+                    win.close();
+                    Ext.create('MainView', { renderTo: document.body });
+                },
+                failure: function() {
+                    Ext.Msg.alert(Strings.login_title, Strings.login_failed);
+                }
+            });
+        }
+    }
 });
