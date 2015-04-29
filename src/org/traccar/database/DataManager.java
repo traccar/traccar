@@ -189,6 +189,7 @@ public class DataManager {
         params.setDouble("course", position.getCourse());
         params.setString("address", position.getAddress());
         params.setString("extended_info", position.getOther());
+        params.setLong("power", null); // temporary
 
         return params;
     }
