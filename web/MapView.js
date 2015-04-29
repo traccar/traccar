@@ -24,13 +24,20 @@ Ext.define('MapView', {
     listeners: {
         afterrender: function() {
 
-            /*var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
-                key: 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F',
+            var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
+
+            var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
+                key: bindKey,
                 imagerySet: 'Road'
-            })});*/
+            })});
+
+            /*var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
+                key: bindKey,
+                imagerySet: 'Aerial'
+            })});
 
             var layer = new ol.layer.Tile({ source: new ol.source.OSM({
-            })});
+            })});*/
 
             var view = new ol.View({
                 center: ol.proj.transform(Styles.map_center, 'EPSG:4326', 'EPSG:3857'),
