@@ -42,7 +42,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             "([EW])" +
             "(\\d{3}\\.\\d{3})" +          // Speed
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
-            "\\d+\\)");
+            "\\d+.*\\)\\]?");
 
     @Override
     protected Object decode(

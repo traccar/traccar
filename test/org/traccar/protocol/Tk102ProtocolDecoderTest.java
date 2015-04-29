@@ -35,6 +35,9 @@ public class Tk102ProtocolDecoderTest extends ProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "[;00000000106(ONE200834A5952.8114N01046.0832E003.93212071305010000)"));
 
+        verify(decoder.decode(null, null,
+                "[\u00930000000000F(ITV153047A1534.0805N03233.0888E000.00029041500000400&Wsz-wl001&B0000)]"));
+
     }
 
 }
