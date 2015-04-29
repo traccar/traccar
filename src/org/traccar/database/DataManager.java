@@ -179,6 +179,7 @@ public class DataManager {
 
     private NamedParameterStatement.Params assignVariables(NamedParameterStatement.Params params, Position position) throws SQLException {
 
+        params.setString("protocol", position.getProtocol());
         params.setLong("device_id", position.getDeviceId());
         params.setTimestamp("time", position.getFixTime());
         params.setBoolean("valid", position.getValid());
