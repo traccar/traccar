@@ -20,7 +20,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.Date;
@@ -56,7 +55,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         // Get device id
         String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
@@ -86,7 +85,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(buf.readInt() / 1000000.0);
                     position.setSpeed(buf.readUnsignedShort() * 0.539957);
                     position.setCourse(buf.readUnsignedShort());
-                    extendedInfo.set("hdop", buf.readUnsignedShort());
+                    position.set("hdop", buf.readUnsignedShort());
                     break;
 
                 default:
@@ -95,8 +94,6 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
-        
         if (hasLocation) {
             return position;
         }

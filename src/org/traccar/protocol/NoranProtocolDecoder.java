@@ -19,7 +19,6 @@ import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -28,9 +27,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class NoranProtocolDecoder extends BaseProtocolDecoder {
@@ -76,7 +72,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             
             if (type == MSG_CONTROL_RESPONSE) {
                 buf.readUnsignedInt(); // GIS ip
@@ -88,7 +84,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setValid((flags & 0x01) != 0);
 
             // Alarm type
-            extendedInfo.set("alarm", buf.readUnsignedByte());
+            position.set("alarm", buf.readUnsignedByte());
 
             // Location
             position.setSpeed(buf.readUnsignedByte());
@@ -116,12 +112,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             // IO status
-            extendedInfo.set("io", buf.readUnsignedByte());
+            position.set("io", buf.readUnsignedByte());
             
             // Fuel
-            extendedInfo.set("fuel", buf.readUnsignedByte());
-            
-            position.setExtendedInfo(extendedInfo.toString());
+            position.set("fuel", buf.readUnsignedByte());
             return position;
         }
 

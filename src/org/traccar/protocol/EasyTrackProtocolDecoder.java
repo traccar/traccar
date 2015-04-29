@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
@@ -76,7 +72,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -87,7 +83,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Command
-        extendedInfo.set("command", parser.group(index++));
+        position.set("command", parser.group(index++));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);
@@ -116,27 +112,25 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Integer.parseInt(parser.group(index++), 16) / 100.0);
 
         // Status
-        extendedInfo.set("status", parser.group(index++));
+        position.set("status", parser.group(index++));
 
         // Signal
-        extendedInfo.set("signal", parser.group(index++));
+        position.set("signal", parser.group(index++));
 
         // Power
-        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
+        position.set("power", Double.valueOf(parser.group(index++)));
 
         // Oil
-        extendedInfo.set("oil", Integer.parseInt(parser.group(index++), 16));
+        position.set("oil", Integer.parseInt(parser.group(index++), 16));
 
         // Milage
-        extendedInfo.set("milage", Integer.parseInt(parser.group(index++), 16));
+        position.set("milage", Integer.parseInt(parser.group(index++), 16));
         
         // Altitude
         String altitude = parser.group(index++);
         if (altitude != null) {
             position.setAltitude(Double.valueOf(altitude));
         }
-
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

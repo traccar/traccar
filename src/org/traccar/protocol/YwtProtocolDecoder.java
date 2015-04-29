@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class YwtProtocolDecoder extends BaseProtocolDecoder {
@@ -84,7 +80,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         Integer index = 1;
         String type = parser.group(index++);
 
@@ -132,13 +128,13 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        extendedInfo.set("satellites", satellites);
+        position.set("satellites", satellites);
         
         // Report identifier
         String reportId = parser.group(index++);
         
         // Status
-        extendedInfo.set("status", parser.group(index++));
+        position.set("status", parser.group(index++));
 
         // Send response
         if (type.equals("KP") || type.equals("EP") || type.equals("EP")) {
@@ -146,8 +142,6 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
                 channel.write("%AT+" + type + "=" + reportId + "\r\n");
             }
         }
-        
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

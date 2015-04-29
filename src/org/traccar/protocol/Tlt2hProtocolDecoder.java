@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,9 +26,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
@@ -89,13 +85,13 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             parser = patternPosition.matcher(message);
             if (parser.matches()) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                position.setProtocol(getProtocol());
                 position.setDeviceId(getDeviceId());
 
                 Integer index = 1;
                 
                 // Cell
-                extendedInfo.set("cell", parser.group(index++));
+                position.set("cell", parser.group(index++));
 
                 // Time
                 Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -139,9 +135,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(time.getTime());
                 
                 // Status
-                extendedInfo.set("status", status);
-                
-                position.setExtendedInfo(extendedInfo.toString());
+                position.set("status", status);
                 positions.add(position);
             }
         }

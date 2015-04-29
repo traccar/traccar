@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,10 +29,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
@@ -86,7 +82,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -98,7 +94,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Event
         int event = Integer.valueOf(parser.group(index++));
-        extendedInfo.set("event", event);
+        position.set("event", event);
 
         // Coordinates
         position.setLatitude(Double.valueOf(parser.group(index++)));
@@ -119,10 +115,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Satellites
-        extendedInfo.set("satellites", parser.group(index++));
+        position.set("satellites", parser.group(index++));
 
         // GSM Signal
-        extendedInfo.set("gsm", parser.group(index++));
+        position.set("gsm", parser.group(index++));
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
@@ -131,39 +127,39 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // HDOP
-        extendedInfo.set("hdop", parser.group(index++));
+        position.set("hdop", parser.group(index++));
 
         // Altitude
         position.setAltitude(Double.valueOf(parser.group(index++)));
 
         // Other
-        extendedInfo.set("milage", parser.group(index++));
-        extendedInfo.set("runtime", parser.group(index++));
-        extendedInfo.set("cell", parser.group(index++));
-        extendedInfo.set("state", parser.group(index++));
+        position.set("milage", parser.group(index++));
+        position.set("runtime", parser.group(index++));
+        position.set("cell", parser.group(index++));
+        position.set("state", parser.group(index++));
         
         // ADC
         String adc1 = parser.group(index++);
         if (adc1 != null) {
-            extendedInfo.set("adc1", Integer.parseInt(adc1, 16));
+            position.set("adc1", Integer.parseInt(adc1, 16));
         }
         String adc2 = parser.group(index++);
         if (adc2 != null) {
-            extendedInfo.set("adc2", Integer.parseInt(adc2, 16));
+            position.set("adc2", Integer.parseInt(adc2, 16));
         }
         String adc3 = parser.group(index++);
         if (adc3 != null) {
-            extendedInfo.set("adc3", Integer.parseInt(adc3, 16));
+            position.set("adc3", Integer.parseInt(adc3, 16));
         }
-        extendedInfo.set("battery", Integer.parseInt(parser.group(index++), 16));
-        extendedInfo.set("power", Integer.parseInt(parser.group(index++), 16));
+        position.set("battery", Integer.parseInt(parser.group(index++), 16));
+        position.set("power", Integer.parseInt(parser.group(index++), 16));
 
         // Event specific
         String data = parser.group(index++);
         if (data != null && !data.isEmpty()) {
             switch (event) {
                 case 37:
-                    extendedInfo.set("rfid", data);
+                    position.set("rfid", data);
                     break;
             }
         }
@@ -171,12 +167,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         // Fuel
         String fuel = parser.group(index++);
         if (fuel != null) {
-            extendedInfo.set("fuel",
+            position.set("fuel",
                     Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
         }
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }
@@ -198,11 +191,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() >= 0x34) {
             
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             position.setDeviceId(getDeviceId());
             
             // Event
-            extendedInfo.set("event", buf.readUnsignedByte());
+            position.set("event", buf.readUnsignedByte());
             
             // Location
             position.setLatitude(buf.readInt() * 0.000001);
@@ -215,10 +208,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(buf.readUnsignedByte() == 1);
 
             // Satellites
-            extendedInfo.set("satellites", buf.readUnsignedByte());
+            position.set("satellites", buf.readUnsignedByte());
             
             // GSM Signal
-            extendedInfo.set("gsm", buf.readUnsignedByte());
+            position.set("gsm", buf.readUnsignedByte());
 
             // Speed
             position.setSpeed(buf.readUnsignedShort() * 0.539957);
@@ -227,27 +220,25 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             // HDOP
-            extendedInfo.set("hdop", buf.readUnsignedShort() * 0.1);
+            position.set("hdop", buf.readUnsignedShort() * 0.1);
 
             // Altitude
             position.setAltitude(buf.readUnsignedShort());
 
             // Other
-            extendedInfo.set("milage", buf.readUnsignedInt());
-            extendedInfo.set("runtime", buf.readUnsignedInt());
-            extendedInfo.set("cell",
+            position.set("milage", buf.readUnsignedInt());
+            position.set("runtime", buf.readUnsignedInt());
+            position.set("cell",
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort() + "|" +
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort());
-            extendedInfo.set("state", buf.readUnsignedShort());
+            position.set("state", buf.readUnsignedShort());
         
             // ADC
-            extendedInfo.set("adc1", buf.readUnsignedShort());
-            extendedInfo.set("battery", buf.readUnsignedShort() * 0.01);
-            extendedInfo.set("power", buf.readUnsignedShort());
+            position.set("adc1", buf.readUnsignedShort());
+            position.set("battery", buf.readUnsignedShort() * 0.01);
+            position.set("power", buf.readUnsignedShort());
             
             buf.readUnsignedInt(); // geo-fence
-            
-            position.setExtendedInfo(extendedInfo.toString());
             positions.add(position);
         }
         

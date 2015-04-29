@@ -15,10 +15,7 @@
  */
 package org.traccar.protocol;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Properties;
-import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -26,11 +23,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Crc;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
@@ -102,8 +95,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setDeviceId(getDeviceId());
             
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-            extendedInfo.set("index", index);
+            position.setProtocol(getProtocol());
+            position.set("index", index);
             
             // Location
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -113,20 +106,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
             
             // Cell
-            extendedInfo.set("cell", ChannelBufferTools.readHexString(buf, 18));
+            position.set("cell", ChannelBufferTools.readHexString(buf, 18));
             
             // Validity
             position.setValid((buf.readUnsignedByte() & 0x01) != 0);
             
             if (type == MSG_ALARM) {
-                extendedInfo.set("alarm", buf.readUnsignedByte());
+                position.set("alarm", buf.readUnsignedByte());
             }
             
             if (type == MSG_STATE) {
-                extendedInfo.set("status", buf.readUnsignedByte());
+                position.set("status", buf.readUnsignedByte());
             }
-            
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 
@@ -143,7 +134,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt02");
-            extendedInfo.set("index", index);
+            position.set("index", index);
 
             // Get device id
             try {
@@ -185,8 +176,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(latitude);
             position.setLongitude(longitude);
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }*/
 

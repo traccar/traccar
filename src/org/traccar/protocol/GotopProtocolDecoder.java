@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GotopProtocolDecoder extends BaseProtocolDecoder {
@@ -63,7 +59,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         Integer index = 1;
 
         // Get device by IMEI
@@ -100,15 +96,13 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
         
         // Status
-        extendedInfo.set("status", parser.group(index++));
+        position.set("status", parser.group(index++));
 
         // Course
         String course = parser.group(index++);
         if (course != null) {
             position.setCourse(Double.valueOf(course));
         }
-
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

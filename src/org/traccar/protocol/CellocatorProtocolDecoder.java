@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -26,9 +25,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
@@ -106,7 +102,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         // Parse location
         if (type == MSG_CLIENT_STATUS) {
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             
             // Device identifier
             if (!identify(String.valueOf(deviceUniqueId))) {
@@ -119,7 +115,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // protocol version
 
             // Status
-            extendedInfo.set("status", buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
+            position.set("status", buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
             
             int operator = (buf.readUnsignedByte() & 0xf0) << 4;
             operator += buf.readUnsignedByte();
@@ -131,7 +127,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             
             operator <<= 8;
             operator += buf.readUnsignedByte();
-            extendedInfo.set("operator", operator);
+            position.set("operator", operator);
             
             buf.readUnsignedInt(); // ADC
             buf.readUnsignedMedium(); // milage
@@ -161,8 +157,6 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
             time.set(Calendar.YEAR, buf.readUnsignedShort());
             position.setTime(time.getTime());
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 

@@ -7,13 +7,13 @@ public class ExtendedInfoFormatterTest {
 
     @Test
     public void testToString() throws Exception {
+
+        Position position = new Position();
+        position.set("a", "1");
+        position.set("b", "2");
+        position.set("a", "3");
         
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("test");
-        extendedInfo.set("a", "1");
-        extendedInfo.set("b", "2");
-        extendedInfo.set("a", "3");
-        
-        assertEquals(extendedInfo.toString(), "<info><protocol>test</protocol><a>3</a><b>2</b></info>");
+        assertEquals(position.getOther(), "<info><a>3</a><b>2</b></info>");
         
     }
 

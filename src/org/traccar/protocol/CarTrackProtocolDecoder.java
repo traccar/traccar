@@ -17,7 +17,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +25,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
@@ -73,7 +69,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         Integer index = 1;
 
         // Get device by unique identifier
@@ -83,7 +79,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Command
-        extendedInfo.set("command", parser.group(index++));
+        position.set("command", parser.group(index++));
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -127,7 +123,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
         
         // State
-        extendedInfo.set("io", parser.group(index++));
+        position.set("io", parser.group(index++));
         /* Start : Added By Rohit Singhal, Decode Milage Data*/
         // Prepare Mile Meter Data
         String milage = parser.group(index++);
@@ -137,13 +133,11 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         milage = milage.replace("=", "D");
         milage = milage.replace(">", "E");
         milage = milage.replace("?", "F");
-        extendedInfo.set("milage", Integer.parseInt(milage, 16));
-        /* Commented By Rohit extendedInfo.set("milage", parser.group(index++)); */
+        position.set("milage", Integer.parseInt(milage, 16));
+        /* Commented By Rohit position.set("milage", parser.group(index++)); */
         /*End : Added By Rohit Singhal, Decode Milage Data*/
-        extendedInfo.set("alarm", parser.group(index++));
-        extendedInfo.set("ad", parser.group(index++));
-
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("alarm", parser.group(index++));
+        position.set("ad", parser.group(index++));
         return position;
     }
 

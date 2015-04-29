@@ -25,9 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
@@ -92,21 +90,19 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         Set<Integer> tags = new HashSet<Integer>();
         boolean hasLocation = false;
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         
         while (buf.readerIndex() < length) {
 
             // Check if new message started
             int tag = buf.readUnsignedByte();
             if (tags.contains(tag)) {
-                position.setExtendedInfo(extendedInfo.toString());
                 if (hasLocation && position.getFixTime() != null) {
                     positions.add(position);
                 }
                 tags.clear();
                 hasLocation = false;
                 position = new Position();
-                extendedInfo = new ExtendedInfoFormatter(getProtocol());
             }
             tags.add(tag);
             
@@ -139,19 +135,19 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                     
                 case TAG_STATUS:
-                    extendedInfo.set("status", buf.readUnsignedShort());
+                    position.set("status", buf.readUnsignedShort());
                     break;
                     
                 case TAG_POWER:
-                    extendedInfo.set("power", buf.readUnsignedShort());
+                    position.set("power", buf.readUnsignedShort());
                     break;
                     
                 case TAG_BATTERY:
-                    extendedInfo.set("battery", buf.readUnsignedShort());
+                    position.set("battery", buf.readUnsignedShort());
                     break;
                     
                 case TAG_MILAGE:
-                    extendedInfo.set("milage", buf.readUnsignedInt());
+                    position.set("milage", buf.readUnsignedInt());
                     break;
                     
                 default:
@@ -160,8 +156,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     
             }
         }
-
-        position.setExtendedInfo(extendedInfo.toString());
         if (hasLocation && position.getFixTime() != null) {
             positions.add(position);
         }

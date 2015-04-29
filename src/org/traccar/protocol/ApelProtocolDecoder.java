@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -29,11 +28,8 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class ApelProtocolDecoder extends BaseProtocolDecoder {
@@ -162,15 +158,15 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                position.setProtocol(getProtocol());
                 position.setDeviceId(getDeviceId());
 
                 // Message index
                 int subtype = type;
                 if (type == MSG_TYPE_LOG_RECORDS) {
-                    extendedInfo.set("archive", true);
+                    position.set("archive", true);
                     lastIndex = buf.readUnsignedInt() + 1;
-                    extendedInfo.set("index", lastIndex);
+                    position.set("index", lastIndex);
 
                     subtype = buf.readUnsignedShort();
                     if (subtype != MSG_TYPE_CURRENT_GPS_DATA && subtype != MSG_TYPE_STATE_FULL_INFO_T104) {
@@ -197,7 +193,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                     int speed = buf.readUnsignedByte();
                     position.setValid(speed != 255);
                     position.setSpeed(speed * 0.539957);
-                    extendedInfo.set("hdop", buf.readByte());
+                    position.set("hdop", buf.readByte());
                 } else {
                     int speed = buf.readShort();
                     position.setValid(speed != -1);
@@ -213,34 +209,31 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 if (subtype == MSG_TYPE_STATE_FULL_INFO_T104) {
 
                     // Satellites
-                    extendedInfo.set("satellites", buf.readUnsignedByte());
+                    position.set("satellites", buf.readUnsignedByte());
                     
                     // Cell signal
-                    extendedInfo.set("gsm", buf.readUnsignedByte());
+                    position.set("gsm", buf.readUnsignedByte());
 
                     // Event type
-                    extendedInfo.set("event", buf.readUnsignedShort());
+                    position.set("event", buf.readUnsignedShort());
 
                     // Milage
-                    extendedInfo.set("milage", buf.readUnsignedInt());
+                    position.set("milage", buf.readUnsignedInt());
 
                     // Input/Output
-                    extendedInfo.set("input", buf.readUnsignedByte());
-                    extendedInfo.set("output", buf.readUnsignedByte());
+                    position.set("input", buf.readUnsignedByte());
+                    position.set("output", buf.readUnsignedByte());
                     
                     // Analog sensors
                     for (int i = 1; i <= 8; i++) {
-                        extendedInfo.set("adc" + i, buf.readUnsignedShort());
+                        position.set("adc" + i, buf.readUnsignedShort());
                     }
                     
                     // Counters
-                    extendedInfo.set("c0", buf.readUnsignedInt());
-                    extendedInfo.set("c1", buf.readUnsignedInt());
-                    extendedInfo.set("c2", buf.readUnsignedInt());
+                    position.set("c0", buf.readUnsignedInt());
+                    position.set("c1", buf.readUnsignedInt());
+                    position.set("c2", buf.readUnsignedInt());
                 }
-
-                // Extended info
-                position.setExtendedInfo(extendedInfo.toString());
 
                 positions.add(position);
             }

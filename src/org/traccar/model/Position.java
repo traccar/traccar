@@ -18,6 +18,8 @@ package org.traccar.model;
 import java.sql.ResultSet;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -29,6 +31,10 @@ public class Position implements Convertable {
     private long id;
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
+
+    private String protocol;
+    public String getProtocol() { return protocol; }
+    public void setProtocol(String protocol) { this.protocol = protocol; }
 
     private long deviceId;
     public long getDeviceId() { return deviceId; }
@@ -79,14 +85,21 @@ public class Position implements Convertable {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    private String extendedInfo;
-    public String getExtendedInfo() { return extendedInfo; }
-    public void setExtendedInfo(String extendedInfo) { this.extendedInfo = extendedInfo; }
+    private final Map<String, Object> other = new LinkedHashMap<String, Object>();
+    public void set(String key, Object value) {
+        if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
+            other.put(key, value);
+        }
+    }
+    public String getOther() {
+        return MiscFormatter.toXmlString(other);
+    }
 
     @Override
     public JsonObject toJson() {
         JsonObjectBuilder json = Json.createObjectBuilder();
         json.add("id", id);
+        json.add("protocol", protocol);
         json.add("deviceId", deviceId);
         json.add("serverTime", ObjectConverter.dateFormat.format(serverTime));
         json.add("deviceTime", ObjectConverter.dateFormat.format(deviceTime));
@@ -105,6 +118,7 @@ public class Position implements Convertable {
     @Override
     public void fromJson(JsonObject json) throws ParseException {
         id = json.getJsonNumber("id").longValue();
+        protocol = json.getString("protocol");
         deviceId = json.getJsonNumber("deviceId").longValue();
         serverTime = ObjectConverter.dateFormat.parse(json.getString("serverTime"));
         deviceTime = ObjectConverter.dateFormat.parse(json.getString("deviceTime"));

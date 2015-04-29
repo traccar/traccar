@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -28,9 +27,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
@@ -106,7 +102,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             // Date and time
             position.setTime(new Date(buf.readUnsignedInt() * 1000)); // gps time
@@ -122,41 +118,39 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             // Report type
-            extendedInfo.set("type", buf.readUnsignedByte());
+            position.set("type", buf.readUnsignedByte());
 
             // Milage
-            extendedInfo.set("milage", buf.readUnsignedInt() * 0.1);
+            position.set("milage", buf.readUnsignedInt() * 0.1);
 
             // Accuracy
-            extendedInfo.set("hdop", buf.readUnsignedShort() * 0.1);
+            position.set("hdop", buf.readUnsignedShort() * 0.1);
 
             // Input
-            extendedInfo.set("input", buf.readUnsignedByte());
+            position.set("input", buf.readUnsignedByte());
 
             // Speed
             position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
             // Output
-            extendedInfo.set("output", buf.readUnsignedByte());
+            position.set("output", buf.readUnsignedByte());
 
             // ADC
-            extendedInfo.set("adc", buf.readUnsignedShort() * 0.001);
+            position.set("adc", buf.readUnsignedShort() * 0.001);
 
             // Driver
-            extendedInfo.set("driver", readString(buf));
+            position.set("driver", readString(buf));
 
             // Temperature
-            extendedInfo.set("temperature1", buf.readShort() * 0.1);
-            extendedInfo.set("temperature2", buf.readShort() * 0.1);
+            position.set("temperature1", buf.readShort() * 0.1);
+            position.set("temperature2", buf.readShort() * 0.1);
 
             // Text Message
-            extendedInfo.set("message", readString(buf));
+            position.set("message", readString(buf));
 
             // With AT$FORM Command you can extend atrack protocol.
             // For example adding AT$FORM %FC /Fuel used you can add the line in this position:
-            // extendedInfo.set("fuelused", buf.readUnsignedInt() * 0.1);
-
-            position.setExtendedInfo(extendedInfo.toString());
+            // position.set("fuelused", buf.readUnsignedInt() * 0.1);
             positions.add(position);
         }
 

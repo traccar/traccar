@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
@@ -174,7 +170,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         // Parse location data
         if (!parseGPRMC(gprmc, position)) {
@@ -192,7 +188,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             int index = 1;
 
             // Alarm
-            extendedInfo.set("alarm", parser.group(index++));
+            position.set("alarm", parser.group(index++));
 
             // IMEI
             if (!identify(parser.group(index++), false)) {
@@ -203,7 +199,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             // Satellites
-            extendedInfo.set("satellites", parser.group(index++));
+            position.set("satellites", parser.group(index++));
 
             // Altitude
             String altitude = parser.group(index++);
@@ -212,17 +208,17 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Battery
-            extendedInfo.set("power", Double.valueOf(parser.group(index++)));
+            position.set("power", Double.valueOf(parser.group(index++)));
 
             // Charger
             String charger = parser.group(index++);
             if (charger != null) {
-                extendedInfo.set("charger", Integer.valueOf(charger) == 1);
+                position.set("charger", Integer.valueOf(charger) == 1);
             }
 
-            extendedInfo.set("mcc", parser.group(index++));
-            extendedInfo.set("mnc", parser.group(index++));
-            extendedInfo.set("lac", parser.group(index++));
+            position.set("mcc", parser.group(index++));
+            position.set("mnc", parser.group(index++));
+            position.set("lac", parser.group(index++));
             
         } else {
 
@@ -239,25 +235,23 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(getDeviceId());
 
-            extendedInfo.set("mcc", parser.group(index++));
-            extendedInfo.set("mnc", parser.group(index++));
-            extendedInfo.set("lac", parser.group(index++));
-            extendedInfo.set("gsm", parser.group(index++));
+            position.set("mcc", parser.group(index++));
+            position.set("mnc", parser.group(index++));
+            position.set("lac", parser.group(index++));
+            position.set("gsm", parser.group(index++));
 
             // Battery
-            extendedInfo.set("battery", Double.valueOf(parser.group(index++)));
+            position.set("battery", Double.valueOf(parser.group(index++)));
             
-            extendedInfo.set("flags", parser.group(index++));
-            extendedInfo.set("input", parser.group(index++));
-            extendedInfo.set("output", parser.group(index++));
-            extendedInfo.set("adc1", parser.group(index++));
-            extendedInfo.set("adc2", parser.group(index++));
-            extendedInfo.set("adc3", parser.group(index++));
-            extendedInfo.set("alarm", parser.group(index++));
+            position.set("flags", parser.group(index++));
+            position.set("input", parser.group(index++));
+            position.set("output", parser.group(index++));
+            position.set("adc1", parser.group(index++));
+            position.set("adc2", parser.group(index++));
+            position.set("adc3", parser.group(index++));
+            position.set("alarm", parser.group(index++));
             
         }
-
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

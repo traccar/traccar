@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -25,9 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
@@ -79,11 +76,11 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             // Status code
             if (checkBit(mask, 1)) {
-                extendedInfo.set("status", buf.readUnsignedInt());
+                position.set("status", buf.readUnsignedInt());
             }
 
             // Device id
@@ -174,7 +171,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Satellites
             if (checkBit(mask, 16)) {
-                extendedInfo.set("satellites", buf.readUnsignedByte());
+                position.set("satellites", buf.readUnsignedByte());
             }
 
             // Battery percentage
@@ -184,12 +181,12 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Trip milage
             if (checkBit(mask, 20)) {
-                extendedInfo.set("trip", buf.readUnsignedInt());
+                position.set("trip", buf.readUnsignedInt());
             }
 
             // Milage
             if (checkBit(mask, 21)) {
-                extendedInfo.set("milage", buf.readUnsignedInt());
+                position.set("milage", buf.readUnsignedInt());
             }
 
             // Time of message generation
@@ -199,7 +196,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Battery level
             if (checkBit(mask, 24)) {
-                extendedInfo.set("power", buf.readUnsignedShort() / 1000.0);
+                position.set("power", buf.readUnsignedShort() / 1000.0);
             }
 
             // GPS overspeed
@@ -214,11 +211,8 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Sequence number
             if (checkBit(mask, 28)) {
-                extendedInfo.set("index", buf.readUnsignedShort());
+                position.set("index", buf.readUnsignedShort());
             }
-
-            // Extended info
-            position.setExtendedInfo(extendedInfo.toString());
 
             return position;
         }

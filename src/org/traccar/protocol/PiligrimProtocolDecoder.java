@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -35,9 +34,6 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
@@ -102,7 +98,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_GPS || type == MSG_GPS_SENSORS) {
                     
                     Position position = new Position();
-                    ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                    position.setProtocol(getProtocol());
                     position.setDeviceId(getDeviceId());
                     
                     // Time
@@ -137,7 +133,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     
                     // Satellites
                     int satellites = buf.readUnsignedByte();
-                    extendedInfo.set("satellites", satellites);
+                    position.set("satellites", satellites);
                     position.setValid(satellites >= 3);
                     
                     // Speed
@@ -155,18 +151,16 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                         // External power
                         double power = buf.readUnsignedByte();
                         power += buf.readUnsignedByte() << 8;
-                        extendedInfo.set("power", power / 100);
+                        position.set("power", power / 100);
 
                         // Battery
                         double battery = buf.readUnsignedByte();
                         battery += buf.readUnsignedByte() << 8;
-                        extendedInfo.set("battery", battery / 100);
+                        position.set("battery", battery / 100);
                         
                         buf.skipBytes(6);
                         
                     }
-                    
-                    position.setExtendedInfo(extendedInfo.toString());
                     positions.add(position);
                     
                 } else if (type == MSG_EVENTS) {

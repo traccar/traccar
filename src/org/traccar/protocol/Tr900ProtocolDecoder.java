@@ -18,13 +18,9 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,7 +68,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         Integer index = 1;
 
         // Identification
@@ -116,14 +112,12 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Other
-        extendedInfo.set("gsm", parser.group(index++));
-        extendedInfo.set("event", Integer.valueOf(parser.group(index++)));
-        extendedInfo.set("adc1", Integer.valueOf(parser.group(index++)));
-        extendedInfo.set("battery", Integer.valueOf(parser.group(index++)));
-        extendedInfo.set("input", parser.group(index++));
-        extendedInfo.set("status", parser.group(index++));
-
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("gsm", parser.group(index++));
+        position.set("event", Integer.valueOf(parser.group(index++)));
+        position.set("adc1", Integer.valueOf(parser.group(index++)));
+        position.set("battery", Integer.valueOf(parser.group(index++)));
+        position.set("input", parser.group(index++));
+        position.set("status", parser.group(index++));
         return position;
     }
 

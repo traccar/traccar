@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -34,9 +33,6 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
@@ -61,7 +57,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         // Identification
         String id = params.get(params.containsKey("id") ? "id" : "deviceid").get(0);
@@ -101,27 +97,25 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (params.containsKey("hdop")) {
-            extendedInfo.set("hdop", params.get("hdop").get(0));
+            position.set("hdop", params.get("hdop").get(0));
         }
 
         if (params.containsKey("vacc")) {
-            extendedInfo.set("vacc", params.get("vacc").get(0));
+            position.set("vacc", params.get("vacc").get(0));
         }
 
         if (params.containsKey("hacc")) {
-            extendedInfo.set("hacc", params.get("hacc").get(0));
+            position.set("hacc", params.get("hacc").get(0));
         }
 
         if (params.containsKey("batt")) {
-            extendedInfo.set("battery", params.get("batt").get(0));
+            position.set("battery", params.get("batt").get(0));
         }
 
         if (params.containsKey("desc")) {
-            extendedInfo.set("description", params.get("desc").get(0));
+            position.set("description", params.get("desc").get(0));
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
-        
         // Send response
         if (channel != null) {
             HttpResponse response = new DefaultHttpResponse(

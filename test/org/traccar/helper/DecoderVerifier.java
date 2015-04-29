@@ -37,7 +37,7 @@ public class DecoderVerifier {
         assertTrue(position.getCourse() >= 0);
         assertTrue(position.getCourse() <= 360);
         
-        assertNotNull(position.getExtendedInfo());
+        assertNotNull(position.getOther());
 
     }
 

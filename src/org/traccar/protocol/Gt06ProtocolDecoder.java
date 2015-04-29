@@ -21,10 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
-import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
@@ -145,7 +142,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             // Date and time
             Calendar time = Calendar.getInstance(timeZone);
@@ -160,7 +157,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             // GPS length and Satellites count
             int gpsLength = buf.readUnsignedByte();
-            extendedInfo.set("satellites", gpsLength & 0xf);
+            position.set("satellites", gpsLength & 0xf);
             gpsLength >>= 4;
 
             // Latitude
@@ -183,7 +180,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
             
             if ((union & 0x4000) != 0) {
-                extendedInfo.set("acc", (union & 0x8000) != 0);
+                position.set("acc", (union & 0x8000) != 0);
             }
 
             buf.skipBytes(gpsLength - 12); // skip reserved
@@ -197,27 +194,27 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 // Cell information
-                extendedInfo.set("mcc", buf.readUnsignedShort());
-                extendedInfo.set("mnc", buf.readUnsignedByte());
-                extendedInfo.set("lac", buf.readUnsignedShort());
-                extendedInfo.set("cell", buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
+                position.set("mcc", buf.readUnsignedShort());
+                position.set("mnc", buf.readUnsignedByte());
+                position.set("lac", buf.readUnsignedShort());
+                position.set("cell", buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
                 buf.skipBytes(lbsLength - 9);
 
                 // Status
                 if (type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3) {
 
-                    extendedInfo.set("alarm", true);
+                    position.set("alarm", true);
 
                     int flags = buf.readUnsignedByte();
 
-                    extendedInfo.set("acc", (flags & 0x2) != 0);
+                    position.set("acc", (flags & 0x2) != 0);
                     // TODO parse other flags
 
                     // Voltage
-                    extendedInfo.set("power", buf.readUnsignedByte());
+                    position.set("power", buf.readUnsignedByte());
 
                     // GSM signal
-                    extendedInfo.set("gsm", buf.readUnsignedByte());
+                    position.set("gsm", buf.readUnsignedByte());
                 }
             }
 
@@ -226,10 +223,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(buf.readableBytes() - 6);
             }
             int index = buf.readUnsignedShort();
-            extendedInfo.set("index", index);
+            position.set("index", index);
             sendResponse(channel, type, index);
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
         

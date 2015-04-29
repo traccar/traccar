@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -24,10 +23,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
@@ -72,7 +68,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             // Identification
             if (!identify(id)) {
@@ -100,24 +96,22 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             // Flags
             int flags = buf.readUnsignedByte();
             position.setValid((flags & 0x80) != 0);
-            extendedInfo.set("satellites", flags & 0x0f);
+            position.set("satellites", flags & 0x0f);
 
             // Status
-            extendedInfo.set("status", buf.readUnsignedByte());
+            position.set("status", buf.readUnsignedByte());
 
             // Key switch
-            extendedInfo.set("key", buf.readUnsignedByte());
+            position.set("key", buf.readUnsignedByte());
 
             // Oil
-            extendedInfo.set("oil", buf.readUnsignedShort() / 10.0);
+            position.set("oil", buf.readUnsignedShort() / 10.0);
 
             // Power
-            extendedInfo.set("power", buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
+            position.set("power", buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
 
             // Milage
-            extendedInfo.set("milage", buf.readUnsignedInt());
-
-            position.setExtendedInfo(extendedInfo.toString());
+            position.set("milage", buf.readUnsignedInt());
             return position;
         }
 

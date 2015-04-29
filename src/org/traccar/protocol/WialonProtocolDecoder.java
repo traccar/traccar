@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,9 +26,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class WialonProtocolDecoder extends BaseProtocolDecoder {
@@ -79,7 +75,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         position.setDeviceId(getDeviceId());
 
         Integer index = 1;
@@ -129,27 +125,27 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         String satellites = parser.group(index++);
         if (satellites != null) {
             position.setValid(Integer.valueOf(satellites) >= 3);
-            extendedInfo.set("satellites", satellites);
+            position.set("satellites", satellites);
         } else {
             position.setValid(false);
         }
 
         // Other
-        extendedInfo.set("hdop", parser.group(index++));
-        extendedInfo.set("inputs", parser.group(index++));
-        extendedInfo.set("outputs", parser.group(index++));
+        position.set("hdop", parser.group(index++));
+        position.set("inputs", parser.group(index++));
+        position.set("outputs", parser.group(index++));
 
         // ADC
         String adc = parser.group(index++);
         if (adc != null) {
             String[] values = adc.split(",");
             for (int i = 0; i < values.length; i++) {
-                extendedInfo.set("adc" + (i + 1), values[i]);
+                position.set("adc" + (i + 1), values[i]);
             }
         }
 
         // iButton
-        extendedInfo.set("ibutton", parser.group(index++));
+        position.set("ibutton", parser.group(index++));
 
         // Params
         String params = parser.group(index);
@@ -158,13 +154,10 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String param : values) {
                 Matcher paramParser = Pattern.compile( "(.*):[1-3]:(.*)").matcher(param);
                 if (paramParser.matches()) {
-                    extendedInfo.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                    position.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
                 }
             }
         }
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }

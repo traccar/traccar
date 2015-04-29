@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
@@ -80,7 +76,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             Integer index = 1;
 
@@ -123,9 +119,6 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
-
-            // Extended info
-            position.setExtendedInfo(extendedInfo.toString());
 
             return position;
         }

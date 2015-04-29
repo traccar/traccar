@@ -18,13 +18,9 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,7 +60,7 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         Integer index = 1;
 
         // Detect device
@@ -94,18 +90,17 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        extendedInfo.set("satellites", satellites);
+        position.set("satellites", satellites);
         
         // Event
-        extendedInfo.set("event", parser.group(index++));
+        position.set("event", parser.group(index++));
 
         // Input
-        extendedInfo.set("battery", parser.group(index++));
+        position.set("battery", parser.group(index++));
 
         // Output
-        extendedInfo.set("temperature", parser.group(index++));
+        position.set("temperature", parser.group(index++));
 
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

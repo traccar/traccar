@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
@@ -66,7 +62,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         int index = 1;
 
         // Identifier
@@ -76,7 +72,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
         
         // Version
-        extendedInfo.set("version", parser.group(index++));
+        position.set("version", parser.group(index++));
 
         // Date and Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -90,7 +86,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
         
         // Cell
-        extendedInfo.set("cell", parser.group(index++));
+        position.set("cell", parser.group(index++));
 
         // Coordinates
         position.setLatitude(Double.valueOf(parser.group(index++)));
@@ -102,9 +98,6 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }

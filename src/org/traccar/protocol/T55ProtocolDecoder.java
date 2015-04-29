@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
@@ -140,7 +136,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;
@@ -184,8 +180,6 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
             time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 
@@ -200,7 +194,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;
@@ -227,8 +221,6 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             longitude += Double.valueOf(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 
@@ -243,7 +235,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;
@@ -277,8 +269,6 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             if (course != null) {
                 position.setCourse(Double.valueOf(course));
             }
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 
@@ -293,7 +283,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;
@@ -320,9 +310,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(Double.valueOf(parser.group(index++)));
 
             // Battery
-            extendedInfo.set("battery", parser.group(index++));
-
-            position.setExtendedInfo(extendedInfo.toString());
+            position.set("battery", parser.group(index++));
             return position;
         }
 

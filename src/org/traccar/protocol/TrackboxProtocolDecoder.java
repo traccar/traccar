@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
@@ -80,7 +76,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             Integer index = 1;
 
@@ -105,14 +101,14 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
             
             // HDOP
-            extendedInfo.set("hdop", parser.group(index++));
+            position.set("hdop", parser.group(index++));
 
             // Altitude
             position.setAltitude(Double.valueOf(parser.group(index++)));
             
             // Validity
             int fix = Integer.valueOf(parser.group(index++));
-            extendedInfo.set("fix", fix);
+            position.set("fix", fix);
             position.setValid(fix > 0);
 
             // Course
@@ -129,10 +125,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
 
             // Satellites
-            extendedInfo.set("satellites", parser.group(index++));
-
-            // Extended info
-            position.setExtendedInfo(extendedInfo.toString());
+            position.set("satellites", parser.group(index++));
 
             return position;
         }

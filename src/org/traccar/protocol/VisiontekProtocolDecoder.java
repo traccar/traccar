@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
@@ -74,7 +70,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -122,23 +118,20 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Additional data
-        extendedInfo.set("satellites", parser.group(index++));
-        extendedInfo.set("milage", parser.group(index++));
-        extendedInfo.set("ignition", parser.group(index++));
-        extendedInfo.set("input1", parser.group(index++));
-        extendedInfo.set("input2", parser.group(index++));
-        extendedInfo.set("immobilizer", parser.group(index++));
-        extendedInfo.set("power", parser.group(index++));
-        extendedInfo.set("gsm", parser.group(index++));
+        position.set("satellites", parser.group(index++));
+        position.set("milage", parser.group(index++));
+        position.set("ignition", parser.group(index++));
+        position.set("input1", parser.group(index++));
+        position.set("input2", parser.group(index++));
+        position.set("immobilizer", parser.group(index++));
+        position.set("power", parser.group(index++));
+        position.set("gsm", parser.group(index++));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // RFID
-        extendedInfo.set("rfid", parser.group(index++));
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("rfid", parser.group(index++));
 
         return position;
     }

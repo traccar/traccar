@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class RitiProtocolDecoder extends BaseProtocolDecoder {
@@ -61,7 +57,7 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         buf.skipBytes(2); // header
 
@@ -71,16 +67,16 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        extendedInfo.set("mode", buf.readUnsignedByte());
-        extendedInfo.set("command", buf.readUnsignedByte());
-        extendedInfo.set("power", buf.readUnsignedShort());
+        position.set("mode", buf.readUnsignedByte());
+        position.set("command", buf.readUnsignedByte());
+        position.set("power", buf.readUnsignedShort());
         
         buf.skipBytes(5);
         buf.readUnsignedShort();
         buf.readUnsignedShort();
         
-        extendedInfo.set("distance", buf.readUnsignedInt());
-        extendedInfo.set("milage", buf.readUnsignedInt());
+        position.set("distance", buf.readUnsignedInt());
+        position.set("milage", buf.readUnsignedInt());
         
         // Parse GPRMC
         Integer end = ChannelBufferTools.find(buf, buf.readerIndex(), buf.readerIndex() + 80, "*");
@@ -132,8 +128,6 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

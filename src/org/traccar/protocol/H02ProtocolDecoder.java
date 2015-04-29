@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
@@ -62,7 +58,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         
         buf.readByte(); // marker
 
@@ -99,9 +95,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse((buf.readUnsignedByte() & 0x0f) * 100.0 + ChannelBufferTools.readHexInteger(buf, 2));
         
         // Status
-        extendedInfo.set("status", ChannelBufferTools.readHexString(buf, 8));
-        
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("status", ChannelBufferTools.readHexString(buf, 8));
         return position;
     }
 
@@ -132,7 +126,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -180,9 +174,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
         
         // Status
-        extendedInfo.set("status", parser.group(index++));
-
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("status", parser.group(index++));
         return position;
     }
 

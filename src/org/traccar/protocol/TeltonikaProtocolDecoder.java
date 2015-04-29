@@ -19,7 +19,6 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -27,9 +26,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
@@ -79,7 +75,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         
         for (int i = 0; i < count; i++) {
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             
             position.setDeviceId(deviceId);
             
@@ -117,28 +113,28 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 
                 if (checkBit(locationMask, 4)) {
                     int satellites = buf.readUnsignedByte();
-                    extendedInfo.set("satellites", satellites);
+                    position.set("satellites", satellites);
                     position.setValid(satellites >= 3);
                 }
                 
                 if (checkBit(locationMask, 5)) {
-                    extendedInfo.set("area", buf.readUnsignedShort());
-                    extendedInfo.set("cell", buf.readUnsignedShort());
+                    position.set("area", buf.readUnsignedShort());
+                    position.set("cell", buf.readUnsignedShort());
                 }
                 
                 if (checkBit(locationMask, 6)) {
-                    extendedInfo.set("gsm", buf.readUnsignedByte());
+                    position.set("gsm", buf.readUnsignedByte());
                 }
                 
                 if (checkBit(locationMask, 7)) {
-                    extendedInfo.set("operator", buf.readUnsignedInt());
+                    position.set("operator", buf.readUnsignedInt());
                 }
 
             } else {
 
                 position.setTime(new Date(buf.readLong()));
 
-                extendedInfo.set("priority", buf.readUnsignedByte());
+                position.set("priority", buf.readUnsignedByte());
 
                 position.setLongitude(buf.readInt() / 10000000.0);
                 position.setLatitude(buf.readInt() / 10000000.0);
@@ -146,13 +142,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(buf.readUnsignedShort());
 
                 int satellites = buf.readUnsignedByte();
-                extendedInfo.set("satellites", satellites);
+                position.set("satellites", satellites);
 
                 position.setValid(satellites != 0);
 
                 position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
-                extendedInfo.set("event", buf.readUnsignedByte());
+                position.set("event", buf.readUnsignedByte());
 
                 buf.readUnsignedByte(); // total IO data records
 
@@ -164,9 +160,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 for (int j = 0; j < cnt; j++) {
                     int id = buf.readUnsignedByte();
                     if (id == 1) {
-                        extendedInfo.set("power", buf.readUnsignedByte());
+                        position.set("power", buf.readUnsignedByte());
                     } else {
-                        extendedInfo.set("io" + id, buf.readUnsignedByte());
+                        position.set("io" + id, buf.readUnsignedByte());
                     }
                 }
             }
@@ -176,7 +172,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (checkBit(globalMask, 2)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
                 }
             }
 
@@ -184,7 +180,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (checkBit(globalMask, 3)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
                 }
             }
 
@@ -192,11 +188,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (codec == CODEC_FM4X00) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readLong());
+                    position.set("io" + buf.readUnsignedByte(), buf.readLong());
                 }
             }
-        
-            position.setExtendedInfo(extendedInfo.toString());
             positions.add(position);
         }
         

@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,9 +26,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
@@ -70,7 +66,7 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         
         // Get device by id
         String id = buf.readBytes(16).toString(Charset.defaultCharset()).trim();
@@ -130,31 +126,28 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // IMSI
-        extendedInfo.set("imsi", parser.group(index++));
+        position.set("imsi", parser.group(index++));
 
         // Cell
-        extendedInfo.set("cell", parser.group(index++));
+        position.set("cell", parser.group(index++));
 
         // GSM signal quality
-        extendedInfo.set("gsm", parser.group(index++));
+        position.set("gsm", parser.group(index++));
         
         // Battery
-        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
+        position.set("power", Double.valueOf(parser.group(index++)));
         
         // Flags
-        extendedInfo.set("flags", parser.group(index++));
+        position.set("flags", parser.group(index++));
 
         // Sensors
-        extendedInfo.set("sensors", parser.group(index++));
+        position.set("sensors", parser.group(index++));
 
         // Fuel
-        extendedInfo.set("fuel", parser.group(index++));
+        position.set("fuel", parser.group(index++));
 
         // Alarm
-        extendedInfo.set("alarm", parser.group(index++));
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("alarm", parser.group(index++));
 
         return position;
     }

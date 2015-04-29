@@ -26,9 +26,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
@@ -92,7 +89,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse data
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length() && valueIndex < values.length; formatIndex++) {
             String value = values[valueIndex];
@@ -170,7 +167,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Double.valueOf(value));
                     break;
                 case 'N':
-                    extendedInfo.set("battery", value);
+                    position.set("battery", value);
                     break;
                 default:
                     // Unsupported
@@ -179,8 +176,6 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
             valueIndex += 1;
         }
-
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
     
@@ -211,7 +206,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         Integer index = 1;
 
         // Identification
@@ -258,12 +253,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Satellites
-        extendedInfo.set("satellites", Integer.valueOf(parser.group(index++)));
+        position.set("satellites", Integer.valueOf(parser.group(index++)));
 
         // HDOP
-        extendedInfo.set("hdop", parser.group(index++));
-
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("hdop", parser.group(index++));
         return position;
     }
 

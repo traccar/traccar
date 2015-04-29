@@ -188,30 +188,7 @@ public class DataManager {
         params.setDouble("speed", position.getSpeed());
         params.setDouble("course", position.getCourse());
         params.setString("address", position.getAddress());
-        params.setString("extended_info", position.getExtendedInfo());
-
-        // DELME: Temporary compatibility support
-        XPath xpath = XPathFactory.newInstance().newXPath();
-        try {
-            InputSource source = new InputSource(new StringReader(position.getExtendedInfo()));
-            String index = xpath.evaluate("/info/index", source);
-            if (!index.isEmpty()) {
-                params.setLong("id", Long.valueOf(index));
-            } else {
-                params.setLong("id", null);
-            }
-            source = new InputSource(new StringReader(position.getExtendedInfo()));
-            String power = xpath.evaluate("/info/power", source);
-            if (!power.isEmpty()) {
-                params.setDouble("power", Double.valueOf(power));
-            } else {
-                params.setLong("power", null);
-            }
-        } catch (XPathExpressionException e) {
-            Log.warning("Error in XML: " + position.getExtendedInfo(), e);
-            params.setLong("id", null);
-            params.setLong("power", null);
-        }
+        params.setString("extended_info", position.getOther());
 
         return params;
     }
@@ -273,6 +250,7 @@ public class DataManager {
 
                             "CREATE TABLE position (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
+                            "protocol VARCHAR(1024)," +
                             "device_id INT NOT NULL," +
                             "server_time TIMESTAMP NOT NULL," +
                             "device_time TIMESTAMP NOT NULL," +
@@ -289,6 +267,7 @@ public class DataManager {
 
                             "CREATE TABLE data (" +
                             "id INT PRIMARY KEY AUTO_INCREMENT," +
+                            "protocol VARCHAR(1024)," +
                             "device_id INT NOT NULL," +
                             "server_time TIMESTAMP NOT NULL," +
                             "device_time TIMESTAMP NOT NULL," +

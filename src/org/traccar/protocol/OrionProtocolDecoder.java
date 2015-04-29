@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -27,9 +26,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
@@ -86,12 +82,12 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 // Create new position
                 Position position = new Position();
                 position.setDeviceId(getDeviceId());
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                position.setProtocol(getProtocol());
                 
-                extendedInfo.set("event", buf.readUnsignedByte());
+                position.set("event", buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length
-                extendedInfo.set("flag1", buf.readUnsignedByte());
-                extendedInfo.set("flag2", buf.readUnsignedByte());
+                position.set("flag1", buf.readUnsignedByte());
+                position.set("flag2", buf.readUnsignedByte());
                 
                 // Location
                 position.setLatitude(convertCoordinate(buf.readInt()));
@@ -113,10 +109,8 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 
                 // Accuracy
                 int satellites = buf.readUnsignedByte();
-                extendedInfo.set("satellites", satellites);
+                position.set("satellites", satellites);
                 position.setValid(satellites >= 3);
-                
-                position.setExtendedInfo(extendedInfo.toString());
                 positions.add(position);
             }
             

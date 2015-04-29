@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +25,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
@@ -68,7 +64,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -108,10 +104,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
-        extendedInfo.set("hdop", parser.group(index++));
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("hdop", parser.group(index++));
 
         return position;
     }

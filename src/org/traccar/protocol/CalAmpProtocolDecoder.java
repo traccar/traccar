@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Date;
-import java.util.Properties;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -26,9 +26,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
@@ -161,7 +158,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             // Location data
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -181,42 +178,42 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
             // Fix status
             if (type == MSG_MINI_EVENT_REPORT) {
-                extendedInfo.set("satellites", buf.getUnsignedByte(buf.readerIndex()) & 0xf);
+                position.set("satellites", buf.getUnsignedByte(buf.readerIndex()) & 0xf);
                 position.setValid((buf.readUnsignedByte() & 0x20) == 0);
             } else {
-                extendedInfo.set("satellites", buf.readUnsignedByte());
+                position.set("satellites", buf.readUnsignedByte());
                 position.setValid((buf.readUnsignedByte() & 0x08) == 0);
             }
 
             if (type != MSG_MINI_EVENT_REPORT) {
 
                 // Carrier
-                extendedInfo.set("carrier", buf.readUnsignedShort());
+                position.set("carrier", buf.readUnsignedShort());
 
                 // Cell signal
-                extendedInfo.set("gsm", buf.readShort());
+                position.set("gsm", buf.readShort());
 
             }
 
             // Modem state
-            extendedInfo.set("modem", buf.readUnsignedByte());
+            position.set("modem", buf.readUnsignedByte());
 
             // HDOP
             if (type != MSG_MINI_EVENT_REPORT) {
-                extendedInfo.set("hdop", buf.readUnsignedByte());
+                position.set("hdop", buf.readUnsignedByte());
             }
 
             // Inputs
-            extendedInfo.set("input", buf.readUnsignedByte());
+            position.set("input", buf.readUnsignedByte());
 
             // Unit status
             if (type != MSG_MINI_EVENT_REPORT) {
-                extendedInfo.set("status", buf.readUnsignedByte());
+                position.set("status", buf.readUnsignedByte());
             }
 
             // Event code and status
             if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
-                extendedInfo.set("event", buf.readUnsignedByte() + " - " + buf.readUnsignedByte());
+                position.set("event", buf.readUnsignedByte() + " - " + buf.readUnsignedByte());
             }
 
             // Accumulators
@@ -232,10 +229,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             }
 
             for (int i = 0; i < accCount; i++) {
-                extendedInfo.set("acc" + i, buf.readUnsignedInt());
+                position.set("acc" + i, buf.readUnsignedInt());
             }
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
 
         }

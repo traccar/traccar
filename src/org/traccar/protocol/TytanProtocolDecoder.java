@@ -27,7 +27,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TytanProtocolDecoder extends BaseProtocolDecoder {
@@ -62,7 +61,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readable()) {
             
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             position.setDeviceId(getDeviceId());
             
             int end = buf.readerIndex() + buf.readUnsignedByte();
@@ -70,8 +69,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             
             int flags = buf.readUnsignedByte();
-            extendedInfo.set("gps", flags >> 5);
-            extendedInfo.set("gsm", flags & 0x07);
+            position.set("gps", flags >> 5);
+            position.set("gsm", flags & 0x07);
             position.setValid(((flags & 0x08) != 0) ^ ((flags & 0x10) != 0));
             
             // Latitude
@@ -98,33 +97,33 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readerIndex() < end) {
                 switch (buf.readUnsignedByte()) {
                     case 2:
-                        extendedInfo.set("milage", buf.readUnsignedMedium());
+                        position.set("milage", buf.readUnsignedMedium());
                         break;
                     case 4:
                         buf.readUnsignedShort(); // device start
                         break;
                     case 5:
-                        extendedInfo.set("input", buf.readUnsignedByte());
+                        position.set("input", buf.readUnsignedByte());
                         break;
                     case 6:
                         buf.readUnsignedShort();
-                        extendedInfo.set("adc", buf.readFloat());
+                        position.set("adc", buf.readFloat());
                         break;
                     case 7:
-                        extendedInfo.set("alarm", buf.readUnsignedShort());
+                        position.set("alarm", buf.readUnsignedShort());
                         break;
                     case 8:
-                        extendedInfo.set("antihijack", buf.readUnsignedByte());
+                        position.set("antihijack", buf.readUnsignedByte());
                         break;
                     case 9:
-                        extendedInfo.set("authorized", ChannelBufferTools.readHexString(buf, 16));
+                        position.set("authorized", ChannelBufferTools.readHexString(buf, 16));
                         break;
                     case 10:
-                        extendedInfo.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
+                        position.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
                         break;
                     case 24:
                         buf.readUnsignedByte();
-                        extendedInfo.set("temperature", buf.readUnsignedByte());
+                        position.set("temperature", buf.readUnsignedByte());
                         break;
                     case 25:
                         buf.readUnsignedByte();
@@ -134,7 +133,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(buf.readUnsignedByte() * 2); // flowmeter
                         break;
                     case 28:
-                        extendedInfo.set("weight", buf.readUnsignedShort());
+                        position.set("weight", buf.readUnsignedShort());
                         buf.readUnsignedByte();
                         break;
                     case 29:
@@ -180,7 +179,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedByte(); // engine load
                         break;
                     case 107:
-                        extendedInfo.set("fuel", buf.readUnsignedShort() & 0x3fff);
+                        position.set("fuel", buf.readUnsignedShort() & 0x3fff);
                         break;
                     case 108:
                         buf.readUnsignedInt(); // total distance
@@ -210,12 +209,10 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedShort(); // fuel rate
                         break;
                     case 150:
-                        extendedInfo.set("door", buf.readUnsignedByte());
+                        position.set("door", buf.readUnsignedByte());
                         break;
                 }
             }
-            
-            position.setExtendedInfo(extendedInfo.toString());
             positions.add(position);
         }
         

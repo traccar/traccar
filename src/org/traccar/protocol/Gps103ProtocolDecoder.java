@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +25,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
@@ -94,7 +90,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -105,7 +101,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Alarm message
-        extendedInfo.set("alarm", parser.group(index++));
+        position.set("alarm", parser.group(index++));
         
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -193,13 +189,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Additional data
-        extendedInfo.set("io1", parser.group(index++));
-        extendedInfo.set("io2", parser.group(index++));
-        extendedInfo.set("io3", parser.group(index++));
-        extendedInfo.set("io4", parser.group(index++));
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("io1", parser.group(index++));
+        position.set("io2", parser.group(index++));
+        position.set("io3", parser.group(index++));
+        position.set("io4", parser.group(index++));
 
         return position;
     }

@@ -20,7 +20,6 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -29,9 +28,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class ProgressProtocolDecoder extends BaseProtocolDecoder {
@@ -118,22 +114,22 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                position.setProtocol(getProtocol());
                 position.setDeviceId(getDeviceId());
 
                 // Message index
                 if (type == MSG_LOGMSG) {
-                    extendedInfo.set("archive", true);
+                    position.set("archive", true);
                     int subtype = buf.readUnsignedShort();
                     if (subtype == MSG_ALARM) {
-                        extendedInfo.set("alarm", true);
+                        position.set("alarm", true);
                     }
                     if (buf.readUnsignedShort() > buf.readableBytes()) {
                         lastIndex += 1;
                         break; // workaround for device bug
                     }
                     lastIndex = buf.readUnsignedInt();
-                    extendedInfo.set("index", lastIndex);
+                    position.set("index", lastIndex);
                 } else {
                     newIndex = buf.readUnsignedInt();
                 }
@@ -161,16 +157,16 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
                 // Satellites
                 int satellitesNumber = buf.readUnsignedByte();
-                extendedInfo.set("satellites", satellitesNumber);
+                position.set("satellites", satellitesNumber);
 
                 // Validity
                 position.setValid(satellitesNumber >= 3); // TODO: probably wrong
 
                 // Cell signal
-                extendedInfo.set("gsm", buf.readUnsignedByte());
+                position.set("gsm", buf.readUnsignedByte());
 
                 // Milage
-                extendedInfo.set("milage", buf.readUnsignedInt());
+                position.set("milage", buf.readUnsignedInt());
 
                 long extraFlags = buf.readLong();
 
@@ -178,7 +174,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 if ((extraFlags & 0x1) == 0x1) {
                     int count = buf.readUnsignedShort();
                     for (int i = 1; i <= count; i++) {
-                        extendedInfo.set("adc" + i, buf.readUnsignedShort());
+                        position.set("adc" + i, buf.readUnsignedShort());
                     }
 
                 }
@@ -186,7 +182,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 // CAN adapter
                 if ((extraFlags & 0x2) == 0x2) {
                     int size = buf.readUnsignedShort();
-                    extendedInfo.set("can", buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
+                    position.set("can", buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
                     buf.skipBytes(size);
                 }
 
@@ -202,7 +198,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                         hex.append(HEX_CHARS.charAt((b & 0x0F)));
                     }
 
-                    extendedInfo.set("passenger", hex);
+                    position.set("passenger", hex);
 
                     buf.skipBytes(size);
                 }
@@ -212,14 +208,11 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     byte[] response = {(byte)0xC9,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
                     channel.write(ChannelBuffers.wrappedBuffer(response));
 
-                    extendedInfo.set("alarm", true);
+                    position.set("alarm", true);
                 }
 
                 // Skip CRC
                 buf.readUnsignedInt();
-
-                // Extended info
-                position.setExtendedInfo(extendedInfo.toString());
 
                 positions.add(position);
             }

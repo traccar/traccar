@@ -20,10 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.*;
@@ -48,7 +45,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         position.setDeviceId(getDeviceId());
 
         if (!history) {
@@ -59,7 +56,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         if (!history) {
             buf.readUnsignedShort();
         }
-        extendedInfo.set("battery", buf.readUnsignedByte());
+        position.set("battery", buf.readUnsignedByte());
         buf.skipBytes(6); // time
 
         // Timers
@@ -71,8 +68,8 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        extendedInfo.set("temperature", buf.readByte());
-        extendedInfo.set("gsm", buf.readUnsignedByte());
+        position.set("temperature", buf.readByte());
+        position.set("gsm", buf.readUnsignedByte());
         buf.readUnsignedShort(); // mcc
         buf.readUnsignedShort(); // mnc
         buf.readUnsignedShort(); // lac
@@ -81,7 +78,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         // GPS status
         int valid = buf.readUnsignedByte();
         position.setValid((valid & 0xc0) != 0);
-        extendedInfo.set("satellites", valid & 0x3f);
+        position.set("satellites", valid & 0x3f);
 
         // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -101,12 +98,10 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(buf.readUnsignedByte());
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
-        extendedInfo.set("hdop", buf.readUnsignedShort());
+        position.set("hdop", buf.readUnsignedShort());
 
         buf.readUnsignedShort(); // reserved
         buf.readUnsignedByte(); // checksum
-
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

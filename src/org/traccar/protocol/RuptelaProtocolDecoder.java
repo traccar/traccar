@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -26,9 +25,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
@@ -63,7 +59,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < count; i++) {
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                position.setProtocol(getProtocol());
                 position.setDeviceId(getDeviceId());
 
                 // Time
@@ -80,40 +76,38 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
                 // Validity
                 int satellites = buf.readUnsignedByte();
-                extendedInfo.set("satellites", satellites);
+                position.set("satellites", satellites);
                 position.setValid(satellites >= 3);
 
                 position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
-                extendedInfo.set("hdop", buf.readUnsignedByte() / 10.0);
+                position.set("hdop", buf.readUnsignedByte() / 10.0);
 
                 buf.readUnsignedByte();
 
                 // Read 1 byte data
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedByte());
                 }
 
                 // Read 2 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
                 }
 
                 // Read 4 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
                 }
 
                 // Read 8 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    extendedInfo.set("io" + buf.readUnsignedByte(), buf.readLong());
+                    position.set("io" + buf.readUnsignedByte(), buf.readLong());
                 }
-
-                position.setExtendedInfo(extendedInfo.toString());
                 positions.add(position);
             }
 

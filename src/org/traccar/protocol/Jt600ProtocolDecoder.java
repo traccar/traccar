@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
@@ -42,7 +38,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeNormalMessage(ChannelBuffer buf) throws Exception {
 
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         buf.readByte(); // header
 
@@ -96,33 +92,31 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         
         if (version == 1) {
             
-            extendedInfo.set("satellites", buf.readUnsignedByte());
+            position.set("satellites", buf.readUnsignedByte());
 
             // Power
-            extendedInfo.set("power", buf.readUnsignedByte());
+            position.set("power", buf.readUnsignedByte());
 
             buf.readByte(); // other flags and sensors
 
             // Altitude
             position.setAltitude(buf.readUnsignedShort());
 
-            extendedInfo.set("cell", buf.readUnsignedShort());
-            extendedInfo.set("lac", buf.readUnsignedShort());
-            extendedInfo.set("gsm", buf.readUnsignedByte());
+            position.set("cell", buf.readUnsignedShort());
+            position.set("lac", buf.readUnsignedShort());
+            position.set("gsm", buf.readUnsignedByte());
 
         } else if (version == 2) {
 
             int fuel = buf.readUnsignedByte() << 8;
 
-            extendedInfo.set("status", buf.readUnsignedInt());
-            extendedInfo.set("milage", buf.readUnsignedInt());
+            position.set("status", buf.readUnsignedInt());
+            position.set("milage", buf.readUnsignedInt());
 
             fuel += buf.readUnsignedByte();
-            extendedInfo.set("fuel", fuel);
+            position.set("fuel", fuel);
 
         }
-        
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 
@@ -157,8 +151,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-        extendedInfo.set("alert", "true");
+        position.setProtocol(getProtocol());
+        position.set("alert", "true");
         Integer index = 1;
 
         // Get device by identifier
@@ -200,9 +194,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Power
-        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
-
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("power", Double.valueOf(parser.group(index++)));
         return position;
     }
 

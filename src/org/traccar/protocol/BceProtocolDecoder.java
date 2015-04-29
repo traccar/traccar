@@ -19,16 +19,12 @@ import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class BceProtocolDecoder extends BaseProtocolDecoder {
@@ -72,7 +68,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readerIndex() < dataEnd) {
 
                 Position position = new Position();
-                ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                position.setProtocol(getProtocol());
                 position.setDeviceId(getDeviceId());
 
                 int structEnd = buf.readUnsignedByte() + buf.readerIndex();
@@ -101,24 +97,22 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         position.setSpeed(buf.readUnsignedByte());
 
                         int gps = buf.readUnsignedByte();
-                        extendedInfo.set("satellites", gps & 0xf);
-                        extendedInfo.set("hdop", gps >> 4);
+                        position.set("satellites", gps & 0xf);
+                        position.set("hdop", gps >> 4);
 
                         position.setCourse(buf.readUnsignedByte());
                         position.setAltitude(buf.readUnsignedShort());
 
-                        extendedInfo.set("milage", buf.readUnsignedInt());
-
-                        position.setExtendedInfo(extendedInfo.toString());
+                        position.set("milage", buf.readUnsignedInt());
                     }
 
                     if (checkBit(mask, 1)) {
-                        extendedInfo.set("input", buf.readUnsignedShort());
+                        position.set("input", buf.readUnsignedShort());
                     }
 
                     for (int i = 1; i <= 8; i++) {
                         if (checkBit(mask, i + 1)) {
-                            extendedInfo.set("adc" + i, buf.readUnsignedShort());
+                            position.set("adc" + i, buf.readUnsignedShort());
                         }
                     }
 
@@ -128,11 +122,11 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                     if (checkBit(mask, 13)) buf.skipBytes(2);
 
                     if (checkBit(mask, 14)) {
-                        extendedInfo.set("mcc", buf.readUnsignedShort());
-                        extendedInfo.set("mnc", buf.readUnsignedByte());
-                        extendedInfo.set("lac", buf.readUnsignedShort());
-                        extendedInfo.set("cell", buf.readUnsignedShort());
-                        extendedInfo.set("gsm", buf.readUnsignedByte());
+                        position.set("mcc", buf.readUnsignedShort());
+                        position.set("mnc", buf.readUnsignedByte());
+                        position.set("lac", buf.readUnsignedShort());
+                        position.set("cell", buf.readUnsignedShort());
+                        position.set("gsm", buf.readUnsignedByte());
                         buf.readUnsignedByte();
                     }
 

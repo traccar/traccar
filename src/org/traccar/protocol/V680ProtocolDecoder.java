@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
@@ -77,7 +73,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             Integer index = 1;
 
             // Get device by IMEI
@@ -91,22 +87,22 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             // User
-            extendedInfo.set("user", parser.group(index++));
+            position.set("user", parser.group(index++));
 
             // Validity
             position.setValid(Integer.valueOf(parser.group(index++)) > 0);
 
             // Password
-            extendedInfo.set("password", parser.group(index++));
+            position.set("password", parser.group(index++));
 
             // Event
-            extendedInfo.set("event", parser.group(index++));
+            position.set("event", parser.group(index++));
 
             // Packet number
-            extendedInfo.set("packet", parser.group(index++));
+            position.set("packet", parser.group(index++));
 
             // GSM base station
-            extendedInfo.set("gsm", parser.group(index++));
+            position.set("gsm", parser.group(index++));
 
             // Longitude
             String lon = parser.group(index++);
@@ -146,8 +142,6 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
         

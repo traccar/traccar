@@ -23,10 +23,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.*;
@@ -69,16 +66,16 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
             position.setDeviceId(getDeviceId());
 
             short status = buf.readUnsignedByte();
-            extendedInfo.set("alarm", (status & 0x80) != 0);
-            extendedInfo.set("battery", status & 0x7F);
+            position.set("alarm", (status & 0x80) != 0);
+            position.set("battery", status & 0x7F);
 
             buf.skipBytes(2); // remaining time
 
-            extendedInfo.set("temperature", buf.readByte());
+            position.set("temperature", buf.readByte());
 
             buf.skipBytes(2); // timer (interval and units)
             buf.readByte(); // mode
@@ -89,7 +86,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             // GPS status
             int valid = buf.readUnsignedByte();
             position.setValid((valid & 0xc0) != 0);
-            extendedInfo.set("satellites", valid & 0x3f);
+            position.set("satellites", valid & 0x3f);
 
             // Date and time
             int timeOfDay = buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte();
@@ -112,8 +109,6 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedByte() << 8 | buf.readUnsignedByte());
 
             buf.readUnsignedByte(); // checksum
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 

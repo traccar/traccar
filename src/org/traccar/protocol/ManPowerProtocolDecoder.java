@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
@@ -67,7 +63,7 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -78,7 +74,7 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Alarm message
-        extendedInfo.set("status", parser.group(index++));
+        position.set("status", parser.group(index++));
         
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -108,9 +104,6 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)));
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }

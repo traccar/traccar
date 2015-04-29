@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
@@ -73,7 +69,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -122,19 +118,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Cell information
-        extendedInfo.set("mcc", parser.group(index++));
-        extendedInfo.set("mnc", parser.group(index++));
-        extendedInfo.set("lac", parser.group(index++));
-        extendedInfo.set("cell", parser.group(index++));
+        position.set("mcc", parser.group(index++));
+        position.set("mnc", parser.group(index++));
+        position.set("lac", parser.group(index++));
+        position.set("cell", parser.group(index++));
 
         // Other
         String milage = parser.group(index++);
         if (milage != null && Double.valueOf(milage) != 0) {
-            extendedInfo.set("milage", milage);
+            position.set("milage", milage);
         }
-        extendedInfo.set("battery", parser.group(index++));
-
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("battery", parser.group(index++));
         return position;
     }
 

@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
@@ -75,15 +71,15 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
         // Serial
-        extendedInfo.set("serial", parser.group(index++));
+        position.set("serial", parser.group(index++));
 
         // Number
-        extendedInfo.set("number", parser.group(index++));
+        position.set("number", parser.group(index++));
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -124,10 +120,10 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Signal
-        extendedInfo.set("signal", parser.group(index++));
+        position.set("signal", parser.group(index++));
 
         // Alarm
-        extendedInfo.set("alarm", parser.group(index++));
+        position.set("alarm", parser.group(index++));
 
         // Get device by IMEI
         if (!identify(parser.group(index++))) {
@@ -136,7 +132,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Satellites
-        extendedInfo.set("satellites", parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+        position.set("satellites", parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
 
         // Altitude
         String altitude = parser.group(index++);
@@ -145,10 +141,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Power
-        extendedInfo.set("power", Double.valueOf(parser.group(index++)));
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("power", Double.valueOf(parser.group(index++)));
 
         return position;
     }

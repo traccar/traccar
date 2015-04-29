@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
@@ -85,7 +84,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             // Date and time(6)
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -100,7 +99,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
             // GPS length and Satellites count
             int gpsLength = buf.readUnsignedByte();
-            extendedInfo.set("satellites", gpsLength & 0xf);
+            position.set("satellites", gpsLength & 0xf);
             gpsLength >>= 4;
 
             //Skip Satellite numbers
@@ -122,21 +121,19 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
 
             if ((union & 0x4000) != 0) {
-                extendedInfo.set("acc", (union & 0x8000) != 0);
+                position.set("acc", (union & 0x8000) != 0);
             }
 
-            extendedInfo.set("lac", buf.readUnsignedShort());
-            extendedInfo.set("cell", buf.readUnsignedMedium());
-            extendedInfo.set("alarm", true);
+            position.set("lac", buf.readUnsignedShort());
+            position.set("cell", buf.readUnsignedMedium());
+            position.set("alarm", true);
             int flags = buf.readUnsignedByte();
-            extendedInfo.set("acc", (flags & 0x2) != 0);
+            position.set("acc", (flags & 0x2) != 0);
 
             // TODO parse other flags
 
-            extendedInfo.set("power", buf.readUnsignedByte());
-            extendedInfo.set("gsm", buf.readUnsignedByte());
-
-            position.setExtendedInfo(extendedInfo.toString());
+            position.set("power", buf.readUnsignedByte());
+            position.set("gsm", buf.readUnsignedByte());
             return position;
         }
 

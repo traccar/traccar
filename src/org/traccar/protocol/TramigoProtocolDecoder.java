@@ -20,9 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 import java.nio.charset.Charset;
@@ -31,7 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,8 +59,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-        extendedInfo.set("index", index);
+        position.setProtocol(getProtocol());
+        position.set("index", index);
         position.setValid(true);
 
         // Get device id
@@ -93,15 +89,13 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedInt(); // distance
 
-            extendedInfo.set("battery", buf.readUnsignedShort());
+            position.set("battery", buf.readUnsignedShort());
 
             buf.readUnsignedShort(); // battery charger status
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
             // TODO: parse other data
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
 
         } else if (protocol == 0x80) {
@@ -137,8 +131,6 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             }
             DateFormat dateFormat = new SimpleDateFormat("HH:mm MMM d yyyy", Locale.ENGLISH);
             position.setTime(dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR)));
-
-            position.setExtendedInfo(extendedInfo.toString());
             return position;
         }
 

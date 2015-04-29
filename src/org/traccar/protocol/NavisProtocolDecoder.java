@@ -28,7 +28,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class NavisProtocolDecoder extends BaseProtocolDecoder {
@@ -80,7 +79,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private ParseResult parsePosition(ChannelBuffer buf) {
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         position.setDeviceId(getDeviceId());
 
@@ -91,13 +90,13 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         } else {
             format = buf.readUnsignedByte();
         }
-        extendedInfo.set("format", format);
+        position.set("format", format);
 
         long index = buf.readUnsignedInt();
-        extendedInfo.set("index", index);
+        position.set("index", index);
 
         // Event type
-        extendedInfo.set("event", buf.readUnsignedShort());
+        position.set("event", buf.readUnsignedShort());
 
         // Event time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -108,44 +107,44 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
         time.set(Calendar.MONTH, buf.readUnsignedByte());
         time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-        extendedInfo.set("time", time.getTimeInMillis());
+        position.set("time", time.getTimeInMillis());
 
         // Alarm status
-        extendedInfo.set("alarm", buf.readUnsignedByte());
+        position.set("alarm", buf.readUnsignedByte());
 
         // Modules status
-        extendedInfo.set("status", buf.readUnsignedByte());
+        position.set("status", buf.readUnsignedByte());
 
         // GSM signal
-        extendedInfo.set("gsm", buf.readUnsignedByte());
+        position.set("gsm", buf.readUnsignedByte());
 
         // Output
         if (isFormat(format, F10, F20, F30)) {
-            extendedInfo.set("output", buf.readUnsignedShort());
+            position.set("output", buf.readUnsignedShort());
         } else if (isFormat(format, F40, F50, F51, F52)) {
-            extendedInfo.set("output", buf.readUnsignedByte());
+            position.set("output", buf.readUnsignedByte());
         }
 
         // Input
         if (isFormat(format, F10, F20, F30, F40)) {
-            extendedInfo.set("input", buf.readUnsignedShort());
+            position.set("input", buf.readUnsignedShort());
         } else if (isFormat(format, F50, F51, F52)) {
-            extendedInfo.set("input", buf.readUnsignedByte());
+            position.set("input", buf.readUnsignedByte());
         }
 
-        extendedInfo.set("power", buf.readUnsignedShort() / 1000.0);
+        position.set("power", buf.readUnsignedShort() / 1000.0);
 
         // Battery power
-        extendedInfo.set("battery", buf.readUnsignedShort());
+        position.set("battery", buf.readUnsignedShort());
 
         // Temperature
         if (isFormat(format, F10, F20, F30)) {
-            extendedInfo.set("temperature", buf.readShort());
+            position.set("temperature", buf.readShort());
         }
 
         if (isFormat(format, F10, F20, F50, F52)) {
-            extendedInfo.set("adc1", buf.readUnsignedShort());
-            extendedInfo.set("adc2", buf.readUnsignedShort());
+            position.set("adc1", buf.readUnsignedShort());
+            position.set("adc2", buf.readUnsignedShort());
         }
 
         if (isFormat(format, F20, F50, F51, F52)) {
@@ -176,10 +175,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             // Milage
-            extendedInfo.set("milage", buf.readFloat());
+            position.set("milage", buf.readFloat());
 
             // Last segment
-            extendedInfo.set("segment", buf.readFloat());
+            position.set("segment", buf.readFloat());
 
             // Segment times
             buf.readUnsignedShort();
@@ -206,9 +205,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             buf.readByte();
             buf.readByte();
         }
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
 
         return new ParseResult(index, position);
     }

@@ -30,10 +30,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
-import org.traccar.database.DataManager;
 import org.traccar.helper.Crc;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
@@ -170,11 +167,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         // Custom data
         if (command == MSG_ALARM) {
-            extendedInfo.set("alarm", buf.readUnsignedByte());
+            position.set("alarm", buf.readUnsignedByte());
         } else if (command == MSG_POSITION_LOGGED) {
             buf.skipBytes(6);
         }
@@ -240,7 +237,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Dilution of precision
-        extendedInfo.set("hdop", parser.group(index++));
+        position.set("hdop", parser.group(index++));
 
         // Altitude
         String altitude = parser.group(index++);
@@ -251,37 +248,34 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         // State
         String state = parser.group(index++);
         if (state != null) {
-            extendedInfo.set("state", state);
+            position.set("state", state);
         }
 
         // ADC
         for (int i = 1; i <= 8; i++) {
             String adc = parser.group(index++);
             if (adc != null) {
-                extendedInfo.set("adc" + i, Integer.parseInt(adc, 16));
+                position.set("adc" + i, Integer.parseInt(adc, 16));
             }
         }
 
         // Cell identifier
         String cell = parser.group(index++);
         if (cell != null) {
-            extendedInfo.set("cell", cell);
+            position.set("cell", cell);
         }
 
         // GSM signal
         String gsm = parser.group(index++);
         if (gsm != null) {
-            extendedInfo.set("gsm", Integer.parseInt(gsm, 16));
+            position.set("gsm", Integer.parseInt(gsm, 16));
         }
 
         // Milage
         String milage = parser.group(index++);
         if (milage != null) {
-            extendedInfo.set("milage", Integer.parseInt(milage, 16));
+            position.set("milage", Integer.parseInt(milage, 16));
         }
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }

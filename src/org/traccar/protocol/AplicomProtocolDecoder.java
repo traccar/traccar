@@ -26,7 +26,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
@@ -130,7 +129,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         if (!identify(imei)) {
             return null;
         }
@@ -139,7 +138,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Event
         int event = buf.readUnsignedByte();
-        extendedInfo.set("event", event);
+        position.set("event", event);
         buf.readUnsignedByte();
 
         // Validity
@@ -159,7 +158,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
-            extendedInfo.set("satellites", buf.readUnsignedByte());
+            position.set("satellites", buf.readUnsignedByte());
         }
 
         // Speed and heading
@@ -171,21 +170,21 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Input
         if ((selector & 0x0040) != 0) {
-            extendedInfo.set("input", buf.readUnsignedByte());
+            position.set("input", buf.readUnsignedByte());
         }
         
         // ADC
         if ((selector & 0x0020) != 0) {
-            extendedInfo.set("adc1", buf.readUnsignedShort());
-            extendedInfo.set("adc2", buf.readUnsignedShort());
-            extendedInfo.set("adc3", buf.readUnsignedShort());
-            extendedInfo.set("adc4", buf.readUnsignedShort());
+            position.set("adc1", buf.readUnsignedShort());
+            position.set("adc2", buf.readUnsignedShort());
+            position.set("adc3", buf.readUnsignedShort());
+            position.set("adc4", buf.readUnsignedShort());
         }
 
         // Power
         if ((selector & 0x8000) != 0) {
-            extendedInfo.set("power", buf.readUnsignedShort() / 1000.0);
-            extendedInfo.set("battery", buf.readUnsignedShort());
+            position.set("power", buf.readUnsignedShort() / 1000.0);
+            position.set("battery", buf.readUnsignedShort());
         }
         
         // Pulse rate 1
@@ -202,17 +201,17 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Trip 1
         if ((selector & 0x0080) != 0) {
-            extendedInfo.set("trip1", buf.readUnsignedInt());
+            position.set("trip1", buf.readUnsignedInt());
         }
 
         // Trip 2
         if ((selector & 0x0100) != 0) {
-            extendedInfo.set("trip2", buf.readUnsignedInt());
+            position.set("trip2", buf.readUnsignedInt());
         }
 
         // Output
         if ((selector & 0x0040) != 0) {
-            extendedInfo.set("output", buf.readUnsignedByte());
+            position.set("output", buf.readUnsignedByte());
         }
         
         // Button
@@ -294,37 +293,36 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 ChannelBuffer value = values.get(i);
                 switch (buf.readInt()) {
                     case 0x40C:
-                        extendedInfo.set("suction-temperature1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        extendedInfo.set("suction-temperature2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        extendedInfo.set("suction-temperature3", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        extendedInfo.set("evaporator-fan", ChannelBuffers.swapShort(value.readShort()));
+                        position.set("suction-temperature1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("suction-temperature2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("suction-temperature3", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("evaporator-fan", ChannelBuffers.swapShort(value.readShort()));
                         break;
                     case 0x50C:
-                        extendedInfo.set("evaporator-temperature1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        extendedInfo.set("evaporator-temperature2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        extendedInfo.set("evaporator-temperature3", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("evaporator-temperature1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("evaporator-temperature2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("evaporator-temperature3", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                         break;
                     case 0x20D:
-                        extendedInfo.set("diesel-rpm", ChannelBuffers.swapShort(value.readShort()));
-                        extendedInfo.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        extendedInfo.set("battery", ChannelBuffers.swapShort(value.readShort()) * 0.01);
-                        extendedInfo.set("air-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("diesel-rpm", ChannelBuffers.swapShort(value.readShort()));
+                        position.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("battery", ChannelBuffers.swapShort(value.readShort()) * 0.01);
+                        position.set("air-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                         break;
                     case 0x30D:
-                        extendedInfo.set("alarms", ChannelBufferTools.readHexString(value, 16));
+                        position.set("alarms", ChannelBufferTools.readHexString(value, 16));
                         break;
                     case 0x40D:
-                        extendedInfo.set("cold-unit-status", ChannelBufferTools.readHexString(value, 16));
+                        position.set("cold-unit-status", ChannelBufferTools.readHexString(value, 16));
                         break;
                     case 0x50D:
-                        extendedInfo.set("coolant-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        extendedInfo.set("suction-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("coolant-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("suction-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                         break;
                 }
             }
         }
 
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

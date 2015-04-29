@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class TotemProtocolDecoder extends BaseProtocolDecoder {
@@ -162,7 +158,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -173,7 +169,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
         
         // Alarm type
-        extendedInfo.set("alarm", parser.group(index++));
+        position.set("alarm", parser.group(index++));
         
         if (format == MessageFormat.first || format == MessageFormat.second) {
 
@@ -231,26 +227,26 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
 
             // Accuracy
-            extendedInfo.set("hdop", parser.group(index++));
+            position.set("hdop", parser.group(index++));
 
             // IO Status
-            extendedInfo.set("io", parser.group(index++));
+            position.set("io", parser.group(index++));
 
             // Power
-            extendedInfo.set("battery", parser.group(index++));
-            extendedInfo.set("power", Double.valueOf(parser.group(index++)));
+            position.set("battery", parser.group(index++));
+            position.set("power", Double.valueOf(parser.group(index++)));
 
             // ADC
-            extendedInfo.set("adc", parser.group(index++));
+            position.set("adc", parser.group(index++));
 
             // Location Code
-            extendedInfo.set("lac", parser.group(index++));
+            position.set("lac", parser.group(index++));
 
             // Temperature
-            extendedInfo.set("temperature", parser.group(index++));
+            position.set("temperature", parser.group(index++));
 
             // Milage
-            extendedInfo.set("milage", parser.group(index++));
+            position.set("milage", parser.group(index++));
         
         } else if (format == MessageFormat.third) {
 
@@ -266,28 +262,28 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
             
             // IO Status
-            extendedInfo.set("io", parser.group(index++));
+            position.set("io", parser.group(index++));
 
             // Power
-            extendedInfo.set("battery", Double.valueOf(parser.group(index++)) / 10);
-            extendedInfo.set("power", Double.valueOf(parser.group(index++)));
+            position.set("battery", Double.valueOf(parser.group(index++)) / 10);
+            position.set("power", Double.valueOf(parser.group(index++)));
 
             // ADC
-            extendedInfo.set("adc1", parser.group(index++));
-            extendedInfo.set("adc2", parser.group(index++));
+            position.set("adc1", parser.group(index++));
+            position.set("adc2", parser.group(index++));
 
             // Temperature
-            extendedInfo.set("temperature1", parser.group(index++));
-            extendedInfo.set("temperature2", parser.group(index++));
+            position.set("temperature1", parser.group(index++));
+            position.set("temperature2", parser.group(index++));
 
             // Location Code
-            extendedInfo.set("lac", parser.group(index++));
+            position.set("lac", parser.group(index++));
 
             // Validity
             position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Satellites
-            extendedInfo.set("satellites", parser.group(index++));
+            position.set("satellites", parser.group(index++));
 
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
@@ -296,10 +292,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(Double.valueOf(parser.group(index++)));
 
             // PDOP
-            extendedInfo.set("pdop", parser.group(index++));
+            position.set("pdop", parser.group(index++));
 
             // Milage
-            extendedInfo.set("milage", parser.group(index++));
+            position.set("milage", parser.group(index++));
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));
@@ -314,9 +310,6 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
         
         }
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
 
         return position;
     }

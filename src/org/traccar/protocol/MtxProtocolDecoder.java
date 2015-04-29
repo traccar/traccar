@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class MtxProtocolDecoder extends BaseProtocolDecoder {
@@ -74,7 +70,7 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -103,12 +99,11 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Other
-        extendedInfo.set("milage", Double.valueOf(parser.group(index++)));
-        extendedInfo.set("input", parser.group(index++));
-        extendedInfo.set("output", parser.group(index++));
-        extendedInfo.set("adc1", parser.group(index++));
-        extendedInfo.set("adc2", parser.group(index++));
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("milage", Double.valueOf(parser.group(index++)));
+        position.set("input", parser.group(index++));
+        position.set("output", parser.group(index++));
+        position.set("adc1", parser.group(index++));
+        position.set("adc2", parser.group(index++));
 
         return position;
     }

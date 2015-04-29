@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class BoxProtocolDecoder extends BaseProtocolDecoder {
@@ -75,7 +71,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+            position.setProtocol(getProtocol());
 
             Integer index = 1;
 
@@ -97,17 +93,15 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(Double.valueOf(parser.group(index++)));
             
             // Distance
-            extendedInfo.set("milage", parser.group(index++));
+            position.set("milage", parser.group(index++));
             
             // Event
-            extendedInfo.set("event", parser.group(index++));
+            position.set("event", parser.group(index++));
             
             // Status
             int status = Integer.valueOf(parser.group(index++));
             position.setValid((status & 0x04) == 0);
-            extendedInfo.set("status", status);
-
-            position.setExtendedInfo(extendedInfo.toString());
+            position.set("status", status);
             return position;
         }
         

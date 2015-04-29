@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +25,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class SyrusProtocolDecoder extends BaseProtocolDecoder {
@@ -131,7 +127,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         position.setDeviceId(getDeviceId());
 
         Integer index = 1;
@@ -162,8 +158,6 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         
         // Validity
         position.setValid(Integer.valueOf(parser.group(index++)) == 2);
-
-        position.setExtendedInfo(extendedInfo.toString());
         return position;
     }
 

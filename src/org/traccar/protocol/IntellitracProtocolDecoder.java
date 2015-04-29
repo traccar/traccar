@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
@@ -79,7 +75,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
         Integer index = 1;
 
         // Detect device
@@ -109,36 +105,34 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        extendedInfo.set("satellites", satellites);
+        position.set("satellites", satellites);
         
         // Report identifier
-        extendedInfo.set("index", Long.valueOf(parser.group(index++)));
+        position.set("index", Long.valueOf(parser.group(index++)));
 
         // Input
-        extendedInfo.set("input", parser.group(index++));
+        position.set("input", parser.group(index++));
 
         // Output
-        extendedInfo.set("output", parser.group(index++));
+        position.set("output", parser.group(index++));
 
         // ADC1
-        extendedInfo.set("adc1", parser.group(index++));
+        position.set("adc1", parser.group(index++));
 
         // ADC2
-        extendedInfo.set("adc2", parser.group(index++));
+        position.set("adc2", parser.group(index++));
 
         // J1939 data
-        extendedInfo.set("vss", parser.group(index++));
-        extendedInfo.set("rpm", parser.group(index++));
-        extendedInfo.set("coolant", parser.group(index++));
-        extendedInfo.set("fuel", parser.group(index++));
-        extendedInfo.set("consumption", parser.group(index++));
-        extendedInfo.set("temperature", parser.group(index++));
-        extendedInfo.set("charger", parser.group(index++));
-        extendedInfo.set("tpl", parser.group(index++));
-        extendedInfo.set("axle", parser.group(index++));
-        extendedInfo.set("milage", parser.group(index++));
-        
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("vss", parser.group(index++));
+        position.set("rpm", parser.group(index++));
+        position.set("coolant", parser.group(index++));
+        position.set("fuel", parser.group(index++));
+        position.set("consumption", parser.group(index++));
+        position.set("temperature", parser.group(index++));
+        position.set("charger", parser.group(index++));
+        position.set("tpl", parser.group(index++));
+        position.set("axle", parser.group(index++));
+        position.set("milage", parser.group(index++));
         return position;
     }
 

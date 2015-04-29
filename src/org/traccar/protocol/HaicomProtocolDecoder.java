@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
 import org.traccar.model.Position;
 
 public class HaicomProtocolDecoder extends BaseProtocolDecoder {
@@ -70,7 +66,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+        position.setProtocol(getProtocol());
 
         Integer index = 1;
 
@@ -81,7 +77,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Firmware version
-        extendedInfo.set("version", parser.group(index++));
+        position.set("version", parser.group(index++));
         
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -117,15 +113,12 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)) / 10);
         
         // Additional data
-        extendedInfo.set("status", parser.group(index++));
-        extendedInfo.set("gprs", parser.group(index++));
-        extendedInfo.set("gps", parser.group(index++));
-        extendedInfo.set("input", parser.group(index++));
-        extendedInfo.set("output", parser.group(index++));
-        extendedInfo.set("battery", Double.valueOf(parser.group(index++)) / 10);
-
-        // Extended info
-        position.setExtendedInfo(extendedInfo.toString());
+        position.set("status", parser.group(index++));
+        position.set("gprs", parser.group(index++));
+        position.set("gps", parser.group(index++));
+        position.set("input", parser.group(index++));
+        position.set("output", parser.group(index++));
+        position.set("battery", Double.valueOf(parser.group(index++)) / 10);
 
         return position;
     }
