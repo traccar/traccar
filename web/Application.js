@@ -37,11 +37,22 @@ Ext.Loader.loadScript({
             name: 'Traccar',
             requires: [
                 'Styles',
-                'Login'
+                'Login',
+                'MainView'
             ],
 
             launch: function() {
-                Ext.create('Login').show();
+                Ext.Ajax.request({
+                    url: '/api/session',
+                    success: function(response) {
+                        var result = Ext.decode(response.responseText);
+                        if (result.success && result.session) {
+                            Ext.create('MainView', { renderTo: document.body });
+                        } else {
+                            Ext.create('Login').show();
+                        }
+                    }
+                })
             }
         });
     }

@@ -53,6 +53,8 @@ public class MainServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
         } else if (command.equals("/async")) {
             async(req.startAsync());
+        } else if (command.equals("/session")) {
+            session(req, resp);
         } else if (command.equals("/login")) {
             login(req, resp);
         } else if (command.equals("/logout")) {
@@ -209,6 +211,10 @@ public class MainServlet extends HttpServlet {
             
             asyncSessions.get(userId).request(context);
         }
+    }
+
+    private void session(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.getWriter().println("{ success: true, session: " + (req.getSession().getAttribute(USER_ID) != null) + " }");
     }
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

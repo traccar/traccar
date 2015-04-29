@@ -65,7 +65,7 @@ Ext.define('Login', {
     closable: false,
 
     items: [{ xtype: 'login-form' }],
-    
+
     submit: function() {
         var win = this;
         var form = this.down('form').getForm();
