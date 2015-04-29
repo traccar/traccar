@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,11 @@ import org.traccar.model.Position;
 
 public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
 
-    private Long deviceId;
-
     public TopflytechProtocolDecoder(String protocol) {
         super(protocol);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    static private final Pattern pattern = Pattern.compile(
             "\\(" +
             "(\\d+)" +                     // IMEI
             ".*" +

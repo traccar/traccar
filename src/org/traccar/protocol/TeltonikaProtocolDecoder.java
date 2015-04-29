@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,15 @@ import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     
-    private long deviceId;
-
     public TeltonikaProtocolDecoder(String protocol) {
         super(protocol);
     }
 
     private void parseIdentification(Channel channel, ChannelBuffer buf) {
-        boolean result = false;
 
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
-        result = identify(imei);
+        boolean result =  identify(imei);
 
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(1);
@@ -77,7 +74,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocol());
             
-            position.setDeviceId(deviceId);
+            position.setDeviceId(getDeviceId());
             
             int globalMask = 0x0f;
             
@@ -95,8 +92,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 int locationMask = buf.readUnsignedByte();
                 
                 if (checkBit(locationMask, 0)) {
-                    position.setLatitude(Double.valueOf(buf.readFloat()));
-                    position.setLongitude(Double.valueOf(buf.readFloat()));
+                    position.setLatitude(buf.readFloat());
+                    position.setLongitude(buf.readFloat());
                 }
                 
                 if (checkBit(locationMask, 1)) {
