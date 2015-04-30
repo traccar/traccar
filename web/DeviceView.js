@@ -78,7 +78,7 @@ Ext.define('DeviceView', {
     },
     
     columns: [
-        { text: Strings.device_name,  dataIndex: 'name', flex: 1 },
+        { text: Strings.device_name, dataIndex: 'name', flex: 1 },
         { text: Strings.device_identifier, dataIndex: 'uniqueId', flex: 1 }
     ]
 });

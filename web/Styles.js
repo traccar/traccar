@@ -21,6 +21,8 @@ Ext.define('Styles', {
 
     device_width: 350,
 
+    report_height: 250,
+
     map_center: [ -0.1275, 51.507222 ],
     map_zoom: 6,
     map_max_zoom: 16

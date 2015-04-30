@@ -19,7 +19,8 @@ Ext.define('MainView', {
 
     requires: [
         'DeviceView',
-        'MapView'
+        'MapView',
+        'ReportView'
     ],
 
     layout: 'border',
@@ -33,6 +34,11 @@ Ext.define('MainView', {
         region:'west',
         xtype: 'device-view',
         width: Styles.device_width
+    }, {
+        region: 'south',
+        xtype: 'report-view',
+        header: false,
+        height: Styles.report_height
     }, {
         region: 'center',
         xtype: 'map-view',

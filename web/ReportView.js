@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-Ext.define('Strings', {
-    singleton: true,
+Ext.define('ReportView', {
+    extend: 'Ext.grid.Panel',
+    xtype: 'report-view',
 
-    login_title: 'Login',
-    login_email: 'Email',
-    login_password: 'Password',
-    login_register: 'Register',
-    login_login: 'Login',
-    login_failed: 'Incorrect email address or password.',
+    title: Strings.report_title,
 
-    device_title: 'Devices',
-    device_name: 'Name',
-    device_identifier: 'Identifier',
+    tbar: [{
+        text:'Do Something'
+    }],
 
-    report_title: 'Reports',
-
-
-    map_title: 'Map'
+    columns: [
+        { text: "Column1", dataIndex: 'c1', flex: 1 },
+        { text: "Column2", dataIndex: 'c2', flex: 1 }
+    ]
 });
