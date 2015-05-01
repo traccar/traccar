@@ -97,9 +97,51 @@ public class DeviceServlet extends HttpServlet {
     }
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        
+        JsonReader jsonReader = Json.createReader(req.getReader());
+        JsonObject jsonObject = jsonReader.readObject();
+        Device device = new Device();
+        try {
+            device.fromJson(jsonObject);
+        } catch (ParseException error) {
+            Log.warning(error);
+        }
+        
+        JsonObjectBuilder result = Json.createObjectBuilder();
+        
+        try {
+            result.add("success", true);
+            Context.getDataManager().updateDevice(device);
+        } catch(SQLException error) {
+            result.add("success", false);
+            result.add("error", error.getMessage());
+        }
+        
+        resp.getWriter().println(result.build().toString());
     }
     
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        
+        JsonReader jsonReader = Json.createReader(req.getReader());
+        JsonObject jsonObject = jsonReader.readObject();
+        Device device = new Device();
+        try {
+            device.fromJson(jsonObject);
+        } catch (ParseException error) {
+            Log.warning(error);
+        }
+        
+        JsonObjectBuilder result = Json.createObjectBuilder();
+        
+        try {
+            result.add("success", true);
+            Context.getDataManager().removeDevice(device);
+        } catch(SQLException error) {
+            result.add("success", false);
+            result.add("error", error.getMessage());
+        }
+        
+        resp.getWriter().println(result.build().toString());
     }
 
 }
