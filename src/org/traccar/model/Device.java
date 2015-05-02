@@ -26,7 +26,12 @@ import org.traccar.database.Convertable;
 import org.traccar.database.ObjectConverter;
 import org.traccar.helper.Log;
 
-public class Device implements Convertable {
+public class Device implements Convertable, Factory {
+
+    @Override
+    public Device create() {
+        return new Device();
+    }
 
     private long id;
     public long getId() { return id; }

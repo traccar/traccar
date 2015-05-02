@@ -45,10 +45,6 @@ public class ObjectConverter {
         return array.build();
     }
     
-    private static String getColumnName(String key) {
-        return key.replaceAll("([A-Z])", "_$1").toLowerCase();
-    }
-    
     private static boolean hasColumn(ResultSet resultSet, String columnName) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
@@ -67,9 +63,8 @@ public class ObjectConverter {
     }
     
     public static String getString(ResultSet record, String key) throws SQLException {
-        String column = getColumnName(key);
-        if (hasColumn(record, column)) {
-            return record.getString(column);
+        if (hasColumn(record, key)) {
+            return record.getString(key);
         }
         return null;
     }
@@ -88,9 +83,8 @@ public class ObjectConverter {
     }
     
     public static long getLong(ResultSet record, String key) throws SQLException {
-        String column = getColumnName(key);
-        if (hasColumn(record, column)) {
-            return record.getLong(column);
+        if (hasColumn(record, key)) {
+            return record.getLong(key);
         }
         return 0;
     }
@@ -111,9 +105,8 @@ public class ObjectConverter {
     }
     
     public static Date getDate(ResultSet record, String key) throws SQLException {
-        String column = getColumnName(key);
-        if (hasColumn(record, column)) {
-            return record.getDate(column);
+        if (hasColumn(record, key)) {
+            return record.getDate(key);
         }
         return null;
     }

@@ -17,21 +17,16 @@ package org.traccar.database;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
-import java.io.StringReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.*;
 import java.util.*;
 import javax.json.JsonArray;
 import javax.sql.DataSource;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import org.traccar.helper.DriverDelegate;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Permission;
 import org.traccar.model.Position;
-import org.xml.sax.InputSource;
 
 public class DataManager {
 
@@ -198,109 +193,98 @@ public class DataManager {
     private void createDatabaseSchema() throws SQLException {
 
         Connection connection = dataSource.getConnection();
-        try {
-            Statement statement = connection.createStatement();
-            try {
-                
-                ResultSet result = connection.getMetaData().getTables(
-                        connection.getCatalog(), null, null, null);
-                
-                boolean exist = false;
-                while (result.next()) {
-                    if (result.getString("TABLE_NAME").equalsIgnoreCase("traccar1")) {
-                        exist = true;
-                        break;
-                    }
-                }
-                
-                if (!exist) {
-
-                    statement.executeUpdate(
-                            "CREATE TABLE user (" +
-                            "id INT PRIMARY KEY AUTO_INCREMENT," +
-                            "email VARCHAR(1024) NOT NULL UNIQUE," +
-                            "password VARCHAR(1024) NOT NULL," +
-                            "salt VARCHAR(1024) NOT NULL," +
-                            "readonly BOOLEAN DEFAULT false NOT NULL," +
-                            "admin BOOLEAN DEFAULT false NOT NULL," +
-                            "map VARCHAR(1024) DEFAULT 'osm' NOT NULL," +
-                            "language VARCHAR(1024) DEFAULT 'en' NOT NULL," +
-                            "distance_unit VARCHAR(1024) DEFAULT 'km' NOT NULL," +
-                            "speed_unit VARCHAR(1024) DEFAULT 'kmh' NOT NULL," +
-                            "latitude DOUBLE DEFAULT 0 NOT NULL," +
-                            "longitude DOUBLE DEFAULT 0 NOT NULL," +
-                            "zoom INT DEFAULT 0 NOT NULL);" +
-                                    
-                            "CREATE TABLE device (" +
-                            "id INT PRIMARY KEY AUTO_INCREMENT," +
-                            "name VARCHAR(1024) NOT NULL," +
-                            "unique_id VARCHAR(1024) NOT NULL UNIQUE," +
-                            "status VARCHAR(1024)," +
-                            "last_update TIMESTAMP," +
-                            "position_id INT," +
-                            "data_id INT);" +
-
-                            "CREATE TABLE user_device (" +
-                            "user_id INT NOT NULL," +
-                            "device_id INT NOT NULL," +
-                            "read BOOLEAN DEFAULT true NOT NULL," +
-                            "write BOOLEAN DEFAULT true NOT NULL," +
-                            "FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE," +
-                            "FOREIGN KEY (device_id) REFERENCES device(id) ON DELETE CASCADE);" +
-
-                            "CREATE INDEX user_device_user_id ON user_device(user_id);" +
-
-                            "CREATE TABLE position (" +
-                            "id INT PRIMARY KEY AUTO_INCREMENT," +
-                            "protocol VARCHAR(1024)," +
-                            "device_id INT NOT NULL," +
-                            "server_time TIMESTAMP NOT NULL," +
-                            "device_time TIMESTAMP NOT NULL," +
-                            "fix_time TIMESTAMP NOT NULL," +
-                            "valid BOOLEAN NOT NULL," +
-                            "latitude DOUBLE NOT NULL," +
-                            "longitude DOUBLE NOT NULL," +
-                            "altitude DOUBLE NOT NULL," +
-                            "speed DOUBLE NOT NULL," +
-                            "course DOUBLE NOT NULL," +
-                            "address VARCHAR(1024)," +
-                            "other VARCHAR(8192) NOT NULL," +
-                            "FOREIGN KEY (device_id) REFERENCES device(id) ON DELETE CASCADE);" +
-
-                            "CREATE TABLE data (" +
-                            "id INT PRIMARY KEY AUTO_INCREMENT," +
-                            "protocol VARCHAR(1024)," +
-                            "device_id INT NOT NULL," +
-                            "server_time TIMESTAMP NOT NULL," +
-                            "device_time TIMESTAMP NOT NULL," +
-                            "other VARCHAR(8192) NOT NULL," +
-                            "FOREIGN KEY (device_id) REFERENCES device(id));" +
-
-                            "ALTER TABLE device ADD " +
-                            "FOREIGN KEY (position_id) REFERENCES position(id);" +
-
-                            "ALTER TABLE device ADD " +
-                            "FOREIGN KEY (data_id) REFERENCES data(id);" +
-
-                            "CREATE TABLE server (" +
-                            "id INT PRIMARY KEY AUTO_INCREMENT," +
-                            "registration BOOLEAN NOT NULL," +
-                            "latitude DOUBLE NOT NULL," +
-                            "longitude DOUBLE NOT NULL," +
-                            "zoom INT NOT NULL);" +
-
-                            "CREATE TABLE traccar1 (" +
-                            "id INT PRIMARY KEY AUTO_INCREMENT);");
-                    
-                    addUser("admin", "admin", true);
-                }
-
-            } finally {
-                statement.close();
+        ResultSet result = connection.getMetaData().getTables(
+                connection.getCatalog(), null, null, null);
+        
+        boolean exist = false;
+        while (result.next()) {
+            if (result.getString("TABLE_NAME").equalsIgnoreCase("traccar1")) {
+                exist = true;
+                break;
             }
-        } finally {
-            connection.close();
         }
+        if (!exist) {
+            return;
+        }
+        
+        QueryBuilder.create(dataSource,
+                "CREATE TABLE user (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "email VARCHAR(1024) NOT NULL UNIQUE," +
+                "password VARCHAR(1024) NOT NULL," +
+                "salt VARCHAR(1024) NOT NULL," +
+                "readonly BOOLEAN DEFAULT false NOT NULL," +
+                "admin BOOLEAN DEFAULT false NOT NULL," +
+                "map VARCHAR(1024) DEFAULT 'osm' NOT NULL," +
+                "language VARCHAR(1024) DEFAULT 'en' NOT NULL," +
+                "distanceUnit VARCHAR(1024) DEFAULT 'km' NOT NULL," +
+                "speedUnit VARCHAR(1024) DEFAULT 'kmh' NOT NULL," +
+                "latitude DOUBLE DEFAULT 0 NOT NULL," +
+                "longitude DOUBLE DEFAULT 0 NOT NULL," +
+                "zoom INT DEFAULT 0 NOT NULL);" +
+
+                "CREATE TABLE device (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "name VARCHAR(1024) NOT NULL," +
+                "uniqueId VARCHAR(1024) NOT NULL UNIQUE," +
+                "status VARCHAR(1024)," +
+                "lastUpdate TIMESTAMP," +
+                "positionId INT," +
+                "dataId INT);" +
+
+                "CREATE TABLE user_device (" +
+                "userId INT NOT NULL," +
+                "deviceId INT NOT NULL," +
+                "read BOOLEAN DEFAULT true NOT NULL," +
+                "write BOOLEAN DEFAULT true NOT NULL," +
+                "FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE," +
+                "FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);" +
+
+                "CREATE INDEX user_device_user_id ON user_device(userId);" +
+
+                "CREATE TABLE position (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "protocol VARCHAR(1024)," +
+                "deviceId INT NOT NULL," +
+                "serverTime TIMESTAMP NOT NULL," +
+                "deviceTime TIMESTAMP NOT NULL," +
+                "fixTime TIMESTAMP NOT NULL," +
+                "valid BOOLEAN NOT NULL," +
+                "latitude DOUBLE NOT NULL," +
+                "longitude DOUBLE NOT NULL," +
+                "altitude DOUBLE NOT NULL," +
+                "speed DOUBLE NOT NULL," +
+                "course DOUBLE NOT NULL," +
+                "address VARCHAR(1024)," +
+                "other VARCHAR(8192) NOT NULL," +
+                "FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);" +
+
+                "CREATE TABLE data (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "protocol VARCHAR(1024)," +
+                "deviceId INT NOT NULL," +
+                "serverTime TIMESTAMP NOT NULL," +
+                "deviceTime TIMESTAMP NOT NULL," +
+                "other VARCHAR(8192) NOT NULL," +
+                "FOREIGN KEY (deviceId) REFERENCES device(id));" +
+
+                "ALTER TABLE device ADD " +
+                "FOREIGN KEY (positionId) REFERENCES position(id);" +
+
+                "ALTER TABLE device ADD " +
+                "FOREIGN KEY (dataId) REFERENCES data(id);" +
+
+                "CREATE TABLE server (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "registration BOOLEAN NOT NULL," +
+                "latitude DOUBLE NOT NULL," +
+                "longitude DOUBLE NOT NULL," +
+                "zoom INT NOT NULL);" +
+
+                "CREATE TABLE traccar1 (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT);").executeUpdate();
+        
+        addUser("admin", "admin", true);
     }
 
     public long login(String email, String password) throws SQLException {
@@ -346,137 +330,47 @@ public class DataManager {
         }
     }
 
-    public Collection<Map.Entry<Long, Long>> getPermissions() throws SQLException {
-
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "SELECT user_id, device_id FROM user_device;");
-            try {
-                ResultSet resultSet = statement.executeQuery();
-
-                List<Map.Entry<Long, Long>> result = new LinkedList<Map.Entry<Long, Long>>();
-                while (resultSet.next()) {
-                    result.add(new AbstractMap.SimpleEntry<Long, Long>(
-                            resultSet.getLong(1), resultSet.getLong(2)));
-                }
-                
-                return result;
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
-        }
+    public Collection<Permission> getPermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, 
+                "SELECT userId, deviceId FROM user_device;")
+                .executeQuery(new Permission());
     }
 
-    public JsonArray getDevices(long userId) throws SQLException {
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM device WHERE id IN (" +
-                    "SELECT device_id FROM user_device WHERE user_id = ?);");
-            try {
-                statement.setLong(1, userId);
-                
-                ResultSet result = statement.executeQuery();
-                
-                List<Device> list = new LinkedList<Device>();
-                while (result.next()) {
-                    Device device = new Device();
-                    device.fromRecord(result);
-                    list.add(device);
-                }
-                
-                return ObjectConverter.arrayToJson(list);
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
-        }
+    public Collection<Device> getDevices(long userId) throws SQLException {
+        return QueryBuilder.create(dataSource, 
+                "SELECT * FROM device WHERE id IN (" +
+                "SELECT deviceId FROM user_device WHERE userId = :userId);")
+                .setLong("userId", userId)
+                .executeQuery(new Device());
     }
     
     public void addDevice(Device device) throws SQLException {
-
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO device (name, unique_id) VALUES (?, ?);",
-                    Statement.RETURN_GENERATED_KEYS);
-            try {
-                statement.setString(1, device.getName());
-                statement.setString(2, device.getUniqueId());
-                
-                statement.executeUpdate();
-                
-                ResultSet result = statement.getGeneratedKeys();
-                if (result.next()) {
-                    device.setId(result.getLong(1));
-                }
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
-        }
+        device.setId(QueryBuilder.create(dataSource,
+                "INSERT INTO device (name, uniqueId) VALUES (:name, :uniqueId);")
+                .setObject(device)
+                .executeUpdate());
     }
     
     public void updateDevice(Device device) throws SQLException {
-
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE device SET name = ?, unique_id = ? WHERE id = ?;");
-            try {
-                statement.setString(1, device.getName());
-                statement.setString(2, device.getUniqueId());
-                statement.setLong(3, device.getId());
-                
-                statement.executeUpdate();
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
-        }
+        QueryBuilder.create(dataSource,
+                "UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;")
+                .setObject(device)
+                .executeUpdate();
     }
     
     public void removeDevice(Device device) throws SQLException {
-
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "DELETE FROM device WHERE id = ?;");
-            try {
-                statement.setLong(1, device.getId());
-                
-                statement.executeUpdate();
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
-        }
+        QueryBuilder.create(dataSource,
+                "DELETE FROM device WHERE id = :id;")
+                .setObject(device)
+                .executeUpdate();
     }
     
     public void linkDevice(long userId, long deviceId) throws SQLException {
-
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO user_device (user_id, device_id) VALUES (?, ?);");
-            try {
-                statement.setLong(1, userId);
-                statement.setLong(2, deviceId);
-                
-                statement.executeUpdate();
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
-        }
+        QueryBuilder.create(dataSource,
+                "INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);")
+                .setLong("userId", userId)
+                .setLong("deviceId", deviceId)
+                .executeUpdate();
     }
 
 }

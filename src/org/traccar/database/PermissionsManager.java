@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.Permission;
 
 public class PermissionsManager {
     
@@ -42,8 +43,8 @@ public class PermissionsManager {
     public final void refresh() {
         permissions.clear();
         try {
-            for (Map.Entry<Long, Long> entry : Context.getDataManager().getPermissions()) {
-                getNotNull(entry.getKey()).add(entry.getValue());
+            for (Permission permission : Context.getDataManager().getPermissions()) {
+                getNotNull(permission.getUserId()).add(permission.getDeviceId());
             }
         } catch (SQLException error) {
             Log.warning(error);

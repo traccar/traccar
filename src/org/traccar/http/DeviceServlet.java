@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
+import org.traccar.database.ObjectConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 
@@ -60,7 +61,8 @@ public class DeviceServlet extends HttpServlet {
         
         try {
             result.add("success", true);
-            result.add("data", Context.getDataManager().getDevices(userId));
+            result.add("data", ObjectConverter.arrayToJson(
+                    Context.getDataManager().getDevices(userId)));
         } catch(SQLException error) {
             result.add("success", false);
             result.add("error", error.getMessage());
