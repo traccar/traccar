@@ -160,6 +160,9 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     case 83:
                         buf.readUnsignedInt(); // diagnostic
                         break;
+                    case 90:
+                        position.set("power", buf.readFloat());
+                        break;
                     case 99:
                         buf.readUnsignedInt(); // tachograph
                         break;
