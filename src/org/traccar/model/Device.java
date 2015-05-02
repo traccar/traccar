@@ -77,19 +77,4 @@ public class Device implements Convertable, Factory {
         dataId = ObjectConverter.getLong(json, "dataId");
     }
 
-    @Override
-    public void fromRecord(ResultSet record) {
-        try {
-            id = ObjectConverter.getLong(record, "id");
-            name = ObjectConverter.getString(record, "name");
-            uniqueId = ObjectConverter.getString(record, "uniqueId");
-            status = ObjectConverter.getString(record, "status");
-            lastUpdate = ObjectConverter.getDate(record, "lastUpdate");
-            positionId = ObjectConverter.getLong(record, "positionId");
-            dataId = ObjectConverter.getLong(record, "dataId");
-        } catch (SQLException error) {
-            Log.warning(error);
-        }
-    }
-
 }

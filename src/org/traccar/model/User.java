@@ -15,7 +15,6 @@
  */
 package org.traccar.model;
 
-import java.sql.ResultSet;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -79,10 +78,6 @@ public class User implements Convertable {
         latitude = json.getJsonNumber("latitude").doubleValue();
         longitude = json.getJsonNumber("longitude").doubleValue();
         zoom = json.getJsonNumber("zoom").intValue();
-    }
-
-    @Override
-    public void fromRecord(ResultSet record) {
     }
 
 }

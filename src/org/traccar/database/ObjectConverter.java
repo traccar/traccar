@@ -15,9 +15,6 @@
  */
 package org.traccar.database;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,26 +42,9 @@ public class ObjectConverter {
         return array.build();
     }
     
-    private static boolean hasColumn(ResultSet resultSet, String columnName) throws SQLException {
-        ResultSetMetaData metaData = resultSet.getMetaData();
-        for (int i = 1; i <= metaData.getColumnCount(); i++) {
-            if (columnName.equalsIgnoreCase(metaData.getColumnName(i))) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     public static String getString(JsonObject json, String key) {
         if (json.containsKey(key)) {
             return json.getString(key);
-        }
-        return null;
-    }
-    
-    public static String getString(ResultSet record, String key) throws SQLException {
-        if (hasColumn(record, key)) {
-            return record.getString(key);
         }
         return null;
     }
@@ -82,13 +62,6 @@ public class ObjectConverter {
         return 0;
     }
     
-    public static long getLong(ResultSet record, String key) throws SQLException {
-        if (hasColumn(record, key)) {
-            return record.getLong(key);
-        }
-        return 0;
-    }
-    
     public static void putLong(JsonObjectBuilder json, String key, long value) {
         json.add(key, value);
     }
@@ -100,13 +73,6 @@ public class ObjectConverter {
             } catch (ParseException error) {
                 Log.warning(error);
             }
-        }
-        return null;
-    }
-    
-    public static Date getDate(ResultSet record, String key) throws SQLException {
-        if (hasColumn(record, key)) {
-            return record.getDate(key);
         }
         return null;
     }

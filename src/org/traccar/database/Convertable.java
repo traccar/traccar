@@ -15,7 +15,6 @@
  */
 package org.traccar.database;
 
-import java.sql.ResultSet;
 import javax.json.JsonObject;
 
 public interface Convertable {
@@ -23,9 +22,5 @@ public interface Convertable {
     public JsonObject toJson();
     
     public void fromJson(JsonObject json) throws Exception;
-    
-    //public void toRecord();
-    
-    public void fromRecord(ResultSet record);
-    
+
 }

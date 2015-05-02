@@ -15,7 +15,6 @@
  */
 package org.traccar.model;
 
-import java.sql.ResultSet;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -131,10 +130,6 @@ public class Position implements Convertable {
         course = json.getJsonNumber("course").doubleValue();
         address = json.getString("address");
         //extendedInfo = json.getString("extendedInfo");
-    }
-
-    @Override
-    public void fromRecord(ResultSet record) {
     }
 
 }

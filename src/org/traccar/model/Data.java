@@ -15,7 +15,6 @@
  */
 package org.traccar.model;
 
-import java.sql.ResultSet;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -78,10 +77,6 @@ public class Data implements Convertable {
         serverTime = ObjectConverter.dateFormat.parse(json.getString("serverTime"));
         deviceTime = ObjectConverter.dateFormat.parse(json.getString("deviceTime"));
         //extendedInfo = json.getString("extendedInfo");
-    }
-
-    @Override
-    public void fromRecord(ResultSet record) {
     }
 
 }
