@@ -24,12 +24,17 @@ Ext.define('Strings', {
     login_login: 'Login',
     login_failed: 'Incorrect email address or password.',
 
+    device_dialog: 'Device',
     device_title: 'Devices',
     device_name: 'Name',
     device_identifier: 'Identifier',
 
     report_title: 'Reports',
-
+    
+    dialog_create: 'Create',
+    dialog_update: 'Update',
+    dialog_delete: 'Delete',
+    dialog_cancel: 'Cancel',
 
     map_title: 'Map'
 });

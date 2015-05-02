@@ -16,6 +16,7 @@
 
 Ext.define('DeviceView', {
     extend: 'Ext.grid.Panel',
+    requires: [ 'DeviceDialog' ],
     xtype: 'device-view',
 
     title: Strings.device_title,
@@ -23,24 +24,35 @@ Ext.define('DeviceView', {
     tbar: [{
         text:'Add',
         handler: function() {
-            
-            var device = {
-                name: "AjaxTest",
-                uniqueId: "UniqueId"
-            };
-            
-            Ext.Ajax.request({
-                url: '/api/device/add',
-                jsonData: Ext.encode(device),
-                success: function() {
-                    alert("success");
+            var panel = this.up('panel');
+            Ext.create('DeviceDialog', {
+                onUpdate: function() {
+                    panel.store.reload();
                 }
-            });
+            }).show();
         }
     }, {
         text:'Edit'
     }, {
-        text:'Remove'
+        text:'Remove',
+        handler: function() {
+            Ext.Msg.show({
+                title: Strings.device_dialog,
+                message: 'Remove device?',
+                buttons: Ext.Msg.YESNO,
+                buttonText: {
+                    yes: Strings.dialog_delete,
+                    no: Strings.dialog_cancel
+                },
+                fn: function(btn) {
+                    if (btn === 'yes') {
+                        console.log('Yes pressed');
+                    } else if (btn === 'no') {
+                        console.log('No pressed');
+                    }
+                }
+            });
+        }
     }, {
         xtype: 'tbfill'
     }, {
