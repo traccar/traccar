@@ -19,34 +19,19 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Position {
-    
-    private long id;
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+public class Position extends BaseEvent implements Factory {
 
-    private String protocol;
-    public String getProtocol() { return protocol; }
-    public void setProtocol(String protocol) { this.protocol = protocol; }
-
-    private long deviceId;
-    public long getDeviceId() { return deviceId; }
-    public void setDeviceId(long deviceId) { this.deviceId = deviceId; }
-
-    private Date serverTime;
-    public Date getServerTime() { return serverTime; }
-    public void setServerTime(Date serverTime) { this.serverTime = serverTime; }
-
-    private Date deviceTime;
-    public Date getDeviceTime() { return deviceTime; }
-    public void setDeviceTime(Date deviceTime) { this.deviceTime = deviceTime; }
+    @Override
+    public Position create() {
+        return new Position();
+    }
 
     private Date fixTime;
     public Date getFixTime() { return fixTime; }
     public void setFixTime(Date fixTime) { this.fixTime = fixTime; }
     
     public void setTime(Date time) {
-        deviceTime = time;
+        setDeviceTime(time);
         fixTime = time;
     }
 
@@ -77,15 +62,5 @@ public class Position {
     private String address;
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-
-    private final Map<String, Object> other = new LinkedHashMap<String, Object>();
-    public void set(String key, Object value) {
-        if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
-            other.put(key, value);
-        }
-    }
-    public String getOther() {
-        return MiscFormatter.toXmlString(other);
-    }
 
 }

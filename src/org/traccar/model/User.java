@@ -15,7 +15,12 @@
  */
 package org.traccar.model;
 
-public class User {
+public class User implements Factory {
+
+    @Override
+    public User create() {
+        return new User();
+    }
 
     private long id;
     public long getId() { return id; }
