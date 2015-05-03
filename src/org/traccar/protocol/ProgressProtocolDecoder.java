@@ -198,7 +198,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                         hex.append(HEX_CHARS.charAt((b & 0x0F)));
                     }
 
-                    position.set("passenger", hex);
+                    position.set("passenger", hex.toString());
 
                     buf.skipBytes(size);
                 }
