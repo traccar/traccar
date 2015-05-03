@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
@@ -101,7 +102,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
             
             // HDOP
-            position.set("hdop", parser.group(index++));
+            position.set(Event.KEY_HDOP, parser.group(index++));
 
             // Altitude
             position.setAltitude(Double.valueOf(parser.group(index++)));
@@ -125,7 +126,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
 
             // Satellites
-            position.set("satellites", parser.group(index++));
+            position.set(Event.KEY_SATELLITES, parser.group(index++));
 
             return position;
         }

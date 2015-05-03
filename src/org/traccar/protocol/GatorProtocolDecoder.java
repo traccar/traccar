@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
@@ -96,10 +97,10 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             // Flags
             int flags = buf.readUnsignedByte();
             position.setValid((flags & 0x80) != 0);
-            position.set("satellites", flags & 0x0f);
+            position.set(Event.KEY_SATELLITES, flags & 0x0f);
 
             // Status
-            position.set("status", buf.readUnsignedByte());
+            position.set(Event.KEY_STATUS, buf.readUnsignedByte());
 
             // Key switch
             position.set("key", buf.readUnsignedByte());
@@ -108,10 +109,10 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             position.set("oil", buf.readUnsignedShort() / 10.0);
 
             // Power
-            position.set("power", buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
+            position.set(Event.KEY_POWER, buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
 
-            // Milage
-            position.set("milage", buf.readUnsignedInt());
+            // Odometer
+            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
             return position;
         }
 

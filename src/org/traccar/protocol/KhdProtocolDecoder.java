@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Crc;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class KhdProtocolDecoder extends BaseProtocolDecoder {
@@ -107,8 +108,8 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             } else {
 
-                // Milage
-                position.set("milage", buf.readUnsignedMedium());
+                // Odometer
+                position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
             
                 // Status
                 buf.skipBytes(4);

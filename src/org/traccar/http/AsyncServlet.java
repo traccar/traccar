@@ -34,6 +34,7 @@ import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.database.DataCache;
 import org.traccar.helper.Log;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class AsyncServlet extends HttpServlet {

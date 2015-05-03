@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class MtxProtocolDecoder extends BaseProtocolDecoder {
@@ -41,7 +42,7 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+\\.\\d+)," +                // Longitude
             "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+)," +                         // Course
-            "(\\d+\\.?\\d*)," +                 // Milage
+            "(\\d+\\.?\\d*)," +                 // Odometer
             "(?:\\d+|X)," +
             "(?:[01]|X)," +
             "([01]+)," +                        // Input
@@ -99,9 +100,9 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Other
-        position.set("milage", Double.valueOf(parser.group(index++)));
-        position.set("input", parser.group(index++));
-        position.set("output", parser.group(index++));
+        position.set(Event.KEY_ODOMETER, Double.valueOf(parser.group(index++)));
+        position.set(Event.KEY_INPUT, parser.group(index++));
+        position.set(Event.KEY_OUTPUT, parser.group(index++));
         position.set("adc1", parser.group(index++));
         position.set("adc2", parser.group(index++));
 

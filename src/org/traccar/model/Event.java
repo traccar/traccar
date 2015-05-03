@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class BaseEvent {
+public abstract class Event {
 
     private long id;
     public long getId() { return id; }
@@ -50,5 +50,25 @@ public abstract class BaseEvent {
     public String getOther() {
         return MiscFormatter.toXmlString(other);
     }
+
+    public static final String KEY_INDEX = "index";
+    public static final String KEY_HDOP = "hdop";
+    public static final String KEY_SATELLITES = "sat";
+    public static final String KEY_GSM = "gsm";
+    public static final String KEY_GPS = "gps";
+    public static final String KEY_EVENT = "event";
+    public static final String KEY_ALARM = "alarm";
+    public static final String KEY_STATUS = "status";
+    public static final String KEY_ODOMETER = "odometer";
+    public static final String KEY_INPUT = "input";
+    public static final String KEY_OUTPUT = "output";
+    public static final String KEY_POWER = "power";
+    public static final String KEY_BATTERY = "battery";
+    public static final String KEY_TEMPERATURE = "temperature";
+    public static final String KEY_MCC = "mcc";
+    public static final String KEY_MNC = "mnc";
+    public static final String KEY_LAC = "lac";
+    public static final String KEY_CELL = "cell";
+    public static final String KEY_FUEL = "fuel";
 
 }

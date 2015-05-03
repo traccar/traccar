@@ -28,6 +28,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class EnforaProtocolDecoder extends BaseProtocolDecoder {

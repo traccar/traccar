@@ -20,6 +20,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.geocode.ReverseGeocoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class ReverseGeocoderHandler extends OneToOneDecoder {

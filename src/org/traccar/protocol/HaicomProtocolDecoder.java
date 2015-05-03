@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class HaicomProtocolDecoder extends BaseProtocolDecoder {
@@ -113,12 +114,12 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)) / 10);
         
         // Additional data
-        position.set("status", parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
         position.set("gprs", parser.group(index++));
-        position.set("gps", parser.group(index++));
-        position.set("input", parser.group(index++));
-        position.set("output", parser.group(index++));
-        position.set("battery", Double.valueOf(parser.group(index++)) / 10);
+        position.set(Event.KEY_GPS, parser.group(index++));
+        position.set(Event.KEY_INPUT, parser.group(index++));
+        position.set(Event.KEY_OUTPUT, parser.group(index++));
+        position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)) / 10);
 
         return position;
     }

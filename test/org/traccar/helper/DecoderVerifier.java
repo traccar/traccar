@@ -3,6 +3,7 @@ package org.traccar.helper;
 import java.util.Date;
 import java.util.List;
 import static org.junit.Assert.*;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class DecoderVerifier {

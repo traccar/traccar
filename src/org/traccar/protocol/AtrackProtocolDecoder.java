@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
@@ -120,20 +121,20 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             // Report type
             position.set("type", buf.readUnsignedByte());
 
-            // Milage
-            position.set("milage", buf.readUnsignedInt() * 0.1);
+            // Odometer
+            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt() * 0.1);
 
             // Accuracy
-            position.set("hdop", buf.readUnsignedShort() * 0.1);
+            position.set(Event.KEY_HDOP, buf.readUnsignedShort() * 0.1);
 
             // Input
-            position.set("input", buf.readUnsignedByte());
+            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
 
             // Speed
             position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
             // Output
-            position.set("output", buf.readUnsignedByte());
+            position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
 
             // ADC
             position.set("adc", buf.readUnsignedShort() * 0.001);

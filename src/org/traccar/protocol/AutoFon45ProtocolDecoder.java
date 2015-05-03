@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.*;
@@ -70,12 +71,12 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             short status = buf.readUnsignedByte();
-            position.set("alarm", (status & 0x80) != 0);
-            position.set("battery", status & 0x7F);
+            position.set(Event.KEY_ALARM, (status & 0x80) != 0);
+            position.set(Event.KEY_BATTERY, status & 0x7F);
 
             buf.skipBytes(2); // remaining time
 
-            position.set("temperature", buf.readByte());
+            position.set(Event.KEY_TEMPERATURE, buf.readByte());
 
             buf.skipBytes(2); // timer (interval and units)
             buf.readByte(); // mode
@@ -86,7 +87,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             // GPS status
             int valid = buf.readUnsignedByte();
             position.setValid((valid & 0xc0) != 0);
-            position.set("satellites", valid & 0x3f);
+            position.set(Event.KEY_SATELLITES, valid & 0x3f);
 
             // Date and time
             int timeOfDay = buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte();

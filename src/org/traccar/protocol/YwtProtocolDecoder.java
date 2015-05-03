@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class YwtProtocolDecoder extends BaseProtocolDecoder {
@@ -128,13 +129,13 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        position.set("satellites", satellites);
+        position.set(Event.KEY_SATELLITES, satellites);
         
         // Report identifier
         String reportId = parser.group(index++);
         
         // Status
-        position.set("status", parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
 
         // Send response
         if (type.equals("KP") || type.equals("EP") || type.equals("EP")) {

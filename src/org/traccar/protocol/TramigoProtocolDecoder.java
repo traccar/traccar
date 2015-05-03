@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.nio.charset.Charset;
@@ -60,7 +61,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         position.setProtocol(getProtocol());
-        position.set("index", index);
+        position.set(Event.KEY_INDEX, index);
         position.setValid(true);
 
         // Get device id
@@ -89,7 +90,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedInt(); // distance
 
-            position.set("battery", buf.readUnsignedShort());
+            position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
 
             buf.readUnsignedShort(); // battery charger status
 

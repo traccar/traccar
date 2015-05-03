@@ -28,6 +28,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class ProgressProtocolDecoder extends BaseProtocolDecoder {
@@ -122,14 +123,14 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     position.set("archive", true);
                     int subtype = buf.readUnsignedShort();
                     if (subtype == MSG_ALARM) {
-                        position.set("alarm", true);
+                        position.set(Event.KEY_ALARM, true);
                     }
                     if (buf.readUnsignedShort() > buf.readableBytes()) {
                         lastIndex += 1;
                         break; // workaround for device bug
                     }
                     lastIndex = buf.readUnsignedInt();
-                    position.set("index", lastIndex);
+                    position.set(Event.KEY_INDEX, lastIndex);
                 } else {
                     newIndex = buf.readUnsignedInt();
                 }
@@ -157,16 +158,16 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
                 // Satellites
                 int satellitesNumber = buf.readUnsignedByte();
-                position.set("satellites", satellitesNumber);
+                position.set(Event.KEY_SATELLITES, satellitesNumber);
 
                 // Validity
                 position.setValid(satellitesNumber >= 3); // TODO: probably wrong
 
                 // Cell signal
-                position.set("gsm", buf.readUnsignedByte());
+                position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
-                // Milage
-                position.set("milage", buf.readUnsignedInt());
+                // Odometer
+                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
 
                 long extraFlags = buf.readLong();
 
@@ -208,7 +209,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     byte[] response = {(byte)0xC9,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
                     channel.write(ChannelBuffers.wrappedBuffer(response));
 
-                    position.set("alarm", true);
+                    position.set(Event.KEY_ALARM, true);
                 }
 
                 // Skip CRC

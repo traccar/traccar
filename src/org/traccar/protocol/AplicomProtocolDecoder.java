@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
@@ -138,7 +139,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Event
         int event = buf.readUnsignedByte();
-        position.set("event", event);
+        position.set(Event.KEY_EVENT, event);
         buf.readUnsignedByte();
 
         // Validity
@@ -158,7 +159,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
-            position.set("satellites", buf.readUnsignedByte());
+            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
         }
 
         // Speed and heading
@@ -170,7 +171,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Input
         if ((selector & 0x0040) != 0) {
-            position.set("input", buf.readUnsignedByte());
+            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
         }
         
         // ADC
@@ -183,8 +184,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Power
         if ((selector & 0x8000) != 0) {
-            position.set("power", buf.readUnsignedShort() / 1000.0);
-            position.set("battery", buf.readUnsignedShort());
+            position.set(Event.KEY_POWER, buf.readUnsignedShort() / 1000.0);
+            position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
         }
         
         // Pulse rate 1
@@ -211,7 +212,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Output
         if ((selector & 0x0040) != 0) {
-            position.set("output", buf.readUnsignedByte());
+            position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
         }
         
         // Button
@@ -306,7 +307,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     case 0x20D:
                         position.set("diesel-rpm", ChannelBuffers.swapShort(value.readShort()));
                         position.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set("battery", ChannelBuffers.swapShort(value.readShort()) * 0.01);
+                        position.set(Event.KEY_BATTERY, ChannelBuffers.swapShort(value.readShort()) * 0.01);
                         position.set("air-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                         break;
                     case 0x30D:

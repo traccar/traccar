@@ -23,6 +23,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class M2mProtocolDecoder extends BaseProtocolDecoder {
@@ -116,7 +117,7 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
             if (satellites == 0) {
                 return null; // cell information
             }
-            position.set("satellites", satellites);
+            position.set(Event.KEY_SATELLITES, satellites);
             position.setValid(true);
 
             // TODO decode everything else

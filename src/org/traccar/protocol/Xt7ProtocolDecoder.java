@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
@@ -129,13 +130,13 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         position.set("imsi", parser.group(index++));
 
         // Cell
-        position.set("cell", parser.group(index++));
+        position.set(Event.KEY_CELL, parser.group(index++));
 
         // GSM signal quality
-        position.set("gsm", parser.group(index++));
+        position.set(Event.KEY_GSM, parser.group(index++));
         
         // Battery
-        position.set("power", Double.valueOf(parser.group(index++)));
+        position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
         
         // Flags
         position.set("flags", parser.group(index++));
@@ -144,10 +145,10 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         position.set("sensors", parser.group(index++));
 
         // Fuel
-        position.set("fuel", parser.group(index++));
+        position.set(Event.KEY_FUEL, parser.group(index++));
 
         // Alarm
-        position.set("alarm", parser.group(index++));
+        position.set(Event.KEY_ALARM, parser.group(index++));
 
         return position;
     }

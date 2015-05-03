@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class TelikProtocolDecoder extends BaseProtocolDecoder {
@@ -99,7 +100,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Satellites
-        position.set("satellites", parser.group(index++));
+        position.set(Event.KEY_SATELLITES, parser.group(index++));
 
         return position;
     }

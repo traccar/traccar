@@ -27,6 +27,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
@@ -92,29 +93,29 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         
         if (version == 1) {
             
-            position.set("satellites", buf.readUnsignedByte());
+            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
 
             // Power
-            position.set("power", buf.readUnsignedByte());
+            position.set(Event.KEY_POWER, buf.readUnsignedByte());
 
             buf.readByte(); // other flags and sensors
 
             // Altitude
             position.setAltitude(buf.readUnsignedShort());
 
-            position.set("cell", buf.readUnsignedShort());
-            position.set("lac", buf.readUnsignedShort());
-            position.set("gsm", buf.readUnsignedByte());
+            position.set(Event.KEY_CELL, buf.readUnsignedShort());
+            position.set(Event.KEY_LAC, buf.readUnsignedShort());
+            position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
         } else if (version == 2) {
 
             int fuel = buf.readUnsignedByte() << 8;
 
-            position.set("status", buf.readUnsignedInt());
-            position.set("milage", buf.readUnsignedInt());
+            position.set(Event.KEY_STATUS, buf.readUnsignedInt());
+            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
 
             fuel += buf.readUnsignedByte();
-            position.set("fuel", fuel);
+            position.set(Event.KEY_FUEL, fuel);
 
         }
         return position;
@@ -194,7 +195,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Power
-        position.set("power", Double.valueOf(parser.group(index++)));
+        position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
         return position;
     }
 

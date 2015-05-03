@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class BoxProtocolDecoder extends BaseProtocolDecoder {
@@ -93,15 +94,15 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(Double.valueOf(parser.group(index++)));
             
             // Distance
-            position.set("milage", parser.group(index++));
+            position.set(Event.KEY_ODOMETER, parser.group(index++));
             
             // Event
-            position.set("event", parser.group(index++));
+            position.set(Event.KEY_EVENT, parser.group(index++));
             
             // Status
             int status = Integer.valueOf(parser.group(index++));
             position.setValid((status & 0x04) == 0);
-            position.set("status", status);
+            position.set(Event.KEY_STATUS, status);
             return position;
         }
         

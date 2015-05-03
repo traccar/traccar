@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class WondexProtocolDecoder extends BaseProtocolDecoder {
@@ -45,7 +46,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Satellites
             "(\\d+),?" +                   // Event
             "(?:(\\d+\\.\\d+)V,)?" +       // Battery
-            "(\\d+\\.\\d+)?,?" +           // Milage
+            "(\\d+\\.\\d+)?,?" +           // Odometer
             "(\\d+)?,?" +                  // Input
             "(\\d+\\.\\d+)?,?" +           // ADC1
             "(\\d+\\.\\d+)?,?" +           // ADC2
@@ -94,26 +95,26 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        position.set("satellites", satellites);
+        position.set(Event.KEY_SATELLITES, satellites);
         
         // Event
-        position.set("event", parser.group(index++));
+        position.set(Event.KEY_EVENT, parser.group(index++));
         
         // Battery
-        position.set("battery", parser.group(index++));
+        position.set(Event.KEY_BATTERY, parser.group(index++));
         
-        // Milage
-        position.set("milage", parser.group(index++));
+        // Odometer
+        position.set(Event.KEY_ODOMETER, parser.group(index++));
         
         // Input
-        position.set("input", parser.group(index++));
+        position.set(Event.KEY_INPUT, parser.group(index++));
         
         // ADC
         position.set("adc1", parser.group(index++));
         position.set("adc2", parser.group(index++));
         
         // Output
-        position.set("output", parser.group(index++));
+        position.set(Event.KEY_OUTPUT, parser.group(index++));
         return position;
     }
 

@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
@@ -124,19 +125,18 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         
         // State
         position.set("io", parser.group(index++));
-        /* Start : Added By Rohit Singhal, Decode Milage Data*/
-        // Prepare Mile Meter Data
-        String milage = parser.group(index++);
-        milage = milage.replace(":", "A");
-        milage = milage.replace(";", "B");
-        milage = milage.replace("<", "C");
-        milage = milage.replace("=", "D");
-        milage = milage.replace(">", "E");
-        milage = milage.replace("?", "F");
-        position.set("milage", Integer.parseInt(milage, 16));
-        /* Commented By Rohit position.set("milage", parser.group(index++)); */
-        /*End : Added By Rohit Singhal, Decode Milage Data*/
-        position.set("alarm", parser.group(index++));
+
+        // Odometer
+        String odometer = parser.group(index++);
+        odometer = odometer.replace(":", "A");
+        odometer = odometer.replace(";", "B");
+        odometer = odometer.replace("<", "C");
+        odometer = odometer.replace("=", "D");
+        odometer = odometer.replace(">", "E");
+        odometer = odometer.replace("?", "F");
+        position.set(Event.KEY_ODOMETER, Integer.parseInt(odometer, 16));
+
+        position.set(Event.KEY_ALARM, parser.group(index++));
         position.set("ad", parser.group(index++));
         return position;
     }

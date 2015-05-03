@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class CarscopProtocolDecoder extends BaseProtocolDecoder {
@@ -44,7 +45,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" + // Date (YYMMDD)
             "(\\d{3}\\.\\d{2})" +        // Course
             "(\\d{8})" +                 // State
-            "L(\\d{6})");                // Milage
+            "L(\\d{6})");                // Odometer
 
     @Override
     protected Object decode(
@@ -112,8 +113,8 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         // State
         position.set("state", parser.group(index++));
 
-        // Milage
-        position.set("milage", Integer.valueOf(parser.group(index++)));
+        // Odometer
+        position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
         return position;
     }
 

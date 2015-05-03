@@ -34,6 +34,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
@@ -162,7 +163,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (checkBit(flags, 3)) {
-                    position.set("milage", buf.readUnsignedShort());
+                    position.set(Event.KEY_ODOMETER, buf.readUnsignedShort());
                 }
 
                 if (checkBit(flags, 4)) {
@@ -180,22 +181,22 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (checkBit(flags, 6)) {
-                    position.set("temperature", buf.readByte());
+                    position.set(Event.KEY_TEMPERATURE, buf.readByte());
                     buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
                     position.set("sensor", buf.readUnsignedShort() & 0x0fff);
                     buf.readUnsignedShort(); // old sensor state (& 0x0fff)
                 }
 
                 if (checkBit(flags, 7)) {
-                    position.set("battery", buf.getUnsignedByte(buf.readerIndex()) >> 2);
-                    position.set("power", buf.readUnsignedShort() & 0x03ff);
+                    position.set(Event.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
+                    position.set(Event.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
                     buf.readByte(); // microcontroller temperature
 
-                    position.set("gsm", (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
+                    position.set(Event.KEY_GSM, (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
 
                     int satellites = buf.readUnsignedByte() & 0x0f;
                     position.setValid(satellites >= 3);
-                    position.set("satellites", satellites);
+                    position.set(Event.KEY_SATELLITES, satellites);
                 }
                 positions.add(position);
             }
@@ -234,7 +235,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readUnsignedShort());
             position.setSpeed(buf.readUnsignedByte());
             position.setCourse(buf.readByte());
-            position.set("milage", new FloatReader().readFloat(buf));
+            position.set(Event.KEY_ODOMETER, new FloatReader().readFloat(buf));
         }
 
         if (checkBit(flags, 1)) {
@@ -246,34 +247,34 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         if (checkBit(flags, 2)) {
             position.set("engine", buf.readUnsignedShort() * 0.125);
             position.set("pedals", buf.readUnsignedByte());
-            position.set("temperature", buf.readUnsignedByte() - 40);
-            buf.readUnsignedShort(); // service milage
+            position.set(Event.KEY_TEMPERATURE, buf.readUnsignedByte() - 40);
+            buf.readUnsignedShort(); // service odometer
         }
 
         if (checkBit(flags, 3)) {
-            position.set("fuel", buf.readUnsignedShort());
+            position.set(Event.KEY_FUEL, buf.readUnsignedShort());
             position.set("adc2", buf.readUnsignedShort());
             position.set("adc3", buf.readUnsignedShort());
             position.set("adc4", buf.readUnsignedShort());
         }
 
         if (checkBit(flags, 4)) {
-            position.set("temperature", buf.readByte());
+            position.set(Event.KEY_TEMPERATURE, buf.readByte());
             buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
             position.set("sensor", buf.readUnsignedShort() & 0x0fff);
             buf.readUnsignedShort(); // old sensor state (& 0x0fff)
         }
 
         if (checkBit(flags, 5)) {
-            position.set("battery", buf.getUnsignedByte(buf.readerIndex()) >> 2);
-            position.set("power", buf.readUnsignedShort() & 0x03ff);
+            position.set(Event.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
+            position.set(Event.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
             buf.readByte(); // microcontroller temperature
 
-            position.set("gsm", buf.getUnsignedByte(buf.readerIndex()) >> 5);
+            position.set(Event.KEY_GSM, buf.getUnsignedByte(buf.readerIndex()) >> 5);
 
             int satellites = buf.readUnsignedByte() & 0x1f;
             position.setValid(satellites >= 3);
-            position.set("satellites", satellites);
+            position.set(Event.KEY_SATELLITES, satellites);
         }
         
         // TODO: process other data

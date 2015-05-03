@@ -25,6 +25,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Log;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
@@ -80,7 +81,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Status code
             if (checkBit(mask, 1)) {
-                position.set("status", buf.readUnsignedInt());
+                position.set(Event.KEY_STATUS, buf.readUnsignedInt());
             }
 
             // Device id
@@ -171,7 +172,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Satellites
             if (checkBit(mask, 16)) {
-                position.set("satellites", buf.readUnsignedByte());
+                position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
             }
 
             // Battery percentage
@@ -179,14 +180,14 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShort();
             }
 
-            // Trip milage
+            // Trip odometer
             if (checkBit(mask, 20)) {
                 position.set("trip", buf.readUnsignedInt());
             }
 
-            // Milage
+            // Odometer
             if (checkBit(mask, 21)) {
-                position.set("milage", buf.readUnsignedInt());
+                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
             // Time of message generation
@@ -196,7 +197,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Battery level
             if (checkBit(mask, 24)) {
-                position.set("power", buf.readUnsignedShort() / 1000.0);
+                position.set(Event.KEY_POWER, buf.readUnsignedShort() / 1000.0);
             }
 
             // GPS overspeed
@@ -211,7 +212,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Sequence number
             if (checkBit(mask, 28)) {
-                position.set("index", buf.readUnsignedShort());
+                position.set(Event.KEY_INDEX, buf.readUnsignedShort());
             }
 
             return position;

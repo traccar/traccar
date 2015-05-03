@@ -37,6 +37,7 @@ import javax.sql.DataSource;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class DataManager {

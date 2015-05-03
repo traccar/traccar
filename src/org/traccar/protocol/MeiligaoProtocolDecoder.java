@@ -31,6 +31,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.Crc;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
@@ -58,7 +59,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             ",([0-9a-fA-F]+),([0-9a-fA-F]+))?" +
             "(?:\\|([0-9a-fA-F]+))?" +          // Cell
             "(?:\\|([0-9a-fA-F]+))?" +          // Signal
-            "(?:\\|([0-9a-fA-F]+))?" +          // Milage
+            "(?:\\|([0-9a-fA-F]+))?" +          // Odometer
             ".*");
     
     private static final int MSG_HEARTBEAT = 0x0001;
@@ -171,7 +172,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Custom data
         if (command == MSG_ALARM) {
-            position.set("alarm", buf.readUnsignedByte());
+            position.set(Event.KEY_ALARM, buf.readUnsignedByte());
         } else if (command == MSG_POSITION_LOGGED) {
             buf.skipBytes(6);
         }
@@ -237,7 +238,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Dilution of precision
-        position.set("hdop", parser.group(index++));
+        position.set(Event.KEY_HDOP, parser.group(index++));
 
         // Altitude
         String altitude = parser.group(index++);
@@ -262,19 +263,19 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         // Cell identifier
         String cell = parser.group(index++);
         if (cell != null) {
-            position.set("cell", cell);
+            position.set(Event.KEY_CELL, cell);
         }
 
         // GSM signal
         String gsm = parser.group(index++);
         if (gsm != null) {
-            position.set("gsm", Integer.parseInt(gsm, 16));
+            position.set(Event.KEY_GSM, Integer.parseInt(gsm, 16));
         }
 
-        // Milage
-        String milage = parser.group(index++);
-        if (milage != null) {
-            position.set("milage", Integer.parseInt(milage, 16));
+        // Odometer
+        String odometer = parser.group(index++);
+        if (odometer != null) {
+            position.set(Event.KEY_ODOMETER, Integer.parseInt(odometer, 16));
         }
 
         return position;

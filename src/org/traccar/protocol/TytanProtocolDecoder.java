@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class TytanProtocolDecoder extends BaseProtocolDecoder {
@@ -69,8 +70,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             
             int flags = buf.readUnsignedByte();
-            position.set("gps", flags >> 5);
-            position.set("gsm", flags & 0x07);
+            position.set(Event.KEY_GPS, flags >> 5);
+            position.set(Event.KEY_GSM, flags & 0x07);
             position.setValid(((flags & 0x08) != 0) ^ ((flags & 0x10) != 0));
             
             // Latitude
@@ -97,20 +98,20 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readerIndex() < end) {
                 switch (buf.readUnsignedByte()) {
                     case 2:
-                        position.set("milage", buf.readUnsignedMedium());
+                        position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
                         break;
                     case 4:
                         buf.readUnsignedShort(); // device start
                         break;
                     case 5:
-                        position.set("input", buf.readUnsignedByte());
+                        position.set(Event.KEY_INPUT, buf.readUnsignedByte());
                         break;
                     case 6:
                         buf.readUnsignedShort();
                         position.set("adc", buf.readFloat());
                         break;
                     case 7:
-                        position.set("alarm", buf.readUnsignedShort());
+                        position.set(Event.KEY_ALARM, buf.readUnsignedShort());
                         break;
                     case 8:
                         position.set("antihijack", buf.readUnsignedByte());
@@ -123,7 +124,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 24:
                         buf.readUnsignedByte();
-                        position.set("temperature", buf.readUnsignedByte());
+                        position.set(Event.KEY_TEMPERATURE, buf.readUnsignedByte());
                         break;
                     case 25:
                         buf.readUnsignedByte();
@@ -161,7 +162,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedInt(); // diagnostic
                         break;
                     case 90:
-                        position.set("power", buf.readFloat());
+                        position.set(Event.KEY_POWER, buf.readFloat());
                         break;
                     case 99:
                         buf.readUnsignedInt(); // tachograph
@@ -182,7 +183,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedByte(); // engine load
                         break;
                     case 107:
-                        position.set("fuel", buf.readUnsignedShort() & 0x3fff);
+                        position.set(Event.KEY_FUEL, buf.readUnsignedShort() & 0x3fff);
                         break;
                     case 108:
                         buf.readUnsignedInt(); // total distance

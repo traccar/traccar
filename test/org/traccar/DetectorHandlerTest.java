@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.traccar.helper.TestDataManager;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.protocol.Gps103ProtocolDecoder;
 

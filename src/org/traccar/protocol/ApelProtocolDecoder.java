@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class ApelProtocolDecoder extends BaseProtocolDecoder {
@@ -166,7 +167,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_TYPE_LOG_RECORDS) {
                     position.set("archive", true);
                     lastIndex = buf.readUnsignedInt() + 1;
-                    position.set("index", lastIndex);
+                    position.set(Event.KEY_INDEX, lastIndex);
 
                     subtype = buf.readUnsignedShort();
                     if (subtype != MSG_TYPE_CURRENT_GPS_DATA && subtype != MSG_TYPE_STATE_FULL_INFO_T104) {
@@ -193,7 +194,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                     int speed = buf.readUnsignedByte();
                     position.setValid(speed != 255);
                     position.setSpeed(speed * 0.539957);
-                    position.set("hdop", buf.readByte());
+                    position.set(Event.KEY_HDOP, buf.readByte());
                 } else {
                     int speed = buf.readShort();
                     position.setValid(speed != -1);
@@ -209,20 +210,20 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 if (subtype == MSG_TYPE_STATE_FULL_INFO_T104) {
 
                     // Satellites
-                    position.set("satellites", buf.readUnsignedByte());
+                    position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
                     
                     // Cell signal
-                    position.set("gsm", buf.readUnsignedByte());
+                    position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
                     // Event type
-                    position.set("event", buf.readUnsignedShort());
+                    position.set(Event.KEY_EVENT, buf.readUnsignedShort());
 
-                    // Milage
-                    position.set("milage", buf.readUnsignedInt());
+                    // Odometer
+                    position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
 
                     // Input/Output
-                    position.set("input", buf.readUnsignedByte());
-                    position.set("output", buf.readUnsignedByte());
+                    position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+                    position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
                     
                     // Analog sensors
                     for (int i = 1; i <= 8; i++) {

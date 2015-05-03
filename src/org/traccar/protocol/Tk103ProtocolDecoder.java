@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
@@ -46,7 +47,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2}),?" + // Time (HHMMSS)
             "(\\d+\\.?\\d+),?" +           // Course
             "([0-9a-fA-F]{8})?,?" +        // State
-            "(?:L([0-9a-fA-F]+))?\\)?");   // Milage
+            "(?:L([0-9a-fA-F]+))?\\)?");   // Odometer
 
     @Override
     protected Object decode(
@@ -133,10 +134,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         // State
         position.set("state", parser.group(index++));
 
-        // Milage
-        String milage = parser.group(index++);
-        if (milage != null) {
-            position.set("milage", Long.parseLong(milage, 16));
+        // Odometer
+        String odometer = parser.group(index++);
+        if (odometer != null) {
+            position.set(Event.KEY_ODOMETER, Long.parseLong(odometer, 16));
         }
         return position;
     }

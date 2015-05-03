@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
@@ -90,16 +91,16 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        position.set("satellites", satellites);
+        position.set(Event.KEY_SATELLITES, satellites);
         
         // Event
-        position.set("event", parser.group(index++));
+        position.set(Event.KEY_EVENT, parser.group(index++));
 
         // Input
-        position.set("battery", parser.group(index++));
+        position.set(Event.KEY_BATTERY, parser.group(index++));
 
         // Output
-        position.set("temperature", parser.group(index++));
+        position.set(Event.KEY_TEMPERATURE, parser.group(index++));
 
         return position;
     }

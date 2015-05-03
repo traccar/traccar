@@ -27,6 +27,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class RitiProtocolDecoder extends BaseProtocolDecoder {
@@ -69,14 +70,14 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
         position.set("mode", buf.readUnsignedByte());
         position.set("command", buf.readUnsignedByte());
-        position.set("power", buf.readUnsignedShort());
+        position.set(Event.KEY_POWER, buf.readUnsignedShort());
         
         buf.skipBytes(5);
         buf.readUnsignedShort();
         buf.readUnsignedShort();
         
         position.set("distance", buf.readUnsignedInt());
-        position.set("milage", buf.readUnsignedInt());
+        position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
         
         // Parse GPRMC
         Integer end = ChannelBufferTools.find(buf, buf.readerIndex(), buf.readerIndex() + 80, "*");

@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class WialonProtocolDecoder extends BaseProtocolDecoder {
@@ -125,13 +126,13 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         String satellites = parser.group(index++);
         if (satellites != null) {
             position.setValid(Integer.valueOf(satellites) >= 3);
-            position.set("satellites", satellites);
+            position.set(Event.KEY_SATELLITES, satellites);
         } else {
             position.setValid(false);
         }
 
         // Other
-        position.set("hdop", parser.group(index++));
+        position.set(Event.KEY_HDOP, parser.group(index++));
         position.set("inputs", parser.group(index++));
         position.set("outputs", parser.group(index++));
 

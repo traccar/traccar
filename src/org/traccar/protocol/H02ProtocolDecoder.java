@@ -27,6 +27,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
@@ -95,7 +96,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse((buf.readUnsignedByte() & 0x0f) * 100.0 + ChannelBufferTools.readHexInteger(buf, 2));
         
         // Status
-        position.set("status", ChannelBufferTools.readHexString(buf, 8));
+        position.set(Event.KEY_STATUS, ChannelBufferTools.readHexString(buf, 8));
         return position;
     }
 
@@ -174,7 +175,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
         
         // Status
-        position.set("status", parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
         return position;
     }
 

@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Log;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
@@ -42,7 +43,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_STATUS = 0x40;
     private static final int TAG_POWER = 0x41;
     private static final int TAG_BATTERY = 0x42;
-    private static final int TAG_MILAGE = 0xd4;
+    private static final int TAG_ODOMETER = 0xd4;
     private static final int TAG_REFRIGERATOR = 0x5b;
     private static final int TAG_PRESSURE = 0x5c;
     
@@ -135,19 +136,19 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                     
                 case TAG_STATUS:
-                    position.set("status", buf.readUnsignedShort());
+                    position.set(Event.KEY_STATUS, buf.readUnsignedShort());
                     break;
                     
                 case TAG_POWER:
-                    position.set("power", buf.readUnsignedShort());
+                    position.set(Event.KEY_POWER, buf.readUnsignedShort());
                     break;
                     
                 case TAG_BATTERY:
-                    position.set("battery", buf.readUnsignedShort());
+                    position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
                     break;
                     
-                case TAG_MILAGE:
-                    position.set("milage", buf.readUnsignedInt());
+                case TAG_ODOMETER:
+                    position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
                     break;
                     
                 default:

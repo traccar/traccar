@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
@@ -178,10 +179,10 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
             // Fix status
             if (type == MSG_MINI_EVENT_REPORT) {
-                position.set("satellites", buf.getUnsignedByte(buf.readerIndex()) & 0xf);
+                position.set(Event.KEY_SATELLITES, buf.getUnsignedByte(buf.readerIndex()) & 0xf);
                 position.setValid((buf.readUnsignedByte() & 0x20) == 0);
             } else {
-                position.set("satellites", buf.readUnsignedByte());
+                position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
                 position.setValid((buf.readUnsignedByte() & 0x08) == 0);
             }
 
@@ -191,7 +192,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                 position.set("carrier", buf.readUnsignedShort());
 
                 // Cell signal
-                position.set("gsm", buf.readShort());
+                position.set(Event.KEY_GSM, buf.readShort());
 
             }
 
@@ -200,20 +201,20 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
             // HDOP
             if (type != MSG_MINI_EVENT_REPORT) {
-                position.set("hdop", buf.readUnsignedByte());
+                position.set(Event.KEY_HDOP, buf.readUnsignedByte());
             }
 
             // Inputs
-            position.set("input", buf.readUnsignedByte());
+            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
 
             // Unit status
             if (type != MSG_MINI_EVENT_REPORT) {
-                position.set("status", buf.readUnsignedByte());
+                position.set(Event.KEY_STATUS, buf.readUnsignedByte());
             }
 
             // Event code and status
             if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
-                position.set("event", buf.readUnsignedByte() + " - " + buf.readUnsignedByte());
+                position.set(Event.KEY_EVENT, buf.readUnsignedByte() + " - " + buf.readUnsignedByte());
             }
 
             // Accumulators

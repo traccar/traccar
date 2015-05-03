@@ -16,10 +16,8 @@
 package org.traccar.model;
 
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-public class Position extends BaseEvent implements Factory {
+public class Position extends Event implements Factory {
 
     @Override
     public Position create() {

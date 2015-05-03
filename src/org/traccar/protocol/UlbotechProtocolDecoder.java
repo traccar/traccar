@@ -20,6 +20,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Date;
@@ -33,7 +34,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
     private static final short DATA_GPS = 0x01;
     private static final short DATA_LBS = 0x02;
     private static final short DATA_STATUS = 0x03;
-    private static final short DATA_MILAGE = 0x04;
+    private static final short DATA_ODOMETER = 0x04;
     private static final short DATA_ADC = 0x05;
     private static final short DATA_GEOFENCE = 0x06;
     private static final short DATA_OBD2 = 0x07;
@@ -85,7 +86,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(buf.readInt() / 1000000.0);
                     position.setSpeed(buf.readUnsignedShort() * 0.539957);
                     position.setCourse(buf.readUnsignedShort());
-                    position.set("hdop", buf.readUnsignedShort());
+                    position.set(Event.KEY_HDOP, buf.readUnsignedShort());
                     break;
 
                 default:

@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
@@ -86,7 +87,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
         
         // Cell
-        position.set("cell", parser.group(index++));
+        position.set(Event.KEY_CELL, parser.group(index++));
 
         // Coordinates
         position.setLatitude(Double.valueOf(parser.group(index++)));

@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
@@ -56,7 +57,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                         // Course
             "(\\d+\\.?\\d*)," +                 // HDOP
             "(-?\\d+)," +                       // Altitude
-            "(\\d+)," +                         // Milage
+            "(\\d+)," +                         // Odometer
             "(\\d+)," +                         // Runtime
             "(\\d+\\|\\d+\\|\\p{XDigit}+\\|\\p{XDigit}+)," + // Cell
             "(\\p{XDigit}+)," +                 // State
@@ -94,7 +95,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Event
         int event = Integer.valueOf(parser.group(index++));
-        position.set("event", event);
+        position.set(Event.KEY_EVENT, event);
 
         // Coordinates
         position.setLatitude(Double.valueOf(parser.group(index++)));
@@ -115,10 +116,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Satellites
-        position.set("satellites", parser.group(index++));
+        position.set(Event.KEY_SATELLITES, parser.group(index++));
 
         // GSM Signal
-        position.set("gsm", parser.group(index++));
+        position.set(Event.KEY_GSM, parser.group(index++));
 
         // Speed
         position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
@@ -127,15 +128,15 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // HDOP
-        position.set("hdop", parser.group(index++));
+        position.set(Event.KEY_HDOP, parser.group(index++));
 
         // Altitude
         position.setAltitude(Double.valueOf(parser.group(index++)));
 
         // Other
-        position.set("milage", parser.group(index++));
+        position.set(Event.KEY_ODOMETER, parser.group(index++));
         position.set("runtime", parser.group(index++));
-        position.set("cell", parser.group(index++));
+        position.set(Event.KEY_CELL, parser.group(index++));
         position.set("state", parser.group(index++));
         
         // ADC
@@ -151,8 +152,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (adc3 != null) {
             position.set("adc3", Integer.parseInt(adc3, 16));
         }
-        position.set("battery", Integer.parseInt(parser.group(index++), 16));
-        position.set("power", Integer.parseInt(parser.group(index++), 16));
+        position.set(Event.KEY_BATTERY, Integer.parseInt(parser.group(index++), 16));
+        position.set(Event.KEY_POWER, Integer.parseInt(parser.group(index++), 16));
 
         // Event specific
         String data = parser.group(index++);
@@ -167,7 +168,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         // Fuel
         String fuel = parser.group(index++);
         if (fuel != null) {
-            position.set("fuel",
+            position.set(Event.KEY_FUEL,
                     Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
         }
 
@@ -195,7 +196,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
             
             // Event
-            position.set("event", buf.readUnsignedByte());
+            position.set(Event.KEY_EVENT, buf.readUnsignedByte());
             
             // Location
             position.setLatitude(buf.readInt() * 0.000001);
@@ -208,10 +209,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(buf.readUnsignedByte() == 1);
 
             // Satellites
-            position.set("satellites", buf.readUnsignedByte());
+            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
             
             // GSM Signal
-            position.set("gsm", buf.readUnsignedByte());
+            position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
             // Speed
             position.setSpeed(buf.readUnsignedShort() * 0.539957);
@@ -220,23 +221,23 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             // HDOP
-            position.set("hdop", buf.readUnsignedShort() * 0.1);
+            position.set(Event.KEY_HDOP, buf.readUnsignedShort() * 0.1);
 
             // Altitude
             position.setAltitude(buf.readUnsignedShort());
 
             // Other
-            position.set("milage", buf.readUnsignedInt());
+            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
             position.set("runtime", buf.readUnsignedInt());
-            position.set("cell",
+            position.set(Event.KEY_CELL,
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort() + "|" +
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort());
             position.set("state", buf.readUnsignedShort());
         
             // ADC
             position.set("adc1", buf.readUnsignedShort());
-            position.set("battery", buf.readUnsignedShort() * 0.01);
-            position.set("power", buf.readUnsignedShort());
+            position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+            position.set(Event.KEY_POWER, buf.readUnsignedShort());
             
             buf.readUnsignedInt(); // geo-fence
             positions.add(position);

@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
@@ -115,7 +116,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // protocol version
 
             // Status
-            position.set("status", buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
+            position.set(Event.KEY_STATUS, buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
             
             int operator = (buf.readUnsignedByte() & 0xf0) << 4;
             operator += buf.readUnsignedByte();
@@ -130,7 +131,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             position.set("operator", operator);
             
             buf.readUnsignedInt(); // ADC
-            buf.readUnsignedMedium(); // milage
+            buf.readUnsignedMedium(); // Odometer
             buf.skipBytes(6); // multi-purpose data
             
             buf.readUnsignedShort(); // gps fix

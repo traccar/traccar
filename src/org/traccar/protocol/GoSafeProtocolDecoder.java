@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
@@ -104,7 +105,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
-        position.set("hdop", parser.group(index++));
+        position.set(Event.KEY_HDOP, parser.group(index++));
 
         return position;
     }

@@ -25,6 +25,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class BceProtocolDecoder extends BaseProtocolDecoder {
@@ -97,17 +98,17 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         position.setSpeed(buf.readUnsignedByte());
 
                         int gps = buf.readUnsignedByte();
-                        position.set("satellites", gps & 0xf);
-                        position.set("hdop", gps >> 4);
+                        position.set(Event.KEY_SATELLITES, gps & 0xf);
+                        position.set(Event.KEY_HDOP, gps >> 4);
 
                         position.setCourse(buf.readUnsignedByte());
                         position.setAltitude(buf.readUnsignedShort());
 
-                        position.set("milage", buf.readUnsignedInt());
+                        position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
                     }
 
                     if (checkBit(mask, 1)) {
-                        position.set("input", buf.readUnsignedShort());
+                        position.set(Event.KEY_INPUT, buf.readUnsignedShort());
                     }
 
                     for (int i = 1; i <= 8; i++) {
@@ -122,11 +123,11 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                     if (checkBit(mask, 13)) buf.skipBytes(2);
 
                     if (checkBit(mask, 14)) {
-                        position.set("mcc", buf.readUnsignedShort());
-                        position.set("mnc", buf.readUnsignedByte());
-                        position.set("lac", buf.readUnsignedShort());
-                        position.set("cell", buf.readUnsignedShort());
-                        position.set("gsm", buf.readUnsignedByte());
+                        position.set(Event.KEY_MCC, buf.readUnsignedShort());
+                        position.set(Event.KEY_MNC, buf.readUnsignedByte());
+                        position.set(Event.KEY_LAC, buf.readUnsignedShort());
+                        position.set(Event.KEY_CELL, buf.readUnsignedShort());
+                        position.set(Event.KEY_GSM, buf.readUnsignedByte());
                         buf.readUnsignedByte();
                     }
 

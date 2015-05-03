@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.*;
@@ -56,7 +57,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         if (!history) {
             buf.readUnsignedShort();
         }
-        position.set("battery", buf.readUnsignedByte());
+        position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
         buf.skipBytes(6); // time
 
         // Timers
@@ -68,8 +69,8 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set("temperature", buf.readByte());
-        position.set("gsm", buf.readUnsignedByte());
+        position.set(Event.KEY_TEMPERATURE, buf.readByte());
+        position.set(Event.KEY_GSM, buf.readUnsignedByte());
         buf.readUnsignedShort(); // mcc
         buf.readUnsignedShort(); // mnc
         buf.readUnsignedShort(); // lac
@@ -78,7 +79,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         // GPS status
         int valid = buf.readUnsignedByte();
         position.setValid((valid & 0xc0) != 0);
-        position.set("satellites", valid & 0x3f);
+        position.set(Event.KEY_SATELLITES, valid & 0x3f);
 
         // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -98,7 +99,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(buf.readUnsignedByte());
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
-        position.set("hdop", buf.readUnsignedShort());
+        position.set(Event.KEY_HDOP, buf.readUnsignedShort());
 
         buf.readUnsignedShort(); // reserved
         buf.readUnsignedByte(); // checksum

@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class GotopProtocolDecoder extends BaseProtocolDecoder {
@@ -96,7 +97,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
         
         // Status
-        position.set("status", parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
 
         // Course
         String course = parser.group(index++);

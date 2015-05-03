@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
@@ -76,12 +77,12 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
                 // Validity
                 int satellites = buf.readUnsignedByte();
-                position.set("satellites", satellites);
+                position.set(Event.KEY_SATELLITES, satellites);
                 position.setValid(satellites >= 3);
 
                 position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
-                position.set("hdop", buf.readUnsignedByte() / 10.0);
+                position.set(Event.KEY_HDOP, buf.readUnsignedByte() / 10.0);
 
                 buf.readUnsignedByte();
 

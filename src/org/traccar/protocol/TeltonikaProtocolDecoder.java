@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
@@ -110,17 +111,17 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 
                 if (checkBit(locationMask, 4)) {
                     int satellites = buf.readUnsignedByte();
-                    position.set("satellites", satellites);
+                    position.set(Event.KEY_SATELLITES, satellites);
                     position.setValid(satellites >= 3);
                 }
                 
                 if (checkBit(locationMask, 5)) {
                     position.set("area", buf.readUnsignedShort());
-                    position.set("cell", buf.readUnsignedShort());
+                    position.set(Event.KEY_CELL, buf.readUnsignedShort());
                 }
                 
                 if (checkBit(locationMask, 6)) {
-                    position.set("gsm", buf.readUnsignedByte());
+                    position.set(Event.KEY_GSM, buf.readUnsignedByte());
                 }
                 
                 if (checkBit(locationMask, 7)) {
@@ -139,13 +140,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(buf.readUnsignedShort());
 
                 int satellites = buf.readUnsignedByte();
-                position.set("satellites", satellites);
+                position.set(Event.KEY_SATELLITES, satellites);
 
                 position.setValid(satellites != 0);
 
                 position.setSpeed(buf.readUnsignedShort() * 0.539957);
 
-                position.set("event", buf.readUnsignedByte());
+                position.set(Event.KEY_EVENT, buf.readUnsignedByte());
 
                 buf.readUnsignedByte(); // total IO data records
 
@@ -157,7 +158,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 for (int j = 0; j < cnt; j++) {
                     int id = buf.readUnsignedByte();
                     if (id == 1) {
-                        position.set("power", buf.readUnsignedByte());
+                        position.set(Event.KEY_POWER, buf.readUnsignedByte());
                     } else {
                         position.set("io" + id, buf.readUnsignedByte());
                     }

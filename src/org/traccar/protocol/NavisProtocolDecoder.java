@@ -28,6 +28,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class NavisProtocolDecoder extends BaseProtocolDecoder {
@@ -93,10 +94,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         position.set("format", format);
 
         long index = buf.readUnsignedInt();
-        position.set("index", index);
+        position.set(Event.KEY_INDEX, index);
 
         // Event type
-        position.set("event", buf.readUnsignedShort());
+        position.set(Event.KEY_EVENT, buf.readUnsignedShort());
 
         // Event time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -110,36 +111,36 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         position.set("time", time.getTimeInMillis());
 
         // Alarm status
-        position.set("alarm", buf.readUnsignedByte());
+        position.set(Event.KEY_ALARM, buf.readUnsignedByte());
 
         // Modules status
-        position.set("status", buf.readUnsignedByte());
+        position.set(Event.KEY_STATUS, buf.readUnsignedByte());
 
         // GSM signal
-        position.set("gsm", buf.readUnsignedByte());
+        position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
         // Output
         if (isFormat(format, F10, F20, F30)) {
-            position.set("output", buf.readUnsignedShort());
+            position.set(Event.KEY_OUTPUT, buf.readUnsignedShort());
         } else if (isFormat(format, F40, F50, F51, F52)) {
-            position.set("output", buf.readUnsignedByte());
+            position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
         }
 
         // Input
         if (isFormat(format, F10, F20, F30, F40)) {
-            position.set("input", buf.readUnsignedShort());
+            position.set(Event.KEY_INPUT, buf.readUnsignedShort());
         } else if (isFormat(format, F50, F51, F52)) {
-            position.set("input", buf.readUnsignedByte());
+            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
         }
 
-        position.set("power", buf.readUnsignedShort() / 1000.0);
+        position.set(Event.KEY_POWER, buf.readUnsignedShort() / 1000.0);
 
         // Battery power
-        position.set("battery", buf.readUnsignedShort());
+        position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
 
         // Temperature
         if (isFormat(format, F10, F20, F30)) {
-            position.set("temperature", buf.readShort());
+            position.set(Event.KEY_TEMPERATURE, buf.readShort());
         }
 
         if (isFormat(format, F10, F20, F50, F52)) {
@@ -174,8 +175,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(buf.readFloat());
             position.setCourse(buf.readUnsignedShort());
 
-            // Milage
-            position.set("milage", buf.readFloat());
+            // Odometer
+            position.set(Event.KEY_ODOMETER, buf.readFloat());
 
             // Last segment
             position.set("segment", buf.readFloat());

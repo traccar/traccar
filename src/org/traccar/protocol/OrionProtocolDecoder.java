@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
@@ -84,7 +85,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(getDeviceId());
                 position.setProtocol(getProtocol());
                 
-                position.set("event", buf.readUnsignedByte());
+                position.set(Event.KEY_EVENT, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length
                 position.set("flag1", buf.readUnsignedByte());
                 position.set("flag2", buf.readUnsignedByte());
@@ -109,7 +110,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 
                 // Accuracy
                 int satellites = buf.readUnsignedByte();
-                position.set("satellites", satellites);
+                position.set(Event.KEY_SATELLITES, satellites);
                 position.setValid(satellites >= 3);
                 positions.add(position);
             }

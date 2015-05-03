@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class NoranProtocolDecoder extends BaseProtocolDecoder {
@@ -84,7 +85,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setValid((flags & 0x01) != 0);
 
             // Alarm type
-            position.set("alarm", buf.readUnsignedByte());
+            position.set(Event.KEY_ALARM, buf.readUnsignedByte());
 
             // Location
             position.setSpeed(buf.readUnsignedByte());
@@ -115,7 +116,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.set("io", buf.readUnsignedByte());
             
             // Fuel
-            position.set("fuel", buf.readUnsignedByte());
+            position.set(Event.KEY_FUEL, buf.readUnsignedByte());
             return position;
         }
 

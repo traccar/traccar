@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
@@ -53,7 +54,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}+)," +                 // Signal
             "(\\d+)," +                         // Power
             "(\\p{XDigit}{4})," +               // Oil
-            "(\\p{XDigit}+),?" +                // Milage
+            "(\\p{XDigit}+),?" +                // Odometer
             "(\\d+)?" +                         // Altitude
             ".*");
 
@@ -112,19 +113,19 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Integer.parseInt(parser.group(index++), 16) / 100.0);
 
         // Status
-        position.set("status", parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
 
         // Signal
         position.set("signal", parser.group(index++));
 
         // Power
-        position.set("power", Double.valueOf(parser.group(index++)));
+        position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
 
         // Oil
         position.set("oil", Integer.parseInt(parser.group(index++), 16));
 
-        // Milage
-        position.set("milage", Integer.parseInt(parser.group(index++), 16));
+        // Odometer
+        position.set(Event.KEY_ODOMETER, Integer.parseInt(parser.group(index++), 16));
         
         // Altitude
         String altitude = parser.group(index++);

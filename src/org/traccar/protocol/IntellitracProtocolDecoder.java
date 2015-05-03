@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
@@ -57,7 +58,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Charger Pressure
             "(\\d+)," +                    // TPL
             "(\\d+)," +                    // Axle Weight
-            "(\\d+))?" +                   // Milage
+            "(\\d+))?" +                   // Odometer
             ".*");
 
     @Override
@@ -105,16 +106,16 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
-        position.set("satellites", satellites);
+        position.set(Event.KEY_SATELLITES, satellites);
         
         // Report identifier
-        position.set("index", Long.valueOf(parser.group(index++)));
+        position.set(Event.KEY_INDEX, Long.valueOf(parser.group(index++)));
 
         // Input
-        position.set("input", parser.group(index++));
+        position.set(Event.KEY_INPUT, parser.group(index++));
 
         // Output
-        position.set("output", parser.group(index++));
+        position.set(Event.KEY_OUTPUT, parser.group(index++));
 
         // ADC1
         position.set("adc1", parser.group(index++));
@@ -126,13 +127,13 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set("vss", parser.group(index++));
         position.set("rpm", parser.group(index++));
         position.set("coolant", parser.group(index++));
-        position.set("fuel", parser.group(index++));
+        position.set(Event.KEY_FUEL, parser.group(index++));
         position.set("consumption", parser.group(index++));
-        position.set("temperature", parser.group(index++));
+        position.set(Event.KEY_TEMPERATURE, parser.group(index++));
         position.set("charger", parser.group(index++));
         position.set("tpl", parser.group(index++));
         position.set("axle", parser.group(index++));
-        position.set("milage", parser.group(index++));
+        position.set(Event.KEY_ODOMETER, parser.group(index++));
         return position;
     }
 

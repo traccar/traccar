@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
@@ -123,7 +124,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         position.set("signal", parser.group(index++));
 
         // Alarm
-        position.set("alarm", parser.group(index++));
+        position.set(Event.KEY_ALARM, parser.group(index++));
 
         // Get device by IMEI
         if (!identify(parser.group(index++))) {
@@ -132,7 +133,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Satellites
-        position.set("satellites", parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+        position.set(Event.KEY_SATELLITES, parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
 
         // Altitude
         String altitude = parser.group(index++);
@@ -141,7 +142,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Power
-        position.set("power", Double.valueOf(parser.group(index++)));
+        position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
 
         return position;
     }

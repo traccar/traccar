@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
@@ -96,7 +97,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
             
             position.setProtocol(getProtocol());
-            position.set("index", index);
+            position.set(Event.KEY_INDEX, index);
             
             // Location
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -106,17 +107,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
             
             // Cell
-            position.set("cell", ChannelBufferTools.readHexString(buf, 18));
+            position.set(Event.KEY_CELL, ChannelBufferTools.readHexString(buf, 18));
             
             // Validity
             position.setValid((buf.readUnsignedByte() & 0x01) != 0);
             
             if (type == MSG_ALARM) {
-                position.set("alarm", buf.readUnsignedByte());
+                position.set(Event.KEY_ALARM, buf.readUnsignedByte());
             }
             
             if (type == MSG_STATE) {
-                position.set("status", buf.readUnsignedByte());
+                position.set(Event.KEY_STATUS, buf.readUnsignedByte());
             }
             return position;
         }
@@ -134,7 +135,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt02");
-            position.set("index", index);
+            position.set(Event.KEY_INDEX, index);
 
             // Get device id
             try {

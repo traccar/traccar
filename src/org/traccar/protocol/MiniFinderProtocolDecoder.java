@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
@@ -101,10 +102,10 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(Double.valueOf(parser.group(index++)));
 
             // Battery
-            position.set("battery", parser.group(index++));
+            position.set(Event.KEY_BATTERY, parser.group(index++));
 
             // Satellites
-            position.set("satellites", parser.group(index++));
+            position.set(Event.KEY_SATELLITES, parser.group(index++));
             return position;
         }
 

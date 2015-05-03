@@ -22,6 +22,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.Crc;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
@@ -157,7 +158,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             // GPS length and Satellites count
             int gpsLength = buf.readUnsignedByte();
-            position.set("satellites", gpsLength & 0xf);
+            position.set(Event.KEY_SATELLITES, gpsLength & 0xf);
             gpsLength >>= 4;
 
             // Latitude
@@ -194,16 +195,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 // Cell information
-                position.set("mcc", buf.readUnsignedShort());
-                position.set("mnc", buf.readUnsignedByte());
-                position.set("lac", buf.readUnsignedShort());
-                position.set("cell", buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
+                position.set(Event.KEY_MCC, buf.readUnsignedShort());
+                position.set(Event.KEY_MNC, buf.readUnsignedByte());
+                position.set(Event.KEY_LAC, buf.readUnsignedShort());
+                position.set(Event.KEY_CELL, buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
                 buf.skipBytes(lbsLength - 9);
 
                 // Status
                 if (type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3) {
 
-                    position.set("alarm", true);
+                    position.set(Event.KEY_ALARM, true);
 
                     int flags = buf.readUnsignedByte();
 
@@ -211,10 +212,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     // TODO parse other flags
 
                     // Voltage
-                    position.set("power", buf.readUnsignedByte());
+                    position.set(Event.KEY_POWER, buf.readUnsignedByte());
 
                     // GSM signal
-                    position.set("gsm", buf.readUnsignedByte());
+                    position.set(Event.KEY_GSM, buf.readUnsignedByte());
                 }
             }
 
@@ -223,7 +224,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(buf.readableBytes() - 6);
             }
             int index = buf.readUnsignedShort();
-            position.set("index", index);
+            position.set(Event.KEY_INDEX, index);
             sendResponse(channel, type, index);
             return position;
         }

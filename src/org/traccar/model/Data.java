@@ -15,7 +15,7 @@
  */
 package org.traccar.model;
 
-public class Data extends BaseEvent implements Factory {
+public class Data extends Event implements Factory {
 
     @Override
     public Data create() {

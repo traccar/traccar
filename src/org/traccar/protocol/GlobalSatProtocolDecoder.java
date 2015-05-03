@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
@@ -167,7 +168,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Double.valueOf(value));
                     break;
                 case 'N':
-                    position.set("battery", value);
+                    position.set(Event.KEY_BATTERY, value);
                     break;
                 default:
                     // Unsupported
@@ -253,10 +254,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Satellites
-        position.set("satellites", Integer.valueOf(parser.group(index++)));
+        position.set(Event.KEY_SATELLITES, Integer.valueOf(parser.group(index++)));
 
         // HDOP
-        position.set("hdop", parser.group(index++));
+        position.set(Event.KEY_HDOP, parser.group(index++));
         return position;
     }
 

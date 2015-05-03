@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
@@ -99,7 +100,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
             // GPS length and Satellites count
             int gpsLength = buf.readUnsignedByte();
-            position.set("satellites", gpsLength & 0xf);
+            position.set(Event.KEY_SATELLITES, gpsLength & 0xf);
             gpsLength >>= 4;
 
             //Skip Satellite numbers
@@ -124,16 +125,16 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
                 position.set("acc", (union & 0x8000) != 0);
             }
 
-            position.set("lac", buf.readUnsignedShort());
-            position.set("cell", buf.readUnsignedMedium());
-            position.set("alarm", true);
+            position.set(Event.KEY_LAC, buf.readUnsignedShort());
+            position.set(Event.KEY_CELL, buf.readUnsignedMedium());
+            position.set(Event.KEY_ALARM, true);
             int flags = buf.readUnsignedByte();
             position.set("acc", (flags & 0x2) != 0);
 
             // TODO parse other flags
 
-            position.set("power", buf.readUnsignedByte());
-            position.set("gsm", buf.readUnsignedByte());
+            position.set(Event.KEY_POWER, buf.readUnsignedByte());
+            position.set(Event.KEY_GSM, buf.readUnsignedByte());
             return position;
         }
 

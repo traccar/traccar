@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
@@ -91,7 +92,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 Integer index = 1;
                 
                 // Cell
-                position.set("cell", parser.group(index++));
+                position.set(Event.KEY_CELL, parser.group(index++));
 
                 // Time
                 Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -135,7 +136,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(time.getTime());
                 
                 // Status
-                position.set("status", status);
+                position.set(Event.KEY_STATUS, status);
                 positions.add(position);
             }
         }

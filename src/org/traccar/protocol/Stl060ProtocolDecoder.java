@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
@@ -43,7 +44,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{3})(\\d{2})\\.?(\\d+)([EW])," + // Longitude
             "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+\\.?\\d*)," +                 // Course
-            "(\\d+)," +                         // Milage
+            "(\\d+)," +                         // Odometer
             "(\\d+)," +                         // Ignition
             "(\\d+)," +                         // DIP1
             "(\\d+)," +                         // DIP2
@@ -108,11 +109,11 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Other
-        position.set("milage", Integer.valueOf(parser.group(index++)));
+        position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
         position.set("ignition", Integer.valueOf(parser.group(index++)));
         position.set("dip1", Integer.valueOf(parser.group(index++)));
         position.set("dip2", Integer.valueOf(parser.group(index++)));
-        position.set("fuel", Integer.valueOf(parser.group(index++)));
+        position.set(Event.KEY_FUEL, Integer.valueOf(parser.group(index++)));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);

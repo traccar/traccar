@@ -34,6 +34,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
@@ -133,7 +134,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     
                     // Satellites
                     int satellites = buf.readUnsignedByte();
-                    position.set("satellites", satellites);
+                    position.set(Event.KEY_SATELLITES, satellites);
                     position.setValid(satellites >= 3);
                     
                     // Speed
@@ -151,12 +152,12 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                         // External power
                         double power = buf.readUnsignedByte();
                         power += buf.readUnsignedByte() << 8;
-                        position.set("power", power / 100);
+                        position.set(Event.KEY_POWER, power / 100);
 
                         // Battery
                         double battery = buf.readUnsignedByte();
                         battery += buf.readUnsignedByte() << 8;
-                        position.set("battery", battery / 100);
+                        position.set(Event.KEY_BATTERY, battery / 100);
                         
                         buf.skipBytes(6);
                         

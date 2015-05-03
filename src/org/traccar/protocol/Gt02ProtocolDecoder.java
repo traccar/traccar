@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
@@ -77,7 +78,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setProtocol(getProtocol());
-            position.set("index", index);
+            position.set(Event.KEY_INDEX, index);
 
             // Get device id
             if (!identify(imei)) {

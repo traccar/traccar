@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class TotemProtocolDecoder extends BaseProtocolDecoder {
@@ -59,7 +60,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "(?:(\\d+)\\|)?" +                  // ADC
             "(\\p{XDigit}{8})\\|" +             // Location Code
             "(\\d+)\\|" +                       // Temperature
-            "(\\d+.\\d+)\\|" +                  // Milage
+            "(\\d+.\\d+)\\|" +                  // Odometer
             "\\d+\\|" +                         // Serial Number
             ".*\\|?" +
             "\\p{XDigit}{4}");                  // Checksum
@@ -86,7 +87,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)\\|" +                       // ADC
             "(\\p{XDigit}{8})\\|" +             // Location Code
             "(\\d+)\\|" +                       // Temperature
-            "(\\d+.\\d+)\\|" +                  // Milage
+            "(\\d+.\\d+)\\|" +                  // Odometer
             "\\d+\\|" +                         // Serial Number
             "\\p{XDigit}{4}");                  // Checksum
 
@@ -111,7 +112,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{3})" +                        // Course
             "(\\d{3})" +                        // Speed
             "(\\d{2}\\.\\d)" +                  // PDOP
-            "(\\d{7})" +                        // Milage
+            "(\\d{7})" +                        // Odometer
             "(\\d{2})(\\d{2}\\.\\d{4})" +       // Latitude (DDMM.MMMM)
             "([NS])" +
             "(\\d{3})(\\d{2}\\.\\d{4})" +       // Longitude (DDDMM.MMMM)
@@ -169,7 +170,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
         
         // Alarm type
-        position.set("alarm", parser.group(index++));
+        position.set(Event.KEY_ALARM, parser.group(index++));
         
         if (format == MessageFormat.first || format == MessageFormat.second) {
 
@@ -227,26 +228,26 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
 
             // Accuracy
-            position.set("hdop", parser.group(index++));
+            position.set(Event.KEY_HDOP, parser.group(index++));
 
             // IO Status
             position.set("io", parser.group(index++));
 
             // Power
-            position.set("battery", parser.group(index++));
-            position.set("power", Double.valueOf(parser.group(index++)));
+            position.set(Event.KEY_BATTERY, parser.group(index++));
+            position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
 
             // ADC
             position.set("adc", parser.group(index++));
 
             // Location Code
-            position.set("lac", parser.group(index++));
+            position.set(Event.KEY_LAC, parser.group(index++));
 
             // Temperature
-            position.set("temperature", parser.group(index++));
+            position.set(Event.KEY_TEMPERATURE, parser.group(index++));
 
-            // Milage
-            position.set("milage", parser.group(index++));
+            // Odometer
+            position.set(Event.KEY_ODOMETER, parser.group(index++));
         
         } else if (format == MessageFormat.third) {
 
@@ -265,8 +266,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set("io", parser.group(index++));
 
             // Power
-            position.set("battery", Double.valueOf(parser.group(index++)) / 10);
-            position.set("power", Double.valueOf(parser.group(index++)));
+            position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)) / 10);
+            position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
 
             // ADC
             position.set("adc1", parser.group(index++));
@@ -277,13 +278,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set("temperature2", parser.group(index++));
 
             // Location Code
-            position.set("lac", parser.group(index++));
+            position.set(Event.KEY_LAC, parser.group(index++));
 
             // Validity
             position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Satellites
-            position.set("satellites", parser.group(index++));
+            position.set(Event.KEY_SATELLITES, parser.group(index++));
 
             // Course
             position.setCourse(Double.valueOf(parser.group(index++)));
@@ -294,8 +295,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             // PDOP
             position.set("pdop", parser.group(index++));
 
-            // Milage
-            position.set("milage", parser.group(index++));
+            // Odometer
+            position.set(Event.KEY_ODOMETER, parser.group(index++));
 
             // Latitude
             Double latitude = Double.valueOf(parser.group(index++));

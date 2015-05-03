@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Calendar;
@@ -112,12 +113,12 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Other
-        position.set("gsm", parser.group(index++));
-        position.set("event", Integer.valueOf(parser.group(index++)));
+        position.set(Event.KEY_GSM, parser.group(index++));
+        position.set(Event.KEY_EVENT, Integer.valueOf(parser.group(index++)));
         position.set("adc1", Integer.valueOf(parser.group(index++)));
-        position.set("battery", Integer.valueOf(parser.group(index++)));
-        position.set("input", parser.group(index++));
-        position.set("status", parser.group(index++));
+        position.set(Event.KEY_BATTERY, Integer.valueOf(parser.group(index++)));
+        position.set(Event.KEY_INPUT, parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
         return position;
     }
 

@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class DataCache {

@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
@@ -44,7 +45,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                         // Course
             "(?:(\\d+)," +                      // Altitude
             "(\\d+),)?" +                       // Satellites
-            "(\\d+)," +                         // Milage
+            "(\\d+)," +                         // Odometer
             "(?:(\\d)," +                       // Ignition
             "(\\d)," +                          // Input 1
             "(\\d)," +                          // Input 2
@@ -118,14 +119,14 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Additional data
-        position.set("satellites", parser.group(index++));
-        position.set("milage", parser.group(index++));
+        position.set(Event.KEY_SATELLITES, parser.group(index++));
+        position.set(Event.KEY_ODOMETER, parser.group(index++));
         position.set("ignition", parser.group(index++));
         position.set("input1", parser.group(index++));
         position.set("input2", parser.group(index++));
         position.set("immobilizer", parser.group(index++));
-        position.set("power", parser.group(index++));
-        position.set("gsm", parser.group(index++));
+        position.set(Event.KEY_POWER, parser.group(index++));
+        position.set(Event.KEY_GSM, parser.group(index++));
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);

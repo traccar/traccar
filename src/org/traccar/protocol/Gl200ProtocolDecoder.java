@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
@@ -50,7 +51,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{4})?," +                      // MNC
             "(\\p{XDigit}{4})?," +              // LAC
             "(\\p{XDigit}{4})?," +              // Cell
-            "(?:(\\d+\\.\\d)?," +               // Milage
+            "(?:(\\d+\\.\\d)?," +               // Odometer
             "(\\d{1,3})?)?" +                   // Battery
             ".*");
 
@@ -118,17 +119,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Cell information
-        position.set("mcc", parser.group(index++));
-        position.set("mnc", parser.group(index++));
-        position.set("lac", parser.group(index++));
-        position.set("cell", parser.group(index++));
+        position.set(Event.KEY_MCC, parser.group(index++));
+        position.set(Event.KEY_MNC, parser.group(index++));
+        position.set(Event.KEY_LAC, parser.group(index++));
+        position.set(Event.KEY_CELL, parser.group(index++));
 
         // Other
-        String milage = parser.group(index++);
-        if (milage != null && Double.valueOf(milage) != 0) {
-            position.set("milage", milage);
+        String odometer = parser.group(index++);
+        if (odometer != null && Double.valueOf(odometer) != 0) {
+            position.set(Event.KEY_ODOMETER, odometer);
         }
-        position.set("battery", parser.group(index++));
+        position.set(Event.KEY_BATTERY, parser.group(index++));
         return position;
     }
 

@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
@@ -188,7 +189,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             int index = 1;
 
             // Alarm
-            position.set("alarm", parser.group(index++));
+            position.set(Event.KEY_ALARM, parser.group(index++));
 
             // IMEI
             if (!identify(parser.group(index++), false)) {
@@ -199,7 +200,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             // Satellites
-            position.set("satellites", parser.group(index++));
+            position.set(Event.KEY_SATELLITES, parser.group(index++));
 
             // Altitude
             String altitude = parser.group(index++);
@@ -208,7 +209,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Battery
-            position.set("power", Double.valueOf(parser.group(index++)));
+            position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
 
             // Charger
             String charger = parser.group(index++);
@@ -216,9 +217,9 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 position.set("charger", Integer.valueOf(charger) == 1);
             }
 
-            position.set("mcc", parser.group(index++));
-            position.set("mnc", parser.group(index++));
-            position.set("lac", parser.group(index++));
+            position.set(Event.KEY_MCC, parser.group(index++));
+            position.set(Event.KEY_MNC, parser.group(index++));
+            position.set(Event.KEY_LAC, parser.group(index++));
             
         } else {
 
@@ -235,21 +236,21 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(getDeviceId());
 
-            position.set("mcc", parser.group(index++));
-            position.set("mnc", parser.group(index++));
-            position.set("lac", parser.group(index++));
-            position.set("gsm", parser.group(index++));
+            position.set(Event.KEY_MCC, parser.group(index++));
+            position.set(Event.KEY_MNC, parser.group(index++));
+            position.set(Event.KEY_LAC, parser.group(index++));
+            position.set(Event.KEY_GSM, parser.group(index++));
 
             // Battery
-            position.set("battery", Double.valueOf(parser.group(index++)));
+            position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)));
             
             position.set("flags", parser.group(index++));
-            position.set("input", parser.group(index++));
-            position.set("output", parser.group(index++));
+            position.set(Event.KEY_INPUT, parser.group(index++));
+            position.set(Event.KEY_OUTPUT, parser.group(index++));
             position.set("adc1", parser.group(index++));
             position.set("adc2", parser.group(index++));
             position.set("adc3", parser.group(index++));
-            position.set("alarm", parser.group(index++));
+            position.set(Event.KEY_ALARM, parser.group(index++));
             
         }
         return position;

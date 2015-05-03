@@ -22,6 +22,7 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.database.DataCache;
 import org.traccar.helper.Log;
 import org.traccar.database.DataManager;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable

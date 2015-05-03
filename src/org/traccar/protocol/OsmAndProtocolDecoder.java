@@ -33,6 +33,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
@@ -97,7 +98,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (params.containsKey("hdop")) {
-            position.set("hdop", params.get("hdop").get(0));
+            position.set(Event.KEY_HDOP, params.get("hdop").get(0));
         }
 
         if (params.containsKey("vacc")) {
@@ -109,7 +110,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (params.containsKey("batt")) {
-            position.set("battery", params.get("batt").get(0));
+            position.set(Event.KEY_BATTERY, params.get("batt").get(0));
         }
 
         if (params.containsKey("desc")) {

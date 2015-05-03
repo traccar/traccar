@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
@@ -96,13 +97,13 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.set("password", parser.group(index++));
 
             // Event
-            position.set("event", parser.group(index++));
+            position.set(Event.KEY_EVENT, parser.group(index++));
 
             // Packet number
             position.set("packet", parser.group(index++));
 
             // GSM base station
-            position.set("gsm", parser.group(index++));
+            position.set(Event.KEY_GSM, parser.group(index++));
 
             // Longitude
             String lon = parser.group(index++);

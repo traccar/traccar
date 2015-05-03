@@ -25,6 +25,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Crc;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class NavigilProtocolDecoder extends BaseProtocolDecoder {
@@ -82,7 +83,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocol());
 
         position.setValid(true);
-        position.set("index", sequenceNumber);
+        position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
         
         buf.readUnsignedShort(); // report trigger
@@ -102,7 +103,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedInt(); // distance
         buf.readUnsignedInt(); // delta distance
 
-        position.set("battery", buf.readUnsignedShort() * 0.001);
+        position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
         
         buf.readUnsignedShort(); // battery charger status
         
@@ -117,7 +118,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocol());
 
         position.setValid(true);
-        position.set("index", sequenceNumber);
+        position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
         
         buf.readUnsignedShort(); // report trigger
@@ -143,7 +144,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // VSAUT1 voltage
         buf.readUnsignedShort(); // VSAUT2 voltage
         buf.readUnsignedShort(); // solar voltage
-        position.set("battery", buf.readUnsignedShort() * 0.001);
+        position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
         
         // TODO: a lot of other stuff
         return position;
@@ -153,7 +154,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocol());
 
-        position.set("index", sequenceNumber);
+        position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
         position.setTime(convertTimestamp(timestamp));
         
@@ -174,7 +175,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocol());
 
-        position.set("index", sequenceNumber);
+        position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
         position.setTime(convertTimestamp(timestamp));
         
@@ -197,7 +198,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocol());
 
-        position.set("index", sequenceNumber);
+        position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
 
         buf.readUnsignedByte(); // report trigger
@@ -226,7 +227,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // supply voltage 1
         buf.readUnsignedByte(); // supply voltage 2
-        position.set("battery", buf.readUnsignedShort() * 0.001);
+        position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
         // TODO: a lot of other stuff
         return position;
@@ -236,7 +237,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocol());
 
-        position.set("index", sequenceNumber);
+        position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
         position.setTime(convertTimestamp(timestamp));
 
@@ -255,7 +256,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // satellites in fix
         
-        position.set("battery", buf.readUnsignedShort() * 0.001);
+        position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
         
         buf.readUnsignedInt(); // distance
         return position;
