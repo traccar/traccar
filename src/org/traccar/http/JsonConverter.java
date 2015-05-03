@@ -82,7 +82,7 @@ public class JsonConverter {
         
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
-                String name = method.getName().substring(3);
+                String name = Introspector.decapitalize(method.getName().substring(3));
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
                         json.add(name, (Boolean) method.invoke(object));

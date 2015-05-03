@@ -19,9 +19,20 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.*;
-import java.util.*;
-import javax.json.JsonArray;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import javax.sql.DataSource;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.model.Device;
@@ -203,7 +214,7 @@ public class DataManager {
                 break;
             }
         }
-        if (!exist) {
+        if (exist) {
             return;
         }
         

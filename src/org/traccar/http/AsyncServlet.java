@@ -15,14 +15,11 @@
  */
 package org.traccar.http;
 
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.TimerTask;
-import org.traccar.Context;
-import org.traccar.GlobalTimer;
-import org.traccar.database.DataCache;
-import org.traccar.helper.Log;
-import org.traccar.model.Position;
-
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.AsyncContext;
@@ -31,12 +28,13 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import org.jboss.netty.util.Timeout;
+import org.jboss.netty.util.TimerTask;
+import org.traccar.Context;
+import org.traccar.GlobalTimer;
+import org.traccar.database.DataCache;
+import org.traccar.helper.Log;
+import org.traccar.model.Position;
 
 public class AsyncServlet extends HttpServlet {
 
