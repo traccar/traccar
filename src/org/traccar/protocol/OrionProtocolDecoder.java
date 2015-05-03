@@ -87,9 +87,8 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 
                 position.set(Event.KEY_EVENT, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length
-                position.set("flag1", buf.readUnsignedByte());
-                position.set("flag2", buf.readUnsignedByte());
-                
+                position.set(Event.KEY_FLAGS, buf.readUnsignedShort());
+
                 // Location
                 position.setLatitude(convertCoordinate(buf.readInt()));
                 position.setLongitude(convertCoordinate(buf.readInt()));

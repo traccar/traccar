@@ -249,7 +249,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         // State
         String state = parser.group(index++);
         if (state != null) {
-            position.set("state", state);
+            position.set(Event.KEY_STATUS, state);
         }
 
         // ADC

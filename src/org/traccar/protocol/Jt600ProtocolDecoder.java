@@ -153,7 +153,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         position.setProtocol(getProtocol());
-        position.set("alert", "true");
+        position.set(Event.KEY_ALARM, true);
         Integer index = 1;
 
         // Get device by identifier

@@ -110,7 +110,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
         // Other
         position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
-        position.set("ignition", Integer.valueOf(parser.group(index++)));
+        position.set(Event.KEY_IGNITION, Integer.valueOf(parser.group(index++)));
         position.set("dip1", Integer.valueOf(parser.group(index++)));
         position.set("dip2", Integer.valueOf(parser.group(index++)));
         position.set(Event.KEY_FUEL, Integer.valueOf(parser.group(index++)));

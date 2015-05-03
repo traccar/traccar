@@ -95,7 +95,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             
             // Flags
             String flags = parser.group(index++);
-            position.set("flags", flags);
+            position.set(Event.KEY_FLAGS, flags);
             position.setValid((Integer.parseInt(flags, 16) & 0x01) != 0);
 
             // Altitude

@@ -244,7 +244,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             // Battery
             position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)));
             
-            position.set("flags", parser.group(index++));
+            position.set(Event.KEY_FLAGS, parser.group(index++));
             position.set(Event.KEY_INPUT, parser.group(index++));
             position.set(Event.KEY_OUTPUT, parser.group(index++));
             position.set(Event.PREFIX_ADC + 1, parser.group(index++));

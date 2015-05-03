@@ -167,8 +167,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (checkBit(flags, 4)) {
-                    position.set(Event.KEY_FUEL, buf.readUnsignedInt());
-                    position.set("fuel2", buf.readUnsignedInt());
+                    position.set(Event.KEY_FUEL, buf.readUnsignedInt() + "|" + buf.readUnsignedInt());
                     position.set("hours1", buf.readUnsignedShort());
                     position.set("hours2", buf.readUnsignedShort());
                 }
@@ -183,7 +182,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 if (checkBit(flags, 6)) {
                     position.set(Event.PREFIX_TEMP + 1, buf.readByte());
                     buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
-                    position.set("sensor", buf.readUnsignedShort() & 0x0fff);
+                    position.set(Event.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
                     buf.readUnsignedShort(); // old sensor state (& 0x0fff)
                 }
 
@@ -261,7 +260,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         if (checkBit(flags, 4)) {
             position.set(Event.PREFIX_TEMP + 1, buf.readByte());
             buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
-            position.set("sensor", buf.readUnsignedShort() & 0x0fff);
+            position.set(Event.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
             buf.readUnsignedShort(); // old sensor state (& 0x0fff)
         }
 

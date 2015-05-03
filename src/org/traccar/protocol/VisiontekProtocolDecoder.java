@@ -121,9 +121,9 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         // Additional data
         position.set(Event.KEY_SATELLITES, parser.group(index++));
         position.set(Event.KEY_ODOMETER, parser.group(index++));
-        position.set("ignition", parser.group(index++));
-        position.set("input1", parser.group(index++));
-        position.set("input2", parser.group(index++));
+        position.set(Event.KEY_IGNITION, parser.group(index++));
+        position.set(Event.PREFIX_IO + 1, parser.group(index++));
+        position.set(Event.PREFIX_IO + 2, parser.group(index++));
         position.set("immobilizer", parser.group(index++));
         position.set(Event.KEY_POWER, parser.group(index++));
         position.set(Event.KEY_GSM, parser.group(index++));
@@ -132,7 +132,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // RFID
-        position.set("rfid", parser.group(index++));
+        position.set(Event.KEY_RFID, parser.group(index++));
 
         return position;
     }

@@ -137,7 +137,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_ODOMETER, parser.group(index++));
         position.set("runtime", parser.group(index++));
         position.set(Event.KEY_CELL, parser.group(index++));
-        position.set("state", parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
         
         // ADC
         String adc1 = parser.group(index++);
@@ -160,7 +160,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (data != null && !data.isEmpty()) {
             switch (event) {
                 case 37:
-                    position.set("rfid", data);
+                    position.set(Event.KEY_RFID, data);
                     break;
             }
         }
@@ -232,7 +232,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_CELL,
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort() + "|" +
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort());
-            position.set("state", buf.readUnsignedShort());
+            position.set(Event.KEY_STATUS, buf.readUnsignedShort());
         
             // ADC
             position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());

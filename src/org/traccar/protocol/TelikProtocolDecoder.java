@@ -73,7 +73,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Message type
-        position.set("type", parser.group(index++));
+        position.set(Event.KEY_TYPE, parser.group(index++));
         
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

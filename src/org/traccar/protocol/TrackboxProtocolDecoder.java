@@ -109,7 +109,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             
             // Validity
             int fix = Integer.valueOf(parser.group(index++));
-            position.set("fix", fix);
+            position.set(Event.KEY_GPS, fix);
             position.setValid(fix > 0);
 
             // Course

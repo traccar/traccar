@@ -73,7 +73,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
         
         // Version
-        position.set("version", parser.group(index++));
+        position.set(Event.KEY_VERSION, parser.group(index++));
 
         // Date and Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

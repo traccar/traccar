@@ -69,6 +69,11 @@ public abstract class Event {
     public static final String KEY_LAC = "lac";
     public static final String KEY_CELL = "cell";
     public static final String KEY_FUEL = "fuel";
+    public static final String KEY_RFID = "rfid";
+    public static final String KEY_VERSION = "version";
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_IGNITION = "ignition";
+    public static final String KEY_FLAGS = "flags";
 
     // Starts with 1 not 0
     public static final String PREFIX_TEMP = "temp";

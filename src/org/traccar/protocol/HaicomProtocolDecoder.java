@@ -78,7 +78,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Firmware version
-        position.set("version", parser.group(index++));
+        position.set(Event.KEY_VERSION, parser.group(index++));
         
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -115,7 +115,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         
         // Additional data
         position.set(Event.KEY_STATUS, parser.group(index++));
-        position.set("gprs", parser.group(index++));
+        position.set(Event.KEY_GSM, parser.group(index++));
         position.set(Event.KEY_GPS, parser.group(index++));
         position.set(Event.KEY_INPUT, parser.group(index++));
         position.set(Event.KEY_OUTPUT, parser.group(index++));

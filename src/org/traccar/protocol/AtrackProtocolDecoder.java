@@ -119,7 +119,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             // Report type
-            position.set("type", buf.readUnsignedByte());
+            position.set(Event.KEY_TYPE, buf.readUnsignedByte());
 
             // Odometer
             position.set(Event.KEY_ODOMETER, buf.readUnsignedInt() * 0.1);

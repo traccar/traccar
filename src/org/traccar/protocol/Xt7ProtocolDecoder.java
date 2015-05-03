@@ -139,10 +139,10 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
         
         // Flags
-        position.set("flags", parser.group(index++));
+        position.set(Event.KEY_FLAGS, parser.group(index++));
 
         // Sensors
-        position.set("sensors", parser.group(index++));
+        position.set(Event.KEY_INPUT, parser.group(index++));
 
         // Fuel
         position.set(Event.KEY_FUEL, parser.group(index++));

@@ -111,7 +111,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
         
         // State
-        position.set("state", parser.group(index++));
+        position.set(Event.KEY_STATUS, parser.group(index++));
 
         // Odometer
         position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));

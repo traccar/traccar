@@ -146,7 +146,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // iButton
-        position.set("ibutton", parser.group(index++));
+        position.set(Event.KEY_RFID, parser.group(index++));
 
         // Params
         String params = parser.group(index);
