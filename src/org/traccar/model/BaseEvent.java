@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class BaseEvent {
+public abstract class BaseEvent {
 
     private long id;
     public long getId() { return id; }
