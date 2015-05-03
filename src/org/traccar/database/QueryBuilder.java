@@ -15,7 +15,6 @@
  */
 package org.traccar.database;
 
-import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
@@ -176,17 +175,17 @@ public class QueryBuilder {
                 String name = method.getName().substring(3);
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
-                        return setBoolean(name, (Boolean) method.invoke(object));
+                        setBoolean(name, (Boolean) method.invoke(object));
                     } else if (method.getReturnType().equals(int.class)) {
-                        return setInteger(name, (Integer) method.invoke(object));
+                        setInteger(name, (Integer) method.invoke(object));
                     } else if (method.getReturnType().equals(long.class)) {
-                        return setLong(name, (Long) method.invoke(object));
+                        setLong(name, (Long) method.invoke(object));
                     } else if (method.getReturnType().equals(double.class)) {
-                        return setDouble(name, (Double) method.invoke(object));
+                        setDouble(name, (Double) method.invoke(object));
                     } else if (method.getReturnType().equals(String.class)) {
-                        return setString(name, (String) method.invoke(object));
+                        setString(name, (String) method.invoke(object));
                     } else if (method.getReturnType().equals(Date.class)) {
-                        return setDate(name, (Date) method.invoke(object));
+                        setDate(name, (Date) method.invoke(object));
                     }
                 } catch (IllegalAccessException error) {
                 } catch (InvocationTargetException error) {

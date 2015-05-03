@@ -15,18 +15,9 @@
  */
 package org.traccar.model;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Date;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import org.traccar.database.Convertable;
-import org.traccar.database.ObjectConverter;
-import org.traccar.helper.Log;
 
-public class Device implements Convertable, Factory {
+public class Device implements Factory {
 
     @Override
     public Device create() {
@@ -52,29 +43,5 @@ public class Device implements Convertable, Factory {
     private long positionId;
     
     private long dataId;
-
-    @Override
-    public JsonObject toJson() {
-        JsonObjectBuilder json = Json.createObjectBuilder();
-        ObjectConverter.putLong(json, "id", id);
-        ObjectConverter.putString(json, "name", name);
-        ObjectConverter.putString(json, "uniqueId", uniqueId);
-        ObjectConverter.putString(json, "status", status);
-        ObjectConverter.putDate(json, "lastUpdate", lastUpdate);
-        ObjectConverter.putLong(json, "positionId", positionId);
-        ObjectConverter.putLong(json, "dataId", dataId);
-        return json.build();
-    }
-
-    @Override
-    public void fromJson(JsonObject json) throws ParseException {
-        id = ObjectConverter.getLong(json, "id");
-        name = ObjectConverter.getString(json, "name");
-        uniqueId = ObjectConverter.getString(json, "uniqueId");
-        status = ObjectConverter.getString(json, "status");
-        lastUpdate = ObjectConverter.getDate(json, "lastUpdate");
-        positionId = ObjectConverter.getLong(json, "positionId");
-        dataId = ObjectConverter.getLong(json, "dataId");
-    }
 
 }

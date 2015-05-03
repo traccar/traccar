@@ -20,7 +20,6 @@ import org.jboss.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.database.DataCache;
-import org.traccar.database.ObjectConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
@@ -160,7 +159,7 @@ public class AsyncServlet extends HttpServlet {
 
                 JsonObjectBuilder result = Json.createObjectBuilder();
                 result.add("success", true);
-                result.add("data", ObjectConverter.arrayToJson(positions.values()));
+                result.add("data", JsonConverter.arrayToJson(positions.values()));
                 positions.clear();
 
                 try {

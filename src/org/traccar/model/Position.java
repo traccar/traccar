@@ -15,17 +15,11 @@
  */
 package org.traccar.model;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import org.traccar.database.Convertable;
-import org.traccar.database.ObjectConverter;
 
-public class Position implements Convertable {
+public class Position {
     
     private long id;
     public long getId() { return id; }
@@ -92,44 +86,6 @@ public class Position implements Convertable {
     }
     public String getOther() {
         return MiscFormatter.toXmlString(other);
-    }
-
-    @Override
-    public JsonObject toJson() {
-        JsonObjectBuilder json = Json.createObjectBuilder();
-        json.add("id", id);
-        json.add("protocol", protocol);
-        json.add("deviceId", deviceId);
-        json.add("serverTime", ObjectConverter.dateFormat.format(serverTime));
-        json.add("deviceTime", ObjectConverter.dateFormat.format(deviceTime));
-        json.add("fixTime", ObjectConverter.dateFormat.format(fixTime));
-        json.add("valid", valid);
-        json.add("latitude", latitude);
-        json.add("longitude", longitude);
-        json.add("altitude", altitude);
-        json.add("speed", speed);
-        json.add("course", course);
-        json.add("address", address);
-        //json.add("extendedInfo", extendedInfo);
-        return json.build();
-    }
-
-    @Override
-    public void fromJson(JsonObject json) throws ParseException {
-        id = json.getJsonNumber("id").longValue();
-        protocol = json.getString("protocol");
-        deviceId = json.getJsonNumber("deviceId").longValue();
-        serverTime = ObjectConverter.dateFormat.parse(json.getString("serverTime"));
-        deviceTime = ObjectConverter.dateFormat.parse(json.getString("deviceTime"));
-        fixTime = ObjectConverter.dateFormat.parse(json.getString("fixTime"));
-        valid = json.getBoolean("valid");
-        latitude = json.getJsonNumber("latitude").doubleValue();
-        longitude = json.getJsonNumber("longitude").doubleValue();
-        altitude = json.getJsonNumber("altitude").doubleValue();
-        speed = json.getJsonNumber("speed").doubleValue();
-        course = json.getJsonNumber("course").doubleValue();
-        address = json.getString("address");
-        //extendedInfo = json.getString("extendedInfo");
     }
 
 }

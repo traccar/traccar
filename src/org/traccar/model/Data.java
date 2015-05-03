@@ -15,17 +15,11 @@
  */
 package org.traccar.model;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import org.traccar.database.Convertable;
-import org.traccar.database.ObjectConverter;
 
-public class Data implements Convertable {
+public class Data {
 
     private long id;
     public long getId() { return id; }
@@ -55,28 +49,6 @@ public class Data implements Convertable {
     }
     public String getOther() {
         return MiscFormatter.toXmlString(other);
-    }
-
-    @Override
-    public JsonObject toJson() {
-        JsonObjectBuilder json = Json.createObjectBuilder();
-        json.add("id", id);
-        json.add("protocol", protocol);
-        json.add("deviceId", deviceId);
-        json.add("serverTime", ObjectConverter.dateFormat.format(serverTime));
-        json.add("deviceTime", ObjectConverter.dateFormat.format(deviceTime));
-        //json.add("extendedInfo", extendedInfo);
-        return json.build();
-    }
-
-    @Override
-    public void fromJson(JsonObject json) throws ParseException {
-        id = json.getJsonNumber("id").longValue();
-        protocol = json.getString("protocol");
-        deviceId = json.getJsonNumber("deviceId").longValue();
-        serverTime = ObjectConverter.dateFormat.parse(json.getString("serverTime"));
-        deviceTime = ObjectConverter.dateFormat.parse(json.getString("deviceTime"));
-        //extendedInfo = json.getString("extendedInfo");
     }
 
 }

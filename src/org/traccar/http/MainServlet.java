@@ -34,7 +34,6 @@ import org.jboss.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.database.DataCache;
-import org.traccar.database.ObjectConverter;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 

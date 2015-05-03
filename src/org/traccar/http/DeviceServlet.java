@@ -19,16 +19,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
-import org.traccar.database.ObjectConverter;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 
 public class DeviceServlet extends HttpServlet {
@@ -61,7 +57,7 @@ public class DeviceServlet extends HttpServlet {
         
         try {
             result.add("success", true);
-            result.add("data", ObjectConverter.arrayToJson(
+            result.add("data", JsonConverter.arrayToJson(
                     Context.getDataManager().getDevices(userId)));
         } catch(SQLException error) {
             result.add("success", false);
@@ -75,13 +71,10 @@ public class DeviceServlet extends HttpServlet {
         
         long userId = (Long) req.getSession().getAttribute(MainServlet.USER_ID);
         
-        JsonReader jsonReader = Json.createReader(req.getReader());
-        JsonObject jsonObject = jsonReader.readObject();
         Device device = new Device();
         try {
-            device.fromJson(jsonObject);
+            JsonConverter.objectFromJson(req.getReader(), device);
         } catch (ParseException error) {
-            Log.warning(error);
         }
         
         JsonObjectBuilder result = Json.createObjectBuilder();
@@ -100,13 +93,10 @@ public class DeviceServlet extends HttpServlet {
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         
-        JsonReader jsonReader = Json.createReader(req.getReader());
-        JsonObject jsonObject = jsonReader.readObject();
         Device device = new Device();
         try {
-            device.fromJson(jsonObject);
+            JsonConverter.objectFromJson(req.getReader(), device);
         } catch (ParseException error) {
-            Log.warning(error);
         }
         
         JsonObjectBuilder result = Json.createObjectBuilder();
@@ -124,13 +114,10 @@ public class DeviceServlet extends HttpServlet {
     
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         
-        JsonReader jsonReader = Json.createReader(req.getReader());
-        JsonObject jsonObject = jsonReader.readObject();
         Device device = new Device();
         try {
-            device.fromJson(jsonObject);
+            JsonConverter.objectFromJson(req.getReader(), device);
         } catch (ParseException error) {
-            Log.warning(error);
         }
         
         JsonObjectBuilder result = Json.createObjectBuilder();
