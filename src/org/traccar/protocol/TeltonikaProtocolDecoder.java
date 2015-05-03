@@ -160,7 +160,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     if (id == 1) {
                         position.set(Event.KEY_POWER, buf.readUnsignedByte());
                     } else {
-                        position.set("io" + id, buf.readUnsignedByte());
+                        position.set(Event.PREFIX_IO + id, buf.readUnsignedByte());
                     }
                 }
             }
@@ -170,7 +170,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (checkBit(globalMask, 2)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
                 }
             }
 
@@ -178,7 +178,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (checkBit(globalMask, 3)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
                 }
             }
 
@@ -186,7 +186,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             if (codec == CODEC_FM4X00) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set("io" + buf.readUnsignedByte(), buf.readLong());
+                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
                 }
             }
             positions.add(position);

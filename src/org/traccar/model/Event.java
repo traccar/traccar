@@ -64,11 +64,16 @@ public abstract class Event {
     public static final String KEY_OUTPUT = "output";
     public static final String KEY_POWER = "power";
     public static final String KEY_BATTERY = "battery";
-    public static final String KEY_TEMPERATURE = "temperature";
     public static final String KEY_MCC = "mcc";
     public static final String KEY_MNC = "mnc";
     public static final String KEY_LAC = "lac";
     public static final String KEY_CELL = "cell";
     public static final String KEY_FUEL = "fuel";
+
+    // Starts with 1 not 0
+    public static final String PREFIX_TEMP = "temp";
+    public static final String PREFIX_ADC = "adc";
+    public static final String PREFIX_IO = "io";
+    public static final String PREFIX_COUNT = "count";
 
 }

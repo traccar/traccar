@@ -124,7 +124,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
         
         // State
-        position.set("io", parser.group(index++));
+        position.set(Event.PREFIX_IO + 1, parser.group(index++));
 
         // Odometer
         String odometer = parser.group(index++);

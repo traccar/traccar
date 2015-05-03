@@ -256,7 +256,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         for (int i = 1; i <= 8; i++) {
             String adc = parser.group(index++);
             if (adc != null) {
-                position.set("adc" + i, Integer.parseInt(adc, 16));
+                position.set(Event.PREFIX_ADC + i, Integer.parseInt(adc, 16));
             }
         }
 

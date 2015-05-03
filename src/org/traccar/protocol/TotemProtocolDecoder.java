@@ -231,20 +231,20 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_HDOP, parser.group(index++));
 
             // IO Status
-            position.set("io", parser.group(index++));
+            position.set(Event.PREFIX_IO + 1, parser.group(index++));
 
             // Power
             position.set(Event.KEY_BATTERY, parser.group(index++));
             position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
 
             // ADC
-            position.set("adc", parser.group(index++));
+            position.set(Event.PREFIX_ADC + 1, parser.group(index++));
 
             // Location Code
             position.set(Event.KEY_LAC, parser.group(index++));
 
             // Temperature
-            position.set(Event.KEY_TEMPERATURE, parser.group(index++));
+            position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
 
             // Odometer
             position.set(Event.KEY_ODOMETER, parser.group(index++));
@@ -263,19 +263,19 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
             
             // IO Status
-            position.set("io", parser.group(index++));
+            position.set(Event.PREFIX_IO + 1, parser.group(index++));
 
             // Power
             position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)) / 10);
             position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
 
             // ADC
-            position.set("adc1", parser.group(index++));
-            position.set("adc2", parser.group(index++));
+            position.set(Event.PREFIX_ADC + 1, parser.group(index++));
+            position.set(Event.PREFIX_ADC + 2, parser.group(index++));
 
             // Temperature
-            position.set("temperature1", parser.group(index++));
-            position.set("temperature2", parser.group(index++));
+            position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
+            position.set(Event.PREFIX_TEMP + 2, parser.group(index++));
 
             // Location Code
             position.set(Event.KEY_LAC, parser.group(index++));

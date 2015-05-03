@@ -247,9 +247,9 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set("flags", parser.group(index++));
             position.set(Event.KEY_INPUT, parser.group(index++));
             position.set(Event.KEY_OUTPUT, parser.group(index++));
-            position.set("adc1", parser.group(index++));
-            position.set("adc2", parser.group(index++));
-            position.set("adc3", parser.group(index++));
+            position.set(Event.PREFIX_ADC + 1, parser.group(index++));
+            position.set(Event.PREFIX_ADC + 2, parser.group(index++));
+            position.set(Event.PREFIX_ADC + 3, parser.group(index++));
             position.set(Event.KEY_ALARM, parser.group(index++));
             
         }

@@ -113,7 +113,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     for (int i = 1; i <= 8; i++) {
                         if (checkBit(mask, i + 1)) {
-                            position.set("adc" + i, buf.readUnsignedShort());
+                            position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
                         }
                     }
 

@@ -100,7 +100,7 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_BATTERY, parser.group(index++));
 
         // Output
-        position.set(Event.KEY_TEMPERATURE, parser.group(index++));
+        position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
 
         return position;
     }

@@ -103,8 +103,8 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_ODOMETER, Double.valueOf(parser.group(index++)));
         position.set(Event.KEY_INPUT, parser.group(index++));
         position.set(Event.KEY_OUTPUT, parser.group(index++));
-        position.set("adc1", parser.group(index++));
-        position.set("adc2", parser.group(index++));
+        position.set(Event.PREFIX_ADC + 1, parser.group(index++));
+        position.set(Event.PREFIX_ADC + 2, parser.group(index++));
 
         return position;
     }

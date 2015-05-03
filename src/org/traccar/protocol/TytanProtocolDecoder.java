@@ -108,7 +108,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 6:
                         buf.readUnsignedShort();
-                        position.set("adc", buf.readFloat());
+                        position.set(Event.PREFIX_ADC + 1, buf.readFloat());
                         break;
                     case 7:
                         position.set(Event.KEY_ALARM, buf.readUnsignedShort());
@@ -124,7 +124,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 24:
                         buf.readUnsignedByte();
-                        position.set(Event.KEY_TEMPERATURE, buf.readUnsignedByte());
+                        position.set(Event.PREFIX_TEMP + 1, buf.readUnsignedByte());
                         break;
                     case 25:
                         buf.readUnsignedByte();

@@ -115,7 +115,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
         // Other
         position.set(Event.KEY_GSM, parser.group(index++));
         position.set(Event.KEY_EVENT, Integer.valueOf(parser.group(index++)));
-        position.set("adc1", Integer.valueOf(parser.group(index++)));
+        position.set(Event.PREFIX_ADC + 1, Integer.valueOf(parser.group(index++)));
         position.set(Event.KEY_BATTERY, Integer.valueOf(parser.group(index++)));
         position.set(Event.KEY_INPUT, parser.group(index++));
         position.set(Event.KEY_STATUS, parser.group(index++));

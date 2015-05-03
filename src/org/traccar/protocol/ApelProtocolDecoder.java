@@ -227,13 +227,13 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                     
                     // Analog sensors
                     for (int i = 1; i <= 8; i++) {
-                        position.set("adc" + i, buf.readUnsignedShort());
+                        position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
                     }
                     
                     // Counters
-                    position.set("c0", buf.readUnsignedInt());
-                    position.set("c1", buf.readUnsignedInt());
-                    position.set("c2", buf.readUnsignedInt());
+                    position.set(Event.PREFIX_COUNT + 1, buf.readUnsignedInt());
+                    position.set(Event.PREFIX_COUNT + 2, buf.readUnsignedInt());
+                    position.set(Event.PREFIX_COUNT + 3, buf.readUnsignedInt());
                 }
 
                 positions.add(position);

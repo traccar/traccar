@@ -89,25 +89,25 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 // Read 1 byte data
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedByte());
                 }
 
                 // Read 2 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedShort());
+                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
                 }
 
                 // Read 4 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set("io" + buf.readUnsignedByte(), buf.readUnsignedInt());
+                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
                 }
 
                 // Read 8 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set("io" + buf.readUnsignedByte(), buf.readLong());
+                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
                 }
                 positions.add(position);
             }

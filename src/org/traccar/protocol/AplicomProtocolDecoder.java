@@ -176,10 +176,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         
         // ADC
         if ((selector & 0x0020) != 0) {
-            position.set("adc1", buf.readUnsignedShort());
-            position.set("adc2", buf.readUnsignedShort());
-            position.set("adc3", buf.readUnsignedShort());
-            position.set("adc4", buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort());
         }
 
         // Power
@@ -311,7 +311,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                         position.set("air-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                         break;
                     case 0x30D:
-                        position.set("alarms", ChannelBufferTools.readHexString(value, 16));
+                        position.set(Event.KEY_ALARM, ChannelBufferTools.readHexString(value, 16));
                         break;
                     case 0x40D:
                         position.set("cold-unit-status", ChannelBufferTools.readHexString(value, 16));

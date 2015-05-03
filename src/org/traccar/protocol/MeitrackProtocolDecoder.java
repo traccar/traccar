@@ -142,15 +142,15 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         // ADC
         String adc1 = parser.group(index++);
         if (adc1 != null) {
-            position.set("adc1", Integer.parseInt(adc1, 16));
+            position.set(Event.PREFIX_ADC + 1, Integer.parseInt(adc1, 16));
         }
         String adc2 = parser.group(index++);
         if (adc2 != null) {
-            position.set("adc2", Integer.parseInt(adc2, 16));
+            position.set(Event.PREFIX_ADC + 2, Integer.parseInt(adc2, 16));
         }
         String adc3 = parser.group(index++);
         if (adc3 != null) {
-            position.set("adc3", Integer.parseInt(adc3, 16));
+            position.set(Event.PREFIX_ADC + 3, Integer.parseInt(adc3, 16));
         }
         position.set(Event.KEY_BATTERY, Integer.parseInt(parser.group(index++), 16));
         position.set(Event.KEY_POWER, Integer.parseInt(parser.group(index++), 16));
@@ -235,7 +235,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.set("state", buf.readUnsignedShort());
         
             // ADC
-            position.set("adc1", buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
             position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
             position.set(Event.KEY_POWER, buf.readUnsignedShort());
             

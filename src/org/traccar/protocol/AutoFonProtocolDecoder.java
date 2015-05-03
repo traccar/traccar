@@ -69,7 +69,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Event.KEY_TEMPERATURE, buf.readByte());
+        position.set(Event.PREFIX_TEMP + 1, buf.readByte());
         position.set(Event.KEY_GSM, buf.readUnsignedByte());
         buf.readUnsignedShort(); // mcc
         buf.readUnsignedShort(); // mnc

@@ -76,7 +76,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.skipBytes(2); // remaining time
 
-            position.set(Event.KEY_TEMPERATURE, buf.readByte());
+            position.set(Event.PREFIX_TEMP + 1, buf.readByte());
 
             buf.skipBytes(2); // timer (interval and units)
             buf.readByte(); // mode

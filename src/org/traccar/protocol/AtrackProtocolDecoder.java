@@ -137,14 +137,14 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
 
             // ADC
-            position.set("adc", buf.readUnsignedShort() * 0.001);
+            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.001);
 
             // Driver
             position.set("driver", readString(buf));
 
             // Temperature
-            position.set("temperature1", buf.readShort() * 0.1);
-            position.set("temperature2", buf.readShort() * 0.1);
+            position.set(Event.PREFIX_TEMP + 1, buf.readShort() * 0.1);
+            position.set(Event.PREFIX_TEMP + 2, buf.readShort() * 0.1);
 
             // Text Message
             position.set("message", readString(buf));

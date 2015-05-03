@@ -110,8 +110,8 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_INPUT, parser.group(index++));
         
         // ADC
-        position.set("adc1", parser.group(index++));
-        position.set("adc2", parser.group(index++));
+        position.set(Event.PREFIX_ADC + 1, parser.group(index++));
+        position.set(Event.PREFIX_ADC + 2, parser.group(index++));
         
         // Output
         position.set(Event.KEY_OUTPUT, parser.group(index++));

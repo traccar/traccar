@@ -167,21 +167,21 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (checkBit(flags, 4)) {
-                    position.set("fuel1", buf.readUnsignedInt());
+                    position.set(Event.KEY_FUEL, buf.readUnsignedInt());
                     position.set("fuel2", buf.readUnsignedInt());
                     position.set("hours1", buf.readUnsignedShort());
                     position.set("hours2", buf.readUnsignedShort());
                 }
 
                 if (checkBit(flags, 5)) {
-                    position.set("adc1", buf.readUnsignedShort() & 0x03ff);
-                    position.set("adc2", buf.readUnsignedShort() & 0x03ff);
-                    position.set("adc3", buf.readUnsignedShort() & 0x03ff);
-                    position.set("adc4", buf.readUnsignedShort() & 0x03ff);
+                    position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort() & 0x03ff);
                 }
 
                 if (checkBit(flags, 6)) {
-                    position.set(Event.KEY_TEMPERATURE, buf.readByte());
+                    position.set(Event.PREFIX_TEMP + 1, buf.readByte());
                     buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
                     position.set("sensor", buf.readUnsignedShort() & 0x0fff);
                     buf.readUnsignedShort(); // old sensor state (& 0x0fff)
@@ -247,19 +247,19 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         if (checkBit(flags, 2)) {
             position.set("engine", buf.readUnsignedShort() * 0.125);
             position.set("pedals", buf.readUnsignedByte());
-            position.set(Event.KEY_TEMPERATURE, buf.readUnsignedByte() - 40);
+            position.set(Event.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
             buf.readUnsignedShort(); // service odometer
         }
 
         if (checkBit(flags, 3)) {
             position.set(Event.KEY_FUEL, buf.readUnsignedShort());
-            position.set("adc2", buf.readUnsignedShort());
-            position.set("adc3", buf.readUnsignedShort());
-            position.set("adc4", buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort());
         }
 
         if (checkBit(flags, 4)) {
-            position.set(Event.KEY_TEMPERATURE, buf.readByte());
+            position.set(Event.PREFIX_TEMP + 1, buf.readByte());
             buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
             position.set("sensor", buf.readUnsignedShort() & 0x0fff);
             buf.readUnsignedShort(); // old sensor state (& 0x0fff)

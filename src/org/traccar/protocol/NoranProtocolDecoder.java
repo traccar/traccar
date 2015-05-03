@@ -113,7 +113,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             // IO status
-            position.set("io", buf.readUnsignedByte());
+            position.set(Event.PREFIX_IO + 1, buf.readUnsignedByte());
             
             // Fuel
             position.set(Event.KEY_FUEL, buf.readUnsignedByte());

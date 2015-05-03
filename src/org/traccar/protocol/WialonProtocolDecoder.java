@@ -133,15 +133,15 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         // Other
         position.set(Event.KEY_HDOP, parser.group(index++));
-        position.set("inputs", parser.group(index++));
-        position.set("outputs", parser.group(index++));
+        position.set(Event.KEY_INPUT, parser.group(index++));
+        position.set(Event.KEY_OUTPUT, parser.group(index++));
 
         // ADC
         String adc = parser.group(index++);
         if (adc != null) {
             String[] values = adc.split(",");
             for (int i = 0; i < values.length; i++) {
-                position.set("adc" + (i + 1), values[i]);
+                position.set(Event.PREFIX_ADC + (i + 1), values[i]);
             }
         }
 

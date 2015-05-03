@@ -117,11 +117,9 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         // Output
         position.set(Event.KEY_OUTPUT, parser.group(index++));
 
-        // ADC1
-        position.set("adc1", parser.group(index++));
-
-        // ADC2
-        position.set("adc2", parser.group(index++));
+        // ADC
+        position.set(Event.PREFIX_ADC + 1, parser.group(index++));
+        position.set(Event.PREFIX_ADC + 2, parser.group(index++));
 
         // J1939 data
         position.set("vss", parser.group(index++));
@@ -129,7 +127,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set("coolant", parser.group(index++));
         position.set(Event.KEY_FUEL, parser.group(index++));
         position.set("consumption", parser.group(index++));
-        position.set(Event.KEY_TEMPERATURE, parser.group(index++));
+        position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
         position.set("charger", parser.group(index++));
         position.set("tpl", parser.group(index++));
         position.set("axle", parser.group(index++));

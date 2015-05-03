@@ -140,12 +140,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         // Temperature
         if (isFormat(format, F10, F20, F30)) {
-            position.set(Event.KEY_TEMPERATURE, buf.readShort());
+            position.set(Event.PREFIX_TEMP + 1, buf.readShort());
         }
 
         if (isFormat(format, F10, F20, F50, F52)) {
-            position.set("adc1", buf.readUnsignedShort());
-            position.set("adc2", buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
         }
 
         if (isFormat(format, F20, F50, F51, F52)) {

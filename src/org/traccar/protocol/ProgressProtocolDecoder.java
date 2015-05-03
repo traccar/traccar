@@ -175,9 +175,8 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 if ((extraFlags & 0x1) == 0x1) {
                     int count = buf.readUnsignedShort();
                     for (int i = 1; i <= count; i++) {
-                        position.set("adc" + i, buf.readUnsignedShort());
+                        position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
                     }
-
                 }
 
                 // CAN adapter
