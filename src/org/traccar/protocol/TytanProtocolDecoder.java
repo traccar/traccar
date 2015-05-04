@@ -122,6 +122,9 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     case 10:
                         position.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
                         break;
+                    case 23:
+                        buf.skipBytes(9);
+                        break;
                     case 24:
                         buf.readUnsignedByte();
                         position.set(Event.PREFIX_TEMP + 1, buf.readUnsignedByte());
