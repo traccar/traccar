@@ -36,9 +36,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_HEARTBEAT = 0x1A;
-    private static final int MSG_DATA = 0x10;
-
     private static final int MIN_DATA_LENGTH = 40;
 
     private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
