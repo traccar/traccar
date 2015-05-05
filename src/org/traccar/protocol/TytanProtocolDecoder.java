@@ -17,9 +17,7 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -96,6 +94,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             }
             
             while (buf.readerIndex() < end) {
+                int x = buf.getUnsignedByte(buf.readerIndex());
                 switch (buf.readUnsignedByte()) {
                     case 2:
                         position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
@@ -107,7 +106,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Event.KEY_INPUT, buf.readUnsignedByte());
                         break;
                     case 6:
-                        buf.readUnsignedShort();
+                        buf.readUnsignedByte();
                         position.set(Event.PREFIX_ADC + 1, buf.readFloat());
                         break;
                     case 7:
@@ -126,8 +125,17 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(9);
                         break;
                     case 24:
-                        buf.readUnsignedByte();
-                        position.set(Event.PREFIX_TEMP + 1, buf.readUnsignedByte());
+                        Set<Integer> temps = new LinkedHashSet<Integer>();
+                        int temp = buf.readUnsignedByte();
+                        for (int i = 3; i >= 0; i--) {
+                            int n = (temp >> (2 * i)) & 0x03;
+                            if (!temps.contains(n)) {
+                                temps.add(n);
+                            }
+                        }
+                        for (int n : temps) {
+                            position.set(Event.PREFIX_TEMP + n, buf.readUnsignedByte());
+                        }
                         break;
                     case 25:
                         buf.readUnsignedByte();
