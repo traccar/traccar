@@ -37,8 +37,8 @@ import javax.sql.DataSource;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 
 public class DataManager {
 
@@ -222,6 +222,7 @@ public class DataManager {
         QueryBuilder.create(dataSource,
                 "CREATE TABLE user (" +
                 "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "name VARCHAR(1024) NOT NULL," +
                 "email VARCHAR(1024) NOT NULL UNIQUE," +
                 "password VARCHAR(1024) NOT NULL," +
                 "salt VARCHAR(1024) NOT NULL," +
@@ -296,7 +297,11 @@ public class DataManager {
                 "CREATE TABLE traccar1 (" +
                 "id INT PRIMARY KEY AUTO_INCREMENT);").executeUpdate();
         
-        addUser("admin", "admin", true);
+        User admin = new User();
+        admin.setName("admin");
+        admin.setEmail("admin");
+        admin.setPassword("admin");
+        addUser(admin);
     }
 
     public long login(String email, String password) throws SQLException {
@@ -321,25 +326,12 @@ public class DataManager {
         }
     }
 
-    public void addUser(String email, String password, boolean admin) throws SQLException {
-
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO user (email, password, salt, admin) " +
-                    "VALUES (?, CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR), '', ?);");
-            try {
-                statement.setString(1, email);
-                statement.setString(2, password);
-                statement.setBoolean(3, admin);
-                
-                statement.executeUpdate();
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
-        }
+    public void addUser(User user) throws SQLException {
+        user.setId(QueryBuilder.create(dataSource,
+                "INSERT INTO user (name, email, password, salt, admin) " +
+                "VALUES (:name, :email, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR), '', :admin);")
+                .setObject(user)
+                .executeUpdate());
     }
 
     public Collection<Permission> getPermissions() throws SQLException {

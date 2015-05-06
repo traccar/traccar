@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
+import org.traccar.model.User;
 
 public class MainServlet extends BaseServlet {
 
@@ -31,6 +32,8 @@ public class MainServlet extends BaseServlet {
             login(req, resp);
         } else if (command.equals("/logout")) {
             logout(req, resp);
+        } else if (command.equals("/register")) {
+            register(req, resp);
         } else {
             return false;
         }
@@ -49,6 +52,12 @@ public class MainServlet extends BaseServlet {
 
     private void logout(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         req.getSession().removeAttribute(USER_ID);
+        sendResponse(resp.getWriter());
+    }
+
+    private void register(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getDataManager().addUser(user);
         sendResponse(resp.getWriter());
     }
 

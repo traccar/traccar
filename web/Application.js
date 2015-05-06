@@ -51,6 +51,9 @@ Ext.Loader.loadScript({
                         } else {
                             Ext.create('Login').show();
                         }
+                    },
+                    failure: function() {
+                        alert(error);
                     }
                 })
             }

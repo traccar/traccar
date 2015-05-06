@@ -18,6 +18,7 @@ Ext.define('Strings', {
     singleton: true,
 
     login_title: 'Login',
+    login_name: 'Name',
     login_email: 'Email',
     login_password: 'Password',
     login_register: 'Register',

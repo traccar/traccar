@@ -37,7 +37,10 @@ Ext.define('LoginForm', {
     }],
 
     buttons: [{
-        text: Strings.login_register
+        text: Strings.login_register,
+        handler: function() {
+            Ext.create('RegisterDialog').show();
+        }
     }, {
         text: Strings.login_login,
         handler: function() {
@@ -59,10 +62,14 @@ Ext.define('LoginForm', {
 
 Ext.define('Login', {
     extend: 'Ext.window.Window',
-    requires: [ 'MainView' ],
+    requires: [
+        'MainView',
+        'RegisterDialog'
+    ],
 
     title: Strings.login_title,
     closable: false,
+    resizable: false,
 
     items: [{ xtype: 'login-form' }],
 

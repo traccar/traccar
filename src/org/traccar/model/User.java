@@ -26,6 +26,10 @@ public class User implements Factory {
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
     
+    private String name;
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    
     private String email;
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
@@ -37,6 +41,8 @@ public class User implements Factory {
     private boolean readonly;
     
     private boolean admin;
+    public boolean getAdmin() { return admin; }
+    public void setAdmin(boolean admin) { this.admin = admin; }
     
     private String map;
     
