@@ -20,6 +20,7 @@ import org.traccar.helper.Log;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 /**
@@ -29,6 +30,16 @@ public class MiscFormatter {
 
     private static final String xmlRootNode = "info";
 
+    private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+    private static String format(Object value) {
+        if (value instanceof Double || value instanceof Float) {
+            return decimalFormat.format(value);
+        } else {
+            return value.toString();
+        }
+    }
+
     public static String toXmlString(Map<String, Object> other) {
         StringBuilder result = new StringBuilder();
         
@@ -37,7 +48,7 @@ public class MiscFormatter {
         for (Map.Entry<String, Object> entry : other.entrySet()) {
          
             result.append("<").append(entry.getKey()).append(">");
-            result.append(entry.getValue());
+            result.append(format(entry.getValue()));
             result.append("</").append(entry.getKey()).append(">");
         }
 
