@@ -1,9 +1,8 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestDataManager;
-import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class Gps103ProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -118,6 +117,9 @@ public class Gps103ProtocolDecoderTest extends ProtocolDecoderTest {
         
         verify(decoder.decode(null, null, null,
                 "imei:353552045403597,tracker,150420051153,53.0,F,0.0,A,5306.64155,N,00700.77848,E,0.0,,1.0,;"));
+        
+        verify(decoder.decode(null, null, null,
+                "imei:359710047424644,tracker,150506224036,,F,154037.000,A,0335.2785,N,09841.1543,E,3.03,337.54,,0,0,45.16%,,;"));
 
     }
 
