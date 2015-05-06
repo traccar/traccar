@@ -111,7 +111,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                             if (n < 2) {
                                 position.set(Event.PREFIX_ADC + n, buf.readFloat());
                             } else {
-                                position.set("DI" + (n - 2), buf.readFloat());
+                                position.set("di" + (n - 2), buf.readFloat());
                             }
                         }
                         break;
