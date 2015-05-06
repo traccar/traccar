@@ -187,8 +187,9 @@ public class DataManager {
     private NamedParameterStatement.Params assignVariables(NamedParameterStatement.Params params, Position position) throws SQLException {
 
         params.setString("protocol", position.getProtocol());
-        params.setLong("device_id", position.getDeviceId());
-        params.setTimestamp("time", position.getFixTime());
+        params.setLong("deviceId", position.getDeviceId());
+        params.setTimestamp("deviceTime", position.getDeviceTime());
+        params.setTimestamp("fixTime", position.getFixTime());
         params.setBoolean("valid", position.getValid());
         params.setDouble("altitude", position.getAltitude());
         params.setDouble("latitude", position.getLatitude());
@@ -196,8 +197,13 @@ public class DataManager {
         params.setDouble("speed", position.getSpeed());
         params.setDouble("course", position.getCourse());
         params.setString("address", position.getAddress());
+        params.setString("other", position.getOther());
+
+        // temporary
+        params.setTimestamp("time", position.getFixTime());
+        params.setLong("device_id", position.getDeviceId());
+        params.setLong("power", null);
         params.setString("extended_info", position.getOther());
-        params.setLong("power", null); // temporary
 
         return params;
     }

@@ -93,9 +93,15 @@ public class JsonConverter {
                     } else if (method.getReturnType().equals(double.class)) {
                         json.add(name, (Double) method.invoke(object));
                     } else if (method.getReturnType().equals(String.class)) {
-                        json.add(name, (String) method.invoke(object));
+                        String value = (String) method.invoke(object);
+                        if (value != null) {
+                            json.add(name, value);
+                        }
                     } else if (method.getReturnType().equals(Date.class)) {
-                        json.add(name, dateFormat.format((Date) method.invoke(object)));
+                        Date value = (Date) method.invoke(object);
+                        if (value != null) {
+                            json.add(name, dateFormat.format(value));
+                        }
                     }
                 } catch (IllegalAccessException error) {
                 } catch (InvocationTargetException error) {

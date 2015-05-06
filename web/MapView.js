@@ -20,6 +20,29 @@ Ext.define('MapView', {
 
     title: Strings.map_title,
     layout: 'fit',
+    
+    update: function() {
+        Ext.Ajax.request({
+            scope: this,
+            url: '/api/async',
+            success: function(response) {
+                var data = Ext.decode(response.responseText).data;
+                
+                var i;
+                for (i = 0; i < data.length; i++) {
+                    var iconFeature = new ol.Feature({
+                        geometry: new ol.geom.Point([30, 30])
+                    });
+                    this.vectorSource.addFeature(iconFeature);   
+                }
+                
+                this.update();
+            },
+            failure: function() {
+                // error
+            }
+        });
+    },
 
     listeners: {
         afterrender: function() {
@@ -38,6 +61,9 @@ Ext.define('MapView', {
 
             var layer = new ol.layer.Tile({ source: new ol.source.OSM({
             })});*/
+            
+            this.vectorSource = new ol.source.Vector({});
+            var vectorLayer = new ol.layer.Vector({ source: this.vectorSource });
 
             var view = new ol.View({
                 center: ol.proj.transform(Styles.map_center, 'EPSG:4326', 'EPSG:3857'),
@@ -47,9 +73,11 @@ Ext.define('MapView', {
 
             this.map = new ol.Map({
                 target: this.body.dom.id,
-                layers: [ layer ],
+                layers: [ layer, vectorLayer ],
                 view: view
             });
+            
+            this.update();
         },
 
         resize: function() {

@@ -34,7 +34,6 @@ import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.database.DataCache;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class AsyncServlet extends HttpServlet {
@@ -51,7 +50,7 @@ public class AsyncServlet extends HttpServlet {
         private static final boolean DEBUG_ASYNC = true;
         
         private static final long SESSION_TIMEOUT = 30;
-        private static final long REQUEST_TIMEOUT = 30;
+        private static final long REQUEST_TIMEOUT = 10;
         
         private boolean destroyed;
         private final long userId;
