@@ -106,8 +106,14 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Event.KEY_INPUT, buf.readUnsignedByte());
                         break;
                     case 6:
-                        buf.readUnsignedByte();
-                        position.set(Event.PREFIX_ADC + 1, buf.readFloat());
+                        {
+                            int n = buf.readUnsignedByte() >> 4;
+                            if (n < 2) {
+                                position.set(Event.PREFIX_ADC + n, buf.readFloat());
+                            } else {
+                                position.set("DI" + (n - 2), buf.readFloat());
+                            }
+                        }
                         break;
                     case 7:
                         position.set(Event.KEY_ALARM, buf.readUnsignedShort());
@@ -125,16 +131,18 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(9);
                         break;
                     case 24:
-                        Set<Integer> temps = new LinkedHashSet<Integer>();
-                        int temp = buf.readUnsignedByte();
-                        for (int i = 3; i >= 0; i--) {
-                            int n = (temp >> (2 * i)) & 0x03;
-                            if (!temps.contains(n)) {
-                                temps.add(n);
+                        {
+                            Set<Integer> temps = new LinkedHashSet<Integer>();
+                            int temp = buf.readUnsignedByte();
+                            for (int i = 3; i >= 0; i--) {
+                                int n = (temp >> (2 * i)) & 0x03;
+                                if (!temps.contains(n)) {
+                                    temps.add(n);
+                                }
                             }
-                        }
-                        for (int n : temps) {
-                            position.set(Event.PREFIX_TEMP + n, buf.readUnsignedByte());
+                            for (int n : temps) {
+                                position.set(Event.PREFIX_TEMP + n, buf.readUnsignedByte());
+                            }
                         }
                         break;
                     case 25:
