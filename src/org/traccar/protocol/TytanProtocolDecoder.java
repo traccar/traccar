@@ -82,8 +82,10 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             lon = lon * 360 / 16777216 - 180;
             position.setLongitude(lon);
             
-            // Course
-            int course = (buf.readUnsignedByte() >> 5) * 45;
+            // Status
+            flags = buf.readUnsignedByte();
+            position.set(Event.KEY_STATUS, flags & 0x1f);
+            int course = (flags >> 5) * 45;
             course = (course + 180) % 360;
             position.setCourse(course);
             
