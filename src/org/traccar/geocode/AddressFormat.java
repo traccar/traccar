@@ -35,6 +35,10 @@ public class AddressFormat extends Format {
 
     private final String format;
 
+    public AddressFormat() {
+        this("%h %r, %t, %s, %c");
+    }
+
     public AddressFormat(String format) {
         this.format = format;
     }

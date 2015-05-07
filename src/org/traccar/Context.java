@@ -17,6 +17,7 @@ package org.traccar;
 
 import org.traccar.database.DataCache;
 import org.traccar.database.DataManager;
+import org.traccar.geocode.GisgraphyReverseGeocoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
@@ -97,6 +98,8 @@ public class Context {
             String type = properties.getProperty("geocoder.type");
             if (type != null && type.equals("nominatim")) {
                 reverseGeocoder = new NominatimReverseGeocoder(properties.getProperty("geocoder.url"));
+            } if (type != null && type.equals("gisgraphy")) {
+                reverseGeocoder = new GisgraphyReverseGeocoder(properties.getProperty("geocoder.url"));
             } else {
                 reverseGeocoder = new GoogleReverseGeocoder();
             }
