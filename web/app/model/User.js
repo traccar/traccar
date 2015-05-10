@@ -14,34 +14,15 @@
  * limitations under the License.
  */
 
-Ext.define('MainView', {
-    extend: 'Ext.container.Viewport',
+Ext.define('Traccar.model.User', {
+    extend: 'Ext.data.Model',
+    identifier: 'negative',
 
-    requires: [
-        'DeviceView',
-        'MapView',
-        'ReportView'
-    ],
-
-    layout: 'border',
-
-    defaults: {
-        collapsible: true,
-        split: true
-    },
-
-    items: [{
-        region:'west',
-        xtype: 'device-view',
-        width: Styles.device_width
-    }, {
-        region: 'south',
-        xtype: 'report-view',
-        header: false,
-        height: Styles.report_height
-    }, {
-        region: 'center',
-        xtype: 'map-view',
-        collapsible: false
-    }]
+    fields: [
+        { name: 'id', type: 'int' },
+        { name: 'name', type: 'string' },
+        { name: 'unqiueId', type: 'string' },
+        { name: 'password', type: 'string' },
+        { name: 'admin', type: 'boolean' }
+    ]
 });

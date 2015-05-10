@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-Ext.define('ReportView', {
-    extend: 'Ext.grid.Panel',
-    xtype: 'report-view',
+Ext.define('Traccar.model.Device', {
+    extend: 'Ext.data.Model',
+    identifier: 'negative',
 
-    title: Strings.report_title,
-
-    tbar: [{
-        text:'Do Something'
-    }],
-
-    columns: [
-        { text: "Column1", dataIndex: 'c1', flex: 1 },
-        { text: "Column2", dataIndex: 'c2', flex: 1 }
+    fields: [
+        { name: 'id', type: 'int' },
+        { name: 'name', type: 'string' },
+        { name: 'uniqueId', type: 'string' }
     ]
 });

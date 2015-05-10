@@ -26,10 +26,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.traccar.model.User;
 
 public abstract class BaseServlet extends HttpServlet {
     
-    public static final String USER_ID = "userId";
+    public static final String USER_KEY = "user";
     
     @Override
     protected final void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -46,16 +47,16 @@ public abstract class BaseServlet extends HttpServlet {
     protected abstract boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception;
     
     public long getUserId(HttpSession session) {
-        Long userId = (Long) session.getAttribute(USER_ID);
-        if (userId == null) {
+        User user = (User) session.getAttribute(USER_KEY);
+        if (user == null) {
             throw new AccessControlException("User is not logged in");
         }
-        return userId;
+        return user.getId();
     }
     
-    public void sendResponse(Writer writer) throws IOException {
+    public void sendResponse(Writer writer, boolean success) throws IOException {
         JsonObjectBuilder result = Json.createObjectBuilder();
-        result.add("success", true);
+        result.add("success", success);
         writer.write(result.build().toString());
     }
     

@@ -29,6 +29,7 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import org.traccar.model.Factory;
 
 public class JsonConverter {
@@ -57,7 +58,9 @@ public class JsonConverter {
                     } else if (parameterType.equals(int.class)) {
                         method.invoke(object, json.getJsonNumber(name).intValue());
                     } else if (parameterType.equals(long.class)) {
-                        method.invoke(object, json.getJsonNumber(name).longValue());
+                        if (json.get(name).getValueType() == JsonValue.ValueType.NUMBER) {
+                            method.invoke(object, json.getJsonNumber(name).longValue());
+                        }
                     } else if (parameterType.equals(double.class)) {
                         method.invoke(object, json.getJsonNumber(name).doubleValue());
                     } else if (parameterType.equals(String.class)) {

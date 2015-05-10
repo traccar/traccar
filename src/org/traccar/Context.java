@@ -15,18 +15,17 @@
  */
 package org.traccar;
 
+import java.io.FileInputStream;
+import java.util.Properties;
 import org.traccar.database.DataCache;
 import org.traccar.database.DataManager;
+import org.traccar.database.PermissionsManager;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.http.WebServer;
-
-import java.io.FileInputStream;
-import java.util.Properties;
-import org.traccar.database.PermissionsManager;
 
 public class Context {
 
@@ -92,7 +91,9 @@ public class Context {
 
         dataManager = new DataManager(properties);
         dataCache = new DataCache(dataManager);
-        permissionsManager = new PermissionsManager();
+        if (Boolean.valueOf(properties.getProperty("http.new"))) {
+            permissionsManager = new PermissionsManager();
+        }
 
         if (Boolean.parseBoolean(properties.getProperty("geocoder.enable"))) {
             String type = properties.getProperty("geocoder.type");

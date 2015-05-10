@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-Ext.define('Strings', {
-    singleton: true,
+Ext.define('Traccar.store.Devices', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Device',
 
-    login_title: 'Логин',
-    login_user: 'Пользователь',
-    login_password: 'Пароль',
-    login_register: 'Регистрация',
-    login_login: 'Вход',
-    login_failed: 'Неправильный логин или пароль.',
-
-    device_title: 'Устройства',
-    device_name: 'Название',
-    device_identifier: 'Идентификатор',
-
-    map_title: 'Карта'
+    proxy: {
+        type: 'ajax',
+        api: {
+            create  : '/api/device/add',
+            read    : '/api/device/get',
+            update  : '/api/device/update',
+            destroy : '/api/device/remove'
+        },
+        reader: {
+            type: 'json',
+            rootProperty: 'data'
+        },
+        writer: {
+            type: 'json',
+            writeAllFields: true
+        }
+    }
 });

@@ -182,7 +182,7 @@ public class AsyncServlet extends HttpServlet {
         
         context.setTimeout(ASYNC_TIMEOUT);
         HttpServletRequest req = (HttpServletRequest) context.getRequest();
-        long userId = (Long) req.getSession().getAttribute(MainServlet.USER_ID);
+        long userId = (Long) req.getSession().getAttribute(MainServlet.USER_KEY);
         
         synchronized (asyncSessions) {
             

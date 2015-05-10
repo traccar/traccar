@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-Ext.define('Styles', {
+Ext.define('Traccar.ErrorManager', {
     singleton: true,
+    
+    check: function(success, response) {
+        if (success) {
+            var result = Ext.decode(response.responseText);
+            if (result.success || result.error === undefined) {
+                return true;
+            } else {
+                Ext.Msg.alert(strings.error_title, result.error);
+                return false;
+            }
+        } else {
+            Ext.Msg.alert(strings.error_title, response.statusText);
+            return false;
+        }
+    },
 
-    panel_padding: 10,
+    error: function(message) {
+        Ext.Msg.alert(strings.error_title, message);
+    }
 
-    device_width: 350,
-
-    report_height: 250,
-
-    map_center: [ -0.1275, 51.507222 ],
-    map_zoom: 6,
-    map_max_zoom: 16
 });

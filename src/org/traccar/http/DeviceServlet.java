@@ -47,19 +47,19 @@ public class DeviceServlet extends BaseServlet {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         Context.getDataManager().addDevice(device);
         Context.getDataManager().linkDevice(getUserId(req.getSession()), device.getId());
-        sendResponse(resp.getWriter());
+        sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
     }
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Context.getDataManager().updateDevice(JsonConverter.objectFromJson(
                 req.getReader(), new Device()));
-        sendResponse(resp.getWriter());
+        sendResponse(resp.getWriter(), true);
     }
     
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Context.getDataManager().removeDevice(JsonConverter.objectFromJson(
                 req.getReader(), new Device()));
-        sendResponse(resp.getWriter());
+        sendResponse(resp.getWriter(), true);
     }
 
 }

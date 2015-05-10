@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-Ext.define('MapView', {
+Ext.define('Traccar.view.map.Map', {
     extend: 'Ext.form.Panel',
     xtype: 'map-view',
 
-    title: Strings.map_title,
+    title: strings.map_title,
     layout: 'fit',
     
-    update: function() {
+    /*update: function() {
         Ext.Ajax.request({
             scope: this,
             url: '/api/async',
@@ -42,33 +42,33 @@ Ext.define('MapView', {
                 // error
             }
         });
-    },
+    },*/
 
     listeners: {
         afterrender: function() {
 
-            var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
+            /*var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
 
             var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
                 key: bindKey,
                 imagerySet: 'Road'
             })});
 
-            /*var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
+            var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
                 key: bindKey,
                 imagerySet: 'Aerial'
-            })});
+            })});*/
 
             var layer = new ol.layer.Tile({ source: new ol.source.OSM({
-            })});*/
+            })});
             
             this.vectorSource = new ol.source.Vector({});
             var vectorLayer = new ol.layer.Vector({ source: this.vectorSource });
 
             var view = new ol.View({
-                center: ol.proj.transform(Styles.map_center, 'EPSG:4326', 'EPSG:3857'),
-                zoom: Styles.map_zoom,
-                maxZoom: Styles.map_max_zoom
+                center: ol.proj.transform(styles.map_center, 'EPSG:4326', 'EPSG:3857'),
+                zoom: styles.map_zoom,
+                maxZoom: styles.map_max_zoom
             });
 
             this.map = new ol.Map({
@@ -77,11 +77,12 @@ Ext.define('MapView', {
                 view: view
             });
             
-            this.update();
+            //this.update();
         },
 
         resize: function() {
             this.map.updateSize();
         }
     }
+
 });

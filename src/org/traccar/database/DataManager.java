@@ -22,7 +22,6 @@ import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -307,28 +306,27 @@ public class DataManager {
         admin.setName("admin");
         admin.setEmail("admin");
         admin.setPassword("admin");
+        admin.setAdmin(true);
         addUser(admin);
+        
+        Device device = new Device();
+        device.setName("test1");
+        device.setUniqueId("123456789012345");
+        addDevice(device);
+        linkDevice(admin.getId(), device.getId());
     }
 
-    public long login(String email, String password) throws SQLException {
-
-        Connection connection = dataSource.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(
-                    "SELECT id FROM user WHERE email = ? AND " +
-                    "password = CAST(HASH('SHA256', STRINGTOUTF8(?), 1000) AS VARCHAR);");
-            try {
-                statement.setString(1, email);
-                statement.setString(2, password);
-
-                ResultSet result = statement.executeQuery();
-                result.next();
-                return result.getLong("id");
-            } finally {
-                statement.close();
-            }
-        } finally {
-            connection.close();
+    public User login(String email, String password) throws SQLException {
+        Collection<User> result = QueryBuilder.create(dataSource,
+                "SELECT * FROM user WHERE email = :email AND " +
+                "password = CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR);")
+                .setString("email", email)
+                .setString("password", password)
+                .executeQuery(new User());
+        if (!result.isEmpty()) {
+            return result.iterator().next();
+        } else {
+            return null;
         }
     }
 

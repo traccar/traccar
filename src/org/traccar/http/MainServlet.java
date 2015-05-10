@@ -41,24 +41,34 @@ public class MainServlet extends BaseServlet {
     }
 
     private void session(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.getWriter().println("{ success: true, session: " + (req.getSession().getAttribute(USER_ID) != null) + " }");
+        User user = (User) req.getSession().getAttribute(USER_KEY);
+        if (user != null) {
+            sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
+        } else {
+            sendResponse(resp.getWriter(), false);
+        }
     }
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        req.getSession().setAttribute(USER_ID, Context.getDataManager().login(
-                req.getParameter("email"), req.getParameter("password")));
-        sendResponse(resp.getWriter());
+        User user = Context.getDataManager().login(
+                req.getParameter("email"), req.getParameter("password"));
+        if (user != null) {
+            req.getSession().setAttribute(USER_KEY, user);
+            sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
+        } else {
+            sendResponse(resp.getWriter(), false);
+        }
     }
 
     private void logout(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        req.getSession().removeAttribute(USER_ID);
-        sendResponse(resp.getWriter());
+        req.getSession().removeAttribute(USER_KEY);
+        sendResponse(resp.getWriter(), true);
     }
 
     private void register(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getDataManager().addUser(user);
-        sendResponse(resp.getWriter());
+        sendResponse(resp.getWriter(), true);
     }
 
 }
