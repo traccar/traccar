@@ -22,6 +22,10 @@ Ext.define('Traccar.view.login.LoginController', {
         'Traccar.view.login.Register'
     ],
 
+    onAfterRender: function(field) {
+        field.focus();
+    },
+
     onSpecialKey: function(field, e) {
         if (e.getKey() === e.ENTER) {
             this.doLogin();

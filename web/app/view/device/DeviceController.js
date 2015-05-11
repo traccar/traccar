@@ -64,27 +64,6 @@ Ext.define('Traccar.view.device.DeviceController', {
         var disabled = selected.length > 0;
         this.lookupReference('deviceEditButton').setDisabled(disabled);
         this.lookupReference('deviceRemoveButton').setDisabled(disabled);
-    },
-    
-    onSaveClick: function(button) {
-        var dialog = button.up('window').down('form');
-        dialog.updateRecord();
-        var store = Ext.getStore('Devices');
-        var device = dialog.getRecord();
-        if (device.phantom) {
-            store.add(device);
-        }
-        store.sync({
-            failure: function(batch) {
-                store.rejectChanges(); // TODO
-                Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
-            }
-        });
-        button.up('window').close();
-    },
-    
-    onCancelClick: function(button) {
-        button.up('window').close();
     }
 
 });

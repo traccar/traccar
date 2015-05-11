@@ -40,7 +40,8 @@ Ext.define('Traccar.view.login.Login', {
             allowBlank: false,
             enableKeyEvents: true,
             listeners: {
-                specialKey: 'onSpecialKey'
+                specialKey: 'onSpecialKey',
+                afterrender: 'onAfterRender'
             }
         }, {
             xtype: 'textfield',
