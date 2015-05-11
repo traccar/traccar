@@ -47,6 +47,8 @@ Ext.define('Traccar.view.map.Map', {
     listeners: {
         afterrender: function() {
 
+            var transform = this.transform;
+
             /*var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
 
             var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
@@ -63,10 +65,22 @@ Ext.define('Traccar.view.map.Map', {
             })});
             
             this.vectorSource = new ol.source.Vector({});
-            var vectorLayer = new ol.layer.Vector({ source: this.vectorSource });
+            var vectorLayer = new ol.layer.Vector({
+                source: this.vectorSource,
+                style: new ol.style.Style({
+                    text: new ol.style.Text({
+                        text: '\uf041',
+                        font: 'normal 32px FontAwesome',
+                        textBaseline: 'Bottom',
+                        fill: new ol.style.Fill({
+                            color: 'green'
+                        })
+                    })
+                })
+            });
 
             var view = new ol.View({
-                center: ol.proj.transform(styles.map_center, 'EPSG:4326', 'EPSG:3857'),
+                center: ol.proj.fromLonLat(styles.map_center),
                 zoom: styles.map_zoom,
                 maxZoom: styles.map_max_zoom
             });
@@ -76,7 +90,13 @@ Ext.define('Traccar.view.map.Map', {
                 layers: [ layer, vectorLayer ],
                 view: view
             });
-            
+
+            var iconFeature = new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([-1.257778, 51.751944]))
+            });
+
+            this.vectorSource.addFeature(iconFeature);
+
             //this.update();
         },
 
