@@ -73,7 +73,11 @@ Ext.define('Traccar.view.map.Map', {
                         font: 'normal 32px FontAwesome',
                         textBaseline: 'Bottom',
                         fill: new ol.style.Fill({
-                            color: 'green'
+                            color: 'red'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: 'black',
+                            width: 2
                         })
                     })
                 })
