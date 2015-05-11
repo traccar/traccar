@@ -57,12 +57,14 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
                 deviceId = device.getId();
                 return true;
             } else {
+                deviceId = 0;
                 if (logWarning) {
                     Log.warning("Unknown device - " + uniqueId);
                 }
                 return false;
             }
         } catch (Exception error) {
+            deviceId = 0;
             Log.warning(error);
             return false;
         }
