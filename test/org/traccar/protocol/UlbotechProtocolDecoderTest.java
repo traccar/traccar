@@ -26,9 +26,24 @@ public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
         
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "F8010108621060211481299C4249FA010E015EE27506BDE80900020000008F030402420000040400523CAF05060392173F220706080000000000000000071131058E410C0E40310D48312F8E41310884080402CA60E43872F8"))));
-        
+
         //verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
         //        "F801010863070018987298729619022701CC0000285534BA4F28553AB14C2855BC9C572855BC9D5B28553AB25C2855445861285544586303040000000004040000076F0508033A18CF220D3DE6A638F8"))));
+
+        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "f8010108653280262660481cdacf830209ffffffffffffffff780304000300000404000000030506017418a021f99697f8"))));
+
+        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "f801010865328026266048fffeae800209ffffffffffffffff7803040200000004040000000005060375175421f3060800000000000000009c28f8"))));
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "f8010108653280262660489ce260b4010e01e757bd022340d7002b010d01570304020200000404000000260506036a17d42200060800000000000000000a0101ab9ff8"))));
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "f8010108653280262660489ce260df010e01e756f30223384a0003010a02a80304020200000404000001280506036217fe22010608000000000000000005aaf8"))));
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "f8010108653280262660489ce26128010e01e769ac022336290014010300730304020200000404000003c905060371181c2201060800000000000000000a0140e471f8"))));
 
     }
 
