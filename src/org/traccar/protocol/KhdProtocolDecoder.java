@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Crc;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -95,7 +96,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             // Location
             position.setLatitude(ChannelBufferTools.readCoordinate(buf));
             position.setLongitude(ChannelBufferTools.readCoordinate(buf));
-            position.setSpeed(ChannelBufferTools.readHexInteger(buf, 4) * 0.539957);
+            position.setSpeed(UnitsConverter.knotsFromKph(ChannelBufferTools.readHexInteger(buf, 4)));
             position.setCourse(ChannelBufferTools.readHexInteger(buf, 4));
 
             // Flags

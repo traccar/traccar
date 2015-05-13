@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -95,7 +96,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(Double.valueOf(parser.group(index++)));
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
-        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.868976);
+        position.setSpeed(UnitsConverter.knotsFromMph(Double.valueOf(parser.group(index++))));
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Additional data

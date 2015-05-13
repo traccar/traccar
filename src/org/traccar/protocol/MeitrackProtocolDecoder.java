@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -122,7 +123,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_GSM, parser.group(index++));
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
@@ -215,7 +216,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
             // Speed
-            position.setSpeed(buf.readUnsignedShort() * 0.539957);
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
             // Course
             position.setCourse(buf.readUnsignedShort());

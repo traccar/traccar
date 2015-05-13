@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -170,11 +171,11 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(buf.readInt() * 0.0000001);
             if (type != MSG_MINI_EVENT_REPORT) {
                 position.setAltitude(buf.readInt() * 0.01);
-                position.setSpeed(buf.readUnsignedInt() * 0.0194384449); // cm/s
+                position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedInt()));
             }
             position.setCourse(buf.readShort());
             if (type == MSG_MINI_EVENT_REPORT) {
-                position.setSpeed(buf.readUnsignedByte() * 0.539957); // km/h
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             }
 
             // Fix status

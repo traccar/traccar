@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -106,7 +107,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 
                 if (checkBit(locationMask, 3)) {
-                    position.setSpeed(buf.readUnsignedByte() * 0.539957);
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
                 }
                 
                 if (checkBit(locationMask, 4)) {
@@ -144,7 +145,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
                 position.setValid(satellites != 0);
 
-                position.setSpeed(buf.readUnsignedShort() * 0.539957);
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
                 position.set(Event.KEY_EVENT, buf.readUnsignedByte());
 

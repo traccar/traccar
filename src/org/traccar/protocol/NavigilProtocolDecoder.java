@@ -25,6 +25,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Crc;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -161,8 +162,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(buf.readMedium() * 0.00002);
         position.setLongitude(buf.readMedium() * 0.00002);
         
-        position.setSpeed(buf.readUnsignedByte() * 0.539957);
-        position.setCourse(buf.readUnsignedByte() * 2.0);
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+        position.setCourse(buf.readUnsignedByte() * 2);
         
         short flags = buf.readUnsignedByte();
         position.setValid((flags & 0x80) == 0x80 && (flags & 0x40) == 0x40);
@@ -184,7 +185,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         
         buf.readUnsignedByte(); // report trigger
 
-        position.setSpeed(buf.readUnsignedByte() * 0.539957);
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
         
         short flags = buf.readUnsignedByte();
         position.setValid((flags & 0x80) == 0x80 && (flags & 0x40) == 0x40);
@@ -251,7 +252,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(buf.readInt() * 0.0000001);
         position.setLongitude(buf.readInt() * 0.0000001);
         
-        position.setSpeed(buf.readUnsignedByte() * 0.539957);
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
         buf.readUnsignedByte(); // satellites in fix

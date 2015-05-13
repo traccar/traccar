@@ -20,6 +20,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -84,7 +85,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     position.setValid(true);
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
-                    position.setSpeed(buf.readUnsignedShort() * 0.539957);
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                     position.setCourse(buf.readUnsignedShort());
                     position.set(Event.KEY_HDOP, buf.readUnsignedShort());
                     break;

@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -164,7 +165,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Speed and heading
         if ((selector & 0x0010) != 0) {
-            position.setSpeed(buf.readUnsignedByte() * 0.539957);
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             buf.readUnsignedByte(); // maximum speed
             position.setCourse(buf.readUnsignedByte() * 2.0);
         }

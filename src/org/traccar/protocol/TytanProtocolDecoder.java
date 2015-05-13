@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -92,7 +93,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             // Speed
             int speed = buf.readUnsignedByte();
             if (speed < 250) {
-                position.setSpeed(speed * 0.539957);
+                position.setSpeed(UnitsConverter.knotsFromKph(speed));
             }
             
             while (buf.readerIndex() < end) {

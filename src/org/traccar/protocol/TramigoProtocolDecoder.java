@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -120,7 +121,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
             matcher = pattern.matcher(sentence);
             if (matcher.find()) {
-                position.setSpeed(Double.valueOf(matcher.group(2)) * 0.539957);
+                position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(matcher.group(2))));
                 position.setCourse(0); // matcher.group(1) for course
             }
 

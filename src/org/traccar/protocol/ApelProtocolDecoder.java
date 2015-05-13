@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Crc;
 import org.traccar.helper.Log;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -193,12 +194,12 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 if (subtype == MSG_TYPE_STATE_FULL_INFO_T104) {
                     int speed = buf.readUnsignedByte();
                     position.setValid(speed != 255);
-                    position.setSpeed(speed * 0.539957);
+                    position.setSpeed(UnitsConverter.knotsFromKph(speed));
                     position.set(Event.KEY_HDOP, buf.readByte());
                 } else {
                     int speed = buf.readShort();
                     position.setValid(speed != -1);
-                    position.setSpeed(speed / 100.0 * 0.539957);
+                    position.setSpeed(UnitsConverter.knotsFromKph(speed / 100.0));
                 }
 
                 // Course

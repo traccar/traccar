@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -128,7 +129,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_INPUT, buf.readUnsignedByte());
 
             // Speed
-            position.setSpeed(buf.readUnsignedShort() * 0.539957);
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
             // Output
             position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());

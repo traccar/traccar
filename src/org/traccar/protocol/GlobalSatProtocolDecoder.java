@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -159,10 +160,10 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(Double.valueOf(value));
                     break;
                 case 'I':
-                    position.setSpeed(Double.valueOf(value) * 0.539957);
+                    position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(value)));
                     break;
                 case 'J':
-                    position.setSpeed(Double.valueOf(value) * 0.868976);
+                    position.setSpeed(UnitsConverter.knotsFromMph(Double.valueOf(value)));
                     break;
                 case 'K':
                     position.setCourse(Double.valueOf(value));

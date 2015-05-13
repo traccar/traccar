@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -94,7 +95,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)) * 0.539957);
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
         
         // Status
         position.set(Event.KEY_STATUS, parser.group(index++));
