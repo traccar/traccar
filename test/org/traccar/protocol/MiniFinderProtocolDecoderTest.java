@@ -20,6 +20,9 @@ public class MiniFinderProtocolDecoderTest extends ProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "!D,22/2/14,13:47:51,56.899517,14.811665,0,0,b0001,179.3,97,5,16,0"));
 
+        verify(decoder.decode(null, null,
+                "!D,3/7/13,6:35:30,22.645952,114.040436,0.0,225.8,1f0001,12.11,98,0,0,0"));
+
     }
 
 }
