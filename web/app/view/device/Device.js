@@ -23,6 +23,7 @@ Ext.define('Traccar.view.device.Device', {
     ],
     
     controller: 'device',
+    store: 'Devices',
 
     title: strings.device_title,
     selType: 'rowmodel',
@@ -50,8 +51,6 @@ Ext.define('Traccar.view.device.Device', {
         handler: 'onLogoutClick'
     }],
 
-    store: 'Devices',
-    
     listeners: {
         selectionchange: 'onSelectionChange'
     },

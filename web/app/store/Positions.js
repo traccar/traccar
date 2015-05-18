@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.Application', {
-    extend: 'Ext.app.Application',
-    name: 'Traccar',
+Ext.define('Traccar.store.Positions', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Position',
 
-    requires: [
-        'Traccar.Resources',
-        'Traccar.ErrorManager'
-    ],
-    
-    models: [
-        'User',
-        'Device',
-        'Position'
-    ],
-    
-    stores: [
-        'Devices',
-        'Positions'
-    ],
-
-    controllers: [
-        'Root'
-    ]
+    proxy: {
+        type: 'ajax',
+        url: '/api/position/get',
+        reader: {
+            type: 'json',
+            rootProperty: 'data'
+        }
+    }
 });

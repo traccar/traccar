@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.Application', {
-    extend: 'Ext.app.Application',
-    name: 'Traccar',
+Ext.define('Traccar.view.report.ReportController', {
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.report',
 
-    requires: [
-        'Traccar.Resources',
-        'Traccar.ErrorManager'
-    ],
-    
-    models: [
-        'User',
-        'Device',
-        'Position'
-    ],
-    
-    stores: [
-        'Devices',
-        'Positions'
-    ],
+    onSelectionChange: function(selected) {
+    }
 
-    controllers: [
-        'Root'
-    ]
 });

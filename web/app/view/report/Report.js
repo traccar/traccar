@@ -18,15 +18,56 @@ Ext.define('Traccar.view.report.Report', {
     extend: 'Ext.grid.Panel',
     xtype: 'report-view',
 
+    requires: [
+        'Traccar.view.report.ReportController'
+    ],
+
+    controller: 'report',
+    store: 'Positions',
+
     title: strings.report_title,
 
     tbar: [{
-        text:'Do Something'
+        xtype: 'tbtext',
+        html: strings.report_device
+    }, {
+        xtype: 'combobox',
+        store: 'Devices',
+        valueField: 'id',
+        displayField: 'name',
+        typeAhead: true,
+        queryMode: 'local'
+    }, '-', {
+        xtype: 'tbtext',
+        html: strings.report_from
+    }, {
+        xtype: 'datefield'
+    }, {
+        xtype: 'timefield',
+        maxWidth: styles.report_time
+    }, '-', {
+        xtype: 'tbtext',
+        html: strings.report_to
+    }, {
+        xtype: 'datefield'
+    }, {
+        xtype: 'timefield',
+        maxWidth: styles.report_time
+    }, '-', {
+        text: strings.report_show
+    }, {
+        text: strings.report_clear
     }],
 
     columns: [
-        { text: "Column1", dataIndex: 'c1', flex: 1 },
-        { text: "Column2", dataIndex: 'c2', flex: 1 }
+        { text: strings.report_time, dataIndex: 'fixTime', flex: 1 },
+        { text: strings.report_valid, dataIndex: 'valid', flex: 1 },
+        { text: strings.report_latitude, dataIndex: 'latitude', flex: 1 },
+        { text: strings.report_longitude, dataIndex: 'longitude', flex: 1 },
+        { text: strings.report_altitude, dataIndex: 'altitude', flex: 1 },
+        { text: strings.report_speed, dataIndex: 'speed', flex: 1 },
+        { text: strings.report_course, dataIndex: 'course', flex: 1 },
+        { text: strings.report_address, dataIndex: 'address', flex: 1 }
     ]
 
 });

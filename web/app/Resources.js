@@ -36,6 +36,19 @@ var strings =  {
     device_remove: 'Remove device?',
 
     report_title: 'Reports',
+    report_device: 'Device',
+    report_from: 'From',
+    report_to: 'To',
+    report_show: 'Show',
+    report_clear: 'Clear',
+    report_time: 'Time',
+    report_valid: 'Valid',
+    report_latitude: 'Latitude',
+    report_longitude: 'Longitude',
+    report_altitude: 'Altitude',
+    report_speed: 'Speed',
+    report_course: 'Course',
+    report_address: 'Address',
 
     dialog_save: 'Save',
     dialog_delete: 'Delete',
@@ -50,6 +63,7 @@ var styles = {
     device_width: 350,
 
     report_height: 250,
+    report_time: 100,
 
     map_center: [ -0.1275, 51.507222 ],
     map_zoom: 6,

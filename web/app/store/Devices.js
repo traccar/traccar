@@ -21,10 +21,10 @@ Ext.define('Traccar.store.Devices', {
     proxy: {
         type: 'ajax',
         api: {
-            create  : '/api/device/add',
-            read    : '/api/device/get',
-            update  : '/api/device/update',
-            destroy : '/api/device/remove'
+            create: '/api/device/add',
+            read: '/api/device/get',
+            update: '/api/device/update',
+            destroy: '/api/device/remove'
         },
         reader: {
             type: 'json',
