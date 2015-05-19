@@ -47,7 +47,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+\\.?\\d*)," +                 // Course
             "(\\d+)," +                         // Satellites
-            "(\\d+)," +                         // HDOP
+            "(\\d+\\.?\\d*)," +                 // HDOP
             "(\\d+\\.\\d+)," +                  // Battery
             "(\\d+)," +                         // GSM
             "(\\d+\\.?\\d*)," +                 // Odometer
