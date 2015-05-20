@@ -54,6 +54,7 @@ public class WebServer {
             servletHandler.setContextPath("/api");
             servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
             servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
+            servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
             servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
 
             ResourceHandler mobileResourceHandler = new ResourceHandler();

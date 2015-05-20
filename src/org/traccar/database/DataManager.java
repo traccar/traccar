@@ -25,13 +25,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import javax.sql.DataSource;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.model.Device;
@@ -379,6 +373,15 @@ public class DataManager {
                 .setLong("userId", userId)
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
+    }
+
+    public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {
+        return QueryBuilder.create(dataSource,
+                "SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to;")
+                .setLong("deviceId", deviceId)
+                .setDate("from", from)
+                .setDate("to", to)
+                .executeQuery(new Position());
     }
 
 }

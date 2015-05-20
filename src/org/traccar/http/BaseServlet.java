@@ -70,7 +70,11 @@ public abstract class BaseServlet extends HttpServlet {
     public void sendResponse(Writer writer, Exception error) throws IOException {
         JsonObjectBuilder result = Json.createObjectBuilder();
         result.add("success", false);
-        result.add("error", error.getMessage());
+        if (error.getMessage() != null) {
+            result.add("error", error.getMessage());
+        } else {
+            result.add("error", error.getClass().getSimpleName());
+        }
         writer.write(result.build().toString());
     }
     

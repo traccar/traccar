@@ -34,8 +34,12 @@ import org.traccar.model.Factory;
 
 public class JsonConverter {
         
-    public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
-    
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+    public static Date parseDate(String value) throws ParseException {
+        return dateFormat.parse(value);
+    }
+
     public static <T extends Factory> T objectFromJson(Reader reader, T prototype) throws ParseException {
         return objectFromJson(Json.createReader(reader).readObject(), prototype);
     }

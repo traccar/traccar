@@ -32,6 +32,7 @@ Ext.define('Traccar.view.report.Report', {
         html: strings.report_device
     }, {
         xtype: 'combobox',
+        reference: 'deviceField',
         store: 'Devices',
         valueField: 'id',
         displayField: 'name',
@@ -41,22 +42,32 @@ Ext.define('Traccar.view.report.Report', {
         xtype: 'tbtext',
         html: strings.report_from
     }, {
-        xtype: 'datefield'
+        xtype: 'datefield',
+        reference: 'fromDateField',
+        value: new Date()
     }, {
         xtype: 'timefield',
-        maxWidth: styles.report_time
+        reference: 'fromTimeField',
+        maxWidth: styles.report_time,
+        value: new Date()
     }, '-', {
         xtype: 'tbtext',
         html: strings.report_to
     }, {
-        xtype: 'datefield'
+        xtype: 'datefield',
+        reference: 'toDateField',
+        value: new Date()
     }, {
         xtype: 'timefield',
-        maxWidth: styles.report_time
+        reference: 'toTimeField',
+        maxWidth: styles.report_time,
+        value: new Date()
     }, '-', {
-        text: strings.report_show
+        text: strings.report_show,
+        handler: 'onShowClick'
     }, {
-        text: strings.report_clear
+        text: strings.report_clear,
+        handler: 'onClearClick'
     }],
 
     columns: [

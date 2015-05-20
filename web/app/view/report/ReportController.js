@@ -18,7 +18,34 @@ Ext.define('Traccar.view.report.ReportController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.report',
 
-    onSelectionChange: function(selected) {
+    onShowClick: function() {
+
+        var deviceId = this.lookupReference('deviceField').getValue();
+        var fromDate = this.lookupReference('fromDateField').getValue();
+        var fromTime = this.lookupReference('fromTimeField').getValue();
+
+        var from = new Date(
+            fromDate.getYear(), fromDate.getMonth(), fromDate.getDay(),
+            fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
+
+        var toDate = this.lookupReference('toDateField').getValue();
+        var toTime = this.lookupReference('toTimeField').getValue();
+
+        var to = new Date(
+            toDate.getYear(), toDate.getMonth(), toDate.getDay(),
+            toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
+
+        var store = Ext.getStore('Positions');
+        store.load({
+            params:{
+                deviceId: deviceId,
+                from: from,
+                to: to
+            }
+        });
+    },
+
+    onClearClick: function() {
     }
 
 });
