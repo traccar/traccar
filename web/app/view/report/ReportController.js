@@ -19,8 +19,8 @@ Ext.define('Traccar.view.report.ReportController', {
     alias: 'controller.report',
 
     onShowClick: function() {
-
         var deviceId = this.lookupReference('deviceField').getValue();
+
         var fromDate = this.lookupReference('fromDateField').getValue();
         var fromTime = this.lookupReference('fromTimeField').getValue();
 
@@ -46,6 +46,7 @@ Ext.define('Traccar.view.report.ReportController', {
     },
 
     onClearClick: function() {
+        Ext.getStore('Positions').removeAll();
     }
 
 });
