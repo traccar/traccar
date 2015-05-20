@@ -18,6 +18,12 @@ Ext.define('Traccar.view.map.Map', {
     extend: 'Ext.form.Panel',
     xtype: 'map-view',
 
+    requires: [
+        'Traccar.view.map.MapController'
+    ],
+
+    controller: 'map',
+
     title: strings.map_title,
     layout: 'fit',
     

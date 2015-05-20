@@ -43,10 +43,14 @@ Ext.define('Traccar.view.report.ReportController', {
                 to: to
             }
         });
+        
+        this.fireEvent("reportShow");
     },
 
     onClearClick: function() {
         Ext.getStore('Positions').removeAll();
+
+        this.fireEvent("reportClear");
     }
 
 });
