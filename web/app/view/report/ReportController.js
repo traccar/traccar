@@ -25,14 +25,14 @@ Ext.define('Traccar.view.report.ReportController', {
         var fromTime = this.lookupReference('fromTimeField').getValue();
 
         var from = new Date(
-            fromDate.getYear(), fromDate.getMonth(), fromDate.getDay(),
+            fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDay(),
             fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
 
         var toDate = this.lookupReference('toDateField').getValue();
         var toTime = this.lookupReference('toTimeField').getValue();
 
         var to = new Date(
-            toDate.getYear(), toDate.getMonth(), toDate.getDay(),
+            toDate.getFullYear(), toDate.getMonth(), toDate.getDay(),
             toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
 
         var store = Ext.getStore('Positions');

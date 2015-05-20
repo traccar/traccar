@@ -64,6 +64,7 @@ var styles = {
 
     report_height: 250,
     report_time: 100,
+    report_format: 'Y-m-d H:i:s',
 
     map_center: [ -0.1275, 51.507222 ],
     map_zoom: 6,
