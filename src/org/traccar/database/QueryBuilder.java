@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -203,6 +204,9 @@ public class QueryBuilder {
     public <T extends Factory> Collection<T> executeQuery(T prototype) throws SQLException {
         List<T> result = new LinkedList<T>();
         
+        ResultSet resultSet = statement.executeQuery();
+        ResultSetMetaData resultMetaData = resultSet.getMetaData();
+        
         List<ResultSetProcessor<T>> processors = new LinkedList<ResultSetProcessor<T>>();
         
         Method[] methods = prototype.getClass().getMethods();
@@ -211,6 +215,19 @@ public class QueryBuilder {
             if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 
                 final String name = method.getName().substring(3);
+                
+                // Check if column exists
+                boolean column = false;
+                for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                    if (name.equalsIgnoreCase(resultMetaData.getColumnName(i))) {
+                        column = true;
+                        break;
+                    }
+                }
+                if (!column) {
+                    continue;
+                }
+                
                 Class<?> parameterType = method.getParameterTypes()[0];
 
                 if (parameterType.equals(boolean.class)) {
@@ -282,8 +299,6 @@ public class QueryBuilder {
                 }
             }
         }
-        
-        ResultSet resultSet = statement.executeQuery();
 
         while (resultSet.next()) {
             T object = (T) prototype.create();
