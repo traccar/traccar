@@ -27,7 +27,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import javax.sql.DataSource;
+
+import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
+import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
@@ -89,10 +92,6 @@ public class DataManager {
         ds.setIdleConnectionTestPeriod(600);
         ds.setTestConnectionOnCheckin(true);
         dataSource = ds;
-        
-        if (useNewDatabase) {
-            createDatabaseSchema();
-        }
 
         // Load statements from configuration
         String query;
@@ -110,6 +109,10 @@ public class DataManager {
         query = properties.getProperty("database.updateLatestPosition");
         if (query != null) {
             queryUpdateLatestPosition = new NamedParameterStatement(query, dataSource);
+        }
+
+        if (useNewDatabase) {
+            createDatabaseSchema();
         }
     }
 
@@ -302,12 +305,29 @@ public class DataManager {
         admin.setPassword("admin");
         admin.setAdmin(true);
         addUser(admin);
-        
-        Device device = new Device();
-        device.setName("test1");
-        device.setUniqueId("123456789012345");
-        addDevice(device);
-        linkDevice(admin.getId(), device.getId());
+
+        mockData(admin.getId());
+    }
+
+    private void mockData(long userId) {
+        if (Boolean.valueOf(Context.getProps().getProperty("database.mock"))) {
+            try {
+
+                Device device = new Device();
+                device.setName("test1");
+                device.setUniqueId("123456789012345");
+                addDevice(device);
+                linkDevice(userId, device.getId());
+
+                Position position = new Position();
+                position.setDeviceId(device.getId());
+                position.setTime(new Date());
+                addPosition(position);
+
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
+        }
     }
 
     public User login(String email, String password) throws SQLException {
