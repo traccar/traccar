@@ -28,10 +28,46 @@ Ext.define('Traccar.view.map.MapController', {
             }
         }
     },
+
+    getLineStyle: function(color) {
+        return new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: color,
+                width: 2
+            })
+        });
+    },
+
+    getMarkerStyle: function(color) {
+        return new ol.style.Style({
+            text: new ol.style.Text({
+                text: '\uf041',
+                font: 'normal 32px FontAwesome',
+                textBaseline: 'Bottom',
+                fill: new ol.style.Fill({
+                    color: color
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'black',
+                    width: 2
+                })
+            })
+        });
+    },
     
     reportShow: function() {
-
         var vectorSource = this.getView().vectorSource;
+
+        var data = Ext.getStore('Positions').getData().splice();
+        data.sort(function(l, r) {
+            if (l < r) return -1;
+            if (r < l) return 1;
+            return 0;
+        });
+
+        var positions = [];
+
+        //for (let p of data)
 
         this.iconFeature = new ol.Feature({
             //geometry: new ol.geom.Point(ol.proj.fromLonLat([-1.257778, 51.751944]))
@@ -41,14 +77,7 @@ Ext.define('Traccar.view.map.MapController', {
             ])
         });
 
-        this.iconFeature.setStyle(
-            new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'black',
-                    width: 2
-                })
-            })
-        );
+        this.iconFeature.setStyle(this.getLineStyle('black'));
 
         vectorSource.addFeature(this.iconFeature);
     },
@@ -57,22 +86,7 @@ Ext.define('Traccar.view.map.MapController', {
         //this.getView().vectorSource.clear();
 
         this.iconFeature.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([-5.257778, 51.751944])));
-        this.iconFeature.setStyle(
-            new ol.style.Style({
-                text: new ol.style.Text({
-                    text: '\uf041',
-                    font: 'normal 32px FontAwesome',
-                    textBaseline: 'Bottom',
-                    fill: new ol.style.Fill({
-                        color: 'red'
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: 'black',
-                        width: 2
-                    })
-                })
-            })
-        );
+        this.iconFeature.setStyle(this.getMarkerStyle('red'));
     }
 
 });

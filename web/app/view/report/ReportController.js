@@ -41,15 +41,16 @@ Ext.define('Traccar.view.report.ReportController', {
                 deviceId: deviceId,
                 from: from,
                 to: to
+            },
+            scope: this,
+            callback: function() {
+                this.fireEvent("reportShow");
             }
         });
-        
-        this.fireEvent("reportShow");
     },
 
     onClearClick: function() {
         Ext.getStore('Positions').removeAll();
-
         this.fireEvent("reportClear");
     }
 
