@@ -25,12 +25,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.util.*;
 import javax.sql.DataSource;
 
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
+import org.traccar.http.JsonConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
@@ -321,10 +323,25 @@ public class DataManager {
 
                 Position position = new Position();
                 position.setDeviceId(device.getId());
-                position.setTime(new Date());
+
+                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:01"));
+                position.setLatitude(-36.8785803);
+                position.setLongitude(174.7281713);
+                addPosition(position);
+
+                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:02"));
+                position.setLatitude(-36.8870932);
+                position.setLongitude(174.7473116);
+                addPosition(position);
+
+                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:03"));
+                position.setLatitude(-36.8932371);
+                position.setLongitude(174.7743053);
                 addPosition(position);
 
             } catch (SQLException error) {
+                Log.warning(error);
+            } catch (ParseException error) {
                 Log.warning(error);
             }
         }
