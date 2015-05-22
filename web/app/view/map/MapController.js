@@ -30,11 +30,49 @@ Ext.define('Traccar.view.map.MapController', {
     },
     
     reportShow: function() {
-        console.log('reportShow');
+
+        var vectorSource = this.getView().vectorSource;
+
+        this.iconFeature = new ol.Feature({
+            //geometry: new ol.geom.Point(ol.proj.fromLonLat([-1.257778, 51.751944]))
+            geometry: new ol.geom.LineString([
+                ol.proj.fromLonLat([-1.257778, 52.751944]),
+                ol.proj.fromLonLat([-3.257778, 51.751944])
+            ])
+        });
+
+        this.iconFeature.setStyle(
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'black',
+                    width: 2
+                })
+            })
+        );
+
+        vectorSource.addFeature(this.iconFeature);
     },
 
     reportClear: function() {
-        console.log('reportClear');
+        //this.getView().vectorSource.clear();
+
+        this.iconFeature.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([-5.257778, 51.751944])));
+        this.iconFeature.setStyle(
+            new ol.style.Style({
+                text: new ol.style.Text({
+                    text: '\uf041',
+                    font: 'normal 32px FontAwesome',
+                    textBaseline: 'Bottom',
+                    fill: new ol.style.Fill({
+                        color: 'red'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: 'black',
+                        width: 2
+                    })
+                })
+            })
+        );
     }
 
 });

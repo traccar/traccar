@@ -72,21 +72,7 @@ Ext.define('Traccar.view.map.Map', {
             
             this.vectorSource = new ol.source.Vector({});
             var vectorLayer = new ol.layer.Vector({
-                source: this.vectorSource,
-                style: new ol.style.Style({
-                    text: new ol.style.Text({
-                        text: '\uf041',
-                        font: 'normal 32px FontAwesome',
-                        textBaseline: 'Bottom',
-                        fill: new ol.style.Fill({
-                            color: 'red'
-                        }),
-                        stroke: new ol.style.Stroke({
-                            color: 'black',
-                            width: 2
-                        })
-                    })
-                })
+                source: this.vectorSource
             });
 
             var view = new ol.View({
@@ -100,12 +86,6 @@ Ext.define('Traccar.view.map.Map', {
                 layers: [ layer, vectorLayer ],
                 view: view
             });
-
-            var iconFeature = new ol.Feature({
-                geometry: new ol.geom.Point(ol.proj.fromLonLat([-1.257778, 51.751944]))
-            });
-
-            this.vectorSource.addFeature(iconFeature);
 
             //this.update();
         },
