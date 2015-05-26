@@ -94,14 +94,19 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        String imei = parser.group(index++);
+        if (!identify(imei)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
         // Alarm message
-        position.set(Event.KEY_ALARM, parser.group(index++));
-        
+        String alarm = parser.group(index++);
+        position.set(Event.KEY_ALARM, alarm);
+        if (channel != null && alarm.equals("help me")) {
+            channel.write("**,imei:" + imei + ",E;", remoteAddress);
+        }
+
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
