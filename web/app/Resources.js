@@ -68,7 +68,11 @@ var styles = {
 
     map_center: [ -0.1275, 51.507222 ],
     map_zoom: 6,
-    map_max_zoom: 16
+    map_max_zoom: 16,
+    map_report_route: 'blue',
+    map_report_marker: 'blue',
+    map_route_width: 5,
+    map_marker_radius: 50
 };
 
 Ext.define('Traccar.Resources', {

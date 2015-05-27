@@ -31,9 +31,12 @@ Ext.define('Traccar.view.map.MapController', {
 
     getLineStyle: function(color) {
         return new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: color
+            }),
             stroke: new ol.style.Stroke({
                 color: color,
-                width: 2
+                width: styles.map_route_width
             })
         });
     },
@@ -58,35 +61,45 @@ Ext.define('Traccar.view.map.MapController', {
     reportShow: function() {
         var vectorSource = this.getView().vectorSource;
 
-        var data = Ext.getStore('Positions').getData().splice();
-        data.sort(function(l, r) {
-            if (l < r) return -1;
-            if (r < l) return 1;
-            return 0;
-        });
-
+        var data = Ext.getStore('Positions').getData().clone();
+        data.sort('fixTime');
+        
+        var index;
         var positions = [];
+        for (index = 0; index < data.getCount(); index++) {
+            positions.push(ol.proj.fromLonLat([
+                data.getAt(index).data.longitude,
+                data.getAt(index).data.latitude
+            ]));
+        }
 
-        //for (let p of data)
-
-        this.iconFeature = new ol.Feature({
-            //geometry: new ol.geom.Point(ol.proj.fromLonLat([-1.257778, 51.751944]))
-            geometry: new ol.geom.LineString([
-                ol.proj.fromLonLat([-1.257778, 52.751944]),
-                ol.proj.fromLonLat([-3.257778, 51.751944])
-            ])
+        this.reportRoute = new ol.Feature({
+            geometry: new ol.geom.LineString(positions)
         });
+        
+        /*this.reportStart = new ol.Feature({
+            geometry: new ol.geom.Circle(positions[0], styles.map_marker_radius)
+        });
+        
+        this.reportFinish = new ol.Feature({
+            geometry: new ol.geom.Circle(positions[positions.length - 1], styles.map_marker_radius)
+        });*/
 
-        this.iconFeature.setStyle(this.getLineStyle('black'));
+        this.reportRoute.setStyle(this.getLineStyle(styles.map_report_route));
+        //this.reportStart.setStyle(this.getLineStyle(styles.map_report_marker));
+        //this.reportFinish.setStyle(this.getLineStyle(styles.map_report_marker));
 
-        vectorSource.addFeature(this.iconFeature);
+        vectorSource.addFeature(this.reportRoute);
+        //vectorSource.addFeature(this.reportStart);
+        //vectorSource.addFeature(this.reportFinish);
     },
 
     reportClear: function() {
-        //this.getView().vectorSource.clear();
-
-        this.iconFeature.setGeometry(new ol.geom.Point(ol.proj.fromLonLat([-5.257778, 51.751944])));
-        this.iconFeature.setStyle(this.getMarkerStyle('red'));
+        var vectorSource = this.getView().vectorSource;
+        
+        vectorSource.removeFeature(this.reportRoute);
+        //vectorSource.removeFeature(this.reportStart);
+        //vectorSource.addFeature(this.reportFinish);
     }
 
 });
