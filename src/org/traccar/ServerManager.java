@@ -244,7 +244,6 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     
-                    pipeline.addLast("frameDecoder",new CharacterDelimiterFrameDecoder(1024, "$", "\0"));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(protocol));
