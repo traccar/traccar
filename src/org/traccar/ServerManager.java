@@ -239,6 +239,16 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(protocol));
                 }
             });
+            
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    
+                    pipeline.addLast("stringDecoder", new StringDecoder());
+                    pipeline.addLast("stringEncoder", new StringEncoder());
+                    pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(protocol));
+                }
+            });
         }
     }
 
