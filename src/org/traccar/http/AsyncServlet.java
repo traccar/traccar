@@ -35,6 +35,7 @@ import org.traccar.GlobalTimer;
 import org.traccar.database.DataCache;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 
 public class AsyncServlet extends HttpServlet {
 
@@ -182,16 +183,16 @@ public class AsyncServlet extends HttpServlet {
         
         context.setTimeout(ASYNC_TIMEOUT);
         HttpServletRequest req = (HttpServletRequest) context.getRequest();
-        long userId = (Long) req.getSession().getAttribute(MainServlet.USER_KEY);
+        User user = (User) req.getSession().getAttribute(MainServlet.USER_KEY);
         
         synchronized (asyncSessions) {
             
-            if (!asyncSessions.containsKey(userId)) {
-                Collection<Long> devices = Context.getPermissionsManager().allowedDevices(userId);
-                asyncSessions.put(userId, new AsyncSession(userId, devices));
+            if (!asyncSessions.containsKey(user.getId())) {
+                Collection<Long> devices = Context.getPermissionsManager().allowedDevices(user.getId());
+                asyncSessions.put(user.getId(), new AsyncSession(user.getId(), devices));
             }
             
-            asyncSessions.get(userId).request(context);
+            asyncSessions.get(user.getId()).request(context);
         }
     }
 

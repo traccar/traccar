@@ -26,46 +26,9 @@ Ext.define('Traccar.view.map.Map', {
 
     title: strings.map_title,
     layout: 'fit',
-    
-    /*update: function() {
-        Ext.Ajax.request({
-            scope: this,
-            url: '/api/async',
-            success: function(response) {
-                var data = Ext.decode(response.responseText).data;
-                
-                var i;
-                for (i = 0; i < data.length; i++) {
-                    var iconFeature = new ol.Feature({
-                        geometry: new ol.geom.Point([30, 30])
-                    });
-                    this.vectorSource.addFeature(iconFeature);   
-                }
-                
-                this.update();
-            },
-            failure: function() {
-                // error
-            }
-        });
-    },*/
 
     listeners: {
         afterrender: function() {
-
-            var transform = this.transform;
-
-            /*var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
-
-            var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
-                key: bindKey,
-                imagerySet: 'Road'
-            })});
-
-            var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
-                key: bindKey,
-                imagerySet: 'Aerial'
-            })});*/
 
             var layer = new ol.layer.Tile({ source: new ol.source.OSM({
             })});
@@ -86,8 +49,6 @@ Ext.define('Traccar.view.map.Map', {
                 layers: [ layer, vectorLayer ],
                 view: view
             });
-
-            //this.update();
         },
 
         resize: function() {

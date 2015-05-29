@@ -14,28 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.Application', {
-    extend: 'Ext.app.Application',
-    name: 'Traccar',
-
-    requires: [
-        'Traccar.Resources',
-        'Traccar.ErrorManager'
-    ],
-    
-    models: [
-        'User',
-        'Device',
-        'Position'
-    ],
-    
-    stores: [
-        'Devices',
-        'Positions',
-        'LiveData'
-    ],
-
-    controllers: [
-        'Root'
-    ]
+Ext.define('Traccar.store.LiveData', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Position'
 });
