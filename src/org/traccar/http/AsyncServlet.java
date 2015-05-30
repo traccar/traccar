@@ -48,7 +48,7 @@ public class AsyncServlet extends HttpServlet {
     
     public class AsyncSession {
         
-        private static final boolean DEBUG_ASYNC = true;
+        private static final boolean DEBUG_ASYNC = false;
         
         private static final long SESSION_TIMEOUT = 30;
         private static final long REQUEST_TIMEOUT = 10;
@@ -78,12 +78,6 @@ public class AsyncServlet extends HttpServlet {
             }
             
             Context.getDataCache().addListener(devices, dataListener);
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            super.finalize();
-            logEvent("finalize");
         }
         
         private final DataCache.DataCacheListener dataListener = new DataCache.DataCacheListener() {
