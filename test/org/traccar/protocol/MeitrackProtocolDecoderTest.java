@@ -3,7 +3,6 @@ package org.traccar.protocol;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.traccar.helper.TestDataManager;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
@@ -14,6 +13,9 @@ public class MeitrackProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(null);
+        
+        verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "$$G145,862106024274815,AAA,35,-1.287125,36.906061,150530054639,A,10,13,12,67,0.8,1621,38359791,42330881,639|2|FB2|2F3,0000,3|0|0|A58|432,,,1,0009,*26", Charset.defaultCharset())));
 
         verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "$$I152,013949004569813,AAA,37,54.739468,25.273648,150208173414,A,5,24,0,73,1.5,165,74,3381,246|1|0065|118A,0000,0003|0003|0000|08D4|0002,006380DF,,1,0008*7C", Charset.defaultCharset())));
