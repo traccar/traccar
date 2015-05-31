@@ -80,7 +80,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             } else if (type == MSG_LOGIN) {
 
-                if (channel == null) {
+                if (channel != null) {
                     ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 41);
                     response.writeByte(0x40); response.writeByte(0x40);
                     response.writeShort(response.capacity());
