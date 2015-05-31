@@ -16,8 +16,10 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -35,11 +37,11 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_LOGIN = 0x0110;
-    private static final int MSG_LOGIN_RESPONSE = 0x0190;
-    private static final int MSG_HEARTBEAT = 0x0301;
-    private static final int MSG_HEARTBEAT_RESPONSE = 0x0390;
-    private static final int MSG_GPS = 0x0140;
+    private static final short MSG_LOGIN = 0x1001;
+    private static final short MSG_LOGIN_RESPONSE = (short) 0x9001;
+    private static final short MSG_HEARTBEAT = 0x1003;
+    private static final short MSG_HEARTBEAT_RESPONSE = (short) 0x9003;
+    private static final short MSG_GPS = 0x4001;
 
     @Override
     protected Object decode(
@@ -52,19 +54,19 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
         int version = buf.readUnsignedByte();
         ChannelBuffer id = buf.readBytes(20);
-        int type = buf.readUnsignedShort();
+        int type = ChannelBuffers.swapShort(buf.readShort());
         
         if (type == MSG_HEARTBEAT) {
             
             if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.directBuffer(31);
-                response.writeByte(0x40); response.writeByte(0x40); // header
-                response.writeShort(response.capacity()); // size
+                ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 31);
+                response.writeByte(0x40); response.writeByte(0x40);
+                response.writeShort(response.capacity());
                 response.writeByte(version);
                 response.writeBytes(id);
-                response.writeShort(MSG_HEARTBEAT_RESPONSE);
-                response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(2, 4))); // TODO
-                response.writeByte(0x0D); response.writeByte(0x0A); // ending
+                response.writeShort(ChannelBuffers.swapShort(MSG_HEARTBEAT_RESPONSE));
+                response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(0, response.writerIndex())));
+                response.writeByte(0x0D); response.writeByte(0x0A);
                 channel.write(response, remoteAddress);
             }
 
@@ -78,18 +80,18 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             } else if (type == MSG_LOGIN) {
 
-                if (channel != null) {
-                    ChannelBuffer response = ChannelBuffers.directBuffer(41);
-                    response.writeByte(0x40); response.writeByte(0x40); // header
-                    response.writeShort(response.capacity()); // size
+                if (channel == null) {
+                    ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 41);
+                    response.writeByte(0x40); response.writeByte(0x40);
+                    response.writeShort(response.capacity());
                     response.writeByte(version);
                     response.writeBytes(id);
-                    response.writeShort(MSG_LOGIN_RESPONSE);
+                    response.writeShort(ChannelBuffers.swapShort(MSG_LOGIN_RESPONSE));
                     response.writeInt(0xFFFFFFFF);
                     response.writeShort(0);
-                    response.writeInt(0); // TODO
-                    response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(2, 4))); // TODO
-                    response.writeByte(0x0D); response.writeByte(0x0A); // ending
+                    response.writeInt((int) (new Date().getTime() / 1000));
+                    response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(0, response.writerIndex())));
+                    response.writeByte(0x0D); response.writeByte(0x0A);
                     channel.write(response, remoteAddress);
                 }
             
