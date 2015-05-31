@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.*;
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import org.traccar.Context;
@@ -70,6 +71,17 @@ public class DataManager {
         
         useNewDatabase = Boolean.valueOf(properties.getProperty("http.new"));
 
+        String jndiName = properties.getProperty("database.jndi");
+        
+        if(jndiName != null) {
+            try {
+            DataSource ds = (DataSource) new InitialContext().lookup(jndiName);
+            dataSource = ds;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        } else {
         // Load driver
         String driver = properties.getProperty("database.driver");
         if (driver != null) {
@@ -94,7 +106,7 @@ public class DataManager {
         ds.setIdleConnectionTestPeriod(600);
         ds.setTestConnectionOnCheckin(true);
         dataSource = ds;
-
+        }
         // Load statements from configuration
         String query;
 
