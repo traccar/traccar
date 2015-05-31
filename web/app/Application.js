@@ -24,6 +24,7 @@ Ext.define('Traccar.Application', {
     ],
     
     models: [
+        'Server',
         'User',
         'Device',
         'Position'
@@ -45,6 +46,14 @@ Ext.define('Traccar.Application', {
     
     getUser: function() {
         return this.user;
+    },
+    
+    setServer: function(server) {
+        this.server = server;
+    },
+    
+    getServer: function() {
+        return this.server;
     }
     
 });
