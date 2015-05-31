@@ -21,7 +21,7 @@ Ext.define('Traccar.model.User', {
     fields: [
         { name: 'id', type: 'int' },
         { name: 'name', type: 'string' },
-        { name: 'unqiueId', type: 'string' },
+        { name: 'email', type: 'string' },
         { name: 'password', type: 'string' },
         { name: 'admin', type: 'boolean' }
     ]

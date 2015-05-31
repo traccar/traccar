@@ -37,5 +37,14 @@ Ext.define('Traccar.Application', {
 
     controllers: [
         'Root'
-    ]
+    ],
+    
+    setUser: function(user) {
+        this.user = user;
+    },
+    
+    getUser: function() {
+        return this.user;
+    }
+    
 });

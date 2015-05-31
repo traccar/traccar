@@ -16,6 +16,14 @@
 
 Ext.define('Traccar.LoginManager', {
     singleton: true,
+    
+    setUser: function(data) {
+        var reader = Ext.create('Ext.data.reader.Json', {
+            model: 'Traccar.model.User'
+        });
+        Traccar.getApplication().setUser(
+                reader.readRecords(data).getRecords()[0]);
+    },
 
     session: function(options) {
         Ext.Ajax.request({
@@ -31,7 +39,7 @@ Ext.define('Traccar.LoginManager', {
         if (Traccar.ErrorManager.check(success, response)) {
             var result = Ext.decode(response.responseText);
             if (result.success) {
-                this.user = result.data;
+                this.setUser(result.data);
             }
             Ext.callback(options.callback, options.scope, [result.success]);
         }
@@ -52,7 +60,7 @@ Ext.define('Traccar.LoginManager', {
         if (Traccar.ErrorManager.check(success, response)) {
             var result = Ext.decode(response.responseText);
             if (result.success) {
-                this.user = result.data;
+                this.setUser(result.data);
             }
             Ext.callback(options.callback, options.scope, [result.success]);
         }
