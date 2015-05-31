@@ -73,7 +73,7 @@ public class DataManager {
 
         String jndiName = properties.getProperty("database.jndi");
         
-        if(jndi != null) {
+        if(jndiName != null) {
             try {
             DataSource ds = (DataSource) new InitialContext().lookup(jndiName);
             dataSource = ds;
