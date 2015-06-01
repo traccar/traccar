@@ -18,7 +18,6 @@ package org.traccar.http;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 import javax.naming.InitialContext;
-
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -53,6 +52,7 @@ public class WebServer {
             ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
             servletHandler.setContextPath("/api");
             servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
+            servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/server/*");
             servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
             servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
             servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
