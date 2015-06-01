@@ -21,7 +21,7 @@ NetBeans comes pre-packaged with Maven plugin, so you don't need to install it s
 
 If your NetBeans doesn't have Maven plugin, then you need to download (`Tools > Plugins`) and configure (`Tools > Options > Miscellaneous > Maven`) it.
 
-To import project select `File > Open Project` and browse to the location of the project folder and click `Open Project`. To compile the project right click on the project and select `Build`.
+To import project select `File > Open Project`, browse to the location of the project folder and click `Open Project`. To compile the project right click on the project and select `Build`.
 
 ### Eclipse
 
