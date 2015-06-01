@@ -94,6 +94,7 @@ public class DataManager {
                 DriverManager.registerDriver(new DriverDelegate(d));
             } else {
                 Class.forName(driver);
+                
             }
         }
         
