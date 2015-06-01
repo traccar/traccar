@@ -26,9 +26,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import javax.sql.DataSource;
-
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
@@ -36,6 +42,7 @@ import org.traccar.http.JsonConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 
 public class DataManager {
@@ -307,6 +314,14 @@ public class DataManager {
         admin.setPassword("admin");
         admin.setAdmin(true);
         addUser(admin);
+        
+        Server server = new Server();
+        server.setRegistration(true);
+        QueryBuilder.create(dataSource,
+                "INSERT INTO server (registration, latitude, longitude, zoom)" +
+                "VALUES (:registration, :latitude, :longitude, :zoom);")
+                .setObject(server)
+                .executeUpdate();
 
         mockData(admin.getId());
     }
@@ -348,17 +363,12 @@ public class DataManager {
     }
 
     public User login(String email, String password) throws SQLException {
-        Collection<User> result = QueryBuilder.create(dataSource,
+        return QueryBuilder.create(dataSource,
                 "SELECT * FROM user WHERE email = :email AND " +
                 "password = CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR);")
                 .setString("email", email)
                 .setString("password", password)
-                .executeQuery(new User());
-        if (!result.isEmpty()) {
-            return result.iterator().next();
-        } else {
-            return null;
-        }
+                .executeQuerySingle(new User());
     }
 
     public void addUser(User user) throws SQLException {
@@ -419,6 +429,19 @@ public class DataManager {
                 .setDate("from", from)
                 .setDate("to", to)
                 .executeQuery(new Position());
+    }
+    
+    public Server getServer() throws SQLException {
+        return QueryBuilder.create(dataSource,
+                "SELECT * FROM server;")
+                .executeQuerySingle(new Server());
+    }
+    
+    public void updateServer(Server server) throws SQLException {
+        QueryBuilder.create(dataSource,
+                "UPDATE server SET registration = :registration WHERE id = :id;")
+                .setObject(server)
+                .executeUpdate();
     }
 
 }

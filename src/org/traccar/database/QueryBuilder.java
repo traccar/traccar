@@ -201,6 +201,15 @@ public class QueryBuilder {
         public void process(T object, ResultSet resultSet) throws SQLException;
     }
     
+    public <T extends Factory> T executeQuerySingle(T prototype) throws SQLException {
+        Collection<T> result = executeQuery(prototype);
+        if (!result.isEmpty()) {
+            return result.iterator().next();
+        } else {
+            return null;
+        }
+    }
+    
     public <T extends Factory> Collection<T> executeQuery(T prototype) throws SQLException {
         List<T> result = new LinkedList<T>();
         

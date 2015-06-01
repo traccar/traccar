@@ -30,7 +30,7 @@ Ext.define('Traccar.view.map.MapController', {
     },
     
     init: function() {
-        this.liveData = new Object();
+        this.liveData = {};
         this.update();
     },
     
