@@ -58,7 +58,8 @@ Ext.define('Traccar.view.login.Login', {
 
     buttons: [{
         text: strings.login_register,
-        handler: 'onRegisterClick'
+        handler: 'onRegisterClick',
+        reference: 'registerButton'
     }, {
         text: strings.login_login,
         handler: 'onLoginClick'

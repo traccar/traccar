@@ -22,6 +22,12 @@ Ext.define('Traccar.view.login.LoginController', {
         'Traccar.view.login.Register'
     ],
 
+    init: function() {
+        this.lookupReference('registerButton').setDisabled(
+            !Traccar.getApplication().getServer().get('registration')
+        );
+    },
+
     onAfterRender: function(field) {
         field.focus();
     },

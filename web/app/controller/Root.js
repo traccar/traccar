@@ -24,6 +24,13 @@ Ext.define('Traccar.controller.Root', {
     ],
     
     onLaunch: function () {
+        Traccar.LoginManager.server({
+            scope: this,
+            callback: 'onServer'
+        });
+    },
+
+    onServer: function() {
         Traccar.LoginManager.session({
             scope: this,
             callback: 'onSession'

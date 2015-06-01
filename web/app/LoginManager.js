@@ -25,6 +25,30 @@ Ext.define('Traccar.LoginManager', {
                 reader.readRecords(data).getRecords()[0]);
     },
 
+    server: function(options) {
+        Ext.Ajax.request({
+            scope: this,
+            url: '/api/server/get',
+            callback: this.onServerReturn,
+            original: options
+        });
+    },
+
+    onServerReturn: function(options, success, response) {
+        options = options.original;
+        if (Traccar.ErrorManager.check(success, response)) {
+            var result = Ext.decode(response.responseText);
+            if (result.success) {
+                var reader = Ext.create('Ext.data.reader.Json', {
+                    model: 'Traccar.model.Server'
+                });
+                Traccar.getApplication().setServer(
+                    reader.readRecords(result.data).getRecords()[0]);
+            }
+            Ext.callback(options.callback, options.scope, [result.success]);
+        }
+    },
+
     session: function(options) {
         Ext.Ajax.request({
             scope: this,

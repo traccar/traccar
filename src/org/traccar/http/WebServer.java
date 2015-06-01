@@ -52,7 +52,7 @@ public class WebServer {
             ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
             servletHandler.setContextPath("/api");
             servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
-            servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/server/*");
+            servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
             servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
             servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
             servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
