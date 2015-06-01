@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
@@ -76,31 +77,40 @@ public class DataManager {
     private void initDatabase(Properties properties) throws Exception {
         
         useNewDatabase = Boolean.valueOf(properties.getProperty("http.new"));
-
-        // Load driver
-        String driver = properties.getProperty("database.driver");
-        if (driver != null) {
-            String driverFile = properties.getProperty("database.driverFile");
-
-            if (driverFile != null) {
-                URL url = new URL("jar:file:" + new File(driverFile).getAbsolutePath() + "!/");
-                URLClassLoader cl = new URLClassLoader(new URL[]{url});
-                Driver d = (Driver) Class.forName(driver, true, cl).newInstance();
-                DriverManager.registerDriver(new DriverDelegate(d));
-            } else {
-                Class.forName(driver);
-            }
-        }
         
-        // Initialize data source
-        ComboPooledDataSource ds = new ComboPooledDataSource();
-        ds.setDriverClass(properties.getProperty("database.driver"));
-        ds.setJdbcUrl(properties.getProperty("database.url"));
-        ds.setUser(properties.getProperty("database.user"));
-        ds.setPassword(properties.getProperty("database.password"));
-        ds.setIdleConnectionTestPeriod(600);
-        ds.setTestConnectionOnCheckin(true);
-        dataSource = ds;
+        String jndiName = properties.getProperty("database.jndi");
+
+        if (jndiName != null) {
+
+            dataSource = (DataSource) new InitialContext().lookup(jndiName);
+
+        } else {
+
+            // Load driver
+            String driver = properties.getProperty("database.driver");
+            if (driver != null) {
+                String driverFile = properties.getProperty("database.driverFile");
+
+                if (driverFile != null) {
+                    URL url = new URL("jar:file:" + new File(driverFile).getAbsolutePath() + "!/");
+                    URLClassLoader cl = new URLClassLoader(new URL[]{url});
+                    Driver d = (Driver) Class.forName(driver, true, cl).newInstance();
+                    DriverManager.registerDriver(new DriverDelegate(d));
+                } else {
+                    Class.forName(driver);
+                }
+            }
+
+            // Initialize data source
+            ComboPooledDataSource ds = new ComboPooledDataSource();
+            ds.setDriverClass(properties.getProperty("database.driver"));
+            ds.setJdbcUrl(properties.getProperty("database.url"));
+            ds.setUser(properties.getProperty("database.user"));
+            ds.setPassword(properties.getProperty("database.password"));
+            ds.setIdleConnectionTestPeriod(600);
+            ds.setTestConnectionOnCheckin(true);
+            dataSource = ds;
+        }
 
         // Load statements from configuration
         String query;
