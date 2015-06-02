@@ -16,19 +16,20 @@
 package org.traccar;
 
 import java.util.List;
-import org.jboss.netty.channel.*;
+import org.jboss.netty.channel.ChannelHandler;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
-import org.traccar.database.DataCache;
 import org.traccar.helper.Log;
-import org.traccar.database.DataManager;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 @ChannelHandler.Sharable
 public class TrackerEventHandler extends IdleStateAwareChannelHandler {
 
-    private Long processSinglePosition(Position position) {
+    private void processSinglePosition(Position position) {
         if (position == null) {
             Log.info("processSinglePosition null message");
         } else {
@@ -40,14 +41,11 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
             Log.info(s.toString());
         }
 
-        // Write position to database
-        Long id = null;
         try {
-            id = Context.getDataManager().addPosition(position);
+            Context.getDataManager().addPosition(position);
         } catch (Exception error) {
             Log.warning(error);
         }
-        return id;
     }
 
     @Override
@@ -55,18 +53,18 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         Long id = null;
         Position lastPostition = null;
         if (e.getMessage() instanceof Position) {
-            id = processSinglePosition((Position) e.getMessage());
+            processSinglePosition((Position) e.getMessage());
             lastPostition = (Position) e.getMessage();
         } else if (e.getMessage() instanceof List) {
             List<Position> positions = (List<Position>) e.getMessage();
             for (Position position : positions) {
-                id = processSinglePosition(position);
+                processSinglePosition(position);
                 lastPostition = position;
             }
         }
         if (lastPostition != null) {
             try {
-                Context.getDataManager().updateLatestPosition(lastPostition, id);
+                Context.getDataManager().updateLatestPosition(lastPostition);
                 Context.getDataCache().update(lastPostition);
             } catch (Exception error) {
                 Log.warning(error);

@@ -24,14 +24,10 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.naming.InitialContext;
@@ -48,7 +44,18 @@ import org.traccar.model.User;
 
 public class DataManager {
 
+    private static final long DEFAULT_REFRESH_DELAY = 300;
+    
+    private final Properties properties;
+    
+    private DataSource dataSource;
+
+    private final Map<String, Device> devices = new HashMap<String, Device>();
+    private long devicesLastUpdate;
+    private long devicesRefreshDelay;
+
     public DataManager(Properties properties) throws Exception {
+        this.properties = properties;
         if (properties != null) {
             initDatabase(properties);
             
@@ -62,21 +69,11 @@ public class DataManager {
         }
     }
     
-    private DataSource dataSource;
-    
     public DataSource getDataSource() {
         return dataSource;
     }
 
-    private NamedParameterStatement queryGetDevices;
-    private NamedParameterStatement queryAddPosition;
-    private NamedParameterStatement queryUpdateLatestPosition;
-    
-    private boolean useNewDatabase;
-
     private void initDatabase(Properties properties) throws Exception {
-        
-        useNewDatabase = Boolean.valueOf(properties.getProperty("http.new"));
         
         String jndiName = properties.getProperty("database.jndi");
 
@@ -112,115 +109,30 @@ public class DataManager {
             dataSource = ds;
         }
 
-        // Load statements from configuration
-        String query;
-
-        query = properties.getProperty("database.selectDevice");
-        if (query != null) {
-            queryGetDevices = new NamedParameterStatement(query, dataSource);
-        }
-
-        query = properties.getProperty("database.insertPosition");
-        if (query != null) {
-            queryAddPosition = new NamedParameterStatement(query, dataSource, Statement.RETURN_GENERATED_KEYS);
-        }
-
-        query = properties.getProperty("database.updateLatestPosition");
-        if (query != null) {
-            queryUpdateLatestPosition = new NamedParameterStatement(query, dataSource);
-        }
-
-        if (useNewDatabase) {
+        if (Boolean.valueOf(properties.getProperty("http.new"))) {
             createDatabaseSchema();
         }
     }
 
-    private final NamedParameterStatement.ResultSetProcessor<Device> deviceResultSetProcessor = new NamedParameterStatement.ResultSetProcessor<Device>() {
-        @Override
-        public Device processNextRow(ResultSet rs) throws SQLException {
-            Device device = new Device();
-            device.setId(rs.getLong("id"));
-            device.setUniqueId(rs.getString("imei"));
-            return device;
-        }
-    };
-
-    public List<Device> getDevices() throws SQLException {
-        if (queryGetDevices != null) {
-            return queryGetDevices.prepare().executeQuery(deviceResultSetProcessor);
-        } else {
-            return new LinkedList<Device>();
-        }
-    }
-
-    /**
-     * Devices cache
-     */
-    private Map<String, Device> devices;
-    private Calendar devicesLastUpdate;
-    private long devicesRefreshDelay;
-    private static final long DEFAULT_REFRESH_DELAY = 300;
-
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
 
-        if (devices == null || !devices.containsKey(uniqueId) ||
-                (Calendar.getInstance().getTimeInMillis() - devicesLastUpdate.getTimeInMillis() > devicesRefreshDelay)) {
+        if ((new Date().getTime() - devicesLastUpdate > devicesRefreshDelay) || !devices.containsKey(uniqueId)) {
 
-            devices = new HashMap<String, Device>();
-            for (Device device : getDevices()) {
+            devices.clear();
+            for (Device device : getAllDevices()) {
                 devices.put(device.getUniqueId(), device);
             }
-            devicesLastUpdate = Calendar.getInstance();
+            devicesLastUpdate = new Date().getTime();
         }
 
         return devices.get(uniqueId);
     }
 
-    private NamedParameterStatement.ResultSetProcessor<Long> generatedKeysResultSetProcessor = new NamedParameterStatement.ResultSetProcessor<Long>() {
-        @Override
-        public Long processNextRow(ResultSet rs) throws SQLException {
-            return rs.getLong(1);
-        }
-    };
-
-    public synchronized Long addPosition(Position position) throws SQLException {
-        if (queryAddPosition != null) {
-            List<Long> result = assignVariables(queryAddPosition.prepare(), position).executeUpdate(generatedKeysResultSetProcessor);
-            if (result != null && !result.isEmpty()) {
-                return result.iterator().next();
-            }
-        }
-        return null;
-    }
-
-    public void updateLatestPosition(Position position, Long positionId) throws SQLException {
-        if (queryUpdateLatestPosition != null) {
-            assignVariables(queryUpdateLatestPosition.prepare(), position).setLong("id", positionId).executeUpdate();
-        }
-    }
-
-    private NamedParameterStatement.Params assignVariables(NamedParameterStatement.Params params, Position position) throws SQLException {
-
-        params.setString("protocol", position.getProtocol());
-        params.setLong("deviceId", position.getDeviceId());
-        params.setTimestamp("deviceTime", position.getDeviceTime());
-        params.setTimestamp("fixTime", position.getFixTime());
-        params.setBoolean("valid", position.getValid());
-        params.setDouble("altitude", position.getAltitude());
-        params.setDouble("latitude", position.getLatitude());
-        params.setDouble("longitude", position.getLongitude());
-        params.setDouble("speed", position.getSpeed());
-        params.setDouble("course", position.getCourse());
-        params.setString("address", position.getAddress());
-        params.setString("other", position.getOther());
-
-        // temporary
-        params.setTimestamp("time", position.getFixTime());
-        params.setLong("device_id", position.getDeviceId());
-        params.setLong("power", null);
-        params.setString("extended_info", position.getOther());
-
-        return params;
+    // TODO: possibly remove this method
+    public void updateLatestPosition(Position position) throws SQLException {
+        QueryBuilder.create(dataSource, properties.getProperty("database.updateLatestPosition"))
+            .setObject(position)
+            .executeUpdate();
     }
 
     private void createDatabaseSchema() throws SQLException {
@@ -395,6 +307,11 @@ public class DataManager {
                 .executeQuery(new Permission());
     }
 
+    public Collection<Device> getAllDevices() throws SQLException {
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectDeviceAll"))
+                .executeQuery(new Device());
+    }
+
     public Collection<Device> getDevices(long userId) throws SQLException {
         return QueryBuilder.create(dataSource, 
                 "SELECT * FROM device WHERE id IN (" +
@@ -439,6 +356,16 @@ public class DataManager {
                 .setDate("from", from)
                 .setDate("to", to)
                 .executeQuery(new Position());
+    }
+
+    public void addPosition(Position position) throws SQLException {
+        position.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertPosition"))
+                .setObject(position)
+                .setDate("time", position.getFixTime()) // tmp
+                .setLong("device_id", position.getDeviceId()) // tmp
+                .setLong("power", 0) // tmp
+                .setString("extended_info", position.getOther()) // tmp
+                .executeUpdate());
     }
     
     public Server getServer() throws SQLException {
