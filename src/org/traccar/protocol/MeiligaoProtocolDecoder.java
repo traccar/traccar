@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,10 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.Crc;
@@ -50,16 +48,18 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)?," +                // Speed
             "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
-            "(?:[^\\|]*\\|(\\d+\\.\\d+)\\|" +   // Dilution of precision
-            "(\\d+\\.?\\d*)\\|)?" +             // Altitude
-            "([0-9a-fA-F]+)?" +                 // State
-            "(?:\\|([0-9a-fA-F]+),([0-9a-fA-F]+))?" + // ADC
-            "(?:,([0-9a-fA-F]+),([0-9a-fA-F]+)" +
-            ",([0-9a-fA-F]+),([0-9a-fA-F]+)" +
-            ",([0-9a-fA-F]+),([0-9a-fA-F]+))?" +
-            "(?:\\|([0-9a-fA-F]+))?" +          // Cell
-            "(?:\\|([0-9a-fA-F]+))?" +          // Signal
-            "(?:\\|([0-9a-fA-F]+))?" +          // Odometer
+            "[^\\|]*" +
+            "(?:\\|(\\d+\\.\\d+)?" +            // HDOP
+            "\\|(-?\\d+\\.?\\d*)?" +            // Altitude
+            "\\|(\\p{XDigit}{4})?" +            // State
+            "(?:\\|(\\p{XDigit}{4}),(\\p{XDigit}{4})" + // ADC
+            "(?:,(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}))?" +
+            "(?:\\|" +
+            "(?:(\\p{XDigit}{16})" +            // Cell
+            "\\|(\\p{XDigit}{2})" +             // GSM
+            "\\|(\\p{XDigit}{8})|" +            // Odometer
+            "(\\p{XDigit}{9})" +                // Odometer
+            "(?:\\|(\\p{XDigit}{5}))?)?)?)?)?" +  // RFID
             ".*");
     
     private static final int MSG_HEARTBEAT = 0x0001;
@@ -237,7 +237,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
-        // Dilution of precision
+        // HDOP
         position.set(Event.KEY_HDOP, parser.group(index++));
 
         // Altitude
@@ -261,10 +261,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Cell identifier
-        String cell = parser.group(index++);
-        if (cell != null) {
-            position.set(Event.KEY_CELL, cell);
-        }
+        position.set(Event.KEY_CELL, parser.group(index++));
 
         // GSM signal
         String gsm = parser.group(index++);
@@ -274,9 +271,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Odometer
         String odometer = parser.group(index++);
+        if (odometer == null) {
+            odometer = parser.group(index++);
+        }
         if (odometer != null) {
             position.set(Event.KEY_ODOMETER, Integer.parseInt(odometer, 16));
         }
+        
+        // RFID
+        position.set(Event.KEY_RFID, parser.group(index++));
 
         return position;
     }
