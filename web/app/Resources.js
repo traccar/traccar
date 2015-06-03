@@ -50,6 +50,9 @@ var strings =  {
     report_course: 'Course',
     report_address: 'Address',
 
+    server_title: 'Server settings',
+    server_registration: 'Registration',
+
     dialog_save: 'Save',
     dialog_delete: 'Delete',
     dialog_cancel: 'Cancel',
