@@ -76,7 +76,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
             position.setProtocol(getProtocol());
             
-            if (!identify(id.toString(Charset.defaultCharset()))) {
+            if (!identify(id.toString(Charset.defaultCharset()).trim())) {
                 return null;
             } else if (type == MSG_LOGIN) {
 
