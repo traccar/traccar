@@ -277,7 +277,7 @@ public class QueryBuilder {
                         // Check if column exists
                         boolean column = false;
                         for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                            if (name.equalsIgnoreCase(resultMetaData.getColumnName(i))) {
+                            if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
                                 column = true;
                                 break;
                             }
