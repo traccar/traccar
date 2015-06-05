@@ -19,10 +19,8 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -40,9 +38,9 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
             "(?:(\\d+),)?" +                    // IMEI
             "(\\d{2}),(\\d{2}),(\\d{2})," +     // Date
             "(\\d{2}),(\\d{2}),(\\d{2})," +     // Time
-            "(\\d{2})(\\d{6})([NS])," +         // Latitude
-            "(\\d{3})(\\d{6})([EW])," +         // Longitude
-            "(\\d+\\.\\d+)," +                  // Speed
+            "(\\d{2})(\\d{2}\\.?\\d{4})([NS])," + // Latitude
+            "(\\d{3})(\\d{2}\\.?\\d{4})([EW])," + // Longitude
+            "(\\d+\\.?\\d+)," +                 // Speed
             "(\\d+)," +                         // Course
             "(?:(\\d+)," +                      // Altitude
             "(\\d+),)?" +                       // Satellites
@@ -97,18 +95,19 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 600000;
+        latitude += Double.valueOf(parser.group(index++).replace(".", "")) / 600000;
         if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
         Double longitude = Double.valueOf(parser.group(index++));
-        longitude += Double.valueOf(parser.group(index++)) / 600000;
+        longitude += Double.valueOf(parser.group(index++).replace(".", "")) / 600000;
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(
+                parser.group(index++).replace(".", "")) / 10));
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
