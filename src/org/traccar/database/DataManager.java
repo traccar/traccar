@@ -231,7 +231,8 @@ public class DataManager {
     
     public void updateUser(User user) throws SQLException {
         QueryBuilder.create(dataSource,
-                "UPDATE user SET name = :name, email = :email, admin = :admin WHERE id = :id;")
+                "UPDATE user SET name = :name, email = :email, admin = :admin," +
+                "password = CASEWHEN((SELECT password FROM user WHERE id = :id) = :password, :password, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR)) WHERE id = :id;")
                 .setObject(user)
                 .executeUpdate();
     }
