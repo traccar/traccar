@@ -33,7 +33,13 @@ var strings =  {
     device_title: 'Devices',
     device_name: 'Name',
     device_identifier: 'Identifier',
-    device_remove: 'Remove device?',
+    device_remove_confirm: 'Remove device?',
+    device_add: 'Add',
+    device_edit: 'Edit',
+    device_remove: 'Remove',
+    device_logout: 'Logout',
+    device_settings: 'Settings',
+    device_settings_server: 'Server',
 
     report_title: 'Reports',
     report_device: 'Device',
@@ -51,6 +57,9 @@ var strings =  {
     report_address: 'Address',
 
     server_title: 'Server settings',
+    server_latitude: 'Latitude',
+    server_longitude: 'Longitude',
+    server_zoom: 'Zoom',
     server_registration: 'Registration',
 
     dialog_save: 'Save',

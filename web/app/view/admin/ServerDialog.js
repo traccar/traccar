@@ -36,6 +36,18 @@ Ext.define('Traccar.view.admin.ServerDialog', {
             name: 'registration',
             fieldLabel: strings.server_registration,
             allowBlank: false
+        }, {
+            xtype: 'numberfield',
+            name: 'latitude',
+            fieldLabel: strings.server_latitude
+        }, {
+            xtype: 'numberfield',
+            name: 'longitude',
+            fieldLabel: strings.server_longitude
+        }, {
+            xtype: 'numberfield',
+            name: 'zoom',
+            fieldLabel: strings.server_zoom
         }]
     },
 

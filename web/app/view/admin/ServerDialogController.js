@@ -21,17 +21,7 @@ Ext.define('Traccar.view.admin.ServerDialogController', {
     onSaveClick: function(button) {
         var dialog = button.up('window').down('form');
         dialog.updateRecord();
-        var store = Ext.getStore('Devices');
-        var device = dialog.getRecord();
-        if (device.phantom) {
-            store.add(device);
-        }
-        store.sync({
-            failure: function(batch) {
-                store.rejectChanges(); // TODO
-                Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
-            }
-        });
+        dialog.getRecord().save();
         button.up('window').close();
     },
 

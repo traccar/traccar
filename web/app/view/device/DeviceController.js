@@ -19,8 +19,15 @@ Ext.define('Traccar.view.device.DeviceController', {
     alias: 'controller.device',
     
     requires: [
-        'Traccar.view.device.DeviceDialog'
+        'Traccar.view.device.DeviceDialog',
+        'Traccar.view.admin.ServerDialog'
     ],
+
+    init: function() {
+        if (Traccar.getApplication().getUser().get('admin')) {
+            this.lookupReference('settingsServerButton').setDisabled(false);
+        }
+    },
     
     onLogoutClick: function() {
         Traccar.LoginManager.logout();
@@ -44,7 +51,7 @@ Ext.define('Traccar.view.device.DeviceController', {
         var device = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
             title: strings.device_dialog,
-            message: strings.device_remove,
+            message: strings.device_remove_confirm,
             buttons: Ext.Msg.YESNO,
             buttonText: {
                 yes: strings.dialog_delete,
@@ -64,6 +71,13 @@ Ext.define('Traccar.view.device.DeviceController', {
         var disabled = selected.length > 0;
         this.lookupReference('deviceEditButton').setDisabled(disabled);
         this.lookupReference('deviceRemoveButton').setDisabled(disabled);
+    },
+
+    onServerClick: function() {
+        var server = Traccar.getApplication().getServer();
+        var dialog = Ext.create('Traccar.view.admin.ServerDialog');
+        dialog.down('form').loadRecord(server);
+        dialog.show();
     }
 
 });

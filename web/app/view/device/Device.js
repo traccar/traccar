@@ -15,7 +15,7 @@
  */
 
 Ext.define('Traccar.view.device.Device', {
-        extend: 'Ext.grid.Panel',
+    extend: 'Ext.grid.Panel',
     xtype: 'device-view',
     
     requires: [
@@ -29,25 +29,31 @@ Ext.define('Traccar.view.device.Device', {
     selType: 'rowmodel',
     
     tbar: [{
-        text:'Add',
+        text: strings.device_add,
         handler: 'onAddClick',
         reference: 'deviceAddButton'
     }, {
-        text:'Edit',
+        text: strings.device_edit,
         disabled: true,
         handler: 'onEditClick',
         reference: 'deviceEditButton'
     }, {
-        text:'Remove',
+        text: strings.device_remove,
         disabled: true,
         handler: 'onRemoveClick',
         reference: 'deviceRemoveButton'
     }, {
         xtype: 'tbfill'
     }, {
-        text:'Settings'
+        text: strings.device_settings,
+        menu: [{
+            text: strings.device_settings_server,
+            disabled: true,
+            handler: 'onServerClick',
+            reference: 'settingsServerButton'
+        }]
     }, {
-        text:'Logout',
+        text: strings.device_logout,
         handler: 'onLogoutClick'
     }],
 

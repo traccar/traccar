@@ -24,5 +24,14 @@ Ext.define('Traccar.model.Server', {
         { name: 'latitude', type: 'float' },
         { name: 'longitude', type: 'float' },
         { name: 'zoom', type: 'int' }
-    ]
+    ],
+
+    proxy: {
+        type: 'ajax',
+        url: '/api/server/update',
+        writer: {
+            type: 'json',
+            writeAllFields: true
+        }
+    }
 });
