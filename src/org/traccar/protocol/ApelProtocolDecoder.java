@@ -73,24 +73,6 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
     private static final String HEX_CHARS = "0123456789ABCDEF";
 
-    private void loadLastIndex() {
-        /*try {
-            Properties p = getServerManager().getProperties();
-            if (p.contains("database.selectLastIndex")) {
-                AdvancedConnection connection = new AdvancedConnection(
-                        p.getProperty("database.url"), p.getProperty("database.user"), p.getProperty("database.password"));
-                NamedParameterStatement queryLastIndex = new NamedParameterStatement(connection, p.getProperty("database.selectLastIndex"));
-                queryLastIndex.prepare();
-                queryLastIndex.setLong("device_id", deviceId);
-                ResultSet result = queryLastIndex.executeQuery();
-                if (result.next()) {
-                    lastIndex = result.getLong(1);
-                }
-            }
-        } catch(Exception error) {
-        }*/
-    }
-
     private void sendSimpleMessage(Channel channel, short type) {
         ChannelBuffer request = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 8);
         request.writeShort(type);

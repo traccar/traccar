@@ -52,24 +52,6 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
     private static final String HEX_CHARS = "0123456789ABCDEF";
 
-    private void loadLastIndex() {
-        /*try {
-            Properties p = getServerManager().getProperties();
-            if (p.contains("database.selectLastIndex")) {
-                AdvancedConnection connection = new AdvancedConnection(
-                        p.getProperty("database.url"), p.getProperty("database.user"), p.getProperty("database.password"));
-                NamedParameterStatement queryLastIndex = new NamedParameterStatement(connection, p.getProperty("database.selectLastIndex"));
-                queryLastIndex.prepare();
-                queryLastIndex.setLong("device_id", deviceId);
-                ResultSet result = queryLastIndex.executeQuery();
-                if (result.next()) {
-                    lastIndex = result.getLong(1);
-                }
-            }
-        } catch(Exception error) {
-        }*/
-    }
-
     private void requestArchive(Channel channel) {
         if (lastIndex == 0) {
             lastIndex = newIndex;
@@ -99,9 +81,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
-            if (identify(imei)) {
-                loadLastIndex();
-            }
+            identify(imei);
         }
 
         // Position
