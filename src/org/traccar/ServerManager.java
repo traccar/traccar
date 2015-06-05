@@ -1449,7 +1449,7 @@ public class ServerManager {
             server = new TrackerServer(new ConnectionlessBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(protocol));
+                    pipeline.addLast("objectDecoder", new CastelProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
