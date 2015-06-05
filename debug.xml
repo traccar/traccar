@@ -6,7 +6,6 @@
 
     <!-- DATABASE CONFIG -->
 
-    <!-- Global configuration -->
     <!--<entry key='database.driverFile'>hsqldb.jar</entry>-->
     <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./target/database</entry>
@@ -108,7 +107,6 @@
 
     <!-- SERVER CONFIG -->
 
-    <!-- Web interface -->
     <entry key='http.enable'>true</entry>
     <!--<entry key='http.address'></entry>-->
     <entry key='http.port'>8082</entry>
@@ -117,12 +115,10 @@
     <entry key='http.path'>web</entry>
     <entry key='http.mobile'>webm</entry>
 
-    <!-- Geocoder options -->
     <entry key='geocoder.enable'>false</entry>
     <entry key='geocoder.type'>nominatim</entry>
     <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
 
-    <!-- Filtering options -->
     <!--<entry key='filter.enable'>true</entry>
     <entry key='filter.limit'>3600</entry>
     <entry key='filter.invalid'>true</entry>
@@ -130,361 +126,100 @@
     <entry key='filter.duplicate'>true</entry>
     <entry key='filter.distance'>50</entry>-->
 
-    <!-- Logging options -->
     <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>all</entry>
     <entry key='logger.file'>target/tracker-server.log</entry>
 
     <!-- PROTOCOL CONFIG -->
 
-    <!-- Protocol detector -->
-    <entry key='detector.enable'>true</entry>
     <entry key='detector.port'>5000</entry>
-
-    <!-- Gps103 server configuration -->
-    <entry key='gps103.enable'>true</entry>
     <entry key='gps103.port'>5001</entry>
-
-    <!-- Tk103 server configuration -->
-    <entry key='tk103.enable'>true</entry>
     <entry key='tk103.port'>5002</entry>
-
-    <!-- Gl100 server configuration -->
-    <entry key='gl100.enable'>true</entry>
     <entry key='gl100.port'>5003</entry>
-
-    <!-- Gl200 server configuration -->
-    <entry key='gl200.enable'>true</entry>
     <entry key='gl200.port'>5004</entry>
-
-    <!-- T55 server configuration -->
-    <entry key='t55.enable'>true</entry>
     <entry key='t55.port'>5005</entry>
-
-    <!-- Xexun server configuration -->
-    <entry key='xexun.enable'>true</entry>
     <entry key='xexun.port'>5006</entry>
     <entry key='xexun.extended'>false</entry>
-
-    <!-- Totem server configuration -->
-    <entry key='totem.enable'>true</entry>
     <entry key='totem.port'>5007</entry>
-
-    <!-- Enfora server configuration -->
-    <entry key='enfora.enable'>true</entry>
     <entry key='enfora.port'>5008</entry>
-
-    <!-- Meiligao server configuration -->
-    <entry key='meiligao.enable'>true</entry>
     <entry key='meiligao.port'>5009</entry>
-
-    <!-- Maxon server configuration -->
-    <entry key='maxon.enable'>true</entry>
     <entry key='maxon.port'>5010</entry>
-
-    <!-- Suntech server configuration -->
-    <entry key='suntech.enable'>true</entry>
     <entry key='suntech.port'>5011</entry>
-
-    <!-- Progress server configuration -->
-    <entry key='progress.enable'>true</entry>
     <entry key='progress.port'>5012</entry>
-
-    <!-- H02 server configuration -->
-    <entry key='h02.enable'>true</entry>
     <entry key='h02.port'>5013</entry>
-
-    <!-- JT600 server configuration -->
-    <entry key='jt600.enable'>true</entry>
     <entry key='jt600.port'>5014</entry>
-
-    <!-- EV603 server configuration -->
-    <entry key='ev603.enable'>true</entry>
     <entry key='ev603.port'>5015</entry>
-
-    <!-- V680 server configuration -->
-    <entry key='v680.enable'>true</entry>
     <entry key='v680.port'>5016</entry>
-
-    <!-- PT502 server configuration -->
-    <entry key='pt502.enable'>true</entry>
     <entry key='pt502.port'>5017</entry>
-
-    <!-- TR20 server configuration -->
-    <entry key='tr20.enable'>true</entry>
     <entry key='tr20.port'>5018</entry>
-
-    <!-- Navis server configuration -->
-    <entry key='navis.enable'>true</entry>
     <entry key='navis.port'>5019</entry>
-
-    <!-- Meitrack server configuration -->
-    <entry key='meitrack.enable'>true</entry>
     <entry key='meitrack.port'>5020</entry>
-
-    <!-- Skypatrol server configuration -->
-    <entry key='skypatrol.enable'>true</entry>
     <entry key='skypatrol.port'>5021</entry>
-
-    <!-- GT02 server configuration -->
-    <entry key='gt02.enable'>true</entry>
     <entry key='gt02.port'>5022</entry>
-
-    <!-- GT06 server configuration -->
-    <entry key='gt06.enable'>true</entry>
     <entry key='gt06.port'>5023</entry>
-
-    <!-- Megastek server configuration -->
-    <entry key='megastek.enable'>true</entry>
     <entry key='megastek.port'>5024</entry>
-
-    <!-- Navigil server configuration -->
-    <entry key='navigil.enable'>true</entry>
     <entry key='navigil.port'>5025</entry>
-    
-    <!-- GpsGate server configuration -->
-    <entry key='gpsgate.enable'>true</entry>
     <entry key='gpsgate.port'>5026</entry>
-
-    <!-- Teltonika server configuration -->
-    <entry key='teltonika.enable'>true</entry>
     <entry key='teltonika.port'>5027</entry>
-
-    <!-- MTA6 server configuration -->
-    <entry key='mta6.enable'>true</entry>
     <entry key='mta6.port'>5028</entry>
-
-    <!-- MTA6CAN server configuration -->
-    <entry key='mta6can.enable'>true</entry>
     <entry key='mta6can.port'>5029</entry>
-
-    <!-- TLT-2H server configuration -->
-    <entry key='tlt2h.enable'>true</entry>
     <entry key='tlt2h.port'>5030</entry>
-
-    <!-- Syrus server configuration -->
-    <entry key='syrus.enable'>true</entry>
     <entry key='syrus.port'>5031</entry>
-
-    <!-- Wondex server configuration -->
-    <entry key='wondex.enable'>true</entry>
     <entry key='wondex.port'>5032</entry>
-
-    <!-- Cellocator server configuration -->
-    <entry key='cellocator.enable'>true</entry>
     <entry key='cellocator.port'>5033</entry>
-
-    <!-- Galileo server configuration -->
-    <entry key='galileo.enable'>true</entry>
     <entry key='galileo.port'>5034</entry>
-
-    <!-- YWT server configuration -->
-    <entry key='ywt.enable'>true</entry>
     <entry key='ywt.port'>5035</entry>
-
-    <!-- TK102 server configuration -->
-    <entry key='tk102.enable'>true</entry>
     <entry key='tk102.port'>5036</entry>
-
-    <!-- IntelliTrac server configuration -->
-    <entry key='intellitrac.enable'>true</entry>
     <entry key='intellitrac.port'>5037</entry>
-
-    <!-- XT7 server configuration -->
-    <entry key='xt7.enable'>true</entry>
     <entry key='xt7.port'>5038</entry>
-
-    <!-- Wialon server configuration -->
-    <entry key='wialon.enable'>true</entry>
     <entry key='wialon.port'>5039</entry>
-
-    <!-- Carscop server configuration -->
-    <entry key='carscop.enable'>true</entry>
     <entry key='carscop.port'>5040</entry>
-
-    <!-- Apel server configuration -->
-    <entry key='apel.enable'>true</entry>
     <entry key='apel.port'>5041</entry>
-
-    <!-- Man Power server configuration -->
-    <entry key='manpower.enable'>true</entry>
     <entry key='manpower.port'>5042</entry>
-
-    <!-- GlobalSat server configuration -->
-    <entry key='globalsat.enable'>true</entry>
     <entry key='globalsat.port'>5043</entry>
-
-    <!-- Atrack server configuration -->
-    <entry key='atrack.enable'>true</entry>
     <entry key='atrack.port'>5044</entry>
-
-    <!-- PT3000 server configuration -->
-    <entry key='pt3000.enable'>true</entry>
     <entry key='pt3000.port'>5045</entry>
-
-    <!-- Ruptela server configuration -->
-    <entry key='ruptela.enable'>true</entry>
     <entry key='ruptela.port'>5046</entry>
-
-    <!-- Topflytech server configuration -->
-    <entry key='topflytech.enable'>true</entry>
     <entry key='topflytech.port'>5047</entry>
-
-    <!-- Laipac server configuration -->
-    <entry key='laipac.enable'>true</entry>
     <entry key='laipac.port'>5048</entry>
-
-    <!-- Aplicom server configuration -->
-    <entry key='aplicom.enable'>true</entry>
     <entry key='aplicom.port'>5049</entry>
     <entry key='aplicom.can'>false</entry>
-
-    <!-- Gotop server configuration -->
-    <entry key='gotop.enable'>true</entry>
     <entry key='gotop.port'>5050</entry>
-
-    <!-- Sanav server configuration -->
-    <entry key='sanav.enable'>true</entry>
     <entry key='sanav.port'>5051</entry>
-
-    <!-- Gator server configuration -->
-    <entry key='gator.enable'>true</entry>
     <entry key='gator.port'>5052</entry>
-
-    <!-- Noran and UniGuard server configuration -->
-    <entry key='noran.enable'>true</entry>
     <entry key='noran.port'>5053</entry>
-
-    <!-- M2M mini server configuration -->
-    <entry key='m2m.enable'>true</entry>
     <entry key='m2m.port'>5054</entry>
-
-    <!-- OsmAnd server configuration -->
-    <entry key='osmand.enable'>true</entry>
     <entry key='osmand.port'>5055</entry>
-
-    <!-- EasyTrack server configuration -->
-    <entry key='easytrack.enable'>true</entry>
     <entry key='easytrack.port'>5056</entry>
-
-    <!-- TAIP server configuration -->
-    <entry key='taip.enable'>true</entry>
     <entry key='taip.port'>5057</entry>
-
-    <!-- KHD server configuration -->
-    <entry key='khd.enable'>true</entry>
     <entry key='khd.port'>5058</entry>
-
-    <!-- Piligrim server configuration -->
-    <entry key='piligrim.enable'>true</entry>
     <entry key='piligrim.port'>5059</entry>
-
-    <!-- STL060 server configuration -->
-    <entry key='stl060.enable'>true</entry>
     <entry key='stl060.port'>5060</entry>
-
-    <!-- CarTrack server configuration -->
-    <entry key='cartrack.enable'>true</entry>
     <entry key='cartrack.port'>5061</entry>
-
-    <!-- MiniFinder server configuration -->
-    <entry key='minifinder.enable'>true</entry>
     <entry key='minifinder.port'>5062</entry>
-
-    <!-- Haicom server configuration -->
-    <entry key='haicom.enable'>true</entry>
     <entry key='haicom.port'>5063</entry>
-
-    <!-- eeLink server configuration -->
-    <entry key='eelink.enable'>true</entry>
     <entry key='eelink.port'>5064</entry>
-
-    <!-- Box server configuration -->
-    <entry key='box.enable'>true</entry>
     <entry key='box.port'>5065</entry>
-
-    <!-- Freedom server configuration -->
-    <entry key='freedom.enable'>true</entry>
     <entry key='freedom.port'>5066</entry>
-
-    <!-- Telik Pikotrack server configuration -->
-    <entry key='telik.enable'>true</entry>
     <entry key='telik.port'>5067</entry>
-
-    <!-- Trackbox server configuration -->
-    <entry key='trackbox.enable'>true</entry>
     <entry key='trackbox.port'>5068</entry>
-
-    <!-- Visiontek server configuration -->
-    <entry key='visiontek.enable'>true</entry>
     <entry key='visiontek.port'>5069</entry>
-
-    <!-- Orion server configuration -->
-    <entry key='orion.enable'>true</entry>
     <entry key='orion.port'>5070</entry>
-
-    <!-- Riti server configuration -->
-    <entry key='riti.enable'>true</entry>
     <entry key='riti.port'>5071</entry>
-
-    <!-- Ulbotech server configuration -->
-    <entry key='ulbotech.enable'>true</entry>
     <entry key='ulbotech.port'>5072</entry>
-
-    <!-- Tramigo server configuration -->
-    <entry key='tramigo.enable'>true</entry>
     <entry key='tramigo.port'>5073</entry>
-
-    <!-- TR900 server configuration -->
-    <entry key='tr900.enable'>true</entry>
     <entry key='tr900.port'>5074</entry>
-
-    <!-- Ardi_01 server configuration -->
-    <entry key='ardi01.enable'>true</entry>
     <entry key='ardi01.port'>5075</entry>
-
-    <!-- XT013 server configuration -->
-    <entry key='xt013.enable'>true</entry>
     <entry key='xt013.port'>5076</entry>
-
-    <!-- AutoFon server configuration -->
-    <entry key='autofon.enable'>true</entry>
     <entry key='autofon.port'>5077</entry>
-
-    <!-- GoSafe server configuration -->
-    <entry key='gosafe.enable'>true</entry>
     <entry key='gosafe.port'>5078</entry>
-
-    <!-- AutoFon 4.5 server configuration -->
-    <entry key='autofon45.enable'>true</entry>
     <entry key='autofon45.port'>5079</entry>
-
-    <!-- BCE server configuration -->
-    <entry key='bce.enable'>true</entry>
     <entry key='bce.port'>5080</entry>
-
-    <!-- Xirgo server configuration -->
-    <entry key='xirgo.enable'>true</entry>
     <entry key='xirgo.port'>5081</entry>
-
-    <!-- CalAmp server configuration -->
-    <entry key='calamp.enable'>true</entry>
     <entry key='calamp.port'>5082</entry>
-
-    <!-- MTX server configuration -->
-    <entry key='mtx.enable'>true</entry>
     <entry key='mtx.port'>5083</entry>
-
-    <!-- Tytan server configuration -->
-    <entry key='tytan.enable'>true</entry>
     <entry key='tytan.port'>5084</entry>
-
-    <!-- AVL301 server configuration -->
-    <entry key='avl301.enable'>true</entry>
     <entry key='avl301.port'>5085</entry>
-
-    <!-- Castel server configuration -->
-    <entry key='castel.enable'>true</entry>
     <entry key='castel.port'>5086</entry>
 
 </properties>

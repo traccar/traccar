@@ -253,11 +253,7 @@ public class ServerManager {
     }
 
     private boolean isProtocolEnabled(String protocol) {
-        String enabled = Context.getProps().getProperty(protocol + ".enable");
-        if (enabled != null) {
-            return Boolean.valueOf(enabled);
-        }
-        return false;
+        return Context.getProps().containsKey(protocol + ".port");
     }
 
     private void initProtocolDetector() throws SQLException {
