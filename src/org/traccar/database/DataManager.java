@@ -106,6 +106,10 @@ public class DataManager {
             ds.setPassword(properties.getProperty("database.password"));
             ds.setIdleConnectionTestPeriod(600);
             ds.setTestConnectionOnCheckin(true);
+            String maxPoolSize = properties.getProperty("database.maxPoolSize");
+            if (maxPoolSize != null) {
+                ds.setMaxPoolSize(Integer.valueOf(maxPoolSize));
+            }
             dataSource = ds;
         }
 
