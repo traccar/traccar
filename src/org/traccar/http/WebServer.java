@@ -39,15 +39,15 @@ public class WebServer {
     public WebServer() {
         Properties properties = Context.getProps();
         
-        String address = properties.getProperty("http.address");
-        Integer port = Integer.valueOf(properties.getProperty("http.port", "8082"));
+        String address = properties.getProperty("web.address");
+        Integer port = Integer.valueOf(properties.getProperty("web.port", "8082"));
         if (address == null) {
             server = new Server(port);
         } else {
             server = new Server(new InetSocketAddress(address, port));
         }
 
-        if (Boolean.valueOf(properties.getProperty("http.new"))) {
+        if (Boolean.valueOf(properties.getProperty("web.new"))) {
 
             ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
             servletHandler.setContextPath("/api");
@@ -58,13 +58,13 @@ public class WebServer {
             servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
 
             ResourceHandler mobileResourceHandler = new ResourceHandler();
-            mobileResourceHandler.setResourceBase(properties.getProperty("http.mobile"));
+            mobileResourceHandler.setResourceBase(properties.getProperty("web.mobile"));
             mobileResourceHandler.setWelcomeFiles(new String[] {"index.html"});
             ContextHandler mobileContext = new ContextHandler("/m");
             mobileContext.setHandler(mobileResourceHandler);
 
             ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setResourceBase(properties.getProperty("http.path"));
+            resourceHandler.setResourceBase(properties.getProperty("web.path"));
             resourceHandler.setWelcomeFiles(new String[]{"index.html"});
 
             HandlerList handlerList = new HandlerList();
@@ -83,7 +83,7 @@ public class WebServer {
 
             WebAppContext webapp = new WebAppContext();
             webapp.setContextPath("/");
-            webapp.setWar(properties.getProperty("http.application"));
+            webapp.setWar(properties.getProperty("web.application"));
             server.setHandler(webapp);
 
         }

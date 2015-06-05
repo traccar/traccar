@@ -91,7 +91,7 @@ public class Context {
 
         dataManager = new DataManager(properties);
         dataCache = new DataCache(dataManager);
-        if (Boolean.valueOf(properties.getProperty("http.new"))) {
+        if (Boolean.valueOf(properties.getProperty("web.new"))) {
             permissionsManager = new PermissionsManager();
         }
 
@@ -106,7 +106,7 @@ public class Context {
             }
         }
 
-        if (Boolean.valueOf(properties.getProperty("http.enable"))) {
+        if (Boolean.valueOf(properties.getProperty("web.enable"))) {
             webServer = new WebServer();
         }
 

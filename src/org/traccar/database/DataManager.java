@@ -113,7 +113,7 @@ public class DataManager {
             dataSource = ds;
         }
 
-        if (Boolean.valueOf(properties.getProperty("http.new"))) {
+        if (Boolean.valueOf(properties.getProperty("web.new"))) {
             createDatabaseSchema();
         }
     }

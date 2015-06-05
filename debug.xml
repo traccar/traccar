@@ -4,6 +4,31 @@
 
 <properties>
 
+    <!-- SERVER CONFIG -->
+
+    <entry key='web.enable'>true</entry>
+    <!--<entry key='web.address'></entry>-->
+    <entry key='web.port'>8082</entry>
+    <entry key='web.application'>../traccar-web/traccar-web.war</entry>
+    <entry key='web.new'>true</entry>
+    <entry key='web.path'>web</entry>
+    <entry key='web.mobile'>webm</entry>
+
+    <entry key='geocoder.enable'>false</entry>
+    <entry key='geocoder.type'>nominatim</entry>
+    <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
+
+    <!--<entry key='filter.enable'>true</entry>
+    <entry key='filter.limit'>3600</entry>
+    <entry key='filter.invalid'>true</entry>
+    <entry key='filter.zero'>true</entry>
+    <entry key='filter.duplicate'>true</entry>
+    <entry key='filter.distance'>50</entry>-->
+
+    <entry key='logger.enable'>true</entry>
+    <entry key='logger.level'>all</entry>
+    <entry key='logger.file'>target/tracker-server.log</entry>
+
     <!-- DATABASE CONFIG -->
 
     <!--<entry key='database.driverFile'>hsqldb.jar</entry>-->
@@ -104,31 +129,6 @@
     <entry key='database.updateLatestPosition'>
         UPDATE device SET positionId = :id WHERE id = :deviceId;
     </entry>
-
-    <!-- SERVER CONFIG -->
-
-    <entry key='http.enable'>true</entry>
-    <!--<entry key='http.address'></entry>-->
-    <entry key='http.port'>8082</entry>
-    <entry key='http.application'>../traccar-web/traccar-web.war</entry>
-    <entry key='http.new'>true</entry>
-    <entry key='http.path'>web</entry>
-    <entry key='http.mobile'>webm</entry>
-
-    <entry key='geocoder.enable'>false</entry>
-    <entry key='geocoder.type'>nominatim</entry>
-    <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
-
-    <!--<entry key='filter.enable'>true</entry>
-    <entry key='filter.limit'>3600</entry>
-    <entry key='filter.invalid'>true</entry>
-    <entry key='filter.zero'>true</entry>
-    <entry key='filter.duplicate'>true</entry>
-    <entry key='filter.distance'>50</entry>-->
-
-    <entry key='logger.enable'>true</entry>
-    <entry key='logger.level'>all</entry>
-    <entry key='logger.file'>target/tracker-server.log</entry>
 
     <!-- PROTOCOL CONFIG -->
 
