@@ -228,6 +228,13 @@ public class DataManager {
                 .setObject(user)
                 .executeUpdate());
     }
+    
+    public void updateUser(User user) throws SQLException {
+        QueryBuilder.create(dataSource,
+                "UPDATE user SET name = :name, email = :email, admin = :admin WHERE id = :id;")
+                .setObject(user)
+                .executeUpdate();
+    }
 
     public Collection<Permission> getPermissions() throws SQLException {
         return QueryBuilder.create(dataSource, 

@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.model.User', {
-    extend: 'Ext.data.Model',
-    identifier: 'negative',
+Ext.define('Traccar.view.user.UserDialogController', {
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.userdialog',
 
-    fields: [
-        { name: 'id', type: 'int' },
-        { name: 'name', type: 'string' },
-        { name: 'email', type: 'string' },
-        { name: 'password', type: 'string' },
-        { name: 'admin', type: 'boolean' }
-    ],
+    onSaveClick: function(button) {
+        var dialog = button.up('window').down('form');
+        dialog.updateRecord();
+        dialog.getRecord().save();
+        button.up('window').close();
+    },
 
-    proxy: {
-        type: 'ajax',
-        url: '/api/user/update',
-        writer: {
-            type: 'json',
-            writeAllFields: true
-        }
+    onCancelClick: function(button) {
+        button.up('window').close();
     }
+
 });

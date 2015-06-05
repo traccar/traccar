@@ -20,6 +20,7 @@ Ext.define('Traccar.view.device.DeviceController', {
     
     requires: [
         'Traccar.view.device.DeviceDialog',
+        'Traccar.view.user.UserDialog',
         'Traccar.view.admin.ServerDialog'
     ],
 
@@ -71,6 +72,13 @@ Ext.define('Traccar.view.device.DeviceController', {
         var disabled = selected.length > 0;
         this.lookupReference('deviceEditButton').setDisabled(disabled);
         this.lookupReference('deviceRemoveButton').setDisabled(disabled);
+    },
+
+    onUserClick: function() {
+        var user = Traccar.getApplication().getUser();
+        var dialog = Ext.create('Traccar.view.user.UserDialog');
+        dialog.down('form').loadRecord(user);
+        dialog.show();
     },
 
     onServerClick: function() {

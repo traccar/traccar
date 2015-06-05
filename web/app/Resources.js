@@ -21,9 +21,11 @@ var strings =  {
     error_unknown: 'Unknown error',
     
     login_title: 'Login',
+    login_user_title: 'User',
     login_name: 'Name',
     login_email: 'Email',
     login_password: 'Password',
+    login_admin: 'Admin',
     login_register: 'Register',
     login_login: 'Login',
     login_failed: 'Incorrect email address or password',
@@ -39,6 +41,7 @@ var strings =  {
     device_remove: 'Remove',
     device_logout: 'Logout',
     device_settings: 'Settings',
+    device_settings_user: 'Account',
     device_settings_server: 'Server',
 
     report_title: 'Reports',

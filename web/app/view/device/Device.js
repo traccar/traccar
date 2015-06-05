@@ -47,6 +47,9 @@ Ext.define('Traccar.view.device.Device', {
     }, {
         text: strings.device_settings,
         menu: [{
+            text: strings.device_settings_user,
+            handler: 'onUserClick'
+        }, {
             text: strings.device_settings_server,
             disabled: true,
             handler: 'onServerClick',
