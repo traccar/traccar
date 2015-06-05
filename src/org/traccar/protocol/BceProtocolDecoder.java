@@ -19,7 +19,6 @@ import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -64,7 +63,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
             int dataEnd = buf.readUnsignedShort() + buf.readerIndex();
             int type = buf.readUnsignedByte();
-            int confirmKey = buf.readUnsignedByte();
+            int confirmKey = buf.readUnsignedByte() & 0x7F;
 
             while (buf.readerIndex() < dataEnd) {
 
