@@ -21,12 +21,14 @@ Ext.define('Traccar.view.device.DeviceController', {
     requires: [
         'Traccar.view.device.DeviceDialog',
         'Traccar.view.user.UserDialog',
-        'Traccar.view.admin.ServerDialog'
+        'Traccar.view.admin.ServerDialog',
+        'Traccar.view.user.User'
     ],
 
     init: function() {
         if (Traccar.getApplication().getUser().get('admin')) {
             this.lookupReference('settingsServerButton').setDisabled(false);
+            this.lookupReference('settingsUsersButton').setDisabled(false);
         }
     },
     
@@ -86,6 +88,19 @@ Ext.define('Traccar.view.device.DeviceController', {
         var dialog = Ext.create('Traccar.view.admin.ServerDialog');
         dialog.down('form').loadRecord(server);
         dialog.show();
+    },
+
+    onUsersClick: function() {
+        Ext.create('Ext.window.Window', {
+            title: strings.login_users_title,
+            width: styles.window_width,
+            height: styles.window_height,
+            layout: 'fit',
+            modal: true,
+            items: {
+                xtype: 'user-view'
+            }
+        }).show();
     }
 
 });

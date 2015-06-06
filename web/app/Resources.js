@@ -22,6 +22,7 @@ var strings =  {
     
     login_title: 'Login',
     login_user_title: 'User',
+    login_users_title: 'Users',
     login_name: 'Name',
     login_email: 'Email',
     login_password: 'Password',
@@ -30,6 +31,8 @@ var strings =  {
     login_login: 'Login',
     login_failed: 'Incorrect email address or password',
     login_created: 'New user has been registered',
+
+    user_remove_confirm: 'Remove user?',
 
     device_dialog: 'Device',
     device_title: 'Devices',
@@ -43,6 +46,7 @@ var strings =  {
     device_settings: 'Settings',
     device_settings_user: 'Account',
     device_settings_server: 'Server',
+    device_settings_users: 'Users',
 
     report_title: 'Reports',
     report_device: 'Device',
@@ -74,6 +78,9 @@ var strings =  {
 
 var styles = {
     panel_padding: 10,
+
+    window_width: 640,
+    window_height: 480,
 
     device_width: 350,
 

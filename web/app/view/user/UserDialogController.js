@@ -21,7 +21,21 @@ Ext.define('Traccar.view.user.UserDialogController', {
     onSaveClick: function(button) {
         var dialog = button.up('window').down('form');
         dialog.updateRecord();
-        dialog.getRecord().save();
+        var record = dialog.getRecord();
+        if (record === Traccar.getApplication().getUser()) {
+            record.save();
+        } else {
+            var store = Ext.getStore('Users');
+            if (record.phantom) {
+                store.add(record);
+            }
+            store.sync({
+                failure: function(batch) {
+                    store.rejectChanges(); // TODO
+                    Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+                }
+            });
+        }
         button.up('window').close();
     },
 

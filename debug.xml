@@ -44,7 +44,7 @@
         name VARCHAR(1024) NOT NULL,
         email VARCHAR(1024) NOT NULL UNIQUE,
         password VARCHAR(1024) NOT NULL,
-        salt VARCHAR(1024) NOT NULL,
+        salt VARCHAR(1024) DEFAULT '' NOT NULL,
         readonly BOOLEAN DEFAULT false NOT NULL,
         admin BOOLEAN DEFAULT false NOT NULL,
         map VARCHAR(1024) DEFAULT 'osm' NOT NULL,

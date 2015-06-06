@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.device.Device', {
+Ext.define('Traccar.view.user.User', {
     extend: 'Ext.grid.Panel',
-    xtype: 'device-view',
+    xtype: 'user-view',
     
     requires: [
-        'Traccar.view.device.DeviceController'
+        'Traccar.view.user.UserController'
     ],
     
-    controller: 'device',
-    store: 'Devices',
+    controller: 'user',
+    store: 'Users',
 
-    title: strings.device_title,
     selType: 'rowmodel',
     
     tbar: [{
@@ -36,42 +35,22 @@ Ext.define('Traccar.view.device.Device', {
         text: strings.device_edit,
         disabled: true,
         handler: 'onEditClick',
-        reference: 'deviceEditButton'
+        reference: 'userEditButton'
     }, {
         text: strings.device_remove,
         disabled: true,
         handler: 'onRemoveClick',
-        reference: 'deviceRemoveButton'
-    }, {
-        xtype: 'tbfill'
-    }, {
-        text: strings.device_settings,
-        menu: [{
-            text: strings.device_settings_user,
-            handler: 'onUserClick'
-        }, {
-            text: strings.device_settings_server,
-            disabled: true,
-            handler: 'onServerClick',
-            reference: 'settingsServerButton'
-        }, {
-            text: strings.device_settings_users,
-            disabled: true,
-            handler: 'onUsersClick',
-            reference: 'settingsUsersButton'
-        }]
-    }, {
-        text: strings.device_logout,
-        handler: 'onLogoutClick'
+        reference: 'userRemoveButton'
     }],
 
     listeners: {
         selectionchange: 'onSelectionChange'
     },
-    
+
     columns: [
-        { text: strings.device_name, dataIndex: 'name', flex: 1 },
-        { text: strings.device_identifier, dataIndex: 'uniqueId', flex: 1 }
+        { text: strings.login_name, dataIndex: 'name', flex: 1 },
+        { text: strings.login_email, dataIndex: 'email', flex: 1 },
+        { text: strings.login_admin, dataIndex: 'admin', flex: 1 }
     ]
 
 });
