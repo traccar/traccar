@@ -34,8 +34,6 @@ public class MainServlet extends BaseServlet {
             logout(req, resp);
         } else if (command.equals("/register")) {
             register(req, resp);
-        } else if (command.equals("/user/update")) {
-            update(req, resp);
         } else {
             return false;
         }
@@ -70,12 +68,6 @@ public class MainServlet extends BaseServlet {
     private void register(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getDataManager().addUser(user);
-        sendResponse(resp.getWriter(), true);
-    }
-    
-    private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Context.getDataManager().updateUser(JsonConverter.objectFromJson(
-                req.getReader(), new User()));
         sendResponse(resp.getWriter(), true);
     }
 

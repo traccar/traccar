@@ -221,10 +221,16 @@ public class DataManager {
                 .executeQuerySingle(new User());
     }
 
+    public Collection<User> getUsers() throws SQLException {
+        return QueryBuilder.create(dataSource, 
+                "SELECT * FROM user;")
+                .executeQuery(new User());
+    }
+
     public void addUser(User user) throws SQLException {
         user.setId(QueryBuilder.create(dataSource,
-                "INSERT INTO user (name, email, password, salt, admin) " +
-                "VALUES (:name, :email, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR), '', :admin);")
+                "INSERT INTO user (name, email, password, admin) " +
+                "VALUES (:name, :email, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR), :admin);")
                 .setObject(user)
                 .executeUpdate());
     }
@@ -233,6 +239,13 @@ public class DataManager {
         QueryBuilder.create(dataSource,
                 "UPDATE user SET name = :name, email = :email, admin = :admin," +
                 "password = CASEWHEN((SELECT password FROM user WHERE id = :id) = :password, :password, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR)) WHERE id = :id;")
+                .setObject(user)
+                .executeUpdate();
+    }
+    
+    public void removeUser(User user) throws SQLException {
+        QueryBuilder.create(dataSource,
+                "DELETE FROM user WHERE id = :id;")
                 .setObject(user)
                 .executeUpdate();
     }
