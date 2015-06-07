@@ -71,9 +71,12 @@ Ext.define('Traccar.view.device.DeviceController', {
     },
     
     onSelectionChange: function(selected) {
-        var disabled = selected.length > 0;
-        this.lookupReference('deviceEditButton').setDisabled(disabled);
-        this.lookupReference('deviceRemoveButton').setDisabled(disabled);
+        var empty = selected.getCount() === 0;
+        this.lookupReference('deviceEditButton').setDisabled(empty);
+        this.lookupReference('deviceRemoveButton').setDisabled(empty);
+        if (!empty) {
+            this.fireEvent("selectDevice", selected.getLastSelected());
+        }
     },
 
     onUserClick: function() {

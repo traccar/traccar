@@ -52,6 +52,12 @@ Ext.define('Traccar.view.report.ReportController', {
     onClearClick: function() {
         Ext.getStore('Positions').removeAll();
         this.fireEvent("reportClear");
+    },
+
+    onSelectionChange: function(selected) {
+        if (selected.getCount() > 0) {
+            this.fireEvent("selectReport", selected.getLastSelected());
+        }
     }
 
 });

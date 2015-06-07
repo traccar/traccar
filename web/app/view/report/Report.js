@@ -70,6 +70,10 @@ Ext.define('Traccar.view.report.Report', {
         handler: 'onClearClick'
     }],
 
+    listeners: {
+        selectionchange: 'onSelectionChange'
+    },
+
     columns: [
         { text: strings.report_valid, dataIndex: 'valid', flex: 1 },
         { text: strings.report_time, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.report_format },

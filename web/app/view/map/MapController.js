@@ -23,7 +23,9 @@ Ext.define('Traccar.view.map.MapController', {
             controller: {
                 '*': {
                     reportShow: 'reportShow',
-                    reportClear: 'reportClear'
+                    reportClear: 'reportClear',
+                    selectDevice: 'selectDevice',
+                    selectReport: 'selectReport'
                 }
             }
         }
@@ -139,6 +141,14 @@ Ext.define('Traccar.view.map.MapController', {
         vectorSource.removeFeature(this.reportRoute);
         vectorSource.removeFeature(this.reportStart);
         vectorSource.addFeature(this.reportFinish);
+    },
+
+    selectDevice: function(device) {
+        console.log(device); // DELME
+    },
+
+    selectReport: function(position) {
+        console.log(position); // DELME
     }
 
 });
