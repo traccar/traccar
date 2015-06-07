@@ -27,14 +27,16 @@ Ext.define('Traccar.Application', {
         'Server',
         'User',
         'Device',
-        'Position'
+        'Position',
+        'Parameter'
     ],
     
     stores: [
         'Devices',
         'Positions',
         'LiveData',
-        'Users'
+        'Users',
+        'Parameters'
     ],
 
     controllers: [

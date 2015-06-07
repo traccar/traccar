@@ -19,6 +19,7 @@ Ext.define('Traccar.view.main.Main', {
 
     requires: [
         'Traccar.view.device.Device',
+        'Traccar.view.state.State',
         'Traccar.view.report.Report',
         'Traccar.view.map.Map'
     ],
@@ -32,8 +33,22 @@ Ext.define('Traccar.view.main.Main', {
 
     items: [{
         region:'west',
-        xtype: 'device-view',
-        width: styles.device_width
+        layout: 'border',
+        width: styles.device_width,
+        header: false,
+        defaults: {
+            split: true
+        },
+        items: [{
+            collapsible: false,
+            region: 'center',
+            xtype: 'device-view',
+            flex: 1
+        }, {
+            region: 'south',
+            xtype: 'state-view',
+            flex: 1
+        }]
     }, {
         region: 'south',
         xtype: 'report-view',

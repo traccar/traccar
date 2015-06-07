@@ -73,7 +73,11 @@ var strings =  {
     dialog_delete: 'Delete',
     dialog_cancel: 'Cancel',
 
-    map_title: 'Map'
+    map_title: 'Map',
+
+    state_title: 'State',
+    state_name: 'Parameter',
+    state_value: 'Value'
 };
 
 var styles = {
