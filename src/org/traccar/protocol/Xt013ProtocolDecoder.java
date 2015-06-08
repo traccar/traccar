@@ -104,7 +104,7 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_GPS, parser.group(index++));
         position.set(Event.KEY_GSM, parser.group(index++));
         position.set(Event.KEY_BATTERY, parser.group(index++));
-        position.set("charging", parser.group(index++));
+        position.set(Event.KEY_CHARGE, parser.group(index++));
         return position;
     }
 

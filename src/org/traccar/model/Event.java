@@ -74,6 +74,7 @@ public abstract class Event {
     public static final String KEY_TYPE = "type";
     public static final String KEY_IGNITION = "ignition";
     public static final String KEY_FLAGS = "flags";
+    public static final String KEY_CHARGE = "charge";
 
     // Starts with 1 not 0
     public static final String PREFIX_TEMP = "temp";

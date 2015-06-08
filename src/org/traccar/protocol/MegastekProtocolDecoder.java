@@ -214,7 +214,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             // Charger
             String charger = parser.group(index++);
             if (charger != null) {
-                position.set("charger", Integer.valueOf(charger) == 1);
+                position.set(Event.KEY_CHARGE, Integer.valueOf(charger) == 1);
             }
 
             position.set(Event.KEY_MCC, parser.group(index++));

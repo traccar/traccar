@@ -44,11 +44,25 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{3})(\\d{2})\\.?(\\d+)([EW])," + // Longitude
             "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+\\.?\\d*)," +                 // Course
-            "(\\d+)," +                         // Odometer
+
+            "(?:(\\d+)," +                      // Odometer
             "(\\d+)," +                         // Ignition
-            "(\\d+)," +                         // DIP1
-            "(\\d+)," +                         // DIP2
+            "(\\d+)," +                         // DI1
+            "(\\d+)," +                         // DI2
+            "(\\d+),|" +                        // Fuel
+
+            "([01])," +                         // Charging
+            "([01])," +                         // Ignition
+            "0,0," +                            // Reserved
+            "(\\d+)," +                         // DI
+            "([^,])," +                         // RFID
+            "(\\d+)," +                         // Odometer
+            "(\\d+)," +                         // Temperature
             "(\\d+)," +                         // Fuel
+            "([01])," +                         // Accelerometer
+            "([01])," +                         // DO1
+            "([01]),)" +                        // DO2
+
             "([AV])" +                          // Validity
             ".*");
 
@@ -108,12 +122,30 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
 
-        // Other
-        position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
-        position.set(Event.KEY_IGNITION, Integer.valueOf(parser.group(index++)));
-        position.set("dip1", Integer.valueOf(parser.group(index++)));
-        position.set("dip2", Integer.valueOf(parser.group(index++)));
-        position.set(Event.KEY_FUEL, Integer.valueOf(parser.group(index++)));
+        // Old format
+        if (parser.group(index) != null) {
+            position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
+            position.set(Event.KEY_IGNITION, Integer.valueOf(parser.group(index++)));
+            position.set(Event.KEY_INPUT, Integer.valueOf(parser.group(index++)) + Integer.valueOf(parser.group(index++)) << 1);
+            position.set(Event.KEY_FUEL, Integer.valueOf(parser.group(index++)));
+        } else {
+            index += 5;
+        }
+
+        // New format
+        if (parser.group(index) != null) {
+            position.set(Event.KEY_CHARGE, Integer.valueOf(parser.group(index++)) == 1);
+            position.set(Event.KEY_IGNITION, Integer.valueOf(parser.group(index++)));
+            position.set(Event.KEY_INPUT, Integer.valueOf(parser.group(index++)));
+            position.set(Event.KEY_RFID, parser.group(index++));
+            position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
+            position.set(Event.PREFIX_TEMP + 1, Integer.valueOf(parser.group(index++)));
+            position.set(Event.KEY_FUEL, Integer.valueOf(parser.group(index++)));
+            position.set("accel", Integer.valueOf(parser.group(index++)) == 1);
+            position.set(Event.KEY_OUTPUT, Integer.valueOf(parser.group(index++)) + Integer.valueOf(parser.group(index++)) << 1);
+        } else {
+            index += 10;
+        }
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);

@@ -128,7 +128,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_FUEL, parser.group(index++));
         position.set("consumption", parser.group(index++));
         position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
-        position.set("charger", parser.group(index++));
+        position.set(Event.KEY_CHARGE, parser.group(index++));
         position.set("tpl", parser.group(index++));
         position.set("axle", parser.group(index++));
         position.set(Event.KEY_ODOMETER, parser.group(index++));
