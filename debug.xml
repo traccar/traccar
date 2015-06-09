@@ -117,9 +117,78 @@
         id INT PRIMARY KEY AUTO_INCREMENT);
     </entry>
 
+    <entry key='database.insertServer'>
+        INSERT INTO server (registration, latitude, longitude, zoom)
+        VALUES (:registration, :latitude, :longitude, :zoom);
+    </entry>
+
+    <entry key='database.selectServer'>
+		SELECT * FROM server;
+    </entry>
+
+    <entry key='database.updateServer'>
+		UPDATE server SET registration = :registration WHERE id = :id;
+    </entry>
+
+    <entry key='database.loginUser'>
+		SELECT * 
+		FROM user 
+		WHERE email = :email AND password = CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR);
+    </entry>
+
+    <entry key='database.selectUsersAll'>
+		SELECT * FROM user;
+    </entry>
+
+    <entry key='database.insertUser'>
+		INSERT INTO user (name, email, password, admin) 
+        VALUES (:name, :email, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR), :admin);
+    </entry>
+        
+    <entry key='database.updateUser'>
+        UPDATE user SET 
+        		name = :name, 
+        		email = :email, 
+        		admin = :admin,
+                password = CASEWHEN((SELECT password FROM user WHERE id = :id) = :password, :password, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR)) 
+        WHERE id = :id;
+    </entry>
+
+    <entry key='database.deleteUser'>
+        DELETE FROM user WHERE id = :id;
+    </entry>
+
+    <entry key='database.getPermissions'>
+        "SELECT userId, deviceId FROM user_device;"
+    </entry>
+    
     <entry key='database.selectDeviceAll'>
         SELECT * FROM device;
     </entry>
+    
+    <entry key='database.selectDevices'>
+        SELECT * FROM device WHERE id IN (SELECT deviceId FROM user_device WHERE userId = :userId);
+    </entry>
+    
+    <entry key='database.insertDevice'>
+        INSERT INTO device (name, uniqueId) VALUES (:name, :uniqueId);
+    </entry>
+    
+    <entry key='database.updateDevice'>
+        UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;
+    </entry>
+    
+    <entry key='database.removeDevice'>
+        DELETE FROM device WHERE id = :id;
+    </entry>
+    
+    <entry key='database.linkDevice'>
+        INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
+    </entry>
+
+    <entry key='database.selectPositions'>
+		SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to;    
+	</entry>
 
     <entry key='database.insertPosition'>
         INSERT INTO position (deviceId, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
@@ -129,6 +198,7 @@
     <entry key='database.updateLatestPosition'>
         UPDATE device SET positionId = :id WHERE id = :deviceId;
     </entry>
+
 
     <!-- PROTOCOL CONFIG -->
 
