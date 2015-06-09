@@ -15,9 +15,7 @@
  */
 package org.traccar.model;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.traccar.helper.Hashing;
 
 public class User implements Factory {
 
@@ -40,7 +38,7 @@ public class User implements Factory {
     
     private byte[] password;
     public byte[] getPassword() { return password; }
-    public void setPassword(String password) { this.password = sha256(password); }
+    public void setPassword(String password) { this.password = Hashing.sha256(password); }
     
     private boolean readonly;
     
@@ -61,19 +59,4 @@ public class User implements Factory {
     private double longitude;
     
     private int zoom;
-
-    
-    public static byte[] sha256(String text) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-
-            md.update(text.getBytes("UTF-8"));
-            byte[] digest = md.digest();
-            return digest;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

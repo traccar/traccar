@@ -38,6 +38,7 @@ import javax.sql.DataSource;
 
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
+import org.traccar.helper.Hashing;
 import org.traccar.helper.Log;
 import org.traccar.http.JsonConverter;
 import org.traccar.model.Device;
@@ -219,7 +220,7 @@ public class DataManager {
     public User login(String email, String password) throws SQLException {
         return QueryBuilder.create(dataSource, properties.getProperty("database.loginUser"))
                 .setString("email", email)
-                .setBytes("password", User.sha256(password))
+                .setBytes("password", Hashing.sha256(password))
                 .executeQuerySingle(new User());
     }
 
