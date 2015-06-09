@@ -37,12 +37,12 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
     <entry key='database.mock'>true</entry>
-
+    
     <entry key='database.createSchema'>
         CREATE TABLE user (
         id INT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(1024) NOT NULL,
-        email VARCHAR(1024) NOT NULL UNIQUE,
+        email VARCHAR(256) NOT NULL UNIQUE,
         password VARCHAR(1024) NOT NULL,
         salt VARCHAR(1024) DEFAULT '' NOT NULL,
         readonly BOOLEAN DEFAULT false NOT NULL,
@@ -58,7 +58,7 @@
         CREATE TABLE device (
         id INT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(1024) NOT NULL,
-        uniqueId VARCHAR(1024) NOT NULL UNIQUE,
+        uniqueId VARCHAR(256) NOT NULL UNIQUE,
         status VARCHAR(1024),
         lastUpdate TIMESTAMP,
         positionId INT,
@@ -67,8 +67,8 @@
         CREATE TABLE user_device (
         userId INT NOT NULL,
         deviceId INT NOT NULL,
-        read BOOLEAN DEFAULT true NOT NULL,
-        write BOOLEAN DEFAULT true NOT NULL,
+        `read` BOOLEAN DEFAULT true NOT NULL,
+        `write` BOOLEAN DEFAULT true NOT NULL,
         FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE,
         FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
 
@@ -101,7 +101,7 @@
         FOREIGN KEY (deviceId) REFERENCES device(id));
 
         ALTER TABLE device ADD
-        FOREIGN KEY (positionId) REFERENCES position(id);
+        FOREIGN KEY (positionId) REFERENCES `position`(id);
 
         ALTER TABLE device ADD
         FOREIGN KEY (dataId) REFERENCES data(id);
@@ -133,7 +133,7 @@
     <entry key='database.loginUser'>
 		SELECT * 
 		FROM user 
-		WHERE email = :email AND password = CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR);
+		WHERE email = :email AND password = :password;
     </entry>
 
     <entry key='database.selectUsersAll'>
@@ -142,18 +142,21 @@
 
     <entry key='database.insertUser'>
 		INSERT INTO user (name, email, password, admin) 
-        VALUES (:name, :email, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR), :admin);
+        VALUES (:name, :email, :password, :admin);
     </entry>
         
     <entry key='database.updateUser'>
         UPDATE user SET 
         		name = :name, 
         		email = :email, 
-        		admin = :admin,
-                password = CASEWHEN((SELECT password FROM user WHERE id = :id) = :password, :password, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR)) 
+        		admin = :admin
         WHERE id = :id;
     </entry>
 
+    <entry key='database.updateUserPassword'>
+        UPDATE user SET password = :password WHERE id = :id;
+    </entry>
+    
     <entry key='database.deleteUser'>
         DELETE FROM user WHERE id = :id;
     </entry>

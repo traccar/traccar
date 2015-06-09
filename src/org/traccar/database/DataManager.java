@@ -15,10 +15,12 @@
  */
 package org.traccar.database;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -30,8 +32,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
@@ -41,6 +45,8 @@ import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class DataManager {
 
@@ -173,7 +179,7 @@ public class DataManager {
 
         mockData(admin.getId());
     }
-
+    
     private void mockData(long userId) {
         if (Boolean.valueOf(Context.getProps().getProperty("database.mock"))) {
             try {
@@ -213,7 +219,7 @@ public class DataManager {
     public User login(String email, String password) throws SQLException {
         return QueryBuilder.create(dataSource, properties.getProperty("database.loginUser"))
                 .setString("email", email)
-                .setString("password", password)
+                .setBytes("password", User.sha256(password))
                 .executeQuerySingle(new User());
     }
 
@@ -232,6 +238,12 @@ public class DataManager {
         QueryBuilder.create(dataSource, properties.getProperty("database.updateUser"))
                 .setObject(user)
                 .executeUpdate();
+        
+        if(user.getPassword() != null) {
+        	QueryBuilder.create(dataSource, properties.getProperty("database.updateUserPassword"))
+            .setObject(user)
+            .executeUpdate();
+        }
     }
     
     public void removeUser(User user) throws SQLException {

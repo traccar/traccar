@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -31,7 +32,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
+
 import org.traccar.model.Factory;
 
 public class QueryBuilder {
@@ -211,6 +214,23 @@ public class QueryBuilder {
         return this;
     }
     
+    public QueryBuilder setBytes(String name, byte[] value) throws SQLException {
+        for (int i : indexes(name)) {
+            try {
+                if (value == null) {
+                    statement.setNull(i, Types.VARCHAR);
+                } else {
+                    statement.setBytes(i, value);
+                }
+            } catch (SQLException error) {
+                statement.close();
+                connection.close();
+                throw error;
+            }
+        }
+        return this;
+    }
+    
     public QueryBuilder setObject(Object object) throws SQLException {
         
         Method[] methods = object.getClass().getMethods();
@@ -231,6 +251,8 @@ public class QueryBuilder {
                         setString(name, (String) method.invoke(object));
                     } else if (method.getReturnType().equals(Date.class)) {
                         setDate(name, (Date) method.invoke(object));
+                    } else if (method.getReturnType().equals(byte[].class)) {
+                        setBytes(name, (byte[]) method.invoke(object));
                     }
                 } catch (IllegalAccessException error) {
                 } catch (InvocationTargetException error) {
