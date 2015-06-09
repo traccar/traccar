@@ -37,7 +37,7 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
     <entry key='database.mock'>true</entry>
-    
+
     <entry key='database.createSchema'>
         CREATE TABLE user (
         id INT PRIMARY KEY AUTO_INCREMENT,
@@ -123,33 +123,33 @@
     </entry>
 
     <entry key='database.selectServer'>
-		SELECT * FROM server;
+        SELECT * FROM server;
     </entry>
 
     <entry key='database.updateServer'>
-		UPDATE server SET registration = :registration WHERE id = :id;
+        UPDATE server SET registration = :registration WHERE id = :id;
     </entry>
 
     <entry key='database.loginUser'>
-		SELECT * 
-		FROM user 
-		WHERE email = :email AND password = :password;
+        SELECT * 
+        FROM user 
+        WHERE email = :email AND password = :password;
     </entry>
 
     <entry key='database.selectUsersAll'>
-		SELECT * FROM user;
+        SELECT * FROM user;
     </entry>
 
     <entry key='database.insertUser'>
-		INSERT INTO user (name, email, password, admin) 
+        INSERT INTO user (name, email, password, admin) 
         VALUES (:name, :email, :password, :admin);
     </entry>
         
     <entry key='database.updateUser'>
         UPDATE user SET 
-        		name = :name, 
-        		email = :email, 
-        		admin = :admin
+                name = :name, 
+                email = :email, 
+                admin = :admin
         WHERE id = :id;
     </entry>
 
@@ -190,8 +190,8 @@
     </entry>
 
     <entry key='database.selectPositions'>
-		SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to;    
-	</entry>
+        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to;    
+    </entry>
 
     <entry key='database.insertPosition'>
         INSERT INTO position (deviceId, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)

@@ -64,16 +64,16 @@ public class User implements Factory {
 
     
     public static byte[] sha256(String text) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
 
-			md.update(text.getBytes("UTF-8"));
-			byte[] digest = md.digest();
-			return digest;
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+            md.update(text.getBytes("UTF-8"));
+            byte[] digest = md.digest();
+            return digest;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

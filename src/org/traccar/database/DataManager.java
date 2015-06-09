@@ -240,9 +240,9 @@ public class DataManager {
                 .executeUpdate();
         
         if(user.getPassword() != null) {
-        	QueryBuilder.create(dataSource, properties.getProperty("database.updateUserPassword"))
-            .setObject(user)
-            .executeUpdate();
+            QueryBuilder.create(dataSource, properties.getProperty("database.updateUserPassword"))
+                .setObject(user)
+                .executeUpdate();
         }
     }
     
