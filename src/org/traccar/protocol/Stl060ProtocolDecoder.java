@@ -19,10 +19,8 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -33,6 +31,9 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    //$1,357804047969310,D001,AP29AW0963,01/01/13,13:24:47,1723.9582N,07834.0945E
+    //,00100,010,0,0,0,0,
+    //0,0008478660,1450,40,34,0,0,0,A
     private static final Pattern pattern = Pattern.compile(
             ".*\\$1," +
             "(\\d+)," +                         // IMEI
@@ -55,7 +56,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             "([01])," +                         // Ignition
             "0,0," +                            // Reserved
             "(\\d+)," +                         // DI
-            "([^,])," +                         // RFID
+            "([^,]+)," +                        // RFID
             "(\\d+)," +                         // Odometer
             "(\\d+)," +                         // Temperature
             "(\\d+)," +                         // Fuel
