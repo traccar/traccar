@@ -15,10 +15,12 @@
  */
 package org.traccar.database;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -30,10 +32,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
+import org.traccar.helper.Hashing;
 import org.traccar.helper.Log;
 import org.traccar.http.JsonConverter;
 import org.traccar.model.Device;
@@ -41,6 +46,8 @@ import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class DataManager {
 
@@ -167,15 +174,13 @@ public class DataManager {
         
         Server server = new Server();
         server.setRegistration(true);
-        QueryBuilder.create(dataSource,
-                "INSERT INTO server (registration, latitude, longitude, zoom)" +
-                "VALUES (:registration, :latitude, :longitude, :zoom);")
+        QueryBuilder.create(dataSource, properties.getProperty("database.insertServer"))
                 .setObject(server)
                 .executeUpdate();
 
         mockData(admin.getId());
     }
-
+    
     private void mockData(long userId) {
         if (Boolean.valueOf(Context.getProps().getProperty("database.mock"))) {
             try {
@@ -213,46 +218,43 @@ public class DataManager {
     }
 
     public User login(String email, String password) throws SQLException {
-        return QueryBuilder.create(dataSource,
-                "SELECT * FROM user WHERE email = :email AND " +
-                "password = CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR);")
+        return QueryBuilder.create(dataSource, properties.getProperty("database.loginUser"))
                 .setString("email", email)
-                .setString("password", password)
+                .setBytes("password", Hashing.sha256(password))
                 .executeQuerySingle(new User());
     }
 
     public Collection<User> getUsers() throws SQLException {
-        return QueryBuilder.create(dataSource, 
-                "SELECT * FROM user;")
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectUsersAll"))
                 .executeQuery(new User());
     }
 
     public void addUser(User user) throws SQLException {
-        user.setId(QueryBuilder.create(dataSource,
-                "INSERT INTO user (name, email, password, admin) " +
-                "VALUES (:name, :email, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR), :admin);")
+        user.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
                 .setObject(user)
                 .executeUpdate());
     }
     
     public void updateUser(User user) throws SQLException {
-        QueryBuilder.create(dataSource,
-                "UPDATE user SET name = :name, email = :email, admin = :admin," +
-                "password = CASEWHEN((SELECT password FROM user WHERE id = :id) = :password, :password, CAST(HASH('SHA256', STRINGTOUTF8(:password), 1000) AS VARCHAR)) WHERE id = :id;")
+        QueryBuilder.create(dataSource, properties.getProperty("database.updateUser"))
                 .setObject(user)
                 .executeUpdate();
+        
+        if(user.getPassword() != null) {
+            QueryBuilder.create(dataSource, properties.getProperty("database.updateUserPassword"))
+                .setObject(user)
+                .executeUpdate();
+        }
     }
     
     public void removeUser(User user) throws SQLException {
-        QueryBuilder.create(dataSource,
-                "DELETE FROM user WHERE id = :id;")
+        QueryBuilder.create(dataSource, properties.getProperty("database.deleteUser"))
                 .setObject(user)
                 .executeUpdate();
     }
 
     public Collection<Permission> getPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, 
-                "SELECT userId, deviceId FROM user_device;")
+        return QueryBuilder.create(dataSource, properties.getProperty("database.getPermissions"))
                 .executeQuery(new Permission());
     }
 
@@ -262,45 +264,38 @@ public class DataManager {
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {
-        return QueryBuilder.create(dataSource, 
-                "SELECT * FROM device WHERE id IN (" +
-                "SELECT deviceId FROM user_device WHERE userId = :userId);")
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectDevices"))
                 .setLong("userId", userId)
                 .executeQuery(new Device());
     }
     
     public void addDevice(Device device) throws SQLException {
-        device.setId(QueryBuilder.create(dataSource,
-                "INSERT INTO device (name, uniqueId) VALUES (:name, :uniqueId);")
+        device.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertDevice"))
                 .setObject(device)
                 .executeUpdate());
     }
     
     public void updateDevice(Device device) throws SQLException {
-        QueryBuilder.create(dataSource,
-                "UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;")
+        QueryBuilder.create(dataSource, properties.getProperty("database.updateDevice"))
                 .setObject(device)
                 .executeUpdate();
     }
     
     public void removeDevice(Device device) throws SQLException {
-        QueryBuilder.create(dataSource,
-                "DELETE FROM device WHERE id = :id;")
+        QueryBuilder.create(dataSource, properties.getProperty("database.removeDevice"))
                 .setObject(device)
                 .executeUpdate();
     }
     
     public void linkDevice(long userId, long deviceId) throws SQLException {
-        QueryBuilder.create(dataSource,
-                "INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);")
+        QueryBuilder.create(dataSource, properties.getProperty("database.linkDevice"))
                 .setLong("userId", userId)
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
     }
 
     public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {
-        return QueryBuilder.create(dataSource,
-                "SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to;")
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectPositions"))
                 .setLong("deviceId", deviceId)
                 .setDate("from", from)
                 .setDate("to", to)
@@ -318,14 +313,12 @@ public class DataManager {
     }
     
     public Server getServer() throws SQLException {
-        return QueryBuilder.create(dataSource,
-                "SELECT * FROM server;")
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectServer"))
                 .executeQuerySingle(new Server());
     }
     
     public void updateServer(Server server) throws SQLException {
-        QueryBuilder.create(dataSource,
-                "UPDATE server SET registration = :registration WHERE id = :id;")
+        QueryBuilder.create(dataSource, properties.getProperty("database.updateServer"))
                 .setObject(server)
                 .executeUpdate();
     }
