@@ -1,4 +1,6 @@
-/target
+target
+nbactions.xml
 .classpath
 .project
-.settings/
+.settings
+web/.idea
