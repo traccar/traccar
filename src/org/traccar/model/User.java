@@ -15,6 +15,8 @@
  */
 package org.traccar.model;
 
+import org.traccar.helper.Hashing;
+
 public class User implements Factory {
 
     @Override
@@ -34,9 +36,9 @@ public class User implements Factory {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
-    private String password;
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    private byte[] password;
+    public byte[] getPassword() { return password; }
+    public void setPassword(String password) { this.password = Hashing.sha256(password); }
     
     private boolean readonly;
     
@@ -57,5 +59,4 @@ public class User implements Factory {
     private double longitude;
     
     private int zoom;
-
 }
