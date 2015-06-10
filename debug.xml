@@ -170,7 +170,7 @@
     </entry>
     
     <entry key='database.selectDevices'>
-        SELECT * FROM device WHERE id IN (SELECT deviceId FROM user_device WHERE userId = :userId);
+        SELECT * FROM device d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
     </entry>
     
     <entry key='database.insertDevice'>
