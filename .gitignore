@@ -3,4 +3,5 @@ nbactions.xml
 .classpath
 .project
 .settings
+.idea
 web/.idea
