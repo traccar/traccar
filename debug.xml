@@ -24,8 +24,6 @@
     <entry key='filter.zero'>true</entry>
     <entry key='filter.duplicate'>true</entry>
     <entry key='filter.distance'>50</entry>-->
-    
-    <entry key='alert.enable'>true</entry>
 
     <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>all</entry>
@@ -164,7 +162,7 @@
     </entry>
 
     <entry key='database.getPermissions'>
-        SELECT userId, deviceId FROM user_device;
+        "SELECT userId, deviceId FROM user_device;"
     </entry>
     
     <entry key='database.selectDeviceAll'>
@@ -204,13 +202,6 @@
         UPDATE device SET positionId = :id WHERE id = :deviceId;
     </entry>
 
-    <entry key='database.getAlertsByDevice'>
-        SELECT a.id, a.idTipo, av.idVehicle, a.idGeofence, a.emails, a.velMax, a.tiempoMinpar, a.nombre, a.odometro, av.odometro_inicial  
-        FROM alerta a 
-        INNER JOIN alerta_vehiculo av ON a.id = av.idAlerta 
-        INNER JOIN vehicle v ON av.idVehicle = v.id      
-        WHERE v.idDevice = :deviceId;
-    </entry>
 
     <!-- PROTOCOL CONFIG -->
 
