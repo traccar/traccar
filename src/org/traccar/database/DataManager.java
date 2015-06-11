@@ -46,6 +46,7 @@ import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.model.Alert;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -322,5 +323,10 @@ public class DataManager {
                 .setObject(server)
                 .executeUpdate();
     }
-
+    
+    public Collection<Alert> getAlertsByDevice(Long deviceId) throws SQLException {
+        return QueryBuilder.create(dataSource, properties.getProperty("database.getAlertsByDevice"))
+                .setLong("deviceId", deviceId)
+                .executeQuery(new Alert());
+    }
 }
