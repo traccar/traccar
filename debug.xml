@@ -162,7 +162,7 @@
     </entry>
 
     <entry key='database.getPermissions'>
-        "SELECT userId, deviceId FROM user_device;"
+        SELECT userId, deviceId FROM user_device;
     </entry>
     
     <entry key='database.selectDeviceAll'>
