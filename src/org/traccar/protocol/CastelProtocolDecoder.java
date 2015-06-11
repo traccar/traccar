@@ -73,7 +73,6 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_LOGIN || type == MSG_GPS) {
             
             Position position = new Position();
-            position.setDeviceId(getDeviceId());
             position.setProtocol(getProtocol());
             
             if (!identify(id.toString(Charset.defaultCharset()).trim())) {
@@ -96,6 +95,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 }
             
             }
+
+            position.setDeviceId(getDeviceId());
             
             if (type == MSG_GPS) {
                 buf.readUnsignedByte(); // historical
