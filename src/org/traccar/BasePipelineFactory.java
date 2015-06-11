@@ -32,7 +32,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
     private FilterHandler filterHandler;
-    private AlertHandler alertHandler;
     private Integer resetDelay;
     private Boolean processInvalidPositions;
 
@@ -94,11 +93,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (enableFilter != null && Boolean.valueOf(enableFilter)) {
             filterHandler = new FilterHandler();
         }
-        
-        String enableAlerts = Context.getProps().getProperty("alert.enable");
-        if(enableAlerts != null && Boolean.valueOf(enableAlerts)){
-            alertHandler = new AlertHandler();
-        }
 
         if (Context.getReverseGeocoder() != null) {
             // Default behavior is to process invalid positions (i.e., the "null" case)
@@ -122,9 +116,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         addSpecificHandlers(pipeline);
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
-        }
-        if (alertHandler != null) {
-            pipeline.addLast("alert", alertHandler);
         }
         if (Context.getReverseGeocoder() != null) {
             pipeline.addLast("geocoder", new ReverseGeocoderHandler(Context.getReverseGeocoder(), processInvalidPositions));
