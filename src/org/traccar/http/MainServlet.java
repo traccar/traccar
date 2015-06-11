@@ -67,7 +67,7 @@ public class MainServlet extends BaseServlet {
 
     private void register(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
-        Context.getDataManager().addUser(user);
+        Context.getDataManager().addUser(user, user.getPassword());
         sendResponse(resp.getWriter(), true);
     }
 

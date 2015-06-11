@@ -166,8 +166,8 @@ public class DataManager {
         User admin = new User();
         admin.setName("admin");
         admin.setEmail("admin");
-        admin.setPassword("admin");
         admin.setAdmin(true);
+        admin.hashPassword("admin");
         admin.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
                 .setObject(admin)
                 .executeUpdate());
@@ -221,10 +221,10 @@ public class DataManager {
     }
 
     public User login(String email, String password) throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.loginUser"))
+        User user = QueryBuilder.create(dataSource, properties.getProperty("database.loginUser"))
                 .setString("email", email)
-                .setBytes("password", Hashing.sha256(password))
                 .executeQuerySingle(new User());
+        return user != null && user.isPasswordValid(password) ? user : null;
     }
 
     public Collection<User> getUsers() throws SQLException {
@@ -232,19 +232,20 @@ public class DataManager {
                 .executeQuery(new User());
     }
 
-    public void addUser(User user) throws SQLException {
+    public void addUser(User user, String password) throws SQLException {
+        user.hashPassword(password);
         user.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
                 .setObject(user)
                 .executeUpdate());
         Context.getPermissionsManager().refresh();
     }
     
-    public void updateUser(User user) throws SQLException {
+    public void updateUser(User user, String password) throws SQLException {
         QueryBuilder.create(dataSource, properties.getProperty("database.updateUser"))
                 .setObject(user)
                 .executeUpdate();
-        
-        if(user.getPassword() != null) {
+        if(password != null) {
+            user.hashPassword(password);
             QueryBuilder.create(dataSource, properties.getProperty("database.updateUserPassword"))
                 .setObject(user)
                 .executeUpdate();
@@ -252,7 +253,7 @@ public class DataManager {
         
         Context.getPermissionsManager().refresh();
     }
-    
+
     public void removeUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, properties.getProperty("database.deleteUser"))
                 .setObject(user)
