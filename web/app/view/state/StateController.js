@@ -18,7 +18,45 @@ Ext.define('Traccar.view.state.StateController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.state',
 
+    config: {
+        listen: {
+            controller: {
+                '*': {
+                    selectDevice: 'selectDevice'
+                }
+            }
+        }
+    },
+
     init: function() {
+    },
+
+    selectDevice: function(device) {
+        var position = {
+            "fixTime":"2012-01-02T01:50:00",
+            "longitude":130.0,
+            "latitude":60.0,
+            "valid":true,
+            "altitude":0.0,
+            "speed":0.0,
+            "course":0.0,
+            "deviceId":1,
+            "other":"<info><status>84-20</status></info>",
+            "deviceTime":"2012-01-02T01:50:00",
+            "id":29,
+            "protocol":"gotop"
+        };
+
+        var store = Ext.getStore('Parameters');
+
+        for (var key in position) {
+            if (position.hasOwnProperty(key) && key !== 'other') {
+                store.add(Ext.create('Traccar.model.Parameter', {
+                    name: key,
+                    value: position[key]
+                }));
+            }
+        }
     }
 
 });
