@@ -48,6 +48,7 @@ Ext.define('Traccar.view.state.StateController', {
         };
 
         var store = Ext.getStore('Parameters');
+        store.removeAll();
 
         for (var key in position) {
             if (position.hasOwnProperty(key) && key !== 'other') {
