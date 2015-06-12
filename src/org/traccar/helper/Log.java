@@ -109,23 +109,12 @@ public class Log {
         StringBuilder s = new StringBuilder();
         if (msg != null) {
             s.append(msg);
-            s.append(" - ");
         }
         if (exception != null) {
-            String exceptionMsg = exception.getMessage();
-            if (exceptionMsg != null) {
-                s.append(exceptionMsg);
+            if (msg != null) {
                 s.append(" - ");
             }
-            s.append(exception.getClass().getName());
-            StackTraceElement[] stack = exception.getStackTrace();
-            if (stack.length > 0) {
-                s.append(" (");
-                s.append(stack[0].getFileName());
-                s.append(":");
-                s.append(stack[0].getLineNumber());
-                s.append(")");
-            }
+            s.append(exception(exception));
         }
         getLogger().warn(s.toString());
     }
@@ -136,6 +125,52 @@ public class Log {
 
     public static void debug(String msg) {
         getLogger().debug(msg);
+    }
+    
+    private static final int MESSAGE_LIMIT = 80;
+    private static final int STACK_LIMIT = 3;
+    
+    public static String exception(Throwable exception) {
+        StringBuilder s = new StringBuilder();
+        String exceptionMsg = exception.getMessage();
+        if (exceptionMsg != null) {
+            s.append(exceptionMsg);
+            s.append(" - ");
+        }
+        s.append(exception.getClass().getSimpleName());
+        StackTraceElement[] stack = exception.getStackTrace();
+        if (stack.length > 0) {
+            s.append(" (");
+            s.append(stack[0].getFileName());
+            s.append(":");
+            s.append(stack[0].getLineNumber());
+            
+            if (exceptionMsg == null || exceptionMsg.length() < MESSAGE_LIMIT) {
+                int count = STACK_LIMIT - 1;
+                boolean skip = false;
+                for (int i = 1; i < stack.length; i += 1) {
+                    if (stack[i].getClassName().startsWith("org.traccar")) {
+                        s.append(" < ");
+                        if (skip) {
+                            s.append(" ... < ");
+                            skip = false;
+                        }
+                        s.append(stack[i].getFileName());
+                        s.append(":");
+                        s.append(stack[i].getLineNumber());
+                        count -= 1;
+                        if (count == 0) {
+                            break;
+                        }
+                    } else {
+                        skip = true;
+                    }
+                }
+            }
+            
+            s.append(")");
+        }
+        return s.toString();
     }
 
     /**

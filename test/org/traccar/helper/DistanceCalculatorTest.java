@@ -3,7 +3,7 @@ package org.traccar.helper;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DIstanceCalculatorTest {
+public class DistanceCalculatorTest {
     
     @Test
     public void testDistance() {
