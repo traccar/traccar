@@ -38,7 +38,7 @@ Ext.define('Traccar.view.map.Map', {
                 source: this.vectorSource
             });
 
-            var view = new ol.View({
+            this.mapView = new ol.View({
                 center: ol.proj.fromLonLat(styles.map_center),
                 zoom: styles.map_zoom,
                 maxZoom: styles.map_max_zoom
@@ -47,7 +47,7 @@ Ext.define('Traccar.view.map.Map', {
             this.map = new ol.Map({
                 target: this.body.dom.id,
                 layers: [ layer, vectorLayer ],
-                view: view
+                view: this.mapView
             });
         },
 

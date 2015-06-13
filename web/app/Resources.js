@@ -100,7 +100,8 @@ var styles = {
     map_report_marker: 'blue',
     map_live_marker: 'red',
     map_route_width: 5,
-    map_marker_radius: 50
+    map_marker_radius: 50,
+    map_delay: 500
 };
 
 Ext.define('Traccar.Resources', {

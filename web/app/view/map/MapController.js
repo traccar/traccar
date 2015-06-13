@@ -144,7 +144,25 @@ Ext.define('Traccar.view.map.MapController', {
     },
 
     selectPosition: function(position) {
-        console.log(position); // DELME
+        if (this.currentPosition === undefined) {
+            this.currentPosition = new ol.Feature({
+                style: this.getLineStyle(styles.map_report_route)
+            });
+            this.getView().vectorSource.addFeature(this.currentPosition);
+        }
+
+        var point = ol.proj.fromLonLat([
+            position.get('longitude'), position.get('latitude')
+        ]);
+
+        this.currentPosition.setGeometry(new ol.geom.Point(point));
+
+        var pan = ol.animation.pan({
+            duration: styles.map_delay,
+            source: this.getView().mapView.getCenter()
+        });
+        this.getView().map.beforeRender(pan);
+        this.getView().mapView.setCenter(point);
     },
 
     selectDevice: function(device) {
