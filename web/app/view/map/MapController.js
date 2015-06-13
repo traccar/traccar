@@ -143,12 +143,16 @@ Ext.define('Traccar.view.map.MapController', {
         vectorSource.addFeature(this.reportFinish);
     },
 
+    selectPosition: function(position) {
+        console.log(position); // DELME
+    },
+
     selectDevice: function(device) {
         console.log(device); // DELME
     },
 
     selectReport: function(position) {
-        console.log(position); // DELME
+        this.selectPosition(position);
     }
 
 });

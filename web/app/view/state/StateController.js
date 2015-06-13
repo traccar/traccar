@@ -31,6 +31,17 @@ Ext.define('Traccar.view.state.StateController', {
     init: function() {
     },
 
+    keys: {
+        'fixTime': strings.report_time,
+        'latitude': strings.report_latitude,
+        'longitude': strings.report_longitude,
+        'valid': strings.report_valid,
+        'altitude': strings.report_altitude,
+        'speed': strings.report_speed,
+        'course': strings.report_course,
+        'protocol': strings.state_protocol
+    },
+
     selectDevice: function(device) {
         var position = {
             "fixTime":"2012-01-02T01:50:00",
@@ -51,9 +62,9 @@ Ext.define('Traccar.view.state.StateController', {
         store.removeAll();
 
         for (var key in position) {
-            if (position.hasOwnProperty(key) && key !== 'other') {
+            if (position.hasOwnProperty(key) && this.keys[key] !== undefined) {
                 store.add(Ext.create('Traccar.model.Parameter', {
-                    name: key,
+                    name: this.keys[key],
                     value: position[key]
                 }));
             }

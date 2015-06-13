@@ -77,7 +77,8 @@ var strings =  {
 
     state_title: 'State',
     state_name: 'Parameter',
-    state_value: 'Value'
+    state_value: 'Value',
+    state_protocol: 'Protocol'
 };
 
 var styles = {
