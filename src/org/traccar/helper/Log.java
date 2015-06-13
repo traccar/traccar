@@ -152,7 +152,7 @@ public class Log {
                     if (stack[i].getClassName().startsWith("org.traccar")) {
                         s.append(" < ");
                         if (skip) {
-                            s.append(" ... < ");
+                            s.append("... < ");
                             skip = false;
                         }
                         s.append(stack[i].getFileName());
