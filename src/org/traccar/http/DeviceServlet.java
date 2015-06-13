@@ -40,25 +40,27 @@ public class DeviceServlet extends BaseServlet {
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
-                    Context.getDataManager().getDevices(getUserId(req.getSession()))));
+                    Context.getDataManager().getDevices(getUserId(req))));
     }
     
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         Context.getDataManager().addDevice(device);
-        Context.getDataManager().linkDevice(getUserId(req.getSession()), device.getId());
+        Context.getDataManager().linkDevice(getUserId(req), device.getId());
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
     }
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Context.getDataManager().updateDevice(JsonConverter.objectFromJson(
-                req.getReader(), new Device()));
+        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
+        Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
+        Context.getDataManager().updateDevice(device);
         sendResponse(resp.getWriter(), true);
     }
     
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Context.getDataManager().removeDevice(JsonConverter.objectFromJson(
-                req.getReader(), new Device()));
+        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
+        Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
+        Context.getDataManager().removeDevice(device);
         sendResponse(resp.getWriter(), true);
     }
 

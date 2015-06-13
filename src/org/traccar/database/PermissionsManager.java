@@ -24,8 +24,11 @@ import java.util.Set;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Permission;
+import org.traccar.model.User;
 
 public class PermissionsManager {
+    
+    private final Map<Long, User> users = new HashMap<Long, User>();
     
     private final Map<Long, Set<Long>> permissions = new HashMap<Long, Set<Long>>();
     
@@ -41,13 +44,29 @@ public class PermissionsManager {
     }
     
     public final void refresh() {
+        users.clear();
         permissions.clear();
         try {
+            for (User user : Context.getDataManager().getUsers()) {
+                users.put(user.getId(), user);
+            }
             for (Permission permission : Context.getDataManager().getPermissions()) {
                 getNotNull(permission.getUserId()).add(permission.getDeviceId());
             }
         } catch (SQLException error) {
             Log.warning(error);
+        }
+    }
+    
+    public void checkAdmin(long userId) throws SecurityException {
+        if (!users.containsKey(userId) || !users.get(userId).getAdmin()) {
+            throw new SecurityException("Admin access required");
+        }
+    }
+    
+    public void checkUser(long userId, long otherUserId) throws SecurityException {
+        if (userId != otherUserId) {
+            checkAdmin(userId);
         }
     }
     
@@ -57,13 +76,7 @@ public class PermissionsManager {
     
     public void checkDevice(long userId, long deviceId) throws SecurityException {
         if (getNotNull(userId).contains(deviceId)) {
-            throw new SecurityException();
-        }
-    }
-    
-    public void checkDevices(long userId, Collection<Long> devices) throws SecurityException {
-        if (getNotNull(userId).containsAll(devices)) {
-            throw new SecurityException();
+            throw new SecurityException("Device access denied");
         }
     }
     

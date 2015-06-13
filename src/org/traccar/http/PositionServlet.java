@@ -15,10 +15,9 @@
  */
 package org.traccar.http;
 
-import org.traccar.Context;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.traccar.Context;
 
 public class PositionServlet extends BaseServlet {
 
@@ -31,10 +30,11 @@ public class PositionServlet extends BaseServlet {
     }
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        long deviceId = Long.valueOf(req.getParameter("deviceId"));
+        Context.getPermissionsManager().checkDevice(getUserId(req), deviceId);
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getPositions(
-                            getUserId(req.getSession()),
-                            Long.valueOf(req.getParameter("deviceId")),
+                            getUserId(req), deviceId,
                             JsonConverter.parseDate(req.getParameter("from")),
                             JsonConverter.parseDate(req.getParameter("to")))));
     }

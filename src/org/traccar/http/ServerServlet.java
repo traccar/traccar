@@ -40,8 +40,9 @@ public class ServerServlet extends BaseServlet {
     }
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Context.getDataManager().updateServer(JsonConverter.objectFromJson(
-                req.getReader(), new Server()));
+        Server server = JsonConverter.objectFromJson(req.getReader(), new Server());
+        Context.getPermissionsManager().checkAdmin(getUserId(req));
+        Context.getDataManager().updateServer(server);
         sendResponse(resp.getWriter(), true);
     }
 

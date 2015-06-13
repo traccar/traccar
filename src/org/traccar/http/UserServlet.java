@@ -39,25 +39,29 @@ public class UserServlet extends BaseServlet {
     }
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        Context.getPermissionsManager().checkAdmin(getUserId(req));
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getUsers()));
     }
     
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
         Context.getDataManager().addUser(user);
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
     }
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Context.getDataManager().updateUser(JsonConverter.objectFromJson(
-                req.getReader(), new User()));
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        Context.getDataManager().updateUser(user);
         sendResponse(resp.getWriter(), true);
     }
     
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Context.getDataManager().removeUser(JsonConverter.objectFromJson(
-                req.getReader(), new User()));
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        Context.getDataManager().removeUser(user);
         sendResponse(resp.getWriter(), true);
     }
 

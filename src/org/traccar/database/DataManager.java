@@ -50,7 +50,7 @@ public class DataManager {
     private final Properties properties;
     
     private DataSource dataSource;
-
+    
     private final Map<String, Device> devices = new HashMap<String, Device>();
     private long devicesLastUpdate;
     private long devicesRefreshDelay;
@@ -231,6 +231,7 @@ public class DataManager {
         user.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
                 .setObject(user)
                 .executeUpdate());
+        Context.getPermissionsManager().refresh();
     }
     
     public void updateUser(User user) throws SQLException {
@@ -243,12 +244,15 @@ public class DataManager {
                 .setObject(user)
                 .executeUpdate();
         }
+        
+        Context.getPermissionsManager().refresh();
     }
     
     public void removeUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, properties.getProperty("database.deleteUser"))
                 .setObject(user)
                 .executeUpdate();
+        Context.getPermissionsManager().refresh();
     }
 
     public Collection<Permission> getPermissions() throws SQLException {
@@ -290,6 +294,7 @@ public class DataManager {
                 .setLong("userId", userId)
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
+        Context.getPermissionsManager().refresh();
     }
 
     public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {
