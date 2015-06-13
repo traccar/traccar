@@ -168,9 +168,9 @@ public class DataManager {
         admin.setEmail("admin");
         admin.setPassword("admin");
         admin.setAdmin(true);
-        QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
+        admin.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
                 .setObject(admin)
-                .executeUpdate();
+                .executeUpdate());
         
         Server server = new Server();
         server.setRegistration(true);
@@ -189,7 +189,10 @@ public class DataManager {
                 device.setName("test1");
                 device.setUniqueId("123456789012345");
                 addDevice(device);
-                linkDevice(userId, device.getId());
+                QueryBuilder.create(dataSource, properties.getProperty("database.linkDevice"))
+                        .setLong("userId", userId)
+                        .setLong("deviceId", device.getId())
+                        .executeUpdate();
 
                 Position position = new Position();
                 position.setDeviceId(device.getId());
