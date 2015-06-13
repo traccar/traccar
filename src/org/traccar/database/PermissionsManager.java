@@ -75,7 +75,7 @@ public class PermissionsManager {
     }
     
     public void checkDevice(long userId, long deviceId) throws SecurityException {
-        if (getNotNull(userId).contains(deviceId)) {
+        if (!getNotNull(userId).contains(deviceId)) {
             throw new SecurityException("Device access denied");
         }
     }

@@ -168,7 +168,9 @@ public class DataManager {
         admin.setEmail("admin");
         admin.setPassword("admin");
         admin.setAdmin(true);
-        addUser(admin);
+        QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
+                .setObject(admin)
+                .executeUpdate();
         
         Server server = new Server();
         server.setRegistration(true);
