@@ -54,6 +54,9 @@ public class Xexun2ProtocolDecoderTest extends ProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "150316182840,07872167745,GPRMC,182840.000,A,5126.1310,N,00055.5573,W,0.00,0.00,160315,,,A*7C,F,,imei:865328023469306,06,54.3,F:4.10V/ADC1=0.76V/ADC2=0.00V,0,157,38486,234,10,34DC,48A6,3.70km"));
 
+        verify(decoder.decode(null, null,
+                "150615123731,+33647384611,GPRMC,103731.636,A,4545.5266,N,00448.8259,E,21.12,276.01,150615,,,A*57,L,, imei:013949002026675,04,3522.9,F:3.72V,0,142,21744,208,01,0702,9C8C"));
+
     }
 
 }
