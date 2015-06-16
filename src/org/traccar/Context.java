@@ -99,7 +99,7 @@ public class Context {
             String type = properties.getProperty("geocoder.type");
             if (type != null && type.equals("nominatim")) {
                 reverseGeocoder = new NominatimReverseGeocoder(properties.getProperty("geocoder.url"));
-            } if (type != null && type.equals("gisgraphy")) {
+            } else if (type != null && type.equals("gisgraphy")) {
                 reverseGeocoder = new GisgraphyReverseGeocoder(properties.getProperty("geocoder.url"));
             } else {
                 reverseGeocoder = new GoogleReverseGeocoder();
