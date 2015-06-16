@@ -260,12 +260,12 @@ public class DataManager {
     }
 
     public Collection<Permission> getPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.getPermissions"))
+        return QueryBuilder.create(dataSource, properties.getProperty("database.getPermissionsAll"))
                 .executeQuery(new Permission());
     }
 
     public Collection<Device> getAllDevices() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectDeviceAll"))
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectDevicesAll"))
                 .executeQuery(new Device());
     }
 
@@ -288,7 +288,7 @@ public class DataManager {
     }
     
     public void removeDevice(Device device) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.removeDevice"))
+        QueryBuilder.create(dataSource, properties.getProperty("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
     }
@@ -320,7 +320,7 @@ public class DataManager {
     }
     
     public Server getServer() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectServer"))
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectServers"))
                 .executeQuerySingle(new Server());
     }
     

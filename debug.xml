@@ -117,13 +117,13 @@
         id INT PRIMARY KEY AUTO_INCREMENT);
     </entry>
 
+    <entry key='database.selectServers'>
+        SELECT * FROM server;
+    </entry>
+
     <entry key='database.insertServer'>
         INSERT INTO server (registration, latitude, longitude, zoom)
         VALUES (:registration, :latitude, :longitude, :zoom);
-    </entry>
-
-    <entry key='database.selectServer'>
-        SELECT * FROM server;
     </entry>
 
     <entry key='database.updateServer'>
@@ -131,8 +131,7 @@
     </entry>
 
     <entry key='database.loginUser'>
-        SELECT * 
-        FROM user 
+        SELECT * FROM user
         WHERE email = :email;
     </entry>
 
@@ -144,12 +143,9 @@
         INSERT INTO user (name, email, hashedPassword, salt, admin)
         VALUES (:name, :email, :hashedPassword, :salt, :admin);
     </entry>
-        
+
     <entry key='database.updateUser'>
-        UPDATE user SET 
-                name = :name, 
-                email = :email, 
-                admin = :admin
+        UPDATE user SET name = :name, email = :email, admin = :admin
         WHERE id = :id;
     </entry>
 
@@ -161,11 +157,11 @@
         DELETE FROM user WHERE id = :id;
     </entry>
 
-    <entry key='database.getPermissions'>
+    <entry key='database.getPermissionsAll'>
         SELECT userId, deviceId FROM user_device;
     </entry>
     
-    <entry key='database.selectDeviceAll'>
+    <entry key='database.selectDevicesAll'>
         SELECT * FROM device;
     </entry>
     
@@ -181,7 +177,7 @@
         UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;
     </entry>
     
-    <entry key='database.removeDevice'>
+    <entry key='database.deleteDevice'>
         DELETE FROM device WHERE id = :id;
     </entry>
     
@@ -201,7 +197,6 @@
     <entry key='database.updateLatestPosition'>
         UPDATE device SET positionId = :id WHERE id = :deviceId;
     </entry>
-
 
     <!-- PROTOCOL CONFIG -->
 
