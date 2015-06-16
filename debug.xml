@@ -43,7 +43,7 @@
         id INT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(1024) NOT NULL,
         email VARCHAR(256) NOT NULL UNIQUE,
-        password VARCHAR(1024) NOT NULL,
+        hashedPassword VARCHAR(1024) NOT NULL,
         salt VARCHAR(1024) DEFAULT '' NOT NULL,
         readonly BOOLEAN DEFAULT false NOT NULL,
         admin BOOLEAN DEFAULT false NOT NULL,
@@ -133,7 +133,7 @@
     <entry key='database.loginUser'>
         SELECT * 
         FROM user 
-        WHERE email = :email AND password = :password;
+        WHERE email = :email;
     </entry>
 
     <entry key='database.selectUsersAll'>
@@ -141,8 +141,8 @@
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO user (name, email, password, admin) 
-        VALUES (:name, :email, :password, :admin);
+        INSERT INTO user (name, email, hashedPassword, salt, admin)
+        VALUES (:name, :email, :hashedPassword, :salt, :admin);
     </entry>
         
     <entry key='database.updateUser'>
@@ -154,7 +154,7 @@
     </entry>
 
     <entry key='database.updateUserPassword'>
-        UPDATE user SET password = :password WHERE id = :id;
+        UPDATE user SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
     </entry>
     
     <entry key='database.deleteUser'>
