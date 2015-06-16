@@ -15,6 +15,7 @@
  */
 package org.traccar.model;
 
+import org.traccar.helper.IgnoreOnSerialization;
 import org.traccar.helper.PasswordHash;
 import org.traccar.helper.PasswordHash.HashingResult;
 
@@ -36,14 +37,16 @@ public class User implements Factory {
     private String email;
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    
-    private String password;
-    public String getPassword() { return password; }
-    public void setPassword(String password) {
-        this.password = password;
+
+    private String hashedPassword;
+    @IgnoreOnSerialization
+    public String getHashedPassword() { return hashedPassword; }
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
     }
-    
+
     private String salt;
+    @IgnoreOnSerialization
     public String getSalt() { return salt; }
     public void setSalt(String salt) { this.salt = salt; }
     private boolean readonly;
@@ -65,14 +68,23 @@ public class User implements Factory {
     private double longitude;
     
     private int zoom;
-    
+
+    private String password;
+    public String getPassword() { return password; }
+    public void setPassword(String password) {
+        this.password = password;
+        if(this.password != null && !this.password.trim().equals("")) {
+            this.hashPassword(password);
+        }
+    }
+
     public boolean isPasswordValid(String inputPassword) {
-        return PasswordHash.validatePassword(inputPassword.toCharArray(), PasswordHash.PBKDF2_ITERATIONS, this.salt, this.password);
+        return PasswordHash.validatePassword(inputPassword.toCharArray(), PasswordHash.PBKDF2_ITERATIONS, this.salt, this.hashedPassword);
     }
     
     public void hashPassword(String password) {
         HashingResult hashingResult = PasswordHash.createHash(password);
-        this.password = hashingResult.hash;
+        this.hashedPassword = hashingResult.hash;
         this.salt = hashingResult.salt;
     }
 }

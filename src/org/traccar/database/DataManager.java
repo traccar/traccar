@@ -167,7 +167,7 @@ public class DataManager {
         admin.setName("admin");
         admin.setEmail("admin");
         admin.setAdmin(true);
-        admin.hashPassword("admin");
+        admin.setPassword("admin");
         admin.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
                 .setObject(admin)
                 .executeUpdate());
@@ -232,20 +232,18 @@ public class DataManager {
                 .executeQuery(new User());
     }
 
-    public void addUser(User user, String password) throws SQLException {
-        user.hashPassword(password);
+    public void addUser(User user) throws SQLException {
         user.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
                 .setObject(user)
                 .executeUpdate());
         Context.getPermissionsManager().refresh();
     }
     
-    public void updateUser(User user, String password) throws SQLException {
+    public void updateUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, properties.getProperty("database.updateUser"))
                 .setObject(user)
                 .executeUpdate();
-        if(password != null) {
-            user.hashPassword(password);
+        if(user.getHashedPassword() != null) {
             QueryBuilder.create(dataSource, properties.getProperty("database.updateUserPassword"))
                 .setObject(user)
                 .executeUpdate();

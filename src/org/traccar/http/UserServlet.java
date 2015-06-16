@@ -47,14 +47,14 @@ public class UserServlet extends BaseServlet {
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
-        Context.getDataManager().addUser(user, user.getPassword());
+        Context.getDataManager().addUser(user);
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
     }
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
-        Context.getDataManager().updateUser(user, user.getPassword());
+        Context.getDataManager().updateUser(user);
         sendResponse(resp.getWriter(), true);
     }
     
