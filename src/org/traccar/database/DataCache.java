@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -31,14 +34,21 @@ public class DataCache {
     private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<Long, Set<DataCacheListener>>();
     
     public DataCache(DataManager dataManager) {
-        // TODO: load latest data from datavase
+        try {
+            Collection<Position> positions = dataManager.getLatestPositions();
+            for (Position position : positions) {
+                this.positions.put(position.getDeviceId(), position);
+            }
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
     }
     
     public synchronized void update(Position position) {
-        long device = position.getDeviceId();
-        positions.put(device, position);
-        if (listeners.containsKey(device)) {
-            for (DataCacheListener listener : listeners.get(device)) {
+        long deviceId = position.getDeviceId();
+        positions.put(deviceId, position);
+        if (listeners.containsKey(deviceId)) {
+            for (DataCacheListener listener : listeners.get(deviceId)) {
                 listener.onUpdate(position);
             }
         }
@@ -62,29 +72,29 @@ public class DataCache {
     }
     
     public void addListener(Collection<Long> devices, DataCacheListener listener) {
-        for (long device : devices) {
-            addListener(device, listener);
+        for (long deviceId : devices) {
+            addListener(deviceId, listener);
         }
     }
     
-    public synchronized void addListener(long device, DataCacheListener listener) {
-        if (!listeners.containsKey(device)) {
-            listeners.put(device, new HashSet<DataCacheListener>());
+    public synchronized void addListener(long deviceId, DataCacheListener listener) {
+        if (!listeners.containsKey(deviceId)) {
+            listeners.put(deviceId, new HashSet<DataCacheListener>());
         }
-        listeners.get(device).add(listener);
+        listeners.get(deviceId).add(listener);
     }
     
     public void removeListener(Collection<Long> devices, DataCacheListener listener) {
-        for (long device : devices) {
-            removeListener(device, listener);
+        for (long deviceId : devices) {
+            removeListener(deviceId, listener);
         }
     }
     
-    public synchronized void removeListener(long device, DataCacheListener listener) {
-        if (!listeners.containsKey(device)) {
-            listeners.put(device, new HashSet<DataCacheListener>());
+    public synchronized void removeListener(long deviceId, DataCacheListener listener) {
+        if (!listeners.containsKey(deviceId)) {
+            listeners.put(deviceId, new HashSet<DataCacheListener>());
         }
-        listeners.get(device).remove(listener);
+        listeners.get(deviceId).remove(listener);
     }
     
 }

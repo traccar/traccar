@@ -133,17 +133,6 @@ public class DataManager {
         return devices.get(uniqueId);
     }
 
-    // TODO: possibly remove this method
-    public void updateLatestPosition(Position position) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.updateLatestPosition"))
-            .setObject(position)
-            .setDate("time", position.getFixTime()) // tmp
-            .setLong("device_id", position.getDeviceId()) // tmp
-            .setLong("power", 0) // tmp
-            .setString("extended_info", position.getOther()) // tmp
-            .executeUpdate();
-    }
-
     private void createDatabaseSchema() throws SQLException {
 
         Connection connection = dataSource.getConnection();
@@ -248,7 +237,6 @@ public class DataManager {
                 .setObject(user)
                 .executeUpdate();
         }
-        
         Context.getPermissionsManager().refresh();
     }
 
@@ -318,12 +306,28 @@ public class DataManager {
                 .setString("extended_info", position.getOther()) // tmp
                 .executeUpdate());
     }
-    
+
+    // TODO: possibly remove this method
+    public void updateLatestPosition(Position position) throws SQLException {
+        QueryBuilder.create(dataSource, properties.getProperty("database.updateLatestPosition"))
+                .setObject(position)
+                .setDate("time", position.getFixTime()) // tmp
+                .setLong("device_id", position.getDeviceId()) // tmp
+                .setLong("power", 0) // tmp
+                .setString("extended_info", position.getOther()) // tmp
+                .executeUpdate();
+    }
+
+    public Collection<Position> getLatestPositions() throws SQLException {
+        return QueryBuilder.create(dataSource, properties.getProperty("database.selectLatestPositions"))
+                .executeQuery(new Position());
+    }
+
     public Server getServer() throws SQLException {
         return QueryBuilder.create(dataSource, properties.getProperty("database.selectServers"))
                 .executeQuerySingle(new Server());
     }
-    
+
     public void updateServer(Server server) throws SQLException {
         QueryBuilder.create(dataSource, properties.getProperty("database.updateServer"))
                 .setObject(server)

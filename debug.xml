@@ -194,6 +194,10 @@
         VALUES (:deviceId, NOW(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
     </entry>
 
+    <entry key='database.selectLatestPositions'>
+        SELECT * FROM position WHERE id IN (SELECT positionId FROM device);
+    </entry>
+
     <entry key='database.updateLatestPosition'>
         UPDATE device SET positionId = :id WHERE id = :deviceId;
     </entry>
