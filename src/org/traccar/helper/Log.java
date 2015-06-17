@@ -36,7 +36,10 @@ import org.jboss.netty.logging.InternalLoggerFactory;
 public class Log {
     
     private static final String LOGGER_NAME = "traccar";
-    
+
+    private static final String STACK_PACKAGE = "org.traccar";
+    private static final int STACK_LIMIT = 3;
+
     private static Logger logger = null;
     
     public static void setupLogger(Properties properties) throws IOException {
@@ -114,7 +117,7 @@ public class Log {
             if (msg != null) {
                 s.append(" - ");
             }
-            s.append(exception(exception));
+            s.append(exceptionStack(exception));
         }
         getLogger().warn(s.toString());
     }
@@ -126,11 +129,8 @@ public class Log {
     public static void debug(String msg) {
         getLogger().debug(msg);
     }
-    
-    private static final int MESSAGE_LIMIT = 120;
-    private static final int STACK_LIMIT = 3;
-    
-    public static String exception(Throwable exception) {
+
+    public static String exceptionStack(Throwable exception) {
         StringBuilder s = new StringBuilder();
         String exceptionMsg = exception.getMessage();
         if (exceptionMsg != null) {
@@ -139,33 +139,41 @@ public class Log {
         }
         s.append(exception.getClass().getSimpleName());
         StackTraceElement[] stack = exception.getStackTrace();
+
         if (stack.length > 0) {
+            int count = STACK_LIMIT;
+            boolean first = true;
+            boolean skip = false;
+            String file = "";
             s.append(" (");
-            s.append(stack[0].getFileName());
-            s.append(":");
-            s.append(stack[0].getLineNumber());
-            
-            if (exceptionMsg == null || exceptionMsg.length() < MESSAGE_LIMIT) {
-                boolean skip = false;
-                for (int i = 1; i < stack.length; i += 1) {
-                    if (stack[i].getClassName().startsWith("org.traccar")) {
+            for (StackTraceElement element : stack) {
+                if (count > 0 && element.getClassName().startsWith(STACK_PACKAGE)) {
+                    if (!first) {
                         s.append(" < ");
-                        if (skip) {
-                            s.append("... < ");
-                            skip = false;
-                        }
-                        s.append(stack[i].getFileName());
-                        s.append(":");
-                        s.append(stack[i].getLineNumber());
                     } else {
-                        skip = true;
+                        first = false;
                     }
-                }
-                if (skip) {
-                    s.append(" < ...");
+
+                    if (skip) {
+                        s.append("... < ");
+                        skip = false;
+                    }
+
+                    if (file.equals(element.getFileName())) {
+                        s.append("*:");
+                    } else {
+                        file = element.getFileName();
+                        s.append(file).append(":");
+                        count -= 1;
+                    }
+                    s.append(element.getLineNumber());
+                } else {
+                    skip = true;
                 }
             }
-            
+            if (skip) {
+                s.append(" < ...");
+            }
             s.append(")");
         }
         return s.toString();
