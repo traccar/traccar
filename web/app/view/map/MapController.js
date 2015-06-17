@@ -55,9 +55,20 @@ Ext.define('Traccar.view.map.MapController', {
                         this.liveData[data[i].deviceId].setGeometry(geometry);
                     } else {
                         var marker = new ol.Feature({
-                            geometry: geometry,
-                            style: this.getLineStyle(styles.map_live_marker)
+                            geometry: geometry
                         });
+                        marker.setStyle(new ol.style.Style({
+                            image: new ol.style.Circle({
+                                radius: 40,
+                                fill: new ol.style.Fill({
+                                    color: 'rgba(150,150,200,0.6)'
+                                }),
+                                stroke: new ol.style.Stroke({
+                                    color: 'rgba(20,30,100,0.8)',
+                                    width: 3
+                                })
+                            })
+                        }));
                         this.getView().vectorSource.addFeature(marker);
                         this.liveData[data[i].deviceId] = marker;
                     }
@@ -73,12 +84,22 @@ Ext.define('Traccar.view.map.MapController', {
 
     getLineStyle: function(color) {
         return new ol.style.Style({
-            fill: new ol.style.Fill({
+            /*fill: new ol.style.Fill({
                 color: color
             }),
             stroke: new ol.style.Stroke({
                 color: color,
                 width: styles.map_route_width
+            }),*/
+            image: new ol.style.Circle({
+                radius: 40,
+                fill: new ol.style.Fill({
+                    color: 'rgba(150,150,200,0.6)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(20,30,100,0.8)',
+                    width: 3
+                })
             })
         });
     },

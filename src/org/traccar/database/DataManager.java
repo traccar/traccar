@@ -34,7 +34,6 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
-import org.traccar.helper.Hashing;
 import org.traccar.helper.Log;
 import org.traccar.http.JsonConverter;
 import org.traccar.model.Device;
@@ -200,6 +199,10 @@ public class DataManager {
                 position.setLatitude(-36.8932371);
                 position.setLongitude(174.7743053);
                 addPosition(position);
+                
+                QueryBuilder.create(dataSource, properties.getProperty("database.updateLatestPosition"))
+                        .setObject(position)
+                        .executeUpdate();
 
             } catch (SQLException error) {
                 Log.warning(error);
