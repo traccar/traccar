@@ -96,11 +96,15 @@ var styles = {
     map_center: [ -0.1275, 51.507222 ],
     map_zoom: 6,
     map_max_zoom: 16,
-    map_report_route: 'blue',
-    map_report_marker: 'blue',
-    map_live_marker: 'red',
+    map_select_color: 'green',
+    map_select_radius: 10,
+    map_report_color: 'blue',
+    map_report_radius: 5,
+    map_live_color: 'red',
+    map_live_radius: 7,
+    map_stroke_color: 'grey',
     map_route_width: 5,
-    map_marker_radius: 50,
+    map_marker_stroke: 2,
     map_delay: 500
 };
 

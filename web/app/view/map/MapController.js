@@ -57,18 +57,7 @@ Ext.define('Traccar.view.map.MapController', {
                         var marker = new ol.Feature({
                             geometry: geometry
                         });
-                        marker.setStyle(new ol.style.Style({
-                            image: new ol.style.Circle({
-                                radius: 40,
-                                fill: new ol.style.Fill({
-                                    color: 'rgba(150,150,200,0.6)'
-                                }),
-                                stroke: new ol.style.Stroke({
-                                    color: 'rgba(20,30,100,0.8)',
-                                    width: 3
-                                })
-                            })
-                        }));
+                        marker.setStyle(this.getMarkerStyle(styles.map_live_radius, styles.map_live_color));
                         this.getView().vectorSource.addFeature(marker);
                         this.liveData[data[i].deviceId] = marker;
                     }
@@ -82,30 +71,17 @@ Ext.define('Traccar.view.map.MapController', {
         });
     },
 
-    getLineStyle: function(color) {
+    getLineStyle: function() {
         return new ol.style.Style({
-            /*fill: new ol.style.Fill({
-                color: color
-            }),
             stroke: new ol.style.Stroke({
-                color: color,
+                color: styles.map_stroke_color,
                 width: styles.map_route_width
-            }),*/
-            image: new ol.style.Circle({
-                radius: 40,
-                fill: new ol.style.Fill({
-                    color: 'rgba(150,150,200,0.6)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(20,30,100,0.8)',
-                    width: 3
-                })
             })
         });
     },
 
-    getMarkerStyle: function(color) {
-        return new ol.style.Style({
+    getMarkerStyle: function(radius, color) {
+        /*return new ol.style.Style({
             text: new ol.style.Text({
                 text: '\uf041',
                 font: 'normal 32px FontAwesome',
@@ -116,6 +92,18 @@ Ext.define('Traccar.view.map.MapController', {
                 stroke: new ol.style.Stroke({
                     color: 'black',
                     width: 2
+                })
+            })
+        });*/
+        return new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: radius,
+                fill: new ol.style.Fill({
+                    color: color
+                }),
+                stroke: new ol.style.Stroke({
+                    color: styles.map_stroke_color,
+                    width: styles.map_marker_stroke
                 })
             })
         });
@@ -129,6 +117,7 @@ Ext.define('Traccar.view.map.MapController', {
         
         var index;
         var positions = [];
+
         for (index = 0; index < data.getCount(); index++) {
             positions.push(ol.proj.fromLonLat([
                 data.getAt(index).data.longitude,
@@ -137,38 +126,38 @@ Ext.define('Traccar.view.map.MapController', {
         }
 
         this.reportRoute = new ol.Feature({
-            geometry: new ol.geom.LineString(positions),
-            style: this.getLineStyle(styles.map_report_route)
+            geometry: new ol.geom.LineString(positions)
         });
-        
-        this.reportStart = new ol.Feature({
-            geometry: new ol.geom.Point(positions[0]),
-            style: this.getLineStyle(styles.map_report_route)
-        });
-        
-        this.reportFinish = new ol.Feature({
-            geometry: new ol.geom.Point(positions[positions.length - 1]),
-            style: this.getLineStyle(styles.map_report_route)
-        });
-
+        this.reportRoute.setStyle(this.getLineStyle());
         vectorSource.addFeature(this.reportRoute);
-        vectorSource.addFeature(this.reportStart);
-        vectorSource.addFeature(this.reportFinish);
+
+        this.reportRoutePoints = [];
+        for (index = 0; index < positions.length; index++) {
+            var feature = new ol.Feature({
+                geometry: new ol.geom.Point(positions[index])
+            });
+            feature.setStyle(this.getMarkerStyle(styles.map_report_radius, styles.map_report_color));
+            this.reportRoutePoints.push(feature);
+            vectorSource.addFeature(feature);
+        }
     },
 
     reportClear: function() {
+        var index;
         var vectorSource = this.getView().vectorSource;
         
         vectorSource.removeFeature(this.reportRoute);
-        vectorSource.removeFeature(this.reportStart);
-        vectorSource.addFeature(this.reportFinish);
+
+        for (index = 0; index < this.reportRoutePoints.length; index++) {
+            vectorSource.removeFeature(this.reportRoutePoints[index]);
+        }
+        this.reportRoutePoints = [];
     },
 
     selectPosition: function(position) {
         if (this.currentPosition === undefined) {
-            this.currentPosition = new ol.Feature({
-                style: this.getLineStyle(styles.map_report_route)
-            });
+            this.currentPosition = new ol.Feature();
+            this.currentPosition.setStyle(this.getMarkerStyle(styles.map_select_radius, styles.map_select_color));
             this.getView().vectorSource.addFeature(this.currentPosition);
         }
 
