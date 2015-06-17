@@ -127,7 +127,7 @@ public class Log {
         getLogger().debug(msg);
     }
     
-    private static final int MESSAGE_LIMIT = 80;
+    private static final int MESSAGE_LIMIT = 120;
     private static final int STACK_LIMIT = 3;
     
     public static String exception(Throwable exception) {
@@ -146,7 +146,6 @@ public class Log {
             s.append(stack[0].getLineNumber());
             
             if (exceptionMsg == null || exceptionMsg.length() < MESSAGE_LIMIT) {
-                int count = STACK_LIMIT - 1;
                 boolean skip = false;
                 for (int i = 1; i < stack.length; i += 1) {
                     if (stack[i].getClassName().startsWith("org.traccar")) {
@@ -158,13 +157,12 @@ public class Log {
                         s.append(stack[i].getFileName());
                         s.append(":");
                         s.append(stack[i].getLineNumber());
-                        count -= 1;
-                        if (count == 0) {
-                            break;
-                        }
                     } else {
                         skip = true;
                     }
+                }
+                if (skip) {
+                    s.append(" < ...");
                 }
             }
             
