@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -33,12 +34,18 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private static final Pattern heartbeatPattern = Pattern.compile(
+            "\\+ACK\\:GTHBD," +
+            "([0-9A-Z]{2}\\p{XDigit}{4})," +
+            ".*," +
+            "(\\p{XDigit}{4})\\$?");
+
     private static final Pattern pattern = Pattern.compile(
             "(?:(?:\\+(?:RESP|BUFF):)|" +
             "(?:\\x00?\\x04,\\p{XDigit}{4},[01],))" +
             "GT...," +
-            "(?:[0-9a-fA-F]{6})?," +            // Protocol version
-            "(\\d{15}),.*," +                   // IMEI
+            "(?:[0-9A-Z]{2}\\p{XDigit}{4})?," + // Protocol version
+            "([^,]+),.*," +                     // IMEI
             "(\\d*)," +                         // GPS accuracy
             "(\\d+.\\d)?," +                    // Speed
             "(\\d+)?," +                        // Course
@@ -49,7 +56,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
             "(\\d{4})?," +                      // MCC
             "(\\d{4})?," +                      // MNC
-            "(\\p{XDigit}{4})?," +              // LAC
+            "(\\p{XDigit}{4}|\\p{XDigit}{8})?," + // LAC
             "(\\p{XDigit}{4})?," +              // Cell
             "(?:(\\d+\\.\\d)?," +               // Odometer
             "(\\d{1,3})?)?" +                   // Battery
@@ -57,13 +64,23 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         String sentence = (String) msg;
 
+        // Handle heartbeat
+        Matcher parser = heartbeatPattern.matcher(sentence);
+        if (parser.matches()) {
+            String s = "+SACK:GTHBD," + parser.group(1) + "," + parser.group(2) + "$";
+            if (channel != null) {
+                channel.write("+SACK:GTHBD," + parser.group(1) + "," + parser.group(2) + "$", remoteAddress);
+            }
+            return null;
+        }
+
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -130,6 +147,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_ODOMETER, odometer);
         }
         position.set(Event.KEY_BATTERY, parser.group(index++));
+
         return position;
     }
 
