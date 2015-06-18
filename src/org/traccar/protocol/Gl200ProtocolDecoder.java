@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -60,7 +61,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}{4})?," +              // Cell
             "(?:(\\d+\\.\\d)?," +               // Odometer
             "(\\d{1,3})?)?" +                   // Battery
-            ".*");
+            ".*," +
+            "(\\p{XDigit}{4})\\$?");
 
     @Override
     protected Object decode(
@@ -72,7 +74,6 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         // Handle heartbeat
         Matcher parser = heartbeatPattern.matcher(sentence);
         if (parser.matches()) {
-            String s = "+SACK:GTHBD," + parser.group(1) + "," + parser.group(2) + "$";
             if (channel != null) {
                 channel.write("+SACK:GTHBD," + parser.group(1) + "," + parser.group(2) + "$", remoteAddress);
             }
@@ -147,6 +148,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_ODOMETER, odometer);
         }
         position.set(Event.KEY_BATTERY, parser.group(index++));
+
+        if (Boolean.valueOf(Context.getProps().getProperty(getProtocol() + ".ack")) && channel != null) {
+            channel.write("+SACK:" + parser.group(index++) + "$", remoteAddress);
+        }
 
         return position;
     }
