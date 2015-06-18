@@ -37,6 +37,7 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
     <entry key='database.mock'>true</entry>
+    <entry key='database.checkTable'>traccar</entry>
 
     <entry key='database.createSchema'>
         CREATE TABLE user (
@@ -113,7 +114,7 @@
         longitude DOUBLE NOT NULL,
         zoom INT NOT NULL);
 
-        CREATE TABLE traccar1 (
+        CREATE TABLE traccar (
         id INT PRIMARY KEY AUTO_INCREMENT);
     </entry>
 

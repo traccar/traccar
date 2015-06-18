@@ -41,9 +41,7 @@ public class User implements Factory {
     private String hashedPassword;
     @IgnoreOnSerialization
     public String getHashedPassword() { return hashedPassword; }
-    public void setHashedPassword(String hashedPassword) {
-        this.hashedPassword = hashedPassword;
-    }
+    public void setHashedPassword(String hashedPassword) { this.hashedPassword = hashedPassword; }
 
     private String salt;
     @IgnoreOnSerialization
@@ -87,4 +85,5 @@ public class User implements Factory {
         this.hashedPassword = hashingResult.hash;
         this.salt = hashingResult.salt;
     }
+
 }

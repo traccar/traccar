@@ -111,6 +111,8 @@ public class Context {
         }
 
         serverManager = new ServerManager();
+
+        dataManager.initDatabaseSchema();
         serverManager.init();
     }
 

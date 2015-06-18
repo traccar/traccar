@@ -112,10 +112,6 @@ public class DataManager {
             }
             dataSource = ds;
         }
-
-        if (Boolean.valueOf(properties.getProperty("web.new"))) {
-            createDatabaseSchema();
-        }
     }
 
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
@@ -132,41 +128,43 @@ public class DataManager {
         return devices.get(uniqueId);
     }
 
-    private void createDatabaseSchema() throws SQLException {
+    public void initDatabaseSchema() throws SQLException {
 
-        Connection connection = dataSource.getConnection();
-        ResultSet result = connection.getMetaData().getTables(
-                connection.getCatalog(), null, null, null);
-        
-        boolean exist = false;
-        while (result.next()) {
-            if (result.getString("TABLE_NAME").equalsIgnoreCase("traccar1")) {
-                exist = true;
-                break;
+        if (Boolean.valueOf(properties.getProperty("web.new"))) {
+
+            Connection connection = dataSource.getConnection();
+            ResultSet result = connection.getMetaData().getTables(
+                    connection.getCatalog(), null, null, null);
+
+            boolean exist = false;
+            String checkTable = properties.getProperty("database.checkTable");
+            while (result.next()) {
+                if (result.getString("TABLE_NAME").equalsIgnoreCase(checkTable)) {
+                    exist = true;
+                    break;
+                }
             }
-        }
-        if (exist) {
-            return;
-        }
-        
-        QueryBuilder.create(dataSource, properties.getProperty("database.createSchema")).executeUpdate();
-        
-        User admin = new User();
-        admin.setName("admin");
-        admin.setEmail("admin");
-        admin.setAdmin(true);
-        admin.setPassword("admin");
-        admin.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
-                .setObject(admin)
-                .executeUpdate());
-        
-        Server server = new Server();
-        server.setRegistration(true);
-        QueryBuilder.create(dataSource, properties.getProperty("database.insertServer"))
-                .setObject(server)
-                .executeUpdate();
+            if (exist) {
+                return;
+            }
 
-        mockData(admin.getId());
+            QueryBuilder.create(dataSource, properties.getProperty("database.createSchema")).executeUpdate();
+
+            User admin = new User();
+            admin.setName("admin");
+            admin.setEmail("admin");
+            admin.setAdmin(true);
+            admin.setPassword("admin");
+            addUser(admin);
+
+            Server server = new Server();
+            server.setRegistration(true);
+            QueryBuilder.create(dataSource, properties.getProperty("database.insertServer"))
+                    .setObject(server)
+                    .executeUpdate();
+
+            mockData(admin.getId());
+        }
     }
     
     private void mockData(long userId) {
@@ -177,10 +175,7 @@ public class DataManager {
                 device.setName("test1");
                 device.setUniqueId("123456789012345");
                 addDevice(device);
-                QueryBuilder.create(dataSource, properties.getProperty("database.linkDevice"))
-                        .setLong("userId", userId)
-                        .setLong("deviceId", device.getId())
-                        .executeUpdate();
+                linkDevice(userId, device.getId());
 
                 Position position = new Position();
                 position.setDeviceId(device.getId());
@@ -200,9 +195,7 @@ public class DataManager {
                 position.setLongitude(174.7743053);
                 addPosition(position);
                 
-                QueryBuilder.create(dataSource, properties.getProperty("database.updateLatestPosition"))
-                        .setObject(position)
-                        .executeUpdate();
+                updateLatestPosition(position);
 
             } catch (SQLException error) {
                 Log.warning(error);
