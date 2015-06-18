@@ -181,7 +181,7 @@ public class AsyncServlet extends HttpServlet {
         
         synchronized (asyncSessions) {
             
-            if (!asyncSessions.containsKey(user.getId())) {
+            if (Boolean.valueOf(req.getParameter("first")) || !asyncSessions.containsKey(user.getId())) {
                 Collection<Long> devices = Context.getPermissionsManager().allowedDevices(user.getId());
                 asyncSessions.put(user.getId(), new AsyncSession(user.getId(), devices));
             }

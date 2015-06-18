@@ -33,13 +33,16 @@ Ext.define('Traccar.view.map.MapController', {
     
     init: function() {
         this.liveData = {};
-        this.update();
+        this.update(true);
     },
     
-    update: function() {
+    update: function(first) {
         Ext.Ajax.request({
             scope: this,
             url: '/api/async',
+            params: {
+                first: first
+            },
             success: function(response) {
                 var data = Ext.decode(response.responseText).data;
                 
@@ -63,7 +66,7 @@ Ext.define('Traccar.view.map.MapController', {
                     }
                 }
                 
-                this.update();
+                this.update(false);
             },
             failure: function() {
                 // TODO: error
