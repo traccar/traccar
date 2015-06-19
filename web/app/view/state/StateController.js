@@ -29,6 +29,9 @@ Ext.define('Traccar.view.state.StateController', {
     },
 
     init: function() {
+        var store = Ext.getStore('LiveData');
+        store.on('add', this.add);
+        store.on('update', this.update);
     },
 
     keys: {
@@ -69,6 +72,14 @@ Ext.define('Traccar.view.state.StateController', {
                 }));
             }
         }
+    },
+
+    add: function(store, data) {
+        console.log(data);
+    },
+
+    update: function(store, data) {
+        console.log(data);
     }
 
 });

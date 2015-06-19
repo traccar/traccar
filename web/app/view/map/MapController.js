@@ -48,7 +48,12 @@ Ext.define('Traccar.view.map.MapController', {
                 
                 var i;
                 for (i = 0; i < data.length; i++) {
-                    
+
+                    // TODO check if exists and update
+                    var store = Ext.getStore('LiveData');
+                    store.add(Ext.create('Traccar.model.Position', data[i]));
+                    //store.commitChanges(); need for update?
+
                     var geometry = new ol.geom.Point(ol.proj.fromLonLat([
                         data[i].longitude,
                         data[i].latitude
