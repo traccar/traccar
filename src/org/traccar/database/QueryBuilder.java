@@ -15,7 +15,6 @@
  */
 package org.traccar.database;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -32,26 +31,28 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.sql.DataSource;
-
 import org.traccar.model.Factory;
 
 public class QueryBuilder {
     
     private final Map<String, List<Integer>> indexMap;
     private final Connection connection;
-    private final PreparedStatement statement;
+    private PreparedStatement statement;
+    private final String query;
     
     private QueryBuilder(DataSource dataSource, String query) throws SQLException {
         indexMap = new HashMap<String, List<Integer>>();
         connection = dataSource.getConnection();
-        String parsedQuery = parse(query, indexMap);
-        try {
-            statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
-        } catch (SQLException error) {
-            connection.close();
-            throw error;
+        this.query = query;
+        if (query != null) {
+            String parsedQuery = parse(query, indexMap);
+            try {
+                statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
+            } catch (SQLException error) {
+                connection.close();
+                throw error;
+            }
         }
     }
     
@@ -279,122 +280,125 @@ public class QueryBuilder {
     public <T extends Factory> Collection<T> executeQuery(T prototype) throws SQLException {
         List<T> result = new LinkedList<T>();
         
-        try {
+        if (query != null) {
         
-            ResultSet resultSet = statement.executeQuery();
-            
             try {
-            
-                ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-                List<ResultSetProcessor<T>> processors = new LinkedList<ResultSetProcessor<T>>();
+                ResultSet resultSet = statement.executeQuery();
 
-                Method[] methods = prototype.getClass().getMethods();
+                try {
 
-                for (final Method method : methods) {
-                    if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
+                    ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-                        final String name = method.getName().substring(3);
+                    List<ResultSetProcessor<T>> processors = new LinkedList<ResultSetProcessor<T>>();
 
-                        // Check if column exists
-                        boolean column = false;
-                        for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                            if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
-                                column = true;
-                                break;
+                    Method[] methods = prototype.getClass().getMethods();
+
+                    for (final Method method : methods) {
+                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
+
+                            final String name = method.getName().substring(3);
+
+                            // Check if column exists
+                            boolean column = false;
+                            for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                                if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
+                                    column = true;
+                                    break;
+                                }
+                            }
+                            if (!column) {
+                                continue;
+                            }
+
+                            Class<?> parameterType = method.getParameterTypes()[0];
+
+                            if (parameterType.equals(boolean.class)) {
+                                processors.add(new ResultSetProcessor<T>() {
+                                    @Override
+                                    public void process(T object, ResultSet resultSet) throws SQLException {
+                                        try {
+                                            method.invoke(object, resultSet.getBoolean(name));
+                                        } catch (IllegalAccessException error) {
+                                        } catch (InvocationTargetException error) {
+                                        }
+                                    }
+                                });
+                            } else if (parameterType.equals(int.class)) {
+                                processors.add(new ResultSetProcessor<T>() {
+                                    @Override
+                                    public void process(T object, ResultSet resultSet) throws SQLException {
+                                        try {
+                                            method.invoke(object, resultSet.getInt(name));
+                                        } catch (IllegalAccessException error) {
+                                        } catch (InvocationTargetException error) {
+                                        }
+                                    }
+                                });
+                            } else if (parameterType.equals(long.class)) {
+                                processors.add(new ResultSetProcessor<T>() {
+                                    @Override
+                                    public void process(T object, ResultSet resultSet) throws SQLException {
+                                        try {
+                                            method.invoke(object, resultSet.getLong(name));
+                                        } catch (IllegalAccessException error) {
+                                        } catch (InvocationTargetException error) {
+                                        }
+                                    }
+                                });
+                            } else if (parameterType.equals(double.class)) {
+                                processors.add(new ResultSetProcessor<T>() {
+                                    @Override
+                                    public void process(T object, ResultSet resultSet) throws SQLException {
+                                        try {
+                                            method.invoke(object, resultSet.getDouble(name));
+                                        } catch (IllegalAccessException error) {
+                                        } catch (InvocationTargetException error) {
+                                        }
+                                    }
+                                });
+                            } else if (parameterType.equals(String.class)) {
+                                processors.add(new ResultSetProcessor<T>() {
+                                    @Override
+                                    public void process(T object, ResultSet resultSet) throws SQLException {
+                                        try {
+                                            method.invoke(object, resultSet.getString(name));
+                                        } catch (IllegalAccessException error) {
+                                        } catch (InvocationTargetException error) {
+                                        }
+                                    }
+                                });
+                            } else if (parameterType.equals(Date.class)) {
+                                processors.add(new ResultSetProcessor<T>() {
+                                    @Override
+                                    public void process(T object, ResultSet resultSet) throws SQLException {
+                                        try {
+                                            method.invoke(object, new Date(resultSet.getTimestamp(name).getTime()));
+                                        } catch (IllegalAccessException error) {
+                                        } catch (InvocationTargetException error) {
+                                        }
+                                    }
+                                });
                             }
                         }
-                        if (!column) {
-                            continue;
-                        }
-
-                        Class<?> parameterType = method.getParameterTypes()[0];
-
-                        if (parameterType.equals(boolean.class)) {
-                            processors.add(new ResultSetProcessor<T>() {
-                                @Override
-                                public void process(T object, ResultSet resultSet) throws SQLException {
-                                    try {
-                                        method.invoke(object, resultSet.getBoolean(name));
-                                    } catch (IllegalAccessException error) {
-                                    } catch (InvocationTargetException error) {
-                                    }
-                                }
-                            });
-                        } else if (parameterType.equals(int.class)) {
-                            processors.add(new ResultSetProcessor<T>() {
-                                @Override
-                                public void process(T object, ResultSet resultSet) throws SQLException {
-                                    try {
-                                        method.invoke(object, resultSet.getInt(name));
-                                    } catch (IllegalAccessException error) {
-                                    } catch (InvocationTargetException error) {
-                                    }
-                                }
-                            });
-                        } else if (parameterType.equals(long.class)) {
-                            processors.add(new ResultSetProcessor<T>() {
-                                @Override
-                                public void process(T object, ResultSet resultSet) throws SQLException {
-                                    try {
-                                        method.invoke(object, resultSet.getLong(name));
-                                    } catch (IllegalAccessException error) {
-                                    } catch (InvocationTargetException error) {
-                                    }
-                                }
-                            });
-                        } else if (parameterType.equals(double.class)) {
-                            processors.add(new ResultSetProcessor<T>() {
-                                @Override
-                                public void process(T object, ResultSet resultSet) throws SQLException {
-                                    try {
-                                        method.invoke(object, resultSet.getDouble(name));
-                                    } catch (IllegalAccessException error) {
-                                    } catch (InvocationTargetException error) {
-                                    }
-                                }
-                            });
-                        } else if (parameterType.equals(String.class)) {
-                            processors.add(new ResultSetProcessor<T>() {
-                                @Override
-                                public void process(T object, ResultSet resultSet) throws SQLException {
-                                    try {
-                                        method.invoke(object, resultSet.getString(name));
-                                    } catch (IllegalAccessException error) {
-                                    } catch (InvocationTargetException error) {
-                                    }
-                                }
-                            });
-                        } else if (parameterType.equals(Date.class)) {
-                            processors.add(new ResultSetProcessor<T>() {
-                                @Override
-                                public void process(T object, ResultSet resultSet) throws SQLException {
-                                    try {
-                                        method.invoke(object, new Date(resultSet.getTimestamp(name).getTime()));
-                                    } catch (IllegalAccessException error) {
-                                    } catch (InvocationTargetException error) {
-                                    }
-                                }
-                            });
-                        }
                     }
+
+                    while (resultSet.next()) {
+                        T object = (T) prototype.create();
+                        for (ResultSetProcessor<T> processor : processors) {
+                            processor.process(object, resultSet);
+                        }
+                        result.add(object);
+                    }
+
+                } finally {
+                    resultSet.close();
                 }
 
-                while (resultSet.next()) {
-                    T object = (T) prototype.create();
-                    for (ResultSetProcessor<T> processor : processors) {
-                        processor.process(object, resultSet);
-                    }
-                    result.add(object);
-                }
-            
             } finally {
-                resultSet.close();
+                statement.close();
+                connection.close();
             }
-        
-        } finally {
-            statement.close();
-            connection.close();
         }
 
         return result;
@@ -402,15 +406,17 @@ public class QueryBuilder {
 
     public long executeUpdate() throws SQLException {
         
-        try {
-            statement.executeUpdate();
-            ResultSet resultSet = statement.getGeneratedKeys();
-            if (resultSet.next()) {
-                return resultSet.getLong(1);
+        if (query != null) {
+            try {
+                statement.executeUpdate();
+                ResultSet resultSet = statement.getGeneratedKeys();
+                if (resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+            } finally {
+                statement.close();
+                connection.close();
             }
-        } finally {
-            statement.close();
-            connection.close();
         }
         return 0;
     }
