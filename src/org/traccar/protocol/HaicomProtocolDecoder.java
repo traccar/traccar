@@ -98,13 +98,13 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
         latitude += Double.valueOf(parser.group(index++)) / 60000;
-        if ((flags & 0x2) == 0) latitude = -latitude;
+        if ((flags & 0x4) == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
         Double longitude = Double.valueOf(parser.group(index++));
         longitude += Double.valueOf(parser.group(index++)) / 60000;
-        if ((flags & 0x4) == 0) longitude = -longitude;
+        if ((flags & 0x2) == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Speed
