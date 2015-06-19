@@ -56,6 +56,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "([^,]+)?,?" +
             "([^,]+)?,?" +
             "([^,]+)?,?" +
+            "([^,]+)?,?" +
             ".*");
 
     @Override
@@ -197,6 +198,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.PREFIX_IO + 2, parser.group(index++));
         position.set(Event.PREFIX_IO + 3, parser.group(index++));
         position.set(Event.PREFIX_IO + 4, parser.group(index++));
+        position.set(Event.PREFIX_IO + 5, parser.group(index++));
 
         return position;
     }

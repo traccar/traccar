@@ -120,6 +120,9 @@ public class Gps103ProtocolDecoderTest extends ProtocolDecoderTest {
         
         verify(decoder.decode(null, null, null,
                 "imei:359710047424644,tracker,150506224036,,F,154037.000,A,0335.2785,N,09841.1543,E,3.03,337.54,,0,0,45.16%,,;"));
+        
+        verify(decoder.decode(null, null, null,
+                "imei:865328023776874,acc off,150619152221,,F,072218.000,A,5439.8489,N,02518.5945,E,0.00,,,1,1,0.0,0.0,23.0,;"));
 
     }
 
