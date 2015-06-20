@@ -1,9 +1,8 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestDataManager;
-import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class GlobalSatProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -41,6 +40,11 @@ public class GlobalSatProtocolDecoderTest extends ProtocolDecoderTest {
 
         /*verify(decoder.decode(null, null,
                 "$353681041893264,9,4,230913,052449,\"250,99,B443,422E,42,37\",\"250,99,B443,4232,43,44\",\"250,99,B443,7910,40,32\",\"250,99,B443,B456,40,28\",\"250,99,B443,B455,40,27\""));*/
+
+        decoder.setFormat0("SPRXYAB27GHKLMmnaefghiotuvwb*U!");
+        
+        verify(decoder.decode(null, null,
+                "GSr,GTR-128,013227006963064,0080,1,a080,3,190615,163816,W07407.7134,N0440.8601,2579,0.01,130,12,0.7,11540mV,0,77,14,\"732,123,0744,2fc1,41,23\",\"732,123,0744,2dfe,05,28\",\"732,123,0744,272a,15,21\",\"732,123,0744,2f02,27,23\"*3b!"));
 
     }
 
