@@ -45,41 +45,39 @@ Ext.define('Traccar.view.state.StateController', {
         'protocol': strings.state_protocol
     },
 
-    selectDevice: function(device) {
-        var position = {
-            "fixTime":"2012-01-02T01:50:00",
-            "longitude":130.0,
-            "latitude":60.0,
-            "valid":true,
-            "altitude":0.0,
-            "speed":0.0,
-            "course":0.0,
-            "deviceId":1,
-            "other":"<info><status>84-20</status></info>",
-            "deviceTime":"2012-01-02T01:50:00",
-            "id":29,
-            "protocol":"gotop"
-        };
+    updatePosition: function(position) {
 
         var store = Ext.getStore('Parameters');
         store.removeAll();
 
-        for (var key in position) {
-            if (position.hasOwnProperty(key) && this.keys[key] !== undefined) {
+        for (var key in position.data) {
+            if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
                 store.add(Ext.create('Traccar.model.Parameter', {
                     name: this.keys[key],
-                    value: position[key]
+                    value: position.get(key)
                 }));
             }
         }
     },
 
+    selectDevice: function(device) {
+        this.deviceId = device.get('id');
+        var found = Ext.getStore('LiveData').query('deviceId', this.deviceId);
+        if (found.getCount() > 0) {
+            this.updatePosition(found.first());
+        }
+    },
+
     add: function(store, data) {
-        console.log(data);
+        if (this.deviceId === data[0].get('deviceId')) {
+            this.updatePosition(data[0]);
+        }
     },
 
     update: function(store, data) {
-        console.log(data);
+        if (this.deviceId === data[0].get('deviceId')) {
+            this.updatePosition(data[0]);
+        }
     }
 
 });

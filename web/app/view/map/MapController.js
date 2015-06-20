@@ -51,8 +51,17 @@ Ext.define('Traccar.view.map.MapController', {
 
                     // TODO check if exists and update
                     var store = Ext.getStore('LiveData');
-                    store.add(Ext.create('Traccar.model.Position', data[i]));
-                    //store.commitChanges(); need for update?
+
+                    var found = store.query('deviceId', data[i].deviceId);
+                    if (found.getCount() > 0) {
+                        var model = found.first();
+                        model.set(data[i]);
+
+                        //store.commitChanges(); need for update?
+
+                    } else {
+                        store.add(Ext.create('Traccar.model.Position', data[i]));
+                    }
 
                     var geometry = new ol.geom.Point(ol.proj.fromLonLat([
                         data[i].longitude,
@@ -62,10 +71,12 @@ Ext.define('Traccar.view.map.MapController', {
                     if (data[i].deviceId in this.liveData) {
                         this.liveData[data[i].deviceId].setGeometry(geometry);
                     } else {
+                        var style = this.getMarkerStyle(styles.map_live_radius, styles.map_live_color);
                         var marker = new ol.Feature({
-                            geometry: geometry
+                            geometry: geometry,
+                            originalStyle: style
                         });
-                        marker.setStyle(this.getMarkerStyle(styles.map_live_radius, styles.map_live_color));
+                        marker.setStyle(style);
                         this.getView().vectorSource.addFeature(marker);
                         this.liveData[data[i].deviceId] = marker;
                     }
@@ -125,12 +136,22 @@ Ext.define('Traccar.view.map.MapController', {
         
         var index;
         var positions = [];
+        this.reportRoutePoints = {};
 
         for (index = 0; index < data.getCount(); index++) {
-            positions.push(ol.proj.fromLonLat([
+            var point = ol.proj.fromLonLat([
                 data.getAt(index).data.longitude,
                 data.getAt(index).data.latitude
-            ]));
+            ]);
+            positions.push(point);
+
+            var style = this.getMarkerStyle(styles.map_report_radius, styles.map_report_color);
+            var feature = new ol.Feature({
+                geometry: new ol.geom.Point(positions[index]),
+                originalStyle: style
+            });
+            feature.setStyle(style);
+            this.reportRoutePoints[data.getAt(index).get('id')] = feature;
         }
 
         this.reportRoute = new ol.Feature({
@@ -139,14 +160,10 @@ Ext.define('Traccar.view.map.MapController', {
         this.reportRoute.setStyle(this.getLineStyle());
         vectorSource.addFeature(this.reportRoute);
 
-        this.reportRoutePoints = [];
-        for (index = 0; index < positions.length; index++) {
-            var feature = new ol.Feature({
-                geometry: new ol.geom.Point(positions[index])
-            });
-            feature.setStyle(this.getMarkerStyle(styles.map_report_radius, styles.map_report_color));
-            this.reportRoutePoints.push(feature);
-            vectorSource.addFeature(feature);
+        for (var key in this.reportRoutePoints) {
+            if (this.reportRoutePoints.hasOwnProperty(key)) {
+                vectorSource.addFeature(this.reportRoutePoints[key]);
+            }
         }
     },
 
@@ -156,39 +173,42 @@ Ext.define('Traccar.view.map.MapController', {
         
         vectorSource.removeFeature(this.reportRoute);
 
-        for (index = 0; index < this.reportRoutePoints.length; index++) {
-            vectorSource.removeFeature(this.reportRoutePoints[index]);
+        for (var key in this.reportRoutePoints) {
+            if (this.reportRoutePoints.hasOwnProperty(key)) {
+                vectorSource.removeFeature(this.reportRoutePoints[key]);
+            }
         }
-        this.reportRoutePoints = [];
+
+        this.reportRoutePoints = {};
     },
 
-    selectPosition: function(position) {
-        if (this.currentPosition === undefined) {
-            this.currentPosition = new ol.Feature();
-            this.currentPosition.setStyle(this.getMarkerStyle(styles.map_select_radius, styles.map_select_color));
-            this.getView().vectorSource.addFeature(this.currentPosition);
+    selectPosition: function(feature) {
+        if (this.currentFeature !== undefined) {
+            this.currentFeature.setStyle(this.currentFeature.get('originalStyle'));
         }
 
-        var point = ol.proj.fromLonLat([
-            position.get('longitude'), position.get('latitude')
-        ]);
-
-        this.currentPosition.setGeometry(new ol.geom.Point(point));
+        feature.setStyle(this.getMarkerStyle(styles.map_select_radius, styles.map_select_color));
 
         var pan = ol.animation.pan({
             duration: styles.map_delay,
             source: this.getView().mapView.getCenter()
         });
         this.getView().map.beforeRender(pan);
-        this.getView().mapView.setCenter(point);
+        this.getView().mapView.setCenter(feature.getGeometry().getCoordinates());
+
+        this.currentFeature = feature;
     },
 
     selectDevice: function(device) {
-        console.log(device); // DELME
+        if (this.liveData[device.get('id')] !== undefined) {
+            this.selectPosition(this.liveData[device.get('id')]);
+        }
     },
 
     selectReport: function(position) {
-        this.selectPosition(position);
+        if (this.reportRoutePoints[position.get('id')] !== undefined) {
+            this.selectPosition(this.reportRoutePoints[position.get('id')]);
+        }
     }
 
 });
