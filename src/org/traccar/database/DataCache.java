@@ -23,9 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class DataCache {
@@ -33,7 +31,7 @@ public class DataCache {
     private final Map<Long, Position> positions = new HashMap<Long, Position>();
     private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<Long, Set<DataCacheListener>>();
     
-    public DataCache(DataManager dataManager) {
+    public void init(DataManager dataManager) {
         try {
             Collection<Position> positions = dataManager.getLatestPositions();
             for (Position position : positions) {

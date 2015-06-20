@@ -90,7 +90,7 @@ public class Context {
         }
 
         dataManager = new DataManager(properties);
-        dataCache = new DataCache(dataManager);
+        dataCache = new DataCache();
         if (Boolean.valueOf(properties.getProperty("web.new"))) {
             permissionsManager = new PermissionsManager();
         }
@@ -113,6 +113,7 @@ public class Context {
         serverManager = new ServerManager();
 
         dataManager.initDatabaseSchema();
+        dataCache.init(dataManager);
         serverManager.init();
     }
 
