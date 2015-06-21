@@ -167,12 +167,16 @@ Ext.define('Traccar.view.map.MapController', {
     reportClear: function() {
         var index;
         var vectorSource = this.getView().vectorSource;
-        
-        vectorSource.removeFeature(this.reportRoute);
 
-        for (var key in this.reportRoutePoints) {
-            if (this.reportRoutePoints.hasOwnProperty(key)) {
-                vectorSource.removeFeature(this.reportRoutePoints[key]);
+        if (this.reportRoute !== undefined) {
+            vectorSource.removeFeature(this.reportRoute);
+        }
+
+        if (this.reportRoutePoints !== undefined) {
+            for (var key in this.reportRoutePoints) {
+                if (this.reportRoutePoints.hasOwnProperty(key)) {
+                    vectorSource.removeFeature(this.reportRoutePoints[key]);
+                }
             }
         }
 
