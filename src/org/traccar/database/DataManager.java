@@ -127,6 +127,14 @@ public class DataManager {
 
         return devices.get(uniqueId);
     }
+    
+    private String getQuery(String key) {
+        String query = properties.getProperty(key);
+        if (query == null) {
+            Log.info("Query not provided: " + key);
+        }
+        return query;
+    }
 
     public void initDatabaseSchema() throws SQLException {
 
@@ -148,7 +156,7 @@ public class DataManager {
                 return;
             }
 
-            QueryBuilder.create(dataSource, properties.getProperty("database.createSchema")).executeUpdate();
+            QueryBuilder.create(dataSource, getQuery("database.createSchema")).executeUpdate();
 
             User admin = new User();
             admin.setName("admin");
@@ -159,7 +167,7 @@ public class DataManager {
 
             Server server = new Server();
             server.setRegistration(true);
-            QueryBuilder.create(dataSource, properties.getProperty("database.insertServer"))
+            QueryBuilder.create(dataSource, getQuery("database.insertServer"))
                     .setObject(server)
                     .executeUpdate();
 
@@ -206,30 +214,30 @@ public class DataManager {
     }
 
     public User login(String email, String password) throws SQLException {
-        User user = QueryBuilder.create(dataSource, properties.getProperty("database.loginUser"))
+        User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
                 .setString("email", email)
                 .executeQuerySingle(new User());
         return user != null && user.isPasswordValid(password) ? user : null;
     }
 
     public Collection<User> getUsers() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectUsersAll"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectUsersAll"))
                 .executeQuery(new User());
     }
 
     public void addUser(User user) throws SQLException {
-        user.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertUser"))
+        user.setId(QueryBuilder.create(dataSource, getQuery("database.insertUser"))
                 .setObject(user)
                 .executeUpdate());
         Context.getPermissionsManager().refresh();
     }
     
     public void updateUser(User user) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.updateUser"))
+        QueryBuilder.create(dataSource, getQuery("database.updateUser"))
                 .setObject(user)
                 .executeUpdate();
         if(user.getHashedPassword() != null) {
-            QueryBuilder.create(dataSource, properties.getProperty("database.updateUserPassword"))
+            QueryBuilder.create(dataSource, getQuery("database.updateUserPassword"))
                 .setObject(user)
                 .executeUpdate();
         }
@@ -237,48 +245,48 @@ public class DataManager {
     }
 
     public void removeUser(User user) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.deleteUser"))
+        QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
                 .setObject(user)
                 .executeUpdate();
         Context.getPermissionsManager().refresh();
     }
 
     public Collection<Permission> getPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.getPermissionsAll"))
+        return QueryBuilder.create(dataSource, getQuery("database.getPermissionsAll"))
                 .executeQuery(new Permission());
     }
 
     public Collection<Device> getAllDevices() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectDevicesAll"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectDevicesAll"))
                 .executeQuery(new Device());
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectDevices"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectDevices"))
                 .setLong("userId", userId)
                 .executeQuery(new Device());
     }
     
     public void addDevice(Device device) throws SQLException {
-        device.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertDevice"))
+        device.setId(QueryBuilder.create(dataSource, getQuery("database.insertDevice"))
                 .setObject(device)
                 .executeUpdate());
     }
     
     public void updateDevice(Device device) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.updateDevice"))
+        QueryBuilder.create(dataSource, getQuery("database.updateDevice"))
                 .setObject(device)
                 .executeUpdate();
     }
     
     public void removeDevice(Device device) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.deleteDevice"))
+        QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
     }
     
     public void linkDevice(long userId, long deviceId) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.linkDevice"))
+        QueryBuilder.create(dataSource, getQuery("database.linkDevice"))
                 .setLong("userId", userId)
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
@@ -286,7 +294,7 @@ public class DataManager {
     }
 
     public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectPositions"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
                 .setLong("deviceId", deviceId)
                 .setDate("from", from)
                 .setDate("to", to)
@@ -294,7 +302,7 @@ public class DataManager {
     }
 
     public void addPosition(Position position) throws SQLException {
-        position.setId(QueryBuilder.create(dataSource, properties.getProperty("database.insertPosition"))
+        position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"))
                 .setObject(position)
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
@@ -305,7 +313,7 @@ public class DataManager {
 
     // TODO: possibly remove this method
     public void updateLatestPosition(Position position) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.updateLatestPosition"))
+        QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setObject(position)
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
@@ -315,17 +323,17 @@ public class DataManager {
     }
 
     public Collection<Position> getLatestPositions() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectLatestPositions"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectLatestPositions"))
                 .executeQuery(new Position());
     }
 
     public Server getServer() throws SQLException {
-        return QueryBuilder.create(dataSource, properties.getProperty("database.selectServers"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
                 .executeQuerySingle(new Server());
     }
 
     public void updateServer(Server server) throws SQLException {
-        QueryBuilder.create(dataSource, properties.getProperty("database.updateServer"))
+        QueryBuilder.create(dataSource, getQuery("database.updateServer"))
                 .setObject(server)
                 .executeUpdate();
     }
