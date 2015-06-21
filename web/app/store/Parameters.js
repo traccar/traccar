@@ -16,5 +16,9 @@
 
 Ext.define('Traccar.store.Parameters', {
     extend: 'Ext.data.Store',
-    model: 'Traccar.model.Parameter'
+    model: 'Traccar.model.Parameter',
+
+    sorters: [{
+        property: 'priority'
+    }]
 });

@@ -35,14 +35,38 @@ Ext.define('Traccar.view.state.StateController', {
     },
 
     keys: {
-        'fixTime': strings.report_time,
-        'latitude': strings.report_latitude,
-        'longitude': strings.report_longitude,
-        'valid': strings.report_valid,
-        'altitude': strings.report_altitude,
-        'speed': strings.report_speed,
-        'course': strings.report_course,
-        'protocol': strings.state_protocol
+        'fixTime': {
+            priority: 1,
+            name: strings.report_time
+        },
+        'latitude': {
+            priority: 2,
+            name: strings.report_latitude
+        },
+        'longitude': {
+            priority: 3,
+            name: strings.report_longitude
+        },
+        'valid': {
+            priority: 4,
+            name: strings.report_valid
+        },
+        'altitude': {
+            priority: 5,
+            name: strings.report_altitude
+        },
+        'speed': {
+            priority: 6,
+            name: strings.report_speed
+        },
+        'course': {
+            priority: 7,
+            name: strings.report_course
+        },
+        'protocol': {
+            priority: 8,
+            name: strings.state_protocol
+        }
     },
 
     updatePosition: function(position) {
@@ -53,11 +77,20 @@ Ext.define('Traccar.view.state.StateController', {
         for (var key in position.data) {
             if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
                 store.add(Ext.create('Traccar.model.Parameter', {
-                    name: this.keys[key],
+                    priority: this.keys[key].priority,
+                    name: this.keys[key].name,
                     value: position.get(key)
                 }));
             }
         }
+
+        // TODO: decode XML
+        var xml = position.get('other');
+        store.add(Ext.create('Traccar.model.Parameter', {
+            priority: 99,
+            name: 'Other',
+            value: xml
+        }));
     },
 
     selectDevice: function(device) {
@@ -75,8 +108,8 @@ Ext.define('Traccar.view.state.StateController', {
     },
 
     update: function(store, data) {
-        if (this.deviceId === data[0].get('deviceId')) {
-            this.updatePosition(data[0]);
+        if (this.deviceId === data.get('deviceId')) {
+            this.updatePosition(data);
         }
     }
 

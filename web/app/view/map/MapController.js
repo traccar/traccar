@@ -49,16 +49,11 @@ Ext.define('Traccar.view.map.MapController', {
                 var i;
                 for (i = 0; i < data.length; i++) {
 
-                    // TODO check if exists and update
                     var store = Ext.getStore('LiveData');
 
                     var found = store.query('deviceId', data[i].deviceId);
                     if (found.getCount() > 0) {
-                        var model = found.first();
-                        model.set(data[i]);
-
-                        //store.commitChanges(); need for update?
-
+                        found.first().set(data[i]);
                     } else {
                         store.add(Ext.create('Traccar.model.Position', data[i]));
                     }
