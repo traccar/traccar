@@ -20,7 +20,6 @@ import java.util.Properties;
 import javax.naming.InitialContext;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -58,18 +57,18 @@ public class WebServer {
             servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
             servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
 
-            ResourceHandler mobileResourceHandler = new ResourceHandler();
+            /*ResourceHandler mobileResourceHandler = new ResourceHandler();
             mobileResourceHandler.setResourceBase(properties.getProperty("web.mobile"));
             mobileResourceHandler.setWelcomeFiles(new String[] {"index.html"});
             ContextHandler mobileContext = new ContextHandler("/m");
-            mobileContext.setHandler(mobileResourceHandler);
+            mobileContext.setHandler(mobileResourceHandler);*/
 
             ResourceHandler resourceHandler = new ResourceHandler();
             resourceHandler.setResourceBase(properties.getProperty("web.path"));
             resourceHandler.setWelcomeFiles(new String[]{"index.html"});
 
             HandlerList handlerList = new HandlerList();
-            handlerList.setHandlers(new Handler[] {servletHandler, mobileContext, resourceHandler});
+            handlerList.setHandlers(new Handler[] {servletHandler, resourceHandler});
 
             server.setHandler(handlerList);
 
