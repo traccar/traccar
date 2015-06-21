@@ -1,4 +1,4 @@
-Web page - http://www.traccar.org
+Web page - https://www.traccar.org
 
 This package contains only main Java application (tracker-server.jar).
 
@@ -8,4 +8,4 @@ This package contains only main Java application (tracker-server.jar).
 
 3) To start application run following command:
 
-java -jar tracker-server.jar "configuration.xml"
+java -jar tracker-server.jar "traccar.xml"

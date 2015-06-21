@@ -1,6 +1,6 @@
 == DESCRIPTION ==
 
-Web page - http://www.traccar.org
+Web page - https://www.traccar.org
 
 Author - Anton Tananaev (anton.tananaev@gmail.com)
 
