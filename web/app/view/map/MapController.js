@@ -129,6 +129,8 @@ Ext.define('Traccar.view.map.MapController', {
     },
     
     reportShow: function() {
+        this.reportClear();
+        
         var vectorSource = this.getView().vectorSource;
 
         var data = Ext.getStore('Positions').getData().clone();
