@@ -10,6 +10,7 @@ Name: "{app}\conf"
 Name: "{app}\data"
 Name: "{app}\lib"
 Name: "{app}\logs"
+Name: "{app}\web"
 
 [Files]
 Source: "..\wrapper\bin\wrapper-windows-x86-32.exe"; DestDir: "{app}\bin"; DestName: "wrapper.exe"
@@ -22,8 +23,8 @@ Source: "..\wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: 
 
 Source: "..\..\target\tracker-server.jar"; DestDir: "{app}"
 Source: "..\..\target\lib\*"; DestDir: "{app}\lib"
-Source: "..\traccar-web.war"; DestDir: "{app}"
-Source: "traccar.cfg"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
+Source: "..\..\web\*"; DestDir: "{app}\web"
+Source: "traccar.xml"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
 
 [Run]
 Filename: "{app}\bin\InstallTraccar-NT.bat"
@@ -63,7 +64,7 @@ var
 begin
   LoadStringFromFile(ExpandConstant(CurrentFileName), S);
   Insert('wrapper.java.classpath.2=../tracker-server.jar' + #13#10, S, Pos('wrapper.java.classpath.1', S));
-  Insert(ExpandConstant('wrapper.app.parameter.2="{app}\conf\traccar.cfg"') + #13#10, S, Pos('wrapper.app.parameter.1', S));
+  Insert(ExpandConstant('wrapper.app.parameter.2="{app}\conf\traccar.xml"') + #13#10, S, Pos('wrapper.app.parameter.1', S));
   StringChangeEx(S, '<YourMainClass>', 'org.traccar.Main', true);
   StringChangeEx(S, '@app.name@', 'Traccar', true);
   StringChangeEx(S, '@app.long.name@', 'Traccar', true);
@@ -77,8 +78,8 @@ var
   S: String;
 begin
   LoadStringFromFile(ExpandConstant(CurrentFileName), S);
-  StringChangeEx(S, '[DATABASE]', ExpandConstant('{app}\data\database'), true);
-  StringChangeEx(S, '[WAR]', ExpandConstant('{app}\traccar-web.war'), true);
+  StringChangeEx(S, '[WEB]', ExpandConstant('{app}\web'), true);
   StringChangeEx(S, '[LOG]', ExpandConstant('{app}\logs\tracker-server.log'), true);
+  StringChangeEx(S, '[DATABASE]', ExpandConstant('{app}\data\database'), true);
   SaveStringToFile(ExpandConstant(CurrentFileName), S, false);
 end;

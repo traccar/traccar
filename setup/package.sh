@@ -7,14 +7,6 @@ fi
 
 # GENERAL REQUIREMENTS
 
-# Check web application
-if [ -e "traccar-web.war" ]; then
-    echo "Web application archive found"
-else
-    echo "Put traccar-web.war into this directory"
-    exit 0
-fi
-
 # Check wrapper
 if ls wrapper-delta-pack-*.tar.gz 1> /dev/null 2>&1; then
     echo "Java wrapper package found"
@@ -119,6 +111,7 @@ mkdir out/conf
 mkdir out/data
 mkdir out/lib
 mkdir out/logs
+mkdir out/web
 
 cp wrapper/src/bin/sh.script.in out/bin/traccar
 cp wrapper/lib/wrapper.jar out/lib
@@ -129,14 +122,14 @@ chmod +x out/bin/traccar
 
 cp ../target/tracker-server.jar out
 cp ../target/lib/* out/lib
-cp traccar-web.war out
-cp linux/traccar.cfg out/conf
+cp -r ../target/web/* out/web
+cp linux/traccar.xml out/conf
 
 sed -i 's/@app.name@/traccar/g' out/bin/traccar
 sed -i 's/@app.long.name@/traccar/g' out/bin/traccar
 
 sed -i '/wrapper.java.classpath.1/i\wrapper.java.classpath.2=../tracker-server.jar' out/conf/wrapper.conf
-sed -i "/wrapper.app.parameter.1/i\wrapper.app.parameter.2=$app/conf/traccar.cfg" out/conf/wrapper.conf
+sed -i "/wrapper.app.parameter.1/i\wrapper.app.parameter.2=$app/conf/traccar.xml" out/conf/wrapper.conf
 sed -i 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
 sed -i 's/@app.name@/traccar/g' out/conf/wrapper.conf
 sed -i 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
@@ -174,13 +167,13 @@ zip -j traccar-linux-arm-$1.zip traccar.run linux/README.txt
 
 # MACOSX PACKAGE
 
-rm out/conf/traccar.cfg
+rm out/conf/traccar.xml
 rm out/bin/wrapper-linux-armel-32
 rm out/bin/wrapper-linux-armhf-32
 rm out/lib/libwrapper-linux-armel-32.so
 rm out/lib/libwrapper-linux-armhf-32.so
 
-cp macosx/traccar.cfg out/conf
+cp macosx/traccar.xml out/conf
 
 cp wrapper/bin/wrapper-macosx-universal-64 out/bin/wrapper
 cp wrapper/lib/libwrapper-macosx-universal-64.jnilib out/lib/libwrapper.jnilib
