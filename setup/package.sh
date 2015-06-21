@@ -122,7 +122,7 @@ chmod +x out/bin/traccar
 
 cp ../target/tracker-server.jar out
 cp ../target/lib/* out/lib
-cp -r ../target/web/* out/web
+cp -r ../web/* out/web
 cp linux/traccar.xml out/conf
 
 sed -i 's/@app.name@/traccar/g' out/bin/traccar
