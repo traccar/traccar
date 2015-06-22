@@ -35,7 +35,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
-            ".*\\$POS," +                       // Data Frame start
+            ".*" +
+            "\\$[A-Z]{3}\\d?," +                // Type
             "(\\d+)," +                         // Id
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -45,7 +46,14 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             "([EW])," +
             "(\\d+\\.\\d+)?," +                 // Speed
             "(\\d+\\.\\d+)?," +                 // Course
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Date
+            "(\\d{2})(\\d{2})(\\d{2}),,," +     // Date
+            "./" +
+            "([01])+," +                        // Input
+            "([01])+/" +                        // Output
+            "([^/]+)/" +                        // ADC
+            "(\\d+)" +                          // Odometer
+            "(?:/([^/]+)?/" +                   // RFID
+            "(\\p{XDigit}{3}))?" +              // State
             ".*");
 
     @Override
@@ -117,6 +125,33 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
+
+        // IO
+        position.set(Event.KEY_INPUT, parser.group(index++));
+        position.set(Event.KEY_OUTPUT, parser.group(index++));
+
+        // ADC
+        String adc = parser.group(index++);
+        if (adc != null) {
+            String[] values = adc.split(",");
+            for (int i = 0; i < values.length; i++) {
+                position.set(Event.PREFIX_ADC + (i + 1), Integer.parseInt(values[i], 16));
+            }
+        }
+
+        position.set(Event.KEY_ODOMETER, parser.group(index++));
+
+        // Driver
+        position.set(Event.KEY_RFID, parser.group(index++));
+
+        // Other
+        String status = parser.group(index++);
+        if (status != null) {
+            int value = Integer.parseInt(status, 16);
+            position.set(Event.KEY_BATTERY, value >> 8);
+            position.set(Event.KEY_GSM, (value >> 4) & 0xf);
+            position.set(Event.KEY_SATELLITES, value & 0xf);
+        }
 
         return position;
     }
