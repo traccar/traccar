@@ -27,59 +27,47 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.traccar.helper.Log;
 import org.w3c.dom.Document;
 
-public class NominatimReverseGeocoder implements ReverseGeocoder {
-
-    private final String url;
+public class NominatimReverseGeocoder extends JsonReverseGeocoder {
 
     public NominatimReverseGeocoder() {
         this("http://nominatim.openstreetmap.org/reverse");
     }
     
     public NominatimReverseGeocoder(String url) {
-        this.url = url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1";
+        super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1");
     }
 
     @Override
-    public String getAddress(AddressFormat format, double latitude, double longitude) {
-        
-        try {
-            Address address = new Address();
-            URLConnection conn = new URL(String.format(url, latitude, longitude)).openConnection();
+    protected Address parseAddress(JsonObject json) {
+        Address address = new Address();
+        JsonObject result = json.getJsonObject("address");
 
-            JsonObject json = Json.createReader(new InputStreamReader(conn.getInputStream())).readObject().getJsonObject("address");
-
-            if (json.containsKey("house_number")) {
-                address.setHouse(json.getString("house_number"));
-            }
-            if (json.containsKey("road")) {
-                address.setStreet(json.getString("road"));
-            }
-            if (json.containsKey("village")) {
-                address.setSettlement(json.getString("village"));
-            }
-            if (json.containsKey("city")) {
-                address.setSettlement(json.getString("city"));
-            }
-            if (json.containsKey("state_district")) {
-                address.setDistrict(json.getString("state_district"));
-            }
-            if (json.containsKey("state")) {
-                address.setState(json.getString("state"));
-            }
-            if (json.containsKey("country_code")) {
-                address.setCountry(json.getString("country_code").toUpperCase());
-            }
-            if (json.containsKey("postcode")) {
-                address.setPostcode(json.getString("postcode"));
-            }
-
-            return format.format(address);
-
-        } catch(Exception error) {
-            Log.warning(error);
+        if (result.containsKey("house_number")) {
+            address.setHouse(result.getString("house_number"));
+        }
+        if (result.containsKey("road")) {
+            address.setStreet(result.getString("road"));
+        }
+        if (result.containsKey("village")) {
+            address.setSettlement(result.getString("village"));
+        }
+        if (result.containsKey("city")) {
+            address.setSettlement(result.getString("city"));
+        }
+        if (result.containsKey("state_district")) {
+            address.setDistrict(result.getString("state_district"));
+        }
+        if (result.containsKey("state")) {
+            address.setState(result.getString("state"));
+        }
+        if (result.containsKey("country_code")) {
+            address.setCountry(result.getString("country_code").toUpperCase());
+        }
+        if (result.containsKey("postcode")) {
+            address.setPostcode(result.getString("postcode"));
         }
 
-        return null;
+        return address;
     }
 
 }

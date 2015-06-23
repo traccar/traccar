@@ -23,45 +23,33 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class GisgraphyReverseGeocoder implements ReverseGeocoder {
-
-    private final String url;
+public class GisgraphyReverseGeocoder extends JsonReverseGeocoder {
 
     public GisgraphyReverseGeocoder() {
         this("http://services.gisgraphy.com/street/streetsearch");
     }
 
     public GisgraphyReverseGeocoder(String url) {
-        this.url = url + "?format=json&lat=%f&lng=%f&from=1&to=1";
+        super(url + "?format=json&lat=%f&lng=%f&from=1&to=1");
     }
 
     @Override
-    public String getAddress(AddressFormat format, double latitude, double longitude) {
-        
-        try {
-            Address address = new Address();
-            URLConnection conn = new URL(String.format(url, latitude, longitude)).openConnection();
+    protected Address parseAddress(JsonObject json) {
+        Address address = new Address();
 
-            JsonObject json = Json.createReader(new InputStreamReader(conn.getInputStream())).readObject();
-            JsonObject result = json.getJsonArray("result").getJsonObject(0);
+        JsonObject result = json.getJsonArray("result").getJsonObject(0);
 
-            if (result.containsKey("name")) {
-                address.setStreet(result.getString("name"));
-            }
-            if (result.containsKey("isIn")) {
-                address.setSettlement(result.getString("isIn"));
-            }
-            if (result.containsKey("countryCode")) {
-                address.setCountry(result.getString("countryCode"));
-            }
-
-            return format.format(address);
-
-        } catch(Exception error) {
-            Log.warning(error);
+        if (result.containsKey("name")) {
+            address.setStreet(result.getString("name"));
+        }
+        if (result.containsKey("isIn")) {
+            address.setSettlement(result.getString("isIn"));
+        }
+        if (result.containsKey("countryCode")) {
+            address.setCountry(result.getString("countryCode"));
         }
 
-        return null;
+        return address;
     }
 
 }

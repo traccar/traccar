@@ -24,60 +24,53 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import org.traccar.helper.Log;
 
-public class GoogleReverseGeocoder implements ReverseGeocoder {
+public class GoogleReverseGeocoder extends JsonReverseGeocoder {
 
-    private final String url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f";
+    public GoogleReverseGeocoder() {
+        super("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f");
+    }
 
     @Override
-    public String getAddress(AddressFormat format, double latitude, double longitude) {
+    protected Address parseAddress(JsonObject json) {
+        JsonArray results = json.getJsonArray("results");
 
-        try {
+        if (!results.isEmpty()) {
             Address address = new Address();
-            URLConnection conn = new URL(String.format(url, latitude, longitude)).openConnection();
 
-            JsonObject json = Json.createReader(new InputStreamReader(conn.getInputStream())).readObject();
-            JsonArray results = json.getJsonArray("results");
+            JsonObject result = (JsonObject) results.get(0);
+            JsonArray components = result.getJsonArray("address_components");
 
-            if (!results.isEmpty()) {
+            for (JsonObject component : components.getValuesAs(JsonObject.class)) {
 
-                JsonObject result = (JsonObject) results.get(0);
-                JsonArray components = result.getJsonArray("address_components");
+                String value = component.getString("short_name");
 
-                for (JsonObject component : components.getValuesAs(JsonObject.class)) {
-
-                    String value = component.getString("short_name");
-
-                    for (JsonString type : component.getJsonArray("types").getValuesAs(JsonString.class)) {
-                        if (type.getString().equals("street_number")) {
-                            address.setHouse(value);
-                            break;
-                        } else if (type.getString().equals("route")) {
-                            address.setStreet(value);
-                            break;
-                        } else if (type.getString().equals("locality")) {
-                            address.setSettlement(value);
-                            break;
-                        } else if (type.getString().equals("administrative_area_level_2")) {
-                            address.setDistrict(value);
-                            break;
-                        } else if (type.getString().equals("administrative_area_level_1")) {
-                            address.setState(value);
-                            break;
-                        } else if (type.getString().equals("country")) {
-                            address.setCountry(value);
-                            break;
-                        } else if (type.getString().equals("postal_code")) {
-                            address.setPostcode(value);
-                            break;
-                        }
+                for (JsonString type : component.getJsonArray("types").getValuesAs(JsonString.class)) {
+                    if (type.getString().equals("street_number")) {
+                        address.setHouse(value);
+                        break;
+                    } else if (type.getString().equals("route")) {
+                        address.setStreet(value);
+                        break;
+                    } else if (type.getString().equals("locality")) {
+                        address.setSettlement(value);
+                        break;
+                    } else if (type.getString().equals("administrative_area_level_2")) {
+                        address.setDistrict(value);
+                        break;
+                    } else if (type.getString().equals("administrative_area_level_1")) {
+                        address.setState(value);
+                        break;
+                    } else if (type.getString().equals("country")) {
+                        address.setCountry(value);
+                        break;
+                    } else if (type.getString().equals("postal_code")) {
+                        address.setPostcode(value);
+                        break;
                     }
                 }
-
-                return format.format(address);
             }
 
-        } catch(Exception error) {
-            Log.warning(error);
+            return address;
         }
 
         return null;

@@ -11,7 +11,7 @@ public class ReverseGeocoderTest {
         ReverseGeocoder reverseGeocoder = new GoogleReverseGeocoder();
 
         assertEquals(
-                "1700 Charleston Rd, Mountain View, CA, US",
+                "1600 Amphitheatre Pkwy, Mountain View, CA, US",
                 reverseGeocoder.getAddress(new AddressFormat(), 37.4217550, -122.0846330));
     }
 
