@@ -85,6 +85,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(millis));
 
             // Location
+            position.setValid(true);
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
 
