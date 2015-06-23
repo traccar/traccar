@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,17 +39,19 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "R.." +                        // Type
+            "(?:R[EP]V" +                  // Type
             "(?:\\d{2}" +                  // Event index
             "(\\d{4})" +                   // Week
             "(\\d))?" +                    // Day
-            "(\\d{5})" +                   // Seconds
+            "(\\d{5})|" +                  // Seconds
+            "RGP" +                        // Type
+            "(\\d{2})(\\d{2})(\\d{2})" +   // Date
+            "(\\d{2})(\\d{2})(\\d{2}))" +  // Time
             "([\\+\\-]\\d{2})(\\d{5})" +   // Latitude
             "([\\+\\-]\\d{3})(\\d{5})" +   // Longitude
             "(\\d{3})" +                   // Speed
             "(\\d{3})" +                   // Course
-            "\\d" +                        // Fix mode
-            "(\\d)" +                      // Fix age
+            "(\\d)" +                      // Fix mode
             ".*\r?\n?");
 
     private Date getTime(long week, long day, long seconds) {
@@ -137,11 +139,24 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         // Time
         String week = parser.group(index++);
         String day = parser.group(index++);
-        int seconds = Integer.valueOf(parser.group(index++));
-        if (week != null && day != null) {
-            position.setTime(getTime(Integer.valueOf(week), Integer.valueOf(day), seconds));
+        String seconds = parser.group(index++);
+        if (seconds != null) {
+            if (week != null && day != null) {
+                position.setTime(getTime(Integer.valueOf(week), Integer.valueOf(day), Integer.valueOf(seconds)));
+            } else {
+                position.setTime(getTime(Integer.valueOf(seconds)));
+            }
+            index += 6;
         } else {
-            position.setTime(getTime(seconds));
+            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            time.clear();
+            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+            position.setTime(time.getTime());
         }
 
         // Latitude
@@ -159,7 +174,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
         
         // Validity
-        position.setValid(Integer.valueOf(parser.group(index++)) == 2);
+        position.setValid(Integer.valueOf(parser.group(index++)) != 0);
         return position;
     }
 

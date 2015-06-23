@@ -12,8 +12,11 @@ public class SyrusProtocolDecoderTest extends ProtocolDecoderTest {
 
         SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(null, false);
 
-        /*verify(decoder.decode(null, null,
-                ">RGP230615010248-2682523-065236820000003007F4101;ID=0005;#0002;*2A<"));*/
+        verify(decoder.decode(null, null,
+                ">RGP230615010248-2682523-065236820000003007F4101;ID=0005;#0002;*2A<"));
+
+        verify(decoder.decode(null, null,
+                ">RGP190805211932-3457215-058493640000000FFBF0300;ID=8251;#2122;*54<"));
 
         assertNotNull(decoder.decode(null, null,
                 ">RPV00000+3739438-1220384601512612;ID=1234;*7F"));
