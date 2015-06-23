@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class BceProtocolDecoder extends BaseProtocolDecoder {
 
-    public BceProtocolDecoder(String protocol) {
+    public BceProtocolDecoder(BceProtocol protocol) {
         super(protocol);
     }
 
@@ -68,7 +68,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readerIndex() < dataEnd) {
 
                 Position position = new Position();
-                position.setProtocol(getProtocol());
+                position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
                 int structEnd = buf.readUnsignedByte() + buf.readerIndex();

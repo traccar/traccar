@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
-    public HaicomProtocolDecoder(String protocol) {
+    public HaicomProtocolDecoder(HaicomProtocol protocol) {
         super(protocol);
     }
 
@@ -67,7 +67,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

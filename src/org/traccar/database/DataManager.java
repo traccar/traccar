@@ -36,6 +36,7 @@ import javax.sql.DataSource;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.http.JsonConverter;
@@ -77,8 +78,8 @@ public class DataManager {
         return dataSource;
     }
 
-    public void setActiveDevice(String uniqueId, Channel channel, SocketAddress remoteAddress) {
-        this.activeDevices.put(uniqueId, new ActiveDevice(uniqueId, channel, remoteAddress));
+    public void setActiveDevice(String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+        this.activeDevices.put(uniqueId, new ActiveDevice(uniqueId, protocol, channel, remoteAddress));
     }
 
     public ActiveDevice getActiveDevice(String uniqueId) {

@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     
-    public TeltonikaProtocolDecoder(String protocol) {
+    public TeltonikaProtocolDecoder(TeltonikaProtocol protocol) {
         super(protocol);
     }
 
@@ -74,7 +74,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         
         for (int i = 0; i < count; i++) {
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             
             position.setDeviceId(getDeviceId());
             

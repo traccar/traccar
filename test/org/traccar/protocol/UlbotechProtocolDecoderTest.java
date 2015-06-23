@@ -13,7 +13,7 @@ public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(null);
+        UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(new UlbotechProtocol());
         
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "f8010103545500500179009ccb4b62010e00144db906310d3f0000000000cb0304000000000404000a8123050603211860221006080000000100000000ef97f8"))));

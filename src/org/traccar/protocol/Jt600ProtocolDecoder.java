@@ -32,14 +32,14 @@ import org.traccar.model.Position;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Jt600ProtocolDecoder(String protocol) {
+    public Jt600ProtocolDecoder(Jt600Protocol protocol) {
         super(protocol);
     }
 
     private Position decodeNormalMessage(ChannelBuffer buf, Channel channel) throws Exception {
 
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         buf.readByte(); // header
 
@@ -152,7 +152,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         position.set(Event.KEY_ALARM, true);
         Integer index = 1;
 

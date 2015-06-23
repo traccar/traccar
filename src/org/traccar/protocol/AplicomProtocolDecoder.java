@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
-    public AplicomProtocolDecoder(String protocol) {
+    public AplicomProtocolDecoder(AplicomProtocol protocol) {
         super(protocol);
     }
 
@@ -131,7 +131,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         if (!identify(imei, channel)) {
             return null;
         }
@@ -274,7 +274,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // CAN data
         if (buf.readable() && (selector & 0x1000) != 0 && event == EVENT_DATA &&
-            Boolean.parseBoolean(Context.getProps().getProperty(getProtocol() + ".can"))) {
+            Boolean.parseBoolean(Context.getProps().getProperty(getProtocolName() + ".can"))) {
 
             buf.readUnsignedMedium(); // packet identifier
             buf.readUnsignedByte(); // version

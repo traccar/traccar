@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
-    public TotemProtocolDecoder(String protocol) {
+    public TotemProtocolDecoder(TotemProtocol protocol) {
         super(protocol);
     }
 
@@ -159,7 +159,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

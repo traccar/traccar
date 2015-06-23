@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class FreedomProtocolDecoder extends BaseProtocolDecoder {
 
-    public FreedomProtocolDecoder(String protocol) {
+    public FreedomProtocolDecoder(FreedomProtocol protocol) {
         super(protocol);
     }
 
@@ -55,7 +55,7 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Identification

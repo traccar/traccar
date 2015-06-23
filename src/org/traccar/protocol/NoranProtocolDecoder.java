@@ -34,7 +34,7 @@ import org.traccar.model.Position;
 
 public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
-    public NoranProtocolDecoder(String protocol) {
+    public NoranProtocolDecoder(NoranProtocol protocol) {
         super(protocol);
     }
 
@@ -87,7 +87,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             
             if (type == MSG_CONTROL_RESPONSE) {
                 buf.readUnsignedInt(); // GIS ip

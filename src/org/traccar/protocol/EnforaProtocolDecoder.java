@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
-    public EnforaProtocolDecoder(String protocol) {
+    public EnforaProtocolDecoder(EnforaProtocol protocol) {
         super(protocol);
     }
 
@@ -94,7 +94,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Get device by IMEI

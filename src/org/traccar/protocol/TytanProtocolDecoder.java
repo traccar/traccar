@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
-    public TytanProtocolDecoder(String protocol) {
+    public TytanProtocolDecoder(TytanProtocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +61,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readable()) {
             
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
             
             int end = buf.readerIndex() + buf.readUnsignedByte();

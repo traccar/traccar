@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tr900ProtocolDecoder(String protocol) {
+    public Tr900ProtocolDecoder(Tr900Protocol protocol) {
         super(protocol);
     }
 
@@ -70,7 +70,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Identification

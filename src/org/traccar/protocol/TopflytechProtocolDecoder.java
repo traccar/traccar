@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
 
-    public TopflytechProtocolDecoder(String protocol) {
+    public TopflytechProtocolDecoder(TopflytechProtocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +61,7 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Identifier

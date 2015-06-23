@@ -11,7 +11,7 @@ public class MeiligaoProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(null);
+        MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(new MeiligaoProtocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "24240000123456FFFFFFFF50008B9B0D0A"))));

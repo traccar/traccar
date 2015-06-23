@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
-    public Ev603ProtocolDecoder(String protocol) {
+    public Ev603ProtocolDecoder(Ev603Protocol protocol) {
         super(protocol);
     }
 
@@ -65,7 +65,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             Integer index = 1;
 
             // Date

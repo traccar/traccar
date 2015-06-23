@@ -38,7 +38,7 @@ import org.traccar.model.Position;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
     
-    public OsmAndProtocolDecoder(String protocol) {
+    public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
         super(protocol);
     }
     
@@ -58,7 +58,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         // Identification
         String id = params.get(params.containsKey("id") ? "id" : "deviceid").get(0);

@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Ardi01ProtocolDecoder(String protocol) {
+    public Ardi01ProtocolDecoder(Ardi01Protocol protocol) {
         super(protocol);
     }
 
@@ -62,7 +62,7 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Detect device

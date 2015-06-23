@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tk103ProtocolDecoder(String protocol) {
+    public Tk103ProtocolDecoder(Tk103Protocol protocol) {
         super(protocol);
     }
 
@@ -83,7 +83,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Get device by IMEI

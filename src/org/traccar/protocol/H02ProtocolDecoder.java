@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
-    public H02ProtocolDecoder(String protocol) {
+    public H02ProtocolDecoder(H02Protocol protocol) {
         super(protocol);
     }
     
@@ -59,7 +59,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         
         buf.readByte(); // marker
 
@@ -127,7 +127,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

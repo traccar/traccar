@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
-    public WialonProtocolDecoder(String protocol) {
+    public WialonProtocolDecoder(WialonProtocol protocol) {
         super(protocol);
     }
 
@@ -77,7 +77,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         position.setDeviceId(getDeviceId());
 
         Integer index = 1;

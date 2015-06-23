@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tk102ProtocolDecoder(String protocol) {
+    public Tk102ProtocolDecoder(Tk102Protocol protocol) {
         super(protocol);
     }
 
@@ -78,7 +78,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;

@@ -37,7 +37,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
 
     private Position position = null;
 
-    public MaxonProtocolDecoder(String protocol) {
+    public MaxonProtocolDecoder(MaxonProtocol protocol) {
         super(protocol);
     }
 

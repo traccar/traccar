@@ -33,7 +33,7 @@ import org.traccar.model.Position;
 
 public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
-    public CastelProtocolDecoder(String protocol) {
+    public CastelProtocolDecoder(CastelProtocol protocol) {
         super(protocol);
     }
 
@@ -73,7 +73,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_LOGIN || type == MSG_GPS) {
             
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             
             if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
                 return null;

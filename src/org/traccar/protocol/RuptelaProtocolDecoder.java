@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     
-    public RuptelaProtocolDecoder(String protocol) {
+    public RuptelaProtocolDecoder(RuptelaProtocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +61,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < count; i++) {
                 Position position = new Position();
-                position.setProtocol(getProtocol());
+                position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
                 // Time

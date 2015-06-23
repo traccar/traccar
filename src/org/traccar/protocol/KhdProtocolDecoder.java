@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
-    public KhdProtocolDecoder(String protocol) {
+    public KhdProtocolDecoder(KhdProtocol protocol) {
         super(protocol);
     }
 
@@ -74,7 +74,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Device identification
             if (!identify(readSerialNumber(buf), channel)) {

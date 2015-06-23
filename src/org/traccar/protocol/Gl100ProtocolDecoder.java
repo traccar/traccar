@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gl100ProtocolDecoder(String protocol) {
+    public Gl100ProtocolDecoder(Gl100Protocol protocol) {
         super(protocol);
     }
 
@@ -73,7 +73,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

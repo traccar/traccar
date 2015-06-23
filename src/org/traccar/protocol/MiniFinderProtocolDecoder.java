@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
-    public MiniFinderProtocolDecoder(String protocol) {
+    public MiniFinderProtocolDecoder(MiniFinderProtocol protocol) {
         super(protocol);
     }
 
@@ -71,7 +71,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;

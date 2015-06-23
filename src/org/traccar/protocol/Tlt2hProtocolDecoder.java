@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tlt2hProtocolDecoder(String protocol) {
+    public Tlt2hProtocolDecoder(Tlt2hProtocol protocol) {
         super(protocol);
     }
 
@@ -86,7 +86,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             parser = patternPosition.matcher(message);
             if (parser.matches()) {
                 Position position = new Position();
-                position.setProtocol(getProtocol());
+                position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
                 Integer index = 1;

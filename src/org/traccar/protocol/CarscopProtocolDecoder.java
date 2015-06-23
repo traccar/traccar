@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class CarscopProtocolDecoder extends BaseProtocolDecoder {
 
-    public CarscopProtocolDecoder(String protocol) {
+    public CarscopProtocolDecoder(CarscopProtocol protocol) {
         super(protocol);
     }
 
@@ -73,7 +73,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         position.setDeviceId(getDeviceId());
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         index = 1;
 
         // Time

@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
-    public T55ProtocolDecoder(String protocol) {
+    public T55ProtocolDecoder(T55Protocol protocol) {
         super(protocol);
     }
 
@@ -137,7 +137,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;
@@ -195,7 +195,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;
@@ -236,7 +236,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;
@@ -284,7 +284,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;

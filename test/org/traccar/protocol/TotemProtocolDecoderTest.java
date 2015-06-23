@@ -10,7 +10,7 @@ public class TotemProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        TotemProtocolDecoder decoder = new TotemProtocolDecoder(null);
+        TotemProtocolDecoder decoder = new TotemProtocolDecoder(new TotemProtocol());
         
         verify(decoder.decode(null, null,
                 "$$AE860990002922822|AA$GPRMC,051002.00,A,0439.26245,N,10108.94448,E,0.023,,140315,,,A*71|02.98|01.95|02.26|000000000000|20150314051003|13841157|105A3B1C|0000|0.0000|0005|5324"));

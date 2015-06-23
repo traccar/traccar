@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
-    public VisiontekProtocolDecoder(String protocol) {
+    public VisiontekProtocolDecoder(VisiontekProtocol protocol) {
         super(protocol);
     }
 
@@ -70,7 +70,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

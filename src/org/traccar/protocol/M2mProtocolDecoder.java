@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class M2mProtocolDecoder extends BaseProtocolDecoder {
 
-    public M2mProtocolDecoder(String protocol) {
+    public M2mProtocolDecoder(M2mProtocol protocol) {
         super(protocol);
     }
     
@@ -70,7 +70,7 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             // Date and time

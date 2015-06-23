@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
-    public LaipacProtocolDecoder(String protocol) {
+    public LaipacProtocolDecoder(LaipacProtocol protocol) {
         super(protocol);
     }
 
@@ -70,7 +70,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Identification

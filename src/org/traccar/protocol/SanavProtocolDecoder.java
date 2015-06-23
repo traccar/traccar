@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class SanavProtocolDecoder extends BaseProtocolDecoder {
 
-    public SanavProtocolDecoder(String protocol) {
+    public SanavProtocolDecoder(SanavProtocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +61,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Identification

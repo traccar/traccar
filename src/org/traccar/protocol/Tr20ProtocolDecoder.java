@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tr20ProtocolDecoder(String protocol) {
+    public Tr20ProtocolDecoder(Tr20Protocol protocol) {
         super(protocol);
     }
 
@@ -77,7 +77,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             Integer index = 1;
 

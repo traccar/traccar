@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
-    public MegastekProtocolDecoder(String protocol) {
+    public MegastekProtocolDecoder(MegastekProtocol protocol) {
         super(protocol);
     }
 
@@ -171,7 +171,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         // Parse location data
         if (!parseGPRMC(gprmc, position)) {

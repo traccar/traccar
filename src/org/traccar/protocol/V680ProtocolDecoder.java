@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
-    public V680ProtocolDecoder(String protocol) {
+    public V680ProtocolDecoder(V680Protocol protocol) {
         super(protocol);
     }
 
@@ -74,7 +74,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             Integer index = 1;
 
             // Get device by IMEI

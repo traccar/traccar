@@ -27,7 +27,7 @@ import org.traccar.model.Position;
 
 public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Stl060ProtocolDecoder(String protocol) {
+    public Stl060ProtocolDecoder(Stl060Protocol protocol) {
         super(protocol);
     }
 
@@ -82,7 +82,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

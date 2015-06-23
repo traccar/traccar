@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Pt502ProtocolDecoder(String protocol) {
+    public Pt502ProtocolDecoder(Pt502Protocol protocol) {
         super(protocol);
     }
 
@@ -71,7 +71,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

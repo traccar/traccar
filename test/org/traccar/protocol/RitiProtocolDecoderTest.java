@@ -13,7 +13,7 @@ public class RitiProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        RitiProtocolDecoder decoder = new RitiProtocolDecoder(null);
+        RitiProtocolDecoder decoder = new RitiProtocolDecoder(new RitiProtocol());
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "3b2864a3056300006d40000003000000000000000000000000244750524d432c3231313734332e3030302c412c313335372e333637352c4e2c31303033362e363939322c452c302e30302c2c3031303931342c2c2c412a37380d0a00000000000000000000000000000000040404"))));

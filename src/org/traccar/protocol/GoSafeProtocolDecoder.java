@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
-    public GoSafeProtocolDecoder(String protocol) {
+    public GoSafeProtocolDecoder(GoSafeProtocol protocol) {
         super(protocol);
     }
 
@@ -65,7 +65,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

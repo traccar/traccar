@@ -28,7 +28,7 @@ import java.util.TimeZone;
 
 public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Avl301ProtocolDecoder(String protocol) {
+    public Avl301ProtocolDecoder(Avl301Protocol protocol) {
         super(protocol);
     }
 
@@ -85,7 +85,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Date and time(6)
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

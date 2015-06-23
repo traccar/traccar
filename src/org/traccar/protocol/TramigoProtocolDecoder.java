@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
-    public TramigoProtocolDecoder(String protocol) {
+    public TramigoProtocolDecoder(TramigoProtocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +61,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         position.set(Event.KEY_INDEX, index);
         position.setValid(true);
 

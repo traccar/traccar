@@ -28,7 +28,7 @@ import java.util.*;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
-    public AutoFonProtocolDecoder(String protocol) {
+    public AutoFonProtocolDecoder(AutoFonProtocol protocol) {
         super(protocol);
     }
 
@@ -46,7 +46,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         position.setDeviceId(getDeviceId());
 
         if (!history) {

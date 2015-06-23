@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
-    public BoxProtocolDecoder(String protocol) {
+    public BoxProtocolDecoder(BoxProtocol protocol) {
         super(protocol);
     }
 
@@ -72,7 +72,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             Integer index = 1;
 

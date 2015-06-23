@@ -36,7 +36,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
         return (degrees + seconds) * ((raw & 0x0f) == 0 ? -1 : 1);
     }
 
-    public AutoFon45ProtocolDecoder(String protocol) {
+    public AutoFon45ProtocolDecoder(AutoFon45Protocol protocol) {
         super(protocol);
     }
 
@@ -67,7 +67,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             short status = buf.readUnsignedByte();

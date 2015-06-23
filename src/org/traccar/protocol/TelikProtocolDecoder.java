@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class TelikProtocolDecoder extends BaseProtocolDecoder {
 
-    public TelikProtocolDecoder(String protocol) {
+    public TelikProtocolDecoder(TelikProtocol protocol) {
         super(protocol);
     }
 
@@ -62,7 +62,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

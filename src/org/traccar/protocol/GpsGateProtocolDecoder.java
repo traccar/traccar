@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
-    public GpsGateProtocolDecoder(String protocol) {
+    public GpsGateProtocolDecoder(GpsGateProtocol protocol) {
         super(protocol);
     }
 
@@ -98,7 +98,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;

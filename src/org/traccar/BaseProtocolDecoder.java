@@ -32,10 +32,10 @@ import org.traccar.model.Device;
  */
 public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
-    private final String protocol;
+    private final Protocol protocol;
 
-    public String getProtocol() {
-        return protocol;
+    public String getProtocolName() {
+        return protocol.getName();
     }
 
     private long deviceId;
@@ -53,7 +53,7 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
             Device device = Context.getDataManager().getDeviceByUniqueId(uniqueId);
             if (device != null) {
                 deviceId = device.getId();
-                Context.getDataManager().setActiveDevice(device.getUniqueId(), channel, remoteAddress);
+                Context.getDataManager().setActiveDevice(device.getUniqueId(), protocol, channel, remoteAddress);
                 return true;
             } else {
                 deviceId = 0;
@@ -77,7 +77,7 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
         return identify(uniqueId, channel, null, true);
     }
 
-    public BaseProtocolDecoder(String protocol) {
+    public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
     }
     

@@ -11,7 +11,7 @@ public class GatorProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        GatorProtocolDecoder decoder = new GatorProtocolDecoder(null);
+        GatorProtocolDecoder decoder = new GatorProtocolDecoder(new GatorProtocol());
         
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "24248000260009632d141121072702059226180104367500000000c04700079c0c34000ad80b00ff000a0d"))));

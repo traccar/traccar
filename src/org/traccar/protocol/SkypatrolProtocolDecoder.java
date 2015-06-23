@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
-    public SkypatrolProtocolDecoder(String protocol) {
+    public SkypatrolProtocolDecoder(SkypatrolProtocol protocol) {
         super(protocol);
     }
 
@@ -77,7 +77,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Status code
             if (checkBit(mask, 1)) {

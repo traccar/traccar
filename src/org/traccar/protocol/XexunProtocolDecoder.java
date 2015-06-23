@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
-    public XexunProtocolDecoder(String protocol) {
+    public XexunProtocolDecoder(XexunProtocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +61,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 

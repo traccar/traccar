@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
-    public GalileoProtocolDecoder(String protocol) {
+    public GalileoProtocolDecoder(GalileoProtocol protocol) {
         super(protocol);
     }
 
@@ -91,7 +91,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         Set<Integer> tags = new HashSet<Integer>();
         boolean hasLocation = false;
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         
         while (buf.readerIndex() < length) {
 

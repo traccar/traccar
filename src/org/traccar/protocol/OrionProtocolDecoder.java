@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
-    public OrionProtocolDecoder(String protocol) {
+    public OrionProtocolDecoder(OrionProtocol protocol) {
         super(protocol);
     }
     
@@ -83,7 +83,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 // Create new position
                 Position position = new Position();
                 position.setDeviceId(getDeviceId());
-                position.setProtocol(getProtocol());
+                position.setProtocol(getProtocolName());
                 
                 position.set(Event.KEY_EVENT, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length

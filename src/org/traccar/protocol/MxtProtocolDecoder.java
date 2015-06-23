@@ -29,7 +29,7 @@ import java.util.TimeZone;
 
 public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
-    public MxtProtocolDecoder(String protocol) {
+    public MxtProtocolDecoder(MxtProtocol protocol) {
         super(protocol);
     }
 
@@ -56,7 +56,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_POSITION) {
 
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             buf.readUnsignedByte(); // protocol
