@@ -59,6 +59,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "([^,]+)?,?" +
             ".*");
 
+    private static final Pattern handshake1Pattern = Pattern.compile("##,imei:(\\d+),A");
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg)
@@ -70,6 +72,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.contains("##")) {
             if (channel != null) {
                 channel.write("LOAD", remoteAddress);
+                Matcher handshakeMatcher = handshake1Pattern.matcher(sentence);
+                if(handshakeMatcher.matches()) {
+                    identify(handshakeMatcher.group(1), channel);
+                }
             }
             return null;
         }
