@@ -30,114 +30,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
-import org.traccar.protocol.ApelProtocolDecoder;
-import org.traccar.protocol.AplicomFrameDecoder;
-import org.traccar.protocol.AplicomProtocolDecoder;
-import org.traccar.protocol.Ardi01ProtocolDecoder;
-import org.traccar.protocol.AtrackFrameDecoder;
-import org.traccar.protocol.AtrackProtocolDecoder;
-import org.traccar.protocol.AutoFon45FrameDecoder;
-import org.traccar.protocol.AutoFon45ProtocolDecoder;
-import org.traccar.protocol.AutoFonFrameDecoder;
-import org.traccar.protocol.AutoFonProtocolDecoder;
-import org.traccar.protocol.Avl301ProtocolDecoder;
-import org.traccar.protocol.BceFrameDecoder;
-import org.traccar.protocol.BceProtocolDecoder;
-import org.traccar.protocol.BoxProtocolDecoder;
-import org.traccar.protocol.CalAmpProtocolDecoder;
-import org.traccar.protocol.CarTrackProtocolDecoder;
-import org.traccar.protocol.CarscopProtocolDecoder;
-import org.traccar.protocol.CastelProtocolDecoder;
-import org.traccar.protocol.CellocatorFrameDecoder;
-import org.traccar.protocol.CellocatorProtocolDecoder;
-import org.traccar.protocol.EasyTrackProtocolDecoder;
-import org.traccar.protocol.EelinkProtocolDecoder;
-import org.traccar.protocol.EnforaProtocolDecoder;
-import org.traccar.protocol.Ev603ProtocolDecoder;
-import org.traccar.protocol.FreedomProtocolDecoder;
-import org.traccar.protocol.GalileoFrameDecoder;
-import org.traccar.protocol.GalileoProtocolDecoder;
-import org.traccar.protocol.GatorProtocolDecoder;
-import org.traccar.protocol.Gl100ProtocolDecoder;
-import org.traccar.protocol.Gl200ProtocolDecoder;
-import org.traccar.protocol.GlobalSatProtocolDecoder;
-import org.traccar.protocol.GoSafeProtocolDecoder;
-import org.traccar.protocol.GotopProtocolDecoder;
-import org.traccar.protocol.Gps103ProtocolDecoder;
-import org.traccar.protocol.GpsGateProtocolDecoder;
-import org.traccar.protocol.Gt02ProtocolDecoder;
-import org.traccar.protocol.Gt06FrameDecoder;
-import org.traccar.protocol.Gt06ProtocolDecoder;
-import org.traccar.protocol.H02FrameDecoder;
-import org.traccar.protocol.H02ProtocolDecoder;
-import org.traccar.protocol.HaicomProtocolDecoder;
-import org.traccar.protocol.IntellitracFrameDecoder;
-import org.traccar.protocol.IntellitracProtocolDecoder;
-import org.traccar.protocol.Jt600FrameDecoder;
-import org.traccar.protocol.Jt600ProtocolDecoder;
-import org.traccar.protocol.KhdProtocolDecoder;
-import org.traccar.protocol.LaipacProtocolDecoder;
-import org.traccar.protocol.M2mProtocolDecoder;
-import org.traccar.protocol.ManPowerProtocolDecoder;
-import org.traccar.protocol.MaxonProtocolDecoder;
-import org.traccar.protocol.MegastekProtocolDecoder;
-import org.traccar.protocol.MeiligaoFrameDecoder;
-import org.traccar.protocol.MeiligaoProtocolDecoder;
-import org.traccar.protocol.MeitrackFrameDecoder;
-import org.traccar.protocol.MeitrackProtocolDecoder;
-import org.traccar.protocol.MiniFinderProtocolDecoder;
-import org.traccar.protocol.Mta6ProtocolDecoder;
-import org.traccar.protocol.MtxProtocolDecoder;
-import org.traccar.protocol.NavigilFrameDecoder;
-import org.traccar.protocol.NavigilProtocolDecoder;
-import org.traccar.protocol.NavisProtocolDecoder;
-import org.traccar.protocol.NoranProtocolDecoder;
-import org.traccar.protocol.OrionFrameDecoder;
-import org.traccar.protocol.OrionProtocolDecoder;
-import org.traccar.protocol.OsmAndProtocolDecoder;
-import org.traccar.protocol.PiligrimProtocolDecoder;
-import org.traccar.protocol.ProgressProtocolDecoder;
-import org.traccar.protocol.Pt3000ProtocolDecoder;
-import org.traccar.protocol.Pt502FrameDecoder;
-import org.traccar.protocol.Pt502ProtocolDecoder;
-import org.traccar.protocol.RitiProtocolDecoder;
-import org.traccar.protocol.RuptelaProtocolDecoder;
-import org.traccar.protocol.SanavProtocolDecoder;
-import org.traccar.protocol.SkypatrolProtocolDecoder;
-import org.traccar.protocol.Stl060FrameDecoder;
-import org.traccar.protocol.Stl060ProtocolDecoder;
-import org.traccar.protocol.SuntechProtocolDecoder;
-import org.traccar.protocol.SyrusProtocolDecoder;
-import org.traccar.protocol.T55ProtocolDecoder;
-import org.traccar.protocol.TelikProtocolDecoder;
-import org.traccar.protocol.TeltonikaFrameDecoder;
-import org.traccar.protocol.TeltonikaProtocolDecoder;
-import org.traccar.protocol.Tk102ProtocolDecoder;
-import org.traccar.protocol.Tk103ProtocolDecoder;
-import org.traccar.protocol.Tlt2hProtocolDecoder;
-import org.traccar.protocol.TopflytechProtocolDecoder;
-import org.traccar.protocol.TotemFrameDecoder;
-import org.traccar.protocol.TotemProtocolDecoder;
-import org.traccar.protocol.Tr20ProtocolDecoder;
-import org.traccar.protocol.Tr900ProtocolDecoder;
-import org.traccar.protocol.TrackboxProtocolDecoder;
-import org.traccar.protocol.TramigoFrameDecoder;
-import org.traccar.protocol.TramigoProtocolDecoder;
-import org.traccar.protocol.TytanProtocolDecoder;
-import org.traccar.protocol.UlbotechFrameDecoder;
-import org.traccar.protocol.UlbotechProtocolDecoder;
-import org.traccar.protocol.V680ProtocolDecoder;
-import org.traccar.protocol.VisiontekProtocolDecoder;
-import org.traccar.protocol.WialonProtocolDecoder;
-import org.traccar.protocol.WondexFrameDecoder;
-import org.traccar.protocol.WondexProtocolDecoder;
-import org.traccar.protocol.Xexun2ProtocolDecoder;
-import org.traccar.protocol.XexunFrameDecoder;
-import org.traccar.protocol.XexunProtocolDecoder;
-import org.traccar.protocol.XirgoProtocolDecoder;
-import org.traccar.protocol.Xt013ProtocolDecoder;
-import org.traccar.protocol.Xt7ProtocolDecoder;
-import org.traccar.protocol.YwtProtocolDecoder;
+import org.traccar.protocol.*;
 
 
 public class ServerManager {
@@ -232,6 +125,7 @@ public class ServerManager {
         initTytanServer("tytan");
         initAvl301Server("avl301");
         initCastelServer("castel");
+        initMxtServer("mxt");
 
         initProtocolDetector();
     }
@@ -1454,6 +1348,20 @@ public class ServerManager {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new CastelProtocolDecoder(protocol));
+                }
+            };
+            server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+            serverList.add(server);
+        }
+    }
+
+    private void initMxtServer(final String protocol) throws SQLException {
+        if (isProtocolEnabled(protocol)) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+                @Override
+                protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                    pipeline.addLast("frameDecoder", new MxtFrameDecoder());
+                    pipeline.addLast("objectDecoder", new MxtProtocolDecoder(protocol));
                 }
             };
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
