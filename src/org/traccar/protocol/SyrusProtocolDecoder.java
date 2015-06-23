@@ -39,7 +39,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "R[EP]V" +                     // Type
+            "R.." +                        // Type
             "(?:\\d{2}" +                  // Event index
             "(\\d{4})" +                   // Week
             "(\\d))?" +                    // Day
