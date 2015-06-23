@@ -15,7 +15,7 @@ public abstract class BaseProtocol implements Protocol {
 
     public BaseProtocol(String name) {
         this.name = name;
-        this.loadCommandTemplates(commandTemplates);
+        this.loadCommandsTemplates(commandTemplates);
     }
 
     public String getName() {
@@ -35,6 +35,6 @@ public abstract class BaseProtocol implements Protocol {
         activeDevice.write(response);
     }
 
-    protected abstract void loadCommandTemplates(Map<CommandType, CommandTemplate> templates);
+    protected abstract void loadCommandsTemplates(Map<CommandType, CommandTemplate> templates);
 
 }
