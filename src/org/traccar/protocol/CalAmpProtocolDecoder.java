@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
-    public CalAmpProtocolDecoder(String protocol) {
+    public CalAmpProtocolDecoder(CalAmpProtocol protocol) {
         super(protocol);
     }
 
@@ -109,7 +109,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
 
-                identify(String.valueOf(id));
+                identify(String.valueOf(id), channel, remoteAddress);
             }
 
             // Identifier type
@@ -160,7 +160,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Location data
             position.setTime(new Date(buf.readUnsignedInt() * 1000));

@@ -36,7 +36,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     private long lastIndex;
     private long newIndex;
 
-    public ProgressProtocolDecoder(String protocol) {
+    public ProgressProtocolDecoder(ProgressProtocol protocol) {
         super(protocol);
     }
 
@@ -81,7 +81,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
-            identify(imei);
+            identify(imei, channel);
         }
 
         // Position
@@ -95,7 +95,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
-                position.setProtocol(getProtocol());
+                position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
                 // Message index

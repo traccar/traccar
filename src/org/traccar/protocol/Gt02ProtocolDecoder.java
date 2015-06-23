@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gt02ProtocolDecoder(String protocol) {
+    public Gt02ProtocolDecoder(Gt02Protocol protocol) {
         super(protocol);
     }
 
@@ -77,11 +77,11 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.set(Event.KEY_INDEX, index);
 
             // Get device id
-            if (!identify(imei)) {
+            if (!identify(imei, channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

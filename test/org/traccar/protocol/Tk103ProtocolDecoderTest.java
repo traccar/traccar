@@ -10,7 +10,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(null);
+        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
         assertNull(decoder.decode(null, null, "(090411121854BP0000001234567890HSO"));
 

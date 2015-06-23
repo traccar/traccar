@@ -94,7 +94,7 @@ public abstract class TrackerServer {
     /**
      * Set endianness
      */
-    void setEndianness(ByteOrder byteOrder) {
+    public void setEndianness(ByteOrder byteOrder) {
         bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(byteOrder));
         bootstrap.setOption("child.bufferFactory", new HeapChannelBufferFactory(byteOrder));
     }

@@ -24,12 +24,11 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gl100ProtocolDecoder(String protocol) {
+    public Gl100ProtocolDecoder(Gl100Protocol protocol) {
         super(protocol);
     }
 
@@ -74,12 +73,12 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

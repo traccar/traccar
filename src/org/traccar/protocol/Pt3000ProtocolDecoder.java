@@ -24,12 +24,11 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Pt3000ProtocolDecoder(String protocol) {
+    public Pt3000ProtocolDecoder(Pt3000Protocol protocol) {
         super(protocol);
     }
 
@@ -62,12 +61,12 @@ public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

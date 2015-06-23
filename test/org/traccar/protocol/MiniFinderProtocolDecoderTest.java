@@ -10,7 +10,7 @@ public class MiniFinderProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        MiniFinderProtocolDecoder decoder = new MiniFinderProtocolDecoder(null);
+        MiniFinderProtocolDecoder decoder = new MiniFinderProtocolDecoder(new MiniFinderProtocol());
 
         assertNull(decoder.decode(null, null, "!1,860719020212696"));
 

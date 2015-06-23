@@ -9,7 +9,7 @@ public class Pt502ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Pt502ProtocolDecoder decoder = new Pt502ProtocolDecoder(null);
+        Pt502ProtocolDecoder decoder = new Pt502ProtocolDecoder(new Pt502Protocol());
 
         verify(decoder.decode(null, null,
                 "$POS,11023456,033731.000,A,0335.2617,N,09841.1587,E,0.00,88.12,210615,,,A/0000,0/1f8/388900//f33//"));

@@ -24,12 +24,11 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class FreedomProtocolDecoder extends BaseProtocolDecoder {
 
-    public FreedomProtocolDecoder(String protocol) {
+    public FreedomProtocolDecoder(FreedomProtocol protocol) {
         super(protocol);
     }
 
@@ -56,11 +55,11 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Identification
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

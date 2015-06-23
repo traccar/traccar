@@ -34,7 +34,7 @@ import org.traccar.model.Position;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
-    public MeiligaoProtocolDecoder(String protocol) {
+    public MeiligaoProtocolDecoder(MeiligaoProtocol protocol) {
         super(protocol);
     }
 
@@ -118,8 +118,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     private String getMeiligaoServer(Channel channel) {
         Properties p = Context.getProps();
         
-        if (p != null && p.containsKey(getProtocol() + ".server")) {
-            return p.getProperty(getProtocol() + ".server");
+        if (p != null && p.containsKey(getProtocolName() + ".server")) {
+            return p.getProperty(getProtocolName() + ".server");
         } else {
             InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
             return address.getAddress().getHostAddress() + ":" + address.getPort();
@@ -168,7 +168,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         // Custom data
         if (command == MSG_ALARM) {
@@ -178,7 +178,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get device by id
-        if (!identify(getImei(id))) {
+        if (!identify(getImei(id), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

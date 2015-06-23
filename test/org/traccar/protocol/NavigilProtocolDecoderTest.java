@@ -13,7 +13,7 @@ public class NavigilProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        NavigilProtocolDecoder decoder = new NavigilProtocolDecoder(null);
+        NavigilProtocolDecoder decoder = new NavigilProtocolDecoder(new NavigilProtocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "01004300040020000000f60203080200e7cd0f510c0000003b00000000000000"))));

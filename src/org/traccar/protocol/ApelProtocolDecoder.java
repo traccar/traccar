@@ -39,7 +39,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
     private long lastIndex;
     private long newIndex;
 
-    public ApelProtocolDecoder(String protocol) {
+    public ApelProtocolDecoder(ApelProtocol protocol) {
         super(protocol);
     }
 
@@ -120,7 +120,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
-            identify(buf.readBytes(length).toString(Charset.defaultCharset()));
+            identify(buf.readBytes(length).toString(Charset.defaultCharset()), channel);
         }
         
         else if (type == MSG_TYPE_LAST_LOG_INDEX) {
@@ -142,7 +142,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
-                position.setProtocol(getProtocol());
+                position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
                 // Message index

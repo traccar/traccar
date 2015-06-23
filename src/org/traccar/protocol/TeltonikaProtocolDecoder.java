@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     
-    public TeltonikaProtocolDecoder(String protocol) {
+    public TeltonikaProtocolDecoder(TeltonikaProtocol protocol) {
         super(protocol);
     }
 
@@ -40,7 +40,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
-        boolean result =  identify(imei);
+        boolean result =  identify(imei, channel);
 
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(1);
@@ -74,7 +74,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         
         for (int i = 0; i < count; i++) {
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             
             position.setDeviceId(getDeviceId());
             
