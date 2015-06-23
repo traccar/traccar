@@ -2,6 +2,8 @@ package org.traccar.http;
 
 import org.traccar.Context;
 import org.traccar.database.ActiveDevice;
+import org.traccar.http.commands.CommandType;
+import org.traccar.http.commands.GpsCommand;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -12,7 +14,10 @@ public class CommandsServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        if (command.equals("/raw")) {
+        if (command.equals("/send")) {
+            send(req, resp);
+        }
+        else if (command.equals("/raw")) {
             sendRawCommand(req, resp);
         }
         else {
@@ -21,6 +26,20 @@ public class CommandsServlet extends BaseServlet {
         return true;
     }
 
+    private void send(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        GpsCommand command = JsonConverter.<GpsCommand>enumObjectFromJson(req.getReader(), new EnumFactory(CommandType.class, "type"));
+
+        String uniqueId = command.getUniqueId();
+
+        ActiveDevice activeDevice = Context.getDataManager().getActiveDevice(uniqueId);
+        if(activeDevice == null) {
+            throw new RuntimeException("The device has not yet registered to the server");
+        }
+
+        activeDevice.sendCommand(command);
+
+        sendResponse(resp.getWriter(), JsonConverter.objectToJson(new Object()));
+    }
 
     private void sendRawCommand(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         JsonObject json = Json.createReader(req.getReader()).readObject();

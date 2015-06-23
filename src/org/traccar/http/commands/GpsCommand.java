@@ -3,6 +3,7 @@ package org.traccar.http.commands;
 import java.util.Map;
 
 public abstract class GpsCommand {
+    public static final String UNIQUE_ID = "uniqueId";
     private String uniqueId;
     private CommandType type;
 
@@ -22,5 +23,5 @@ public abstract class GpsCommand {
         this.type = type;
     }
 
-    public abstract Map<String, String> getReplacements();
+    public abstract Map<String, Object> getReplacements();
 }

@@ -9,9 +9,9 @@ public class FixPositioningCommand extends GpsCommand {
     private Duration data;
 
     @Override
-    public Map<String, String> getReplacements() {
-        Map<String, String> replacements = new HashMap<String, String>();
-        replacements.put(FREQUENCY, data.toCommandFormat());
+    public Map<String, Object> getReplacements() {
+        Map<String, Object> replacements = new HashMap<String, Object>();
+        replacements.put(FREQUENCY, data);
         return replacements;
     }
 

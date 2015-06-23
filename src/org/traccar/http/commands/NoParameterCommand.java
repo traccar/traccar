@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class NoParameterCommand extends GpsCommand {
     @Override
-    public Map<String, String> getReplacements() {
-        return new HashMap<String, String>();
+    public Map<String, Object> getReplacements() {
+        return new HashMap<String, Object>();
     }
 }

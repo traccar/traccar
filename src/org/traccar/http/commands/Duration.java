@@ -20,10 +20,6 @@ public class Duration {
     private TimeUnit unit;
     private int value;
 
-    public String toCommandFormat() {
-        return String.format("%02d%s", this.getValue(), this.getUnit().getCommandFormat());
-    }
-
     public TimeUnit getUnit() {
         return unit;
     }
