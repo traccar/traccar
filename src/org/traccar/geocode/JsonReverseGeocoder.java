@@ -21,6 +21,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -36,15 +37,19 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
     public String getAddress(AddressFormat format, double latitude, double longitude) {
 
         try {
-            URLConnection conn = new URL(String.format(url, latitude, longitude)).openConnection();
-            Reader reader = new InputStreamReader(conn.getInputStream());
+            HttpURLConnection conn = (HttpURLConnection) new URL(String.format(url, latitude, longitude)).openConnection();
             try {
-                Address address = parseAddress(Json.createReader(reader).readObject());
-                if (address != null) {
-                    return format.format(address);
+            Reader reader = new InputStreamReader(conn.getInputStream());
+                try {
+                    Address address = parseAddress(Json.createReader(reader).readObject());
+                    if (address != null) {
+                        return format.format(address);
+                    }
+                } finally {
+                    reader.close();
                 }
             } finally {
-                reader.close();
+                conn.disconnect();
             }
         } catch(Exception error) {
             Log.warning(error);
