@@ -23,4 +23,7 @@ public class ActiveDevice {
         return uniqueId;
     }
 
+    public void write(Object message) {
+        getChannel().write(message, remoteAddress);
+    }
 }
