@@ -24,13 +24,19 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
     public MxtProtocolDecoder(String protocol) {
         super(protocol);
     }
+
+    private static final int MSG_ACK = 0x02;
+    private static final int MSG_NACK = 0x03;
+    private static final int MSG_POSITION = 0x31;
 
     @Override
     protected Object decode(
@@ -39,54 +45,58 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        /*buf.readByte(); // header
-        buf.readUnsignedByte(); // version
-        buf.readUnsignedByte(); // type
+        buf.readUnsignedByte(); // start
+        buf.readUnsignedByte(); // device descriptor
+        int type = buf.readUnsignedByte();
 
-        // Create new position
-        Position position = new Position();
-        position.setProtocol(getProtocol());
-
-        // Get device id
-        String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
-        if (!identify(imei)) {
+        String id = String.valueOf(buf.readUnsignedInt());
+        if (!identify(id)) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
 
-        // Time
-        long seconds = buf.readUnsignedInt() & 0x7fffffffl;
-        seconds += 946684800l; // 2000-01-01 00:00
-        position.setTime(new Date(seconds * 1000));
-        
-        boolean hasLocation = false;
+        if (type == MSG_POSITION) {
 
-        while (buf.readableBytes() > 3) {
+            Position position = new Position();
+            position.setProtocol(getProtocol());
+            position.setDeviceId(getDeviceId());
 
-            short type = buf.readUnsignedByte();
-            short length = buf.readUnsignedByte();
+            buf.readUnsignedByte(); // protocol
+            int infoGroups = buf.readUnsignedByte();
 
-            switch (type) {
+            position.set(Event.KEY_INDEX, buf.readUnsignedShort());
 
-                case DATA_GPS:
-                    hasLocation = true;
-                    position.setValid(true);
-                    position.setLatitude(buf.readInt() / 1000000.0);
-                    position.setLongitude(buf.readInt() / 1000000.0);
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
-                    position.setCourse(buf.readUnsignedShort());
-                    position.set(Event.KEY_HDOP, buf.readUnsignedShort());
-                    break;
+            // Date and time
+            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            time.clear();
+            time.set(Calendar.YEAR, 2000);
+            time.set(Calendar.MONTH, 0);
+            time.set(Calendar.DAY_OF_MONTH, 1);
 
-                default:
-                    buf.skipBytes(length);
-                    break;
-            }
+            long date = buf.readUnsignedInt();
+
+            long days = date >> (5 + 6 + 6);
+            long hours = (date >> (6 + 6)) & 0x1f;
+            long minutes = (date >> 6) & 0x3f;
+            long seconds = date & 0x3f;
+
+            long millis = time.getTimeInMillis();
+            millis += (((days * 24 + hours) * 60 + minutes) * 60 + seconds) * 1000;
+
+            position.setTime(new Date(millis));
+
+            // Location
+            position.setLatitude(buf.readInt() / 1000000.0);
+            position.setLongitude(buf.readInt() / 1000000.0);
+
+            long flags = buf.readUnsignedInt();
+
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+
+            int inputMask = buf.readUnsignedByte();
+
+            return position;
         }
 
-        if (hasLocation) {
-            return position;
-        }*/
         return null;
     }
 
