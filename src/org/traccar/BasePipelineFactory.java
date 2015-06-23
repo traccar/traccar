@@ -120,6 +120,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (Context.getReverseGeocoder() != null) {
             pipeline.addLast("geocoder", new ReverseGeocoderHandler(Context.getReverseGeocoder(), processInvalidPositions));
         }
+        pipeline.addLast("remoteAddress", new RemoteAddressHandler());
         pipeline.addLast("handler", new TrackerEventHandler());
         return pipeline;
     }

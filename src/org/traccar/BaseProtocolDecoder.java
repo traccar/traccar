@@ -32,7 +32,7 @@ import org.traccar.model.Device;
 /**
  * Base class for protocol decoders
  */
-public abstract class BaseProtocolDecoder extends OneToOneDecoder {
+public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private final String protocol;
 
@@ -76,37 +76,6 @@ public abstract class BaseProtocolDecoder extends OneToOneDecoder {
 
     public BaseProtocolDecoder(String protocol) {
         this.protocol = protocol;
-    }
-    
-    @Override
-    public void handleUpstream(
-            ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
-        if (!(evt instanceof MessageEvent)) {
-            ctx.sendUpstream(evt);
-            return;
-        }
-
-        MessageEvent e = (MessageEvent) evt;
-        Object originalMessage = e.getMessage();
-        Object decodedMessage = decode(ctx, e.getChannel(), e.getRemoteAddress(), originalMessage);
-        if (originalMessage == decodedMessage) {
-            ctx.sendUpstream(evt);
-        } else if (decodedMessage != null) {
-            fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
-        }
-    }
-    
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        
-        return decode(ctx, channel, msg);
-    }
-    
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
-        
-        return null; // default implementation
     }
 
 }
