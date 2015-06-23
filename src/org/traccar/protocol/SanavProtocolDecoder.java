@@ -24,7 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class SanavProtocolDecoder extends BaseProtocolDecoder {
@@ -66,7 +65,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identification
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

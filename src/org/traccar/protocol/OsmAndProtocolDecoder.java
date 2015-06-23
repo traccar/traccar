@@ -62,7 +62,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
         // Identification
         String id = params.get(params.containsKey("id") ? "id" : "deviceid").get(0);
-        if (!identify(id)) {
+        if (!identify(id, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

@@ -178,7 +178,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get device by id
-        if (!identify(getImei(id))) {
+        if (!identify(getImei(id), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

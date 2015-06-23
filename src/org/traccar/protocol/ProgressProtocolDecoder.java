@@ -81,7 +81,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
-            identify(imei);
+            identify(imei, channel);
         }
 
         // Position

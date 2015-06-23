@@ -61,7 +61,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device id
         String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

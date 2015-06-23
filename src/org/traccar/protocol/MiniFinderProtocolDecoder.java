@@ -57,7 +57,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
         // Identification
         if (sentence.startsWith("!1")) {
-            identify(sentence.substring(3, sentence.length()));
+            identify(sentence.substring(3, sentence.length()), channel);
         }
 
         // Location

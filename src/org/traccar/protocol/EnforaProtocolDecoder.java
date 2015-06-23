@@ -28,7 +28,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class EnforaProtocolDecoder extends BaseProtocolDecoder {
@@ -99,7 +98,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

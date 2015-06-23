@@ -68,7 +68,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         int index = 1;
 
         // Identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

@@ -63,7 +63,7 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
 
         // Get device id
-        if (!identify(String.valueOf(buf.readUnsignedShort()))) {
+        if (!identify(String.valueOf(buf.readUnsignedShort()), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

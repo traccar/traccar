@@ -66,7 +66,7 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Detect device
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

@@ -70,7 +70,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         int index = 1;
 
         // Device identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

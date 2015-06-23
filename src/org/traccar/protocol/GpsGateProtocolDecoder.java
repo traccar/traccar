@@ -25,7 +25,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Crc;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
@@ -68,7 +67,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
                 int endIndex = sentence.indexOf(',', beginIndex);
                 if (endIndex != -1) {
                     String imei = sentence.substring(beginIndex, endIndex);
-                    if (identify(imei)) {
+                    if (identify(imei, channel)) {
                         if (channel != null) {
                             send(channel, "$FRSES," + channel.getId());
                         }

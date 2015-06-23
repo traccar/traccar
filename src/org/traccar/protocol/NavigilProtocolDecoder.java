@@ -278,7 +278,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // checksum
         
         // Get device identifier
-        if (!identify(String.valueOf(buf.readUnsignedInt()))) {
+        if (!identify(String.valueOf(buf.readUnsignedInt()), channel)) {
             return null;
         }
 

@@ -89,7 +89,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identification
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -184,7 +184,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         
         // Identification
         String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
 

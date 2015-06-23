@@ -52,7 +52,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         }
         
         String id = String.valueOf(buf.readUnsignedInt());
-        if (!identify(id)) {
+        if (!identify(id, channel, remoteAddress)) {
             return null;
         }
 
