@@ -84,7 +84,7 @@ Ext.define('Traccar.view.state.StateController', {
             }
         }
 
-        var xml = '<info><a>aa</a><b>bb</b></info>';//position.get('other');
+        var xml = position.get('other');
         var other = this.parseXml(xml);
         for (var key in other) {
             if (other.hasOwnProperty(key)) {
@@ -100,7 +100,7 @@ Ext.define('Traccar.view.state.StateController', {
     },
 
     selectDevice: function(device) {
-        this.deviceId = device.get('id');
+        this.deviceId = device.get('deviceId');
         var found = Ext.getStore('LiveData').query('deviceId', this.deviceId);
         if (found.getCount() > 0) {
             this.updatePosition(found.first());
