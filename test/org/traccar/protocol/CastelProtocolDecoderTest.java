@@ -12,7 +12,7 @@ public class CastelProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        CastelProtocolDecoder decoder = new CastelProtocolDecoder(null);
+        CastelProtocolDecoder decoder = new CastelProtocolDecoder(new CastelProtocol());
 
         assertNull(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "40401F00043130303131313235323939383700000000000000100303320D0A"))));

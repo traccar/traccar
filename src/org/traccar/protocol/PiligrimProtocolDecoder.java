@@ -39,7 +39,7 @@ import org.traccar.model.Position;
 
 public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
     
-    public PiligrimProtocolDecoder(String protocol) {
+    public PiligrimProtocolDecoder(PiligrimProtocol protocol) {
         super(protocol);
     }
 
@@ -83,7 +83,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             
             // Identification
             QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-            if (!identify(decoder.getParameters().get("imei").get(0))) {
+            if (!identify(decoder.getParameters().get("imei").get(0), channel)) {
                 return null;
             }
 
@@ -99,7 +99,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_GPS || type == MSG_GPS_SENSORS) {
                     
                     Position position = new Position();
-                    position.setProtocol(getProtocol());
+                    position.setProtocol(getProtocolName());
                     position.setDeviceId(getDeviceId());
                     
                     // Time

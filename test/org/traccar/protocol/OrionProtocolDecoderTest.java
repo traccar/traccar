@@ -13,7 +13,7 @@ public class OrionProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        OrionProtocolDecoder decoder = new OrionProtocolDecoder(null);
+        OrionProtocolDecoder decoder = new OrionProtocolDecoder(new OrionProtocol());
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "5057000137bf6236235a0331b5c6e402a3b5ecff5102980003000e0c1d172936080e0c1d172936b03b01000882050000008e080000000000008c0300940500000084030085030003067600900113150000000000000000000000000000000000000004a4c8"))));

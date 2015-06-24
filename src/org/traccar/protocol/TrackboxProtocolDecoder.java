@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
     
-    public TrackboxProtocolDecoder(String protocol) {
+    public TrackboxProtocolDecoder(TrackboxProtocol protocol) {
         super(protocol);
     }
 
@@ -61,7 +61,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("a=connect")) {
             String id = sentence.substring(sentence.indexOf("i=") + 2);
-            if (identify(id)) {
+            if (identify(id, channel)) {
                 sendResponse(channel);
             }
         }
@@ -77,7 +77,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             Integer index = 1;
 

@@ -38,7 +38,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Charset charset = Charset.defaultCharset();
 
-    public NavisProtocolDecoder(String protocol) {
+    public NavisProtocolDecoder(NavisProtocol protocol) {
         super(protocol);
     }
 
@@ -80,7 +80,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private ParseResult parsePosition(ChannelBuffer buf) {
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         position.setDeviceId(getDeviceId());
 
@@ -252,7 +252,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processHandshake(Channel channel, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
-        if (identify(buf.toString(Charset.defaultCharset()))) {
+        if (identify(buf.toString(Charset.defaultCharset()), channel)) {
             sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", charset));
         }
         return null;

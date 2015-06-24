@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
-    public NavigilProtocolDecoder(String protocol) {
+    public NavigilProtocolDecoder(NavigilProtocol protocol) {
         super(protocol);
     }
     
@@ -81,7 +81,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseUnitReport(ChannelBuffer buf, int sequenceNumber) {
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         position.setValid(true);
         position.set(Event.KEY_INDEX, sequenceNumber);
@@ -116,7 +116,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseTg2Report(ChannelBuffer buf, int sequenceNumber) {
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         position.setValid(true);
         position.set(Event.KEY_INDEX, sequenceNumber);
@@ -153,7 +153,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parsePositionReport(ChannelBuffer buf, int sequenceNumber, long timestamp) {
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
@@ -174,7 +174,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parsePositionReport2(ChannelBuffer buf, int sequenceNumber, long timestamp) {
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
@@ -197,7 +197,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseSnapshot4(ChannelBuffer buf, int sequenceNumber) {
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
@@ -236,7 +236,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     
     private Position parseTrackingData(ChannelBuffer buf, int sequenceNumber, long timestamp) {
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         position.set(Event.KEY_INDEX, sequenceNumber);
         position.setDeviceId(getDeviceId());
@@ -278,7 +278,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // checksum
         
         // Get device identifier
-        if (!identify(String.valueOf(buf.readUnsignedInt()))) {
+        if (!identify(String.valueOf(buf.readUnsignedInt()), channel)) {
             return null;
         }
 

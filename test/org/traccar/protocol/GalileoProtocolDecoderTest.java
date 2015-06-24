@@ -13,7 +13,7 @@ public class GalileoProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        GalileoProtocolDecoder decoder = new GalileoProtocolDecoder(null);
+        GalileoProtocolDecoder decoder = new GalileoProtocolDecoder(new GalileoProtocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "011380033836383230343030313534393038370432008590"))));

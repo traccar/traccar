@@ -39,93 +39,94 @@ public class ServerManager {
 
     public void init() throws Exception {
 
-        initGps103Server("gps103");
-        initTk103Server("tk103");
-        initGl100Server("gl100");
-        initGl200Server("gl200");
-        initT55Server("t55");
-        initXexunServer("xexun");
-        initTotemServer("totem");
-        initEnforaServer("enfora");
-        initMeiligaoServer("meiligao");
-        initMaxonServer("maxon");
-        initSuntechServer("suntech");
-        initProgressServer("progress");
-        initH02Server("h02");
-        initJt600Server("jt600");
-        initEv603Server("ev603");
-        initV680Server("v680");
-        initPt502Server("pt502");
-        initTr20Server("tr20");
-        initNavisServer("navis");
-        initMeitrackServer("meitrack");
-        initSkypatrolServer("skypatrol");
-        initGt02Server("gt02");
-        initGt06Server("gt06");
-        initMegastekServer("megastek");
-        initNavigilServer("navigil");
-        initGpsGateServer("gpsgate");
-        initTeltonikaServer("teltonika");
-        initMta6Server("mta6");
-        initMta6CanServer("mta6can");
-        initTlt2hServer("tlt2h");
-        initSyrusServer("syrus");
-        initWondexServer("wondex");
-        initCellocatorServer("cellocator");
-        initGalileoServer("galileo");
-        initYwtServer("ywt");
-        initTk102Server("tk102");
-        initIntellitracServer("intellitrac");
-        initXt7Server("xt7");
-        initWialonServer("wialon");
-        initCarscopServer("carscop");
-        initApelServer("apel");
-        initManPowerServer("manpower");
-        initGlobalSatServer("globalsat");
-        initAtrackServer("atrack");
-        initPt3000Server("pt3000");
-        initRuptelaServer("ruptela");
-        initTopflytechServer("topflytech");
-        initLaipacServer("laipac");
-        initAplicomServer("aplicom");
-        initGotopServer("gotop");
-        initSanavServer("sanav");
-        initGatorServer("gator");
-        initNoranServer("noran");
-        initM2mServer("m2m");
-        initOsmAndServer("osmand");
-        initEasyTrackServer("easytrack");
-        initTaipServer("taip");
-        initKhdServer("khd");
-        initPiligrimServer("piligrim");
-        initStl060Server("stl060");
-        initCarTrackServer("cartrack");
-        initMiniFinderServer("minifinder");
-        initHaicomServer("haicom");
-        initEelinkServer("eelink");
-        initBoxServer("box");
-        initFreedomServer("freedom");
-        initTelikServer("telik");
-        initTrackboxServer("trackbox");
-        initVisiontekServer("visiontek");
-        initOrionServer("orion");
-        initRitiServer("riti");
-        initUlbotechServer("ulbotech");
-        initTramigoServer("tramigo");
-        initTr900Server("tr900");
-        initArdi01Server("ardi01");
-        initXt013Server("xt013");
-        initAutoFonServer("autofon");
-        initGoSafeServer("gosafe");
-        initAutoFon45Server("autofon45");
-        initBceServer("bce");
-        initXirgoServer("xirgo");
-        initCalAmpServer("calamp");
-        initMtxServer("mtx");
-        initTytanServer("tytan");
-        initAvl301Server("avl301");
-        initCastelServer("castel");
-        initMxtServer("mxt");
+
+        initGps103Server(new Gps103Protocol());
+        initTk103Server(new Tk103Protocol());
+        initGl100Server(new Gl100Protocol());
+        initGl200Server(new Gl200Protocol());
+        initT55Server(new T55Protocol());
+        initXexunServer(new XexunProtocol());
+        initTotemServer(new TotemProtocol());
+        initEnforaServer(new EnforaProtocol());
+        initMeiligaoServer(new MeiligaoProtocol());
+        initMaxonServer(new MaxonProtocol());
+        initSuntechServer(new SuntechProtocol());
+        initProgressServer(new ProgressProtocol());
+        initH02Server(new H02Protocol());
+        initJt600Server(new Jt600Protocol());
+        initEv603Server(new Ev603Protocol());
+        initV680Server(new V680Protocol());
+        initPt502Server(new Pt502Protocol());
+        initTr20Server(new Tr20Protocol());
+        initNavisServer(new NavisProtocol());
+        initMeitrackServer(new MeitrackProtocol());
+        initSkypatrolServer(new SkypatrolProtocol());
+        initGt02Server(new Gt02Protocol());
+        initGt06Server(new Gt06Protocol());
+        initMegastekServer(new MegastekProtocol());
+        initNavigilServer(new NavigilProtocol());
+        initGpsGateServer(new GpsGateProtocol());
+        initTeltonikaServer(new TeltonikaProtocol());
+        initMta6Server(new Mta6Protocol());
+        initMta6CanServer(new Mta6canProtocol());
+        initTlt2hServer(new Tlt2hProtocol());
+        initSyrusServer(new SyrusProtocol());
+        initWondexServer(new WondexProtocol());
+        initCellocatorServer(new CellocatorProtocol());
+        initGalileoServer(new GalileoProtocol());
+        initYwtServer(new YwtProtocol());
+        initTk102Server(new Tk102Protocol());
+        initIntellitracServer(new IntellitracProtocol());
+        initXt7Server(new Xt7Protocol());
+        initWialonServer(new WialonProtocol());
+        initCarscopServer(new CarscopProtocol());
+        initApelServer(new ApelProtocol());
+        initManPowerServer(new ManPowerProtocol());
+        initGlobalSatServer(new GlobalSatProtocol());
+        initAtrackServer(new AtrackProtocol());
+        initPt3000Server(new Pt3000Protocol());
+        initRuptelaServer(new RuptelaProtocol());
+        initTopflytechServer(new TopflytechProtocol());
+        initLaipacServer(new LaipacProtocol());
+        initAplicomServer(new AplicomProtocol());
+        initGotopServer(new GotopProtocol());
+        initSanavServer(new SanavProtocol());
+        initGatorServer(new GatorProtocol());
+        initNoranServer(new NoranProtocol());
+        initM2mServer(new M2mProtocol());
+        initOsmAndServer(new OsmAndProtocol());
+        initEasyTrackServer(new EasyTrackProtocol());
+        initTaipServer(new TaipProtocol());
+        initKhdServer(new KhdProtocol());
+        initPiligrimServer(new PiligrimProtocol());
+        initStl060Server(new Stl060Protocol());
+        initCarTrackServer(new CarTrackProtocol());
+        initMiniFinderServer(new MiniFinderProtocol());
+        initHaicomServer(new HaicomProtocol());
+        initEelinkServer(new EelinkProtocol());
+        initBoxServer(new BoxProtocol());
+        initFreedomServer(new FreedomProtocol());
+        initTelikServer(new TelikProtocol());
+        initTrackboxServer(new TrackboxProtocol());
+        initVisiontekServer(new VisiontekProtocol());
+        initOrionServer(new OrionProtocol());
+        initRitiServer(new RitiProtocol());
+        initUlbotechServer(new UlbotechProtocol());
+        initTramigoServer(new TramigoProtocol());
+        initTr900Server(new Tr900Protocol());
+        initArdi01Server(new Ardi01Protocol());
+        initXt013Server(new Xt013Protocol());
+        initAutoFonServer(new AutoFonProtocol());
+        initGoSafeServer(new GoSafeProtocol());
+        initAutoFon45Server(new AutoFon45Protocol());
+        initBceServer(new BceProtocol());
+        initXirgoServer(new XirgoProtocol());
+        initCalAmpServer(new CalAmpProtocol());
+        initMtxServer(new MtxProtocol());
+        initTytanServer(new TytanProtocol());
+        initAvl301Server(new Avl301Protocol());
+        initCastelServer(new CastelProtocol());
+        initMxtServer(new MxtProtocol());
 
         initProtocolDetector();
     }
@@ -168,9 +169,9 @@ public class ServerManager {
         }
     }
 
-    private void initGps103Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGps103Server(final Gps103Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "\r\n", "\n", ";"));
@@ -179,7 +180,7 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(protocol));
                 }
             });
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
@@ -190,9 +191,9 @@ public class ServerManager {
         }
     }
 
-    private void initTk103Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTk103Server(final Tk103Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
@@ -201,7 +202,7 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new Tk103ProtocolDecoder(protocol));
                 }
             });
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
@@ -212,9 +213,9 @@ public class ServerManager {
         }
     }
 
-    private void initGl100Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGl100Server(final Gl100Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\0'));
@@ -226,9 +227,9 @@ public class ServerManager {
         }
     }
 
-    private void initGl200Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGl200Server(final Gl200Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "$", "\0"));
@@ -238,7 +239,7 @@ public class ServerManager {
                 }
             });
             
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     
@@ -250,9 +251,9 @@ public class ServerManager {
         }
     }
 
-    private void initT55Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initT55Server(final T55Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -264,9 +265,9 @@ public class ServerManager {
         }
     }
 
-    private void initXexunServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initXexunServer(final XexunProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     if (Boolean.valueOf(Context.getProps().getProperty(protocol + ".extended"))) {
@@ -283,9 +284,9 @@ public class ServerManager {
         }
     }
 
-    private void initTotemServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTotemServer(final TotemProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TotemFrameDecoder());
@@ -296,9 +297,9 @@ public class ServerManager {
         }
     }
 
-    private void initEnforaServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initEnforaServer(final EnforaProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
@@ -308,9 +309,9 @@ public class ServerManager {
         }
     }
 
-    private void initMeiligaoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMeiligaoServer(final MeiligaoProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
@@ -320,9 +321,9 @@ public class ServerManager {
         }
     }
 
-    private void initMaxonServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMaxonServer(final MaxonProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -334,9 +335,9 @@ public class ServerManager {
         }
     }
 
-    private void initSuntechServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initSuntechServer(final SuntechProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
@@ -347,9 +348,9 @@ public class ServerManager {
         }
     }
 
-    private void initProgressServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initProgressServer(final ProgressProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
@@ -361,9 +362,9 @@ public class ServerManager {
         }
     }
 
-    private void initH02Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initH02Server(final H02Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new H02FrameDecoder());
@@ -373,9 +374,9 @@ public class ServerManager {
         }
     }
 
-    private void initJt600Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initJt600Server(final Jt600Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Jt600FrameDecoder());
@@ -385,9 +386,9 @@ public class ServerManager {
         }
     }
 
-    private void initEv603Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initEv603Server(final Ev603Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
@@ -398,9 +399,9 @@ public class ServerManager {
         }
     }
 
-    private void initV680Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initV680Server(final V680Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
@@ -411,9 +412,9 @@ public class ServerManager {
         }
     }
 
-    private void initPt502Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initPt502Server(final Pt502Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Pt502FrameDecoder());
@@ -426,9 +427,9 @@ public class ServerManager {
         }
     }
 
-    private void initTr20Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTr20Server(final Tr20Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -440,9 +441,9 @@ public class ServerManager {
         }
     }
 
-    private void initNavisServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initNavisServer(final NavisProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(4 * 1024, 12, 2, 2, 0));
@@ -454,9 +455,9 @@ public class ServerManager {
         }
     }
 
-    private void initMeitrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMeitrackServer(final MeitrackProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
@@ -469,9 +470,9 @@ public class ServerManager {
         }
     }
 
-    private void initSkypatrolServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+    private void initSkypatrolServer(final SkypatrolProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new SkypatrolProtocolDecoder(protocol));
@@ -480,9 +481,9 @@ public class ServerManager {
         }
     }
 
-    private void initGt02Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGt02Server(final Gt02Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
@@ -492,9 +493,9 @@ public class ServerManager {
         }
     }
 
-    private void initGt06Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGt06Server(final Gt06Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Gt06FrameDecoder());
@@ -504,9 +505,9 @@ public class ServerManager {
         }
     }
 
-    private void initMegastekServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMegastekServer(final MegastekProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -518,9 +519,9 @@ public class ServerManager {
         }
     }
 
-    private void initNavigilServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initNavigilServer(final NavigilProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new NavigilFrameDecoder());
@@ -532,9 +533,9 @@ public class ServerManager {
         }
     }
 
-    private void initGpsGateServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGpsGateServer(final GpsGateProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -546,9 +547,9 @@ public class ServerManager {
         }
     }
 
-    private void initTeltonikaServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTeltonikaServer(final TeltonikaProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
@@ -558,9 +559,9 @@ public class ServerManager {
         }
     }
     
-    private void initMta6Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMta6Server(final Mta6Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
@@ -571,9 +572,9 @@ public class ServerManager {
         }
     }
 
-    private void initMta6CanServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMta6CanServer(final Mta6canProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
@@ -584,9 +585,9 @@ public class ServerManager {
         }
     }
     
-    private void initTlt2hServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTlt2hServer(final Tlt2hProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(32 * 1024, "##"));
@@ -598,9 +599,9 @@ public class ServerManager {
         }
     }
     
-    private void initSyrusServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initSyrusServer(final SyrusProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '<'));
@@ -612,9 +613,9 @@ public class ServerManager {
         }
     }
 
-    private void initWondexServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initWondexServer(final WondexProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new WondexFrameDecoder());
@@ -625,9 +626,9 @@ public class ServerManager {
         }
     }
 
-    private void initCellocatorServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initCellocatorServer(final CellocatorProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
@@ -639,9 +640,9 @@ public class ServerManager {
         }
     }
 
-    private void initGalileoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGalileoServer(final GalileoProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new GalileoFrameDecoder());
@@ -653,9 +654,9 @@ public class ServerManager {
         }
     }
 
-    private void initYwtServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initYwtServer(final YwtProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -667,9 +668,9 @@ public class ServerManager {
         }
     }
 
-    private void initTk102Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTk102Server(final Tk102Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ']'));
@@ -681,9 +682,9 @@ public class ServerManager {
         }
     }
     
-    private void initIntellitracServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initIntellitracServer(final IntellitracProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new IntellitracFrameDecoder(1024));
@@ -695,9 +696,9 @@ public class ServerManager {
         }
     }
 
-    private void initXt7Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initXt7Server(final Xt7Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 20, 1, 5, 0));
@@ -707,9 +708,9 @@ public class ServerManager {
         }
     }
 
-    private void initWialonServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initWialonServer(final WialonProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(4 * 1024));
@@ -721,9 +722,9 @@ public class ServerManager {
         }
     }
 
-    private void initCarscopServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initCarscopServer(final CarscopProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '^'));
@@ -735,9 +736,9 @@ public class ServerManager {
         }
     }
 
-    private void initApelServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initApelServer(final ApelProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, 4, 0));
@@ -749,9 +750,9 @@ public class ServerManager {
         }
     }
 
-    private void initManPowerServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initManPowerServer(final ManPowerProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
@@ -763,9 +764,9 @@ public class ServerManager {
         }
     }
 
-    private void initGlobalSatServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGlobalSatServer(final GlobalSatProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '!'));
@@ -777,16 +778,16 @@ public class ServerManager {
         }
     }
 
-    private void initAtrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initAtrackServer(final AtrackProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AtrackFrameDecoder());
                     pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(protocol));
                 }
             });
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new AtrackProtocolDecoder(protocol));
@@ -796,9 +797,9 @@ public class ServerManager {
         }
     }
 
-    private void initPt3000Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initPt3000Server(final Pt3000Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, 'd')); // probably wrong
@@ -810,9 +811,9 @@ public class ServerManager {
         }
     }
 
-    private void initRuptelaServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initRuptelaServer(final RuptelaProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
@@ -822,9 +823,9 @@ public class ServerManager {
         }
     }
 
-    private void initTopflytechServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTopflytechServer(final TopflytechProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ')'));
@@ -835,9 +836,9 @@ public class ServerManager {
         }
     }
 
-    private void initLaipacServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initLaipacServer(final LaipacProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -849,9 +850,9 @@ public class ServerManager {
         }
     }
 
-    private void initAplicomServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initAplicomServer(final AplicomProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AplicomFrameDecoder());
@@ -861,9 +862,9 @@ public class ServerManager {
         }
     }
 
-    private void initGotopServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGotopServer(final GotopProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
@@ -874,9 +875,9 @@ public class ServerManager {
         }
     }
 
-    private void initSanavServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initSanavServer(final SanavProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '*'));
@@ -887,9 +888,9 @@ public class ServerManager {
         }
     }
 
-    private void initGatorServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+    private void initGatorServer(final GatorProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new GatorProtocolDecoder(protocol));
@@ -898,9 +899,9 @@ public class ServerManager {
         }
     }
 
-    private void initNoranServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+    private void initNoranServer(final NoranProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new NoranProtocolDecoder(protocol));
@@ -911,9 +912,9 @@ public class ServerManager {
         }
     }
 
-    private void initM2mServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initM2mServer(final M2mProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(23));
@@ -923,9 +924,9 @@ public class ServerManager {
         }
     }
     
-    private void initOsmAndServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initOsmAndServer(final OsmAndProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
@@ -936,9 +937,9 @@ public class ServerManager {
         }
     }
 
-    private void initEasyTrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initEasyTrackServer(final EasyTrackProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
@@ -949,9 +950,9 @@ public class ServerManager {
         }
     }
 
-    private void initTaipServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+    private void initTaipServer(final TaipProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
@@ -961,9 +962,9 @@ public class ServerManager {
         }
     }
 
-    private void initKhdServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initKhdServer(final KhdProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 3, 2));
@@ -973,9 +974,9 @@ public class ServerManager {
         }
     }
     
-    private void initPiligrimServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initPiligrimServer(final PiligrimProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("httpDecoder", new HttpRequestDecoder());
@@ -987,9 +988,9 @@ public class ServerManager {
         }
     }
 
-    private void initStl060Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initStl060Server(final Stl060Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new Stl060FrameDecoder(1024));
@@ -1000,9 +1001,9 @@ public class ServerManager {
         }
     }
 
-    private void initCarTrackServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initCarTrackServer(final CarTrackProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
@@ -1013,9 +1014,9 @@ public class ServerManager {
         }
     }
 
-    private void initMiniFinderServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMiniFinderServer(final MiniFinderProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
@@ -1026,9 +1027,9 @@ public class ServerManager {
         }
     }
 
-    private void initHaicomServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initHaicomServer(final HaicomProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '*'));
@@ -1039,9 +1040,9 @@ public class ServerManager {
         }
     }
 
-    private void initEelinkServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initEelinkServer(final EelinkProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2));
@@ -1051,9 +1052,9 @@ public class ServerManager {
         }
     }
 
-    private void initBoxServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initBoxServer(final BoxProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
@@ -1064,9 +1065,9 @@ public class ServerManager {
         }
     }
 
-    private void initFreedomServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initFreedomServer(final FreedomProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -1077,9 +1078,9 @@ public class ServerManager {
         }
     }
 
-    private void initTelikServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTelikServer(final TelikProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\0'));
@@ -1090,9 +1091,9 @@ public class ServerManager {
         }
     }
 
-    private void initTrackboxServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTrackboxServer(final TrackboxProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -1104,9 +1105,9 @@ public class ServerManager {
         }
     }
 
-    private void initVisiontekServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initVisiontekServer(final VisiontekProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
@@ -1117,9 +1118,9 @@ public class ServerManager {
         }
     }
 
-    private void initOrionServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initOrionServer(final OrionProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new OrionFrameDecoder());
@@ -1131,9 +1132,9 @@ public class ServerManager {
         }
     }
 
-    private void initRitiServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initRitiServer(final RitiProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 105, 2, 3, 0));
@@ -1145,9 +1146,9 @@ public class ServerManager {
         }
     }
 
-    private void initUlbotechServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initUlbotechServer(final UlbotechProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new UlbotechFrameDecoder());
@@ -1157,9 +1158,9 @@ public class ServerManager {
         }
     }
 
-    private void initTramigoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTramigoServer(final TramigoProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new TramigoFrameDecoder());
@@ -1171,9 +1172,9 @@ public class ServerManager {
         }
     }
 
-    private void initTr900Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initTr900Server(final Tr900Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '!'));
@@ -1182,7 +1183,7 @@ public class ServerManager {
                     pipeline.addLast("objectDecoder", new Tr900ProtocolDecoder(protocol));
                 }
             });
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("stringDecoder", new StringDecoder());
@@ -1193,9 +1194,9 @@ public class ServerManager {
         }
     }
 
-    private void initArdi01Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initArdi01Server(final Ardi01Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -1206,9 +1207,9 @@ public class ServerManager {
         }
     }
 
-    private void initXt013Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initXt013Server(final Xt013Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -1219,9 +1220,9 @@ public class ServerManager {
         }
     }
 
-    private void initAutoFonServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initAutoFonServer(final AutoFonProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AutoFonFrameDecoder());
@@ -1231,9 +1232,9 @@ public class ServerManager {
         }
     }
 
-    private void initGoSafeServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initGoSafeServer(final GoSafeProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '#'));
@@ -1244,9 +1245,9 @@ public class ServerManager {
         }
     }
 
-    private void initAutoFon45Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initAutoFon45Server(final AutoFon45Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new AutoFon45FrameDecoder());
@@ -1256,9 +1257,9 @@ public class ServerManager {
         }
     }
 
-    private void initBceServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initBceServer(final BceProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new BceFrameDecoder());
@@ -1270,9 +1271,9 @@ public class ServerManager {
         }
     }
     
-    private void initXirgoServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initXirgoServer(final XirgoProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
@@ -1284,9 +1285,9 @@ public class ServerManager {
         }
     }
 
-    private void initCalAmpServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+    private void initCalAmpServer(final CalAmpProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new CalAmpProtocolDecoder(protocol));
@@ -1295,9 +1296,9 @@ public class ServerManager {
         }
     }
     
-    private void initMtxServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMtxServer(final MtxProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
@@ -1309,9 +1310,9 @@ public class ServerManager {
         }
     }
 
-    private void initTytanServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+    private void initTytanServer(final TytanProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new TytanProtocolDecoder(protocol));
@@ -1320,9 +1321,9 @@ public class ServerManager {
         }
     }
 
-    private void initAvl301Server(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initAvl301Server(final Avl301Protocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            serverList.add(new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 1, -3, 0));
@@ -1332,9 +1333,9 @@ public class ServerManager {
         }
     }
 
-    private void initCastelServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initCastelServer(final CastelProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));
@@ -1344,7 +1345,7 @@ public class ServerManager {
             server.setEndianness(ByteOrder.LITTLE_ENDIAN);
             serverList.add(server);
 
-            server = new TrackerServer(new ConnectionlessBootstrap(), protocol) {
+            server = new TrackerServer(new ConnectionlessBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("objectDecoder", new CastelProtocolDecoder(protocol));
@@ -1355,9 +1356,9 @@ public class ServerManager {
         }
     }
 
-    private void initMxtServer(final String protocol) throws SQLException {
-        if (isProtocolEnabled(protocol)) {
-            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol) {
+    private void initMxtServer(final MxtProtocol protocol) throws SQLException {
+        if (isProtocolEnabled(protocol.getName())) {
+            TrackerServer server = new TrackerServer(new ServerBootstrap(), protocol.getName()) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
                     pipeline.addLast("frameDecoder", new MxtFrameDecoder());

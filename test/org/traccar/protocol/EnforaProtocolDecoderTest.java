@@ -14,7 +14,7 @@ public class EnforaProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(null);
+        EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(new EnforaProtocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "000A08002020202020303131303730303030353730323637"))));

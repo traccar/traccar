@@ -10,7 +10,7 @@ public class GotopProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        GotopProtocolDecoder decoder = new GotopProtocolDecoder(null);
+        GotopProtocolDecoder decoder = new GotopProtocolDecoder(new GotopProtocol());
 
         assertNull(decoder.decode(null, null, ""));
         

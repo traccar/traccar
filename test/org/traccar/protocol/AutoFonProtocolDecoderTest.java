@@ -13,7 +13,7 @@ public class AutoFonProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        AutoFonProtocolDecoder decoder = new AutoFonProtocolDecoder(null);
+        AutoFonProtocolDecoder decoder = new AutoFonProtocolDecoder(new AutoFonProtocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "10556103592310314825728F"))));

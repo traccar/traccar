@@ -12,7 +12,7 @@ public class EelinkProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(null);
+        EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(new EelinkProtocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "676701000b001b035418804661834901"))));

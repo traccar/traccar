@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
-    public GoSafeProtocolDecoder(String protocol) {
+    public GoSafeProtocolDecoder(GoSafeProtocol protocol) {
         super(protocol);
     }
 
@@ -65,12 +65,12 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

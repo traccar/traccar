@@ -33,7 +33,7 @@ import org.traccar.model.Position;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public AtrackProtocolDecoder(String protocol) {
+    public AtrackProtocolDecoder(AtrackProtocol protocol) {
         super(protocol);
     }
 
@@ -87,7 +87,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device id
         long id = buf.readLong();
-        if (!identify(String.valueOf(id))) {
+        if (!identify(String.valueOf(id), channel, remoteAddress)) {
             return null;
         }
 
@@ -101,7 +101,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Date and time
             position.setTime(new Date(buf.readUnsignedInt() * 1000)); // gps time

@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
-    public V680ProtocolDecoder(String protocol) {
+    public V680ProtocolDecoder(V680Protocol protocol) {
         super(protocol);
     }
 
@@ -63,7 +63,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         // Detect device ID
         if (sentence.length() == 16) {
             String imei = sentence.substring(1, sentence.length());
-            identify(imei);
+            identify(imei, channel);
         } else {
 
             // Parse message
@@ -74,13 +74,13 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             Integer index = 1;
 
             // Get device by IMEI
             String imei = parser.group(index++);
             if (imei != null) {
-                identify(imei);
+                identify(imei, channel);
             }
             if (!hasDeviceId()) {
                 return null;

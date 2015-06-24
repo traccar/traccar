@@ -17,6 +17,7 @@ package org.traccar.database;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
@@ -32,7 +33,10 @@ import java.util.Map;
 import java.util.Properties;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
+import org.jboss.netty.channel.Channel;
 import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.http.JsonConverter;
@@ -51,6 +55,7 @@ public class DataManager {
     private DataSource dataSource;
     
     private final Map<String, Device> devices = new HashMap<String, Device>();
+    private Map<String, ActiveDevice> activeDevices = new HashMap<String, ActiveDevice>();
     private long devicesLastUpdate;
     private long devicesRefreshDelay;
 
@@ -71,6 +76,14 @@ public class DataManager {
     
     public DataSource getDataSource() {
         return dataSource;
+    }
+
+    public void setActiveDevice(String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+        this.activeDevices.put(uniqueId, new ActiveDevice(uniqueId, protocol, channel, remoteAddress));
+    }
+
+    public ActiveDevice getActiveDevice(String uniqueId) {
+        return this.activeDevices.get(uniqueId);
     }
 
     private void initDatabase(Properties properties) throws Exception {

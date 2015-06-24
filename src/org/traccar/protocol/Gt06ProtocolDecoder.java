@@ -35,7 +35,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private boolean forceTimeZone = false;
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
-    public Gt06ProtocolDecoder(String protocol) {
+    public Gt06ProtocolDecoder(Gt06Protocol protocol) {
         super(protocol);
 
         Properties properties = Context.getProps();
@@ -126,7 +126,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (identify(imei)) {
+            if (identify(imei, channel)) {
                 buf.skipBytes(buf.readableBytes() - 6);
                 sendResponse(channel, type, buf.readUnsignedShort());
             }
@@ -144,7 +144,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Date and time
             Calendar time = Calendar.getInstance(timeZone);

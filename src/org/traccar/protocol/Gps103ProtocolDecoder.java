@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gps103ProtocolDecoder(String protocol) {
+    public Gps103ProtocolDecoder(Gps103Protocol protocol) {
         super(protocol);
     }
 
@@ -90,13 +90,13 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
         String imei = parser.group(index++);
-        if (!identify(imei)) {
+        if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
