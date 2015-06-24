@@ -64,7 +64,7 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Identification
-            identify(imei.toString());
+            identify(imei.toString(), channel);
 
         } else if (hasDeviceId()) {
             

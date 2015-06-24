@@ -81,7 +81,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_INDEX, index);
 
             // Get device id
-            if (!identify(imei)) {
+            if (!identify(imei, channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

@@ -174,7 +174,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         // Detect device ID
         if (sentence.startsWith("#L#")) {
             String imei = sentence.substring(3, sentence.indexOf(';'));
-            if (identify(imei)) {
+            if (identify(imei, channel)) {
                 sendResponse(channel, "#AL#", 1);
             }
         }

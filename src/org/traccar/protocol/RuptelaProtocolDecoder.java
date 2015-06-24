@@ -47,7 +47,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
         // Identify device
         String imei = String.format("%015d", buf.readLong());
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
 

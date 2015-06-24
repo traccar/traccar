@@ -75,7 +75,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocol());
             
-            if (!identify(id.toString(Charset.defaultCharset()).trim())) {
+            if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
                 return null;
             } else if (type == MSG_LOGIN) {
 

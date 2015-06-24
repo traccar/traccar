@@ -72,7 +72,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get device identifier
-        if (!identify(parser.group(1))) {
+        if (!identify(parser.group(1), channel)) {
             return null;
         }
 

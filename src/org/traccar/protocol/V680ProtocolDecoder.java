@@ -63,7 +63,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         // Detect device ID
         if (sentence.length() == 16) {
             String imei = sentence.substring(1, sentence.length());
-            identify(imei);
+            identify(imei, channel);
         } else {
 
             // Parse message
@@ -80,7 +80,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             // Get device by IMEI
             String imei = parser.group(index++);
             if (imei != null) {
-                identify(imei);
+                identify(imei, channel);
             }
             if (!hasDeviceId()) {
                 return null;

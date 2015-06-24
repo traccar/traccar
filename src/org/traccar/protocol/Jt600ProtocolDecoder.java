@@ -36,7 +36,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private Position decodeNormalMessage(ChannelBuffer buf) throws Exception {
+    private Position decodeNormalMessage(ChannelBuffer buf, Channel channel) throws Exception {
 
         Position position = new Position();
         position.setProtocol(getProtocol());
@@ -45,7 +45,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device by identifier
         String id = Long.valueOf(ChannelBufferTools.readHexString(buf, 10)).toString();
-        if (!identify(id)) {
+        if (!identify(id, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -140,7 +140,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                  // Alert Type
             ".*\\)");
 
-    private Position decodeAlertMessage(ChannelBuffer buf) throws Exception {
+    private Position decodeAlertMessage(ChannelBuffer buf, Channel channel) throws Exception {
 
         String message = buf.toString(Charset.defaultCharset());
 
@@ -157,7 +157,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -209,9 +209,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Check message type
         if (first == '$') {
-            return decodeNormalMessage(buf);
+            return decodeNormalMessage(buf, channel);
         } else if (first == '(') {
-            return decodeAlertMessage(buf);
+            return decodeAlertMessage(buf, channel);
         }
 
         return null;

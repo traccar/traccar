@@ -93,7 +93,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

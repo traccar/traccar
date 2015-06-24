@@ -107,7 +107,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocol());
             
             // Device identifier
-            if (!identify(String.valueOf(deviceUniqueId))) {
+            if (!identify(String.valueOf(deviceUniqueId), channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

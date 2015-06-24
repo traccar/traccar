@@ -84,7 +84,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
         
         if (type == MSG_LOGIN) {
-            identify(ChannelBufferTools.readHexString(buf, 16).substring(1));
+            identify(ChannelBufferTools.readHexString(buf, 16).substring(1), channel);
         }
         
         else if (hasDeviceId() &&

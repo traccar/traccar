@@ -25,7 +25,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
@@ -83,7 +82,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
             Integer index = 1;
 
             // Get device by id
-            if (!identify(parser.group(index++))) {
+            if (!identify(parser.group(index++), channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

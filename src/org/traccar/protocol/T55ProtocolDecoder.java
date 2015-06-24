@@ -92,33 +92,33 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             if (id.endsWith(",")) {
                 id = id.substring(0, id.length() - 1);
             }
-            identify(id);
+            identify(id, channel);
             sentence = sentence.substring(index);
         }
 
         // Identification
         if (sentence.startsWith("$PGID")) {
-            identify(sentence.substring(6, sentence.length() - 3));
+            identify(sentence.substring(6, sentence.length() - 3), channel);
         }
 
         // Identification
         else if (sentence.startsWith("$PCPTI")) {
-            identify(sentence.substring(7, sentence.indexOf(",", 7)));
+            identify(sentence.substring(7, sentence.indexOf(",", 7)), channel);
         }
 
         // Identification
         else if (sentence.startsWith("IMEI")) {
-            identify(sentence.substring(5, sentence.length()));
+            identify(sentence.substring(5, sentence.length()), channel);
         }
 
         // Identification
         else if (sentence.startsWith("$GPFID")) {
-            identify(sentence.substring(6, sentence.length()));
+            identify(sentence.substring(6, sentence.length()), channel);
         }
 
         // Identification
         else if (Character.isDigit(sentence.charAt(0)) & sentence.length() == 15) {
-            identify(sentence);
+            identify(sentence, channel);
         }
 
         // Location
