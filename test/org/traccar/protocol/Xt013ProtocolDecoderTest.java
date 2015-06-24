@@ -10,7 +10,7 @@ public class Xt013ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Xt013ProtocolDecoder decoder = new Xt013ProtocolDecoder(null);
+        Xt013ProtocolDecoder decoder = new Xt013ProtocolDecoder(new Xt013Protocol());
         
         verify(decoder.decode(null, null,
                 "TK,862950021650364,150131090859,+53.267863,+5.767363,0,38,12,0,F,204,08,C94,336C,24,,4.09,1,,,,,,,,"));

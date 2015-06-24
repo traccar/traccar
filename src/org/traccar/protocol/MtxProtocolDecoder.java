@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class MtxProtocolDecoder extends BaseProtocolDecoder {
 
-    public MtxProtocolDecoder(String protocol) {
+    public MtxProtocolDecoder(MtxProtocol protocol) {
         super(protocol);
     }
 
@@ -71,12 +71,12 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

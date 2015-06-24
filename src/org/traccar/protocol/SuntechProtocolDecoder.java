@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
-    public SuntechProtocolDecoder(String protocol) {
+    public SuntechProtocolDecoder(SuntechProtocol protocol) {
         super(protocol);
     }
 
@@ -64,11 +64,11 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         int index = 1;
 
         // Identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

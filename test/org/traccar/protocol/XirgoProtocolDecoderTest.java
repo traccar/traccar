@@ -9,7 +9,7 @@ public class XirgoProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        XirgoProtocolDecoder decoder = new XirgoProtocolDecoder(null);
+        XirgoProtocolDecoder decoder = new XirgoProtocolDecoder(new XirgoProtocol());
 
         verify(decoder.decode(null, null, null,
                 "$$357207059646786,4003,2015/05/19,15:54:56,-20.21422,-70.14927,37.5,1.8,0.0,11,0.8,12.9,31,297,1,0,0.0,0.0,0,1,1,1##"));

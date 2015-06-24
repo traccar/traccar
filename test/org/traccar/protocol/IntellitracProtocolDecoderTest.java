@@ -10,7 +10,7 @@ public class IntellitracProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        IntellitracProtocolDecoder decoder = new IntellitracProtocolDecoder(null);
+        IntellitracProtocolDecoder decoder = new IntellitracProtocolDecoder(new IntellitracProtocol());
 
         assertNull(decoder.decode(null, null, "$OK:TRACKING"));
 

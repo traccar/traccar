@@ -10,7 +10,7 @@ public class GpsGateProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        GpsGateProtocolDecoder decoder = new GpsGateProtocolDecoder(null);
+        GpsGateProtocolDecoder decoder = new GpsGateProtocolDecoder(new GpsGateProtocol());
 
         assertNull(decoder.decode(null, null, "$FRLIN,,user1,8IVHF*7A"));
         

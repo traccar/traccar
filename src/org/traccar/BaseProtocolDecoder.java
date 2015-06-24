@@ -16,7 +16,6 @@
 package org.traccar;
 
 import java.net.SocketAddress;
-import java.util.Properties;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
@@ -25,7 +24,6 @@ import static org.jboss.netty.channel.Channels.fireMessageReceived;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 
-import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 
@@ -34,10 +32,10 @@ import org.traccar.model.Device;
  */
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
-    private final String protocol;
+    private final Protocol protocol;
 
-    public String getProtocol() {
-        return protocol;
+    public String getProtocolName() {
+        return protocol.getName();
     }
 
     private long deviceId;
@@ -50,11 +48,12 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         return deviceId;
     }
 
-    public boolean identify(String uniqueId, boolean logWarning) {
+    public boolean identify(String uniqueId, Channel channel, SocketAddress remoteAddress, boolean logWarning) {
         try {
             Device device = Context.getDataManager().getDeviceByUniqueId(uniqueId);
             if (device != null) {
                 deviceId = device.getId();
+                Context.getDataManager().setActiveDevice(device.getUniqueId(), protocol, channel, remoteAddress);
                 return true;
             } else {
                 deviceId = 0;
@@ -70,11 +69,15 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
     }
 
-    public boolean identify(String uniqueId) {
-        return identify(uniqueId, true);
+    public boolean identify(String uniqueId, Channel channel, SocketAddress remoteAddress) {
+        return identify(uniqueId, channel, remoteAddress, true);
     }
 
-    public BaseProtocolDecoder(String protocol) {
+    public boolean identify(String uniqueId, Channel channel) {
+        return identify(uniqueId, channel, null, true);
+    }
+
+    public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
     }
 

@@ -12,7 +12,7 @@ public class NoranProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        NoranProtocolDecoder decoder = new NoranProtocolDecoder(null);
+        NoranProtocolDecoder decoder = new NoranProtocolDecoder(new NoranProtocol());
         
         verify(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "3400080001090000000000001D43A29BE842E62520424E523039423036363932000031322D30332D30352031313A34373A343300"))));

@@ -36,7 +36,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private String format0 = "TSPRXAB27GHKLMnaicz*U!";
     private String format1 = "SARY*U!";
 
-    public GlobalSatProtocolDecoder(String protocol) {
+    public GlobalSatProtocolDecoder(GlobalSatProtocol protocol) {
         super(protocol);
 
         Properties properties = Context.getProps();
@@ -91,14 +91,14 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse data
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length() && valueIndex < values.length; formatIndex++) {
             String value = values[valueIndex];
 
             switch(format.charAt(formatIndex)) {
                 case 'S':
-                    if (!identify(value)) {
+                    if (!identify(value, channel)) {
                         return null;
                     }
                     position.setDeviceId(getDeviceId());
@@ -208,11 +208,11 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Identification
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

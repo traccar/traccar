@@ -16,7 +16,7 @@ public class PiligrimProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        PiligrimProtocolDecoder decoder = new PiligrimProtocolDecoder(null);
+        PiligrimProtocolDecoder decoder = new PiligrimProtocolDecoder(new PiligrimProtocol());
         
         HttpRequest msg1 = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/bingps?imei=868204005544720&csq=18&vout=00&vin=4050&dataid=00000000");
         msg1.setContent(ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(

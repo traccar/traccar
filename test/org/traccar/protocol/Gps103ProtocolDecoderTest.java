@@ -9,7 +9,7 @@ public class Gps103ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(null);
+        Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new Gps103Protocol());
 
         // Log on request
         assertNull(decoder.decode(null, null, null, "##,imei:359586015829802,A"));

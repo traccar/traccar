@@ -10,7 +10,7 @@ public class RuptelaProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        RuptelaProtocolDecoder decoder = new RuptelaProtocolDecoder(null);
+        RuptelaProtocolDecoder decoder = new RuptelaProtocolDecoder(new RuptelaProtocol());
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "00560003116e7438a7a50100015565cbb9000020fd21300f113f4600005f000600090d090805011b13cf00020003001c012029ad00041d31dd1e0ebd160000c50000047200000000d0000000004100016a2a960000a5a300c9ee"))));

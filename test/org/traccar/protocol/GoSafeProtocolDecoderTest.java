@@ -10,7 +10,7 @@ public class GoSafeProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(null);
+        GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(new GoSafeProtocol());
 
         assertNull(decoder.decode(null, null, null,
                 "*GS16,351535058709775"));

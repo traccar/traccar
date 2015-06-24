@@ -12,7 +12,7 @@ public class Gt02ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gt02ProtocolDecoder decoder = new Gt02ProtocolDecoder(null);
+        Gt02ProtocolDecoder decoder = new Gt02ProtocolDecoder(new Gt02Protocol());
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "68682500000123456789012345000110010101010101026B3F3E026B3F3E000000000000000000010D0A"))));
