@@ -84,13 +84,19 @@ Ext.define('Traccar.view.state.StateController', {
             }
         }
 
-        // TODO: decode XML
-        var xml = position.get('other');
-        store.add(Ext.create('Traccar.model.Parameter', {
-            priority: 99,
-            name: 'Other',
-            value: xml
-        }));
+        var xml = '<info><a>aa</a><b>bb</b></info>';//position.get('other');
+        var other = this.parseXml(xml);
+        for (var key in other) {
+            if (other.hasOwnProperty(key)) {
+                store.add(Ext.create('Traccar.model.Parameter', {
+                    priority: 999,
+                    name: key.replace(/^./, function (match) {
+                        return match.toUpperCase();
+                    }),
+                    value: other[key]
+                }));
+            }
+        }
     },
 
     selectDevice: function(device) {
@@ -111,6 +117,25 @@ Ext.define('Traccar.view.state.StateController', {
         if (this.deviceId === data.get('deviceId')) {
             this.updatePosition(data);
         }
+    },
+
+    parseXml: function(xml) {
+        var dom = null;
+        if (window.DOMParser) {
+            dom = (new DOMParser()).parseFromString(xml, "text/xml");
+        } else if (window.ActiveXObject) {
+            dom = new ActiveXObject('Microsoft.XMLDOM');
+            dom.async = false;
+            dom.loadXML(xml);
+        }
+
+        var result = {};
+        var length = dom.childNodes[0].childNodes.length;
+        for(var i = 0; i < length; i++) {
+            var node = dom.childNodes[0].childNodes[i];
+            result[node.nodeName] = node.innerHTML; // use textContent in future
+        }
+        return result;
     }
 
 });
