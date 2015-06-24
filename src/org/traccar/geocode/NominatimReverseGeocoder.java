@@ -39,35 +39,40 @@ public class NominatimReverseGeocoder extends JsonReverseGeocoder {
 
     @Override
     protected Address parseAddress(JsonObject json) {
-        Address address = new Address();
         JsonObject result = json.getJsonObject("address");
 
-        if (result.containsKey("house_number")) {
-            address.setHouse(result.getString("house_number"));
-        }
-        if (result.containsKey("road")) {
-            address.setStreet(result.getString("road"));
-        }
-        if (result.containsKey("village")) {
-            address.setSettlement(result.getString("village"));
-        }
-        if (result.containsKey("city")) {
-            address.setSettlement(result.getString("city"));
-        }
-        if (result.containsKey("state_district")) {
-            address.setDistrict(result.getString("state_district"));
-        }
-        if (result.containsKey("state")) {
-            address.setState(result.getString("state"));
-        }
-        if (result.containsKey("country_code")) {
-            address.setCountry(result.getString("country_code").toUpperCase());
-        }
-        if (result.containsKey("postcode")) {
-            address.setPostcode(result.getString("postcode"));
+        if (result != null) {
+            Address address = new Address();
+
+            if (result.containsKey("house_number")) {
+                address.setHouse(result.getString("house_number"));
+            }
+            if (result.containsKey("road")) {
+                address.setStreet(result.getString("road"));
+            }
+            if (result.containsKey("village")) {
+                address.setSettlement(result.getString("village"));
+            }
+            if (result.containsKey("city")) {
+                address.setSettlement(result.getString("city"));
+            }
+            if (result.containsKey("state_district")) {
+                address.setDistrict(result.getString("state_district"));
+            }
+            if (result.containsKey("state")) {
+                address.setState(result.getString("state"));
+            }
+            if (result.containsKey("country_code")) {
+                address.setCountry(result.getString("country_code").toUpperCase());
+            }
+            if (result.containsKey("postcode")) {
+                address.setPostcode(result.getString("postcode"));
+            }
+
+            return address;
         }
 
-        return address;
+        return null;
     }
 
 }
