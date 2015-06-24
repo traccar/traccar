@@ -15,15 +15,17 @@
  */
 package org.traccar.geocode;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.traccar.helper.Log;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 
 public abstract class JsonReverseGeocoder implements ReverseGeocoder {
 
@@ -37,21 +39,29 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
     public String getAddress(AddressFormat format, double latitude, double longitude) {
 
         try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(String.format(url, latitude, longitude)).openConnection();
+            CloseableHttpClient httpClient = HttpClients.createDefault();
             try {
-            Reader reader = new InputStreamReader(conn.getInputStream());
+                CloseableHttpResponse response = httpClient.execute(new HttpGet(String.format(url, latitude, longitude)));
                 try {
-                    Address address = parseAddress(Json.createReader(reader).readObject());
-                    if (address != null) {
-                        return format.format(address);
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        JsonReader reader = Json.createReader(new InputStreamReader(entity.getContent()));
+                        try {
+                            Address address = parseAddress(reader.readObject());
+                            if (address != null) {
+                                return format.format(address);
+                            }
+                        } finally {
+                            reader.close();
+                        }
                     }
                 } finally {
-                    reader.close();
+                    response.close();
                 }
             } finally {
-                conn.disconnect();
+                httpClient.close();
             }
-        } catch(Exception error) {
+        } catch (Exception error) {
             Log.warning(error);
         }
 
