@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -104,7 +105,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         // Speed
         String speed = parser.group(index++);
         if (speed != null) {
-            position.setSpeed(Double.valueOf(speed));
+            position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(speed)));
         }
 
         // Course
