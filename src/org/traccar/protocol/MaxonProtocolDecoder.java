@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,9 +24,6 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.database.DataManager;
-import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 /**
@@ -41,7 +37,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
 
     private Position position = null;
 
-    public MaxonProtocolDecoder(String protocol) {
+    public MaxonProtocolDecoder(MaxonProtocol protocol) {
         super(protocol);
     }
 
@@ -126,7 +122,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             Matcher parser = gpfidPattern.matcher(sentence);
 
             if (parser.matches()) {
-                if (!identify(parser.group(1))) {
+                if (!identify(parser.group(1), channel)) {
                     return null;
                 }
                 position.setDeviceId(getDeviceId());

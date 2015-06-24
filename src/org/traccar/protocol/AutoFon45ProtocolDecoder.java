@@ -36,7 +36,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
         return (degrees + seconds) * ((raw & 0x0f) == 0 ? -1 : 1);
     }
 
-    public AutoFon45ProtocolDecoder(String protocol) {
+    public AutoFon45ProtocolDecoder(AutoFon45Protocol protocol) {
         super(protocol);
     }
 
@@ -51,7 +51,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             buf.readBytes(bytes);
 
             String imei = ChannelBufferTools.readHexString(ChannelBuffers.wrappedBuffer(bytes, 1, 16), 16).substring(1);
-            if (!identify(imei)) {
+            if (!identify(imei, channel)) {
                 return null;
             }
 
@@ -67,7 +67,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             short status = buf.readUnsignedByte();

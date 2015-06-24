@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
 
-    public ManPowerProtocolDecoder(String protocol) {
+    public ManPowerProtocolDecoder(ManPowerProtocol protocol) {
         super(protocol);
     }
 
@@ -64,12 +64,12 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

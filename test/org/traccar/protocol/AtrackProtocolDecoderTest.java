@@ -12,7 +12,7 @@ public class AtrackProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(null);
+        AtrackProtocolDecoder decoder = new AtrackProtocolDecoder(new AtrackProtocol());
 
         assertNull(decoder.decode(null, null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "fe0200014104d8f196820001"))));

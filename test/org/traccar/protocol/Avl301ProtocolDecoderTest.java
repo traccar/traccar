@@ -12,7 +12,7 @@ public class Avl301ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Avl301ProtocolDecoder decoder = new Avl301ProtocolDecoder(null);
+        Avl301ProtocolDecoder decoder = new Avl301ProtocolDecoder(new Avl301Protocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "244c0f086058500087335500010d0a"))));

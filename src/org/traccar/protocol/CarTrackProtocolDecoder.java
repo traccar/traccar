@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public CarTrackProtocolDecoder(String protocol) {
+    public CarTrackProtocolDecoder(CarTrackProtocol protocol) {
         super(protocol);
     }
 
@@ -70,11 +70,11 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Get device by unique identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

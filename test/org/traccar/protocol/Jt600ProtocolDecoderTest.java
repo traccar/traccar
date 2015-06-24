@@ -12,7 +12,7 @@ public class Jt600ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(null);
+        Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(new Jt600Protocol());
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "24311021600111001B16021105591022329862114046227B0598095080012327951435161F"))));

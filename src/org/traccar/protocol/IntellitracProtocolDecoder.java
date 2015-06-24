@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
-    public IntellitracProtocolDecoder(String protocol) {
+    public IntellitracProtocolDecoder(IntellitracProtocol protocol) {
         super(protocol);
     }
 
@@ -76,11 +76,11 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Detect device
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

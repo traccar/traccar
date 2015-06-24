@@ -9,7 +9,7 @@ public class HaicomProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        HaicomProtocolDecoder decoder = new HaicomProtocolDecoder(null);
+        HaicomProtocolDecoder decoder = new HaicomProtocolDecoder(new HaicomProtocol());
 
         verify(decoder.decode(null, null,
                 "$GPRS012497007097169,T100001,150618,230031,5402267400332464,0004,2014,000001,,,1,00#V040*"));

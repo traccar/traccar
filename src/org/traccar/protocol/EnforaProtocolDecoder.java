@@ -28,12 +28,11 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
-    public EnforaProtocolDecoder(String protocol) {
+    public EnforaProtocolDecoder(EnforaProtocol protocol) {
         super(protocol);
     }
 
@@ -95,11 +94,11 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

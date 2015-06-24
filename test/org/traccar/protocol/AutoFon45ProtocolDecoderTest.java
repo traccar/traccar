@@ -11,7 +11,7 @@ import static org.traccar.helper.DecoderVerifier.verify;
 public class AutoFon45ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
-        AutoFon45ProtocolDecoder decoder = new AutoFon45ProtocolDecoder(null);
+        AutoFon45ProtocolDecoder decoder = new AutoFon45ProtocolDecoder(new AutoFon45Protocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "41032125656985547543619173484002123481"))));

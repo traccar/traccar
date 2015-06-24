@@ -15,7 +15,7 @@ public class ProgressProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        ProgressProtocolDecoder decoder = new ProgressProtocolDecoder(null);
+        ProgressProtocolDecoder decoder = new ProgressProtocolDecoder(new ProgressProtocol());
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "020037000100000003003131310f003335343836383035313339303036320f00323530303136333832383531353535010000000100000000000000e6bb97b6"))));

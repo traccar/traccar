@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gps103ProtocolDecoder(String protocol) {
+    public Gps103ProtocolDecoder(Gps103Protocol protocol) {
         super(protocol);
     }
 
@@ -59,6 +59,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "([^,;]+)?,?" +
             ".*");
 
+    private static final Pattern handshake1Pattern = Pattern.compile("##,imei:(\\d+),A");
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg)
@@ -70,6 +72,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.contains("##")) {
             if (channel != null) {
                 channel.write("LOAD", remoteAddress);
+                Matcher handshakeMatcher = handshake1Pattern.matcher(sentence);
+                if(handshakeMatcher.matches()) {
+                    identify(handshakeMatcher.group(1), channel);
+                }
             }
             return null;
         }
@@ -90,13 +96,13 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
         String imei = parser.group(index++);
-        if (!identify(imei)) {
+        if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
