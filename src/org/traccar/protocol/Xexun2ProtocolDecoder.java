@@ -127,7 +127,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_ALARM, parser.group(index++));
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

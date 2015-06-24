@@ -87,7 +87,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Get device id
         long id = buf.readLong();
-        if (!identify(String.valueOf(id))) {
+        if (!identify(String.valueOf(id), channel, remoteAddress)) {
             return null;
         }
 

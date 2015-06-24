@@ -35,7 +35,7 @@ import org.traccar.helper.IgnoreOnSerialization;
 import org.traccar.model.Factory;
 
 public class JsonConverter {
-        
+
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     public static Date parseDate(String value) throws ParseException {
@@ -45,19 +45,29 @@ public class JsonConverter {
     public static <T extends Factory> T objectFromJson(Reader reader, T prototype) throws ParseException {
         return objectFromJson(Json.createReader(reader).readObject(), prototype);
     }
-    
-    public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) throws ParseException {
 
+    public static <T> T enumObjectFromJson(Reader reader, EnumFactory<? extends Enum<?>> factory) throws ParseException {
+        JsonObject json = Json.createReader(reader).readObject();
+        T object = factory.<T>create(json);
+        populateObject(json, object);
+        return object;
+    }
+
+    public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) throws ParseException {
         T object = (T) prototype.create();
-        
-        Method[] methods = prototype.getClass().getMethods();
-        
+        populateObject(json, object);
+        return object;
+    }
+
+    private static void populateObject(JsonObject json, Object object) throws ParseException {
+        Method[] methods = object.getClass().getMethods();
+
         for (final Method method : methods) {
             if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 
                 final String name = Introspector.decapitalize(method.getName().substring(3));
                 Class<?> parameterType = method.getParameterTypes()[0];
-                
+
                 if (json.containsKey(name)) try {
                     if (parameterType.equals(boolean.class)) {
                         method.invoke(object, json.getBoolean(name));
@@ -73,22 +83,28 @@ public class JsonConverter {
                         method.invoke(object, json.getString(name));
                     } else if (parameterType.equals(Date.class)) {
                         method.invoke(object, dateFormat.parse(json.getString(name)));
+                    } else if (parameterType.isEnum()) {
+                        method.invoke(object, Enum.valueOf((Class<? extends Enum>) parameterType, json.getString(name)));
+                    } else {
+                        Object nestedObject = parameterType.newInstance();
+                        populateObject(json.getJsonObject(name), nestedObject);
+                        method.invoke(object, nestedObject);
                     }
                 } catch (IllegalAccessException error) {
                 } catch (InvocationTargetException error) {
+                } catch (InstantiationException e) {
                 }
             }
         }
-        
-        return object;
+
     }
-    
+
     public static <T> JsonObject objectToJson(T object) {
-        
+
         JsonObjectBuilder json = Json.createObjectBuilder();
-        
+
         Method[] methods = object.getClass().getMethods();
-        
+
         for (Method method : methods) {
             if(method.isAnnotationPresent(IgnoreOnSerialization.class)) {
                 continue;
@@ -127,7 +143,7 @@ public class JsonConverter {
     public static JsonArray arrayToJson(Collection<?> array) {
 
         JsonArrayBuilder json = Json.createArrayBuilder();
-        
+
         for (Object object : array) {
             json.add(objectToJson(object));
         }

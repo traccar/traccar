@@ -77,7 +77,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         // Device identification
         String id = parser.group(index++);
         String imei = parser.group(index++);
-        if (!identify(id, false) && !identify(imei)) {
+        if (!identify(id, channel, null, false) && !identify(imei, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

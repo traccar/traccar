@@ -132,7 +132,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         // Create new position
         Position position = new Position();
         position.setProtocol(getProtocol());
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
 

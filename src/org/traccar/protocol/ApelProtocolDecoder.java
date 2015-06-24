@@ -120,7 +120,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
-            identify(buf.readBytes(length).toString(Charset.defaultCharset()));
+            identify(buf.readBytes(length).toString(Charset.defaultCharset()), channel);
         }
         
         else if (type == MSG_TYPE_LAST_LOG_INDEX) {

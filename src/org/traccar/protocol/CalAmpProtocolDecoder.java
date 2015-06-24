@@ -109,7 +109,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
 
-                identify(String.valueOf(id));
+                identify(String.valueOf(id), channel, remoteAddress);
             }
 
             // Identifier type

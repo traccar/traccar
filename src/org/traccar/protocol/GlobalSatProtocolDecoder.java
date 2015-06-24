@@ -98,7 +98,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
             switch(format.charAt(formatIndex)) {
                 case 'S':
-                    if (!identify(value)) {
+                    if (!identify(value, channel)) {
                         return null;
                     }
                     position.setDeviceId(getDeviceId());
@@ -212,7 +212,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identification
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

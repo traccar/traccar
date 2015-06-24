@@ -73,7 +73,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocol());
 
             // Identification
-            if (!identify(id)) {
+            if (!identify(id, channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

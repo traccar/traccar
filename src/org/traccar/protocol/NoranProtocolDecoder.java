@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -129,7 +128,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             // Identification
             String id = buf.readBytes(newFormat ? 12 : 11).toString(Charset.defaultCharset()).replaceAll("[^\\p{Print}]", "");
-            if (!identify(id)) {
+            if (!identify(id, channel, remoteAddress)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

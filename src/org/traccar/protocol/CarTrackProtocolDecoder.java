@@ -74,7 +74,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Get device by unique identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

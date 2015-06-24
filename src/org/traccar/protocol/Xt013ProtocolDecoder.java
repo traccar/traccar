@@ -76,7 +76,7 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         Integer index = 1;
 
         // Identify device
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

@@ -83,7 +83,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             
             // Identification
             QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-            if (!identify(decoder.getParameters().get("imei").get(0))) {
+            if (!identify(decoder.getParameters().get("imei").get(0), channel)) {
                 return null;
             }
 

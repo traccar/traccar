@@ -26,7 +26,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class SyrusProtocolDecoder extends BaseProtocolDecoder {
@@ -111,7 +110,7 @@ public class SyrusProtocolDecoder extends BaseProtocolDecoder {
 
             // Find device in database
             String id = sentence.substring(beginIndex, endIndex);
-            if (!identify(id)) {
+            if (!identify(id, channel)) {
                 return null;
             }
 

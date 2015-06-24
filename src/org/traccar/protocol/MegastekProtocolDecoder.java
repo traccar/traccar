@@ -192,8 +192,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_ALARM, parser.group(index++));
 
             // IMEI
-            if (!identify(parser.group(index++), false)) {
-                if (!identify(id)) {
+            if (!identify(parser.group(index++), channel, null, false)) {
+                if (!identify(id, channel)) {
                     return null;
                 }
             }
@@ -231,7 +231,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             
             int index = 1;
 
-            if (!identify(id)) {
+            if (!identify(id, channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

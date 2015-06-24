@@ -72,7 +72,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, buf);
             }
 
-            if (!identify(String.valueOf(buf.readUnsignedInt()))) {
+            if (!identify(String.valueOf(buf.readUnsignedInt()), channel)) {
                 return null;
             }
 

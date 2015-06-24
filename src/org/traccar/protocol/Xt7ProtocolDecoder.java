@@ -71,7 +71,7 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
         
         // Get device by id
         String id = buf.readBytes(16).toString(Charset.defaultCharset()).trim();
-        if (!identify(id)) {
+        if (!identify(id, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

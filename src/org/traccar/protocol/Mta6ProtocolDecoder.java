@@ -295,7 +295,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes("id=".length());
         int index = ChannelBufferTools.find(buf, buf.readerIndex(), length, "&");
         String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), Charset.defaultCharset());
-        if (!identify(uniqueId)) {
+        if (!identify(uniqueId, channel)) {
             return null;
         }
         buf.skipBytes(uniqueId.length());

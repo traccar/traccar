@@ -252,7 +252,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processHandshake(Channel channel, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
-        if (identify(buf.toString(Charset.defaultCharset()))) {
+        if (identify(buf.toString(Charset.defaultCharset()), channel)) {
             sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", charset));
         }
         return null;
