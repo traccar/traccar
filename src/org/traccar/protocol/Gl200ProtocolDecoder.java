@@ -61,7 +61,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}{4}|\\p{XDigit}{8})?," + // LAC
             "(\\p{XDigit}{4})?," +              // Cell
             "(?:(\\d+\\.\\d)?," +               // Odometer
-            "(\\d{1,3})?)?" +                   // Battery
+            "(\\d{1,3})?,)?" +                  // Battery
             ".*," +
             "(\\p{XDigit}{4})\\$?");
 
