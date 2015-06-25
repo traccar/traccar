@@ -1176,7 +1176,7 @@ public class ServerManager {
             serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
                 @Override
                 protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '!'));
+                    pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("stringEncoder", new StringEncoder());
                     pipeline.addLast("objectDecoder", new Tr900ProtocolDecoder(protocol));
