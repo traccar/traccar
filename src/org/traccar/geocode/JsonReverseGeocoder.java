@@ -19,6 +19,7 @@ import org.traccar.helper.Log;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
@@ -38,10 +39,13 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
 
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(String.format(url, latitude, longitude)).openConnection();
+            conn.setRequestProperty("Connection", "close"); // don't keep-alive connections
             try {
-            Reader reader = new InputStreamReader(conn.getInputStream());
+                InputStreamReader streamReader = new InputStreamReader(conn.getInputStream());
+                JsonReader reader = Json.createReader(streamReader);
                 try {
-                    Address address = parseAddress(Json.createReader(reader).readObject());
+                    Address address = parseAddress(reader.readObject());
+                    while (streamReader.read() > 0); // make sure we reached the end
                     if (address != null) {
                         return format.format(address);
                     }
