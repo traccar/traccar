@@ -91,7 +91,7 @@ public class Context {
 
         dataManager = new DataManager(properties);
         dataCache = new DataCache();
-        if (Boolean.valueOf(properties.getProperty("web.new"))) {
+        if (!Boolean.valueOf(properties.getProperty("web.old"))) {
             permissionsManager = new PermissionsManager();
         }
 

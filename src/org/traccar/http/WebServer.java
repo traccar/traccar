@@ -46,7 +46,7 @@ public class WebServer {
             server = new Server(new InetSocketAddress(address, port));
         }
 
-        if (Boolean.valueOf(properties.getProperty("web.new"))) {
+        if (!Boolean.valueOf(properties.getProperty("web.old"))) {
 
             ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
             servletHandler.setContextPath("/api");

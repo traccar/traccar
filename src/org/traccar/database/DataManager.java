@@ -139,7 +139,7 @@ public class DataManager {
 
     public void initDatabaseSchema() throws SQLException {
 
-        if (Boolean.valueOf(properties.getProperty("web.new"))) {
+        if (!Boolean.valueOf(properties.getProperty("web.old"))) {
 
             Connection connection = dataSource.getConnection();
             ResultSet result = connection.getMetaData().getTables(

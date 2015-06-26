@@ -8,7 +8,6 @@
 
     <entry key='web.enable'>true</entry>
     <entry key='web.port'>8082</entry>
-    <entry key='web.new'>true</entry>
     <entry key='web.path'>/opt/traccar/web</entry>
 
     <entry key='geocoder.enable'>true</entry>
