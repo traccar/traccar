@@ -272,59 +272,6 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        // CAN data
-        if (buf.readable() && (selector & 0x1000) != 0 && event == EVENT_DATA &&
-            Boolean.parseBoolean(Context.getProps().getProperty(getProtocol() + ".can"))) {
-
-            buf.readUnsignedMedium(); // packet identifier
-            buf.readUnsignedByte(); // version
-            int count = buf.readUnsignedByte();
-            buf.readUnsignedByte(); // batch count
-            buf.readUnsignedShort(); // selector bit
-            buf.readUnsignedInt(); // timestamp
-
-            buf.skipBytes(8);
-
-            ArrayList<ChannelBuffer> values = new ArrayList<ChannelBuffer>(count);
-
-            for (int i = 0; i < count; i++) {
-                values.add(buf.readBytes(8));
-            }
-
-            for (int i = 0; i < count; i++) {
-                ChannelBuffer value = values.get(i);
-                switch (buf.readInt()) {
-                    case 0x40C:
-                        position.set("suction-temperature1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set("suction-temperature2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set("suction-temperature3", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set("evaporator-fan", ChannelBuffers.swapShort(value.readShort()));
-                        break;
-                    case 0x50C:
-                        position.set("evaporator-temperature1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set("evaporator-temperature2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set("evaporator-temperature3", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        break;
-                    case 0x20D:
-                        position.set("diesel-rpm", ChannelBuffers.swapShort(value.readShort()));
-                        position.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set(Event.KEY_BATTERY, ChannelBuffers.swapShort(value.readShort()) * 0.01);
-                        position.set("air-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        break;
-                    case 0x30D:
-                        position.set(Event.KEY_ALARM, ChannelBufferTools.readHexString(value, 16));
-                        break;
-                    case 0x40D:
-                        position.set("cold-unit-status", ChannelBufferTools.readHexString(value, 16));
-                        break;
-                    case 0x50D:
-                        position.set("coolant-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        position.set("suction-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                        break;
-                }
-            }
-        }
-
         return position;
     }
 
