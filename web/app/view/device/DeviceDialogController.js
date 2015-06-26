@@ -27,6 +27,9 @@ Ext.define('Traccar.view.device.DeviceDialogController', {
             store.add(device);
         }
         store.sync({
+            success: function() {
+                store.reload(); // workaround for selection problem
+            },
             failure: function(batch) {
                 store.rejectChanges(); // TODO
                 Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
