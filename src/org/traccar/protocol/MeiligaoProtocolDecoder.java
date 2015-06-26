@@ -59,7 +59,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "\\|(\\p{XDigit}{2})" +             // GSM
             "\\|(\\p{XDigit}{8})|" +            // Odometer
             "(\\p{XDigit}{9})" +                // Odometer
-            "(?:\\|(\\p{XDigit}{5}))?)?)?)?)?" +  // RFID
+            "(?:\\|(\\p{XDigit}{5,}))?)?)?)?)?" + // RFID
             ".*");
     
     private static final int MSG_HEARTBEAT = 0x0001;
@@ -279,7 +279,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
         
         // RFID
-        position.set(Event.KEY_RFID, parser.group(index++));
+        String rfid = parser.group(index++);
+        if (rfid != null) {
+            position.set(Event.KEY_RFID, Integer.parseInt(rfid, 16));
+        }
 
         return position;
     }
