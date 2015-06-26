@@ -18,6 +18,16 @@ Ext.define('Traccar.view.report.ReportController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.report',
 
+    config: {
+        listen: {
+            controller: {
+                '*': {
+                    selectDevice: 'selectDevice'
+                }
+            }
+        }
+    },
+
     onShowClick: function() {
         var deviceId = this.lookupReference('deviceField').getValue();
 
@@ -57,6 +67,12 @@ Ext.define('Traccar.view.report.ReportController', {
     onSelectionChange: function(selected) {
         if (selected.getCount() > 0) {
             this.fireEvent("selectReport", selected.getLastSelected());
+        }
+    },
+
+    selectDevice: function(device) {
+        if (device !== undefined) {
+            this.getView().getSelectionModel().deselectAll();
         }
     }
 

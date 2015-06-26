@@ -25,6 +25,16 @@ Ext.define('Traccar.view.device.DeviceController', {
         'Traccar.view.user.User'
     ],
 
+    config: {
+        listen: {
+            controller: {
+                '*': {
+                    selectReport: 'selectReport'
+                }
+            }
+        }
+    },
+
     init: function() {
         if (Traccar.getApplication().getUser().get('admin')) {
             this.lookupReference('settingsServerButton').setDisabled(false);
@@ -104,6 +114,12 @@ Ext.define('Traccar.view.device.DeviceController', {
                 xtype: 'user-view'
             }
         }).show();
+    },
+
+    selectReport: function(position) {
+        if (position !== undefined) {
+            this.getView().getSelectionModel().deselectAll();
+        }
     }
 
 });
