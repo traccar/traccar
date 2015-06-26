@@ -18,6 +18,12 @@ Ext.define('Traccar.view.user.UserDialogController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.userdialog',
 
+    init: function() {
+        if (Traccar.getApplication().getUser().get('admin')) {
+            this.lookupReference('adminField').setDisabled(false);
+        }
+    },
+
     onSaveClick: function(button) {
         var dialog = button.up('window').down('form');
         dialog.updateRecord();

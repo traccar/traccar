@@ -50,7 +50,9 @@ Ext.define('Traccar.view.user.UserDialog', {
             xtype: 'checkboxfield',
             name: 'admin',
             fieldLabel: strings.login_admin,
-            allowBlank: false
+            allowBlank: false,
+            disabled: true,
+            reference: 'adminField'
         }]
     },
 
