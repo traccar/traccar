@@ -35,6 +35,7 @@ import javax.sql.DataSource;
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
+import org.traccar.http.AsyncServlet;
 import org.traccar.http.JsonConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
@@ -283,6 +284,8 @@ public class DataManager {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
+        Context.getPermissionsManager().refresh();
+        AsyncServlet.sessionRefreshDevice(device.getId());
     }
     
     public void linkDevice(long userId, long deviceId) throws SQLException {
@@ -291,6 +294,7 @@ public class DataManager {
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
         Context.getPermissionsManager().refresh();
+        AsyncServlet.sessionRefreshUser(userId);
     }
 
     public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {

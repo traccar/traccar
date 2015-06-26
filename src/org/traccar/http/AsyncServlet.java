@@ -18,7 +18,11 @@ package org.traccar.http;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -51,11 +55,11 @@ public class AsyncServlet extends HttpServlet {
         private static final boolean DEBUG_ASYNC = false;
         
         private static final long SESSION_TIMEOUT = 30;
-        private static final long REQUEST_TIMEOUT = 10;
+        private static final long REQUEST_TIMEOUT = 20;
         
         private boolean destroyed;
         private final long userId;
-        private final Collection<Long> devices;
+        private final Set<Long> devices = new HashSet<Long>();
         private Timeout sessionTimeout;
         private Timeout requestTimeout;
         private final Map<Long, Position> positions = new HashMap<Long, Position>();
@@ -70,7 +74,7 @@ public class AsyncServlet extends HttpServlet {
         public AsyncSession(long userId, Collection<Long> devices) {
             logEvent("create userId: " + userId + " devices: " + devices.size());
             this.userId = userId;
-            this.devices = devices;
+            this.devices.addAll(devices);
 
             Collection<Position> initialPositions = Context.getDataCache().getInitialState(devices);
             for (Position position : initialPositions) {
@@ -78,6 +82,10 @@ public class AsyncServlet extends HttpServlet {
             }
             
             Context.getDataCache().addListener(devices, dataListener);
+        }
+        
+        public boolean hasDevice(long deviceId) {
+            return devices.contains(deviceId);
         }
         
         private final DataCache.DataCacheListener dataListener = new DataCache.DataCacheListener() {
@@ -171,7 +179,20 @@ public class AsyncServlet extends HttpServlet {
         
     }
     
-    private final Map<Long, AsyncSession> asyncSessions = new HashMap<Long, AsyncSession>();
+    private static final Map<Long, AsyncSession> asyncSessions = new HashMap<Long, AsyncSession>();
+    
+    public static void sessionRefreshUser(long userId) {
+        asyncSessions.remove(userId);
+    }
+    
+    public static void sessionRefreshDevice(long deviceId) {
+        Iterator<Entry<Long, AsyncSession>> iterator = asyncSessions.entrySet().iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getValue().hasDevice(deviceId)) {
+                iterator.remove();
+            }
+        }
+    }
     
     private void async(final AsyncContext context) {
         
