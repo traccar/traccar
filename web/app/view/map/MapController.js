@@ -170,6 +170,7 @@ Ext.define('Traccar.view.map.MapController', {
 
         if (this.reportRoute !== undefined) {
             vectorSource.removeFeature(this.reportRoute);
+            this.reportRoute = undefined;
         }
 
         if (this.reportRoutePoints !== undefined) {
@@ -178,9 +179,8 @@ Ext.define('Traccar.view.map.MapController', {
                     vectorSource.removeFeature(this.reportRoutePoints[key]);
                 }
             }
+            this.reportRoutePoints = {};
         }
-
-        this.reportRoutePoints = {};
     },
 
     selectPosition: function(feature) {
@@ -188,22 +188,22 @@ Ext.define('Traccar.view.map.MapController', {
             this.currentFeature.setStyle(this.currentFeature.get('originalStyle'));
         }
 
-        feature.setStyle(this.getMarkerStyle(styles.map_select_radius, styles.map_select_color));
+        if (feature !== undefined) {
+            feature.setStyle(this.getMarkerStyle(styles.map_select_radius, styles.map_select_color));
 
-        var pan = ol.animation.pan({
-            duration: styles.map_delay,
-            source: this.getView().mapView.getCenter()
-        });
-        this.getView().map.beforeRender(pan);
-        this.getView().mapView.setCenter(feature.getGeometry().getCoordinates());
+            var pan = ol.animation.pan({
+                duration: styles.map_delay,
+                source: this.getView().mapView.getCenter()
+            });
+            this.getView().map.beforeRender(pan);
+            this.getView().mapView.setCenter(feature.getGeometry().getCoordinates());
+        }
 
         this.currentFeature = feature;
     },
 
     selectDevice: function(device) {
-        if (this.liveData[device.get('id')] !== undefined) {
-            this.selectPosition(this.liveData[device.get('id')]);
-        }
+        this.selectPosition(this.liveData[device.get('id')]);
     },
 
     selectReport: function(position) {
