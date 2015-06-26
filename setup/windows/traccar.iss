@@ -23,7 +23,7 @@ Source: "..\wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: 
 
 Source: "..\..\target\tracker-server.jar"; DestDir: "{app}"
 Source: "..\..\target\lib\*"; DestDir: "{app}\lib"
-Source: "..\..\web\*"; DestDir: "{app}\web"
+Source: "..\..\web\*"; DestDir: "{app}\web"; Flags: recursesubdirs
 Source: "traccar.xml"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
 
 [Run]
