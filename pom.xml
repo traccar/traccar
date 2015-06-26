@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>2.12-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
 
     <name>traccar</name>
-    <url>http://www.traccar.org</url>
+    <url>https://www.traccar.org</url>
 
     <dependencies>
         <dependency>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.186</version>
+            <version>1.4.187</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -38,12 +38,12 @@
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
-            <version>0.9.5</version>
+            <version>0.9.5.1</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
-            <version>3.10.1.Final</version>
+            <version>3.10.3.Final</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>org.eclipse.jetty.aggregate</groupId>
             <artifactId>jetty-all-server</artifactId>
-            <version>8.1.16.v20140903</version>
+            <version>8.1.17.v20150415</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.jetty.orbit</groupId>
@@ -122,7 +122,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.5.3</version>
+                <version>2.5.5</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
