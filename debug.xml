@@ -90,7 +90,7 @@
         other VARCHAR(8192) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
         
-        CREATE INDEX position_deviceId_fixTime ON position(deviceId, fixTime);
+        CREATE INDEX position_deviceId_fixTime ON `position`(deviceId, fixTime);
 
         CREATE TABLE data (
         id INT PRIMARY KEY AUTO_INCREMENT,
