@@ -73,8 +73,6 @@
         FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE,
         FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
 
-        CREATE INDEX user_device_user_id ON user_device(userId);
-
         CREATE TABLE position (
         id INT PRIMARY KEY AUTO_INCREMENT,
         protocol VARCHAR(1024),
@@ -91,6 +89,8 @@
         address VARCHAR(1024),
         other VARCHAR(8192) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
+        
+        CREATE INDEX position_deviceId_fixTime ON position(deviceId, fixTime);
 
         CREATE TABLE data (
         id INT PRIMARY KEY AUTO_INCREMENT,
