@@ -15,17 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -53,7 +52,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
             "\\d+," +                      // Impulses
             "(\\d+)," +                    // Input
             "(\\d+)" +                     // Status
-            ".*");
+            ".*(?:\r\n)?");
 
     @Override
     protected Object decode(
