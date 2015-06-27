@@ -1,12 +1,9 @@
 package org.traccar.protocol;
 
+import java.nio.ByteOrder;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
-
-import java.nio.ByteOrder;
-
-import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
 public class MxtProtocolDecoderTest extends ProtocolDecoderTest {

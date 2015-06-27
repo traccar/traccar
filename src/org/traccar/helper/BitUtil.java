@@ -24,8 +24,16 @@ public class BitUtil {
         return (number & (1 << index)) != 0;
     }
     
+    public static int range(int number, int index) {
+        return (number >> index);
+    }
+    
     public static int range(int number, int index, int length) {
         return (number >> index) & ((1 << length) - 1);
+    }
+    
+    public static long range(long number, int index) {
+        return (number >> index);
     }
     
     public static long range(long number, int index, int length) {

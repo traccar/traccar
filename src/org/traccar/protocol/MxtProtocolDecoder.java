@@ -15,18 +15,17 @@
  */
 package org.traccar.protocol;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
@@ -74,10 +73,10 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
             long date = buf.readUnsignedInt();
 
-            long days = date >> (5 + 6 + 6);
-            long hours = (date >> (6 + 6)) & 0x1f;
-            long minutes = (date >> 6) & 0x3f;
-            long seconds = date & 0x3f;
+            long days = BitUtil.range(date, 6 + 6 + 5);
+            long hours = BitUtil.range(date, 6 + 6, 5);
+            long minutes = BitUtil.range(date, 6, 6);
+            long seconds = BitUtil.range(date, 0, 6);
 
             long millis = time.getTimeInMillis();
             millis += (((days * 24 + hours) * 60 + minutes) * 60 + seconds) * 1000;
@@ -90,10 +89,56 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(buf.readInt() / 1000000.0);
 
             long flags = buf.readUnsignedInt();
+            position.set(Event.KEY_IGNITION, BitUtil.check(flags, 0));
+            position.set(Event.KEY_ALARM, BitUtil.check(flags, 1));
+            position.set(Event.KEY_INPUT, BitUtil.range(flags, 2, 5));
+            position.set(Event.KEY_OUTPUT, BitUtil.range(flags, 7, 3));
+            position.setCourse(BitUtil.range(flags, 10, 3) * 45);
+            //position.setValid(BitUtil.check(flags, 15));
+            position.set(Event.KEY_CHARGE, BitUtil.check(flags, 20));
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
             int inputMask = buf.readUnsignedByte();
+            
+            if (BitUtil.check(infoGroups, 0)) {
+                buf.skipBytes(8); // waypoints
+            }
+            
+            if (BitUtil.check(infoGroups, 1)) {
+                buf.skipBytes(8); // wireless accessory
+            }
+            
+            if (BitUtil.check(infoGroups, 2)) {
+                position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
+                position.set(Event.KEY_HDOP, buf.readUnsignedByte());
+                buf.readUnsignedByte(); // GPS accuracy
+                position.set(Event.KEY_GSM, buf.readUnsignedByte());
+                buf.readUnsignedShort(); // time since boot
+                buf.readUnsignedByte(); // input voltage
+                position.set(Event.PREFIX_TEMP + 1, buf.readByte());
+            }
+            
+            if (BitUtil.check(infoGroups, 3)) {
+                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+            }
+            
+            if (BitUtil.check(infoGroups, 4)) {
+                buf.readUnsignedInt(); // hours
+            }
+            
+            if (BitUtil.check(infoGroups, 5)) {
+                buf.readUnsignedInt(); // reason
+            }
+            
+            if (BitUtil.check(infoGroups, 6)) {
+                position.set(Event.KEY_POWER, buf.readUnsignedShort() * 0.001);
+                position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+            }
+            
+            if (BitUtil.check(infoGroups, 7)) {
+                position.set(Event.KEY_RFID, buf.readUnsignedInt());
+            }
 
             return position;
         }
