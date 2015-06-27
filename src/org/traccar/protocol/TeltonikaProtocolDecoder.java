@@ -19,13 +19,12 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -47,11 +46,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(result ? 1 : 0);
             channel.write(response);
         }
-    }
-
-    private static boolean checkBit(long mask, int bit) {
-        long checkMask = 1 << bit;
-        return (mask & checkMask) == checkMask;
     }
 
     private static final int CODEC_GH3000 = 0x07;
@@ -87,45 +81,45 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(new Date(time * 1000));
                 
                 globalMask = buf.readUnsignedByte();
-                if (!checkBit(globalMask, 0)) {
+                if (!BitUtil.check(globalMask, 0)) {
                     return null;
                 }
                 
                 int locationMask = buf.readUnsignedByte();
                 
-                if (checkBit(locationMask, 0)) {
+                if (BitUtil.check(locationMask, 0)) {
                     position.setLatitude(buf.readFloat());
                     position.setLongitude(buf.readFloat());
                 }
                 
-                if (checkBit(locationMask, 1)) {
+                if (BitUtil.check(locationMask, 1)) {
                     position.setAltitude(buf.readUnsignedShort());
                 }
                 
-                if (checkBit(locationMask, 2)) {
+                if (BitUtil.check(locationMask, 2)) {
                     position.setCourse(buf.readUnsignedByte() * 360.0 / 256);
                 }
                 
-                if (checkBit(locationMask, 3)) {
+                if (BitUtil.check(locationMask, 3)) {
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
                 }
                 
-                if (checkBit(locationMask, 4)) {
+                if (BitUtil.check(locationMask, 4)) {
                     int satellites = buf.readUnsignedByte();
                     position.set(Event.KEY_SATELLITES, satellites);
                     position.setValid(satellites >= 3);
                 }
                 
-                if (checkBit(locationMask, 5)) {
+                if (BitUtil.check(locationMask, 5)) {
                     position.set("area", buf.readUnsignedShort());
                     position.set(Event.KEY_CELL, buf.readUnsignedShort());
                 }
                 
-                if (checkBit(locationMask, 6)) {
+                if (BitUtil.check(locationMask, 6)) {
                     position.set(Event.KEY_GSM, buf.readUnsignedByte());
                 }
                 
-                if (checkBit(locationMask, 7)) {
+                if (BitUtil.check(locationMask, 7)) {
                     position.set("operator", buf.readUnsignedInt());
                 }
 
@@ -154,7 +148,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
             
             // Read 1 byte data
-            if (checkBit(globalMask, 1)) {
+            if (BitUtil.check(globalMask, 1)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
                     int id = buf.readUnsignedByte();
@@ -168,7 +162,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
             
             // Read 2 byte data
-            if (checkBit(globalMask, 2)) {
+            if (BitUtil.check(globalMask, 2)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
                     position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
@@ -176,7 +170,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Read 4 byte data
-            if (checkBit(globalMask, 3)) {
+            if (BitUtil.check(globalMask, 3)) {
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
                     position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());

@@ -24,6 +24,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -40,10 +41,6 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_TIME_TRIGGERED = 0xA0;
     private static final int MSG_OUTPUT_CONTROL = 0x41;
     private static final int MSG_OUTPUT_CONTROL_ACK = 0xC1;
-
-    private static boolean checkBit(int mask, int bit) {
-        return (mask & (1 << bit)) != 0;
-    }
 
     @Override
     protected Object decode(
@@ -86,11 +83,11 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                     do {
                         mask = buf.readUnsignedShort();
                         masks.add(mask);
-                    } while (checkBit(mask, 15));
+                    } while (BitUtil.check(mask, 15));
 
                     mask = masks.get(0);
 
-                    if (checkBit(mask, 0)) {
+                    if (BitUtil.check(mask, 0)) {
                         position.setValid(true);
                         position.setLongitude(buf.readFloat());
                         position.setLatitude(buf.readFloat());
@@ -106,22 +103,22 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
                     }
 
-                    if (checkBit(mask, 1)) {
+                    if (BitUtil.check(mask, 1)) {
                         position.set(Event.KEY_INPUT, buf.readUnsignedShort());
                     }
 
                     for (int i = 1; i <= 8; i++) {
-                        if (checkBit(mask, i + 1)) {
+                        if (BitUtil.check(mask, i + 1)) {
                             position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
                         }
                     }
 
-                    if (checkBit(mask, 10)) buf.skipBytes(4);
-                    if (checkBit(mask, 11)) buf.skipBytes(4);
-                    if (checkBit(mask, 12)) buf.skipBytes(2);
-                    if (checkBit(mask, 13)) buf.skipBytes(2);
+                    if (BitUtil.check(mask, 10)) buf.skipBytes(4);
+                    if (BitUtil.check(mask, 11)) buf.skipBytes(4);
+                    if (BitUtil.check(mask, 12)) buf.skipBytes(2);
+                    if (BitUtil.check(mask, 13)) buf.skipBytes(2);
 
-                    if (checkBit(mask, 14)) {
+                    if (BitUtil.check(mask, 14)) {
                         position.set(Event.KEY_MCC, buf.readUnsignedShort());
                         position.set(Event.KEY_MNC, buf.readUnsignedByte());
                         position.set(Event.KEY_LAC, buf.readUnsignedShort());
@@ -130,7 +127,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedByte();
                     }
 
-                    if (checkBit(mask, 0)) {
+                    if (BitUtil.check(mask, 0)) {
                         positions.add(position);
                     }
                 }

@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -31,8 +30,8 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
-
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -64,11 +63,6 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         
         response.setContent(ChannelBuffers.wrappedBuffer(begin, end));
         channel.write(response);
-    }
-    
-    private static boolean checkBit(long mask, int bit) {
-        long checkMask = 1 << bit;
-        return (mask & checkMask) == checkMask;
     }
     
     private static class FloatReader {
@@ -135,11 +129,11 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
                 // Skip events
                 short event = buf.readUnsignedByte();
-                if (checkBit(event, 7)) {
-                    if (checkBit(event, 6)) {
+                if (BitUtil.check(event, 7)) {
+                    if (BitUtil.check(event, 6)) {
                         buf.skipBytes(8);
                     } else {
-                        while (checkBit(event, 7)) {
+                        while (BitUtil.check(event, 7)) {
                             event = buf.readUnsignedByte();
                         }
                     }
@@ -149,44 +143,44 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 position.setLongitude(longitudeReader.readFloat(buf) / Math.PI * 180);
                 position.setTime(timeReader.readTime(buf));
 
-                if (checkBit(flags, 0)) {
+                if (BitUtil.check(flags, 0)) {
                     buf.readUnsignedByte(); // status
                 }
 
-                if (checkBit(flags, 1)) {
+                if (BitUtil.check(flags, 1)) {
                     position.setAltitude(buf.readUnsignedShort());
                 }
 
-                if (checkBit(flags, 2)) {
+                if (BitUtil.check(flags, 2)) {
                     position.setSpeed(buf.readUnsignedShort() & 0x03ff);
                     position.setCourse(buf.readUnsignedByte());
                 }
 
-                if (checkBit(flags, 3)) {
+                if (BitUtil.check(flags, 3)) {
                     position.set(Event.KEY_ODOMETER, buf.readUnsignedShort());
                 }
 
-                if (checkBit(flags, 4)) {
+                if (BitUtil.check(flags, 4)) {
                     position.set(Event.KEY_FUEL, buf.readUnsignedInt() + "|" + buf.readUnsignedInt());
                     position.set("hours1", buf.readUnsignedShort());
                     position.set("hours2", buf.readUnsignedShort());
                 }
 
-                if (checkBit(flags, 5)) {
+                if (BitUtil.check(flags, 5)) {
                     position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() & 0x03ff);
                     position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort() & 0x03ff);
                     position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort() & 0x03ff);
                     position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort() & 0x03ff);
                 }
 
-                if (checkBit(flags, 6)) {
+                if (BitUtil.check(flags, 6)) {
                     position.set(Event.PREFIX_TEMP + 1, buf.readByte());
                     buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
                     position.set(Event.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
                     buf.readUnsignedShort(); // old sensor state (& 0x0fff)
                 }
 
-                if (checkBit(flags, 7)) {
+                if (BitUtil.check(flags, 7)) {
                     position.set(Event.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
                     position.set(Event.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
                     buf.readByte(); // microcontroller temperature
@@ -214,11 +208,11 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         // Skip events
         short event = buf.readUnsignedByte();
-        if (checkBit(event, 7)) {
-            if (checkBit(event, 6)) {
+        if (BitUtil.check(event, 7)) {
+            if (BitUtil.check(event, 6)) {
                 buf.skipBytes(8);
             } else {
-                while (checkBit(event, 7)) {
+                while (BitUtil.check(event, 7)) {
                     event = buf.readUnsignedByte();
                 }
             }
@@ -230,41 +224,41 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // status
 
-        if (checkBit(flags, 0)) {
+        if (BitUtil.check(flags, 0)) {
             position.setAltitude(buf.readUnsignedShort());
             position.setSpeed(buf.readUnsignedByte());
             position.setCourse(buf.readByte());
             position.set(Event.KEY_ODOMETER, new FloatReader().readFloat(buf));
         }
 
-        if (checkBit(flags, 1)) {
+        if (BitUtil.check(flags, 1)) {
             new FloatReader().readFloat(buf); // fuel consumtion
             position.set("hours", new FloatReader().readFloat(buf));
             position.set("tank", buf.readUnsignedByte() * 0.4);
         }
 
-        if (checkBit(flags, 2)) {
+        if (BitUtil.check(flags, 2)) {
             position.set("engine", buf.readUnsignedShort() * 0.125);
             position.set("pedals", buf.readUnsignedByte());
             position.set(Event.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
             buf.readUnsignedShort(); // service odometer
         }
 
-        if (checkBit(flags, 3)) {
+        if (BitUtil.check(flags, 3)) {
             position.set(Event.KEY_FUEL, buf.readUnsignedShort());
             position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
             position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort());
             position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort());
         }
 
-        if (checkBit(flags, 4)) {
+        if (BitUtil.check(flags, 4)) {
             position.set(Event.PREFIX_TEMP + 1, buf.readByte());
             buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
             position.set(Event.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
             buf.readUnsignedShort(); // old sensor state (& 0x0fff)
         }
 
-        if (checkBit(flags, 5)) {
+        if (BitUtil.check(flags, 5)) {
             position.set(Event.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
             position.set(Event.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
             buf.readByte(); // microcontroller temperature
