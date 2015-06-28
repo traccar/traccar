@@ -227,7 +227,7 @@ public class DataManager {
     }
 
     public void addUser(User user) throws SQLException {
-        user.setId(QueryBuilder.create(dataSource, getQuery("database.insertUser"))
+        user.setId(QueryBuilder.create(dataSource, getQuery("database.insertUser"), true)
                 .setObject(user)
                 .executeUpdate());
         Context.getPermissionsManager().refresh();
@@ -269,7 +269,7 @@ public class DataManager {
     }
     
     public void addDevice(Device device) throws SQLException {
-        device.setId(QueryBuilder.create(dataSource, getQuery("database.insertDevice"))
+        device.setId(QueryBuilder.create(dataSource, getQuery("database.insertDevice"), true)
                 .setObject(device)
                 .executeUpdate());
     }
@@ -306,7 +306,7 @@ public class DataManager {
     }
 
     public void addPosition(Position position) throws SQLException {
-        position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"))
+        position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"), true)
                 .setObject(position)
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp

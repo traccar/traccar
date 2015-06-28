@@ -41,14 +41,18 @@ public class QueryBuilder {
     private PreparedStatement statement;
     private final String query;
     
-    private QueryBuilder(DataSource dataSource, String query) throws SQLException {
+    private QueryBuilder(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
         indexMap = new HashMap<String, List<Integer>>();
         connection = dataSource.getConnection();
         this.query = query;
         if (query != null) {
-            String parsedQuery = parse(query, indexMap);
+            String parsedQuery = parse(query.trim(), indexMap);
             try {
-                statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
+                if (returnGeneratedKeys) {
+                    statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
+                } else {
+                    statement = connection.prepareStatement(parsedQuery);
+                }
             } catch (SQLException error) {
                 connection.close();
                 throw error;
@@ -115,9 +119,13 @@ public class QueryBuilder {
 
         return parsedQuery.toString();
     }
-    
+
     public static QueryBuilder create(DataSource dataSource, String query) throws SQLException {
-        return new QueryBuilder(dataSource, query);
+        return new QueryBuilder(dataSource, query, false);
+    }
+
+    public static QueryBuilder create(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
+        return new QueryBuilder(dataSource, query, returnGeneratedKeys);
     }
     
     private List<Integer> indexes(String name) {
