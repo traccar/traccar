@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
-    public AplicomProtocolDecoder(String protocol) {
+    public AplicomProtocolDecoder(AplicomProtocol protocol) {
         super(protocol);
     }
 
@@ -131,8 +131,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
-        if (!identify(imei)) {
+        position.setProtocol(getProtocolName());
+        if (!identify(imei, channel)) {
             return null;
         }
 

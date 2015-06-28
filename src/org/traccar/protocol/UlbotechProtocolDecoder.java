@@ -28,7 +28,7 @@ import java.util.Date;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
-    public UlbotechProtocolDecoder(String protocol) {
+    public UlbotechProtocolDecoder(UlbotechProtocol protocol) {
         super(protocol);
     }
 
@@ -57,11 +57,11 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         // Get device id
         String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

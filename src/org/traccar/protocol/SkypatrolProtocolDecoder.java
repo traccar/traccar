@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
-    public SkypatrolProtocolDecoder(String protocol) {
+    public SkypatrolProtocolDecoder(SkypatrolProtocol protocol) {
         super(protocol);
     }
 
@@ -71,7 +71,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Status code
             if (BitUtil.check(mask, 1)) {
@@ -90,7 +90,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning("No device id field");
                 return null;
             }
-            if (!identify(id)) {
+            if (!identify(id, channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

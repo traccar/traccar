@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
-    public RitiProtocolDecoder(String protocol) {
+    public RitiProtocolDecoder(RitiProtocol protocol) {
         super(protocol);
     }
 
@@ -58,12 +58,12 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         buf.skipBytes(2); // header
 
         // Get device id
-        if (!identify(String.valueOf(buf.readUnsignedShort()))) {
+        if (!identify(String.valueOf(buf.readUnsignedShort()), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

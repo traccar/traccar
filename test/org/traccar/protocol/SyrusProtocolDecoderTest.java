@@ -10,7 +10,7 @@ public class SyrusProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(null, false);
+        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(new SyrusProtocol(), false);
 
         verify(decoder.decode(null, null,
                 ">RGP230615010248-2682523-065236820000003007F4101;ID=0005;#0002;*2A<"));

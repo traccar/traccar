@@ -28,7 +28,7 @@ import java.util.*;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
-    public AutoFonProtocolDecoder(String protocol) {
+    public AutoFonProtocolDecoder(AutoFonProtocol protocol) {
         super(protocol);
     }
 
@@ -46,7 +46,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         position.setDeviceId(getDeviceId());
 
         if (!history) {
@@ -121,7 +121,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // software version
 
             String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
-            if (!identify(imei)) {
+            if (!identify(imei, channel)) {
                 return null;
             }
 

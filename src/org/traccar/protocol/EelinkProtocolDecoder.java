@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
-    public EelinkProtocolDecoder(String protocol) {
+    public EelinkProtocolDecoder(EelinkProtocol protocol) {
         super(protocol);
     }
 
@@ -84,7 +84,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
         
         if (type == MSG_LOGIN) {
-            identify(ChannelBufferTools.readHexString(buf, 16).substring(1));
+            identify(ChannelBufferTools.readHexString(buf, 16).substring(1), channel);
         }
         
         else if (hasDeviceId() &&
@@ -97,7 +97,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setDeviceId(getDeviceId());
             
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.set(Event.KEY_INDEX, index);
             
             // Location

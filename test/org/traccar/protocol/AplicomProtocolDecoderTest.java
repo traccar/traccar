@@ -10,8 +10,8 @@ public class AplicomProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        AplicomProtocolDecoder decoder = new AplicomProtocolDecoder(null);
-
+        AplicomProtocolDecoder decoder = new AplicomProtocolDecoder(new AplicomProtocol());
+        
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "44C20146B710C158DA002100B09F0700C054CA0EA254CA0E9C03BE0BF6015D7069070000142A600000000000000001"))));
 

@@ -9,14 +9,14 @@ public class Gl200ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(null);
+        Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new Gl200Protocol());
 
         verify(decoder.decode(null, null, null,
                 "+RESP:GTSTT,1A0401,860599000508846,,41,0,0.0,84,107.5,-76.657998,39.497203,20150623160622,0310,0260,B435,3B81,,20150623160622,0F54$"));
 
         verify(decoder.decode(null, null, null,
                 "+RESP:GTFRI,1A0401,860599000508846,,0,0,1,1,134.8,154,278.7,-76.671089,39.778885,20150623154301,0310,0260,043F,7761,,99,20150623154314,0F24$"));
-        
+
         verify(decoder.decode(null, null, null,
                 "+RESP:GTFRI,1A0200,860599000165464,CRI001,0,0,1,2,,41,,-71.153137,42.301634,20150328020301,,,,,280.3,55,20150327220351,320C"));
         

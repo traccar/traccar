@@ -55,6 +55,7 @@ public class WebServer {
             servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
             servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
             servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
+            servletHandler.addServlet(new ServletHolder(new CommandsServlet()), "/commands/*");
             servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
 
             /*ResourceHandler mobileResourceHandler = new ResourceHandler();

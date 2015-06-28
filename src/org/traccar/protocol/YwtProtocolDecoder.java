@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class YwtProtocolDecoder extends BaseProtocolDecoder {
 
-    public YwtProtocolDecoder(String protocol) {
+    public YwtProtocolDecoder(YwtProtocol protocol) {
         super(protocol);
     }
 
@@ -81,12 +81,12 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         Integer index = 1;
         String type = parser.group(index++);
 
         // Device
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

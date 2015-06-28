@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
-    public WondexProtocolDecoder(String protocol) {
+    public WondexProtocolDecoder(WondexProtocol protocol) {
         super(protocol);
     }
 
@@ -66,11 +66,11 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         int index = 1;
 
         // Device identifier
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

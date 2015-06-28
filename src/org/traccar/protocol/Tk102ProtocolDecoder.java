@@ -24,12 +24,11 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Tk102ProtocolDecoder(String protocol) {
+    public Tk102ProtocolDecoder(Tk102Protocol protocol) {
         super(protocol);
     }
 
@@ -54,7 +53,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         // Login
         if (sentence.startsWith("[!")) {
-            if (!identify(sentence.substring(14, 14 + 15))) {
+            if (!identify(sentence.substring(14, 14 + 15), channel)) {
                 return null;
             }
 
@@ -79,7 +78,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             Integer index = 1;

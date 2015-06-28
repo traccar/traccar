@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public CellocatorProtocolDecoder(String protocol) {
+    public CellocatorProtocolDecoder(CellocatorProtocol protocol) {
         super(protocol);
     }
 
@@ -104,10 +104,10 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         // Parse location
         if (type == MSG_CLIENT_STATUS) {
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             
             // Device identifier
-            if (!identify(String.valueOf(deviceUniqueId))) {
+            if (!identify(String.valueOf(deviceUniqueId), channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

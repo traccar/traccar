@@ -10,7 +10,7 @@ public class T55ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        T55ProtocolDecoder decoder = new T55ProtocolDecoder(null);
+        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new T55Protocol());
         
         assertNull(decoder.decode(null, null, "$GPFID,ID123456ABC"));
 

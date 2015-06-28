@@ -10,7 +10,7 @@ public class Tk102ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tk102ProtocolDecoder decoder = new Tk102ProtocolDecoder(null);
+        Tk102ProtocolDecoder decoder = new Tk102ProtocolDecoder(new Tk102Protocol());
 
         assertNull(decoder.decode(null, null, ""));
 

@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public EasyTrackProtocolDecoder(String protocol) {
+    public EasyTrackProtocolDecoder(EasyTrackProtocol protocol) {
         super(protocol);
     }
 
@@ -73,12 +73,12 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
