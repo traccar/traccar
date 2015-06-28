@@ -11,5 +11,5 @@ public interface Protocol {
 
     void sendCommand(ActiveDevice activeDevice, GpsCommand command);
 
-    void addTrackerServersTo(List<TrackerServer> serverList);
+    void initTrackerServers(List<TrackerServer> serverList);
 }

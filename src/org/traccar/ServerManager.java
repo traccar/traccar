@@ -15,21 +15,12 @@
  */
 package org.traccar;
 
-import java.nio.ByteOrder;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.FixedLengthFrameDecoder;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
-import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
-import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.protocol.*;
 
 public class ServerManager {
@@ -66,7 +57,6 @@ public class ServerManager {
         initProtocolServer(new GpsGateProtocol());
         initProtocolServer(new TeltonikaProtocol());
         initProtocolServer(new Mta6Protocol());
-        initProtocolServer(new Mta6canProtocol());
         initProtocolServer(new Tlt2hProtocol());
         initProtocolServer(new SyrusProtocol());
         initProtocolServer(new WondexProtocol());
@@ -169,7 +159,7 @@ public class ServerManager {
 
     private void initProtocolServer(final Protocol protocol) throws SQLException {
         if (isProtocolEnabled(protocol.getName())) {
-            protocol.addTrackerServersTo(serverList);
+            protocol.initTrackerServers(serverList);
         }
     }
 

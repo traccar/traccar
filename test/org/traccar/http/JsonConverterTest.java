@@ -1,4 +1,4 @@
-package org.traccar.http.json;
+package org.traccar.http;
 
 import org.junit.Test;
 import org.traccar.http.JsonConverter;
@@ -13,7 +13,7 @@ import java.util.Date;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class JsonConverterTestCase {
+public class JsonConverterTest {
 
     private <T extends Factory> T convert(String jsonString, T prototype) throws ParseException {
         Reader r = new StringReader(
