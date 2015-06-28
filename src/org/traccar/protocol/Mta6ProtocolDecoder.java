@@ -32,6 +32,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
+import org.traccar.Protocol;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -40,7 +41,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
     private boolean simple;
 
-    public Mta6ProtocolDecoder(String protocol, boolean simple) {
+    public Mta6ProtocolDecoder(Protocol protocol, boolean simple) {
         super(protocol);
         this.simple = simple;
     }
@@ -123,7 +124,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             while (buf.readable()) {
                 Position position = new Position();
                 position.setDeviceId(getDeviceId());
-                position.setProtocol(getProtocol());
+                position.setProtocol(getProtocolName());
 
                 short flags = buf.readUnsignedByte();
 
@@ -202,7 +203,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     private Position parseFormatA1(ChannelBuffer buf) {
         Position position = new Position();
         position.setDeviceId(getDeviceId());
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         short flags = buf.readUnsignedByte();
 
@@ -289,7 +290,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes("id=".length());
         int index = ChannelBufferTools.find(buf, buf.readerIndex(), length, "&");
         String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), Charset.defaultCharset());
-        if (!identify(uniqueId)) {
+        if (!identify(uniqueId, channel)) {
             return null;
         }
         buf.skipBytes(uniqueId.length());

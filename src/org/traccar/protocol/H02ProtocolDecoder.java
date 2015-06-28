@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
-    public H02ProtocolDecoder(String protocol) {
+    public H02ProtocolDecoder(H02Protocol protocol) {
         super(protocol);
     }
     
@@ -55,16 +55,16 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return result;
     }
     
-    private Position decodeBinary(ChannelBuffer buf) {
+    private Position decodeBinary(ChannelBuffer buf, Channel channel) {
         
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         
         buf.readByte(); // marker
 
         // Identification
-        if (!identify(ChannelBufferTools.readHexString(buf, 10))) {
+        if (!identify(ChannelBufferTools.readHexString(buf, 10), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -117,7 +117,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}{8})" +                // Status
             ".*");
     
-    private Position decodeText(String sentence) {
+    private Position decodeText(String sentence, Channel channel) {
 
         // Parse message
         Matcher parser = pattern.matcher(sentence);
@@ -127,12 +127,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -190,9 +190,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         // TODO X mode?
 
         if (marker.equals("*")) {
-            return decodeText(buf.toString(Charset.defaultCharset()));
+            return decodeText(buf.toString(Charset.defaultCharset()), channel);
         } else if (marker.equals("$")) {
-            return decodeBinary(buf);
+            return decodeBinary(buf, channel);
         }
 
         return null;

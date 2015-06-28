@@ -25,12 +25,11 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
-    public XexunProtocolDecoder(String protocol) {
+    public XexunProtocolDecoder(XexunProtocol protocol) {
         super(protocol);
     }
 
@@ -62,7 +61,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
@@ -108,7 +107,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xexun2ProtocolDecoder(String protocol) {
+    public Xexun2ProtocolDecoder(XexunProtocol protocol) {
         super(protocol);
     }
 
@@ -72,7 +72,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
@@ -127,7 +127,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_ALARM, parser.group(index++));
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

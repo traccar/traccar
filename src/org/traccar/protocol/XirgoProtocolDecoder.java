@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
-    public XirgoProtocolDecoder(String protocol) {
+    public XirgoProtocolDecoder(XirgoProtocol protocol) {
         super(protocol);
     }
 
@@ -69,12 +69,12 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

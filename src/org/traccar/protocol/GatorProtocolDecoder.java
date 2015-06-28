@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
-    public GatorProtocolDecoder(String protocol) {
+    public GatorProtocolDecoder(GatorProtocol protocol) {
         super(protocol);
     }
 
@@ -70,10 +70,10 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             
             // Create new position
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
 
             // Identification
-            if (!identify(id)) {
+            if (!identify(id, channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

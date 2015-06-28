@@ -9,7 +9,7 @@ public class VisiontekProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        VisiontekProtocolDecoder decoder = new VisiontekProtocolDecoder(null);
+        VisiontekProtocolDecoder decoder = new VisiontekProtocolDecoder(new VisiontekProtocol());
         
         //verify(decoder.decode(null, null,
         //        "$1,AP116,05,06,15,11,48,32,1725.0460N,07824.5289E,0617,07,0,030,2091,0,0,0,1,1,1,1,20,00.0000,00.3820,00.0000,VAJRA V1.00,A#"));

@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xt013ProtocolDecoder(String protocol) {
+    public Xt013ProtocolDecoder(Xt013Protocol protocol) {
         super(protocol);
     }
 
@@ -71,12 +71,12 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Identify device
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

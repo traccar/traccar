@@ -8,7 +8,7 @@ public class Tr900ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tr900ProtocolDecoder decoder = new Tr900ProtocolDecoder(null);
+        Tr900ProtocolDecoder decoder = new Tr900ProtocolDecoder(new Tr900Protocol());
 
         verify(decoder.decode(null, null, null,
                 ">00001001,4,1,150626,131252,W05830.2978,S3137.2783,,00,348,18,00,003-000,0,3,11111011*3b!"));

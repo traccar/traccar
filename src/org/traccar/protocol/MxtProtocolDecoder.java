@@ -29,7 +29,7 @@ import org.traccar.model.Position;
 
 public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
-    public MxtProtocolDecoder(String protocol) {
+    public MxtProtocolDecoder(MxtProtocol protocol) {
         super(protocol);
     }
 
@@ -49,14 +49,14 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         String id = String.valueOf(buf.readUnsignedInt());
-        if (!identify(id)) {
+        if (!identify(id, channel)) {
             return null;
         }
 
         if (type == MSG_POSITION) {
 
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             buf.readUnsignedByte(); // protocol

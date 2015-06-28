@@ -32,7 +32,7 @@ import org.traccar.model.Position;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Gl200ProtocolDecoder(String protocol) {
+    public Gl200ProtocolDecoder(Gl200Protocol protocol) {
         super(protocol);
     }
 
@@ -89,12 +89,12 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Get device by IMEI
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -150,7 +150,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.set(Event.KEY_BATTERY, parser.group(index++));
 
-        if (Boolean.valueOf(Context.getProps().getProperty(getProtocol() + ".ack")) && channel != null) {
+        if (Boolean.valueOf(Context.getProps().getProperty(getProtocolName() + ".ack")) && channel != null) {
             channel.write("+SACK:" + parser.group(index++) + "$", remoteAddress);
         }
 

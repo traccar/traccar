@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
-    public Xt7ProtocolDecoder(String protocol) {
+    public Xt7ProtocolDecoder(Xt7Protocol protocol) {
         super(protocol);
     }
 
@@ -67,11 +67,11 @@ public class Xt7ProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
         
         // Get device by id
         String id = buf.readBytes(16).toString(Charset.defaultCharset()).trim();
-        if (!identify(id)) {
+        if (!identify(id, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

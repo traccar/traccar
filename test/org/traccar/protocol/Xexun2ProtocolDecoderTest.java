@@ -10,7 +10,7 @@ public class Xexun2ProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        Xexun2ProtocolDecoder decoder = new Xexun2ProtocolDecoder(null);
+        Xexun2ProtocolDecoder decoder = new Xexun2ProtocolDecoder(new XexunProtocol());
         
         assertNull(decoder.decode(null, null,
                 ",+48606717068,,L,, imei:012207005047292,,,F:4.28V,1,52,11565,247,01,000E,1FC5"));

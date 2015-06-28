@@ -36,7 +36,7 @@ import org.traccar.model.Position;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
-    public MeitrackProtocolDecoder(String protocol) {
+    public MeitrackProtocolDecoder(MeitrackProtocol protocol) {
         super(protocol);
     }
 
@@ -84,12 +84,12 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Create new position
         Position position = new Position();
-        position.setProtocol(getProtocol());
+        position.setProtocol(getProtocolName());
 
         Integer index = 1;
 
         // Identification
-        if (!identify(parser.group(index++))) {
+        if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -184,7 +184,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         
         // Identification
         String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
-        if (!identify(imei)) {
+        if (!identify(imei, channel)) {
             return null;
         }
 
@@ -193,7 +193,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() >= 0x34) {
             
             Position position = new Position();
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
             
             // Event

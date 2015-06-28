@@ -11,7 +11,7 @@ public class MxtProtocolDecoderTest extends ProtocolDecoderTest {
     @Test
     public void testDecode() throws Exception {
 
-        MxtProtocolDecoder decoder = new MxtProtocolDecoder(null);
+        MxtProtocolDecoder decoder = new MxtProtocolDecoder(new MxtProtocol());
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "01a631361e7a00082471418b052a2c46b587ffc01ae3fd000008800000000000003345422203000000f000f00000000000ea1e04"))));

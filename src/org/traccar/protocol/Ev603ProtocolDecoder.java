@@ -25,12 +25,11 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
-    public Ev603ProtocolDecoder(String protocol) {
+    public Ev603ProtocolDecoder(Ev603Protocol protocol) {
         super(protocol);
     }
 
@@ -53,7 +52,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
         // Detect device ID
         if (sentence.startsWith("!1,")) {
-            identify(sentence.substring(3));
+            identify(sentence.substring(3), channel);
         }
 
         else if (sentence.startsWith("!A,")) {
@@ -66,7 +65,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocol());
+            position.setProtocol(getProtocolName());
             Integer index = 1;
 
             // Date
