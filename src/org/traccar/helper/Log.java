@@ -172,7 +172,10 @@ public class Log {
                 }
             }
             if (skip) {
-                s.append(" < ...");
+                if (!first) {
+                    s.append(" < ");
+                }
+                s.append("...");
             }
             s.append(")");
         }
