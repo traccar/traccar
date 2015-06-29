@@ -123,6 +123,7 @@ public class Context {
     public static void init(DataManager dataManager) {
         properties = new Properties();
         Context.dataManager = dataManager;
+        connectionManager = new ConnectionManager();
     }
 
 }
