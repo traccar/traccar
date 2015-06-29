@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -121,7 +122,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
+        if (Boolean.valueOf(Context.getProps().getProperty(getProtocolName() + ".mph"))) {
+            position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
+        } else {
+            position.setSpeed(UnitsConverter.knotsFromMph(Double.valueOf(parser.group(index++))));
+        }
 
         // Time
         time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
