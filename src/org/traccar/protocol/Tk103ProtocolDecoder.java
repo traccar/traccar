@@ -123,9 +123,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Speed
         if (Boolean.valueOf(Context.getProps().getProperty(getProtocolName() + ".mph"))) {
-            position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
-        } else {
             position.setSpeed(UnitsConverter.knotsFromMph(Double.valueOf(parser.group(index++))));
+        } else {
+            position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
         }
 
         // Time
