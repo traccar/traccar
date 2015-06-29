@@ -22,11 +22,8 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.TrackerServer;
-import org.traccar.protocol.commands.CommandTemplate;
-import org.traccar.http.commands.CommandType;
 
 import java.util.List;
-import java.util.Map;
 
 public class XexunProtocol extends BaseProtocol {
 
@@ -39,15 +36,14 @@ public class XexunProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                if (Boolean.valueOf(Context.getProps().getProperty(getName() + ".extended"))) {
+                boolean full = Boolean.valueOf(Context.getProps().getProperty(getName() + ".extended"));
+                if (full) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024)); // tracker bug \n\r
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(XexunProtocol.this));
                 } else {
                     pipeline.addLast("frameDecoder", new XexunFrameDecoder());
-                    pipeline.addLast("stringDecoder", new StringDecoder());
-                    pipeline.addLast("objectDecoder", new XexunProtocolDecoder(XexunProtocol.this));
                 }
+                pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectDecoder", new XexunProtocolDecoder(XexunProtocol.this, full));
             }
         });
     }

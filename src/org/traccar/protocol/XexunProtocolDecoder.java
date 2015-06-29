@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -25,17 +24,21 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
-    public XexunProtocolDecoder(XexunProtocol protocol) {
+    private boolean full;
+
+    public XexunProtocolDecoder(XexunProtocol protocol, boolean full) {
         super(protocol);
+        this.full = full;
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    static private Pattern patternBasic = Pattern.compile(
             "G[PN]RMC," +
-            "(\\d{2})(\\d{2})(\\d{2}).(\\d+)," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
             "([NS])," +
@@ -44,8 +47,22 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)," +                 // Speed
             "(\\d+\\.?\\d*)?," +                // Course
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            ".*\r?\n?.*imei:" +
+            "[^\\*]*\\*..,"       +             // Checksum
+            "([FL])," +                         // Signal
+            "(?:([^,]*),)?" +                   // Alarm
+            ".*imei:" +
             "(\\d+),");                         // IMEI
+
+    static private Pattern patternFull = Pattern.compile(
+            "[\r\n]*" +
+            "(\\d+)," +                         // Serial
+            "([^,]+)?," +                       // Number
+            patternBasic.pattern() +
+            "(\\d+)," +                         // Satellites
+            "(-?\\d+\\.\\d+)?," +               // Altitude
+            "[FL]:(\\d+\\.\\d+)V" +             // Power
+            ".*" +
+            "[\r\n]*");
 
     @Override
     protected Object decode(
@@ -53,10 +70,10 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         // Parse message
-        String sentence = (String) msg;
-        Matcher parser = pattern.matcher(sentence);
+        Pattern pattern = full ? patternFull : patternBasic;
+        Matcher parser = pattern.matcher((String) msg);
         if (!parser.matches()) {
-            throw new ParseException(null, 0);
+            return null;
         }
 
         // Create new position
@@ -64,6 +81,11 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
 
         Integer index = 1;
+
+        if (full) {
+            position.set("serial", parser.group(index++));
+            position.set("number", parser.group(index++));
+        }
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -106,11 +128,33 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
+        // Signal
+        position.set("signal", parser.group(index++));
+
+        // Alarm
+        position.set(Event.KEY_ALARM, parser.group(index++));
+
         // Get device by IMEI
         if (!identify(parser.group(index++), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
+
+        if (full) {
+
+            // Satellites
+            position.set(Event.KEY_SATELLITES, parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+
+            // Altitude
+            String altitude = parser.group(index++);
+            if (altitude != null) {
+                position.setAltitude(Double.valueOf(altitude));
+            }
+
+            // Power
+            position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
+        }
+
         return position;
     }
 
