@@ -235,7 +235,6 @@
     <entry key='gpsgate.port'>5026</entry>
     <entry key='teltonika.port'>5027</entry>
     <entry key='mta6.port'>5028</entry>
-    <entry key='mta6can.port'>5029</entry>
     <entry key='tlt2h.port'>5030</entry>
     <entry key='syrus.port'>5031</entry>
     <entry key='wondex.port'>5032</entry>

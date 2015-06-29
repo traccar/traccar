@@ -73,7 +73,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             if (channel != null) {
                 channel.write("LOAD", remoteAddress);
                 Matcher handshakeMatcher = handshakePattern.matcher(sentence);
-                if(handshakeMatcher.matches()) {
+                if (handshakeMatcher.matches()) {
                     identify(handshakeMatcher.group(1), channel);
                 }
             }

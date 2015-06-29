@@ -39,7 +39,7 @@ public class XexunProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                if (Boolean.valueOf(Context.getProps().getProperty(XexunProtocol.this.getName() + ".extended"))) {
+                if (Boolean.valueOf(Context.getProps().getProperty(getName() + ".extended"))) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024)); // tracker bug \n\r
                     pipeline.addLast("stringDecoder", new StringDecoder());
                     pipeline.addLast("objectDecoder", new Xexun2ProtocolDecoder(XexunProtocol.this));
