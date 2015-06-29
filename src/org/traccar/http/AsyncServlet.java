@@ -41,13 +41,14 @@ import org.traccar.helper.Log;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 
-public class AsyncServlet extends HttpServlet {
+public class AsyncServlet extends BaseServlet {
 
     private static final long ASYNC_TIMEOUT = 120000;
     
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        async(req.startAsync());
+    protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        async(req.startAsync(), getUserId(req));
+        return true;
     }
     
     public class AsyncSession {
@@ -194,20 +195,19 @@ public class AsyncServlet extends HttpServlet {
         }
     }
     
-    private void async(final AsyncContext context) {
+    private void async(final AsyncContext context, long userId) {
         
         context.setTimeout(ASYNC_TIMEOUT);
         HttpServletRequest req = (HttpServletRequest) context.getRequest();
-        User user = (User) req.getSession().getAttribute(MainServlet.USER_KEY);
-        
+
         synchronized (asyncSessions) {
             
-            if (Boolean.valueOf(req.getParameter("first")) || !asyncSessions.containsKey(user.getId())) {
-                Collection<Long> devices = Context.getPermissionsManager().allowedDevices(user.getId());
-                asyncSessions.put(user.getId(), new AsyncSession(user.getId(), devices));
+            if (Boolean.valueOf(req.getParameter("first")) || !asyncSessions.containsKey(userId)) {
+                Collection<Long> devices = Context.getPermissionsManager().allowedDevices(userId);
+                asyncSessions.put(userId, new AsyncSession(userId, devices));
             }
             
-            asyncSessions.get(user.getId()).request(context);
+            asyncSessions.get(userId).request(context);
         }
     }
 
