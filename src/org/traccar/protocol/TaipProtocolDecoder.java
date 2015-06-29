@@ -29,11 +29,11 @@ import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-public class SyrusProtocolDecoder extends BaseProtocolDecoder {
+public class TaipProtocolDecoder extends BaseProtocolDecoder {
     
     boolean sendResponse;
 
-    public SyrusProtocolDecoder(Protocol protocol, boolean sendResponse) {
+    public TaipProtocolDecoder(TaipProtocol protocol, boolean sendResponse) {
         super(protocol);
         this.sendResponse = sendResponse;
     }

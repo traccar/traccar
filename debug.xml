@@ -236,7 +236,7 @@
     <entry key='teltonika.port'>5027</entry>
     <entry key='mta6.port'>5028</entry>
     <entry key='tlt2h.port'>5030</entry>
-    <entry key='syrus.port'>5031</entry>
+    <entry key='taip.port'>5031</entry>
     <entry key='wondex.port'>5032</entry>
     <entry key='cellocator.port'>5033</entry>
     <entry key='galileo.port'>5034</entry>
@@ -263,7 +263,6 @@
     <entry key='m2m.port'>5054</entry>
     <entry key='osmand.port'>5055</entry>
     <entry key='easytrack.port'>5056</entry>
-    <entry key='taip.port'>5057</entry>
     <entry key='khd.port'>5058</entry>
     <entry key='piligrim.port'>5059</entry>
     <entry key='stl060.port'>5060</entry>

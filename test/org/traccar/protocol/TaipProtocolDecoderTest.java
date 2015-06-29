@@ -1,16 +1,15 @@
 package org.traccar.protocol;
 
 import static org.junit.Assert.assertNotNull;
-import org.traccar.helper.TestDataManager;
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 
-public class SyrusProtocolDecoderTest extends ProtocolDecoderTest {
+public class TaipProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        SyrusProtocolDecoder decoder = new SyrusProtocolDecoder(new SyrusProtocol(), false);
+        TaipProtocolDecoder decoder = new TaipProtocolDecoder(new TaipProtocol(), false);
 
         verify(decoder.decode(null, null,
                 ">RGP230615010248-2682523-065236820000003007F4101;ID=0005;#0002;*2A<"));
