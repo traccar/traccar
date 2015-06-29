@@ -65,7 +65,7 @@ public class TrackerEventHandler extends IdleStateAwareChannelHandler {
         if (lastPostition != null) {
             try {
                 Context.getDataManager().updateLatestPosition(lastPostition);
-                Context.getDataCache().update(lastPostition);
+                Context.getConnectionManager().update(lastPostition);
             } catch (Exception error) {
                 Log.warning(error);
             }

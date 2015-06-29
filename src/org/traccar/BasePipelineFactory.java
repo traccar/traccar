@@ -21,12 +21,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
-import org.traccar.database.DataCache;
-import org.traccar.database.DataManager;
-import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
-
-import javax.crypto.Cipher;
 
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 

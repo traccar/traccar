@@ -17,7 +17,7 @@ package org.traccar;
 
 import java.io.FileInputStream;
 import java.util.Properties;
-import org.traccar.database.DataCache;
+import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
@@ -47,10 +47,10 @@ public class Context {
         return dataManager;
     }
 
-    private static DataCache dataCache;
+    private static ConnectionManager connectionManager;
 
-    public static DataCache getDataCache() {
-        return dataCache;
+    public static ConnectionManager getConnectionManager() {
+        return connectionManager;
     }
 
     private static PermissionsManager permissionsManager;
@@ -90,7 +90,7 @@ public class Context {
         }
 
         dataManager = new DataManager(properties);
-        dataCache = new DataCache();
+        connectionManager = new ConnectionManager();
         if (!Boolean.valueOf(properties.getProperty("web.old"))) {
             permissionsManager = new PermissionsManager();
         }
@@ -113,7 +113,7 @@ public class Context {
         serverManager = new ServerManager();
 
         dataManager.initDatabaseSchema();
-        dataCache.init(dataManager);
+        connectionManager.init(dataManager);
         serverManager.init();
     }
 

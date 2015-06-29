@@ -31,7 +31,7 @@ public class CommandsServlet extends BaseServlet {
 
         String uniqueId = command.getUniqueId();
 
-        ActiveDevice activeDevice = Context.getDataManager().getActiveDevice(uniqueId);
+        ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(uniqueId);
         if(activeDevice == null) {
             throw new RuntimeException("The device has not yet registered to the server");
         }
@@ -45,7 +45,7 @@ public class CommandsServlet extends BaseServlet {
         JsonObject json = Json.createReader(req.getReader()).readObject();
         String uniqueId = json.getString("uniqueId");
 
-        ActiveDevice activeDevice = Context.getDataManager().getActiveDevice(uniqueId);
+        ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(uniqueId);
         if(activeDevice == null) {
             throw new RuntimeException("The device has not yet registered to the server");
         }

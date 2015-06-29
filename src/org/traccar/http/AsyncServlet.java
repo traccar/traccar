@@ -36,7 +36,7 @@ import org.jboss.netty.util.Timeout;
 import org.jboss.netty.util.TimerTask;
 import org.traccar.Context;
 import org.traccar.GlobalTimer;
-import org.traccar.database.DataCache;
+import org.traccar.database.ConnectionManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -76,19 +76,19 @@ public class AsyncServlet extends HttpServlet {
             this.userId = userId;
             this.devices.addAll(devices);
 
-            Collection<Position> initialPositions = Context.getDataCache().getInitialState(devices);
+            Collection<Position> initialPositions = Context.getConnectionManager().getInitialState(devices);
             for (Position position : initialPositions) {
                 positions.put(position.getDeviceId(), position);
             }
             
-            Context.getDataCache().addListener(devices, dataListener);
+            Context.getConnectionManager().addListener(devices, dataListener);
         }
         
         public boolean hasDevice(long deviceId) {
             return devices.contains(deviceId);
         }
         
-        private final DataCache.DataCacheListener dataListener = new DataCache.DataCacheListener() {
+        private final ConnectionManager.DataCacheListener dataListener = new ConnectionManager.DataCacheListener() {
             @Override
             public void onUpdate(Position position) {
                 synchronized (AsyncSession.this) {
@@ -112,7 +112,7 @@ public class AsyncServlet extends HttpServlet {
             public void run(Timeout tmt) throws Exception {
                 synchronized (AsyncSession.this) {
                     logEvent("sessionTimeout");
-                    Context.getDataCache().removeListener(devices, dataListener);
+                    Context.getConnectionManager().removeListener(devices, dataListener);
                     synchronized (asyncSessions) {
                         asyncSessions.remove(userId);
                     }

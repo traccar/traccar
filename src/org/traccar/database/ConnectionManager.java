@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import java.net.SocketAddress;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,11 +24,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.netty.channel.Channel;
+import org.traccar.Protocol;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-public class DataCache {
-    
+public class ConnectionManager {
+
+    private Map<String, ActiveDevice> activeDevices = new HashMap<String, ActiveDevice>();
     private final Map<Long, Position> positions = new HashMap<Long, Position>();
     private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<Long, Set<DataCacheListener>>();
     
@@ -41,7 +46,15 @@ public class DataCache {
             Log.warning(error);
         }
     }
-    
+
+    public void setActiveDevice(String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+        activeDevices.put(uniqueId, new ActiveDevice(uniqueId, protocol, channel, remoteAddress));
+    }
+
+    public ActiveDevice getActiveDevice(String uniqueId) {
+        return activeDevices.get(uniqueId);
+    }
+
     public synchronized void update(Position position) {
         long deviceId = position.getDeviceId();
         positions.put(deviceId, position);
