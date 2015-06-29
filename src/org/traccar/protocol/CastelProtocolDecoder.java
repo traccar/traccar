@@ -130,8 +130,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort() % 360);
             
             int flags = buf.readUnsignedByte();
-            position.setLatitude((flags & 0x01) == 0 ? -lat : lat);
-            position.setLongitude((flags & 0x02) == 0 ? -lon : lon);
+            position.setLatitude((flags & 0x02) == 0 ? -lat : lat);
+            position.setLongitude((flags & 0x01) == 0 ? -lon : lon);
             position.setValid((flags & 0x0C) > 0);
             position.set(Event.KEY_SATELLITES, flags >> 4);
             
