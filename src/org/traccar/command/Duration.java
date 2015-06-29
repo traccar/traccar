@@ -1,4 +1,4 @@
-package org.traccar.http.commands;
+package org.traccar.command;
 
 public class Duration {
 

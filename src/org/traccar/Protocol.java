@@ -1,7 +1,7 @@
 package org.traccar;
 
 import org.traccar.database.ActiveDevice;
-import org.traccar.http.commands.GpsCommand;
+import org.traccar.command.GpsCommand;
 
 import java.util.List;
 

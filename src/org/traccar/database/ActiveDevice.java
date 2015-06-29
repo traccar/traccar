@@ -2,7 +2,7 @@ package org.traccar.database;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
-import org.traccar.http.commands.GpsCommand;
+import org.traccar.command.GpsCommand;
 
 import java.net.SocketAddress;
 

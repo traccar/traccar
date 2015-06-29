@@ -22,11 +22,8 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.TrackerServer;
-import org.traccar.protocol.commands.CommandTemplate;
-import org.traccar.http.commands.CommandType;
 
 import java.util.List;
-import java.util.Map;
 
 public class Mta6Protocol extends BaseProtocol {
 

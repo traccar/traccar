@@ -1,8 +1,6 @@
-package org.traccar.protocol.commands;
+package org.traccar.command;
 
 import org.traccar.database.ActiveDevice;
-import org.traccar.http.commands.GpsCommand;
-import org.traccar.protocol.commands.CommandValueConversion;
 
 import java.util.HashMap;
 import java.util.Map;

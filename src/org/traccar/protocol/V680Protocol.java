@@ -21,11 +21,8 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
-import org.traccar.protocol.commands.CommandTemplate;
-import org.traccar.http.commands.CommandType;
 
 import java.util.List;
-import java.util.Map;
 
 public class V680Protocol extends BaseProtocol {
 

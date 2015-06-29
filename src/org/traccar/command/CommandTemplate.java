@@ -1,7 +1,7 @@
-package org.traccar.protocol.commands;
+package org.traccar.command;
 
 import org.traccar.database.ActiveDevice;
-import org.traccar.http.commands.GpsCommand;
+import org.traccar.command.GpsCommand;
 
 public interface CommandTemplate<T extends GpsCommand> {
     Object applyTo(ActiveDevice activeDevice, T command);

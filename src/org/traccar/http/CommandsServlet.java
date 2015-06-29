@@ -2,8 +2,8 @@ package org.traccar.http;
 
 import org.traccar.Context;
 import org.traccar.database.ActiveDevice;
-import org.traccar.http.commands.CommandType;
-import org.traccar.http.commands.GpsCommand;
+import org.traccar.command.CommandType;
+import org.traccar.command.GpsCommand;
 
 import javax.json.Json;
 import javax.json.JsonObject;

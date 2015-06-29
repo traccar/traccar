@@ -20,11 +20,8 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
-import org.traccar.protocol.commands.CommandTemplate;
-import org.traccar.http.commands.CommandType;
 
 import java.util.List;
-import java.util.Map;
 
 public class AtrackProtocol extends BaseProtocol {
 

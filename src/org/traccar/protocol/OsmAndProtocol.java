@@ -21,11 +21,8 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
-import org.traccar.protocol.commands.CommandTemplate;
-import org.traccar.http.commands.CommandType;
 
 import java.util.List;
-import java.util.Map;
 
 public class OsmAndProtocol extends BaseProtocol {
 

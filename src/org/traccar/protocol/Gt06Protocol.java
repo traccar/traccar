@@ -23,9 +23,9 @@ import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 import org.traccar.database.ActiveDevice;
 import org.traccar.helper.Crc;
-import org.traccar.http.commands.CommandType;
-import org.traccar.http.commands.NoParameterCommand;
-import org.traccar.protocol.commands.CommandTemplate;
+import org.traccar.command.CommandType;
+import org.traccar.command.NoParameterCommand;
+import org.traccar.command.CommandTemplate;
 
 import java.util.List;
 import java.util.Map;

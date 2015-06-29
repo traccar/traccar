@@ -20,12 +20,9 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
-import org.traccar.protocol.commands.CommandTemplate;
-import org.traccar.http.commands.CommandType;
 
 import java.nio.ByteOrder;
 import java.util.List;
-import java.util.Map;
 
 public class MeitrackProtocol extends BaseProtocol {
 
