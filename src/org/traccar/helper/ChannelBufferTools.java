@@ -15,6 +15,7 @@
  */
 package org.traccar.helper;
 
+import java.math.BigInteger;
 import java.util.Formatter;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.traccar.protocol.IntellitracFrameDecoder;
@@ -142,6 +143,18 @@ public class ChannelBufferTools {
             out[i] = Integer.valueOf(in.substring(i * 2, (i + 1) * 2), 16).byteValue();
         }
         return out;
+    }
+
+    /**
+     * Convert byte array to hex string
+     */
+    public static String convertByteArray(byte[] in) {
+        StringBuilder out = new StringBuilder();
+        Formatter formatter = new Formatter(out);
+        for (byte b : in) {
+            formatter.format("%02x", b);
+        }
+        return out.toString();
     }
 
 }
