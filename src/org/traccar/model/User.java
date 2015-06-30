@@ -15,9 +15,8 @@
  */
 package org.traccar.model;
 
+import org.traccar.helper.Hashing;
 import org.traccar.helper.IgnoreOnSerialization;
-import org.traccar.helper.PasswordHash;
-import org.traccar.helper.PasswordHash.HashingResult;
 
 public class User implements Factory {
 
@@ -77,11 +76,11 @@ public class User implements Factory {
     }
 
     public boolean isPasswordValid(String inputPassword) {
-        return PasswordHash.validatePassword(inputPassword.toCharArray(), PasswordHash.PBKDF2_ITERATIONS, this.salt, this.hashedPassword);
+        return Hashing.validatePassword(inputPassword, this.hashedPassword, this.salt);
     }
     
     public void hashPassword(String password) {
-        HashingResult hashingResult = PasswordHash.createHash(password);
+        Hashing.HashingResult hashingResult = Hashing.createHash(password);
         this.hashedPassword = hashingResult.hash;
         this.salt = hashingResult.salt;
     }
