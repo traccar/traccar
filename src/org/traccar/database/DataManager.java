@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Properties;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-
 import org.traccar.Context;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
@@ -60,6 +59,7 @@ public class DataManager {
         this.properties = properties;
         if (properties != null) {
             initDatabase(properties);
+            initDatabaseSchema();
             
             // Refresh delay
             String refreshDelay = properties.getProperty("database.refreshDelay");
@@ -138,7 +138,7 @@ public class DataManager {
         return query;
     }
 
-    public void initDatabaseSchema() throws SQLException {
+    private void initDatabaseSchema() throws SQLException {
 
         if (!Boolean.valueOf(properties.getProperty("web.old"))) {
 
@@ -231,7 +231,6 @@ public class DataManager {
         user.setId(QueryBuilder.create(dataSource, getQuery("database.insertUser"), true)
                 .setObject(user)
                 .executeUpdate());
-        Context.getPermissionsManager().refresh();
     }
     
     public void updateUser(User user) throws SQLException {
@@ -243,14 +242,12 @@ public class DataManager {
                 .setObject(user)
                 .executeUpdate();
         }
-        Context.getPermissionsManager().refresh();
     }
 
     public void removeUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
                 .setObject(user)
                 .executeUpdate();
-        Context.getPermissionsManager().refresh();
     }
 
     public Collection<Permission> getPermissions() throws SQLException {
@@ -285,7 +282,6 @@ public class DataManager {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
-        Context.getPermissionsManager().refresh();
         AsyncServlet.sessionRefreshDevice(device.getId());
     }
     
@@ -294,7 +290,6 @@ public class DataManager {
                 .setLong("userId", userId)
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
-        Context.getPermissionsManager().refresh();
         AsyncServlet.sessionRefreshUser(userId);
     }
 

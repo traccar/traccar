@@ -90,6 +90,7 @@ public class Context {
         }
 
         dataManager = new DataManager(properties);
+
         connectionManager = new ConnectionManager();
         if (!Boolean.valueOf(properties.getProperty("web.old"))) {
             permissionsManager = new PermissionsManager();
@@ -112,7 +113,6 @@ public class Context {
 
         serverManager = new ServerManager();
 
-        dataManager.initDatabaseSchema();
         connectionManager.init(dataManager);
         serverManager.init();
     }

@@ -48,6 +48,7 @@ public class UserServlet extends BaseServlet {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
         Context.getDataManager().addUser(user);
+        Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
     }
     
@@ -59,6 +60,7 @@ public class UserServlet extends BaseServlet {
             Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
         }
         Context.getDataManager().updateUser(user);
+        Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), true);
     }
     
@@ -66,6 +68,7 @@ public class UserServlet extends BaseServlet {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
         Context.getDataManager().removeUser(user);
+        Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), true);
     }
 

@@ -47,6 +47,7 @@ public class DeviceServlet extends BaseServlet {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         Context.getDataManager().addDevice(device);
         Context.getDataManager().linkDevice(getUserId(req), device.getId());
+        Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
     }
     
@@ -61,6 +62,7 @@ public class DeviceServlet extends BaseServlet {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
         Context.getDataManager().removeDevice(device);
+        Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), true);
     }
 
