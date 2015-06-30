@@ -27,9 +27,7 @@ import java.util.concurrent.TimeUnit;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jboss.netty.util.Timeout;
@@ -39,7 +37,6 @@ import org.traccar.GlobalTimer;
 import org.traccar.database.ConnectionManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
-import org.traccar.model.User;
 
 public class AsyncServlet extends BaseServlet {
 

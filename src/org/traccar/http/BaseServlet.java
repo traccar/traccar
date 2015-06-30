@@ -34,8 +34,11 @@ public abstract class BaseServlet extends HttpServlet {
     @Override
     protected final void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String command = req.getPathInfo();
+        if (command == null) {
+            command = "";
+        }
         try {
-            if (command == null || !handle(command, req, resp)) {
+            if (!handle(command, req, resp)) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
         } catch (Exception error) {
