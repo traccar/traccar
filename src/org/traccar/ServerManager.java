@@ -15,11 +15,16 @@
  */
 package org.traccar;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -30,18 +35,35 @@ public class ServerManager {
 
     public void init() throws Exception {
 
-        ClassLoader cl = ServerManager.class.getClassLoader();
-        String pack = "org/traccar/protocol";
-        String dottedPackage = pack.replaceAll("[/]", ".");
+        List<String> names = new LinkedList<String>();
+        String packageName = "org.traccar.protocol";
+        String packagePath = packageName.replace('.', '/');
+        URL packageUrl = Thread.currentThread().getContextClassLoader().getResource(packagePath);
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(cl.getResourceAsStream(pack)));
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            if (line.endsWith(".class")) {
-                Class protocolClass = Class.forName(dottedPackage + "." + line.substring(0, line.lastIndexOf('.')));
-                if (BaseProtocol.class.isAssignableFrom(protocolClass)) {
-                    initProtocolServer((BaseProtocol) protocolClass.newInstance());
+        if (packageUrl.getProtocol().equals("jar")) {
+            String jarFileName = URLDecoder.decode(packageUrl.getFile(), "UTF-8");
+            JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")));
+            
+            Enumeration<JarEntry> jarEntries = jf.entries();
+            while(jarEntries.hasMoreElements()){
+                String entryName = jarEntries.nextElement().getName();
+                if (entryName.startsWith(packagePath) && entryName.length() > packagePath.length() + 5) {
+                    names.add(entryName.substring(packagePath.length() + 1, entryName.lastIndexOf('.')));
                 }
+            }
+        } else {
+            File folder = new File(new URI(packageUrl.toString()));
+            File[] files = folder.listFiles();
+            for (File actual: files) {
+                String entryName = actual.getName();
+                names.add(entryName.substring(0, entryName.lastIndexOf('.')));
+            }
+        }
+        
+        for (String name : names) {
+            Class protocolClass = Class.forName(packageName + '.' + name);
+            if (BaseProtocol.class.isAssignableFrom(protocolClass)) {
+                initProtocolServer((BaseProtocol) protocolClass.newInstance());
             }
         }
 
