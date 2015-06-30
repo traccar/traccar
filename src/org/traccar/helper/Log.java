@@ -63,6 +63,9 @@ public class Log {
                 return new NettyInternalLogger();
             }
         });
+
+        Log.logSystemInfo();
+        Log.info("Version: " + Log.class.getPackage().getImplementationVersion());
     }
 
     public static Logger getLogger() {

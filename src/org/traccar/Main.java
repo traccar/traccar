@@ -24,10 +24,7 @@ public class Main {
         Locale.setDefault(Locale.ENGLISH);
 
         Context.init(args);
-
         Log.info("Starting server...");
-        Log.logSystemInfo();
-        Log.info("Version: " + Main.class.getPackage().getImplementationVersion());
 
         Context.getServerManager().start();
         if (Context.getWebServer() != null) {
