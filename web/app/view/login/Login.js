@@ -27,8 +27,7 @@ Ext.define('Traccar.view.login.Login', {
     title: strings.login_title,
     closable: false,
     resizable: false,
-    modal: true,
-    
+
     items: {
         xtype: 'form',
         reference: 'form',
