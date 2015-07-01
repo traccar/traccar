@@ -58,6 +58,7 @@ Ext.define('Traccar.controller.Root', {
     
     loadApp: function() {
         Ext.getStore('Devices').load();
+        Ext.getBody().empty();
         Ext.create('Traccar.view.main.Main');
     }
 
