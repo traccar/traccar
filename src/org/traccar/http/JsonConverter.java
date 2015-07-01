@@ -31,7 +31,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-import org.traccar.helper.IgnoreOnSerialization;
 import org.traccar.model.Factory;
 
 public class JsonConverter {
@@ -106,7 +105,7 @@ public class JsonConverter {
         Method[] methods = object.getClass().getMethods();
 
         for (Method method : methods) {
-            if(method.isAnnotationPresent(IgnoreOnSerialization.class)) {
+            if(method.isAnnotationPresent(JsonIgnore.class)) {
                 continue;
             }
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {

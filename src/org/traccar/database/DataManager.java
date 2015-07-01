@@ -237,7 +237,7 @@ public class DataManager {
         QueryBuilder.create(dataSource, getQuery("database.updateUser"))
                 .setObject(user)
                 .executeUpdate();
-        if(user.getHashedPassword() != null) {
+        if (user.getHashedPassword() != null) {
             QueryBuilder.create(dataSource, getQuery("database.updateUserPassword"))
                 .setObject(user)
                 .executeUpdate();

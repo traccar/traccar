@@ -1,4 +1,4 @@
-package org.traccar.helper;
+package org.traccar.http;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,5 +8,5 @@ import static java.lang.annotation.ElementType.METHOD;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {METHOD})
-public @interface IgnoreOnSerialization {
+public @interface JsonIgnore {
 }

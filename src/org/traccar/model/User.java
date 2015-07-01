@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.traccar.model;
 
 import org.traccar.helper.Hashing;
-import org.traccar.helper.IgnoreOnSerialization;
+import org.traccar.http.JsonIgnore;
 
 public class User implements Factory {
 
@@ -37,15 +37,6 @@ public class User implements Factory {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    private String hashedPassword;
-    @IgnoreOnSerialization
-    public String getHashedPassword() { return hashedPassword; }
-    public void setHashedPassword(String hashedPassword) { this.hashedPassword = hashedPassword; }
-
-    private String salt;
-    @IgnoreOnSerialization
-    public String getSalt() { return salt; }
-    public void setSalt(String salt) { this.salt = salt; }
     private boolean readonly;
     
     private boolean admin;
@@ -70,19 +61,25 @@ public class User implements Factory {
     public String getPassword() { return password; }
     public void setPassword(String password) {
         this.password = password;
-        if(this.password != null && !this.password.trim().equals("")) {
-            this.hashPassword(password);
+        if (password != null && !password.isEmpty()) {
+            Hashing.HashingResult hashingResult = Hashing.createHash(password);
+            hashedPassword = hashingResult.hash;
+            salt = hashingResult.salt;
         }
     }
 
-    public boolean isPasswordValid(String inputPassword) {
-        return Hashing.validatePassword(inputPassword, this.hashedPassword, this.salt);
-    }
-    
-    public void hashPassword(String password) {
-        Hashing.HashingResult hashingResult = Hashing.createHash(password);
-        this.hashedPassword = hashingResult.hash;
-        this.salt = hashingResult.salt;
+    private String hashedPassword;
+    @JsonIgnore
+    public String getHashedPassword() { return hashedPassword; }
+    public void setHashedPassword(String hashedPassword) { this.hashedPassword = hashedPassword; }
+
+    private String salt;
+    @JsonIgnore
+    public String getSalt() { return salt; }
+    public void setSalt(String salt) { this.salt = salt; }
+
+    public boolean isPasswordValid(String password) {
+        return Hashing.validatePassword(password, hashedPassword, salt);
     }
 
 }
