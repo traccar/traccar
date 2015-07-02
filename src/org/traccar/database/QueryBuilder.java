@@ -40,11 +40,13 @@ public class QueryBuilder {
     private final Connection connection;
     private PreparedStatement statement;
     private final String query;
+    private final boolean returnGeneratedKeys;
     
     private QueryBuilder(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
         indexMap = new HashMap<String, List<Integer>>();
         connection = dataSource.getConnection();
         this.query = query;
+        this.returnGeneratedKeys = returnGeneratedKeys;
         if (query != null) {
             String parsedQuery = parse(query.trim(), indexMap);
             try {
@@ -417,9 +419,11 @@ public class QueryBuilder {
         if (query != null) {
             try {
                 statement.executeUpdate();
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    return resultSet.getLong(1);
+                if (returnGeneratedKeys) {
+                    ResultSet resultSet = statement.getGeneratedKeys();
+                    if (resultSet.next()) {
+                        return resultSet.getLong(1);
+                    }
                 }
             } finally {
                 statement.close();
