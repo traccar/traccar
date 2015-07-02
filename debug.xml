@@ -38,23 +38,24 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
     <entry key='database.mock'>true</entry>
+
     <entry key='database.checkTable'>traccar</entry>
 
     <entry key='database.createSchema'>
-        CREATE TABLE user (
+        CREATE TABLE "user" (
         id INT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(128) NOT NULL,
         email VARCHAR(128) NOT NULL UNIQUE,
         hashedPassword VARCHAR(128) NOT NULL,
         salt VARCHAR(128) DEFAULT '' NOT NULL,
-        readonly BOOLEAN DEFAULT false NOT NULL,
-        admin BOOLEAN DEFAULT false NOT NULL,
+        readonly BIT DEFAULT 0 NOT NULL,
+        admin BIT DEFAULT 0 NOT NULL,
         map VARCHAR(128) DEFAULT 'osm' NOT NULL,
         language VARCHAR(128) DEFAULT 'en' NOT NULL,
         distanceUnit VARCHAR(128) DEFAULT 'km' NOT NULL,
         speedUnit VARCHAR(128) DEFAULT 'kmh' NOT NULL,
-        latitude DOUBLE DEFAULT 0 NOT NULL,
-        longitude DOUBLE DEFAULT 0 NOT NULL,
+        latitude FLOAT DEFAULT 0 NOT NULL,
+        longitude FLOAT DEFAULT 0 NOT NULL,
         zoom INT DEFAULT 0 NOT NULL);
 
         CREATE TABLE device (
@@ -69,10 +70,10 @@
         CREATE TABLE user_device (
         userId INT NOT NULL,
         deviceId INT NOT NULL,
-        `read` BOOLEAN DEFAULT true NOT NULL,
-        `write` BOOLEAN DEFAULT true NOT NULL,
-        FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE,
-        FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
+        "read" BIT DEFAULT 1 NOT NULL,
+        "write" BIT DEFAULT 1 NOT NULL,
+        FOREIGN KEY (userId) REFERENCES "user" (id) ON DELETE CASCADE,
+        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
 
         CREATE TABLE position (
         id INT PRIMARY KEY AUTO_INCREMENT,
@@ -81,17 +82,17 @@
         serverTime TIMESTAMP NOT NULL,
         deviceTime TIMESTAMP NOT NULL,
         fixTime TIMESTAMP NOT NULL,
-        valid BOOLEAN NOT NULL,
-        latitude DOUBLE NOT NULL,
-        longitude DOUBLE NOT NULL,
-        altitude DOUBLE NOT NULL,
-        speed DOUBLE NOT NULL,
-        course DOUBLE NOT NULL,
+        valid BIT NOT NULL,
+        latitude FLOAT NOT NULL,
+        longitude FLOAT NOT NULL,
+        altitude FLOAT NOT NULL,
+        speed FLOAT NOT NULL,
+        course FLOAT NOT NULL,
         address VARCHAR(512),
         other VARCHAR(4096) NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
+        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
         
-        CREATE INDEX position_deviceId_fixTime ON `position`(deviceId, fixTime);
+        CREATE INDEX position_deviceId_fixTime ON position (deviceId, fixTime);
 
         CREATE TABLE data (
         id INT PRIMARY KEY AUTO_INCREMENT,
@@ -100,23 +101,22 @@
         serverTime TIMESTAMP NOT NULL,
         deviceTime TIMESTAMP NOT NULL,
         other VARCHAR(4096) NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES device(id));
+        FOREIGN KEY (deviceId) REFERENCES device (id));
 
         ALTER TABLE device ADD
-        FOREIGN KEY (positionId) REFERENCES `position`(id);
+        FOREIGN KEY (positionId) REFERENCES position (id);
 
         ALTER TABLE device ADD
-        FOREIGN KEY (dataId) REFERENCES data(id);
+        FOREIGN KEY (dataId) REFERENCES data (id);
 
         CREATE TABLE server (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        registration BOOLEAN NOT NULL,
-        latitude DOUBLE NOT NULL,
-        longitude DOUBLE NOT NULL,
+        registration BIT NOT NULL,
+        latitude FLOAT NOT NULL,
+        longitude FLOAT NOT NULL,
         zoom INT NOT NULL);
 
-        CREATE TABLE traccar (
-        id INT PRIMARY KEY AUTO_INCREMENT);
+        CREATE TABLE traccar (id INT);
     </entry>
 
     <entry key='database.selectServers'>
@@ -133,30 +133,30 @@
     </entry>
 
     <entry key='database.loginUser'>
-        SELECT * FROM user
+        SELECT * FROM "user"
         WHERE email = :email;
     </entry>
 
     <entry key='database.selectUsersAll'>
-        SELECT * FROM user;
+        SELECT * FROM "user";
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO user (name, email, hashedPassword, salt, admin)
+        INSERT INTO "user" (name, email, hashedPassword, salt, admin)
         VALUES (:name, :email, :hashedPassword, :salt, :admin);
     </entry>
 
     <entry key='database.updateUser'>
-        UPDATE user SET name = :name, email = :email, admin = :admin
+        UPDATE "user" SET name = :name, email = :email, admin = :admin
         WHERE id = :id;
     </entry>
 
     <entry key='database.updateUserPassword'>
-        UPDATE user SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
+        UPDATE "user" SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
     </entry>
     
     <entry key='database.deleteUser'>
-        DELETE FROM user WHERE id = :id;
+        DELETE FROM "user" WHERE id = :id;
     </entry>
 
     <entry key='database.getPermissionsAll'>
@@ -193,7 +193,7 @@
 
     <entry key='database.insertPosition'>
         INSERT INTO position (deviceId, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
-        VALUES (:deviceId, NOW(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+        VALUES (:deviceId, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
     </entry>
 
     <entry key='database.selectLatestPositions'>
