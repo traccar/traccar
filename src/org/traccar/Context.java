@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
+import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
@@ -39,6 +40,12 @@ public class Context {
 
     public static boolean isLoggerEnabled() {
         return loggerEnabled;
+    }
+    
+    private static IdentityManager identityManager;
+    
+    public static IdentityManager getIdentityManager() {
+        return identityManager;
     }
 
     private static DataManager dataManager;
@@ -90,6 +97,7 @@ public class Context {
         }
 
         dataManager = new DataManager(properties);
+        identityManager = dataManager;
 
         connectionManager = new ConnectionManager();
         if (!Boolean.valueOf(properties.getProperty("web.old"))) {
@@ -120,10 +128,10 @@ public class Context {
     /**
      * Initialize context for unit testing
      */
-    public static void init(DataManager dataManager) {
+    public static void init(IdentityManager identityManager) {
         properties = new Properties();
-        Context.dataManager = dataManager;
         connectionManager = new ConnectionManager();
+        Context.identityManager = identityManager;
     }
 
 }

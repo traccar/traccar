@@ -43,7 +43,7 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 
-public class DataManager {
+public class DataManager implements IdentityManager {
 
     private static final long DEFAULT_REFRESH_DELAY = 300;
     
@@ -116,6 +116,7 @@ public class DataManager {
         }
     }
 
+    @Override
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
 
         if ((new Date().getTime() - devicesLastUpdate > devicesRefreshDelay) || !devices.containsKey(uniqueId)) {

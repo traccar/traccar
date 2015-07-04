@@ -1,16 +1,9 @@
 package org.traccar.helper;
 
-import java.util.List;
-import org.traccar.database.DataManager;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
 
-public class TestDataManager extends DataManager {
-
-    public TestDataManager() throws Exception {
-        super(null);
-    }
+public class TestIdentityManager implements IdentityManager {
 
     @Override
     public Device getDeviceByUniqueId(String imei) {

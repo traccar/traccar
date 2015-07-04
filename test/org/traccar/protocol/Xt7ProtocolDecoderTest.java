@@ -2,7 +2,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.TestDataManager;
+import org.traccar.helper.TestIdentityManager;
 import org.jboss.netty.buffer.ChannelBufferFactory;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import static org.traccar.helper.DecoderVerifier.verify;

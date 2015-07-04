@@ -16,14 +16,7 @@
 package org.traccar;
 
 import java.net.SocketAddress;
-
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import static org.jboss.netty.channel.Channels.fireMessageReceived;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 
@@ -50,7 +43,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public boolean identify(String uniqueId, Channel channel, SocketAddress remoteAddress, boolean logWarning) {
         try {
-            Device device = Context.getDataManager().getDeviceByUniqueId(uniqueId);
+            Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
             if (device != null) {
                 deviceId = device.getId();
                 Context.getConnectionManager().setActiveDevice(device.getUniqueId(), protocol, channel, remoteAddress);

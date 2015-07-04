@@ -1,7 +1,7 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-import org.traccar.helper.TestDataManager;
+import org.traccar.helper.TestIdentityManager;
 
 import static org.traccar.helper.DecoderVerifier.verify;
 
