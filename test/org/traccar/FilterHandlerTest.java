@@ -1,20 +1,12 @@
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.TestIdentityManager;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-import org.traccar.protocol.AtrackProtocolDecoder;
-
 import java.util.Date;
-
+import org.junit.After;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.traccar.helper.DecoderVerifier.verify;
+import org.junit.Before;
+import org.junit.Test;
+import org.traccar.model.Position;
 
 public class FilterHandlerTest {
 

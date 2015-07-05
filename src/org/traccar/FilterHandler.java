@@ -15,17 +15,14 @@
  */
 package org.traccar;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class FilterHandler extends OneToOneDecoder {
@@ -36,8 +33,6 @@ public class FilterHandler extends OneToOneDecoder {
     private int filterDistance;
     private long filterLimit;
     
-    private final Map<Long, Position> lastPositions = new HashMap<Long, Position>();
-
     public FilterHandler(
             boolean filterInvalid,
             boolean filterZero,
@@ -71,6 +66,10 @@ public class FilterHandler extends OneToOneDecoder {
         if (value != null) filterLimit = Long.valueOf(value) * 1000;
     }
     
+    private Position getLastPosition(long deviceId) {
+        return Context.getConnectionManager().getLastPosition(deviceId);
+    }
+    
     private boolean filterInvalid(Position position) {
         return filterInvalid && !position.getValid();
     }
@@ -83,7 +82,7 @@ public class FilterHandler extends OneToOneDecoder {
     
     private boolean filterDuplicate(Position position) {
         if (filterDuplicate) {
-            Position last = lastPositions.get(position.getDeviceId());
+            Position last = getLastPosition(position.getDeviceId());
             if (last != null) {
                 return position.getFixTime().equals(last.getFixTime());
             } else {
@@ -96,7 +95,7 @@ public class FilterHandler extends OneToOneDecoder {
     
     private boolean filterDistance(Position position) {
         if (filterDistance != 0) {
-            Position last = lastPositions.get(position.getDeviceId());
+            Position last = getLastPosition(position.getDeviceId());
             if (last != null) {
                 double distance = DistanceCalculator.distance(
                         position.getLatitude(), position.getLongitude(),
@@ -112,7 +111,7 @@ public class FilterHandler extends OneToOneDecoder {
     
     private boolean filterLimit(Position position) {
         if (filterLimit != 0) {
-            Position last = lastPositions.get(position.getDeviceId());
+            Position last = getLastPosition(position.getDeviceId());
             if (last != null) {
                 return (position.getFixTime().getTime() - last.getFixTime().getTime()) > filterLimit;
             } else {
@@ -135,10 +134,7 @@ public class FilterHandler extends OneToOneDecoder {
             result = false;
         }
         
-        if (!result) {
-            lastPositions.put(p.getDeviceId(), p);
-        } else {
-            StringBuilder s = new StringBuilder();
+        if (result) {
             Log.info("Position filtered from " + p.getDeviceId());
         }
 

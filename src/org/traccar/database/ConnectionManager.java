@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
 import org.traccar.helper.Log;
@@ -63,6 +62,10 @@ public class ConnectionManager {
                 listener.onUpdate(position);
             }
         }
+    }
+    
+    public Position getLastPosition(long deviceId) {
+        return positions.get(deviceId);
     }
     
     public synchronized Collection<Position> getInitialState(Collection<Long> devices) {
