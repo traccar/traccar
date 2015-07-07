@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.Crc;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -40,68 +41,41 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
     private static final long IMEI_BASE_TC65_V28 = 358244010000000L;
     private static final long IMEI_BASE_TC65I_V11 = 0x14143B4000000L;
 
+    private static boolean validateImei(long imei) {
+        return Crc.luhnChecksum(imei / 10) == imei % 10;
+    }
+
     private static long imeiFromUnitId(long unitId) {
-        if(unitId == 0) {
-            return 0L;
-        } else if(unitId < 0x1000000) {
-            // Assume TC65i.
-            long imei = IMEI_BASE_TC65I_V11 + unitId;
-            if(validateImei(imei)) {
-                return imei;
-            }
-            
-            // No? Maybe it's TC65 v2.8?
-            imei = IMEI_BASE_TC65_V28 + ((unitId + 0xA8180) & 0xFFFFFF);
-            if(validateImei(imei)) {
-                return imei;
-            }
-            
-            // Still no match? How about TC65 v2.0?
-            imei = IMEI_BASE_TC65_V20 + unitId;
-            if(validateImei(imei)) {
-                return imei;
-            }
+
+        if (unitId == 0) {
+
+            return 0;
+
         } else {
-            // Unit ID is full IMEI, just check it.
-            if(validateImei(unitId)) {
-                return unitId;
+
+            // Try TC65i
+            long imei = IMEI_BASE_TC65I_V11 + unitId;
+            if (validateImei(imei)) {
+                return imei;
             }
+            
+            // Try TC65 v2.8
+            imei = IMEI_BASE_TC65_V28 + ((unitId + 0xA8180) & 0xFFFFFF);
+            if (validateImei(imei)) {
+                return imei;
+            }
+            
+            // Try TC65 v2.0
+            imei = IMEI_BASE_TC65_V20 + unitId;
+            if (validateImei(imei)) {
+                return imei;
+            }
+
         }
         
         return unitId;
     }
-    
-    private static boolean validateImei(long imei2) {
 
-        int checksum = 0;
-        long remain = imei2;
-
-        // Iterate through all meaningful digits.
-        for (int i = 0; remain != 0; i++) {
-            // Extract the rightmost digit, that is, compute
-            // imei modulo 10 (or remainder of imei / 10).
-            int digit = (int) (remain % 10);
-
-            // For each even-positioned digit, calculate the value
-            // to be added to sum: Double the digit and then sum up
-            // the digits of the result.
-            // Example: 7 -> 2*7 = 14 -> 1 + 4 = 5
-            if (0 != (i % 2)) {
-                digit = digit * 2;
-                if (digit >= 10) {
-                    digit = digit - 9;
-                }
-            }
-            checksum = checksum + digit;
-
-            // Remove the rightmost digit as it's already processed.
-            remain = remain / 10;
-        }
-
-        // The IMEI is valid if the calculated checksum is dividable by 10.
-        return 0 == (checksum % 10);
-    }
-    
     private static final int DEFAULT_SELECTOR = 0x0002FC;
 
     private static final int EVENT_DATA = 119;
@@ -115,11 +89,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // marker
         int version = buf.readUnsignedByte();
-        if ((version & 0x80) != 0) {
-            buf.skipBytes(4); // unit id high
-        }
 
-        String imei = String.valueOf(imeiFromUnitId(buf.readUnsignedMedium()));
+        String imei;
+        if ((version & 0x80) != 0) {
+            imei = String.valueOf((buf.readUnsignedInt() << (3 * 8)) | buf.readUnsignedMedium());
+        } else {
+            imei = String.valueOf(imeiFromUnitId(buf.readUnsignedMedium()));
+        }
 
         buf.readUnsignedShort(); // length
 

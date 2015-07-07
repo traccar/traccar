@@ -154,21 +154,25 @@ public class Crc {
         return String.format("*%02x", checksum).toUpperCase();
     }
 
-    public static String luhnChecksum(String s) {
-        int sum = 0;
-        boolean evenPosition = true;
-        for (int i = s.length() - 1; i >= 0; i--) {
-            int n = Integer.parseInt(s.substring(i, i + 1));
-            if (evenPosition) {
-                n *= 2;
-                if (n > 9) {
-                    n = (n % 10) + 1;
+    public static long luhnChecksum(long imei) {
+        long checksum = 0;
+        long remain = imei;
+
+        for (int i = 0; remain != 0; i++) {
+            long digit = remain % 10;
+
+            if ((i % 2) == 0) {
+                digit *= 2;
+                if (digit >= 10) {
+                    digit = 1 + (digit % 10);
                 }
             }
-            sum += n;
-            evenPosition = !evenPosition;
+
+            checksum += digit;
+            remain /= 10;
         }
-        return String.valueOf(10 - sum % 10);
-    }    
+
+        return 10 - (checksum % 10);
+    }
     
 }
