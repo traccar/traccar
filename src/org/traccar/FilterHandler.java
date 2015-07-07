@@ -67,7 +67,10 @@ public class FilterHandler extends OneToOneDecoder {
     }
     
     private Position getLastPosition(long deviceId) {
-        return Context.getConnectionManager().getLastPosition(deviceId);
+        if (Context.getConnectionManager() != null) {
+            return Context.getConnectionManager().getLastPosition(deviceId);
+        }
+        return null;
     }
     
     private boolean filterInvalid(Position position) {
