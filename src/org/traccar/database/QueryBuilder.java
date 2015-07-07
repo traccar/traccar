@@ -36,18 +36,17 @@ import org.traccar.model.Factory;
 
 public class QueryBuilder {
     
-    private final Map<String, List<Integer>> indexMap;
-    private final Connection connection;
+    private final Map<String, List<Integer>> indexMap = new HashMap<String, List<Integer>>();
+    private Connection connection;
     private PreparedStatement statement;
     private final String query;
     private final boolean returnGeneratedKeys;
     
     private QueryBuilder(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
-        indexMap = new HashMap<String, List<Integer>>();
-        connection = dataSource.getConnection();
         this.query = query;
         this.returnGeneratedKeys = returnGeneratedKeys;
         if (query != null) {
+            connection = dataSource.getConnection();
             String parsedQuery = parse(query.trim(), indexMap);
             try {
                 if (returnGeneratedKeys) {
