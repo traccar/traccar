@@ -1,18 +1,18 @@
-var strings =  {
+﻿var strings =  {
     shared_loading: 'Loading...',
 
     error_title: 'Error',
     error_unknown: 'Unknown error',
 
     login_title: 'Логин',
-    login_user_title: 'User',
+    login_user_title: 'Пользователь',
     login_users_title: 'Users',
-    login_name: 'Name',
+    login_name: 'Имя',
     login_email: 'Email',
-    login_password: 'Password',
+    login_password: 'Пароль',
     login_admin: 'Admin',
-    login_register: 'Register',
-    login_login: 'Login',
+    login_register: 'Регистрация',
+    login_login: 'Вход',
     login_failed: 'Incorrect email address or password',
     login_created: 'New user has been registered',
 
