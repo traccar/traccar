@@ -18,6 +18,25 @@ Ext.Loader.setConfig({
     disableCaching: false
 });
 
+{
+    var available = {
+        'en': true,
+        'ru': true
+    };
+
+    var language = Ext.Object.fromQueryString(window.location.search.substring(1)).locale;
+    if (language === undefined) {
+        language = window.navigator.userLanguage || window.navigator.language;
+        language = language.substr(0, 2);
+    }
+
+    if (!(language in available)) {
+        language = 'en'; // default
+    }
+
+    Ext.Loader.loadScript('/l10n/' + language + '.js');
+}
+
 Ext.application({
     name: 'Traccar',
     extend: 'Traccar.Application'
