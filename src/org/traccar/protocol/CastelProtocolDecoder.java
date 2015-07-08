@@ -18,9 +18,8 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -72,11 +71,10 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_LOGIN || type == MSG_GPS) {
             
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            
             if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
+
                 return null;
+
             } else if (type == MSG_LOGIN) {
 
                 if (channel != null) {
@@ -96,46 +94,59 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             
             }
 
-            position.setDeviceId(getDeviceId());
-            
             if (type == MSG_GPS) {
                 buf.readUnsignedByte(); // historical
             }
             
             buf.readUnsignedInt(); // ACC ON time
             buf.readUnsignedInt(); // UTC time
-            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+            long odometer = buf.readUnsignedInt();
             buf.readUnsignedInt(); // trip odometer
             buf.readUnsignedInt(); // total fuel consumption
             buf.readUnsignedShort(); // current fuel consumption
-            position.set(Event.KEY_STATUS, buf.readUnsignedInt());
+            long status = buf.readUnsignedInt();
             buf.skipBytes(8);
             
-            buf.readUnsignedByte(); // count
-            
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-            time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
-            position.setTime(time.getTime());
-            
-            double lat = buf.readUnsignedInt() / 3600000.0;
-            double lon = buf.readUnsignedInt() / 3600000.0;
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
-            position.setCourse(buf.readUnsignedShort() % 360);
-            
-            int flags = buf.readUnsignedByte();
-            position.setLatitude((flags & 0x02) == 0 ? -lat : lat);
-            position.setLongitude((flags & 0x01) == 0 ? -lon : lon);
-            position.setValid((flags & 0x0C) > 0);
-            position.set(Event.KEY_SATELLITES, flags >> 4);
-            
-            return position;
+            int count = buf.readUnsignedByte();
+
+            List<Position> positions = new LinkedList<Position>();
+
+            for (int i = 0; i < count; i++) {
+
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(getDeviceId());
+                position.set(Event.KEY_ODOMETER, odometer);
+                position.set(Event.KEY_STATUS, status);
+
+                // Date and time
+                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                time.clear();
+                time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
+                time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
+                time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
+                time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
+                time.set(Calendar.MINUTE, buf.readUnsignedByte());
+                time.set(Calendar.SECOND, buf.readUnsignedByte());
+                position.setTime(time.getTime());
+
+                double lat = buf.readUnsignedInt() / 3600000.0;
+                double lon = buf.readUnsignedInt() / 3600000.0;
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                position.setCourse(buf.readUnsignedShort() % 360);
+
+                int flags = buf.readUnsignedByte();
+                position.setLatitude((flags & 0x02) == 0 ? -lat : lat);
+                position.setLongitude((flags & 0x01) == 0 ? -lon : lon);
+                position.setValid((flags & 0x0C) > 0);
+                position.set(Event.KEY_SATELLITES, flags >> 4);
+
+                positions.add(position);
+            }
+
+            if (!positions.isEmpty()) {
+                return positions;
+            }
         }
         
         return null;
