@@ -34,13 +34,13 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "!A," +                           // Type
+            "!.," +                           // Type
             "(\\d{2})\\/(\\d{2})\\/(\\d{2})," + // Date dd/mm/YY
             "(\\d{2}):(\\d{2}):(\\d{2})," +   // Time hh:mm:ss
-            "(-?\\d+\\.\\d+)," +              // Latitude (DDMM.MMMM)
-            "(-?\\d+\\.\\d+)," +              // Longitude (DDDMM.MMMM)
-            "(\\d+\\.\\d+)," +                // Speed
-            "(\\d+\\.?\\d+)," +               // Course
+            "(-?\\d+\\.\\d+)," +              // Latitude
+            "(-?\\d+\\.\\d+)," +              // Longitude
+            "(\\d+\\.?\\d*)," +               // Speed
+            "(\\d+\\.?\\d*)," +               // Course
             ".*");
 
     @Override
@@ -52,10 +52,11 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
         // Detect device ID
         if (sentence.startsWith("!1,")) {
-            identify(sentence.substring(3), channel);
-        }
 
-        else if (sentence.startsWith("!A,")) {
+            identify(sentence.substring(3), channel);
+
+        } else {
+
             // Parse message
             Matcher parser = pattern.matcher(sentence);
             if (!hasDeviceId() || !parser.matches()) {
