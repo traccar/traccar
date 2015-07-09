@@ -38,9 +38,39 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private static final short MSG_LOGIN = 0x1001;
     private static final short MSG_LOGIN_RESPONSE = (short) 0x9001;
+    private static final short MSG_LOGOUT = 0x1002;
     private static final short MSG_HEARTBEAT = 0x1003;
     private static final short MSG_HEARTBEAT_RESPONSE = (short) 0x9003;
     private static final short MSG_GPS = 0x4001;
+    private static final short MSG_ALARM = 0x4007;
+    private static final short MSG_GPS_SLEEP = 0x4009;
+    private static final short MSG_AGPS_REQUEST = 0x5101;
+    private static final short MSG_CURRENT_LOCATION = (short) 0xB001;
+
+    private static void readPosition(ChannelBuffer buf, Position position) {
+
+        // Date and time
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.clear();
+        time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
+        time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
+        time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
+        time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
+        time.set(Calendar.MINUTE, buf.readUnsignedByte());
+        time.set(Calendar.SECOND, buf.readUnsignedByte());
+        position.setTime(time.getTime());
+
+        double lat = buf.readUnsignedInt() / 3600000.0;
+        double lon = buf.readUnsignedInt() / 3600000.0;
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+        position.setCourse(buf.readUnsignedShort() % 360);
+
+        int flags = buf.readUnsignedByte();
+        position.setLatitude((flags & 0x02) == 0 ? -lat : lat);
+        position.setLongitude((flags & 0x01) == 0 ? -lon : lon);
+        position.setValid((flags & 0x0C) > 0);
+        position.set(Event.KEY_SATELLITES, flags >> 4);
+    }
 
     @Override
     protected Object decode(
@@ -69,7 +99,12 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 channel.write(response, remoteAddress);
             }
 
-        } else if (type == MSG_LOGIN || type == MSG_GPS) {
+        } else if (
+                type == MSG_LOGIN ||
+                type == MSG_LOGOUT ||
+                type == MSG_GPS ||
+                type == MSG_ALARM ||
+                type == MSG_CURRENT_LOCATION) {
             
             if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
 
@@ -96,6 +131,10 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             if (type == MSG_GPS) {
                 buf.readUnsignedByte(); // historical
+            } else if (type == MSG_ALARM) {
+                buf.readUnsignedInt(); // alarm
+            } else if (type == MSG_CURRENT_LOCATION) {
+                buf.readUnsignedShort();
             }
             
             buf.readUnsignedInt(); // ACC ON time
@@ -116,30 +155,11 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 Position position = new Position();
                 position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
+
+                readPosition(buf, position);
+
                 position.set(Event.KEY_ODOMETER, odometer);
                 position.set(Event.KEY_STATUS, status);
-
-                // Date and time
-                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                time.clear();
-                time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-                time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-                time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-                time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-                time.set(Calendar.MINUTE, buf.readUnsignedByte());
-                time.set(Calendar.SECOND, buf.readUnsignedByte());
-                position.setTime(time.getTime());
-
-                double lat = buf.readUnsignedInt() / 3600000.0;
-                double lon = buf.readUnsignedInt() / 3600000.0;
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
-                position.setCourse(buf.readUnsignedShort() % 360);
-
-                int flags = buf.readUnsignedByte();
-                position.setLatitude((flags & 0x02) == 0 ? -lat : lat);
-                position.setLongitude((flags & 0x01) == 0 ? -lon : lon);
-                position.setValid((flags & 0x0C) > 0);
-                position.set(Event.KEY_SATELLITES, flags >> 4);
 
                 positions.add(position);
             }
@@ -147,6 +167,20 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             if (!positions.isEmpty()) {
                 return positions;
             }
+
+        } else if (type == MSG_GPS_SLEEP || type == MSG_AGPS_REQUEST) {
+
+            if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
+                return null;
+            }
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+
+            readPosition(buf, position);
+
+            return position;
         }
         
         return null;
