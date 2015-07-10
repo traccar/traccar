@@ -22,7 +22,8 @@ Ext.Loader.setConfig({
     var available = {
         'en': true,
         'ru': true,
-        'pl': true
+        'pl': true,
+        'fr': true
     };
 
     var language = Ext.Object.fromQueryString(window.location.search.substring(1)).locale;
