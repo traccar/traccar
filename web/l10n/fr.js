@@ -15,9 +15,9 @@
     user_password: 'Mot de Passe',
     user_admin: 'Admin',
 
-    login_title: 'Login',
+    login_title: 'Identification',
     login_register: 'Inscription',
-    login_login: 'Login',
+    login_login: 'Se connecter',
     login_failed: 'Adresse email ou mot de passe incorrect',
     login_created: 'New user has been registered',
     login_logout: 'Déconnection',
