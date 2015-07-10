@@ -15,9 +15,9 @@
     user_password: 'Hasło',
     user_admin: 'Admin',
 
-    login_title: 'Zaloguj',
+    login_title: 'Logowanie',
     login_register: 'Rejestracja',
-    login_login: 'Login',
+    login_login: 'Zaloguj',
     login_failed: 'Nieprawidłowy adres e-mail lub hasło',
     login_created: 'Nowy użytkownik został zarejestrowany',
     login_logout: 'Wyloguj',
@@ -55,7 +55,7 @@
 
     map_title: 'Mapa',
 
-    state_title: 'Państwo',
-    state_name: 'Parametr',
+    state_title: 'Lokalizacja',
+    state_name: 'Właściwości',
     state_value: 'Wartość'
 };
