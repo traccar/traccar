@@ -75,14 +75,14 @@ Ext.define('Traccar.view.report.Report', {
     },
 
     columns: [
-        { text: strings.report_valid, dataIndex: 'valid', flex: 1 },
-        { text: strings.report_time, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.report_format },
-        { text: strings.report_latitude, dataIndex: 'latitude', flex: 1 },
-        { text: strings.report_longitude, dataIndex: 'longitude', flex: 1 },
-        { text: strings.report_altitude, dataIndex: 'altitude', flex: 1 },
-        { text: strings.report_speed, dataIndex: 'speed', flex: 1 },
-        { text: strings.report_course, dataIndex: 'course', flex: 1 },
-        { text: strings.report_address, dataIndex: 'address', flex: 1 }
+        { text: strings.position_valid, dataIndex: 'valid', flex: 1 },
+        { text: strings.position_time, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.report_format },
+        { text: strings.position_latitude, dataIndex: 'latitude', flex: 1 },
+        { text: strings.position_longitude, dataIndex: 'longitude', flex: 1 },
+        { text: strings.position_altitude, dataIndex: 'altitude', flex: 1 },
+        { text: strings.position_speed, dataIndex: 'speed', flex: 1 },
+        { text: strings.position_course, dataIndex: 'course', flex: 1 },
+        { text: strings.position_address, dataIndex: 'address', flex: 1 }
     ]
 
 });

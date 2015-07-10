@@ -64,11 +64,11 @@ Ext.define('Traccar.view.device.DeviceController', {
         var device = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
             title: strings.device_dialog,
-            message: strings.device_remove_confirm,
+            message: strings.shared_remove_confirm,
             buttons: Ext.Msg.YESNO,
             buttonText: {
-                yes: strings.dialog_delete,
-                no: strings.dialog_cancel
+                yes: strings.shared_remove,
+                no: strings.shared_cancel
             },
             fn: function(btn) {
                 if (btn === 'yes') {
@@ -105,7 +105,7 @@ Ext.define('Traccar.view.device.DeviceController', {
 
     onUsersClick: function() {
         Ext.create('Ext.window.Window', {
-            title: strings.login_users_title,
+            title: strings.settings_users,
             width: styles.window_width,
             height: styles.window_height,
             layout: 'fit',

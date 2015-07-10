@@ -39,11 +39,11 @@ Ext.define('Traccar.view.admin.ServerDialog', {
         }, {
             xtype: 'numberfield',
             name: 'latitude',
-            fieldLabel: strings.server_latitude
+            fieldLabel: strings.position_latitude
         }, {
             xtype: 'numberfield',
             name: 'longitude',
-            fieldLabel: strings.server_longitude
+            fieldLabel: strings.position_longitude
         }, {
             xtype: 'numberfield',
             name: 'zoom',
@@ -52,10 +52,10 @@ Ext.define('Traccar.view.admin.ServerDialog', {
     },
 
     buttons: [{
-        text: strings.dialog_save,
+        text: strings.shared_save,
         handler: 'onSaveClick'
     }, {
-        text: strings.dialog_cancel,
+        text: strings.shared_cancel,
         handler: 'onCancelClick'
     }]
 

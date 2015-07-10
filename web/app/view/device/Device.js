@@ -29,39 +29,40 @@ Ext.define('Traccar.view.device.Device', {
     selType: 'rowmodel',
     
     tbar: [{
-        text: strings.device_add,
+        text: strings.shared_add,
         handler: 'onAddClick',
-        reference: 'deviceAddButton'
+        reference: 'deviceAddButton',
+        glyph: 'xf067@FontAwesome'
     }, {
-        text: strings.device_edit,
         disabled: true,
         handler: 'onEditClick',
-        reference: 'deviceEditButton'
+        reference: 'deviceEditButton',
+        glyph: 'xf040@FontAwesome'
     }, {
-        text: strings.device_remove,
         disabled: true,
         handler: 'onRemoveClick',
-        reference: 'deviceRemoveButton'
+        reference: 'deviceRemoveButton',
+        glyph: 'xf00d@FontAwesome'
     }, {
         xtype: 'tbfill'
     }, {
-        text: strings.device_settings,
+        text: strings.settings_title,
         menu: [{
-            text: strings.device_settings_user,
+            text: strings.settings_user,
             handler: 'onUserClick'
         }, {
-            text: strings.device_settings_server,
+            text: strings.settings_server,
             disabled: true,
             handler: 'onServerClick',
             reference: 'settingsServerButton'
         }, {
-            text: strings.device_settings_users,
+            text: strings.settings_users,
             disabled: true,
             handler: 'onUsersClick',
             reference: 'settingsUsersButton'
         }]
     }, {
-        text: strings.device_logout,
+        text: strings.login_logout,
         handler: 'onLogoutClick'
     }],
 

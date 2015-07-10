@@ -45,10 +45,10 @@ Ext.define('Traccar.view.device.DeviceDialog', {
     },
 
     buttons: [{
-        text: strings.dialog_save,
+        text: strings.shared_save,
         handler: 'onSaveClick'
     }, {
-        text: strings.dialog_cancel,
+        text: strings.shared_cancel,
         handler: 'onCancelClick'
     }]
 

@@ -35,7 +35,7 @@ Ext.define('Traccar.view.login.Login', {
         items: [{
             xtype: 'textfield',
             name: 'email',
-            fieldLabel: strings.login_email,
+            fieldLabel: strings.user_email,
             allowBlank: false,
             enableKeyEvents: true,
             listeners: {
@@ -45,7 +45,7 @@ Ext.define('Traccar.view.login.Login', {
         }, {
             xtype: 'textfield',
             name: 'password',
-            fieldLabel: strings.login_password,
+            fieldLabel: strings.user_password,
             inputType: 'password',
             allowBlank: false,
             enableKeyEvents: true,

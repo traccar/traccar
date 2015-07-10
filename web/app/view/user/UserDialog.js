@@ -25,7 +25,7 @@ Ext.define('Traccar.view.user.UserDialog', {
     controller: 'userdialog',
     
     bodyPadding: styles.panel_padding,
-    title: strings.login_user_title,
+    title: strings.settings_user,
     resizable: false,
     modal: true,
     
@@ -34,22 +34,22 @@ Ext.define('Traccar.view.user.UserDialog', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: strings.login_name
+            fieldLabel: strings.user_name
         }, {
             xtype: 'textfield',
             name: 'email',
-            fieldLabel: strings.login_email,
+            fieldLabel: strings.user_email,
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'password',
-            fieldLabel: strings.login_password,
+            fieldLabel: strings.user_password,
             inputType: 'password',
             allowBlank: false
         }, {
             xtype: 'checkboxfield',
             name: 'admin',
-            fieldLabel: strings.login_admin,
+            fieldLabel: strings.user_admin,
             allowBlank: false,
             disabled: true,
             reference: 'adminField'
@@ -57,10 +57,10 @@ Ext.define('Traccar.view.user.UserDialog', {
     },
 
     buttons: [{
-        text: strings.dialog_save,
+        text: strings.shared_save,
         handler: 'onSaveClick'
     }, {
-        text: strings.dialog_cancel,
+        text: strings.shared_cancel,
         handler: 'onCancelClick'
     }]
 
