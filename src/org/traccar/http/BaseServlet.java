@@ -38,6 +38,8 @@ public abstract class BaseServlet extends HttpServlet {
             command = "";
         }
         try {
+            resp.setContentType("application/json");
+            resp.setCharacterEncoding("UTF-8");
             if (!handle(command, req, resp)) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
