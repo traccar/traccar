@@ -63,8 +63,12 @@ Ext.define('Traccar.view.state.StateController', {
             priority: 7,
             name: strings.position_course
         },
-        'protocol': {
+        'address': {
             priority: 8,
+            name: strings.position_address
+        },
+        'protocol': {
+            priority: 9,
             name: strings.position_protocol
         }
     },
