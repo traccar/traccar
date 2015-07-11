@@ -38,6 +38,7 @@ Ext.Loader.setConfig({
     }
 
     Ext.Loader.loadScript('/l10n/' + language + '.js');
+    Ext.Loader.loadScript('http://cdn.sencha.com/ext/gpl/5.1.0/build/packages/ext-locale/build/ext-locale-' + language + '.js');
 }
 
 Ext.application({
