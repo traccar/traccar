@@ -4,7 +4,7 @@ var strings =  {
     shared_cancel: 'Anuluj',
     shared_add: 'Dodaj',
     shared_edit: 'Edytuj',
-    shared_remove: 'Usunąć',
+    shared_remove: 'Usuń',
     shared_remove_confirm: 'Usuń obiekt?',
 
     error_title: 'Bląd',
@@ -13,7 +13,7 @@ var strings =  {
     user_name: 'Nazwa',
     user_email: 'Email',
     user_password: 'Hasło',
-    user_admin: 'Admin',
+    user_admin: 'Administrator',
 
     login_title: 'Logowanie',
     login_register: 'Rejestracja',
@@ -50,7 +50,7 @@ var strings =  {
     position_protocol: 'Protokół',
 
     server_title: 'Ustawienia serwera',
-    server_zoom: 'Powiększ',
+    server_zoom: 'Powiększenie',
     server_registration: 'Rejestracja',
 
     map_title: 'Mapa',
