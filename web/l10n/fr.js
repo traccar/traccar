@@ -1,4 +1,4 @@
-﻿var strings =  {
+var strings =  {
     shared_loading: 'Chargement...',
     shared_save: 'Enregistrer',
     shared_cancel: 'Annuler',
