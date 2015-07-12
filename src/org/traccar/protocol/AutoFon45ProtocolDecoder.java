@@ -15,19 +15,19 @@
  */
 package org.traccar.protocol;
 
-import static org.traccar.protocol.AutoFon45FrameDecoder.MSG_LOGIN;
-import static org.traccar.protocol.AutoFon45FrameDecoder.MSG_LOCATION;
-
+import java.net.SocketAddress;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-
-import java.util.*;
+import static org.traccar.protocol.AutoFon45FrameDecoder.MSG_LOCATION;
+import static org.traccar.protocol.AutoFon45FrameDecoder.MSG_LOGIN;
 
 public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -41,7 +41,10 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg)
+            throws Exception {
+        
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         int type = buf.getUnsignedByte(0);

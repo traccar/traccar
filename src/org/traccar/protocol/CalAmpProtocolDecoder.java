@@ -17,14 +17,9 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Date;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -53,23 +48,6 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
     private static final int SERVICE_ACKNOWLEDGED = 1;
     private static final int SERVICE_RESPONSE = 2;
 
-    @Override
-    public void handleUpstream(
-            ChannelHandlerContext ctx, ChannelEvent evt)
-            throws Exception {
-
-        if (!(evt instanceof MessageEvent)) {
-            ctx.sendUpstream(evt);
-            return;
-        }
-
-        MessageEvent e = (MessageEvent) evt;
-        Object decodedMessage = decode(ctx, e.getChannel(), e.getMessage(), e.getRemoteAddress());
-        if (decodedMessage != null) {
-            Channels.fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
-        }
-    }
-
     private void sendResponse(Channel channel, SocketAddress remoteAddress, int type, int index, int result) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(10);
@@ -85,7 +63,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
     }
 
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg, SocketAddress remoteAddress)
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;

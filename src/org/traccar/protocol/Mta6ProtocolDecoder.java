@@ -16,7 +16,8 @@
 package org.traccar.protocol;
 
 import java.nio.charset.Charset;
-import java.util.Calendar;
+import java.net.SocketAddress;
+import java.util.Calendar; 
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -278,7 +279,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
         
         HttpRequest request = (HttpRequest) msg;

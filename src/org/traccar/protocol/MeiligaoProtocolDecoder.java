@@ -17,7 +17,8 @@ package org.traccar.protocol;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
-import java.util.Calendar;
+import java.net.SocketAddress;
+import java.util.Calendar; 
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -128,7 +129,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
         
         ChannelBuffer buf = (ChannelBuffer) msg;

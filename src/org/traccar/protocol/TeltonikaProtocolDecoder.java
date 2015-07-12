@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.LinkedList;
@@ -22,7 +23,6 @@ import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
@@ -197,7 +197,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     }
     
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, Object msg)
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
         
         ChannelBuffer buf = (ChannelBuffer) msg;

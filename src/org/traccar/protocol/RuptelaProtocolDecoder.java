@@ -15,15 +15,13 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -38,7 +36,8 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     private static final int COMMAND_RECORDS = 0x01;
     
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, Object msg)
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;

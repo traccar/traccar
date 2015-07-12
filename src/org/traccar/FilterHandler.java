@@ -15,17 +15,16 @@
  */
 package org.traccar;
 
+import java.net.SocketAddress;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-public class FilterHandler extends OneToOneDecoder {
+public class FilterHandler extends ExtendedObjectDecoder {
 
     private boolean filterInvalid;
     private boolean filterZero;
@@ -146,7 +145,7 @@ public class FilterHandler extends OneToOneDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
         
         if (msg instanceof Position) {

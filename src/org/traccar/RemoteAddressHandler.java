@@ -15,23 +15,18 @@
  */
 package org.traccar;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-import org.traccar.geocode.AddressFormat;
-import org.traccar.geocode.ReverseGeocoder;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
+import org.jboss.netty.channel.Channel;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 public class RemoteAddressHandler extends ExtendedObjectDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg)
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         String hostAddress = ((InetSocketAddress) remoteAddress).getAddress().getHostAddress();

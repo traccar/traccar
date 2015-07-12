@@ -15,17 +15,15 @@
  */
 package org.traccar;
 
+import java.net.SocketAddress;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
-
-import java.net.SocketAddress;
-
+import org.jboss.netty.channel.ChannelUpstreamHandler;
 import static org.jboss.netty.channel.Channels.fireMessageReceived;
+import org.jboss.netty.channel.MessageEvent;
 
-public abstract class ExtendedObjectDecoder extends OneToOneDecoder {
+public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
 
     @Override
     public void handleUpstream(
@@ -37,7 +35,7 @@ public abstract class ExtendedObjectDecoder extends OneToOneDecoder {
 
         MessageEvent e = (MessageEvent) evt;
         Object originalMessage = e.getMessage();
-        Object decodedMessage = decode(ctx, e.getChannel(), e.getRemoteAddress(), originalMessage);
+        Object decodedMessage = decode(e.getChannel(), e.getRemoteAddress(), originalMessage);
         if (originalMessage == decodedMessage) {
             ctx.sendUpstream(evt);
         } else if (decodedMessage != null) {
@@ -45,17 +43,6 @@ public abstract class ExtendedObjectDecoder extends OneToOneDecoder {
         }
     }
     
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        
-        return decode(ctx, channel, msg);
-    }
-    
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
-        
-        return null; // default implementation
-    }
+    protected abstract Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception;
 
 }

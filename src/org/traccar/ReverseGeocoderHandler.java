@@ -15,16 +15,14 @@
  */
 package org.traccar;
 
+import java.net.SocketAddress;
 import java.util.List;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.traccar.geocode.AddressFormat;
 import org.traccar.geocode.ReverseGeocoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-public class ReverseGeocoderHandler extends OneToOneDecoder {
+public class ReverseGeocoderHandler extends ExtendedObjectDecoder {
 
     private final ReverseGeocoder geocoder;
     private final boolean processInvalidPositions;
@@ -38,7 +36,7 @@ public class ReverseGeocoderHandler extends OneToOneDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
         
         if (geocoder != null) {

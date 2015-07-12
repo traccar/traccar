@@ -15,14 +15,12 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.util.Date;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Crc;
 import org.traccar.helper.UnitsConverter;
@@ -264,7 +262,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     }
     
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, Object msg)
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
         
         ChannelBuffer buf = (ChannelBuffer) msg;
