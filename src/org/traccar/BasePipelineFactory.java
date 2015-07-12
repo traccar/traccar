@@ -18,7 +18,16 @@ package org.traccar;
 import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.*;
+import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.DownstreamMessageEvent;
+import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.helper.Log;
@@ -57,13 +66,13 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
                 msg.append("[").append(String.format("%08X", e.getChannel().getId())).append(": ");
                 msg.append(((InetSocketAddress) e.getChannel().getLocalAddress()).getPort());
-                msg.append((e instanceof DownstreamMessageEvent) ? " -> " : " <- ");
+                msg.append((e instanceof DownstreamMessageEvent) ? " > " : " < ");
 
                 msg.append(((InetSocketAddress) event.getRemoteAddress()).getAddress().getHostAddress()).append("]");
 
                 // Append hex message
                 if (event.getMessage() instanceof ChannelBuffer) {
-                    msg.append(" - HEX: ");
+                    msg.append(" HEX: ");
                     msg.append(ChannelBuffers.hexDump((ChannelBuffer) event.getMessage()));
                 }
 
@@ -116,7 +125,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("geocoder", new ReverseGeocoderHandler(Context.getReverseGeocoder(), processInvalidPositions));
         }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
-        pipeline.addLast("handler", new TrackerEventHandler());
+        pipeline.addLast("handler", new MainEventHandler());
         return pipeline;
     }
 

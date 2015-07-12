@@ -16,6 +16,7 @@
 package org.traccar;
 
 import java.net.SocketAddress;
+import java.util.Collection;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -39,7 +40,13 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
         if (originalMessage == decodedMessage) {
             ctx.sendUpstream(evt);
         } else if (decodedMessage != null) {
-            fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
+            if (decodedMessage instanceof Collection) {
+                for (Object o : (Collection) e.getMessage()) {
+                    fireMessageReceived(ctx, o, e.getRemoteAddress());
+                }
+            } else {
+                fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
+            }
         }
     }
     

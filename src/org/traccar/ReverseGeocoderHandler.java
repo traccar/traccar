@@ -15,14 +15,11 @@
  */
 package org.traccar;
 
-import java.net.SocketAddress;
-import java.util.List;
-import org.jboss.netty.channel.Channel;
 import org.traccar.geocode.AddressFormat;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.model.Position;
 
-public class ReverseGeocoderHandler extends ExtendedObjectDecoder {
+public class ReverseGeocoderHandler extends BaseDataHandler {
 
     private final ReverseGeocoder geocoder;
     private final boolean processInvalidPositions;
@@ -35,30 +32,12 @@ public class ReverseGeocoderHandler extends ExtendedObjectDecoder {
     }
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
-        
-        if (geocoder != null) {
-            if (msg instanceof Position) {
-                Position position = (Position) msg;
-                
-                if (processInvalidPositions || position.getValid()) {
-                    position.setAddress(geocoder.getAddress(
-                            addressFormat, position.getLatitude(), position.getLongitude()));
-                }
-            } else if (msg instanceof List) {
-                List<Position> positions = (List<Position>) msg;
-                for (Position position : positions) {
-                    if (processInvalidPositions || position.getValid()) {
-                        position.setAddress(geocoder.getAddress(
-                                addressFormat, position.getLatitude(), position.getLongitude()));
-                    }
-                }
-            }
+    protected Position handlePosition(Position position) {
+        if (geocoder != null && (processInvalidPositions || position.getValid())) {
+            position.setAddress(geocoder.getAddress(
+                    addressFormat, position.getLatitude(), position.getLongitude()));
         }
-
-        return msg;
+        return position;
     }
 
 }

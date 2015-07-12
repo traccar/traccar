@@ -15,16 +15,12 @@
  */
 package org.traccar;
 
-import java.net.SocketAddress;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
-import org.jboss.netty.channel.Channel;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-public class FilterHandler extends ExtendedObjectDecoder {
+public class FilterHandler extends BaseDataHandler {
 
     private boolean filterInvalid;
     private boolean filterZero;
@@ -144,24 +140,8 @@ public class FilterHandler extends ExtendedObjectDecoder {
     }
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
-        
-        if (msg instanceof Position) {
-            if (filter((Position) msg)) {
-                return null;
-            }
-        } else if (msg instanceof List) {
-            Iterator<Position> i = ((List<Position>) msg).iterator();
-            while (i.hasNext()) {
-               if (filter(i.next())) {
-                   i.remove();
-               }
-            }
-        }
-
-        return msg;
+    protected Position handlePosition(Position position) {
+        return filter(position) ? null : position;
     }
 
 }
