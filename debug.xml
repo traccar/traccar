@@ -25,6 +25,9 @@
     <entry key='filter.zero'>true</entry>
     <entry key='filter.duplicate'>true</entry>
     <entry key='filter.distance'>50</entry>-->
+    
+    <!--<entry key='forward.enable'>true</entry>
+    <entry key='forward.url'>http://localhost:5055?id={deviceId}&amp;timestamp={fixTime}&amp;lat={latitude}&amp;lon={longitude}</entry>-->
 
     <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>all</entry>

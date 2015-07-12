@@ -31,27 +31,18 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
         
         if (e.getMessage() != null) {
-            
             if (e.getMessage() instanceof Position) {
 
                 Position position = (Position) e.getMessage();
 
                 // Log position
                 StringBuilder s = new StringBuilder();
-                s.append("device: ").append(position.getDeviceId()).append(", ");
+                s.append(formatChannel(e.getChannel())).append(" ");
+                s.append("id: ").append(position.getDeviceId()).append(", ");
                 s.append("time: ").append(position.getFixTime()).append(", ");
                 s.append("lat: ").append(position.getLatitude()).append(", ");
                 s.append("lon: ").append(position.getLongitude());
                 Log.info(s.toString());
-
-                try {
-                    Context.getDataManager().addPosition(position);
-                    Context.getDataManager().updateLatestPosition(position);
-                    Context.getConnectionManager().update(position);
-                } catch (Exception error) {
-                    Log.warning(error);
-                }
-
             }
         }
     }

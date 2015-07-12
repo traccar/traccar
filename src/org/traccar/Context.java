@@ -35,6 +35,18 @@ public class Context {
     public static Properties getProps() {
         return properties;
     }
+    
+    /*public static boolean getPropBoolean(String key) {
+        return Boolean.valueOf(properties.getProperty(key));
+    }
+    
+    public static int getPropInt() {
+        return Integer.valueOf(null);
+    }
+    
+    public static String getPropString() {
+        return null;
+    }*/
 
     private static boolean loggerEnabled;
 
