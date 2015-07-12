@@ -16,7 +16,6 @@
 package org.traccar.http;
 
 import java.net.InetSocketAddress;
-import java.util.Properties;
 import javax.naming.InitialContext;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -25,6 +24,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 
@@ -35,18 +35,17 @@ public class WebServer {
 
     private Server server;
 
-    public WebServer() {
-        Properties properties = Context.getProps();
-        
-        String address = properties.getProperty("web.address");
-        Integer port = Integer.valueOf(properties.getProperty("web.port", "8082"));
+    public WebServer(Config config) {
+
+        String address = config.getString("web.address");
+        int port = config.getInteger("web.port", 8082);
         if (address == null) {
             server = new Server(port);
         } else {
             server = new Server(new InetSocketAddress(address, port));
         }
 
-        if (!Boolean.valueOf(properties.getProperty("web.old"))) {
+        if (!config.getBoolean("web.old")) {
 
             ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
             servletHandler.setContextPath("/api");
@@ -65,11 +64,11 @@ public class WebServer {
             mobileContext.setHandler(mobileResourceHandler);*/
 
             ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setResourceBase(properties.getProperty("web.path"));
-            if (Boolean.valueOf(properties.getProperty("web.debug"))) {
-                resourceHandler.setWelcomeFiles(new String[]{"debug.html"});
+            resourceHandler.setResourceBase(config.getString("web.path"));
+            if (config.getBoolean("web.debug")) {
+                resourceHandler.setWelcomeFiles(new String[] { "debug.html" });
             } else {
-                resourceHandler.setWelcomeFiles(new String[]{"release.html"});
+                resourceHandler.setWelcomeFiles(new String[] { "release.html" });
             }
 
             HandlerList handlerList = new HandlerList();
@@ -88,7 +87,7 @@ public class WebServer {
 
             WebAppContext webapp = new WebAppContext();
             webapp.setContextPath("/");
-            webapp.setWar(properties.getProperty("web.application"));
+            webapp.setWar(config.getString("web.application"));
             server.setHandler(webapp);
 
         }

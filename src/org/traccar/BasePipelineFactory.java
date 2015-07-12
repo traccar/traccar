@@ -35,9 +35,11 @@ import org.traccar.helper.Log;
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
-    private FilterHandler filterHandler;
-    private Integer resetDelay;
+    private int resetDelay;
     private Boolean processInvalidPositions;
+    
+    private FilterHandler filterHandler;
+    private ReverseGeocoderHandler reverseGeocoderHandler;
 
     protected class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -87,21 +89,17 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
+        
+        resetDelay = Context.getConfig().getInteger(protocol + ".resetDelay", 0);
+        processInvalidPositions = Context.getConfig().getBoolean("geocode.processInvalidPositions");
 
-        String resetDelayProperty = Context.getProps().getProperty(protocol + ".resetDelay");
-        if (resetDelayProperty != null) {
-            resetDelay = Integer.valueOf(resetDelayProperty);
-        }
-
-        String enableFilter = Context.getProps().getProperty("filter.enable");
-        if (enableFilter != null && Boolean.valueOf(enableFilter)) {
+        if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
         }
-
+        
         if (Context.getReverseGeocoder() != null) {
-            // Default behavior is to process invalid positions (i.e., the "null" case)
-            String invalidPositions = Context.getProps().getProperty("geocode.processInvalidPositions");
-            processInvalidPositions = (invalidPositions == null || Boolean.valueOf(invalidPositions));
+            reverseGeocoderHandler = new ReverseGeocoderHandler(
+                    Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocode.processInvalidPositions"));
         }
     }
 
@@ -110,7 +108,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     @Override
     public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = Channels.pipeline();
-        if (resetDelay != null) {
+        if (resetDelay != 0) {
             pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), resetDelay, 0, 0));
         }
         pipeline.addLast("openHandler", new OpenChannelHandler(server));
@@ -121,15 +119,15 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
         }
-        if (Context.getReverseGeocoder() != null) {
-            pipeline.addLast("geocoder", new ReverseGeocoderHandler(Context.getReverseGeocoder(), processInvalidPositions));
+        if (reverseGeocoderHandler != null) {
+            pipeline.addLast("geocoder", reverseGeocoderHandler);
         }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
         }
-        if (Boolean.valueOf(Context.getProps().getProperty("forward.enable"))) {
-            pipeline.addLast("webHandler", new WebDataHandler(Context.getProps().getProperty("forward.url")));
+        if (Context.getConfig().getBoolean("forward.enable")) {
+            pipeline.addLast("webHandler", new WebDataHandler(Context.getConfig().getString("forward.url")));
         }
         pipeline.addLast("mainHandler", new MainEventHandler());
         return pipeline;

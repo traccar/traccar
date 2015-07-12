@@ -17,14 +17,10 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Calendar; 
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
@@ -33,22 +29,14 @@ import org.traccar.model.Position;
 
 public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
-    // Default values
-    private String format0 = "TSPRXAB27GHKLMnaicz*U!";
-    private String format1 = "SARY*U!";
+    private String format0;
+    private String format1;
 
     public GlobalSatProtocolDecoder(GlobalSatProtocol protocol) {
         super(protocol);
-
-        Properties properties = Context.getProps();
-        if (properties != null) {
-            if (properties.containsKey(protocol + ".format0")) {
-                format0 = properties.getProperty(protocol + ".format0");
-            }
-            if (properties.containsKey(protocol + ".format1")) {
-                format1 = properties.getProperty(protocol + ".format1");
-            }
-        }
+        
+        format0 = Context.getConfig().getString(protocol + ".format0", "TSPRXAB27GHKLMnaicz*U!");
+        format1 = Context.getConfig().getString(protocol + ".format1", "SARY*U!");
     }
 
     public void setFormat0(String format) {

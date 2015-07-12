@@ -20,7 +20,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
-import java.util.Properties;
 import org.apache.log4j.Appender;
 import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.Layout;
@@ -32,6 +31,7 @@ import org.apache.log4j.varia.NullAppender;
 import org.jboss.netty.logging.AbstractInternalLogger;
 import org.jboss.netty.logging.InternalLogger;
 import org.jboss.netty.logging.InternalLoggerFactory;
+import org.traccar.Config;
 
 public class Log {
     
@@ -42,19 +42,19 @@ public class Log {
 
     private static Logger logger = null;
     
-    public static void setupLogger(Properties properties) throws IOException {
+    public static void setupLogger(Config config) throws IOException {
 
         Layout layout = new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %5p: %m%n");
 
         Appender appender = new DailyRollingFileAppender(
-                layout, properties.getProperty("logger.file"), "'.'yyyyMMdd");
+                layout, config.getString("logger.file"), "'.'yyyyMMdd");
 
         LogManager.resetConfiguration();
         LogManager.getRootLogger().addAppender(new NullAppender());
         
         logger = Logger.getLogger(LOGGER_NAME);
         logger.addAppender(appender);
-        logger.setLevel(Level.toLevel(properties.getProperty("logger.level"), Level.ALL));
+        logger.setLevel(Level.toLevel(config.getString("logger.level"), Level.ALL));
 
         // Workaround for "Bug 745866 - (EDG-45) Possible netty logging config problem"
         InternalLoggerFactory.setDefaultFactory(new InternalLoggerFactory() {

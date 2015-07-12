@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.util.List;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
@@ -22,8 +23,6 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.TrackerServer;
-
-import java.util.List;
 
 public class XexunProtocol extends BaseProtocol {
 
@@ -36,7 +35,7 @@ public class XexunProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                boolean full = Boolean.valueOf(Context.getProps().getProperty(getName() + ".extended"));
+                boolean full = Context.getConfig().getBoolean(getName() + ".extended");
                 if (full) {
                     pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024)); // tracker bug \n\r
                 } else {

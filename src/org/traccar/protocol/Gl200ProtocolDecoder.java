@@ -147,7 +147,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.set(Event.KEY_BATTERY, parser.group(index++));
 
-        if (Boolean.valueOf(Context.getProps().getProperty(getProtocolName() + ".ack")) && channel != null) {
+        if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
             channel.write("+SACK:" + parser.group(index++) + "$", remoteAddress);
         }
 

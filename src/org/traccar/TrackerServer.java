@@ -51,9 +51,8 @@ public abstract class TrackerServer {
             bootstrap.setFactory(GlobalChannelFactory.getDatagramFactory());
         }
 
-        address = Context.getProps().getProperty(protocol + ".address");
-        String portProperty = Context.getProps().getProperty(protocol + ".port");
-        port = Integer.valueOf(portProperty);
+        address = Context.getConfig().getString(protocol + ".address");
+        port = Context.getConfig().getInteger(protocol + ".port");
 
         bootstrap.setPipelineFactory(new BasePipelineFactory(this, protocol) {
             @Override

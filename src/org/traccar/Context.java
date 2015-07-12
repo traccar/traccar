@@ -15,8 +15,6 @@
  */
 package org.traccar;
 
-import java.io.FileInputStream;
-import java.util.Properties;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
@@ -29,24 +27,12 @@ import org.traccar.helper.Log;
 import org.traccar.http.WebServer;
 
 public class Context {
-
-    private static Properties properties;
-
-    public static Properties getProps() {
-        return properties;
-    }
     
-    /*public static boolean getPropBoolean(String key) {
-        return Boolean.valueOf(properties.getProperty(key));
-    }
+    private static Config config;
     
-    public static int getPropInt() {
-        return Integer.valueOf(null);
+    public static Config getConfig() {
+        return config;
     }
-    
-    public static String getPropString() {
-        return null;
-    }*/
 
     private static boolean loggerEnabled;
 
@@ -98,37 +84,38 @@ public class Context {
 
     public static void init(String[] arguments) throws Exception {
 
-        properties = new Properties();
+        config = new Config();
         if (arguments.length > 0) {
-            properties.loadFromXML(new FileInputStream(arguments[0]));
+            config.load(arguments[0]);
         }
 
-        loggerEnabled = Boolean.valueOf(properties.getProperty("logger.enable"));
+        loggerEnabled = config.getBoolean("logger.enable");
         if (loggerEnabled) {
-            Log.setupLogger(properties);
+            Log.setupLogger(config);
         }
 
-        dataManager = new DataManager(properties);
+        dataManager = new DataManager(config);
         identityManager = dataManager;
 
         connectionManager = new ConnectionManager();
-        if (!Boolean.valueOf(properties.getProperty("web.old"))) {
+        if (!config.getBoolean("web.old")) {
             permissionsManager = new PermissionsManager();
         }
 
-        if (Boolean.parseBoolean(properties.getProperty("geocoder.enable"))) {
-            String type = properties.getProperty("geocoder.type");
+        if (config.getBoolean("geocoder.enable")) {
+            String type = config.getString("geocoder.type");
+            String url = config.getString("geocoder.url");
             if (type != null && type.equals("nominatim")) {
-                reverseGeocoder = new NominatimReverseGeocoder(properties.getProperty("geocoder.url"));
+                reverseGeocoder = new NominatimReverseGeocoder(url);
             } else if (type != null && type.equals("gisgraphy")) {
-                reverseGeocoder = new GisgraphyReverseGeocoder(properties.getProperty("geocoder.url"));
+                reverseGeocoder = new GisgraphyReverseGeocoder(url);
             } else {
                 reverseGeocoder = new GoogleReverseGeocoder();
             }
         }
 
-        if (Boolean.valueOf(properties.getProperty("web.enable"))) {
-            webServer = new WebServer();
+        if (config.getBoolean("web.enable")) {
+            webServer = new WebServer(config);
         }
 
         serverManager = new ServerManager();
@@ -141,7 +128,7 @@ public class Context {
      * Initialize context for unit testing
      */
     public static void init(IdentityManager identityManager) {
-        properties = new Properties();
+        config = new Config();
         connectionManager = new ConnectionManager();
         Context.identityManager = identityManager;
     }

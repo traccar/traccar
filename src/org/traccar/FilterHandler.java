@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import java.util.Properties;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
@@ -43,22 +42,13 @@ public class FilterHandler extends BaseDataHandler {
     }
     
     public FilterHandler() {
-        Properties properties = Context.getProps();
+        Config config = Context.getConfig();
 
-        String value = properties.getProperty("filter.invalid");
-        if (value != null) filterInvalid = Boolean.valueOf(value);
-
-        value = properties.getProperty("filter.zero");
-        if (value != null) filterZero = Boolean.valueOf(value);
-
-        value = properties.getProperty("filter.duplicate");
-        if (value != null) filterDuplicate = Boolean.valueOf(value);
-
-        value = properties.getProperty("filter.distance");
-        if (value != null) filterDistance = Integer.valueOf(value);
-
-        value = properties.getProperty("filter.limit");
-        if (value != null) filterLimit = Long.valueOf(value) * 1000;
+        filterInvalid = config.getBoolean("filter.invalid");
+        filterZero = config.getBoolean("filter.zero");
+        filterDuplicate = config.getBoolean("filter.duplicate");
+        filterDistance = config.getInteger("filter.distance");
+        filterLimit = config.getLong("filter.limit") * 1000;
     }
     
     private Position getLastPosition(long deviceId) {

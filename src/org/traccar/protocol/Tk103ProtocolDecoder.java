@@ -20,10 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
@@ -123,7 +120,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        if (Boolean.valueOf(Context.getProps().getProperty(getProtocolName() + ".mph"))) {
+        if (Context.getConfig().getBoolean(getProtocolName() + ".mph")) {
             position.setSpeed(UnitsConverter.knotsFromMph(Double.valueOf(parser.group(index++))));
         } else {
             position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));

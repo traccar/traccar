@@ -87,7 +87,7 @@ public class ServerManager {
     }
 
     private boolean isProtocolEnabled(String protocol) {
-        return Context.getProps().containsKey(protocol + ".port");
+        return Context.getConfig().hasKey(protocol + ".port");
     }
 
     private void initProtocolDetector() throws SQLException {

@@ -16,17 +16,15 @@
 package org.traccar.protocol;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.Calendar; 
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.Crc;
@@ -117,14 +115,12 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
     
     private String getMeiligaoServer(Channel channel) {
-        Properties p = Context.getProps();
-        
-        if (p != null && p.containsKey(getProtocolName() + ".server")) {
-            return p.getProperty(getProtocolName() + ".server");
-        } else {
+        String server = Context.getConfig().getString(getProtocolName() + ".server");
+        if (server == null) {
             InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
-            return address.getAddress().getHostAddress() + ":" + address.getPort();
+            server = address.getAddress().getHostAddress() + ":" + address.getPort();
         }
+        return server;
     }
 
     @Override

@@ -29,10 +29,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import org.traccar.Context;
+import org.traccar.Config;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.http.AsyncServlet;
@@ -47,37 +46,30 @@ public class DataManager implements IdentityManager {
 
     private static final long DEFAULT_REFRESH_DELAY = 300;
     
-    private final Properties properties;
+    private final Config config;
     
     private DataSource dataSource;
     
     private final Map<String, Device> devices = new HashMap<String, Device>();
     private long devicesLastUpdate;
-    private long devicesRefreshDelay;
+    private final long devicesRefreshDelay;
 
-    public DataManager(Properties properties) throws Exception {
-        this.properties = properties;
-        if (properties != null) {
-            initDatabase(properties);
-            initDatabaseSchema();
-            
-            // Refresh delay
-            String refreshDelay = properties.getProperty("database.refreshDelay");
-            if (refreshDelay != null) {
-                devicesRefreshDelay = Long.valueOf(refreshDelay) * 1000;
-            } else {
-                devicesRefreshDelay = DEFAULT_REFRESH_DELAY * 1000;
-            }
-        }
+    public DataManager(Config config) throws Exception {
+        this.config = config;
+
+        initDatabase();
+        initDatabaseSchema();
+
+        devicesRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
     }
     
     public DataSource getDataSource() {
         return dataSource;
     }
 
-    private void initDatabase(Properties properties) throws Exception {
+    private void initDatabase() throws Exception {
         
-        String jndiName = properties.getProperty("database.jndi");
+        String jndiName = config.getString("database.jndi");
 
         if (jndiName != null) {
 
@@ -86,9 +78,9 @@ public class DataManager implements IdentityManager {
         } else {
 
             // Load driver
-            String driver = properties.getProperty("database.driver");
+            String driver = config.getString("database.driver");
             if (driver != null) {
-                String driverFile = properties.getProperty("database.driverFile");
+                String driverFile = config.getString("database.driverFile");
 
                 if (driverFile != null) {
                     URL url = new URL("jar:file:" + new File(driverFile).getAbsolutePath() + "!/");
@@ -102,15 +94,15 @@ public class DataManager implements IdentityManager {
 
             // Initialize data source
             ComboPooledDataSource ds = new ComboPooledDataSource();
-            ds.setDriverClass(properties.getProperty("database.driver"));
-            ds.setJdbcUrl(properties.getProperty("database.url"));
-            ds.setUser(properties.getProperty("database.user"));
-            ds.setPassword(properties.getProperty("database.password"));
+            ds.setDriverClass(config.getString("database.driver"));
+            ds.setJdbcUrl(config.getString("database.url"));
+            ds.setUser(config.getString("database.user"));
+            ds.setPassword(config.getString("database.password"));
             ds.setIdleConnectionTestPeriod(600);
             ds.setTestConnectionOnCheckin(true);
-            String maxPoolSize = properties.getProperty("database.maxPoolSize");
-            if (maxPoolSize != null) {
-                ds.setMaxPoolSize(Integer.valueOf(maxPoolSize));
+            int maxPoolSize = config.getInteger("database.maxPoolSize");
+            if (maxPoolSize != 0) {
+                ds.setMaxPoolSize(maxPoolSize);
             }
             dataSource = ds;
         }
@@ -132,7 +124,7 @@ public class DataManager implements IdentityManager {
     }
     
     private String getQuery(String key) {
-        String query = properties.getProperty(key);
+        String query = config.getString(key);
         if (query == null) {
             Log.info("Query not provided: " + key);
         }
@@ -141,14 +133,14 @@ public class DataManager implements IdentityManager {
 
     private void initDatabaseSchema() throws SQLException {
 
-        if (!Boolean.valueOf(properties.getProperty("web.old"))) {
+        if (!config.getBoolean("web.old")) {
 
             Connection connection = dataSource.getConnection();
             ResultSet result = connection.getMetaData().getTables(
                     connection.getCatalog(), null, null, null);
 
             boolean exist = false;
-            String checkTable = properties.getProperty("database.checkTable");
+            String checkTable = config.getString("database.checkTable");
             while (result.next()) {
                 if (result.getString("TABLE_NAME").equalsIgnoreCase(checkTable)) {
                     exist = true;
@@ -179,7 +171,7 @@ public class DataManager implements IdentityManager {
     }
     
     private void mockData(long userId) {
-        if (Boolean.valueOf(Context.getProps().getProperty("database.mock"))) {
+        if (config.getBoolean("database.mock")) {
             try {
 
                 Device device = new Device();
