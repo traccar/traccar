@@ -156,7 +156,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             // GPS length and Satellites count
             int gpsLength = buf.readUnsignedByte();
-            position.set(Event.KEY_SATELLITES, gpsLength & 0xf);
+            position.set(Event.KEY_SATELLITES, gpsLength & 0b0000_1111);
             gpsLength >>= 4;
 
             // Latitude
@@ -170,16 +170,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             // Course and flags
             int union = buf.readUnsignedShort();
-            position.setCourse(union & 0x03FF);
-            position.setValid((union & 0x1000) != 0);
-            if ((union & 0x0400) == 0) latitude = -latitude;
-            if ((union & 0x0800) != 0) longitude = -longitude;
+            position.setCourse(union & 0b0000_0011_1111_1111);
+            position.setValid((union & 0b0001_0000_0000_0000) != 0);
+            if ((union & 0b0000_0100_0000_0000) == 0) latitude = -latitude;
+            if ((union & 0b0000_1000_0000_0000) != 0) longitude = -longitude;
 
             position.setLatitude(latitude);
             position.setLongitude(longitude);
             
-            if ((union & 0x4000) != 0) {
-                position.set("acc", (union & 0x8000) != 0);
+            if ((union & 0b0100_0000_0000_0000) != 0) {
+                position.set("acc", (union & 0b1000_0000_0000_0000) != 0);
             }
 
             buf.skipBytes(gpsLength - 12); // skip reserved
