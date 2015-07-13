@@ -200,9 +200,7 @@ public class DataManager implements IdentityManager {
                 
                 updateLatestPosition(position);
 
-            } catch (SQLException error) {
-                Log.warning(error);
-            } catch (ParseException error) {
+            } catch (SQLException | ParseException error) {
                 Log.warning(error);
             }
         }

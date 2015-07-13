@@ -264,8 +264,7 @@ public class QueryBuilder {
                     } else if (method.getReturnType().equals(byte[].class)) {
                         setBytes(name, (byte[]) method.invoke(object));
                     }
-                } catch (IllegalAccessException error) {
-                } catch (InvocationTargetException error) {
+                } catch (IllegalAccessException | InvocationTargetException error) {
                 }
             }
         }
@@ -328,8 +327,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getBoolean(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -339,8 +337,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getInt(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -350,8 +347,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getLong(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -361,8 +357,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getDouble(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -372,8 +367,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getString(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -383,8 +377,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, new Date(resultSet.getTimestamp(name).getTime()));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });

@@ -30,7 +30,6 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
-
 import org.traccar.model.Factory;
 
 public class JsonConverter {
@@ -89,9 +88,7 @@ public class JsonConverter {
                         populateObject(json.getJsonObject(name), nestedObject);
                         method.invoke(object, nestedObject);
                     }
-                } catch (IllegalAccessException error) {
-                } catch (InvocationTargetException error) {
-                } catch (InstantiationException e) {
+                } catch (IllegalAccessException | InvocationTargetException | InstantiationException error) {
                 }
             }
         }
@@ -130,8 +127,7 @@ public class JsonConverter {
                             json.add(name, dateFormat.format(value));
                         }
                     }
-                } catch (IllegalAccessException error) {
-                } catch (InvocationTargetException error) {
+                } catch (IllegalAccessException | InvocationTargetException error) {
                 }
             }
         }
