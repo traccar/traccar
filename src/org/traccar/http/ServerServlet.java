@@ -24,14 +24,18 @@ public class ServerServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        if (command.equals("/get")) {
-            get(req, resp);
-        } else if (command.equals("/update")) {
-            update(req, resp);
-        } else {
-            return false;
+
+        switch (command) {
+            case "/get":
+                get(req, resp);
+                break;
+            case "/update":
+                update(req, resp);
+                break;
+            default:
+                return false;
         }
-        return true;
+        return true;        
     }
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {

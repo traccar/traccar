@@ -103,14 +103,18 @@ public class Context {
         }
 
         if (config.getBoolean("geocoder.enable")) {
-            String type = config.getString("geocoder.type");
+            String type = config.getString("geocoder.type", "google");
             String url = config.getString("geocoder.url");
-            if (type != null && type.equals("nominatim")) {
-                reverseGeocoder = new NominatimReverseGeocoder(url);
-            } else if (type != null && type.equals("gisgraphy")) {
-                reverseGeocoder = new GisgraphyReverseGeocoder(url);
-            } else {
-                reverseGeocoder = new GoogleReverseGeocoder();
+            switch (type) {
+                case "google":
+                    reverseGeocoder = new GoogleReverseGeocoder();
+                    break;
+                case "nominatim":
+                    reverseGeocoder = new NominatimReverseGeocoder(url);
+                    break;
+                case "gisgraphy":
+                    reverseGeocoder = new GisgraphyReverseGeocoder(url);
+                    break;
             }
         }
 

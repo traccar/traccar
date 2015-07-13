@@ -1,29 +1,29 @@
 package org.traccar.http;
 
-import org.traccar.Context;
-import org.traccar.database.ActiveDevice;
-import org.traccar.command.CommandType;
-import org.traccar.command.GpsCommand;
-
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.traccar.Context;
+import org.traccar.command.CommandType;
+import org.traccar.command.GpsCommand;
+import org.traccar.database.ActiveDevice;
 
 public class CommandsServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        if (command.equals("/send")) {
-            send(req, resp);
+        
+        switch (command) {
+            case "/send":
+                send(req, resp);
+                return true;
+            case "/raw":
+                sendRawCommand(req, resp);
+                return true;
+            default:
+                return false;
         }
-        else if (command.equals("/raw")) {
-            sendRawCommand(req, resp);
-        }
-        else {
-            return false;
-        }
-        return true;
     }
 
     private void send(HttpServletRequest req, HttpServletResponse resp) throws Exception {
