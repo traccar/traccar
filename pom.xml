@@ -29,12 +29,12 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.35</version>
+            <version>5.1.36</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.3-1103-jdbc4</version>
+            <version>9.4-1201-jdbc41</version>
         </dependency>
         <dependency>
             <groupId>com.mchange</groupId>
@@ -58,14 +58,8 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.aggregate</groupId>
-            <artifactId>jetty-all-server</artifactId>
-            <version>8.1.17.v20150415</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.jetty.orbit</groupId>
-                    <artifactId>javax.mail.glassfish</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>jetty-all</artifactId>
+            <version>9.2.11.v20150529</version>
         </dependency>
     </dependencies>
 
