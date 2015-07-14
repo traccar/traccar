@@ -8,8 +8,7 @@ public enum CommandType implements Factory {
     STOP_ENGINE(NoParameterCommand.class),
     RESUME_ENGINE(NoParameterCommand.class);
 
-
-    private Class<? extends GpsCommand> commandClass;
+    private final Class<? extends GpsCommand> commandClass;
 
     CommandType(Class<? extends GpsCommand> commandClass) {
         this.commandClass = commandClass;
@@ -19,10 +18,8 @@ public enum CommandType implements Factory {
     public Object create() {
         try {
             return commandClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (InstantiationException | IllegalAccessException error) {
+            throw new RuntimeException(error);
         }
     }
 }

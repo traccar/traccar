@@ -200,7 +200,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         else if (sentence.startsWith("#B#")) {
             
             String[] messages = sentence.substring(sentence.indexOf('#', 1) + 1).split("\\|");
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
 
             for (String message : messages) {
                 Position position = decodePosition(message);

@@ -24,18 +24,24 @@ public class UserServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        if (command.equals("/get")) {
-            get(req, resp);
-        } else if (command.equals("/add")) {
-            add(req, resp);
-        } else if (command.equals("/update")) {
-            update(req, resp);
-        } else if (command.equals("/remove")) {
-            remove(req, resp);
-        } else {
-            return false;
+
+        switch (command) {
+            case "/get":
+                get(req, resp);
+                break;
+            case "/add":
+                add(req, resp);
+                break;
+            case "/update":
+                update(req, resp);
+                break;
+            case "/remove":
+                remove(req, resp);
+                break;
+            default:
+                return false;
         }
-        return true;
+        return true;        
     }
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {

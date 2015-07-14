@@ -15,14 +15,9 @@
  */
 package org.traccar.geocode;
 
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
-import org.traccar.helper.Log;
 
 public class GoogleReverseGeocoder extends JsonReverseGeocoder {
 
@@ -45,28 +40,34 @@ public class GoogleReverseGeocoder extends JsonReverseGeocoder {
                 String value = component.getString("short_name");
 
                 for (JsonString type : component.getJsonArray("types").getValuesAs(JsonString.class)) {
-                    if (type.getString().equals("street_number")) {
-                        address.setHouse(value);
-                        break;
-                    } else if (type.getString().equals("route")) {
-                        address.setStreet(value);
-                        break;
-                    } else if (type.getString().equals("locality")) {
-                        address.setSettlement(value);
-                        break;
-                    } else if (type.getString().equals("administrative_area_level_2")) {
-                        address.setDistrict(value);
-                        break;
-                    } else if (type.getString().equals("administrative_area_level_1")) {
-                        address.setState(value);
-                        break;
-                    } else if (type.getString().equals("country")) {
-                        address.setCountry(value);
-                        break;
-                    } else if (type.getString().equals("postal_code")) {
-                        address.setPostcode(value);
-                        break;
+                    
+                    switch (type.getString()) {
+                        case "street_number":
+                            address.setHouse(value);
+                            break;
+                        case "route":
+                            address.setStreet(value);
+                            break;
+                        case "locality":
+                            address.setSettlement(value);
+                            break;
+                        case "administrative_area_level_2":
+                            address.setDistrict(value);
+                            break;
+                        case "administrative_area_level_1":
+                            address.setState(value);
+                            break;
+                        case "country":
+                            address.setCountry(value);
+                            break;
+                        case "postal_code":
+                            address.setPostcode(value);
+                            break;
+                        default:
+                            continue;
                     }
+                    
+                    break;
                 }
             }
 

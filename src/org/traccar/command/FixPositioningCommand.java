@@ -10,7 +10,7 @@ public class FixPositioningCommand extends GpsCommand {
 
     @Override
     public Map<String, Object> getReplacements() {
-        Map<String, Object> replacements = new HashMap<String, Object>();
+        Map<String, Object> replacements = new HashMap<>();
         replacements.put(FREQUENCY, data);
         return replacements;
     }

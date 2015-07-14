@@ -53,7 +53,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         
         if (type == COMMAND_RECORDS) {
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
 
             buf.readUnsignedByte(); // records left
             int count = buf.readUnsignedByte();

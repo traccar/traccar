@@ -26,18 +26,24 @@ public class MainServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        if (command.equals("/session")) {
-            session(req, resp);
-        } else if (command.equals("/login")) {
-            login(req, resp);
-        } else if (command.equals("/logout")) {
-            logout(req, resp);
-        } else if (command.equals("/register")) {
-            register(req, resp);
-        } else {
-            return false;
+        
+        switch (command) {
+            case "/session":
+                session(req, resp);
+                break;
+            case "/login":
+                login(req, resp);
+                break;
+            case "/logout":
+                logout(req, resp);
+                break;
+            case "/register":
+                register(req, resp);
+                break;
+            default:
+                return false;
         }
-        return true;
+        return true;        
     }
 
     private void session(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

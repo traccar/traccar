@@ -87,7 +87,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
         // Position
         else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
 
             int recordCount = 1;
             if (type == MSG_LOGMSG) {

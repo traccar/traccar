@@ -178,7 +178,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> decodeBinaryMessage(Channel channel, ChannelBuffer buf) {
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
         
         String flag = buf.toString(2, 1, Charset.defaultCharset());
         int index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");

@@ -36,7 +36,7 @@ import org.traccar.model.Factory;
 
 public class QueryBuilder {
     
-    private final Map<String, List<Integer>> indexMap = new HashMap<String, List<Integer>>();
+    private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
     private PreparedStatement statement;
     private final String query;
@@ -106,7 +106,7 @@ public class QueryBuilder {
                     // Add to list
                     List<Integer> indexList = paramMap.get(name);
                     if (indexList == null) {
-                        indexList = new LinkedList<Integer>();
+                        indexList = new LinkedList<>();
                         paramMap.put(name, indexList);
                     }
                     indexList.add(index);
@@ -133,7 +133,7 @@ public class QueryBuilder {
         name = name.toLowerCase();
         List<Integer> result = indexMap.get(name);
         if (result == null) {
-            result = new LinkedList<Integer>();
+            result = new LinkedList<>();
         }
         return result;
     }
@@ -264,8 +264,7 @@ public class QueryBuilder {
                     } else if (method.getReturnType().equals(byte[].class)) {
                         setBytes(name, (byte[]) method.invoke(object));
                     }
-                } catch (IllegalAccessException error) {
-                } catch (InvocationTargetException error) {
+                } catch (IllegalAccessException | InvocationTargetException error) {
                 }
             }
         }
@@ -293,13 +292,11 @@ public class QueryBuilder {
         
             try {
 
-                ResultSet resultSet = statement.executeQuery();
-
-                try {
+                try (ResultSet resultSet = statement.executeQuery()) {
 
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-                    List<ResultSetProcessor<T>> processors = new LinkedList<ResultSetProcessor<T>>();
+                    List<ResultSetProcessor<T>> processors = new LinkedList<>();
 
                     Method[] methods = prototype.getClass().getMethods();
 
@@ -328,8 +325,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getBoolean(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -339,8 +335,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getInt(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -350,8 +345,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getLong(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -361,8 +355,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getDouble(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -372,8 +365,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, resultSet.getString(name));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -383,8 +375,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, new Date(resultSet.getTimestamp(name).getTime()));
-                                        } catch (IllegalAccessException error) {
-                                        } catch (InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }
                                 });
@@ -399,9 +390,6 @@ public class QueryBuilder {
                         }
                         result.add(object);
                     }
-
-                } finally {
-                    resultSet.close();
                 }
 
             } finally {

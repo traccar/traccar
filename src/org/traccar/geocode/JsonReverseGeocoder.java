@@ -42,15 +42,12 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
             conn.setRequestProperty("Connection", "close"); // don't keep-alive connections
             try {
                 InputStreamReader streamReader = new InputStreamReader(conn.getInputStream());
-                JsonReader reader = Json.createReader(streamReader);
-                try {
+                try (JsonReader reader = Json.createReader(streamReader)) {
                     Address address = parseAddress(reader.readObject());
                     while (streamReader.read() > 0); // make sure we reached the end
                     if (address != null) {
                         return format.format(address);
                     }
-                } finally {
-                    reader.close();
                 }
             } finally {
                 conn.disconnect();

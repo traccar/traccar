@@ -54,7 +54,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
 
         while (buf.readableBytes() > 1) {
 
@@ -79,7 +79,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     // Read masks
                     int mask;
-                    List<Integer> masks = new LinkedList<Integer>();
+                    List<Integer> masks = new LinkedList<>();
                     do {
                         mask = buf.readUnsignedShort();
                         masks.add(mask);

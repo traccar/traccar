@@ -1,6 +1,6 @@
 [Setup]
 AppName=Traccar
-AppVersion=2.12
+AppVersion=3.0
 DefaultDirName={pf}\Traccar
 AlwaysRestart=yes
 
@@ -54,7 +54,7 @@ begin
   else
   begin
     Result := false;
-    MsgBox('This application requires Java Runtime Environment version 1.6 or later. Please download and install the JRE and run this setup again.', mbCriticalError, MB_OK);
+    MsgBox('This application requires Java Runtime Environment version 7 or later. Please download and install the JRE and run this setup again.', mbCriticalError, MB_OK);
   end;
 end;
 

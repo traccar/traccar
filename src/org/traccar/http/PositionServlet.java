@@ -23,10 +23,15 @@ public class PositionServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        if (command.equals("/get")) {
-            get(req, resp);
+
+        switch (command) {
+            case "/get":
+                get(req, resp);
+                break;
+            default:
+                return false;
         }
-        return true;
+        return true;        
     }
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {

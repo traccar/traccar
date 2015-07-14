@@ -31,7 +31,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 
 public class ServerManager {
 
-    private final List<TrackerServer> serverList = new LinkedList<TrackerServer>();
+    private final List<TrackerServer> serverList = new LinkedList<>();
 
     public void init() throws Exception {
 

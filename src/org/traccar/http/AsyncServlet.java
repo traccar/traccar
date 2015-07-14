@@ -57,10 +57,10 @@ public class AsyncServlet extends BaseServlet {
         
         private boolean destroyed;
         private final long userId;
-        private final Set<Long> devices = new HashSet<Long>();
+        private final Set<Long> devices = new HashSet<>();
         private Timeout sessionTimeout;
         private Timeout requestTimeout;
-        private final Map<Long, Position> positions = new HashMap<Long, Position>();
+        private final Map<Long, Position> positions = new HashMap<>();
         private AsyncContext activeContext;
         
         private void logEvent(String message) {
@@ -177,7 +177,7 @@ public class AsyncServlet extends BaseServlet {
         
     }
     
-    private static final Map<Long, AsyncSession> asyncSessions = new HashMap<Long, AsyncSession>();
+    private static final Map<Long, AsyncSession> asyncSessions = new HashMap<>();
     
     public static void sessionRefreshUser(long userId) {
         asyncSessions.remove(userId);

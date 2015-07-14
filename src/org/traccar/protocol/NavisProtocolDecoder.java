@@ -15,19 +15,16 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.net.SocketAddress;
 import java.util.Calendar; 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -228,7 +225,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object processArray(Channel channel, ChannelBuffer buf) {
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
         int count = buf.readUnsignedByte();
 
         for (int i = 0; i < count; i++) {
@@ -303,13 +300,14 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         // Read message type
         String type = buf.toString(buf.readerIndex(), 3, charset);
         buf.skipBytes(type.length());
-
-        if (type.equals("*>T")) {
-            return processSingle(channel, buf);
-        } else if (type.equals("*>A")) {
-            return processArray(channel, buf);
-        } else if (type.equals("*>S")) {
-            return processHandshake(channel, buf);
+        
+        switch (type) {
+            case "*>T":
+                return processSingle(channel, buf);
+            case "*>A":
+                return processArray(channel, buf);
+            case "*>S":
+                return processHandshake(channel, buf);
         }
 
         return null;

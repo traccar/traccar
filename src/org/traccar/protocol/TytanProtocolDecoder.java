@@ -58,7 +58,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
         
         while (buf.readable()) {
             
@@ -137,7 +137,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 24:
                         {
-                            Set<Integer> temps = new LinkedHashSet<Integer>();
+                            Set<Integer> temps = new LinkedHashSet<>();
                             int temp = buf.readUnsignedByte();
                             for (int i = 3; i >= 0; i--) {
                                 int n = (temp >> (2 * i)) & 0x03;
