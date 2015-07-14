@@ -94,7 +94,9 @@ public class Context {
             Log.setupLogger(config);
         }
 
-        dataManager = new DataManager(config);
+        if (config.hasKey("database.url")) {
+            dataManager = new DataManager(config);
+        }
         identityManager = dataManager;
 
         connectionManager = new ConnectionManager(dataManager);
