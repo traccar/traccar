@@ -41,7 +41,7 @@ public abstract class Event {
     public Date getDeviceTime() { return deviceTime; }
     public void setDeviceTime(Date deviceTime) { this.deviceTime = deviceTime; }
 
-    private final Map<String, Object> other = new LinkedHashMap<String, Object>();
+    private final Map<String, Object> other = new LinkedHashMap<>();
     public void set(String key, Object value) {
         if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
             other.put(key, value);

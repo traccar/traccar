@@ -88,7 +88,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
             ChannelBuffer buf = request.getContent();
             
             while (buf.readableBytes() > 2) {

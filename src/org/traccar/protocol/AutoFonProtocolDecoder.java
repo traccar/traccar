@@ -140,7 +140,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
             int count = buf.readUnsignedByte() & 0x0f;
             buf.readUnsignedShort(); // total count
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
 
             for (int i = 0; i < count; i++) {
                 positions.add(decodePosition(buf, true));

@@ -115,7 +115,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> parseFormatA(ChannelBuffer buf) {
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
         
         FloatReader latitudeReader = new FloatReader();
         FloatReader longitudeReader = new FloatReader();

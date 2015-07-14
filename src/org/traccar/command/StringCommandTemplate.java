@@ -8,7 +8,7 @@ import java.util.Map;
 public class StringCommandTemplate<T extends GpsCommand> implements CommandTemplate<T> {
 
     private String messageTemplate;
-    private Map<Class<?>, CommandValueConversion> converters = new HashMap<Class<?>, CommandValueConversion>();
+    private Map<Class<?>, CommandValueConversion> converters = new HashMap<>();
 
     public StringCommandTemplate(String template, Object... replacements) {
         this.messageTemplate = String.format(template, replacements);

@@ -31,9 +31,9 @@ import org.traccar.model.Position;
 
 public class ConnectionManager {
 
-    private Map<String, ActiveDevice> activeDevices = new HashMap<String, ActiveDevice>();
-    private final Map<Long, Position> positions = new HashMap<Long, Position>();
-    private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<Long, Set<DataCacheListener>>();
+    private Map<String, ActiveDevice> activeDevices = new HashMap<>();
+    private final Map<Long, Position> positions = new HashMap<>();
+    private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<>();
     
     public void init(DataManager dataManager) {
         try {
@@ -70,7 +70,7 @@ public class ConnectionManager {
     
     public synchronized Collection<Position> getInitialState(Collection<Long> devices) {
         
-        List<Position> result = new LinkedList<Position>();
+        List<Position> result = new LinkedList<>();
         
         for (long device : devices) {
             if (positions.containsKey(device)) {

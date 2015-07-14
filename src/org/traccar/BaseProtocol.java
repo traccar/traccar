@@ -26,7 +26,7 @@ import java.util.Map;
 public abstract class BaseProtocol implements Protocol {
 
     private final String name;
-    private Map<CommandType, CommandTemplate> commandTemplates = new HashMap<CommandType, CommandTemplate>();
+    private Map<CommandType, CommandTemplate> commandTemplates = new HashMap<>();
 
     public BaseProtocol(String name) {
         this.name = name;

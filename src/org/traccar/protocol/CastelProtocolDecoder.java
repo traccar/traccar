@@ -150,7 +150,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             
             int count = buf.readUnsignedByte();
 
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
 
             for (int i = 0; i < count; i++) {
 

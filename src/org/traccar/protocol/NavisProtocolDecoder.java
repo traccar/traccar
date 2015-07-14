@@ -225,7 +225,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object processArray(Channel channel, ChannelBuffer buf) {
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
         int count = buf.readUnsignedByte();
 
         for (int i = 0; i < count; i++) {

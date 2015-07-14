@@ -131,7 +131,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
         // Position
         else if (hasDeviceId() && (type == MSG_TYPE_CURRENT_GPS_DATA || type == MSG_TYPE_STATE_FULL_INFO_T104 || type == MSG_TYPE_LOG_RECORDS)) {
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
 
             int recordCount = 1;
             if (type == MSG_TYPE_LOG_RECORDS) {

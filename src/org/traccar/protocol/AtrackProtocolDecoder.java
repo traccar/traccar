@@ -91,7 +91,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         // Send acknowledgement
         sendResponse(channel, remoteAddress, id, index);
 
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
 
         while (buf.readableBytes() >= MIN_DATA_LENGTH) {
 

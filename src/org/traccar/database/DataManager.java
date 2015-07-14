@@ -50,7 +50,7 @@ public class DataManager implements IdentityManager {
     
     private DataSource dataSource;
     
-    private final Map<String, Device> devices = new HashMap<String, Device>();
+    private final Map<String, Device> devices = new HashMap<>();
     private long devicesLastUpdate;
     private final long devicesRefreshDelay;
 

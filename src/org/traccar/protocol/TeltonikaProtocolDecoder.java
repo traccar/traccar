@@ -53,7 +53,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     private static final int CODEC_12 = 0x0C;
     
     private List<Position> parseLocation(Channel channel, ChannelBuffer buf) {
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new LinkedList<>();
         
         buf.skipBytes(4); // marker
         buf.readUnsignedInt(); // data length

@@ -28,9 +28,9 @@ import org.traccar.model.User;
 
 public class PermissionsManager {
     
-    private final Map<Long, User> users = new HashMap<Long, User>();
+    private final Map<Long, User> users = new HashMap<>();
     
-    private final Map<Long, Set<Long>> permissions = new HashMap<Long, Set<Long>>();
+    private final Map<Long, Set<Long>> permissions = new HashMap<>();
     
     private Set<Long> getNotNull(long userId) {
         if (!permissions.containsKey(userId)) {

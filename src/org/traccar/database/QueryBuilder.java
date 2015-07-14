@@ -36,7 +36,7 @@ import org.traccar.model.Factory;
 
 public class QueryBuilder {
     
-    private final Map<String, List<Integer>> indexMap = new HashMap<String, List<Integer>>();
+    private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
     private PreparedStatement statement;
     private final String query;
@@ -106,7 +106,7 @@ public class QueryBuilder {
                     // Add to list
                     List<Integer> indexList = paramMap.get(name);
                     if (indexList == null) {
-                        indexList = new LinkedList<Integer>();
+                        indexList = new LinkedList<>();
                         paramMap.put(name, indexList);
                     }
                     indexList.add(index);
@@ -133,7 +133,7 @@ public class QueryBuilder {
         name = name.toLowerCase();
         List<Integer> result = indexMap.get(name);
         if (result == null) {
-            result = new LinkedList<Integer>();
+            result = new LinkedList<>();
         }
         return result;
     }
@@ -298,7 +298,7 @@ public class QueryBuilder {
 
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-                    List<ResultSetProcessor<T>> processors = new LinkedList<ResultSetProcessor<T>>();
+                    List<ResultSetProcessor<T>> processors = new LinkedList<>();
 
                     Method[] methods = prototype.getClass().getMethods();
 

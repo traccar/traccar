@@ -77,7 +77,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
             
             for (int i = 0; i < (header & 0x0f); i++) {
                 
