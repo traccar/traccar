@@ -25,6 +25,7 @@ Ext.Loader.setConfig({
         'es': true,
         'fr': true,
         'pl': true,
+        'pt': true,
         'ru': true,
         'th': true
     };
