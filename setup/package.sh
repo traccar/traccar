@@ -141,7 +141,7 @@ sed -i 's/wrapper.logfile=..\/logs\/wrapper.log/wrapper.logfile=..\/logs\/wrappe
 cp wrapper/bin/wrapper-linux-x86-32 out/bin/wrapper
 cp wrapper/lib/libwrapper-linux-x86-32.so out/lib/libwrapper.so
 
-makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
+makeself out traccar.run "traccar" "if [ $(java -version 2>&1 | sed 's/.*version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q') -lt 17 ]; then echo "Please install Java version 7 or higher"; else mkdir $app; cp -rf * $app; $app/bin/traccar install; fi"
 zip -j traccar-linux-32-$1.zip traccar.run linux/README.txt
 
 # linux 64
@@ -149,7 +149,7 @@ zip -j traccar-linux-32-$1.zip traccar.run linux/README.txt
 cp wrapper/bin/wrapper-linux-x86-64 out/bin/wrapper
 cp wrapper/lib/libwrapper-linux-x86-64.so out/lib/libwrapper.so
 
-makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; $app/bin/traccar install"
+makeself out traccar.run "traccar" "if [ $(java -version 2>&1 | sed 's/.*version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q') -lt 17 ]; then echo "Please install Java version 7 or higher"; else mkdir $app; cp -rf * $app; $app/bin/traccar install; fi"
 zip -j traccar-linux-64-$1.zip traccar.run linux/README.txt
 
 # linux arm
@@ -162,7 +162,7 @@ cp wrapper/bin/wrapper-linux-armhf-32 out/bin/
 cp wrapper/lib/libwrapper-linux-armel-32.so out/lib/
 cp wrapper/lib/libwrapper-linux-armhf-32.so out/lib/
 
-makeself out traccar.run "traccar" "mkdir $app; cp -rf * $app; if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ]; then mv $app/bin/wrapper-linux-armel-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armel-32.so $app/lib/libwrapper.so; else mv $app/bin/wrapper-linux-armhf-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armhf-32.so $app/lib/libwrapper.so; fi; $app/bin/traccar install"
+makeself out traccar.run "traccar" "if [ $(java -version 2>&1 | sed 's/.*version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q') -lt 17 ]; then echo "Please install Java version 7 or higher"; else mkdir $app; cp -rf * $app; if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ]; then mv $app/bin/wrapper-linux-armel-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armel-32.so $app/lib/libwrapper.so; else mv $app/bin/wrapper-linux-armhf-32 $app/bin/wrapper; mv $app/lib/libwrapper-linux-armhf-32.so $app/lib/libwrapper.so; fi; $app/bin/traccar install; fi"
 zip -j traccar-linux-arm-$1.zip traccar.run linux/README.txt
 
 # MACOSX PACKAGE
