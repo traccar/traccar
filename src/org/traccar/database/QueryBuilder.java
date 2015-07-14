@@ -292,9 +292,7 @@ public class QueryBuilder {
         
             try {
 
-                ResultSet resultSet = statement.executeQuery();
-
-                try {
+                try (ResultSet resultSet = statement.executeQuery()) {
 
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
@@ -392,9 +390,6 @@ public class QueryBuilder {
                         }
                         result.add(object);
                     }
-
-                } finally {
-                    resultSet.close();
                 }
 
             } finally {
