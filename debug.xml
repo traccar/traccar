@@ -27,7 +27,7 @@
     <entry key='filter.distance'>50</entry>-->
     
     <!--<entry key='forward.enable'>true</entry>
-    <entry key='forward.url'>http://localhost:5055?id={deviceId}&amp;timestamp={fixTime}&amp;lat={latitude}&amp;lon={longitude}</entry>-->
+    <entry key='forward.url'>http://example.com:8080/gprmc/Data?id={uniqueId}&amp;code=0x0000&amp;gprmc={gprmc}</entry>-->
 
     <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>all</entry>

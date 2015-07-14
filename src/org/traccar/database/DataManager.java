@@ -50,7 +50,8 @@ public class DataManager implements IdentityManager {
     
     private DataSource dataSource;
     
-    private final Map<String, Device> devices = new HashMap<>();
+    private final Map<Long, Device> devicesById = new HashMap<>();
+    private final Map<String, Device> devicesByUniqueId = new HashMap<>();
     private long devicesLastUpdate;
     private final long devicesRefreshDelay;
 
@@ -107,20 +108,27 @@ public class DataManager implements IdentityManager {
             dataSource = ds;
         }
     }
+    
+    @Override
+    public Device getDeviceById(long id) {
+        return devicesById.get(id);
+    }
 
     @Override
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
 
-        if ((new Date().getTime() - devicesLastUpdate > devicesRefreshDelay) || !devices.containsKey(uniqueId)) {
+        if ((new Date().getTime() - devicesLastUpdate > devicesRefreshDelay) || !devicesByUniqueId.containsKey(uniqueId)) {
 
-            devices.clear();
+            devicesById.clear();
+            devicesByUniqueId.clear();
             for (Device device : getAllDevices()) {
-                devices.put(device.getUniqueId(), device);
+                devicesById.put(device.getId(), device);
+                devicesByUniqueId.put(device.getUniqueId(), device);
             }
             devicesLastUpdate = new Date().getTime();
         }
 
-        return devices.get(uniqueId);
+        return devicesByUniqueId.get(uniqueId);
     }
     
     private String getQuery(String key) {

@@ -26,7 +26,6 @@ public class DefaultDataHandler extends BaseDataHandler {
         try {
             Context.getDataManager().addPosition(position);
             Context.getDataManager().updateLatestPosition(position);
-            Context.getConnectionManager().update(position);
         } catch (Exception error) {
             Log.warning(error);
         }
