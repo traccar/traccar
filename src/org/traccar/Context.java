@@ -97,10 +97,7 @@ public class Context {
         dataManager = new DataManager(config);
         identityManager = dataManager;
 
-        connectionManager = new ConnectionManager();
-        if (!config.getBoolean("web.old")) {
-            permissionsManager = new PermissionsManager();
-        }
+        connectionManager = new ConnectionManager(dataManager);
 
         if (config.getBoolean("geocoder.enable")) {
             String type = config.getString("geocoder.type", "google");
@@ -119,22 +116,21 @@ public class Context {
         }
 
         if (config.getBoolean("web.enable")) {
-            webServer = new WebServer(config);
+            if (!config.getBoolean("web.old")) {
+                permissionsManager = new PermissionsManager(dataManager);
+                webServer = new WebServer(config);
+            } else {
+                webServer = new WebServer(config, dataManager.getDataSource());
+            }
         }
 
         serverManager = new ServerManager();
-
-        connectionManager.init(dataManager);
-        serverManager.init();
     }
 
-    /**
-     * Initialize context for unit testing
-     */
-    public static void init(IdentityManager identityManager) {
+    public static void init(IdentityManager testIdentityManager) {
         config = new Config();
-        connectionManager = new ConnectionManager();
-        Context.identityManager = identityManager;
+        connectionManager = new ConnectionManager(null);
+        identityManager = testIdentityManager;
     }
 
 }

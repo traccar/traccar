@@ -31,18 +31,19 @@ import org.traccar.model.Position;
 
 public class ConnectionManager {
 
-    private Map<String, ActiveDevice> activeDevices = new HashMap<>();
+    private final Map<String, ActiveDevice> activeDevices = new HashMap<>();
     private final Map<Long, Position> positions = new HashMap<>();
     private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<>();
     
-    public void init(DataManager dataManager) {
-        try {
-            Collection<Position> positions = dataManager.getLatestPositions();
-            for (Position position : positions) {
-                this.positions.put(position.getDeviceId(), position);
+    public ConnectionManager(DataManager dataManager) {
+        if (dataManager != null) {
+            try {
+                for (Position position : dataManager.getLatestPositions()) {
+                    this.positions.put(position.getDeviceId(), position);
+                }
+            } catch (SQLException error) {
+                Log.warning(error);
             }
-        } catch (SQLException error) {
-            Log.warning(error);
         }
     }
 

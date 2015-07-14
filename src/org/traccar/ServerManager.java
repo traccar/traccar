@@ -33,9 +33,9 @@ public class ServerManager {
 
     private final List<TrackerServer> serverList = new LinkedList<>();
 
-    public void init() throws Exception {
+    public ServerManager() throws Exception {
 
-        List<String> names = new LinkedList<String>();
+        List<String> names = new LinkedList<>();
         String packageName = "org.traccar.protocol";
         String packagePath = packageName.replace('.', '/');
         URL packageUrl = Thread.currentThread().getContextClassLoader().getResource(packagePath);

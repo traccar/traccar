@@ -17,6 +17,7 @@ package org.traccar.http;
 
 import java.net.InetSocketAddress;
 import javax.naming.InitialContext;
+import javax.sql.DataSource;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -25,7 +26,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.traccar.Config;
-import org.traccar.Context;
 import org.traccar.helper.Log;
 
 /**
@@ -34,8 +34,8 @@ import org.traccar.helper.Log;
 public class WebServer {
 
     private Server server;
-
-    public WebServer(Config config) {
+    
+    private void initServer(Config config) {
 
         String address = config.getString("web.address");
         int port = config.getInteger("web.port", 8082);
@@ -44,53 +44,57 @@ public class WebServer {
         } else {
             server = new Server(new InetSocketAddress(address, port));
         }
-
-        if (!config.getBoolean("web.old")) {
-
-            ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-            servletHandler.setContextPath("/api");
-            servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
-            servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
-            servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
-            servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
-            servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
-            servletHandler.addServlet(new ServletHolder(new CommandsServlet()), "/commands/*");
-            servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
-
-            /*ResourceHandler mobileResourceHandler = new ResourceHandler();
-            mobileResourceHandler.setResourceBase(properties.getProperty("web.mobile"));
-            mobileResourceHandler.setWelcomeFiles(new String[] {"index.html"});
-            ContextHandler mobileContext = new ContextHandler("/m");
-            mobileContext.setHandler(mobileResourceHandler);*/
-
-            ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setResourceBase(config.getString("web.path"));
-            if (config.getBoolean("web.debug")) {
-                resourceHandler.setWelcomeFiles(new String[] { "debug.html" });
-            } else {
-                resourceHandler.setWelcomeFiles(new String[] { "release.html" });
-            }
-
-            HandlerList handlerList = new HandlerList();
-            handlerList.setHandlers(new Handler[] {servletHandler, resourceHandler});
-
-            server.setHandler(handlerList);
-
-        } else {
-
-            try {
-                javax.naming.Context context = new InitialContext();
-                context.bind("java:/DefaultDS", Context.getDataManager().getDataSource());
-            } catch (Exception error) {
-                Log.warning(error);
-            }
-
-            WebAppContext webapp = new WebAppContext();
-            webapp.setContextPath("/");
-            webapp.setWar(config.getString("web.application"));
-            server.setHandler(webapp);
-
+    }
+    
+    public WebServer(Config config, DataSource dataSource) {
+        
+        initServer(config);
+        
+        try {
+            javax.naming.Context context = new InitialContext();
+            context.bind("java:/DefaultDS", dataSource);
+        } catch (Exception error) {
+            Log.warning(error);
         }
+
+        WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath("/");
+        webapp.setWar(config.getString("web.application"));
+        server.setHandler(webapp);        
+    }
+
+    public WebServer(Config config) {
+        
+        initServer(config);
+
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletHandler.setContextPath("/api");
+        servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
+        servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
+        servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
+        servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
+        servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
+        servletHandler.addServlet(new ServletHolder(new CommandsServlet()), "/commands/*");
+        servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
+
+        /*ResourceHandler mobileResourceHandler = new ResourceHandler();
+        mobileResourceHandler.setResourceBase(properties.getProperty("web.mobile"));
+        mobileResourceHandler.setWelcomeFiles(new String[] {"index.html"});
+        ContextHandler mobileContext = new ContextHandler("/m");
+        mobileContext.setHandler(mobileResourceHandler);*/
+
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setResourceBase(config.getString("web.path"));
+        if (config.getBoolean("web.debug")) {
+            resourceHandler.setWelcomeFiles(new String[] { "debug.html" });
+        } else {
+            resourceHandler.setWelcomeFiles(new String[] { "release.html" });
+        }
+
+        HandlerList handlerList = new HandlerList();
+        handlerList.setHandlers(new Handler[] {servletHandler, resourceHandler});
+
+        server.setHandler(handlerList);
     }
 
     public void start() {

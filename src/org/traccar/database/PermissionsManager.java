@@ -21,12 +21,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
 
 public class PermissionsManager {
+    
+    private final DataManager dataManager;
     
     private final Map<Long, User> users = new HashMap<>();
     
@@ -39,7 +40,8 @@ public class PermissionsManager {
         return permissions.get(userId);
     }
     
-    public PermissionsManager() {
+    public PermissionsManager(DataManager dataManager) {
+        this.dataManager = dataManager;
         refresh();
     }
     
@@ -47,10 +49,10 @@ public class PermissionsManager {
         users.clear();
         permissions.clear();
         try {
-            for (User user : Context.getDataManager().getUsers()) {
+            for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
             }
-            for (Permission permission : Context.getDataManager().getPermissions()) {
+            for (Permission permission : dataManager.getPermissions()) {
                 getNotNull(permission.getUserId()).add(permission.getDeviceId());
             }
         } catch (SQLException error) {
