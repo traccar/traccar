@@ -75,6 +75,7 @@ Ext.define('Traccar.view.state.StateController', {
 
     updatePosition: function(position) {
 
+        var other;
         var store = Ext.getStore('Parameters');
         store.removeAll();
 
@@ -89,7 +90,11 @@ Ext.define('Traccar.view.state.StateController', {
         }
 
         var xml = position.get('other');
-        var other = this.parseXml(xml);
+        if (typeof xml === 'string' || xml instanceof String) {
+            other = this.parseXml(xml);
+        } else {
+            other = xml;
+        }
         for (var key in other) {
             if (other.hasOwnProperty(key)) {
                 store.add(Ext.create('Traccar.model.Parameter', {

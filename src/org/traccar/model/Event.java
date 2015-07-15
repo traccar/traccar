@@ -41,15 +41,14 @@ public abstract class Event {
     public Date getDeviceTime() { return deviceTime; }
     public void setDeviceTime(Date deviceTime) { this.deviceTime = deviceTime; }
 
-    private final Map<String, Object> other = new LinkedHashMap<>();
+    private Map<String, Object> other = new LinkedHashMap<>();
     public void set(String key, Object value) {
         if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
             other.put(key, value);
         }
     }
-    public String getOther() {
-        return MiscFormatter.toXmlString(other);
-    }
+    public void setOther(Map<String, Object> other) { this.other = other; }
+    public Map<String, Object> getOther() { return other; }
 
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";

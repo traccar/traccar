@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -31,8 +32,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import javax.json.Json;
+import javax.json.JsonReader;
 import javax.sql.DataSource;
 import org.traccar.model.Factory;
+import org.traccar.model.MiscFormatter;
 
 public class QueryBuilder {
     
@@ -224,23 +228,6 @@ public class QueryBuilder {
         return this;
     }
     
-    public QueryBuilder setBytes(String name, byte[] value) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                if (value == null) {
-                    statement.setNull(i, Types.VARCHAR);
-                } else {
-                    statement.setBytes(i, value);
-                }
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
-            }
-        }
-        return this;
-    }
-    
     public QueryBuilder setObject(Object object) throws SQLException {
         
         Method[] methods = object.getClass().getMethods();
@@ -261,8 +248,8 @@ public class QueryBuilder {
                         setString(name, (String) method.invoke(object));
                     } else if (method.getReturnType().equals(Date.class)) {
                         setDate(name, (Date) method.invoke(object));
-                    } else if (method.getReturnType().equals(byte[].class)) {
-                        setBytes(name, (byte[]) method.invoke(object));
+                    } else if (method.getReturnType().equals(Map.class)) {
+                        setString(name, MiscFormatter.toJsonString((Map) method.invoke(object)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
                 }
@@ -375,6 +362,16 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
                                             method.invoke(object, new Date(resultSet.getTimestamp(name).getTime()));
+                                        } catch (IllegalAccessException | InvocationTargetException error) {
+                                        }
+                                    }
+                                });
+                            } else if (parameterType.equals(Map.class)) {
+                                processors.add(new ResultSetProcessor<T>() {
+                                    @Override
+                                    public void process(T object, ResultSet resultSet) throws SQLException {
+                                        try (JsonReader reader = Json.createReader(new StringReader(resultSet.getString(name)))) {
+                                            method.invoke(object, MiscFormatter.fromJson(reader.readObject()));
                                         } catch (IllegalAccessException | InvocationTargetException error) {
                                         }
                                     }

@@ -37,6 +37,7 @@ import org.traccar.helper.Log;
 import org.traccar.http.AsyncServlet;
 import org.traccar.http.JsonConverter;
 import org.traccar.model.Device;
+import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -306,18 +307,17 @@ public class DataManager implements IdentityManager {
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
                 .setLong("power", 0) // tmp
-                .setString("extended_info", position.getOther()) // tmp
+                .setString("extended_info", MiscFormatter.toXmlString(position.getOther())) // tmp
                 .executeUpdate());
     }
 
-    // TODO: possibly remove this method
     public void updateLatestPosition(Position position) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setObject(position)
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
                 .setLong("power", 0) // tmp
-                .setString("extended_info", position.getOther()) // tmp
+                .setString("extended_info", MiscFormatter.toXmlString(position.getOther())) // tmp
                 .executeUpdate();
     }
 

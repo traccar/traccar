@@ -15,13 +15,16 @@
  */
 package org.traccar.model;
 
-import org.traccar.helper.Log;
-
+import java.text.DecimalFormat;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.json.Json;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.text.DecimalFormat;
-import java.util.Map;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import org.traccar.helper.Log;
 
 /**
  * Format extended tracker status
@@ -79,7 +82,36 @@ public class MiscFormatter {
         return json.build();
     }
     
-    private static String toJsonString(Map<String, Object> other) {
+    public static Map<String, Object> fromJson(JsonObject json) {
+        
+        Map<String, Object> other = new LinkedHashMap<>();
+        
+        for (Map.Entry<String, JsonValue> entry : json.entrySet()) {
+            switch (entry.getValue().getValueType()) {
+                case STRING:
+                    other.put(entry.getKey(), ((JsonString) entry.getValue()).getString());
+                    break;
+                case NUMBER:
+                    JsonNumber number = (JsonNumber) entry.getValue();
+                    if (number.isIntegral()) {
+                        other.put(entry.getKey(), number.longValue());
+                    } else {
+                        other.put(entry.getKey(), number.doubleValue());
+                    }
+                    break;
+                case TRUE:
+                    other.put(entry.getKey(), true);
+                    break;
+                case FALSE:
+                    other.put(entry.getKey(), false);
+                    break;
+            }
+        }
+        
+        return other;
+    }
+    
+    public static String toJsonString(Map<String, Object> other) {
         return toJson(other).toString();
     }
 

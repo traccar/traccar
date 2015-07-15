@@ -32,6 +32,6 @@ Ext.define('Traccar.model.Position', {
         { name: 'speed', type: 'float' },
         { name: 'course', type: 'float' },
         { name: 'address', type: 'string' },
-        { name: 'other', type: 'string' }
+        { name: 'other' }
     ]
 });

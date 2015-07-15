@@ -41,6 +41,7 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
     <entry key='database.mock'>true</entry>
+    <entry key='database.xml'>false</entry>
 
     <entry key='database.checkTable'>traccar</entry>
 

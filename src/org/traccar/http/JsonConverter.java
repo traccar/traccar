@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -31,6 +32,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import org.traccar.model.Factory;
+import org.traccar.model.MiscFormatter;
 
 public class JsonConverter {
 
@@ -83,6 +85,8 @@ public class JsonConverter {
                         method.invoke(object, dateFormat.parse(json.getString(name)));
                     } else if (parameterType.isEnum()) {
                         method.invoke(object, Enum.valueOf((Class<? extends Enum>) parameterType, json.getString(name)));
+                    } else if (parameterType.equals(Map.class)) {
+                        //method.invoke(object, json.getString(name));
                     } else {
                         Object nestedObject = parameterType.newInstance();
                         populateObject(json.getJsonObject(name), nestedObject);
@@ -126,6 +130,8 @@ public class JsonConverter {
                         if (value != null) {
                             json.add(name, dateFormat.format(value));
                         }
+                    } else if (method.getReturnType().equals(Map.class)) {
+                        json.add(name, MiscFormatter.toJson((Map) method.invoke(object)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
                 }
