@@ -211,6 +211,11 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(8);
         }
 
+        // Cell info
+        if ((selector & 0x80000) != 0) {
+            buf.skipBytes(11);
+        }
+
         // Event specific data
         if ((selector & 0x1000) != 0) {
             switch (event) {

@@ -3,6 +3,8 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
+
+import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
 public class AplicomProtocolDecoderTest extends ProtocolDecoderTest {
@@ -11,7 +13,10 @@ public class AplicomProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         AplicomProtocolDecoder decoder = new AplicomProtocolDecoder(new AplicomProtocol());
-        
+
+        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "44c3014645e8e9bada003e03fff7070055a4f24200000081000000000000000000000000000000000000000000000000000000000000000000000000000000ff00000001000000000000000044c3014645e8e9bada003e03fff77bff55a4f24300000081000000000000000000000000000000000000000000000000000000000000000000000000000000ff00300002000000000000000044c3014645e8e9bada003e03fff7690655a4f24500000081000000000000000000000000000000000000000000000000000000000000000000000000000000ff003000030000000000000000"))));
+
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "44c3014645e8e9d29a002d0022ff6d00f455893b4d55893b4c027a7e1500189d710800009e0000000000000000000000023300000000000000009d"))));
         
