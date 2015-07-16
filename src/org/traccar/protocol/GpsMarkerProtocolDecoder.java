@@ -32,12 +32,10 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    //                         DDMMYYHHMM    GGMMmmmm  GGGMMmmmm
-    //$GM 1   350123456789012 T1005111233   N55516789 E037561234 000 000 3 52 00298
-    //$GM 203 863071014445404 T150715202258 N55481576 E037292753 000 000 4 05 30301
     private static final Pattern pattern = Pattern.compile(
             "\\$GM" +
-            "\\d+" +                            // Type
+            "\\d" +                             // Type
+            "(?:\\p{XDigit}{2})?" +             // Index
             "(\\d{15})" +                       // IMEI
             "T(\\d{2})(\\d{2})(\\d{2})" +       // Date
             "(\\d{2})(\\d{2})(\\d{2})?" +       // Time
