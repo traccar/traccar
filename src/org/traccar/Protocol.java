@@ -1,15 +1,15 @@
 package org.traccar;
 
-import org.traccar.database.ActiveDevice;
-import org.traccar.command.GpsCommand;
-
 import java.util.List;
+import org.traccar.database.ActiveDevice;
+import org.traccar.model.Command;
 
 public interface Protocol {
 
     public String getName();
 
-    void sendCommand(ActiveDevice activeDevice, GpsCommand command);
+    void sendCommand(ActiveDevice activeDevice, Command command);
 
     void initTrackerServers(List<TrackerServer> serverList);
+
 }

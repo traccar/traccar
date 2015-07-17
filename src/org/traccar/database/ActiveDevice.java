@@ -17,19 +17,19 @@ package org.traccar.database;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
-import org.traccar.command.GpsCommand;
+import org.traccar.model.Command;
 
 import java.net.SocketAddress;
 
 public class ActiveDevice {
 
-    private String uniqueId;
+    private long deviceId;
     private Protocol protocol;
     private Channel channel;
     private SocketAddress remoteAddress;
 
-    public ActiveDevice(String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        this.uniqueId = uniqueId;
+    public ActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+        this.deviceId = deviceId;
         this.protocol = protocol;
         this.channel = channel;
         this.remoteAddress = remoteAddress;
@@ -39,11 +39,11 @@ public class ActiveDevice {
         return channel;
     }
 
-    public String getUniqueId() {
-        return uniqueId;
+    public long getDeviceId() {
+        return deviceId;
     }
 
-    public void sendCommand(GpsCommand command) {
+    public void sendCommand(Command command) {
         protocol.sendCommand(this, command);
     }
 

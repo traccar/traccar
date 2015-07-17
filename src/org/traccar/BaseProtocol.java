@@ -15,42 +15,36 @@
  */
 package org.traccar;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.traccar.database.ActiveDevice;
-import org.traccar.command.CommandType;
-import org.traccar.command.CommandTemplate;
-import org.traccar.command.GpsCommand;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.traccar.model.Command;
 
 public abstract class BaseProtocol implements Protocol {
 
     private final String name;
-    private Map<CommandType, CommandTemplate> commandTemplates = new HashMap<>();
+    private final Set<String> supportedCommands = new HashSet<>();
 
     public BaseProtocol(String name) {
         this.name = name;
-        this.initCommandsTemplates(commandTemplates);
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
-    @Override
-    public void sendCommand(ActiveDevice activeDevice, GpsCommand command) {
-        CommandTemplate commandMessage = commandTemplates.get(command.getType());
-
-        if (commandMessage == null) {
-            throw new RuntimeException("The command " + command + " is not yet supported in protocol " + this.getName());
-        }
-
-        Object response = commandMessage.applyTo(activeDevice, command);
-
-        activeDevice.write(response);
+    public void setSupportedCommands(String... commands) {
+        supportedCommands.addAll(Arrays.asList(commands));
     }
 
-    protected void initCommandsTemplates(Map<CommandType, CommandTemplate> templates) {
+    @Override
+    public void sendCommand(ActiveDevice activeDevice, Command command) {
+        if (!supportedCommands.contains(command.getType())) {
+            throw new RuntimeException("Command " + command + " is not supported in protocol " + getName());
+        }
+        activeDevice.write(command);
     }
 
 }

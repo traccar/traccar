@@ -20,9 +20,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 
-/**
- * Base class for protocol decoders
- */
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private final Protocol protocol;
@@ -46,7 +43,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
             if (device != null) {
                 deviceId = device.getId();
-                Context.getConnectionManager().setActiveDevice(device.getUniqueId(), protocol, channel, remoteAddress);
+                Context.getConnectionManager().setActiveDevice(deviceId, protocol, channel, remoteAddress);
                 return true;
             } else {
                 deviceId = 0;

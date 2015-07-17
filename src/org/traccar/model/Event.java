@@ -42,13 +42,14 @@ public abstract class Event {
     public void setDeviceTime(Date deviceTime) { this.deviceTime = deviceTime; }
 
     private Map<String, Object> other = new LinkedHashMap<>();
+    public Map<String, Object> getOther() { return other; }
+    public void setOther(Map<String, Object> other) { this.other = other; }
+
     public void set(String key, Object value) {
         if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
             other.put(key, value);
         }
     }
-    public void setOther(Map<String, Object> other) { this.other = other; }
-    public Map<String, Object> getOther() { return other; }
 
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";

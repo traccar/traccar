@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import java.util.List;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -23,35 +24,17 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
-import org.traccar.command.CommandType;
-import org.traccar.command.Duration;
-import org.traccar.command.FixPositioningCommand;
-import org.traccar.command.GpsCommand;
-import org.traccar.command.CommandTemplate;
-import org.traccar.command.CommandValueConversion;
-import org.traccar.command.StringCommandTemplate;
-
-import java.util.List;
-import java.util.Map;
+import org.traccar.model.Command;
 
 public class Gps103Protocol extends BaseProtocol {
 
     public Gps103Protocol() {
         super("gps103");
-    }
-
-    @Override
-    protected void initCommandsTemplates(Map<CommandType, CommandTemplate> templates) {
-        templates.put(CommandType.STOP_POSITIONING, new StringCommandTemplate("**,imei:[%s],A", GpsCommand.UNIQUE_ID));
-        templates.put(CommandType.FIX_POSITIONING, new StringCommandTemplate("**,imei:[%s],C,[%s]", GpsCommand.UNIQUE_ID, FixPositioningCommand.FREQUENCY)
-                .addConverter(Duration.class, new CommandValueConversion<Duration>() {
-                    @Override
-                    public String convert(Duration value) {
-                        return String.format("%02d%s", value.getValue(), value.getUnit().getCommandFormat());
-                    }
-                }));
-        templates.put(CommandType.RESUME_ENGINE, new StringCommandTemplate("**,imei:[%s],J", GpsCommand.UNIQUE_ID));
-        templates.put(CommandType.STOP_ENGINE, new StringCommandTemplate("**,imei:[%s],K", GpsCommand.UNIQUE_ID));
+        setSupportedCommands(
+                Command.TYPE_POSITION_STOP,
+                Command.TYPE_POSITION_FIX,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
@@ -63,6 +46,7 @@ public class Gps103Protocol extends BaseProtocol {
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
+                pipeline.addLast("objectEncoder", new Gps103ProtocolEncoder());
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
@@ -71,6 +55,7 @@ public class Gps103Protocol extends BaseProtocol {
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
+                pipeline.addLast("objectEncoder", new Gps103ProtocolEncoder());
             }
         });
     }
