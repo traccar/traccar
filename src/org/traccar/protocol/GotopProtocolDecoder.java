@@ -45,7 +45,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             "LOT:(\\d+.\\d+)([EW])," +          // Longitude
             "Speed:(\\d+.\\d+)," +              // Speed
             "([^,]+)," +                        // Status
-            "(\\d+)?" +                         // Course
+            "(\\d+)," +                         // Course
             ".*");
 
     @Override
