@@ -35,7 +35,7 @@ public abstract class BaseProtocol implements Protocol {
         return name;
     }
 
-    public void setSupportedCommands(String[] commands) {
+    public void setSupportedCommands(String... commands) {
         supportedCommands.addAll(Arrays.asList(commands));
     }
 
