@@ -23,7 +23,6 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
-import org.traccar.command.*;
 
 import java.util.List;
 import java.util.Map;

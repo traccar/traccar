@@ -23,9 +23,6 @@ import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 import org.traccar.database.ActiveDevice;
 import org.traccar.helper.Crc;
-import org.traccar.command.CommandType;
-import org.traccar.command.NoParameterCommand;
-import org.traccar.command.CommandTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -36,11 +33,11 @@ public class Gt06Protocol extends BaseProtocol {
         super("gt06");
     }
 
-    @Override
+    /*@Override
     protected void initCommandsTemplates(Map<CommandType, CommandTemplate> templates) {
         templates.put(CommandType.STOP_ENGINE, new Gt06CommandTemplate("DYD#"));
         templates.put(CommandType.RESUME_ENGINE, new Gt06CommandTemplate("HFYD#"));
-    }
+    }*/
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
@@ -53,7 +50,7 @@ public class Gt06Protocol extends BaseProtocol {
         });
     }
 
-    class Gt06CommandTemplate implements CommandTemplate<NoParameterCommand> {
+    /*class Gt06CommandTemplate implements CommandTemplate<NoParameterCommand> {
 
         private String commandContent;
 
@@ -65,7 +62,7 @@ public class Gt06Protocol extends BaseProtocol {
         public Object applyTo(ActiveDevice activeDevice, NoParameterCommand command) {
             int serverFlagBit = 0x0;
             int commandLength = serverFlagBit + commandContent.length();
-            int packetLength =  0x80 /*Protocol Number */ + commandContent.length() /* Information Content */ + 2 /*Information Serial Number */+  2 /*Error Check */;
+            int packetLength =  0x80 /*Protocol Number  + commandContent.length() /* Information Content  + 2 /*Information Serial Number +  2 /*Error Check ;
 
             int informationSerialNumber = 1;
 
@@ -90,6 +87,6 @@ public class Gt06Protocol extends BaseProtocol {
 
             return response;
         }
-    }
+    }*/
 
 }

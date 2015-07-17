@@ -46,7 +46,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
             if (device != null) {
                 deviceId = device.getId();
-                Context.getConnectionManager().setActiveDevice(device.getUniqueId(), protocol, channel, remoteAddress);
+                Context.getConnectionManager().setActiveDevice(deviceId, protocol, channel, remoteAddress);
                 return true;
             } else {
                 deviceId = 0;

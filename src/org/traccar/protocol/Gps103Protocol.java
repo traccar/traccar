@@ -23,16 +23,8 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
-import org.traccar.command.CommandType;
-import org.traccar.command.Duration;
-import org.traccar.command.FixPositioningCommand;
-import org.traccar.command.GpsCommand;
-import org.traccar.command.CommandTemplate;
-import org.traccar.command.CommandValueConversion;
-import org.traccar.command.StringCommandTemplate;
 
 import java.util.List;
-import java.util.Map;
 
 public class Gps103Protocol extends BaseProtocol {
 
@@ -40,19 +32,19 @@ public class Gps103Protocol extends BaseProtocol {
         super("gps103");
     }
 
-    @Override
+    /*@Override
     protected void initCommandsTemplates(Map<CommandType, CommandTemplate> templates) {
-        templates.put(CommandType.STOP_POSITIONING, new StringCommandTemplate("**,imei:[%s],A", GpsCommand.UNIQUE_ID));
-        templates.put(CommandType.FIX_POSITIONING, new StringCommandTemplate("**,imei:[%s],C,[%s]", GpsCommand.UNIQUE_ID, FixPositioningCommand.FREQUENCY)
+        templates.put(CommandType.STOP_POSITIONING, new StringCommandTemplate("**,imei:[%s],A", Command.UNIQUE_ID));
+        templates.put(CommandType.FIX_POSITIONING, new StringCommandTemplate("**,imei:[%s],C,[%s]", Command.UNIQUE_ID, FixPositioningCommand.FREQUENCY)
                 .addConverter(Duration.class, new CommandValueConversion<Duration>() {
                     @Override
                     public String convert(Duration value) {
                         return String.format("%02d%s", value.getValue(), value.getUnit().getCommandFormat());
                     }
                 }));
-        templates.put(CommandType.RESUME_ENGINE, new StringCommandTemplate("**,imei:[%s],J", GpsCommand.UNIQUE_ID));
-        templates.put(CommandType.STOP_ENGINE, new StringCommandTemplate("**,imei:[%s],K", GpsCommand.UNIQUE_ID));
-    }
+        templates.put(CommandType.RESUME_ENGINE, new StringCommandTemplate("**,imei:[%s],J", Command.UNIQUE_ID));
+        templates.put(CommandType.STOP_ENGINE, new StringCommandTemplate("**,imei:[%s],K", Command.UNIQUE_ID));
+    }*/
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {

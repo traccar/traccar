@@ -31,7 +31,7 @@ import org.traccar.model.Position;
 
 public class ConnectionManager {
 
-    private final Map<String, ActiveDevice> activeDevices = new HashMap<>();
+    private final Map<Long, ActiveDevice> activeDevices = new HashMap<>();
     private final Map<Long, Position> positions = new HashMap<>();
     private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<>();
     
@@ -47,12 +47,12 @@ public class ConnectionManager {
         }
     }
 
-    public void setActiveDevice(String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        activeDevices.put(uniqueId, new ActiveDevice(uniqueId, protocol, channel, remoteAddress));
+    public void setActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+        activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
     }
 
-    public ActiveDevice getActiveDevice(String uniqueId) {
-        return activeDevices.get(uniqueId);
+    public ActiveDevice getActiveDevice(long deviceId) {
+        return activeDevices.get(deviceId);
     }
 
     public synchronized void update(Position position) {
