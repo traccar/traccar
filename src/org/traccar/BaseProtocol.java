@@ -42,7 +42,7 @@ public abstract class BaseProtocol implements Protocol {
     @Override
     public void sendCommand(ActiveDevice activeDevice, Command command) {
         if (!supportedCommands.contains(command.getType())) {
-            throw new RuntimeException("Command " + command + " is not supported in protocol " + this.getName());
+            throw new RuntimeException("Command " + command + " is not supported in protocol " + getName());
         }
         activeDevice.write(command);
     }

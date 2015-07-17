@@ -21,42 +21,43 @@ import org.traccar.model.Command;
 
 public class Gps103ProtocolEncoder extends BaseProtocolEncoder {
 
-    /*@Override
-    protected void initCommandsTemplates(Map<CommandType, CommandTemplate> templates) {
-        templates.put(CommandType.FIX_POSITIONING, new StringCommandTemplate("**,imei:[%s],C,[%s]", Command.UNIQUE_ID, FixPositioningCommand.FREQUENCY)
-                .addConverter(Duration.class, new CommandValueConversion<Duration>() {
-                    @Override
-                    public String convert(Duration value) {
-                        return String.format("%02d%s", value.getValue(), value.getUnit().getCommandFormat());
-                    }
-                }));
-    }*/
-
-    private String formatCommand(String format, Command command) {
+    private String formatCommand(Command command, String format, String... keys) {
         
-        String result = format;
+        String result = String.format(format, (Object[]) keys);
         
-        result = result.replaceAll("\\{uniqueId}", getUniqueId(command.getDeviceId()));
+        result = result.replaceAll("\\{" + Command.KEY_UNIQUE_ID + "}", getUniqueId(command.getDeviceId()));
         for (Map.Entry<String, Object> entry : command.getOther().entrySet()) {
-            result = result.replaceAll("\\{" + entry.getKey() + "}", entry.getValue().toString());
+            String value;
+            if (entry.getKey().equals(Command.KEY_FREQUENCY)) {
+                long frequency = (Long) entry.getValue();
+                if (frequency / 60 / 60 > 0) {
+                    value = String.format("%02dh", frequency / 60 / 60);
+                } else if (frequency / 60 > 0) {
+                    value = String.format("%02dm", frequency / 60);
+                } else {
+                    value = String.format("%02ds", frequency);
+                }
+            } else {
+                value = entry.getValue().toString();
+            }
+            result = result.replaceAll("\\{" + entry.getKey() + "}", value);
         }
         
         return result;
     }
-    
     
     @Override
     protected Object encodeCommand(Command command) {
         
         switch (command.getType()) {
             case Command.TYPE_POSITION_STOP:
-                return formatCommand("**,imei:{uniqueId},A", command);
+                return formatCommand(command, "**,imei:{%s},A", Command.KEY_UNIQUE_ID);
             case Command.TYPE_POSITION_FIX:
-                return formatCommand("**,imei:{uniqueId},C,{time}", command); // TODO
+                return formatCommand(command, "**,imei:{%s},C,{%s}", Command.KEY_UNIQUE_ID, Command.KEY_FREQUENCY);
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand("**,imei:{uniqueId},K", command);
+                return formatCommand(command, "**,imei:{%s},K", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand("**,imei:{uniqueId},J", command);
+                return formatCommand(command, "**,imei:{%s},J", Command.KEY_UNIQUE_ID);
         }
         
         return null;
