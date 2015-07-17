@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonReader;
+import javax.json.stream.JsonParsingException;
 import javax.sql.DataSource;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
@@ -273,7 +274,7 @@ public class QueryBuilder {
     }
     
     public <T extends Factory> Collection<T> executeQuery(T prototype) throws SQLException {
-        List<T> result = new LinkedList<T>();
+        List<T> result = new LinkedList<>();
         
         if (query != null) {
         
@@ -372,7 +373,7 @@ public class QueryBuilder {
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try (JsonReader reader = Json.createReader(new StringReader(resultSet.getString(name)))) {
                                             method.invoke(object, MiscFormatter.fromJson(reader.readObject()));
-                                        } catch (IllegalAccessException | InvocationTargetException error) {
+                                        } catch (IllegalAccessException | InvocationTargetException | JsonParsingException error) {
                                         }
                                     }
                                 });
