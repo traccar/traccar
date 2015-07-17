@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.http;
+package org.traccar.web;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
-import org.traccar.model.Server;
 
-public class ServerServlet extends BaseServlet {
+public class PositionServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -29,9 +28,6 @@ public class ServerServlet extends BaseServlet {
             case "/get":
                 get(req, resp);
                 break;
-            case "/update":
-                update(req, resp);
-                break;
             default:
                 return false;
         }
@@ -39,15 +35,13 @@ public class ServerServlet extends BaseServlet {
     }
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        sendResponse(resp.getWriter(), JsonConverter.objectToJson(
-                    Context.getDataManager().getServer()));
-    }
-    
-    private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Server server = JsonConverter.objectFromJson(req.getReader(), new Server());
-        Context.getPermissionsManager().checkAdmin(getUserId(req));
-        Context.getDataManager().updateServer(server);
-        sendResponse(resp.getWriter(), true);
+        long deviceId = Long.valueOf(req.getParameter("deviceId"));
+        Context.getPermissionsManager().checkDevice(getUserId(req), deviceId);
+        sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
+                    Context.getDataManager().getPositions(
+                            getUserId(req), deviceId,
+                            JsonConverter.parseDate(req.getParameter("from")),
+                            JsonConverter.parseDate(req.getParameter("to")))));
     }
 
 }

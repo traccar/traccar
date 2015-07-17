@@ -16,7 +16,7 @@
 package org.traccar.model;
 
 import org.traccar.helper.Hashing;
-import org.traccar.http.JsonIgnore;
+import org.traccar.web.JsonIgnore;
 
 public class User implements Factory {
 

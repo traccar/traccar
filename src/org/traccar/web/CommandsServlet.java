@@ -1,4 +1,4 @@
-package org.traccar.http;
+package org.traccar.web;
 
 import javax.json.Json;
 import javax.json.JsonObject;

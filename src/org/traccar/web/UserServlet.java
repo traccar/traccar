@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.http;
+package org.traccar.web;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
-import org.traccar.model.Device;
+import org.traccar.model.User;
 
-public class DeviceServlet extends BaseServlet {
+public class UserServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -41,33 +41,39 @@ public class DeviceServlet extends BaseServlet {
             default:
                 return false;
         }
-        return true;
+        return true;        
     }
     
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        Context.getPermissionsManager().checkAdmin(getUserId(req));
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
-                    Context.getDataManager().getDevices(getUserId(req))));
+                    Context.getDataManager().getUsers()));
     }
     
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
-        Context.getDataManager().addDevice(device);
-        Context.getDataManager().linkDevice(getUserId(req), device.getId());
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        Context.getDataManager().addUser(user);
         Context.getPermissionsManager().refresh();
-        sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
+        sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
     }
     
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
-        Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
-        Context.getDataManager().updateDevice(device);
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        if (user.getAdmin()) {
+            Context.getPermissionsManager().checkAdmin(getUserId(req));
+        } else {
+            Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        }
+        Context.getDataManager().updateUser(user);
+        Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), true);
     }
     
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
-        Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
-        Context.getDataManager().removeDevice(device);
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        Context.getDataManager().removeUser(user);
         Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), true);
     }

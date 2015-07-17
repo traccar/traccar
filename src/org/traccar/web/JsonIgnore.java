@@ -1,4 +1,4 @@
-package org.traccar.http;
+package org.traccar.web;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

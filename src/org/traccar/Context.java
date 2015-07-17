@@ -24,7 +24,7 @@ import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
-import org.traccar.http.WebServer;
+import org.traccar.web.WebServer;
 
 public class Context {
     

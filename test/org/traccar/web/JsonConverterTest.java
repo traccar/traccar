@@ -1,7 +1,6 @@
-package org.traccar.http;
+package org.traccar.web;
 
 import org.junit.Test;
-import org.traccar.http.JsonConverter;
 import org.traccar.model.Factory;
 
 import java.io.Reader;

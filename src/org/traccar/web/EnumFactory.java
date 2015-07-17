@@ -1,4 +1,4 @@
-package org.traccar.http;
+package org.traccar.web;
 
 import org.traccar.model.Factory;
 
