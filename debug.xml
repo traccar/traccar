@@ -267,6 +267,7 @@
     <entry key='m2m.port'>5054</entry>
     <entry key='osmand.port'>5055</entry>
     <entry key='easytrack.port'>5056</entry>
+    <entry key='gpsmarker.port'>5057</entry>
     <entry key='khd.port'>5058</entry>
     <entry key='piligrim.port'>5059</entry>
     <entry key='stl060.port'>5060</entry>
