@@ -20,9 +20,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 
-/**
- * Base class for protocol decoders
- */
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private final Protocol protocol;

@@ -1,9 +1,8 @@
 package org.traccar;
 
-import org.traccar.model.Command;
-import org.traccar.database.ActiveDevice;
-
 import java.util.List;
+import org.traccar.database.ActiveDevice;
+import org.traccar.model.Command;
 
 public interface Protocol {
 
@@ -12,4 +11,5 @@ public interface Protocol {
     void sendCommand(ActiveDevice activeDevice, Command command);
 
     void initTrackerServers(List<TrackerServer> serverList);
+
 }

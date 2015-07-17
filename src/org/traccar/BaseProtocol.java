@@ -15,10 +15,11 @@
  */
 package org.traccar;
 
-import org.traccar.model.Command;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.traccar.database.ActiveDevice;
-
-import java.util.*;
+import org.traccar.model.Command;
 
 public abstract class BaseProtocol implements Protocol {
 
@@ -29,6 +30,7 @@ public abstract class BaseProtocol implements Protocol {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -39,15 +41,10 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public void sendCommand(ActiveDevice activeDevice, Command command) {
-        /*CommandTemplate commandMessage = commandTemplates.get(command.getType());
-
-        if (commandMessage == null) {
-            throw new RuntimeException("The command " + command + " is not yet supported in protocol " + this.getName());
+        if (!supportedCommands.contains(command.getType())) {
+            throw new RuntimeException("Command " + command + " is not supported in protocol " + this.getName());
         }
-
-        Object response = commandMessage.applyTo(activeDevice, command);
-
-        activeDevice.write(response);*/
+        activeDevice.write(command);
     }
 
 }
