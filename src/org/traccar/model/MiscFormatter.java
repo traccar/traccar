@@ -24,7 +24,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
-import org.traccar.helper.Log;
 
 /**
  * Format extended tracker status
@@ -33,7 +32,7 @@ public class MiscFormatter {
 
     private static final String xmlRootNode = "info";
 
-    private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     private static String format(Object value) {
         if (value instanceof Double || value instanceof Float) {
@@ -74,8 +73,6 @@ public class MiscFormatter {
                 json.add(entry.getKey(), (Double) entry.getValue());
             } else if (entry.getValue() instanceof Boolean) {
                 json.add(entry.getKey(), (Boolean) entry.getValue());
-            } else {
-                Log.warning("Unknown type of data");
             }
         }
 

@@ -30,6 +30,7 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 import javax.json.JsonValue;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
@@ -43,7 +44,9 @@ public class JsonConverter {
     }
 
     public static <T extends Factory> T objectFromJson(Reader reader, T prototype) throws ParseException {
-        return objectFromJson(Json.createReader(reader).readObject(), prototype);
+        try (JsonReader jsonReader = Json.createReader(reader)) {
+            return objectFromJson(jsonReader.readObject(), prototype);
+        }
     }
 
     public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) throws ParseException {
@@ -72,10 +75,8 @@ public class JsonConverter {
                         method.invoke(object, json.getString(name));
                     } else if (parameterType.equals(Date.class)) {
                         method.invoke(object, dateFormat.parse(json.getString(name)));
-                    } else if (parameterType.isEnum()) {
-                        method.invoke(object, Enum.valueOf((Class<? extends Enum>) parameterType, json.getString(name)));
                     } else if (parameterType.equals(Map.class)) {
-                        // TODO: method.invoke(object, json.getString(name));
+                        method.invoke(object, MiscFormatter.fromJson(json.getJsonObject(name)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
                 }
