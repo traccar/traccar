@@ -41,7 +41,7 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
             ctx.sendUpstream(evt);
         } else if (decodedMessage != null) {
             if (decodedMessage instanceof Collection) {
-                for (Object o : (Collection) e.getMessage()) {
+                for (Object o : (Collection) decodedMessage) {
                     fireMessageReceived(ctx, o, e.getRemoteAddress());
                 }
             } else {
