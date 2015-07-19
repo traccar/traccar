@@ -1,9 +1,8 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
-import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class SuntechProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -43,6 +42,9 @@ public class SuntechProtocolDecoderTest extends ProtocolDecoderTest {
 
         verify(decoder.decode(null, null,
                 "ST300STT;205027329;03;374;20150108;17:54:42;177b38;-23.566052;-046.477588;000.000;000.00;0;0;0;12.11;000000;1;0312"));
+        
+        verify(decoder.decode(null, null,
+                "ST910;Emergency;205283272;500;20150716;19:12:01;-23.659019;-046.695403;000.602;000.00;0;4.2;1;1;02;10820;2fdb090736;724;05;0;2311;255;0;100"));
 
     }
 

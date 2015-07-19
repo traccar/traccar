@@ -20,10 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -35,7 +32,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "S.\\d{3}(?:\\w{3})?;" +       // Header
             "(?:[^;]+;)?" +
             "(\\d{6,});" +                 // Device ID
@@ -44,10 +41,12 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{4})(\\d{2})(\\d{2});" +  // Date (YYYYMMDD)
             "(\\d{2}):(\\d{2}):(\\d{2});" + // Time (HH:MM:SS)
             "(?:(\\p{XDigit}+);)?" +       // Cell
-            "([-\\+]\\d{2}.\\d+);" +       // Latitude
-            "([-\\+]\\d{3}.\\d+);" +       // Longitude
-            "(\\d{3}.\\d{3});" +           // Speed
-            "(\\d{3}.\\d{2});" +           // Course
+            "([-\\+]\\d{2}\\.\\d+);" +     // Latitude
+            "([-\\+]\\d{3}\\.\\d+);" +     // Longitude
+            "(\\d{3}\\.\\d{3});" +         // Speed
+            "(\\d{3}\\.\\d{2});" +         // Course
+            "(?:\\d+;)?" +
+            "(\\d+\\.\\d+)?" +             // Battery
             ".*");                         // Full format
 
     @Override
@@ -101,6 +100,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
+        
+        // Battery
+        position.set(Event.KEY_BATTERY, parser.group(index++));
 
         return position;
     }
