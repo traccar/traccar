@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,6 +215,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     // GSM signal
                     position.set(Event.KEY_GSM, buf.readUnsignedByte());
                 }
+            }
+            
+            if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
+                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
             // Index
