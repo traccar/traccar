@@ -36,6 +36,8 @@ import javax.json.Json;
 import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 import javax.sql.DataSource;
+
+import org.traccar.Context;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
@@ -250,7 +252,11 @@ public class QueryBuilder {
                     } else if (method.getReturnType().equals(Date.class)) {
                         setDate(name, (Date) method.invoke(object));
                     } else if (method.getReturnType().equals(Map.class)) {
-                        setString(name, MiscFormatter.toJsonString((Map) method.invoke(object)));
+                        if (Context.getConfig().getBoolean("database.xml")) {
+                            setString(name, MiscFormatter.toXmlString((Map) method.invoke(object)));
+                        } else {
+                            setString(name, MiscFormatter.toJsonString((Map) method.invoke(object)));
+                        }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
                 }
