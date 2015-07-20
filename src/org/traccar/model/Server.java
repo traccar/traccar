@@ -29,7 +29,23 @@ public class Server implements Factory {
     private boolean registration;
     public boolean getRegistration() { return registration; }
     public void setRegistration(boolean registration) { this.registration = registration; }
-    
+
+    private String map;
+    public String getMap() { return map; }
+    public void setMap(String map) { this.map = map; }
+
+    private String language;
+    public String getLanguage() { return language; }
+    public void setLanguage(String language) { this.language = language; }
+
+    private String distanceUnit;
+    public String getDistanceUnit() { return distanceUnit; }
+    public void setDistanceUnit(String distanceUnit) { this.distanceUnit = distanceUnit; }
+
+    private String speedUnit;
+    public String getSpeedUnit() { return speedUnit; }
+    public void setSpeedUnit(String speedUnit) { this.speedUnit = speedUnit; }
+
     private double latitude;
     public double getLatitude() { return latitude; }
     public void setLatitude(double latitude) { this.latitude = latitude; }

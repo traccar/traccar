@@ -44,18 +44,32 @@ public class User implements Factory {
     public void setAdmin(boolean admin) { this.admin = admin; }
     
     private String map;
-    
+    public String getMap() { return map; }
+    public void setMap(String map) { this.map = map; }
+
     private String language;
-    
+    public String getLanguage() { return language; }
+    public void setLanguage(String language) { this.language = language; }
+
     private String distanceUnit;
-    
+    public String getDistanceUnit() { return distanceUnit; }
+    public void setDistanceUnit(String distanceUnit) { this.distanceUnit = distanceUnit; }
+
     private String speedUnit;
-    
+    public String getSpeedUnit() { return speedUnit; }
+    public void setSpeedUnit(String speedUnit) { this.speedUnit = speedUnit; }
+
     private double latitude;
-    
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
     private double longitude;
-    
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
     private int zoom;
+    public int getZoom() { return zoom; }
+    public void setZoom(int zoom) { this.zoom = zoom; }
 
     private String password;
     public String getPassword() { return password; }
