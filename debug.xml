@@ -54,10 +54,10 @@
         salt VARCHAR(128) DEFAULT '' NOT NULL,
         readonly BIT DEFAULT 0 NOT NULL,
         admin BIT DEFAULT 0 NOT NULL,
-        map VARCHAR(128) DEFAULT 'osm' NOT NULL,
-        language VARCHAR(128) DEFAULT 'en' NOT NULL,
-        distanceUnit VARCHAR(128) DEFAULT 'km' NOT NULL,
-        speedUnit VARCHAR(128) DEFAULT 'kmh' NOT NULL,
+        map VARCHAR(128),
+        language VARCHAR(128),
+        distanceUnit VARCHAR(128),
+        speedUnit VARCHAR(128),
         latitude FLOAT DEFAULT 0 NOT NULL,
         longitude FLOAT DEFAULT 0 NOT NULL,
         zoom INT DEFAULT 0 NOT NULL);
@@ -116,11 +116,16 @@
         CREATE TABLE server (
         id INT PRIMARY KEY AUTO_INCREMENT,
         registration BIT NOT NULL,
-        latitude FLOAT NOT NULL,
-        longitude FLOAT NOT NULL,
-        zoom INT NOT NULL);
+        map VARCHAR(128),
+        language VARCHAR(128),
+        distanceUnit VARCHAR(128),
+        speedUnit VARCHAR(128),
+        latitude FLOAT DEFAULT 0 NOT NULL,
+        longitude FLOAT DEFAULT 0 NOT NULL,
+        zoom INT DEFAULT 0 NOT NULL);
 
-        CREATE TABLE traccar (id INT);
+        CREATE TABLE traccar (
+        version INT DEFAULT 0 NOT NULL);
     </entry>
 
     <entry key='database.selectServers'>
