@@ -36,7 +36,8 @@ Ext.define('Traccar.Application', {
         'Positions',
         'LiveData',
         'Users',
-        'Parameters'
+        'Parameters',
+        'MapTypes'
     ],
 
     controllers: [

@@ -54,6 +54,7 @@ var strings = {
     server_registration: 'Registration',
 
     map_title: 'Map',
+    map_layer: 'Map Layer',
 
     state_title: 'State',
     state_name: 'Parameter',

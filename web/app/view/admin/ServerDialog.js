@@ -37,6 +37,13 @@ Ext.define('Traccar.view.admin.ServerDialog', {
             fieldLabel: strings.server_registration,
             allowBlank: false
         }, {
+            xtype: 'combobox',
+            name: 'map',
+            fieldLabel: strings.map_layer,
+            store: 'MapTypes',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
             xtype: 'numberfield',
             name: 'latitude',
             fieldLabel: strings.position_latitude

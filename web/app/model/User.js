@@ -23,7 +23,14 @@ Ext.define('Traccar.model.User', {
         { name: 'name', type: 'string' },
         { name: 'email', type: 'string' },
         { name: 'password', type: 'string' },
-        { name: 'admin', type: 'boolean' }
+        { name: 'admin', type: 'boolean' },
+        { name: 'map', type: 'string' },
+        { name: 'language', type: 'string' },
+        { name: 'distanceUnit', type: 'string' },
+        { name: 'speedUnit', type: 'string' },
+        { name: 'latitude', type: 'float' },
+        { name: 'longitude', type: 'float' },
+        { name: 'zoom', type: 'int' }
     ],
 
     proxy: {
