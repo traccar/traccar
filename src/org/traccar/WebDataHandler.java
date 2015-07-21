@@ -63,12 +63,12 @@ public class WebDataHandler extends BaseDataHandler {
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
         
         String request = url.
-                replaceAll("\\{uniqueId}", device.getUniqueId()).
-                replaceAll("\\{deviceId}", String.valueOf(device.getId())).
-                replaceAll("\\{fixTime}", String.valueOf(position.getFixTime().getTime())).
-                replaceAll("\\{latitude}", String.valueOf(position.getLatitude())).
-                replaceAll("\\{longitude}", String.valueOf(position.getLongitude())).
-                replaceAll("\\{gprmc}", formatSentence(position));
+                replace("{uniqueId}", device.getUniqueId()).
+                replace("{deviceId}", String.valueOf(device.getId())).
+                replace("{fixTime}", String.valueOf(position.getFixTime().getTime())).
+                replace("{latitude}", String.valueOf(position.getLatitude())).
+                replace("{longitude}", String.valueOf(position.getLongitude())).
+                replace("{gprmc}", formatSentence(position));
         
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         asyncHttpClient.prepareGet(request).execute();
