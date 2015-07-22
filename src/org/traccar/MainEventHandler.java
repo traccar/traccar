@@ -66,7 +66,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-        Log.info(formatChannel(e.getChannel()) + " error caught");
+        Log.warning(formatChannel(e.getChannel()) + " error", e.getCause());
         e.getChannel().close();
     }
 
