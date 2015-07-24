@@ -136,27 +136,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         return server;
     }
 
-    private Position decodeRfid(Position position, ChannelBuffer buf) {
-
-        for (int i = 0; i < 15; i++) {
-            long rfid = buf.readUnsignedInt();
-            if (rfid != 0) {
-                position.set(Event.KEY_RFID, String.format("%010d", rfid));
-            }
-        }
-
-        // Parse message
-        String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset());
-        Matcher parser = pattern.matcher(sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-        Integer index = 1;
-
-
-        return position;
-    }
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
