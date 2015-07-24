@@ -14,6 +14,9 @@ public class NoranProtocolDecoderTest extends ProtocolDecoderTest {
 
         NoranProtocolDecoder decoder = new NoranProtocolDecoder(new NoranProtocol());
         
+        //verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
+        //        "28003200c38000d900fcc97a416b1a7a42b43eef3d4e523039473034383737000000000092fcda4a"))));
+        
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, ChannelBufferTools.convertHexString(
                 "3400080001090000000000001D43A29BE842E62520424E523039423036363932000031322D30332D30352031313A34373A343300"))));
         

@@ -38,12 +38,14 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
     private static final DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
     private static final int MSG_UPLOAD_POSITION = 0x0008;
+    private static final int MSG_UPLOAD_POSITION_NEW = 0x0032;
     private static final int MSG_CONTROL_RESPONSE = 0x8009;
     private static final int MSG_ALARM = 0x0003;
     private static final int MSG_SHAKE_HAND = 0x0000;
     private static final int MSG_SHAKE_HAND_RESPONSE = 0x8000;
     private static final int MSG_IMAGE_SIZE = 0x0200;
     private static final int MSG_IMAGE_PACKET = 0x0201;
+    
 
     @Override
     protected Object decode(
@@ -69,6 +71,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         }
         
         else if (type == MSG_UPLOAD_POSITION ||
+                 type == MSG_UPLOAD_POSITION_NEW ||
                  type == MSG_CONTROL_RESPONSE ||
                  type == MSG_ALARM) {
 
@@ -78,7 +81,8 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 newFormat = false;
             }*/
             if (((type == MSG_UPLOAD_POSITION || type == MSG_ALARM) && buf.readableBytes() == 48) ||
-                ((type == MSG_CONTROL_RESPONSE) && buf.readableBytes() == 57)) {
+                ((type == MSG_CONTROL_RESPONSE) && buf.readableBytes() == 57) ||
+                ((type == MSG_UPLOAD_POSITION_NEW))) {
                 newFormat = true;
             }
 
@@ -136,13 +140,13 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 buf.readByte();
             }
 
+            // Other data
             if (!newFormat) {
-
-                // IO status
                 position.set(Event.PREFIX_IO + 1, buf.readUnsignedByte());
-
-                // Fuel
                 position.set(Event.KEY_FUEL, buf.readUnsignedByte());
+            } else if (type == MSG_UPLOAD_POSITION_NEW) {
+                position.set(Event.PREFIX_TEMP + 1, buf.readShort());
+                position.set(Event.KEY_ODOMETER, buf.readFloat());
             }
 
             return position;
