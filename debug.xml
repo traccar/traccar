@@ -304,5 +304,6 @@
     <entry key='avl301.port'>5085</entry>
     <entry key='castel.port'>5086</entry>
     <entry key='mxt.port'>5087</entry>
+    <entry key='cityeasy.port'>5088</entry>
 
 </properties>
