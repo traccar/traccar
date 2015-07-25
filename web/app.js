@@ -20,6 +20,7 @@ Ext.Loader.setConfig({
 
 {
     var available = {
+        'cn': true,
         'de': true,
         'en': true,
         'es': true,
