@@ -44,6 +44,20 @@ Ext.define('Traccar.view.admin.ServerDialog', {
             displayField: 'name',
             valueField: 'key'
         }, {
+            xtype: 'combobox',
+            name: 'distanceUnit',
+            fieldLabel: strings.settings_distance_unit,
+            store: 'DistanceUnits',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
+            xtype: 'combobox',
+            name: 'speedUnit',
+            fieldLabel: strings.settings_speed_unit,
+            store: 'SpeedUnits',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
             xtype: 'numberfield',
             name: 'latitude',
             fieldLabel: strings.position_latitude

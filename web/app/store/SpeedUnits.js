@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.MapTypes', {
+Ext.define('Traccar.store.SpeedUnits', {
     extend: 'Ext.data.Store',
     fields: ['key', 'name'],
     data : [
-        {'key': 'osm', 'name': strings.map_osm},
-        {'key': 'bing', 'name': strings.map_bing}
+        {'key': 'kph', 'name': strings.shared_kph},
+        {'key': 'mph', 'name': strings.shared_mph}
     ]
 });

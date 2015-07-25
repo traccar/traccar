@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.MapTypes', {
+Ext.define('Traccar.store.DistanceUnits', {
     extend: 'Ext.data.Store',
     fields: ['key', 'name'],
     data : [
-        {'key': 'osm', 'name': strings.map_osm},
-        {'key': 'bing', 'name': strings.map_bing}
+        {'key': 'km', 'name': strings.shared_km},
+        {'key': 'mi', 'name': strings.shared_mi}
     ]
 });

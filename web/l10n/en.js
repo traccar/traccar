@@ -6,6 +6,10 @@ var strings = {
     shared_edit: 'Edit',
     shared_remove: 'Remove',
     shared_remove_confirm: 'Remove item?',
+    shared_km: 'km',
+    shared_mi: 'mi',
+    shared_kph: 'km/h',
+    shared_mph: 'mph',
 
     error_title: 'Error',
     error_unknown: 'Unknown error',
@@ -31,6 +35,8 @@ var strings = {
     settings_user: 'Account',
     settings_server: 'Server',
     settings_users: 'Users',
+    settings_distance_unit: 'Distance',
+    settings_speed_unit: 'Speed',
 
     report_title: 'Reports',
     report_device: 'Device',
@@ -55,6 +61,8 @@ var strings = {
 
     map_title: 'Map',
     map_layer: 'Map Layer',
+    map_osm: 'OpenStreetMap',
+    map_bing: 'Bing Maps',
 
     state_title: 'State',
     state_name: 'Parameter',

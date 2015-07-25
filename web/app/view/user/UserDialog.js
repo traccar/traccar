@@ -53,6 +53,39 @@ Ext.define('Traccar.view.user.UserDialog', {
             allowBlank: false,
             disabled: true,
             reference: 'adminField'
+        }, {
+            xtype: 'combobox',
+            name: 'map',
+            fieldLabel: strings.map_layer,
+            store: 'MapTypes',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
+            xtype: 'combobox',
+            name: 'distanceUnit',
+            fieldLabel: strings.settings_distance_unit,
+            store: 'DistanceUnits',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
+            xtype: 'combobox',
+            name: 'speedUnit',
+            fieldLabel: strings.settings_speed_unit,
+            store: 'SpeedUnits',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
+            xtype: 'numberfield',
+            name: 'latitude',
+            fieldLabel: strings.position_latitude
+        }, {
+            xtype: 'numberfield',
+            name: 'longitude',
+            fieldLabel: strings.position_longitude
+        }, {
+            xtype: 'numberfield',
+            name: 'zoom',
+            fieldLabel: strings.server_zoom
         }]
     },
 
