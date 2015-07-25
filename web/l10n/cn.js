@@ -31,7 +31,7 @@ var strings = {
     device_name: '名字',
     device_identifier: '标识符',
 
-    settings_title: '字符串',
+    settings_title: '设置',
     settings_user: '账户',
     settings_server: '服务器',
     settings_users: '用户',
@@ -40,8 +40,8 @@ var strings = {
 
     report_title: '报表',
     report_device: '设备',
-    report_from: '从。。。开始',
-    report_to: '到。。。。结束',
+    report_from: '开始',
+    report_to: '结束',
     report_show: '显示',
     report_clear: '清空',
 
