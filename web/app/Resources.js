@@ -26,8 +26,10 @@ var styles = {
     report_time: 100,
     report_format: 'Y-m-d H:i:s',
 
-    map_center: [ -0.1275, 51.507222 ],
-    map_zoom: 6,
+    map_default_lat: -0.1275,
+    map_default_lon: 51.507222,
+    map_default_zoom: 6,
+
     map_max_zoom: 16,
     map_select_color: 'rgba(0, 255, 0, 1.0)',
     map_select_radius: 10,

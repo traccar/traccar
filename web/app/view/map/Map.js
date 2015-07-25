@@ -30,8 +30,11 @@ Ext.define('Traccar.view.map.Map', {
     listeners: {
         afterrender: function() {
 
+            var user = Traccar.getApplication().getUser();
+            var server = Traccar.getApplication().getServer();
+
             var layer;
-            var mapLayer = Traccar.getApplication().getUser().get('map') || Traccar.getApplication().getServer().get('map');
+            var mapLayer = user.get('map') || server.get('map');
 
             var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
 
@@ -55,9 +58,13 @@ Ext.define('Traccar.view.map.Map', {
                 source: this.vectorSource
             });
 
+            var lat = user.get('latitude') || server.get('latitude') || styles.map_default_lat;
+            var lon = user.get('longitude') || server.get('longitude') || styles.map_default_lon;
+            var zoom = user.get('zoom') || server.get('zoom') || styles.map_default_zoom;
+
             this.mapView = new ol.View({
-                center: ol.proj.fromLonLat(styles.map_center),
-                zoom: styles.map_zoom,
+                center: ol.proj.fromLonLat([lat, lon]),
+                zoom: zoom,
                 maxZoom: styles.map_max_zoom
             });
 
