@@ -20,5 +20,19 @@ Ext.define('Traccar.store.SpeedUnits', {
     data : [
         {'key': 'kph', 'name': strings.shared_kph},
         {'key': 'mph', 'name': strings.shared_mph}
-    ]
+    ],
+
+    convert: function(value, unit) {
+        switch (unit) {
+            case 'kph':
+                return value * 1.852;
+            case 'mph':
+                return value * 1.15078;
+        }
+        return value;
+    },
+
+    getUnitName: function(unit) {
+        return this.findRecord('key', unit).get('name');
+    }
 });

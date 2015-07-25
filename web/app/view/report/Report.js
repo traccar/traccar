@@ -80,7 +80,16 @@ Ext.define('Traccar.view.report.Report', {
         { text: strings.position_latitude, dataIndex: 'latitude', flex: 1 },
         { text: strings.position_longitude, dataIndex: 'longitude', flex: 1 },
         { text: strings.position_altitude, dataIndex: 'altitude', flex: 1 },
-        { text: strings.position_speed, dataIndex: 'speed', flex: 1 },
+        {
+            text: strings.position_speed,
+            dataIndex: 'speed',
+            flex: 1,
+            renderer: function(value) {
+                var speedUnits = Ext.getStore('SpeedUnits');
+                var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
+                return speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
+            }
+        },
         { text: strings.position_course, dataIndex: 'course', flex: 1 },
         { text: strings.position_address, dataIndex: 'address', flex: 1 }
     ]

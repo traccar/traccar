@@ -81,10 +81,16 @@ Ext.define('Traccar.view.state.StateController', {
 
         for (var key in position.data) {
             if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
+                var value = position.get(key);
+                if (key === 'speed') {
+                    var speedUnits = Ext.getStore('SpeedUnits');
+                    var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
+                    value = speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
+                }
                 store.add(Ext.create('Traccar.model.Parameter', {
                     priority: this.keys[key].priority,
                     name: this.keys[key].name,
-                    value: position.get(key)
+                    value: value
                 }));
             }
         }
