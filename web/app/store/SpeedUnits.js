@@ -33,6 +33,10 @@ Ext.define('Traccar.store.SpeedUnits', {
     },
 
     getUnitName: function(unit) {
-        return this.findRecord('key', unit).get('name');
+        if (unit) {
+            return this.findRecord('key', unit).get('name');
+        } else {
+            return '';
+        }
     }
 });
