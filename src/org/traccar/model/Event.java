@@ -51,6 +51,7 @@ public abstract class Event {
         }
     }
 
+    // Words separated by dashes (word-second-third)
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
     public static final String KEY_SATELLITES = "sat";
