@@ -34,14 +34,14 @@ import javax.sql.DataSource;
 import org.traccar.Config;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
-import org.traccar.web.AsyncServlet;
-import org.traccar.web.JsonConverter;
 import org.traccar.model.Device;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.web.AsyncServlet;
+import org.traccar.web.JsonConverter;
 
 public class DataManager implements IdentityManager {
 
@@ -225,6 +225,12 @@ public class DataManager implements IdentityManager {
     public Collection<User> getUsers() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectUsersAll"))
                 .executeQuery(new User());
+    }
+
+    public User getUser(long userId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectUser"))
+                .setLong("id", userId)
+                .executeQuerySingle(new User());
     }
 
     public void addUser(User user) throws SQLException {

@@ -25,7 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.traccar.model.User;
 
 public abstract class BaseServlet extends HttpServlet {
     
@@ -51,11 +50,11 @@ public abstract class BaseServlet extends HttpServlet {
     protected abstract boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception;
     
     public long getUserId(HttpServletRequest req) {
-        User user = (User) req.getSession().getAttribute(USER_KEY);
-        if (user == null) {
+        Long userId = (Long) req.getSession().getAttribute(USER_KEY);
+        if (userId == null) {
             throw new AccessControlException("User not logged in");
         }
-        return user.getId();
+        return userId;
     }
     
     public void securityCheck(boolean check) throws SecurityException {

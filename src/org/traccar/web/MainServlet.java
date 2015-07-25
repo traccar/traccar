@@ -15,8 +15,6 @@
  */
 package org.traccar.web;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
@@ -46,10 +44,11 @@ public class MainServlet extends BaseServlet {
         return true;        
     }
 
-    private void session(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        User user = (User) req.getSession().getAttribute(USER_KEY);
-        if (user != null) {
-            sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
+    private void session(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        Long userId = (Long) req.getSession().getAttribute(USER_KEY);
+        if (userId != null) {
+            sendResponse(resp.getWriter(), JsonConverter.objectToJson(
+                    Context.getDataManager().getUser(userId)));
         } else {
             sendResponse(resp.getWriter(), false);
         }
@@ -59,7 +58,7 @@ public class MainServlet extends BaseServlet {
         User user = Context.getDataManager().login(
                 req.getParameter("email"), req.getParameter("password"));
         if (user != null) {
-            req.getSession().setAttribute(USER_KEY, user);
+            req.getSession().setAttribute(USER_KEY, user.getId());
             sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
         } else {
             sendResponse(resp.getWriter(), false);

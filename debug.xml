@@ -155,6 +155,11 @@
         WHERE email = :email;
     </entry>
 
+    <entry key='database.selectUser'>
+        SELECT * FROM "user"
+        WHERE id = :id;
+    </entry>
+
     <entry key='database.selectUsersAll'>
         SELECT * FROM "user";
     </entry>
