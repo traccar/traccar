@@ -30,6 +30,7 @@ var strings = {
     device_title: 'Devices',
     device_name: 'Name',
     device_identifier: 'Identifier',
+    device_command: 'Command',
 
     settings_title: 'Settings',
     settings_user: 'Account',
@@ -61,8 +62,9 @@ var strings = {
 
     map_title: 'Map',
     map_layer: 'Map Layer',
-    map_osm: 'OpenStreetMap',
-    map_bing: 'Bing Maps',
+    map_osm: 'Open Street Map',
+    map_bing_road: 'Bing Maps Road',
+    map_bing_aerial: 'Bing Maps Aerial',
 
     state_title: 'State',
     state_name: 'Parameter',

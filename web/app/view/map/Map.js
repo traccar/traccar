@@ -30,9 +30,26 @@ Ext.define('Traccar.view.map.Map', {
     listeners: {
         afterrender: function() {
 
-            var layer = new ol.layer.Tile({ source: new ol.source.OSM({
-            })});
-            
+            var layer;
+            var mapLayer = Traccar.getApplication().getUser().get('map') || Traccar.getApplication().getServer().get('map');
+
+            var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
+
+            if (mapLayer === 'bingRoad') {
+                var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
+                    key: bindKey,
+                    imagerySet: 'Road'
+                })});
+            } else if (mapLayer === 'bingAerial') {
+                var layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
+                    key: bindKey,
+                    imagerySet: 'Aerial'
+                })});
+            } else {
+                layer = new ol.layer.Tile({ source: new ol.source.OSM({
+                })});
+            }
+
             this.vectorSource = new ol.source.Vector({});
             var vectorLayer = new ol.layer.Vector({
                 source: this.vectorSource
