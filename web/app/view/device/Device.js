@@ -29,20 +29,32 @@ Ext.define('Traccar.view.device.Device', {
     selType: 'rowmodel',
     
     tbar: [{
-        text: strings.shared_add,
         handler: 'onAddClick',
         reference: 'deviceAddButton',
-        glyph: 'xf067@FontAwesome'
+        glyph: 'xf067@FontAwesome',
+        tooltip: strings.shared_add,
+        tooltipType: 'title'
     }, {
         disabled: true,
         handler: 'onEditClick',
         reference: 'deviceEditButton',
-        glyph: 'xf040@FontAwesome'
+        glyph: 'xf040@FontAwesome',
+        tooltip: strings.shared_edit,
+        tooltipType: 'title'
     }, {
         disabled: true,
         handler: 'onRemoveClick',
         reference: 'deviceRemoveButton',
-        glyph: 'xf00d@FontAwesome'
+        glyph: 'xf00d@FontAwesome',
+        tooltip: strings.shared_remove,
+        tooltipType: 'title'
+    }, {
+        disabled: true,
+        handler: 'onCommandClick',
+        reference: 'deviceCommandButton',
+        glyph: 'xf093@FontAwesome',
+        tooltip: strings.device_command,
+        tooltipType: 'title'
     }, {
         xtype: 'tbfill'
     }, {

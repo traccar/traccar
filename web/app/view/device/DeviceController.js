@@ -79,11 +79,17 @@ Ext.define('Traccar.view.device.DeviceController', {
             }
         });
     },
+
+    onCommandClick: function() {
+        var device = this.getView().getSelectionModel().getSelection()[0];
+        console.log('send command here');
+    },
     
     onSelectionChange: function(selected) {
         var empty = selected.getCount() === 0;
         this.lookupReference('deviceEditButton').setDisabled(empty);
         this.lookupReference('deviceRemoveButton').setDisabled(empty);
+        this.lookupReference('deviceCommandButton').setDisabled(empty);
         if (!empty) {
             this.fireEvent("selectDevice", selected.getLastSelected());
         }
