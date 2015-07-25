@@ -68,5 +68,13 @@ var strings = {
 
     state_title: 'State',
     state_name: 'Parameter',
-    state_value: 'Value'
+    state_value: 'Value',
+
+    command_title: 'Command',
+    command_send: 'Send',
+    command_type: 'Type',
+    command_position_stop: 'Position Stop',
+    command_position_fix: 'Position Fix',
+    command_engine_stop: 'Engine Stop',
+    command_engine_resume: 'Engine Resume'
 };

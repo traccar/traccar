@@ -20,6 +20,7 @@ Ext.define('Traccar.view.device.DeviceController', {
     
     requires: [
         'Traccar.view.device.DeviceDialog',
+        'Traccar.view.command.CommandDialog',
         'Traccar.view.user.UserDialog',
         'Traccar.view.admin.ServerDialog',
         'Traccar.view.user.User'
@@ -82,9 +83,13 @@ Ext.define('Traccar.view.device.DeviceController', {
 
     onCommandClick: function() {
         var device = this.getView().getSelectionModel().getSelection()[0];
-        console.log('send command here');
+        var command = Ext.create('Traccar.model.Command');
+        command.set('deviceId', device.get('id'));
+        var dialog = Ext.create('Traccar.view.command.CommandDialog');
+        dialog.down('form').loadRecord(command);
+        dialog.show();
     },
-    
+
     onSelectionChange: function(selected) {
         var empty = selected.getCount() === 0;
         this.lookupReference('deviceEditButton').setDisabled(empty);
