@@ -19,16 +19,16 @@ Ext.Loader.setConfig({
 });
 
 {
-    var available = {
-        'cn': true,
-        'de': true,
-        'en': true,
-        'es': true,
-        'fr': true,
-        'pl': true,
-        'pt': true,
-        'ru': true,
-        'th': true
+    var availableLanguages = {
+        'cn': '中文',
+        'de': 'Deutsch',
+        'en': 'English',
+        'es': 'Español',
+        'fr': 'Français',
+        'pl': 'Polski',
+        'pt': 'Português',
+        'ru': 'Русский',
+        'th': 'ไทย'
     };
 
     var language = Ext.Object.fromQueryString(window.location.search.substring(1)).locale;
@@ -37,7 +37,7 @@ Ext.Loader.setConfig({
         language = language.substr(0, 2);
     }
 
-    if (!(language in available)) {
+    if (!(language in availableLanguages)) {
         language = 'en'; // default
     }
 

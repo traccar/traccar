@@ -23,6 +23,7 @@ var strings = {
     user_admin: 'Admin',
 
     login_title: 'Login',
+    login_language: 'Language',
     login_register: 'Register',
     login_login: 'Login',
     login_failed: 'Incorrect email address or password',

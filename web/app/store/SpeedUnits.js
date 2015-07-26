@@ -17,7 +17,7 @@
 Ext.define('Traccar.store.SpeedUnits', {
     extend: 'Ext.data.Store',
     fields: ['key', 'name'],
-    data : [
+    data: [
         {'key': 'kph', 'name': strings.shared_kph},
         {'key': 'mph', 'name': strings.shared_mph}
     ],

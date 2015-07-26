@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.MapTypes', {
+Ext.define('Traccar.store.Languages', {
     extend: 'Ext.data.Store',
-    fields: ['key', 'name'],
-    data: [
-        {'key': 'osm', 'name': strings.map_osm},
-        {'key': 'bingRoad', 'name': strings.map_bing_road},
-        {'key': 'bingAerial', 'name': strings.map_bing_aerial}
-    ]
+    fields: ['code', 'name'],
+    data: function() {
+        var data = [];
+        for (var code in availableLanguages) {
+            if (availableLanguages.hasOwnProperty(code)) {
+                data.push({
+                    'code': code,
+                    'name': availableLanguages[code]
+                });
+            }
+        }
+        return data;
+    }()
 });
