@@ -15,18 +15,17 @@
  */
 package org.traccar.database;
 
+import java.net.SocketAddress;
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
 import org.traccar.model.Command;
 
-import java.net.SocketAddress;
-
 public class ActiveDevice {
 
-    private long deviceId;
-    private Protocol protocol;
-    private Channel channel;
-    private SocketAddress remoteAddress;
+    private final long deviceId;
+    private final Protocol protocol;
+    private final Channel channel;
+    private final SocketAddress remoteAddress;
 
     public ActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         this.deviceId = deviceId;
