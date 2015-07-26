@@ -18,10 +18,25 @@ Ext.define('Traccar.view.command.CommandDialogController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.commanddialog',
 
+    onSelect: function(selected) {
+        this.lookupReference('paramPositionFix').setHidden(selected.getValue() !== 'positionFix');
+    },
+
     onSendClick: function(button) {
-        var dialog = button.up('window').down('form');
-        dialog.updateRecord();
-        var record = dialog.getRecord();
+        var other;
+        var form = button.up('window').down('form');
+        form.updateRecord();
+        var record = form.getRecord();
+
+        if (record.get('type') === 'positionFix') {
+            other = this.lookupReference('paramPositionFix');
+            var value = other.down('numberfield[name="frequency"]').getValue();
+            value *= other.down('combobox[name="unit"]').getValue();
+
+            record.set('other', {
+                frequency: value
+            });
+        }
 
         Ext.Ajax.request({
             scope: this,

@@ -41,7 +41,8 @@ Ext.define('Traccar.Application', {
         'MapTypes',
         'DistanceUnits',
         'SpeedUnits',
-        'CommandTypes'
+        'CommandTypes',
+        'TimeUnits'
     ],
 
     controllers: [

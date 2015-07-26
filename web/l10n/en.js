@@ -10,6 +10,9 @@ var strings = {
     shared_mi: 'mi',
     shared_kph: 'km/h',
     shared_mph: 'mph',
+    shared_hour: 'Hour',
+    shared_minute: 'Minute',
+    shared_second: 'Second',
 
     error_title: 'Error',
     error_unknown: 'Unknown error',
@@ -76,5 +79,7 @@ var strings = {
     command_position_stop: 'Position Stop',
     command_position_fix: 'Position Fix',
     command_engine_stop: 'Engine Stop',
-    command_engine_resume: 'Engine Resume'
+    command_engine_resume: 'Engine Resume',
+    command_frequency: 'Frequency',
+    command_unit: 'Unit'
 };

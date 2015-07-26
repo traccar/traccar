@@ -37,7 +37,28 @@ Ext.define('Traccar.view.command.CommandDialog', {
             fieldLabel: strings.command_type,
             store: 'CommandTypes',
             displayField: 'name',
-            valueField: 'key'
+            valueField: 'key',
+            listeners: {
+                select: 'onSelect'
+            }
+        }, {
+            xtype: 'fieldcontainer',
+            reference: 'paramPositionFix',
+            name: 'other',
+            hidden: true,
+
+            items: [{
+                xtype: 'numberfield',
+                fieldLabel: strings.command_frequency,
+                name: 'frequency'
+            }, {
+                xtype: 'combobox',
+                fieldLabel: strings.command_unit,
+                name: 'unit',
+                store: 'TimeUnits',
+                displayField: 'name',
+                valueField: 'multiplier'
+            }]
         }]
     },
 
