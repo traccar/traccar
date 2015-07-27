@@ -16,21 +16,41 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.Crc;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
     public CityeasyProtocolDecoder(CityeasyProtocol protocol) {
         super(protocol);
     }
+
+    private static final Pattern pattern = Pattern.compile(
+            "(\\d{4})(\\d{2})(\\d{2})" +        // Date
+            "(\\d{2})(\\d{2})(\\d{2})," +       // Time
+            "([AV])," +                         // Validity
+            "(\\d+)," +                         // Satellites
+            "([NS]),(\\d+\\.\\d+)," +           // Latitude
+            "([EW]),(\\d+\\.\\d+)," +           // Longitude
+            "(\\d+\\.\\d)," +                   // Speed
+            "(\\d+\\.\\d)," +                   // HDOP
+            "(\\d+\\.\\d);" +                   // Altitude
+            "(\\d+)," +                         // MCC
+            "(\\d+)," +                         // MNC
+            "(\\d+)," +                         // LAC
+            "(\\d+)" +                          // Cell
+            ".*");
 
     private static final int MSG_LOCATION_REPORT = 0x0003;
     private static final int MSG_LOCATION_INQUIRY_RESPONSE = 0x0004;
@@ -42,72 +62,72 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        /*buf.skipBytes(2); // header
-        buf.readByte(); // size
+        buf.skipBytes(2); // header
+        buf.readUnsignedShort(); // length
 
-        // Zero for location messages
-        buf.readByte(); // voltage
-        buf.readByte(); // gsm signal
-
-        String imei = readImei(buf);
-        long index = buf.readUnsignedShort();
-        int type = buf.readUnsignedByte();
-
-        if (type == MSG_HEARTBEAT) {
-            if (channel != null) {
-                byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(ChannelBuffers.wrappedBuffer(response));
-            }
+        String imei = ChannelBufferTools.readHexString(buf, 14);
+        imei += Crc.luhnChecksum(Long.valueOf(imei));
+        if (!identify(imei, channel)) {
+            return null;
         }
 
-        else if (type == MSG_DATA) {
+        int type = buf.readUnsignedShort();
 
-            // Create new position
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.set(Event.KEY_INDEX, index);
+        if (type == MSG_LOCATION_REPORT || type == MSG_LOCATION_INQUIRY_RESPONSE) {
 
-            // Get device id
-            if (!identify(imei, channel)) {
+            String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 8, Charset.defaultCharset());
+            Matcher parser = pattern.matcher(sentence);
+            if (!parser.matches()) {
                 return null;
             }
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
+
+            Integer index = 1;
 
             // Date and time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
-            time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
+            time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+            time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
             position.setTime(time.getTime());
 
+            position.setValid(parser.group(index++).equals("A"));
+            position.set(Event.KEY_SATELLITES, parser.group(index++));
+
             // Latitude
-            double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
+            String hemisphere = parser.group(index++);
+            double latitude = Double.parseDouble(parser.group(index++));
+            if (hemisphere.compareTo("S") == 0) {
+                latitude = -latitude;
+            }
+            position.setLatitude(latitude);
 
             // Longitude
-            double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-
-            // Speed
-            position.setSpeed(buf.readUnsignedByte());
-
-            // Course
-            position.setCourse(buf.readUnsignedShort());
-
-            buf.skipBytes(3); // reserved
-
-            // Flags
-            long flags = buf.readUnsignedInt();
-            position.setValid((flags & 0x1) == 0x1);
-            if ((flags & 0x2) == 0) latitude = -latitude;
-            if ((flags & 0x4) == 0) longitude = -longitude;
-
-            position.setLatitude(latitude);
+            hemisphere = parser.group(index++);
+            double longitude = Double.parseDouble(parser.group(index++));
+            if (hemisphere.compareTo("W") == 0) {
+                longitude = -longitude;
+            }
             position.setLongitude(longitude);
+
+            position.setSpeed(Double.parseDouble(parser.group(index++)));
+            position.set(Event.KEY_HDOP, Double.parseDouble(parser.group(index++)));
+            position.setAltitude(Double.parseDouble(parser.group(index++)));
+
+            position.set(Event.KEY_MCC, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_MNC, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_LAC, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_CELL, Integer.parseInt(parser.group(index++)));
+
             return position;
-        }*/
+        }
 
         return null;
     }
