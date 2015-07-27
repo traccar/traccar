@@ -18,9 +18,11 @@ package org.traccar.protocol;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -28,6 +30,9 @@ public class SuntechProtocol extends BaseProtocol {
 
     public SuntechProtocol() {
         super("suntech");
+        setSupportedCommands(
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_STOP);
     }
 
     @Override
@@ -37,7 +42,9 @@ public class SuntechProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(SuntechProtocol.this));
+                pipeline.addLast("objectEncoder", new SuntechProtocolEncoder());
             }
         });
     }
