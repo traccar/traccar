@@ -22,7 +22,7 @@ public class Gps103ProtocolEncoderTest {
         
         command.setOther(other);
         
-        Assert.assertEquals("**,imei:123456789012345,C,05m;", encoder.encodeCommand(command));
+        Assert.assertEquals("**,123456789012345,C,05m;", encoder.encodeCommand(command));
 
     }
 
