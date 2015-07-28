@@ -30,6 +30,36 @@ public class BoxProtocolDecoderTest extends ProtocolDecoderTest {
         assertNull(decoder.decode(null, null,
                 "E,1"));
 
+        verify(decoder.decode(null, null,
+                "L,150728150130,G,24.68312,46.67526,0,140,0,3,20;A,0;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728155815,G,24.68311,46.67528,0,140,0,6,21;A,0;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728155833,G,24.68311,46.67528,11,140,0,52,23;A,0.79;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728155934,G,24.68396,46.67489,0,282,0.12,1,21;A,1.27;D,1.23;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728160033,G,24.68414,46.67485,0,282,0.12,1,21;A,0;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728160133,G,24.68388,46.675,0,282,0.12,1,21;A,0;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728160233,G,24.68377,46.67501,0,282,0.12,1,21;A,0;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728160333,G,24.684,46.67488,0,282,0.12,1,21;A,0;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728155855,G,24.68413,46.67482,0,282,0.14,53,21;A,0;D,0;I,0"));
+
+        verify(decoder.decode(null, null,
+                "L,150728160400,G,24.68413,46.67482,0,282,0.14,7,20;A,0;D,0;I,0;END,25,326,150728155814"));
+
     }
 
 }

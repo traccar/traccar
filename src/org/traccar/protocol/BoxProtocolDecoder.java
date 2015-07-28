@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             "(-?\\d+\\.\\d+)," +          // Longitude
             "(\\d+\\.?\\d*)," +           // Speed
             "(\\d+\\.?\\d*)," +           // Course
-            "(\\d+)," +                   // Distance
+            "(\\d+\\.?\\d*)," +           // Distance
             "(\\d+)," +                   // Event
             "(\\d+)" +                    // Status
             ".*");
@@ -62,7 +62,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             identify(id, channel);
         }
         
-        else if (sentence.startsWith("L,")) {
+        else if (hasDeviceId() && sentence.startsWith("L,")) {
 
             // Parse message
             Matcher parser = pattern.matcher(sentence);
