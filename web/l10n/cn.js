@@ -8,9 +8,12 @@ var strings = {
     shared_remove_confirm: '要移除选项吗？',
     shared_km: '千米',
     shared_mi: '海里',
-                  
     shared_kph: '千米/小时',
     shared_mph: '每小时英里数',
+    shared_hour: 'Hour (*)',
+    shared_minute: 'Minute (*)',
+    shared_second: 'Second (*)',
+
     error_title: '错误',
     error_unknown: '未知错误',
 
@@ -20,16 +23,18 @@ var strings = {
     user_admin: '管理员',
 
     login_title: '登录',
+    login_language: 'Language (*)',
     login_register: '注册',
     login_login: '登录',
     login_failed: '邮箱地址或密码不对',
- 
     login_created: '新用户已经被注册了',
     login_logout: '登出',
+
     device_dialog: '设备',
     device_title: '设备',
     device_name: '名字',
     device_identifier: '标识符',
+    device_command: 'Command (*)',
 
     settings_title: '设置',
     settings_user: '账户',
@@ -54,6 +59,7 @@ var strings = {
     position_course: '航向',
     position_address: '地址',
     position_protocol: '协议',
+
     server_title: '服务器设置',
     server_zoom: '缩放',
     server_registration: '注册',
@@ -61,8 +67,20 @@ var strings = {
     map_title: '地图',
     map_layer: '地图图层',
     map_osm: 'OpenStreetMap 地图',
-    map_bing: 'Bing 地图',
+    map_bing_road: 'Bing Maps Road (*)',
+    map_bing_aerial: 'Bing Maps Aerial (*)',
+
     state_title: '状态',
     state_name: '参数',
-    state_value: '数值'
+    state_value: '数值',
+
+    command_title: 'Command (*)',
+    command_send: 'Send (*)',
+    command_type: 'Type (*)',
+    command_position_stop: 'Position Stop (*)',
+    command_position_fix: 'Position Fix (*)',
+    command_engine_stop: 'Engine Stop (*)',
+    command_engine_resume: 'Engine Resume (*)',
+    command_frequency: 'Frequency (*)',
+    command_unit: 'Unit (*)'
 };

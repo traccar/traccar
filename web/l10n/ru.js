@@ -6,6 +6,13 @@ var strings = {
     shared_edit: 'Редактировать',
     shared_remove: 'Удалить',
     shared_remove_confirm: 'Удалить элемент?',
+    shared_km: 'km (*)',
+    shared_mi: 'mi (*)',
+    shared_kph: 'km/h (*)',
+    shared_mph: 'mph (*)',
+    shared_hour: 'Hour (*)',
+    shared_minute: 'Minute (*)',
+    shared_second: 'Second (*)',
 
     error_title: 'Ошибка',
     error_unknown: 'Неизвестная ошибка',
@@ -16,6 +23,7 @@ var strings = {
     user_admin: 'Администратор',
 
     login_title: 'Вход',
+    login_language: 'Language (*)',
     login_register: 'Регистрация',
     login_login: 'Вход',
     login_failed: 'Неправильный email адрес или пароль',
@@ -26,11 +34,14 @@ var strings = {
     device_title: 'Устройства',
     device_name: 'Название',
     device_identifier: 'Идентификатор',
+    device_command: 'Command (*)',
 
     settings_title: 'Настройки',
     settings_user: 'Аккаунт',
     settings_server: 'Сервер',
     settings_users: 'Пользователи',
+    settings_distance_unit: 'Distance (*)',
+    settings_speed_unit: 'Speed (*)',
 
     report_title: 'Отчеты',
     report_device: 'Устройтво',
@@ -54,8 +65,22 @@ var strings = {
     server_registration: 'Регистрация',
 
     map_title: 'Карта',
+    map_layer: 'Map Layer (*)',
+    map_osm: 'Open Street Map (*)',
+    map_bing_road: 'Bing Maps Road (*)',
+    map_bing_aerial: 'Bing Maps Aerial (*)',
 
     state_title: 'Состояние',
     state_name: 'Параметр',
-    state_value: 'Значение'
+    state_value: 'Значение',
+
+    command_title: 'Command (*)',
+    command_send: 'Send (*)',
+    command_type: 'Type (*)',
+    command_position_stop: 'Position Stop (*)',
+    command_position_fix: 'Position Fix (*)',
+    command_engine_stop: 'Engine Stop (*)',
+    command_engine_resume: 'Engine Resume (*)',
+    command_frequency: 'Frequency (*)',
+    command_unit: 'Unit (*)'
 };

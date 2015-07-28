@@ -6,6 +6,13 @@ var strings = {
     shared_edit: 'Bearbeiten',
     shared_remove: 'Entfernen',
     shared_remove_confirm: 'Objekt entfernen?',
+    shared_km: 'km (*)',
+    shared_mi: 'mi (*)',
+    shared_kph: 'km/h (*)',
+    shared_mph: 'mph (*)',
+    shared_hour: 'Hour (*)',
+    shared_minute: 'Minute (*)',
+    shared_second: 'Second (*)',
 
     error_title: 'Fehler',
     error_unknown: 'Unbekannter Fehler',
@@ -16,6 +23,7 @@ var strings = {
     user_admin: 'Admin',
 
     login_title: 'Anmeldung',
+    login_language: 'Language (*)',
     login_register: 'Registrieren',
     login_login: 'Anmelden',
     login_failed: 'Falsche Emailadresse oder Passwort',
@@ -26,11 +34,14 @@ var strings = {
     device_title: 'Geräte',
     device_name: 'Name',
     device_identifier: 'Kennung',
+    device_command: 'Command (*)',
 
     settings_title: 'Einstellungen',
     settings_user: 'Benutzerkonto',
     settings_server: 'Server',
     settings_users: 'Benutzer',
+    settings_distance_unit: 'Distance (*)',
+    settings_speed_unit: 'Speed (*)',
 
     report_title: 'Berichte',
     report_device: 'Gerät',
@@ -54,8 +65,22 @@ var strings = {
     server_registration: 'Registrierung zulassen',
 
     map_title: 'Karte',
+    map_layer: 'Map Layer (*)',
+    map_osm: 'Open Street Map (*)',
+    map_bing_road: 'Bing Maps Road (*)',
+    map_bing_aerial: 'Bing Maps Aerial (*)',
 
     state_title: 'Status',
     state_name: 'Parameter',
-    state_value: 'Wert'
+    state_value: 'Wert',
+
+    command_title: 'Command (*)',
+    command_send: 'Send (*)',
+    command_type: 'Type (*)',
+    command_position_stop: 'Position Stop (*)',
+    command_position_fix: 'Position Fix (*)',
+    command_engine_stop: 'Engine Stop (*)',
+    command_engine_resume: 'Engine Resume (*)',
+    command_frequency: 'Frequency (*)',
+    command_unit: 'Unit (*)'
 };
