@@ -10,9 +10,9 @@ var strings = {
     shared_mi: '海里',
     shared_kph: '千米/小时',
     shared_mph: '每小时英里数',
-    shared_hour: 'Hour (*)',
-    shared_minute: 'Minute (*)',
-    shared_second: 'Second (*)',
+    shared_hour: '小时',
+    shared_minute: '分钟',
+    shared_second: '秒',
 
     error_title: '错误',
     error_unknown: '未知错误',
@@ -23,7 +23,7 @@ var strings = {
     user_admin: '管理员',
 
     login_title: '登录',
-    login_language: 'Language (*)',
+    login_language: '语言',
     login_register: '注册',
     login_login: '登录',
     login_failed: '邮箱地址或密码不对',
@@ -34,7 +34,7 @@ var strings = {
     device_title: '设备',
     device_name: '名字',
     device_identifier: '标识符',
-    device_command: 'Command (*)',
+    device_command: '指令',
 
     settings_title: '设置',
     settings_user: '账户',
@@ -67,20 +67,20 @@ var strings = {
     map_title: '地图',
     map_layer: '地图图层',
     map_osm: 'OpenStreetMap 地图',
-    map_bing_road: 'Bing Maps Road (*)',
-    map_bing_aerial: 'Bing Maps Aerial (*)',
+    map_bing_road: 'Bing 公路线路地图',
+    map_bing_aerial: 'Bing 航测地图',
 
     state_title: '状态',
     state_name: '参数',
     state_value: '数值',
 
-    command_title: 'Command (*)',
-    command_send: 'Send (*)',
-    command_type: 'Type (*)',
-    command_position_stop: 'Position Stop (*)',
-    command_position_fix: 'Position Fix (*)',
-    command_engine_stop: 'Engine Stop (*)',
-    command_engine_resume: 'Engine Resume (*)',
-    command_frequency: 'Frequency (*)',
-    command_unit: 'Unit (*)'
+    command_title: '命令',
+    command_send: '发送',
+    command_type: '类型',
+    command_position_stop: '位置停止',
+    command_position_fix: '位置获取',
+    command_engine_stop: '引擎熄火',
+    command_engine_resume: '引擎启动',
+    command_frequency: '频率',
+    command_unit: '单位'
 };
