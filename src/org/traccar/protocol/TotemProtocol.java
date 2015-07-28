@@ -22,11 +22,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
 import java.util.List;
+import org.traccar.model.Command;
 
 public class TotemProtocol extends BaseProtocol {
 
     public TotemProtocol() {
         super("totem");
+        setSupportedCommands(
+                Command.TYPE_IMEI);
     }
 
     @Override
@@ -37,6 +40,7 @@ public class TotemProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new TotemFrameDecoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new TotemProtocolDecoder(TotemProtocol.this));
+                pipeline.addLast("objectEncoder", new TotemProtocolEncoder());
             }
         });
     }
