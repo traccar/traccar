@@ -15,6 +15,12 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
+import java.nio.charset.Charset;
+import java.util.Calendar;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -22,13 +28,6 @@ import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Crc;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
@@ -66,9 +65,10 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
 
         String imei = ChannelBufferTools.readHexString(buf, 14);
-        imei += Crc.luhnChecksum(Long.valueOf(imei));
-        if (!identify(imei, channel)) {
-            return null;
+        if (!identify(imei, channel, null, false)) {
+            if (!identify(imei + Crc.luhnChecksum(Long.valueOf(imei)), channel)) {
+                return null;
+            }
         }
 
         int type = buf.readUnsignedShort();
