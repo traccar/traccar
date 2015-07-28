@@ -22,6 +22,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
 import java.util.List;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.model.Command;
 
 public class TotemProtocol extends BaseProtocol {
@@ -39,6 +40,7 @@ public class TotemProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new TotemFrameDecoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new TotemProtocolDecoder(TotemProtocol.this));
                 pipeline.addLast("objectEncoder", new TotemProtocolEncoder());
             }

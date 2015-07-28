@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.helper.Log;
 
 public class TotemFrameDecoder extends FrameDecoder {
 
@@ -38,13 +39,20 @@ public class TotemFrameDecoder extends FrameDecoder {
         if (buf.getUnsignedShort(buf.readerIndex()) == 0x0d0a) {
             buf.skipBytes(2);
         }
-
-        // Read message
-        int length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
-        if (length <= buf.readableBytes()) {
-            return buf.readBytes(length);
+        
+        try{
+            // Read message
+            int length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
+            if (length <= buf.readableBytes()) {
+                return buf.readBytes(length);
+            }
+        }catch(Exception e){
+            //TODO: notify to user the GPS response
+            
+            Log.debug("GPS Response: " + buf.toString(buf.readerIndex(), buf.readableBytes(), Charset.defaultCharset()));
+            //return buf.readBytes(buf.readableBytes());
         }
-
+        
         return null;
     }
 
