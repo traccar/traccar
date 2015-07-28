@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 alexis.
+ * Copyright 2015 Irving Gonzalez
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.model.Command;
 
-/**
- *
- * @author alexis
- */
 public class TotemProtocolEncoderTest {
     @Test
     public void testDecode() throws Exception {
@@ -36,7 +32,7 @@ public class TotemProtocolEncoderTest {
         command.setType(Command.TYPE_ENGINE_STOP);
         
         Map<String, Object> other = new HashMap<>();
-        other.put(Command.KEY_GPS_PASSWORD, "000000");
+        other.put(Command.KEY_DEVICE_PASSWORD, "000000");
         
         command.setOther(other);
         

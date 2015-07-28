@@ -1,5 +1,6 @@
 /*
- * Copyright 2015 alexis.
+ * Copyright 2015 Irving Gonzalez
+ * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +19,28 @@ package org.traccar.protocol;
 import org.traccar.StringProtocolEncoder; 
 import org.traccar.model.Command;
 
-/**
- *
- * @author Irving Gonzalez [ialexis93@gmail.com]
- */
+import java.util.HashMap;
+import java.util.Map;
+
 public class TotemProtocolEncoder extends StringProtocolEncoder{
     
     @Override
     protected Object encodeCommand(Command command) {
+
+        // Temporary put default password
+        Map<String, Object> other = command.getOther();
+        if (other == null) {
+            other = new HashMap<>();
+            command.setOther(other);
+        }
+        other.put(Command.KEY_DEVICE_PASSWORD, "000000");
         
         switch (command.getType()) {
             //Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "*{%s},025,C,1#", Command.KEY_GPS_PASSWORD);
+                return formatCommand(command, "*{%s},025,C,1#", Command.KEY_DEVICE_PASSWORD);
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "*{%s},025,C,0#", Command.KEY_GPS_PASSWORD);
+                return formatCommand(command, "*{%s},025,C,0#", Command.KEY_DEVICE_PASSWORD);
         }
         
         return null;
