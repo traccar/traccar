@@ -6,6 +6,13 @@ var strings = {
     shared_edit: 'Editar',
     shared_remove: 'Remover',
     shared_remove_confirm: 'Remove item?',
+    shared_km: 'km (*)',
+    shared_mi: 'mi (*)',
+    shared_kph: 'km/h (*)',
+    shared_mph: 'mph (*)',
+    shared_hour: 'Hour (*)',
+    shared_minute: 'Minute (*)',
+    shared_second: 'Second (*)',
 
     error_title: 'Erro',
     error_unknown: 'Erro desconhecido',
@@ -15,22 +22,26 @@ var strings = {
     user_password: 'Senha',
     user_admin: 'Admin',
 
-    login_title : 'Entre',
-    login_register : 'Register',
-    login_login : 'Entre',
-    login_failed : 'Endereço de email ou senha incorreta',
-    login_created : 'Novo usuário foi registrado',
-    login_logout : 'Sair',
+    login_title: 'Login (*)',
+    login_language: 'Language (*)',
+    login_register: 'Register (*)',
+    login_login: 'Login (*)',
+    login_failed: 'Incorrect email address or password (*)',
+    login_created: 'New user has been registered (*)',
+    login_logout: 'Logout (*)',
 
     device_dialog: 'Dispositivo',
     device_title: 'Devices',
     device_name: 'Nome',
     device_identifier: 'Identificador',
+    device_command: 'Command (*)',
 
     settings_title: 'Configurações',
     settings_user: 'Conta',
     settings_server: 'Servidor',
     settings_users: 'Usuário',
+    settings_distance_unit: 'Distance (*)',
+    settings_speed_unit: 'Speed (*)',
 
     report_title: 'Relatórios',
     report_device: 'Dispositivo',
@@ -54,8 +65,22 @@ var strings = {
     server_registration: 'Registro',
 
     map_title: 'Map',
+    map_layer: 'Map Layer (*)',
+    map_osm: 'Open Street Map (*)',
+    map_bing_road: 'Bing Maps Road (*)',
+    map_bing_aerial: 'Bing Maps Aerial (*)',
 
     state_title: 'Estado',
     state_name: 'Parâmetro',
-    state_value:  'Valor'
+    state_value: 'Value (*)',
+
+    command_title: 'Command (*)',
+    command_send: 'Send (*)',
+    command_type: 'Type (*)',
+    command_position_stop: 'Position Stop (*)',
+    command_position_fix: 'Position Fix (*)',
+    command_engine_stop: 'Engine Stop (*)',
+    command_engine_resume: 'Engine Resume (*)',
+    command_frequency: 'Frequency (*)',
+    command_unit: 'Unit (*)'
 };

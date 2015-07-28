@@ -83,7 +83,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         
         // Location
         double latitude = readCoordinate(buf, false);
-        int x = buf.readByte(); // reserved
+        position.set(Event.KEY_POWER, buf.readByte());
         double longitude = readCoordinate(buf, true);
         int flags = buf.readUnsignedByte() & 0x0f;
         position.setValid((flags & 0x02) != 0);

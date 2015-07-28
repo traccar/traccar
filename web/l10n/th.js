@@ -6,6 +6,13 @@ var strings = {
     shared_edit: 'ตรวจแก้ ปรับเปลี่ยนข้อมูล',
     shared_remove: 'ย้ายออก',
     shared_remove_confirm: 'ลบรายการ',
+    shared_km: 'km (*)',
+    shared_mi: 'mi (*)',
+    shared_kph: 'km/h (*)',
+    shared_mph: 'mph (*)',
+    shared_hour: 'Hour (*)',
+    shared_minute: 'Minute (*)',
+    shared_second: 'Second (*)',
 
     error_title: 'ผิดพลาด',
     error_unknown: 'ข้อผิดพลาดที่ไม่รู้จัก',
@@ -16,6 +23,7 @@ var strings = {
     user_admin: 'ผู้ดูแลระบบ',
 
     login_title: 'เข้าสู่ระบบ',
+    login_language: 'Language (*)',
     login_register: 'ลงทะเบียน',
     login_login: 'เข้าสู่ระบบ',
     login_failed: 'ที่อยู่อีเมลหรือรหัสผ่านไม่ถูกต้อง',
@@ -26,11 +34,14 @@ var strings = {
     device_title: 'เครื่อง/อุปกรณ์',
     device_name: 'ชื่อ',
     device_identifier: 'ระบุ',
+    device_command: 'Command (*)',
 
     settings_title: 'การตั้งค่า',
     settings_user: 'บัญชี',
     settings_server: 'ผู้ให้บริการ',
     settings_users: 'ผู้ใช้งาน',
+    settings_distance_unit: 'Distance (*)',
+    settings_speed_unit: 'Speed (*)',
 
     report_title: 'รายงาน',
     report_device: 'เครื่อง/อุปกรณ์',
@@ -54,8 +65,22 @@ var strings = {
     server_registration: 'ลงทะเบียน',
 
     map_title: 'แผนที่',
+    map_layer: 'Map Layer (*)',
+    map_osm: 'Open Street Map (*)',
+    map_bing_road: 'Bing Maps Road (*)',
+    map_bing_aerial: 'Bing Maps Aerial (*)',
 
     state_title: 'สถานะ',
     state_name: 'พารามิเตอร์',
-    state_value: 'มูลค่า'
+    state_value: 'มูลค่า',
+
+    command_title: 'Command (*)',
+    command_send: 'Send (*)',
+    command_type: 'Type (*)',
+    command_position_stop: 'Position Stop (*)',
+    command_position_fix: 'Position Fix (*)',
+    command_engine_stop: 'Engine Stop (*)',
+    command_engine_resume: 'Engine Resume (*)',
+    command_frequency: 'Frequency (*)',
+    command_unit: 'Unit (*)'
 };

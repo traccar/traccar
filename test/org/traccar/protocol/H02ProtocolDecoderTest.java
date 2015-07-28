@@ -96,6 +96,9 @@ public class H02ProtocolDecoderTest extends ProtocolDecoderTest {
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "24270517030820321418041423307879000463213792000056fffff9ffff0000"))));
 
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "2441091144271222470112142233983006114026520E000000FFFFFBFFFF0014060000000001CC00262B0F170A"))));
+
     }
 
 }
