@@ -30,7 +30,9 @@ public class TotemProtocol extends BaseProtocol {
     public TotemProtocol() {
         super("totem");
         setSupportedCommands(
-                Command.TYPE_IMEI);
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ENGINE_STOP
+        );
     }
 
     @Override

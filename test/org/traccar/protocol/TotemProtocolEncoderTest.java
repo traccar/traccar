@@ -33,9 +33,9 @@ public class TotemProtocolEncoderTest {
         
         Command command = new Command();
         command.setDeviceId(2);
-        command.setType(Command.TYPE_IMEI);
+        command.setType(Command.TYPE_ENGINE_STOP);
         
-        Assert.assertEquals("*000000,801#", encoder.encodeCommand(command));
+        Assert.assertEquals("*000000,025,C,1#", encoder.encodeCommand(command));
 
     }
 }

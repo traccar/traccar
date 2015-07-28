@@ -15,7 +15,7 @@
  */
 package org.traccar.protocol;
  
-import org.traccar.StringProtocolEncoder;
+import org.traccar.StringProtocolEncoder; 
 import org.traccar.model.Command;
 
 /**
@@ -28,8 +28,11 @@ public class TotemProtocolEncoder extends StringProtocolEncoder{
     protected Object encodeCommand(Command command) {
         
         switch (command.getType()) {
-            case Command.TYPE_IMEI:
-                return "*000000,801#";
+            //Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
+            case Command.TYPE_ENGINE_STOP:
+                return formatCommand(command, "*{%s},025,C,1#", Command.KEY_GPS_PASSWORD);
+            case Command.TYPE_ENGINE_RESUME:
+                return formatCommand(command, "*{%s},025,C,0#", Command.KEY_GPS_PASSWORD);
         }
         
         return null;

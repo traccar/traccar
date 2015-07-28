@@ -25,10 +25,11 @@ public class Command implements Factory {
     public static final String TYPE_POSITION_STOP = "positionStop";
     public static final String TYPE_POSITION_FIX = "positionFix";
     public static final String TYPE_ENGINE_STOP = "engineStop";
-    public static final String TYPE_ENGINE_RESUME = "engineResume";
-    public static final String TYPE_IMEI = "imei";
+    public static final String TYPE_ENGINE_RESUME = "engineResume"; 
     
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
+    public static final String KEY_GPS_PASSWORD = "gpsPassword";
+    
 
 }
