@@ -36,22 +36,22 @@ public class XexunFrameDecoder extends FrameDecoder {
         }
 
         // Find start
-        Integer beginIndex = ChannelBufferTools.find(buf, 0, length, "GPRMC");
+        Integer beginIndex = ChannelBufferTools.find(buf, buf.readerIndex(), "GPRMC");
         if (beginIndex == null) {
-            beginIndex = ChannelBufferTools.find(buf, 0, length, "GNRMC");
+            beginIndex = ChannelBufferTools.find(buf, buf.readerIndex(), "GNRMC");
             if (beginIndex == null) {
                 return null;
             }
         }
 
         // Find identifier
-        Integer idIndex = ChannelBufferTools.find(buf, beginIndex, length, "imei:");
+        Integer idIndex = ChannelBufferTools.find(buf, beginIndex, "imei:");
         if (idIndex == null) {
             return null;
         }
 
         // Find end
-        Integer endIndex = ChannelBufferTools.find(buf, idIndex, length, ",");
+        Integer endIndex = ChannelBufferTools.find(buf, idIndex, ",");
         if (endIndex == null) {
             return null;
         }
