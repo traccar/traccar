@@ -19,7 +19,8 @@ import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder; 
+import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import org.traccar.helper.ChannelBufferTools;
 
 public class TotemFrameDecoder extends FrameDecoder {
 
@@ -28,27 +29,26 @@ public class TotemFrameDecoder extends FrameDecoder {
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         // Check minimum length
         if (buf.readableBytes() < 10) {
             return null;
         }
-        
-        // Trim end line
-        if (buf.getUnsignedShort(buf.readerIndex()) == 0x0d0a) {
-            buf.skipBytes(2);
+
+        // Find start
+        Integer beginIndex = ChannelBufferTools.find(buf, buf.readerIndex(), "$$");
+        if (beginIndex == null) {
+            return null;
+        } else if (beginIndex > buf.readerIndex()) {
+            buf.readerIndex(beginIndex);
         }
-        
-        if(buf.toString(buf.readerIndex(), 2, Charset.defaultCharset()).equals("$$")){
-            int length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
-            if (length <= buf.readableBytes()) {
-                return buf.readBytes(length);
-            }
-        }else{
-            //TODO: notify to user the GPS response
-            return buf.readBytes(buf.readableBytes());
+
+        // Read message
+        int length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
+        if (length <= buf.readableBytes()) {
+            return buf.readBytes(length);
         }
-        
+
         return null;
     }
 
