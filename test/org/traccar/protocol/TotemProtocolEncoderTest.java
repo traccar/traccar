@@ -35,6 +35,11 @@ public class TotemProtocolEncoderTest {
         command.setDeviceId(2);
         command.setType(Command.TYPE_ENGINE_STOP);
         
+        Map<String, Object> other = new HashMap<>();
+        other.put(Command.KEY_GPS_PASSWORD, "000000");
+        
+        command.setOther(other);
+        
         Assert.assertEquals("*000000,025,C,1#", encoder.encodeCommand(command));
 
     }
