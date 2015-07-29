@@ -20,7 +20,6 @@ Ext.Loader.setConfig({
 
 {
     var availableLanguages = {
-        'cn': '中文',
         'de': 'Deutsch',
         'en': 'English',
         'es': 'Español',
@@ -28,7 +27,8 @@ Ext.Loader.setConfig({
         'pl': 'Polski',
         'pt': 'Português',
         'ru': 'Русский',
-        'th': 'ไทย'
+        'th': 'ไทย',
+        'zh': '中文'
     };
 
     var language = Ext.Object.fromQueryString(window.location.search.substring(1)).locale;
