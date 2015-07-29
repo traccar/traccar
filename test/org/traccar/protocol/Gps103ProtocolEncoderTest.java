@@ -15,7 +15,7 @@ public class Gps103ProtocolEncoderTest {
         
         Command command = new Command();
         command.setDeviceId(1);
-        command.setType(Command.TYPE_POSITION_FIX);
+        command.setType(Command.TYPE_POSITION_PERIODIC);
         
         Map<String, Object> other = new HashMap<>();
         other.put(Command.KEY_FREQUENCY, 300l);
