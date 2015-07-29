@@ -22,8 +22,9 @@ public class Command implements Factory {
     public Map<String, Object> getOther() { return other; }
     public void setOther(Map<String, Object> other) { this.other = other; }
 
+    public static final String TYPE_POSITION_SINGLE = "positionSingle";
+    public static final String TYPE_POSITION_PERIODIC = "positionPeriodic";
     public static final String TYPE_POSITION_STOP = "positionStop";
-    public static final String TYPE_POSITION_FIX = "positionFix";
     public static final String TYPE_ENGINE_STOP = "engineStop";
     public static final String TYPE_ENGINE_RESUME = "engineResume";
     

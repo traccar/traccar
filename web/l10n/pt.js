@@ -76,11 +76,11 @@ var strings = {
 
     command_title: 'Comando',
     command_send: 'Enviar',
-    command_type: 'Tipo' ,
-    command_position_stop: 'Parar Posição' ,
-    command_position_fix: 'Posição Tempo' ,
-    command_engine_stop: 'Bloqueio Veículo' ,
-    command_engine_resume: 'Desbloqueio Veículo' ,
-    command_frequency: 'Frequência' ,
+    command_type: 'Tipo',
+    command_position_periodic: 'Posição Tempo',
+    command_position_stop: 'Parar Posição',
+    command_engine_stop: 'Bloqueio Veículo',
+    command_engine_resume: 'Desbloqueio Veículo',
+    command_frequency: 'Frequência',
     command_unit: 'Unidade'
 };

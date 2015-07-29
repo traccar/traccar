@@ -31,8 +31,9 @@ public class Gps103Protocol extends BaseProtocol {
     public Gps103Protocol() {
         super("gps103");
         setSupportedCommands(
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
-                Command.TYPE_POSITION_FIX,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
     }
