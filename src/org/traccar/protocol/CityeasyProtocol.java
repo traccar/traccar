@@ -34,7 +34,7 @@ public class CityeasyProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -2, 0));
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));
                 pipeline.addLast("objectDecoder", new CityeasyProtocolDecoder(CityeasyProtocol.this));
             }
         });
