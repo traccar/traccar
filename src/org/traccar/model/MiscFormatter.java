@@ -15,6 +15,8 @@
  */
 package org.traccar.model;
 
+import org.traccar.web.JsonConverter;
+
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -73,6 +75,10 @@ public class MiscFormatter {
                 json.add(entry.getKey(), (Double) entry.getValue());
             } else if (entry.getValue() instanceof Boolean) {
                 json.add(entry.getKey(), (Boolean) entry.getValue());
+            } else if (entry.getValue() == null) {
+                json.add(entry.getKey(), JsonValue.NULL);
+            } else {
+                json.add(entry.getKey(), JsonConverter.objectToJson(entry.getValue()));
             }
         }
 

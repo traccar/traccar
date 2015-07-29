@@ -18,6 +18,11 @@ package org.traccar.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
+import org.traccar.model.MiscFormatter;
+import org.traccar.model.Position;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PositionServlet extends BaseServlet {
 
@@ -27,6 +32,9 @@ public class PositionServlet extends BaseServlet {
         switch (command) {
             case "/get":
                 get(req, resp);
+                break;
+            case "/devices":
+                devices(req, resp);
                 break;
             default:
                 return false;
@@ -44,4 +52,19 @@ public class PositionServlet extends BaseServlet {
                             JsonConverter.parseDate(req.getParameter("to")))));
     }
 
+    private void devices(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        long userId = getUserId(req);
+        Map<String, Object> positions = new HashMap<>();
+
+        for(String deviceIdString : req.getParameterValues("devicesId")) {
+            Long deviceId = Long.parseLong(deviceIdString);
+
+            Context.getPermissionsManager().checkDevice(userId, deviceId);
+
+            Position position = Context.getConnectionManager().getLastPosition(deviceId);
+            positions.put(deviceId.toString(), position);
+        }
+
+        sendResponse(resp.getWriter(), MiscFormatter.toJson(positions));
+    }
 }
