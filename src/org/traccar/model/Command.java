@@ -27,10 +27,11 @@ public class Command implements Factory {
     public static final String TYPE_POSITION_STOP = "positionStop";
     public static final String TYPE_ENGINE_STOP = "engineStop";
     public static final String TYPE_ENGINE_RESUME = "engineResume";
-    
+    public static final String TYPE_ALARM_ARM = "alarmArm";
+    public static final String TYPE_ALARM_DISARM = "alarmDisarm";
+
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";
     
-
 }

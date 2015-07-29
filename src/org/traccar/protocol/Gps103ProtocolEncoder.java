@@ -51,6 +51,10 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
                 return formatCommand(command, "**,imei:{%s},J;", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(command, "**,imei:{%s},K;", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_ARM:
+                return formatCommand(command, "**,imei:{%s},L;", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_DISARM:
+                return formatCommand(command, "**,imei:{%s},M;", Command.KEY_UNIQUE_ID);
         }
         
         return null;
