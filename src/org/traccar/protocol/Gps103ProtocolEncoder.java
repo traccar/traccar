@@ -42,13 +42,13 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
         
         switch (command.getType()) {
             case Command.TYPE_POSITION_STOP:
-                return formatCommand(command, "**,{%s},A;", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "**,imei:{%s},A;", Command.KEY_UNIQUE_ID);
             case Command.TYPE_POSITION_FIX:
-                return formatCommand(command, "**,{%s},C,{%s};", this, Command.KEY_UNIQUE_ID, Command.KEY_FREQUENCY);
+                return formatCommand(command, "**,imei:{%s},C,{%s};", this, Command.KEY_UNIQUE_ID, Command.KEY_FREQUENCY);
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "**,{%s},J;", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "**,imei:{%s},J;", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "**,{%s},K;", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "**,imei:{%s},K;", Command.KEY_UNIQUE_ID);
         }
         
         return null;
