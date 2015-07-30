@@ -20,6 +20,7 @@ import java.util.Date;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -27,8 +28,14 @@ import org.traccar.model.Position;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
+    private long timeZone;
+
     public UlbotechProtocolDecoder(UlbotechProtocol protocol) {
         super(protocol);
+
+        if (Context.getConfig().hasKey(protocol + ".timezone")) {
+            timeZone = Context.getConfig().getInteger(protocol + ".timezone");
+        }
     }
 
     private static final short DATA_GPS = 0x01;
@@ -68,6 +75,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         // Time
         long seconds = buf.readUnsignedInt() & 0x7fffffffl;
         seconds += 946684800l; // 2000-01-01 00:00
+        seconds -= timeZone;
         position.setTime(new Date(seconds * 1000));
         
         boolean hasLocation = false;
