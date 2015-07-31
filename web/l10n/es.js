@@ -77,7 +77,7 @@ var strings = {
     command_title: 'Comando',
     command_send: 'Enviar',
     command_type: 'Tipo',
-    command_position_periodic: 'Periodic Position Reporting (*)',
+    command_position_periodic: 'Posicion Fix',
     command_position_stop: 'Posicion Parado',
     command_engine_stop: 'Motor detenido',
     command_engine_resume: 'Resumen de motor',
