@@ -199,7 +199,9 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 0; i < 15; i++) {
                 long rfid = buf.readUnsignedInt();
                 if (rfid != 0) {
-                    position.set(Event.KEY_RFID, String.format("%010d", rfid));
+                    String card = String.format("%010d", rfid);
+                    position.set("card" + (i + 1), card);
+                    position.set(Event.KEY_RFID, card);
                 }
             }
         }
