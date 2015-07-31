@@ -23,7 +23,7 @@ var strings = {
     user_admin: 'ผู้ดูแลระบบ',
 
     login_title: 'เข้าสู่ระบบ',
-    login_language: 'Language (*)',
+    login_language: 'ภาษา',
     login_register: 'ลงทะเบียน',
     login_login: 'เข้าสู่ระบบ',
     login_failed: 'ที่อยู่อีเมลหรือรหัสผ่านไม่ถูกต้อง',
@@ -34,7 +34,7 @@ var strings = {
     device_title: 'เครื่อง/อุปกรณ์',
     device_name: 'ชื่อ',
     device_identifier: 'ระบุ',
-    device_command: 'Command (*)',
+    device_command: 'คำสั่ง',
 
     settings_title: 'การตั้งค่า',
     settings_user: 'บัญชี',
