@@ -28,8 +28,8 @@ Ext.define('Traccar.view.command.CommandDialogController', {
         form.updateRecord();
         var record = form.getRecord();
 
-        if (record.get('type') === 'positionFix') {
-            other = this.lookupReference('paramPositionFix');
+        if (record.get('type') === 'positionPeriodic') {
+            other = this.lookupReference('paramPositionPeriodic');
             var value = other.down('numberfield[name="frequency"]').getValue();
             value *= other.down('combobox[name="unit"]').getValue();
 

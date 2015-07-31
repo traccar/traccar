@@ -43,7 +43,7 @@ Ext.define('Traccar.view.command.CommandDialog', {
             }
         }, {
             xtype: 'fieldcontainer',
-            reference: 'paramPositionFix',
+            reference: 'paramPositionPeriodic',
             name: 'other',
             hidden: true,
 
