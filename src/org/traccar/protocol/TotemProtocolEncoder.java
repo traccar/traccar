@@ -19,21 +19,13 @@ package org.traccar.protocol;
 import org.traccar.StringProtocolEncoder; 
 import org.traccar.model.Command;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class TotemProtocolEncoder extends StringProtocolEncoder{
     
     @Override
     protected Object encodeCommand(Command command) {
 
         // Temporary put default password
-        Map<String, Object> other = command.getOther();
-        if (other == null) {
-            other = new HashMap<>();
-            command.setOther(other);
-        }
-        other.put(Command.KEY_DEVICE_PASSWORD, "000000");
+        command.set(Command.KEY_DEVICE_PASSWORD, "000000");
         
         switch (command.getType()) {
             //Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8

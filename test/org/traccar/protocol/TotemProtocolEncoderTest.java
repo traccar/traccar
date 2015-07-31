@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.model.Command;
@@ -30,11 +28,7 @@ public class TotemProtocolEncoderTest {
         Command command = new Command();
         command.setDeviceId(2);
         command.setType(Command.TYPE_ENGINE_STOP);
-        
-        Map<String, Object> other = new HashMap<>();
-        other.put(Command.KEY_DEVICE_PASSWORD, "000000");
-        
-        command.setOther(other);
+        command.set(Command.KEY_DEVICE_PASSWORD, "000000");
         
         Assert.assertEquals("*000000,025,C,1#", encoder.encodeCommand(command));
 

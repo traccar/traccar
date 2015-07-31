@@ -45,11 +45,11 @@ public abstract class Event {
     public Map<String, Object> getOther() { return other; }
     public void setOther(Map<String, Object> other) { this.other = other; }
 
-    public void set(String key, Object value) {
-        if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
-            other.put(key, value);
-        }
-    }
+    public void set(String key, boolean value) { other.put(key, value); }
+    public void set(String key, int value) { other.put(key, value); }
+    public void set(String key, long value) { other.put(key, value); }
+    public void set(String key, double value) { other.put(key, value); }
+    public void set(String key, String value) { if (value != null && !value.isEmpty()) other.put(key, value); }
 
     // Words separated by dashes (word-second-third)
     public static final String KEY_INDEX = "index";

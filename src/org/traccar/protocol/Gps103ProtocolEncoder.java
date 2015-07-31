@@ -24,7 +24,7 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
     public String formatValue(String key, Object value) {
 
         if (key.equals(Command.KEY_FREQUENCY)) {
-            long frequency = (Long) value;
+            long frequency = ((Number) value).longValue();
             if (frequency / 60 / 60 > 0) {
                 return String.format("%02dh", frequency / 60 / 60);
             } else if (frequency / 60 > 0) {

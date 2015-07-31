@@ -22,6 +22,12 @@ public class Command implements Factory {
     public Map<String, Object> getOther() { return other; }
     public void setOther(Map<String, Object> other) { this.other = other; }
 
+    public void set(String key, boolean value) { other.put(key, value); }
+    public void set(String key, int value) { other.put(key, value); }
+    public void set(String key, long value) { other.put(key, value); }
+    public void set(String key, double value) { other.put(key, value); }
+    public void set(String key, String value) { if (value != null && !value.isEmpty()) other.put(key, value); }
+    
     public static final String TYPE_POSITION_SINGLE = "positionSingle";
     public static final String TYPE_POSITION_PERIODIC = "positionPeriodic";
     public static final String TYPE_POSITION_STOP = "positionStop";
