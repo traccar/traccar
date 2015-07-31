@@ -5,12 +5,12 @@ var strings = {
     shared_add: 'Agregar',
     shared_edit: 'Editar',
     shared_remove: 'Borrar',
-    shared_remove_confirm: 'Borrar item?',
+    shared_remove_confirm: 'Borrar elemento?',
     shared_km: 'km',
     shared_mi: 'mi',
     shared_kph: 'km/h',
     shared_mph: 'mph',
-    shared_hour: 'Hour',
+    shared_hour: 'Hora',
     shared_minute: 'Minuto',
     shared_second: 'Segundos',
 
@@ -27,7 +27,7 @@ var strings = {
     login_register: 'Registrar',
     login_login: 'Ingresar',
     login_failed: 'Direccion de correo o Contraseña Incorrecta',
-    login_created: 'Nuevo Usuario ha Sido Registrado',
+    login_created: 'Nuevo usuario ha sido registrado',
     login_logout: 'Salir',
 
     device_dialog: 'Dispositivo',
@@ -46,7 +46,7 @@ var strings = {
     report_title: 'Reportes',
     report_device: 'Dispositivos',
     report_from: 'Desde',
-    report_to: 'A',
+    report_to: 'Hasta',
     report_show: 'Mostrar',
     report_clear: 'Limpiar',
 
@@ -66,9 +66,9 @@ var strings = {
 
     map_title: 'Mapa',
     map_layer: 'Capa de Mapa',
-    map_osm: 'Open Street Mapa',
-    map_bing_road: 'Bing Mapas de Carretera',
-    map_bing_aerial: 'Bing Mapas Aereos',
+    map_osm: 'Open Street Map',
+    map_bing_road: 'Bing Maps - Carretera',
+    map_bing_aerial: 'Bing Maps - Aereo',
 
     state_title: 'Estado',
     state_name: 'Parametro',
@@ -77,10 +77,10 @@ var strings = {
     command_title: 'Comando',
     command_send: 'Enviar',
     command_type: 'Tipo',
-    command_position_periodic: 'Posicion Fix',
-    command_position_stop: 'Posicion Parado',
-    command_engine_stop: 'Motor detenido',
-    command_engine_resume: 'Resumen de motor',
+    command_position_periodic: 'Frecuencia de posiciones',
+    command_position_stop: 'Detener reporte de posiciones',
+    command_engine_stop: 'Apagar motor',
+    command_engine_resume: 'Desbloquear encendido de motor',
     command_frequency: 'Frequencia',
     command_unit: 'Unidad'
 };
