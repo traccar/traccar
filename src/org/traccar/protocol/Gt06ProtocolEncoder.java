@@ -40,7 +40,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         int commandLength = serverFlagBit + content.length();
         int packetLength =  0x80 + content.length() + 2 + 2;
 
-        ChannelBuffer response = ChannelBuffers.directBuffer(10);
+        ChannelBuffer response = ChannelBuffers.dynamicBuffer();
         response.writeBytes(new byte[]{0x78, 0x78}); // Start Bit
         response.writeByte(packetLength); // Packet Length
         response.writeByte(0x80); // Protocol Number

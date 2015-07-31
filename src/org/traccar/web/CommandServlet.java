@@ -5,8 +5,8 @@ import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
-import org.traccar.model.Command;
 import org.traccar.database.ActiveDevice;
+import org.traccar.model.Command;
 
 public class CommandServlet extends BaseServlet {
 
@@ -36,7 +36,7 @@ public class CommandServlet extends BaseServlet {
     private void send(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 
         Command command = JsonConverter.objectFromJson(req.getReader(), new Command());
-        getActiveDevice(command.getDeviceId()).write(command);
+        getActiveDevice(command.getDeviceId()).sendCommand(command);
         sendResponse(resp.getWriter(), true);
     }
 
