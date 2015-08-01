@@ -3,6 +3,10 @@
 import re
 import os
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 path = '../web/l10n/'
 
 files = [f for f in os.listdir(path) if os.path.isfile(path + f) and f.endswith('.js') and not f.endswith('en.js')]

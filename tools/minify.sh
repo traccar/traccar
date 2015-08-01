@@ -1,3 +1,5 @@
+#!/bin/sh
+
 cd $(dirname $0)/../web
 
 SDK="../../ext-6.0.0"

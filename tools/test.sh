@@ -1,3 +1,4 @@
+#!/bin/sh
 
 #
 # This test data assumes three devices exist:

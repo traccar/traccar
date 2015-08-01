@@ -1,3 +1,5 @@
+#!/bin/sh
+
 #
 # This test data assumes device "352964051908664" exists.
 #

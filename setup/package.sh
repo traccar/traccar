@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd $(dirname $0)
+
 if [ $# -eq 0 ]; then
     echo "Version number is not provided"
     exit 0
