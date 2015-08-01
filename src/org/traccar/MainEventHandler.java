@@ -62,6 +62,8 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
         e.getChannel().close();
+        
+        Context.getConnectionManager().removeActiveDevice(e.getChannel());
     }
 
     @Override

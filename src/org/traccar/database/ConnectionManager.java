@@ -50,6 +50,15 @@ public class ConnectionManager {
     public void setActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
     }
+    
+    public void removeActiveDevice(Channel channel) {
+        for (ActiveDevice activeDevice : activeDevices.values()) {
+            if (activeDevice.getChannel() == channel) {
+                activeDevices.remove(activeDevice.getDeviceId());
+                break;
+            }
+        }
+    }
 
     public ActiveDevice getActiveDevice(long deviceId) {
         return activeDevices.get(deviceId);
