@@ -23,7 +23,7 @@ Ext.define('Traccar.store.Languages', {
             if (availableLanguages.hasOwnProperty(code)) {
                 data.push({
                     'code': code,
-                    'name': availableLanguages[code]
+                    'name': availableLanguages[code].name
                 });
             }
         }

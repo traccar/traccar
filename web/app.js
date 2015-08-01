@@ -14,37 +14,6 @@
  * limitations under the License.
  */
 
-Ext.Loader.setConfig({
-    disableCaching: false
-});
-
-{
-    var availableLanguages = {
-        'de': 'Deutsch',
-        'en': 'English',
-        'es': 'Español',
-        'fr': 'Français',
-        'pl': 'Polski',
-        'pt': 'Português',
-        'ru': 'Русский',
-        'th': 'ไทย',
-        'zh': '中文'
-    };
-
-    var language = Ext.Object.fromQueryString(window.location.search.substring(1)).locale;
-    if (language === undefined) {
-        language = window.navigator.userLanguage || window.navigator.language;
-        language = language.substr(0, 2);
-    }
-
-    if (!(language in availableLanguages)) {
-        language = 'en'; // default
-    }
-
-    Ext.Loader.loadScript('/l10n/' + language + '.js');
-    Ext.Loader.loadScript('http://cdn.sencha.com/ext/gpl/5.1.0/build/packages/ext-locale/build/ext-locale-' + language + '.js');
-}
-
 Ext.application({
     name: 'Traccar',
     extend: 'Traccar.Application'
