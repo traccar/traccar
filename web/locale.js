@@ -41,4 +41,4 @@ if (!(language in availableLanguages)) {
 }
 
 Ext.Loader.loadScript('/l10n/' + language + '.js');
-Ext.Loader.loadScript('http://cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/locale/locale-' + availableLanguages[language].code + '.js');
+Ext.Loader.loadScript('//cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/locale/locale-' + availableLanguages[language].code + '.js');
