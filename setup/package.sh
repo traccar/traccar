@@ -66,6 +66,8 @@ fi
 tar -xzf wrapper-delta-pack-*.tar.gz
 mv wrapper-delta-pack-*/ wrapper/
 
+../tools/minify.sh
+
 # UNIVERSAL PACKAGE
 
 zip -j tracker-server-$1.zip ../target/tracker-server.jar universal/README.txt
@@ -189,3 +191,5 @@ rm -rf out
 # GENERAL CLEANUP
 
 rm -rf wrapper/
+
+rm ../web/app.min.js
