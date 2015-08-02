@@ -16,13 +16,12 @@
 
 Ext.define('Traccar.view.user.UserDialog', {
     extend: 'Ext.window.Window',
-    xtype: 'user-dialog',
 
     requires: [
         'Traccar.view.user.UserDialogController'
     ],
 
-    controller: 'userdialog',
+    controller: 'userDialog',
     
     bodyPadding: styles.panelPadding,
     title: strings.settingsUser,

@@ -16,8 +16,8 @@
 
 Ext.define('Traccar.view.user.User', {
     extend: 'Ext.grid.Panel',
-    xtype: 'user-view',
-    
+    xtype: 'userView',
+
     requires: [
         'Traccar.view.user.UserController'
     ],

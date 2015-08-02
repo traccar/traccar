@@ -16,7 +16,7 @@
 
 Ext.define('Traccar.view.report.Report', {
     extend: 'Ext.grid.Panel',
-    xtype: 'report-view',
+    xtype: 'reportView',
 
     requires: [
         'Traccar.view.report.ReportController'

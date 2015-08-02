@@ -122,7 +122,7 @@ Ext.define('Traccar.view.device.DeviceController', {
             layout: 'fit',
             modal: true,
             items: {
-                xtype: 'user-view'
+                xtype: 'userView'
             }
         }).show();
     },

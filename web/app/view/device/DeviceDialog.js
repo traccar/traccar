@@ -16,13 +16,12 @@
 
 Ext.define('Traccar.view.device.DeviceDialog', {
     extend: 'Ext.window.Window',
-    xtype: 'device-dialog',
 
     requires: [
         'Traccar.view.device.DeviceDialogController'
     ],
 
-    controller: 'devicedialog',
+    controller: 'deviceDialog',
     
     bodyPadding: styles.panelPadding,
     title: strings.deviceDialog,

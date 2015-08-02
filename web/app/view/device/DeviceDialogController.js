@@ -16,7 +16,7 @@
 
 Ext.define('Traccar.view.device.DeviceDialogController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.devicedialog',
+    alias: 'controller.deviceDialog',
 
     onSaveClick: function(button) {
         var dialog = button.up('window').down('form');

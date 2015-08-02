@@ -16,7 +16,7 @@
 
 Ext.define('Traccar.view.admin.ServerDialogController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.serverdialog',
+    alias: 'controller.serverDialog',
 
     onSaveClick: function(button) {
         var dialog = button.up('window').down('form');

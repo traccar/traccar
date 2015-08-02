@@ -42,21 +42,21 @@ Ext.define('Traccar.view.main.Main', {
         items: [{
             collapsible: false,
             region: 'center',
-            xtype: 'device-view',
+            xtype: 'deviceView',
             flex: 1
         }, {
             region: 'south',
-            xtype: 'state-view',
+            xtype: 'stateView',
             flex: 1
         }]
     }, {
         region: 'south',
-        xtype: 'report-view',
+        xtype: 'reportView',
         header: false,
         height: styles.reportHeight
     }, {
         region: 'center',
-        xtype: 'map-view',
+        xtype: 'mapView',
         collapsible: false
     }]
 

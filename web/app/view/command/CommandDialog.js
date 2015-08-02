@@ -16,13 +16,12 @@
 
 Ext.define('Traccar.view.command.CommandDialog', {
     extend: 'Ext.window.Window',
-    xtype: 'command-dialog',
 
     requires: [
         'Traccar.view.command.CommandDialogController'
     ],
 
-    controller: 'commanddialog',
+    controller: 'commandDialog',
     
     bodyPadding: styles.panelPadding,
     title: strings.commandTitle,

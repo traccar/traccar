@@ -16,13 +16,12 @@
 
 Ext.define('Traccar.view.admin.ServerDialog', {
     extend: 'Ext.window.Window',
-    xtype: 'server-dialog',
 
     requires: [
         'Traccar.view.admin.ServerDialogController'
     ],
 
-    controller: 'serverdialog',
+    controller: 'serverDialog',
     
     bodyPadding: styles.panelPadding,
     title: strings.serverTitle,

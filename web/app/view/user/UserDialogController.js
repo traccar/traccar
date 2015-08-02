@@ -16,7 +16,7 @@
 
 Ext.define('Traccar.view.user.UserDialogController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.userdialog',
+    alias: 'controller.userDialog',
 
     init: function() {
         if (Traccar.getApplication().getUser().get('admin')) {
