@@ -41,7 +41,9 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
                 s.append("id: ").append(position.getDeviceId()).append(", ");
                 s.append("time: ").append(position.getFixTime()).append(", ");
                 s.append("lat: ").append(position.getLatitude()).append(", ");
-                s.append("lon: ").append(position.getLongitude());
+                s.append("lon: ").append(position.getLongitude()).append(", ");
+                s.append("speed: ").append(position.getSpeed()).append(", ");
+                s.append("course: ").append(position.getCourse());
                 Log.info(s.toString());
 
                 Context.getConnectionManager().update(position);
