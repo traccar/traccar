@@ -27,7 +27,11 @@ Ext.define('Traccar.ErrorManager', {
                 return false;
             }
         } else {
-            Ext.Msg.alert(strings.errorTitle, response.statusText);
+            if (response.statusText) {
+                Ext.Msg.alert(strings.errorTitle, response.statusText);
+            } else {
+                Ext.Msg.alert(strings.errorTitle, response.status.toString()); // TODO: text message
+            }
             return false;
         }
     },
