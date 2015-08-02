@@ -8,7 +8,7 @@ var strings = {
     shared_remove_confirm: '要移除选项吗？',
     shared_km: '千米',
     shared_mi: '海里',
-    shared_kph: '千米/小时',
+    shared_kmh: '千米/小时',
     shared_mph: '每小时英里数',
     shared_hour: '小时',
     shared_minute: '分钟',

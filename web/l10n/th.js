@@ -8,7 +8,7 @@ var strings = {
     shared_remove_confirm: 'ลบรายการ',
     shared_km: 'กม.',
     shared_mi: 'ไมล์',
-    shared_kph: 'กม. / ชม',
+    shared_kmh: 'กม. / ชม',
     shared_mph: 'ไมล์ต่อชั่วโมง',
     shared_hour: 'ชั่วโมง',
     shared_minute: 'นาที',

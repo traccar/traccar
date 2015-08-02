@@ -8,7 +8,7 @@ var strings = {
     shared_remove_confirm: 'Удалить элемент?',
     shared_km: 'км',
     shared_mi: 'мили',
-    shared_kph: 'км/ч',
+    shared_kmh: 'км/ч',
     shared_mph: 'миль/ч',
     shared_hour: 'Часы',
     shared_minute: 'Минуты',

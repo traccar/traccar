@@ -8,7 +8,7 @@ var strings = {
     shared_remove_confirm: 'Objekt entfernen?',
     shared_km: 'km',
     shared_mi: 'mi',
-    shared_kph: 'km/h',
+    shared_kmh: 'km/h',
     shared_mph: 'mph',
     shared_hour: 'Stunde',
     shared_minute: 'Minute',

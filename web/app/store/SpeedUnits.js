@@ -18,13 +18,13 @@ Ext.define('Traccar.store.SpeedUnits', {
     extend: 'Ext.data.Store',
     fields: ['key', 'name'],
     data: [
-        {'key': 'kph', 'name': strings.shared_kph},
+        {'key': 'kmh', 'name': strings.shared_kmh},
         {'key': 'mph', 'name': strings.shared_mph}
     ],
 
     convert: function(value, unit) {
         switch (unit) {
-            case 'kph':
+            case 'kmh':
                 return value * 1.852;
             case 'mph':
                 return value * 1.15078;
