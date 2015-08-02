@@ -78,9 +78,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 }
 
                 Log.debug(msg.toString());
-            } else if (e instanceof ExceptionEvent) {
-                ExceptionEvent event = (ExceptionEvent) e;
-                Log.warning(event.getCause());
             }
         }
 
