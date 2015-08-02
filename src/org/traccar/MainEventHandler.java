@@ -43,7 +43,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
                 s.append("lat: ").append(position.getLatitude()).append(", ");
                 s.append("lon: ").append(position.getLongitude()).append(", ");
                 s.append("speed: ").append(position.getSpeed()).append(", ");
-                s.append("course: ").append(position.getCourse()).append(", ");
+                s.append("course: ").append(position.getCourse());
                 Log.info(s.toString());
 
                 Context.getConnectionManager().update(position);
