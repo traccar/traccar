@@ -38,6 +38,7 @@ import org.traccar.model.Device;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
+import org.traccar.model.Schema;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.web.AsyncServlet;
@@ -157,6 +158,23 @@ public class DataManager implements IdentityManager {
                 }
             }
             if (exist) {
+                
+                String schemaVersionQuery = getQuery("database.selectSchemaVersion");
+                if (schemaVersionQuery != null) {
+                
+                    Schema schema = QueryBuilder.create(dataSource, schemaVersionQuery).executeQuerySingle(new Schema());
+
+                    int version = 0;
+                    if (schema != null) {
+                        version = schema.getVersion();
+                    }
+
+                    if (version != 301) {
+                        Log.error("Wrong database schema version (" + version + ")");
+                        throw new RuntimeException();
+                    }
+                }
+                
                 return;
             }
 
