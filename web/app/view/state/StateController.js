@@ -37,39 +37,39 @@ Ext.define('Traccar.view.state.StateController', {
     keys: {
         'fixTime': {
             priority: 1,
-            name: strings.position_time
+            name: strings.positionTime
         },
         'latitude': {
             priority: 2,
-            name: strings.position_latitude
+            name: strings.positionLatitude
         },
         'longitude': {
             priority: 3,
-            name: strings.position_longitude
+            name: strings.positionLongitude
         },
         'valid': {
             priority: 4,
-            name: strings.position_valid
+            name: strings.positionValid
         },
         'altitude': {
             priority: 5,
-            name: strings.position_altitude
+            name: strings.positionAltitude
         },
         'speed': {
             priority: 6,
-            name: strings.position_speed
+            name: strings.positionSpeed
         },
         'course': {
             priority: 7,
-            name: strings.position_course
+            name: strings.positionCourse
         },
         'address': {
             priority: 8,
-            name: strings.position_address
+            name: strings.positionAddress
         },
         'protocol': {
             priority: 9,
-            name: strings.position_protocol
+            name: strings.positionProtocol
         }
     },
 

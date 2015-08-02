@@ -24,7 +24,7 @@ Ext.define('Traccar.view.login.Register', {
     controller: 'register',
 
     bodyPadding: styles.panel_padding,
-    title: strings.login_register,
+    title: strings.loginRegister,
     resizable: false,
     modal: true,
     
@@ -36,28 +36,28 @@ Ext.define('Traccar.view.login.Register', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: strings.user_name,
+            fieldLabel: strings.userName,
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'email',
-            fieldLabel: strings.user_email,
+            fieldLabel: strings.userEmail,
             vtype: 'email',
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'password',
-            fieldLabel: strings.user_password,
+            fieldLabel: strings.userPassword,
             inputType: 'password',
             allowBlank: false
         }]
     },
 
     buttons: [{
-        text: strings.shared_save,
+        text: strings.sharedSave,
         handler: 'onCreateClick'
     }, {
-        text: strings.shared_cancel,
+        text: strings.sharedCancel,
         handler: 'closeView'
     }]
 

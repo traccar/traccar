@@ -28,16 +28,16 @@ Ext.define('Traccar.view.user.User', {
     selType: 'rowmodel',
     
     tbar: [{
-        text: strings.shared_add,
+        text: strings.sharedAdd,
         handler: 'onAddClick',
         reference: 'deviceAddButton'
     }, {
-        text: strings.shared_edit,
+        text: strings.sharedEdit,
         disabled: true,
         handler: 'onEditClick',
         reference: 'userEditButton'
     }, {
-        text: strings.shared_remove,
+        text: strings.sharedRemove,
         disabled: true,
         handler: 'onRemoveClick',
         reference: 'userRemoveButton'
@@ -48,9 +48,9 @@ Ext.define('Traccar.view.user.User', {
     },
 
     columns: [
-        { text: strings.user_name, dataIndex: 'name', flex: 1 },
-        { text: strings.user_email, dataIndex: 'email', flex: 1 },
-        { text: strings.user_admin, dataIndex: 'admin', flex: 1 }
+        { text: strings.userName, dataIndex: 'name', flex: 1 },
+        { text: strings.userEmail, dataIndex: 'email', flex: 1 },
+        { text: strings.userAdmin, dataIndex: 'admin', flex: 1 }
     ]
 
 });

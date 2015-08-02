@@ -25,7 +25,7 @@ Ext.define('Traccar.view.admin.ServerDialog', {
     controller: 'serverdialog',
     
     bodyPadding: styles.panel_padding,
-    title: strings.server_title,
+    title: strings.serverTitle,
     resizable: false,
     modal: true,
     
@@ -34,49 +34,49 @@ Ext.define('Traccar.view.admin.ServerDialog', {
         items: [{
             xtype: 'checkboxfield',
             name: 'registration',
-            fieldLabel: strings.server_registration,
+            fieldLabel: strings.serverRegistration,
             allowBlank: false
         }, {
             xtype: 'combobox',
             name: 'map',
-            fieldLabel: strings.map_layer,
+            fieldLabel: strings.mapLayer,
             store: 'MapTypes',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'combobox',
             name: 'distanceUnit',
-            fieldLabel: strings.settings_distance_unit,
+            fieldLabel: strings.settingsDistanceUnit,
             store: 'DistanceUnits',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'combobox',
             name: 'speedUnit',
-            fieldLabel: strings.settings_speed_unit,
+            fieldLabel: strings.settingsSpeedUnit,
             store: 'SpeedUnits',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'numberfield',
             name: 'latitude',
-            fieldLabel: strings.position_latitude
+            fieldLabel: strings.positionLatitude
         }, {
             xtype: 'numberfield',
             name: 'longitude',
-            fieldLabel: strings.position_longitude
+            fieldLabel: strings.positionLongitude
         }, {
             xtype: 'numberfield',
             name: 'zoom',
-            fieldLabel: strings.server_zoom
+            fieldLabel: strings.serverZoom
         }]
     },
 
     buttons: [{
-        text: strings.shared_save,
+        text: strings.sharedSave,
         handler: 'onSaveClick'
     }, {
-        text: strings.shared_cancel,
+        text: strings.sharedCancel,
         handler: 'onCancelClick'
     }]
 

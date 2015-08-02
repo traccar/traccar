@@ -47,12 +47,12 @@ Ext.define('Traccar.view.user.UserController', {
     onRemoveClick: function() {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
-            title: strings.settings_user,
-            message: strings.shared_remove_confirm,
+            title: strings.settingsUser,
+            message: strings.sharedRemoveConfirm,
             buttons: Ext.Msg.YESNO,
             buttonText: {
-                yes: strings.shared_remove,
-                no: strings.shared_cancel
+                yes: strings.sharedRemove,
+                no: strings.sharedCancel
             },
             fn: function(btn) {
                 if (btn === 'yes') {

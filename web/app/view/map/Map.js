@@ -24,7 +24,7 @@ Ext.define('Traccar.view.map.Map', {
 
     controller: 'map',
 
-    title: strings.map_title,
+    title: strings.mapTitle,
     layout: 'fit',
 
     listeners: {

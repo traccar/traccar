@@ -24,7 +24,7 @@ Ext.define('Traccar.view.login.Login', {
     controller: 'login',
 
     bodyPadding: styles.panel_padding,
-    title: strings.login_title,
+    title: strings.loginTitle,
     closable: false,
     resizable: false,
 
@@ -35,7 +35,7 @@ Ext.define('Traccar.view.login.Login', {
         items: [{
             xtype: 'combobox',
             name: 'language',
-            fieldLabel: strings.login_language,
+            fieldLabel: strings.loginLanguage,
             store: 'Languages',
             displayField: 'name',
             valueField: 'code',
@@ -47,7 +47,7 @@ Ext.define('Traccar.view.login.Login', {
         }, {
             xtype: 'textfield',
             name: 'email',
-            fieldLabel: strings.user_email,
+            fieldLabel: strings.userEmail,
             allowBlank: false,
             enableKeyEvents: true,
             listeners: {
@@ -57,7 +57,7 @@ Ext.define('Traccar.view.login.Login', {
         }, {
             xtype: 'textfield',
             name: 'password',
-            fieldLabel: strings.user_password,
+            fieldLabel: strings.userPassword,
             inputType: 'password',
             allowBlank: false,
             enableKeyEvents: true,
@@ -68,11 +68,11 @@ Ext.define('Traccar.view.login.Login', {
     },
 
     buttons: [{
-        text: strings.login_register,
+        text: strings.loginRegister,
         handler: 'onRegisterClick',
         reference: 'registerButton'
     }, {
-        text: strings.login_login,
+        text: strings.loginLogin,
         handler: 'onLoginClick'
     }]
 

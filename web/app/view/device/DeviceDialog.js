@@ -25,7 +25,7 @@ Ext.define('Traccar.view.device.DeviceDialog', {
     controller: 'devicedialog',
     
     bodyPadding: styles.panel_padding,
-    title: strings.device_dialog,
+    title: strings.deviceDialog,
     resizable: false,
     modal: true,
     
@@ -34,21 +34,21 @@ Ext.define('Traccar.view.device.DeviceDialog', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: strings.device_name,
+            fieldLabel: strings.deviceName,
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'uniqueId',
-            fieldLabel: strings.device_identifier,
+            fieldLabel: strings.deviceIdentifier,
             allowBlank: false
         }]
     },
 
     buttons: [{
-        text: strings.shared_save,
+        text: strings.sharedSave,
         handler: 'onSaveClick'
     }, {
-        text: strings.shared_cancel,
+        text: strings.sharedCancel,
         handler: 'onCancelClick'
     }]
 

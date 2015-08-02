@@ -25,11 +25,11 @@ Ext.define('Traccar.view.report.Report', {
     controller: 'report',
     store: 'Positions',
 
-    title: strings.report_title,
+    title: strings.reportTitle,
 
     tbar: [{
         xtype: 'tbtext',
-        html: strings.report_device
+        html: strings.reportDevice
     }, {
         xtype: 'combobox',
         reference: 'deviceField',
@@ -40,7 +40,7 @@ Ext.define('Traccar.view.report.Report', {
         queryMode: 'local'
     }, '-', {
         xtype: 'tbtext',
-        html: strings.report_from
+        html: strings.reportFrom
     }, {
         xtype: 'datefield',
         reference: 'fromDateField',
@@ -52,7 +52,7 @@ Ext.define('Traccar.view.report.Report', {
         value: new Date()
     }, '-', {
         xtype: 'tbtext',
-        html: strings.report_to
+        html: strings.reportTo
     }, {
         xtype: 'datefield',
         reference: 'toDateField',
@@ -63,10 +63,10 @@ Ext.define('Traccar.view.report.Report', {
         maxWidth: styles.report_time,
         value: new Date()
     }, '-', {
-        text: strings.report_show,
+        text: strings.reportShow,
         handler: 'onShowClick'
     }, {
-        text: strings.report_clear,
+        text: strings.reportClear,
         handler: 'onClearClick'
     }],
 
@@ -75,13 +75,13 @@ Ext.define('Traccar.view.report.Report', {
     },
 
     columns: [
-        { text: strings.position_valid, dataIndex: 'valid', flex: 1 },
-        { text: strings.position_time, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.report_format },
-        { text: strings.position_latitude, dataIndex: 'latitude', flex: 1 },
-        { text: strings.position_longitude, dataIndex: 'longitude', flex: 1 },
-        { text: strings.position_altitude, dataIndex: 'altitude', flex: 1 },
+        { text: strings.positionValid, dataIndex: 'valid', flex: 1 },
+        { text: strings.positionTime, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.report_format },
+        { text: strings.positionLatitude, dataIndex: 'latitude', flex: 1 },
+        { text: strings.positionLongitude, dataIndex: 'longitude', flex: 1 },
+        { text: strings.positionAltitude, dataIndex: 'altitude', flex: 1 },
         {
-            text: strings.position_speed,
+            text: strings.positionSpeed,
             dataIndex: 'speed',
             flex: 1,
             renderer: function(value) {
@@ -90,8 +90,8 @@ Ext.define('Traccar.view.report.Report', {
                 return speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
             }
         },
-        { text: strings.position_course, dataIndex: 'course', flex: 1 },
-        { text: strings.position_address, dataIndex: 'address', flex: 1 }
+        { text: strings.positionCourse, dataIndex: 'course', flex: 1 },
+        { text: strings.positionAddress, dataIndex: 'address', flex: 1 }
     ]
 
 });

@@ -25,11 +25,11 @@ Ext.define('Traccar.view.state.State', {
     controller: 'state',
     store: 'Parameters',
 
-    title: strings.state_title,
+    title: strings.stateTitle,
 
     columns: [
-        { text: strings.state_name, dataIndex: 'name', flex: 1 },
-        { text: strings.state_value, dataIndex: 'value', flex: 1 }
+        { text: strings.stateName, dataIndex: 'name', flex: 1 },
+        { text: strings.stateValue, dataIndex: 'value', flex: 1 }
     ]
 
 });

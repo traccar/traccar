@@ -18,7 +18,7 @@ Ext.define('Traccar.store.DistanceUnits', {
     extend: 'Ext.data.Store',
     fields: ['key', 'name'],
     data: [
-        {'key': 'km', 'name': strings.shared_km},
-        {'key': 'mi', 'name': strings.shared_mi}
+        {'key': 'km', 'name': strings.sharedKm},
+        {'key': 'mi', 'name': strings.sharedMi}
     ]
 });

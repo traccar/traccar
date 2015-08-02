@@ -25,7 +25,7 @@ Ext.define('Traccar.view.user.UserDialog', {
     controller: 'userdialog',
     
     bodyPadding: styles.panel_padding,
-    title: strings.settings_user,
+    title: strings.settingsUser,
     resizable: false,
     modal: true,
     
@@ -34,66 +34,66 @@ Ext.define('Traccar.view.user.UserDialog', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: strings.user_name
+            fieldLabel: strings.userName
         }, {
             xtype: 'textfield',
             name: 'email',
-            fieldLabel: strings.user_email,
+            fieldLabel: strings.userEmail,
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'password',
-            fieldLabel: strings.user_password,
+            fieldLabel: strings.userPassword,
             inputType: 'password',
             allowBlank: false
         }, {
             xtype: 'checkboxfield',
             name: 'admin',
-            fieldLabel: strings.user_admin,
+            fieldLabel: strings.userAdmin,
             allowBlank: false,
             disabled: true,
             reference: 'adminField'
         }, {
             xtype: 'combobox',
             name: 'map',
-            fieldLabel: strings.map_layer,
+            fieldLabel: strings.mapLayer,
             store: 'MapTypes',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'combobox',
             name: 'distanceUnit',
-            fieldLabel: strings.settings_distance_unit,
+            fieldLabel: strings.settingsDistanceUnit,
             store: 'DistanceUnits',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'combobox',
             name: 'speedUnit',
-            fieldLabel: strings.settings_speed_unit,
+            fieldLabel: strings.settingsSpeedUnit,
             store: 'SpeedUnits',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'numberfield',
             name: 'latitude',
-            fieldLabel: strings.position_latitude
+            fieldLabel: strings.positionLatitude
         }, {
             xtype: 'numberfield',
             name: 'longitude',
-            fieldLabel: strings.position_longitude
+            fieldLabel: strings.positionLongitude
         }, {
             xtype: 'numberfield',
             name: 'zoom',
-            fieldLabel: strings.server_zoom
+            fieldLabel: strings.serverZoom
         }]
     },
 
     buttons: [{
-        text: strings.shared_save,
+        text: strings.sharedSave,
         handler: 'onSaveClick'
     }, {
-        text: strings.shared_cancel,
+        text: strings.sharedCancel,
         handler: 'onCancelClick'
     }]
 

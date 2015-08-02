@@ -67,7 +67,7 @@ Ext.define('Traccar.view.login.LoginController', {
     doLogin: function() {
         var form = this.lookupReference('form');
         if (form.isValid()) {
-            Ext.getBody().mask(strings.shared_loading);
+            Ext.getBody().mask(strings.sharedLoading);
             
             Traccar.LoginManager.login({
                 data: form.getValues(),
@@ -82,7 +82,7 @@ Ext.define('Traccar.view.login.LoginController', {
         if (success) {
             this.fireViewEvent('login');
         } else {
-            Traccar.ErrorManager.error(strings.login_failed);
+            Traccar.ErrorManager.error(strings.loginFailed);
         }
     },
     

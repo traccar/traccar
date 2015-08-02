@@ -50,7 +50,7 @@ Ext.define('Traccar.view.command.CommandDialogController', {
     onSendReturn: function(options, success, response) {
         if (Traccar.ErrorManager.check(success, response)) {
             this.closeView();
-            //TODO toast Ext.toast(strings.login_created);
+            //TODO toast Ext.toast(strings.loginCreated);
         }
     },
 

@@ -23,17 +23,17 @@ Ext.define('Traccar.ErrorManager', {
             if (result.success || result.error === undefined) {
                 return true;
             } else {
-                Ext.Msg.alert(strings.error_title, result.error);
+                Ext.Msg.alert(strings.errorTitle, result.error);
                 return false;
             }
         } else {
-            Ext.Msg.alert(strings.error_title, response.statusText);
+            Ext.Msg.alert(strings.errorTitle, response.statusText);
             return false;
         }
     },
 
     error: function(message) {
-        Ext.Msg.alert(strings.error_title, message);
+        Ext.Msg.alert(strings.errorTitle, message);
     }
 
 });

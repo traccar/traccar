@@ -25,56 +25,56 @@ Ext.define('Traccar.view.device.Device', {
     controller: 'device',
     store: 'Devices',
 
-    title: strings.device_title,
+    title: strings.deviceTitle,
     selType: 'rowmodel',
     
     tbar: [{
         handler: 'onAddClick',
         reference: 'deviceAddButton',
         glyph: 'xf067@FontAwesome',
-        tooltip: strings.shared_add,
+        tooltip: strings.sharedAdd,
         tooltipType: 'title'
     }, {
         disabled: true,
         handler: 'onEditClick',
         reference: 'deviceEditButton',
         glyph: 'xf040@FontAwesome',
-        tooltip: strings.shared_edit,
+        tooltip: strings.sharedEdit,
         tooltipType: 'title'
     }, {
         disabled: true,
         handler: 'onRemoveClick',
         reference: 'deviceRemoveButton',
         glyph: 'xf00d@FontAwesome',
-        tooltip: strings.shared_remove,
+        tooltip: strings.sharedRemove,
         tooltipType: 'title'
     }, {
         disabled: true,
         handler: 'onCommandClick',
         reference: 'deviceCommandButton',
         glyph: 'xf093@FontAwesome',
-        tooltip: strings.device_command,
+        tooltip: strings.deviceCommand,
         tooltipType: 'title'
     }, {
         xtype: 'tbfill'
     }, {
-        text: strings.settings_title,
+        text: strings.settingsTitle,
         menu: [{
-            text: strings.settings_user,
+            text: strings.settingsUser,
             handler: 'onUserClick'
         }, {
-            text: strings.settings_server,
+            text: strings.settingsServer,
             disabled: true,
             handler: 'onServerClick',
             reference: 'settingsServerButton'
         }, {
-            text: strings.settings_users,
+            text: strings.settingsUsers,
             disabled: true,
             handler: 'onUsersClick',
             reference: 'settingsUsersButton'
         }]
     }, {
-        text: strings.login_logout,
+        text: strings.loginLogout,
         handler: 'onLogoutClick'
     }],
 
@@ -83,8 +83,8 @@ Ext.define('Traccar.view.device.Device', {
     },
     
     columns: [
-        { text: strings.device_name, dataIndex: 'name', flex: 1 },
-        { text: strings.device_identifier, dataIndex: 'uniqueId', flex: 1 }
+        { text: strings.deviceName, dataIndex: 'name', flex: 1 },
+        { text: strings.deviceIdentifier, dataIndex: 'uniqueId', flex: 1 }
     ]
 
 });
