@@ -24,7 +24,7 @@ Ext.define('Traccar.view.device.DeviceDialog', {
 
     controller: 'devicedialog',
     
-    bodyPadding: styles.panel_padding,
+    bodyPadding: styles.panelPadding,
     title: strings.deviceDialog,
     resizable: false,
     modal: true,

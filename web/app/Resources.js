@@ -15,32 +15,32 @@
  */
 
 var styles = {
-    panel_padding: 10,
+    panelPadding: 10,
 
-    window_width: 640,
-    window_height: 480,
+    windowWidth: 640,
+    windowHeight: 480,
 
-    device_width: 350,
+    deviceWidth: 350,
 
-    report_height: 250,
-    report_time: 100,
-    report_format: 'Y-m-d H:i:s',
+    reportHeight: 250,
+    reportTime: 100,
+    reportFormat: 'Y-m-d H:i:s',
 
-    map_default_lat: -0.1275,
-    map_default_lon: 51.507222,
-    map_default_zoom: 6,
+    mapDefaultLat: -0.1275,
+    mapDefaultLon: 51.507222,
+    mapDefaultZoom: 6,
 
-    map_max_zoom: 16,
-    map_select_color: 'rgba(0, 255, 0, 1.0)',
-    map_select_radius: 10,
-    map_report_color: 'rgba(0, 0, 255, 1.0)',
-    map_report_radius: 5,
-    map_live_color: 'rgba(255, 0, 0, 1.0)',
-    map_live_radius: 7,
-    map_stroke_color: 'rgba(50, 50, 50, 1.0)',
-    map_route_width: 5,
-    map_marker_stroke: 2,
-    map_delay: 500
+    mapMaxZoom: 16,
+    mapSelectColor: 'rgba(0, 255, 0, 1.0)',
+    mapSelectRadius: 10,
+    mapReportColor: 'rgba(0, 0, 255, 1.0)',
+    mapReportRadius: 5,
+    mapLiveColor: 'rgba(255, 0, 0, 1.0)',
+    mapLiveRadius: 7,
+    mapStrokeColor: 'rgba(50, 50, 50, 1.0)',
+    mapRouteWidth: 5,
+    mapMarkerStroke: 2,
+    mapDelay: 500
 };
 
 Ext.define('Traccar.Resources', {

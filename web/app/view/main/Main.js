@@ -34,7 +34,7 @@ Ext.define('Traccar.view.main.Main', {
     items: [{
         region:'west',
         layout: 'border',
-        width: styles.device_width,
+        width: styles.deviceWidth,
         header: false,
         defaults: {
             split: true
@@ -53,7 +53,7 @@ Ext.define('Traccar.view.main.Main', {
         region: 'south',
         xtype: 'report-view',
         header: false,
-        height: styles.report_height
+        height: styles.reportHeight
     }, {
         region: 'center',
         xtype: 'map-view',

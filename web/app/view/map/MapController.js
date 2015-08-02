@@ -66,7 +66,7 @@ Ext.define('Traccar.view.map.MapController', {
                     if (data[i].deviceId in this.liveData) {
                         this.liveData[data[i].deviceId].setGeometry(geometry);
                     } else {
-                        var style = this.getMarkerStyle(styles.map_live_radius, styles.map_live_color);
+                        var style = this.getMarkerStyle(styles.mapLiveRadius, styles.mapLiveColor);
                         var marker = new ol.Feature({
                             geometry: geometry,
                             originalStyle: style
@@ -88,8 +88,8 @@ Ext.define('Traccar.view.map.MapController', {
     getLineStyle: function() {
         return new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: styles.map_stroke_color,
-                width: styles.map_route_width
+                color: styles.mapStrokeColor,
+                width: styles.mapRouteWidth
             })
         });
     },
@@ -116,8 +116,8 @@ Ext.define('Traccar.view.map.MapController', {
                     color: color
                 }),
                 stroke: new ol.style.Stroke({
-                    color: styles.map_stroke_color,
-                    width: styles.map_marker_stroke
+                    color: styles.mapStrokeColor,
+                    width: styles.mapMarkerStroke
                 })
             })
         });
@@ -142,7 +142,7 @@ Ext.define('Traccar.view.map.MapController', {
             ]);
             positions.push(point);
 
-            var style = this.getMarkerStyle(styles.map_report_radius, styles.map_report_color);
+            var style = this.getMarkerStyle(styles.mapReportRadius, styles.mapReportColor);
             var feature = new ol.Feature({
                 geometry: new ol.geom.Point(positions[index]),
                 originalStyle: style
@@ -189,10 +189,10 @@ Ext.define('Traccar.view.map.MapController', {
         }
 
         if (feature !== undefined) {
-            feature.setStyle(this.getMarkerStyle(styles.map_select_radius, styles.map_select_color));
+            feature.setStyle(this.getMarkerStyle(styles.mapSelectRadius, styles.mapSelectColor));
 
             var pan = ol.animation.pan({
-                duration: styles.map_delay,
+                duration: styles.mapDelay,
                 source: this.getView().mapView.getCenter()
             });
             this.getView().map.beforeRender(pan);

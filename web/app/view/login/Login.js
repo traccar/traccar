@@ -23,7 +23,7 @@ Ext.define('Traccar.view.login.Login', {
     
     controller: 'login',
 
-    bodyPadding: styles.panel_padding,
+    bodyPadding: styles.panelPadding,
     title: strings.loginTitle,
     closable: false,
     resizable: false,

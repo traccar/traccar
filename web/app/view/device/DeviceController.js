@@ -117,8 +117,8 @@ Ext.define('Traccar.view.device.DeviceController', {
     onUsersClick: function() {
         Ext.create('Ext.window.Window', {
             title: strings.settingsUsers,
-            width: styles.window_width,
-            height: styles.window_height,
+            width: styles.windowWidth,
+            height: styles.windowHeight,
             layout: 'fit',
             modal: true,
             items: {

@@ -23,7 +23,7 @@ Ext.define('Traccar.view.login.Register', {
     
     controller: 'register',
 
-    bodyPadding: styles.panel_padding,
+    bodyPadding: styles.panelPadding,
     title: strings.loginRegister,
     resizable: false,
     modal: true,

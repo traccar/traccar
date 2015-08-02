@@ -24,7 +24,7 @@ Ext.define('Traccar.view.admin.ServerDialog', {
 
     controller: 'serverdialog',
     
-    bodyPadding: styles.panel_padding,
+    bodyPadding: styles.panelPadding,
     title: strings.serverTitle,
     resizable: false,
     modal: true,

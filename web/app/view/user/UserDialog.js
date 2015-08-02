@@ -24,7 +24,7 @@ Ext.define('Traccar.view.user.UserDialog', {
 
     controller: 'userdialog',
     
-    bodyPadding: styles.panel_padding,
+    bodyPadding: styles.panelPadding,
     title: strings.settingsUser,
     resizable: false,
     modal: true,

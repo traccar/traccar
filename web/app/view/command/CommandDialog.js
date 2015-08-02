@@ -24,7 +24,7 @@ Ext.define('Traccar.view.command.CommandDialog', {
 
     controller: 'commanddialog',
     
-    bodyPadding: styles.panel_padding,
+    bodyPadding: styles.panelPadding,
     title: strings.commandTitle,
     resizable: false,
     modal: true,

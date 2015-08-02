@@ -58,14 +58,14 @@ Ext.define('Traccar.view.map.Map', {
                 source: this.vectorSource
             });
 
-            var lat = user.get('latitude') || server.get('latitude') || styles.map_default_lat;
-            var lon = user.get('longitude') || server.get('longitude') || styles.map_default_lon;
-            var zoom = user.get('zoom') || server.get('zoom') || styles.map_default_zoom;
+            var lat = user.get('latitude') || server.get('latitude') || styles.mapDefaultLat;
+            var lon = user.get('longitude') || server.get('longitude') || styles.mapDefaultLon;
+            var zoom = user.get('zoom') || server.get('zoom') || styles.mapDefaultZoom;
 
             this.mapView = new ol.View({
                 center: ol.proj.fromLonLat([lat, lon]),
                 zoom: zoom,
-                maxZoom: styles.map_max_zoom
+                maxZoom: styles.mapMaxZoom
             });
 
             this.map = new ol.Map({

@@ -48,7 +48,7 @@ Ext.define('Traccar.view.report.Report', {
     }, {
         xtype: 'timefield',
         reference: 'fromTimeField',
-        maxWidth: styles.report_time,
+        maxWidth: styles.reportTime,
         value: new Date()
     }, '-', {
         xtype: 'tbtext',
@@ -60,7 +60,7 @@ Ext.define('Traccar.view.report.Report', {
     }, {
         xtype: 'timefield',
         reference: 'toTimeField',
-        maxWidth: styles.report_time,
+        maxWidth: styles.reportTime,
         value: new Date()
     }, '-', {
         text: strings.reportShow,
@@ -76,7 +76,7 @@ Ext.define('Traccar.view.report.Report', {
 
     columns: [
         { text: strings.positionValid, dataIndex: 'valid', flex: 1 },
-        { text: strings.positionTime, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.report_format },
+        { text: strings.positionTime, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.reportFormat },
         { text: strings.positionLatitude, dataIndex: 'latitude', flex: 1 },
         { text: strings.positionLongitude, dataIndex: 'longitude', flex: 1 },
         { text: strings.positionAltitude, dataIndex: 'altitude', flex: 1 },
