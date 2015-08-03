@@ -18,47 +18,48 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Crc;
 import org.traccar.model.Command;
 
 public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
+
+    private ChannelBuffer encodeContent(String content) {
+
+        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+
+        buf.writeByte(0x78);
+        buf.writeByte(0x78);
+
+        buf.writeByte(1 + 1 + 4 + content.length() + 2 + 2); // message length
+
+        buf.writeByte(0x80); // message type
+
+        buf.writeByte(content.length()); // command length
+        buf.writeInt(0);
+        buf.writeBytes(content.getBytes()); // command
+
+        buf.writeShort(0); // message index
+
+        buf.writeShort(Crc.crc16Ccitt(buf.toByteBuffer(2, buf.writerIndex() - 2)));
+
+        buf.writeByte('\r');
+        buf.writeByte('\n');
+
+        return buf;
+    }
     
     @Override
     protected Object encodeCommand(Command command) {
         
-        String content = "";
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                content = "DYD#";
-                break;
+                return encodeContent("DYD,000000#");
             case Command.TYPE_ENGINE_RESUME:
-                content = "HFYD#";
-                break;
+                return encodeContent("HFYD,000000#");
         }
-        
-        int serverFlagBit = 0x00;
-        int commandLength = serverFlagBit + content.length();
-        int packetLength =  0x80 + content.length() + 2 + 2;
 
-        ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-        response.writeBytes(new byte[]{0x78, 0x78}); // Start Bit
-        response.writeByte(packetLength); // Packet Length
-        response.writeByte(0x80); // Protocol Number
-
-        // Information Content
-        response.writeByte(commandLength); // Length of command
-        response.writeByte(serverFlagBit); // Server Flag Bit
-        response.writeBytes(content.getBytes()); // Command Content
-        response.writeBytes(new byte[]{0x00, 0x02}); // Language
-
-        response.writeShort(1); // Information Serial Number
-
-        int crc = Crc.crc16Ccitt(response.toByteBuffer(2, response.writerIndex()));
-        response.writeShort(crc); // Error Check
-
-        response.writeBytes(new byte[] {0x0D, 0x0A}); // Stop Bit
-
-        return response;
+        return null;
     }
     
 }
