@@ -28,11 +28,11 @@ import org.traccar.model.Position;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
-    private long timeZone;
+    private final long timeZone;
 
     public UlbotechProtocolDecoder(UlbotechProtocol protocol) {
         super(protocol);
-        timeZone = Context.getConfig().getInteger(protocol + ".timezone", 0);
+        timeZone = Context.getConfig().getInteger(getProtocolName() + ".timezone", 0);
     }
 
     private static final short DATA_GPS = 0x01;
