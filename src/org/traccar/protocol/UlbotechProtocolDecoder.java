@@ -32,10 +32,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
     public UlbotechProtocolDecoder(UlbotechProtocol protocol) {
         super(protocol);
-
-        if (Context.getConfig().hasKey(protocol + ".timezone")) {
-            timeZone = Context.getConfig().getInteger(protocol + ".timezone");
-        }
+        timeZone = Context.getConfig().getInteger(protocol + ".timezone", 0);
     }
 
     private static final short DATA_GPS = 0x01;
