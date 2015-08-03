@@ -28,7 +28,7 @@ public class Gt06Protocol extends BaseProtocol {
         super("gt06");
         setSupportedCommands(
                 Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_STOP);
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
