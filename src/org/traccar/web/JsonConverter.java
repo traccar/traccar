@@ -37,7 +37,7 @@ import org.traccar.model.MiscFormatter;
 
 public class JsonConverter {
 
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
     public static Date parseDate(String value) throws ParseException {
         return dateFormat.parse(value);
