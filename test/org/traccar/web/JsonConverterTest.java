@@ -19,7 +19,7 @@ public class JsonConverterTest {
                 "\"int\": 42, " +
                 "\"double\": 41.99, " +
                 "\"string\": \"discworld\", " +
-                "\"date\":\"2015-07-09T19:02:17\"" +
+                "\"date\":\"2015-07-09T19:02:17+0000\"" +
                 "}"),
                 new Primitives());
 
@@ -27,15 +27,7 @@ public class JsonConverterTest {
         assertEquals(42, o.getInt());
         assertEquals(41.99, o.getDouble(), 0.001);
         assertEquals("discworld", o.getString());
-
-        Calendar c = Calendar.getInstance();
-        c.setTime(o.getDate());
-        assertEquals(2015, c.get(Calendar.YEAR));
-        assertEquals(Calendar.JULY, c.get(Calendar.MONTH));
-        assertEquals(9, c.get(Calendar.DAY_OF_MONTH));
-        assertEquals(19, c.get(Calendar.HOUR_OF_DAY));
-        assertEquals(2, c.get(Calendar.MINUTE));
-        assertEquals(17, c.get(Calendar.SECOND));
+        assertEquals(1436468537000L, o.getDate().getTime());
 
     }
 
