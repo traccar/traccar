@@ -65,7 +65,7 @@ var strings = {
     serverRegistration: 'Rejestracja',
 
     mapTitle: 'Mapa',
-    mapLayer: 'Map Layer',
+    mapLayer: 'Mapa',
     mapOsm: 'Open Street Map',
     mapBingRoad: 'Bing Maps Road',
     mapBingAerial: 'Bing Maps Aerial',
