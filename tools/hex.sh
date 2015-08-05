@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # Script to send convert HEX string into binary and send it to specified local port
