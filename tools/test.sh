@@ -9,7 +9,7 @@
 #     ('Test Device 3', 123456);
 #
 # Test data:
-#   ids - 123456789012345 (30), 123456789012 (1), 123456 (2)
+#   ids - 123456789012345 (27), 123456789012 (1), 123456 (4)
 #   time - 12:00 + X min (where X is port number - 5000)
 #
 # To verify test check database entries
