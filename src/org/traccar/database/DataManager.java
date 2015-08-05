@@ -210,17 +210,17 @@ public class DataManager implements IdentityManager {
                 Position position = new Position();
                 position.setDeviceId(device.getId());
 
-                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:01"));
+                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:01.000Z"));
                 position.setLatitude(-36.8785803);
                 position.setLongitude(174.7281713);
                 addPosition(position);
 
-                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:02"));
+                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:02.000Z"));
                 position.setLatitude(-36.8870932);
                 position.setLongitude(174.7473116);
                 addPosition(position);
 
-                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:03"));
+                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:03.000Z"));
                 position.setLatitude(-36.8932371);
                 position.setLongitude(174.7743053);
                 addPosition(position);
