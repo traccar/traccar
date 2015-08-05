@@ -19,7 +19,7 @@
 
 test_protocol () {
   echo -n -e $3 | nc localhost $1
-  if [[ $? -ne 0 ]]
+  if [ $? -ne 0 ]
   then
     printf "%-4s %-15s FAIL\n" $1 $2
   else
