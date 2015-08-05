@@ -1,64 +1,63 @@
-#!/bin/sh
+#!/bin/bash
+
+#
+# Shell script to create installers
+#
 
 cd $(dirname $0)
 
-if [ $# -eq 0 ]; then
-    echo "Version number is not provided"
-    exit 0
+if [[ $# -lt 1 ]]
+then
+  echo "USAGE: $0 <version>"
+  exit 1
 fi
 
 # GENERAL REQUIREMENTS
 
 # Check wrapper
-if ls wrapper-delta-pack-*.tar.gz 1> /dev/null 2>&1; then
-    echo "Java wrapper package found"
-else
-    echo "Put wrapper-delta-pack-*.tar.gz into this directory"
-    exit 0
+if ! ls wrapper-delta-pack-*.tar.gz &>/dev/null
+then
+  echo "Missing wrapper-delta-pack-*.tar.gz (http://wrapper.tanukisoftware.com/doc/english/download.jsp)"
+  exit 1
 fi
 
 # Check Windows x64 wrapper
-if ls wrapper-windows-x86-64-*.zip 1> /dev/null 2>&1; then
-    echo "Java wrapper package found"
-else
-    echo "Put wrapper-windows-x86-64-*.zip (from http://www.krenger.ch/blog/tag/java-service-wrapper/) into this directory"
-    exit 0
+if ! ls wrapper-windows-x86-64-*.zip &>/dev/null
+then
+  echo "Missing wrapper-windows-x86-64-*.zip (http://www.krenger.ch/blog/tag/java-service-wrapper/)"
+  exit 1
 fi
 
 # WINDOWS REQUIREMENTS
 
 # Check inno setup
-if ls isetup-*.exe 1> /dev/null 2>&1; then
-    echo "Inno setup installer found"
-else
-    echo "Put isetup-*.exe into this directory"
-    exit 0
+if ! ls isetup-*.exe &>/dev/null
+then
+  echo "Missing isetup-*.exe (http://www.jrsoftware.org/isdl.php)"
+  exit 1
 fi
 
 # Check wine
-if which wine > /dev/null; then
-    echo "Found wine"
-else
-    echo "Install wine package"
-    exit 0
+if ! which wine &>/dev/null
+then
+  echo "Missing wine package"
+  exit 1
 fi
 
 # Check innoextract
-if which innoextract > /dev/null; then
-    echo "Found Innoextract"
-else
-    echo "Install innoextract package"
-    exit 0
+if ! which innoextract &>/dev/null
+then
+  echo "Missing innoextract package"
+  exit 1
 fi
 
 # LINUX REQUIREMENTS
 
 # Check makeself
-if which makeself > /dev/null; then
-    echo "Found makeself"
-else
-    echo "Install makeself package"
-    exit 0
+if ! which makeself &>/dev/null
+then
+  echo "Install makeself package"
+  exit 1
 fi
 
 # GENERAL PREPARATION
@@ -75,7 +74,7 @@ zip -j tracker-server-$1.zip ../target/tracker-server.jar universal/README.txt
 # WINDOWS PACKAGE
 
 innoextract isetup-*.exe
-echo "NOTE: if you got any errors here try isetup version 5.5.0 (or check what versions are supported by 'innoextract -v')"
+echo "NOTE: if you got any errors here try isetup version 5.5.5 (or check what versions are supported by 'innoextract -v')"
 
 # windows 32
 
@@ -193,3 +192,5 @@ rm -rf out
 rm -rf wrapper/
 
 rm ../web/app.min.js
+
+exit 0
