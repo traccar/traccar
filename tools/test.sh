@@ -17,9 +17,6 @@
 # Warning: Not all shells support "echo -e"
 #
 
-cd $(dirname $0)
-
-# port name string
 test_protocol () {
   echo -n -e $3 | nc localhost $1
   if [[ $? -ne 0 ]]
