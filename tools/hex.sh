@@ -1,14 +1,35 @@
 #!/bin/sh
 
 #
-# This test data assumes device "352964051908664" exists.
+# Script to send convert HEX string into binary and send it to specified local port
 #
-#     INSERT INTO device ( name, uniqueid )
-#         VALUES ( 'Test Device for hex.sh', 352964051908664 );
+# Example usage:
 #
-# Note: Not all shells support "echo -e" (e.g., dash - default on Ubuntu).
-#       This will cause an unknown device error for "-e".
+#   hex.sh 5039 3e52505631393535352b343533383431382d303733393531383530303032303231323b49443d393939393b2a37423c0d0a
 #
 
-echo 3e52505631393535352b343533383431382d303733393531383530303032303231323b49443d393939393b2a37423c0d0a | perl -ne 's/([0-9a-f]{2})/print chr hex $1/gie' | nc -v -w 10 localhost 5039
-#echo 3e52505631393535352b343533383431382d303733393531383530303032303231323b49443d393939393b2a37423c0d0a | perl -ne 's/([0-9a-f]{2})/print chr hex $1/gie' > /dev/udp/localhost/5057
+if [[ $# -lt 2 ]]
+then
+  echo "USAGE: $0 <port> <hex>"
+  exit 1
+fi
+
+send_hex_udp () {
+  echo $2 | xxd -r -p | nc -u localhost $1
+}
+
+send_hex_tcp () {
+  echo $2 | xxd -r -p | nc localhost $1
+}
+
+send_text_udp () {
+  echo -n -e $2 | nc -u localhost $1
+}
+
+send_text_tcp () {
+  echo -n -e $2 | nc localhost $1
+}
+
+send_hex_tcp $1 $2
+
+exit $?

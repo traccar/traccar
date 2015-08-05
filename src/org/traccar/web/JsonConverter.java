@@ -32,15 +32,20 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
+
+import org.apache.log4j.helpers.ISO8601DateFormat;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
 public class JsonConverter {
 
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter dateFormat = ISODateTimeFormat.dateTime();
 
     public static Date parseDate(String value) throws ParseException {
-        return dateFormat.parse(value);
+        return dateFormat.parseDateTime(value).toDate();
     }
 
     public static <T extends Factory> T objectFromJson(Reader reader, T prototype) throws ParseException {
@@ -74,7 +79,7 @@ public class JsonConverter {
                     } else if (parameterType.equals(String.class)) {
                         method.invoke(object, json.getString(name));
                     } else if (parameterType.equals(Date.class)) {
-                        method.invoke(object, dateFormat.parse(json.getString(name)));
+                        method.invoke(object, dateFormat.parseDateTime(json.getString(name)).toDate());
                     } else if (parameterType.equals(Map.class)) {
                         method.invoke(object, MiscFormatter.fromJson(json.getJsonObject(name)));
                     }
@@ -115,7 +120,7 @@ public class JsonConverter {
                     } else if (method.getReturnType().equals(Date.class)) {
                         Date value = (Date) method.invoke(object);
                         if (value != null) {
-                            json.add(name, dateFormat.format(value));
+                            json.add(name, dateFormat.print(new DateTime(value)));
                         }
                     } else if (method.getReturnType().equals(Map.class)) {
                         json.add(name, MiscFormatter.toJson((Map) method.invoke(object)));

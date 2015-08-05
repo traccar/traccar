@@ -19,7 +19,7 @@ public class JsonConverterTest {
                 "\"int\": 42, " +
                 "\"double\": 41.99, " +
                 "\"string\": \"discworld\", " +
-                "\"date\":\"2015-07-09T19:02:17+0000\"" +
+                "\"date\":\"2015-07-09T19:02:17.000Z\"" +
                 "}"),
                 new Primitives());
 

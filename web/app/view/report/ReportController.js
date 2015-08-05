@@ -49,8 +49,8 @@ Ext.define('Traccar.view.report.ReportController', {
         store.load({
             params:{
                 deviceId: deviceId,
-                from: from,
-                to: to
+                from: from.toISOString(),
+                to: to.toISOString()
             },
             scope: this,
             callback: function() {
