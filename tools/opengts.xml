@@ -21,13 +21,13 @@
     <entry key='database.password'>[PASSWORD]</entry>
     
     <entry key='database.selectDevicesAll'>
-        SELECT imeiNumber AS id, imeiNumber AS uniqueId FROM Device WHERE imeiNumber REGEXP '^[0-9]+$';
+        SELECT CONCAT('1', imeiNumber) AS id, imeiNumber AS uniqueId FROM Device WHERE imeiNumber REGEXP '^[0-9]+$';
     </entry>
 
     <entry key='database.insertPosition'>
         START TRANSACTION;
-            UPDATE Device SET lastValidLatitude = :latitude, lastValidLongitude = :longitude, lastGPSTimestamp = UNIX_TIMESTAMP(:time), lastUpdateTime = UNIX_TIMESTAMP(NOW()) WHERE imeiNumber = RIGHT(CONCAT('000000000000000', :deviceId), 15);
-            SELECT @accountID := accountID, @deviceID := deviceID FROM Device WHERE imeiNumber = RIGHT(CONCAT('000000000000000', :deviceId), 15);
+            UPDATE Device SET lastValidLatitude = :latitude, lastValidLongitude = :longitude, lastGPSTimestamp = UNIX_TIMESTAMP(:time), lastUpdateTime = UNIX_TIMESTAMP(NOW()) WHERE imeiNumber = SUBSTRING(CAST(:deviceId AS CHAR(32)), 2);
+            SELECT @accountID := accountID, @deviceID := deviceID FROM Device WHERE imeiNumber = SUBSTRING(CAST(:deviceId AS CHAR(32)), 2);
             INSERT INTO EventData (accountID, deviceID, timestamp, statusCode, latitude, longitude, speedKPH, heading, altitude, rawData, creationTime, address)
             VALUES (@accountID, @deviceID, UNIX_TIMESTAMP(:time), 0, :latitude, :longitude, :speed * 1.852, :course, :altitude, '', UNIX_TIMESTAMP(NOW()), :address);
         COMMIT;
