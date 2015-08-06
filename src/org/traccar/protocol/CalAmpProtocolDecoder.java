@@ -193,7 +193,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
             // Event code and status
             if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
-                position.set(Event.KEY_EVENT, buf.readUnsignedByte() + " - " + buf.readUnsignedByte());
+                buf.readUnsignedByte();
+                position.set(Event.KEY_EVENT, buf.readUnsignedByte());
             }
 
             // Accumulators
