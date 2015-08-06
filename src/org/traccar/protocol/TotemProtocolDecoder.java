@@ -64,8 +64,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+.\\d+)\\|" +                  // Odometer
             "\\d+\\|" +                         // Serial Number
             ".*\\|?" +
-            "\\p{XDigit}{4}");                  // Checksum
-            
+            "\\p{XDigit}{4}" +                  // Checksum
+            "\r?\n?");
+
     private static final Pattern patternSecond = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
@@ -90,7 +91,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)\\|" +                       // Temperature
             "(\\d+.\\d+)\\|" +                  // Odometer
             "\\d+\\|" +                         // Serial Number
-            "\\p{XDigit}{4}");                  // Checksum
+            "\\p{XDigit}{4}" +                  // Checksum
+            "\r?\n?");
 
     private static final Pattern patternThird = Pattern.compile(
             "\\$\\$" +                          // Header
@@ -119,7 +121,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{3})(\\d{2}\\.\\d{4})" +       // Longitude (DDDMM.MMMM)
             "([EW])" +
             "\\d{4}" +                          // Serial Number
-            "\\p{XDigit}{4}");                  // Checksum
+            "\\p{XDigit}{4}" +                  // Checksum
+            "\r?\n?");
 
     private enum MessageFormat {
         first,
