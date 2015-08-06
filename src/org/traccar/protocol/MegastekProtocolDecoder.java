@@ -274,13 +274,6 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.\\d+)," +             // Odometer
             ".*");
 
-    //$MGV002,013777007536434,,R,010114,000057,V,0000.0000,N,00000.0000,E,00,00,00,99.9,0.000,0.00,0.0,80.263,510,89,2342,030B,,0000,0000,200,96,0, , ,,,,Timer;!
-    //<data head><protocol version>,<device IMEI>,<device name>,
-    // <GPRS real-time/stored data flag>,<date>,<time>,<GPS fixed flag>,
-    // <latitude>,<N/S>,<longitude>,<W/E>,<used satellite number of BDS>,<used satellite number of GPS>,<used satellite number of GLONASS>,
-    // <HDOP>,<speed>,<course>,<altitude>,<mileage>,<MCC>,<MNC>,<LAC>,<Cell ID>,<GSM signal strength>,<digital input>,<digital output>,
-    // <analog input 1>,<analog input 2>,<analog input 3>,<temperature sensor 1>,<temperature sensor 2>,<RFID>,<external accessories status>,
-    // <battery level>,<alert event type>;<checksum><data tail>
     private Position decodeNew(Channel channel, String sentence) {
 
         Matcher parser = patternNew.matcher(sentence);
