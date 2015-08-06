@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
@@ -127,13 +126,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         return true;
     }
-    
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
 
-        String sentence = (String) msg;
+    private Position decodeOld(Channel channel, String sentence) {
 
         // Detect type
         boolean simple = (sentence.charAt(3) == ',' || sentence.charAt(6) == ',');
@@ -154,7 +148,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
             beginIndex = endIndex + 1;
             status = sentence.substring(beginIndex);
-        
+
         } else {
 
             int beginIndex = 3;
@@ -167,7 +161,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
             beginIndex = endIndex + 1;
             status = sentence.substring(beginIndex);
-        
+
         }
 
         // Create new position
@@ -178,7 +172,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         if (!parseGPRMC(gprmc, position)) {
             return null;
         }
-        
+
         if (simple) {
 
             // Parse status
@@ -186,7 +180,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             if (!parser.matches()) {
                 return null;
             }
-            
+
             int index = 1;
 
             // Alarm
@@ -221,7 +215,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_MCC, parser.group(index++));
             position.set(Event.KEY_MNC, parser.group(index++));
             position.set(Event.KEY_LAC, parser.group(index++));
-            
+
         } else {
 
             // Parse status
@@ -229,7 +223,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             if (!parser.matches()) {
                 return null;
             }
-            
+
             int index = 1;
 
             if (!identify(id, channel)) {
@@ -244,7 +238,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
             // Battery
             position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)));
-            
+
             position.set(Event.KEY_FLAGS, parser.group(index++));
             position.set(Event.KEY_INPUT, parser.group(index++));
             position.set(Event.KEY_OUTPUT, parser.group(index++));
@@ -252,9 +246,111 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.PREFIX_ADC + 2, parser.group(index++));
             position.set(Event.PREFIX_ADC + 3, parser.group(index++));
             position.set(Event.KEY_ALARM, parser.group(index++));
-            
+
         }
+
         return position;
+    }
+
+    private static final Pattern patternNew = Pattern.compile(
+            "\\$MGV\\d{3}," +
+            "(\\d+)," +                    // IMEI
+            "[^,]*," +                     // Name
+            "([RS])," +
+            "(\\d{2})(\\d{2})(\\d{2})," +  // Date (DDMMYY)
+            "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
+            "([AV])," +                    // Validity
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Latitude (DDMM.MMMM)
+            "([NS])," +
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude (DDDMM.MMMM)
+            "([EW])," +
+            "\\d{2}," +
+            "(\\d{2})," +                  // Satellites
+            "\\d{2}," +
+            "(\\d+\\.\\d+)," +             // HDOP
+            "(\\d+\\.\\d+)," +             // Speed
+            "(\\d+\\.\\d+)," +             // Course
+            "(\\d+\\.\\d+)," +             // Altitude
+            "(\\d+\\.\\d+)," +             // Odometer
+            ".*");
+
+    //$MGV002,013777007536434,,R,010114,000057,V,0000.0000,N,00000.0000,E,00,00,00,99.9,0.000,0.00,0.0,80.263,510,89,2342,030B,,0000,0000,200,96,0, , ,,,,Timer;!
+    //<data head><protocol version>,<device IMEI>,<device name>,
+    // <GPRS real-time/stored data flag>,<date>,<time>,<GPS fixed flag>,
+    // <latitude>,<N/S>,<longitude>,<W/E>,<used satellite number of BDS>,<used satellite number of GPS>,<used satellite number of GLONASS>,
+    // <HDOP>,<speed>,<course>,<altitude>,<mileage>,<MCC>,<MNC>,<LAC>,<Cell ID>,<GSM signal strength>,<digital input>,<digital output>,
+    // <analog input 1>,<analog input 2>,<analog input 3>,<temperature sensor 1>,<temperature sensor 2>,<RFID>,<external accessories status>,
+    // <battery level>,<alert event type>;<checksum><data tail>
+    private Position decodeNew(Channel channel, String sentence) {
+
+        Matcher parser = patternNew.matcher(sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+        int index = 1;
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        if (!identify(parser.group(index++), channel)) {
+            return null;
+        }
+        position.setDeviceId(getDeviceId());
+
+        if (parser.group(index++).equals("S")) {
+            position.set(Event.KEY_ARCHIVE, true);
+        }
+
+        // Date and Time
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.clear();
+        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
+        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        position.setTime(time.getTime());
+
+        // Validity
+        position.setValid(parser.group(index++).equals("A"));
+
+        // Latitude
+        double latitude = Double.valueOf(parser.group(index++));
+        latitude += Double.valueOf(parser.group(index++)) / 60;
+        if (parser.group(index++).equals("S")) latitude = -latitude;
+        position.setLatitude(latitude);
+
+        // Longitude
+        double longitude = Double.valueOf(parser.group(index++));
+        longitude += Double.valueOf(parser.group(index++)) / 60;
+        if (parser.group(index++).equals("W")) longitude = -longitude;
+        position.setLongitude(longitude);
+
+        position.set(Event.KEY_SATELLITES, Integer.parseInt(parser.group(index++)));
+        position.set(Event.KEY_HDOP, Double.parseDouble(parser.group(index++)));
+
+        position.setSpeed(Double.parseDouble(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
+        position.setAltitude(Double.parseDouble(parser.group(index++)));
+
+        position.set(Event.KEY_ODOMETER, Double.parseDouble(parser.group(index++)));
+
+        return position;
+    }
+    
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg)
+            throws Exception {
+
+        String sentence = (String) msg;
+
+        if (sentence.startsWith("$MG")) {
+            return decodeNew(channel, sentence);
+        } else {
+            return decodeOld(channel, sentence);
+        }
     }
 
 }

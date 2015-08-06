@@ -146,7 +146,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 // Message index
                 int subtype = type;
                 if (type == MSG_TYPE_LOG_RECORDS) {
-                    position.set("archive", true);
+                    position.set(Event.KEY_ARCHIVE, true);
                     lastIndex = buf.readUnsignedInt() + 1;
                     position.set(Event.KEY_INDEX, lastIndex);
 
