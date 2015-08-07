@@ -247,7 +247,7 @@
 
     <!-- PROTOCOL CONFIG -->
 
-    <entry key='detector.port'>5000</entry>
+    <!--<entry key='detector.port'>5000</entry>-->
     <entry key='gps103.port'>5001</entry>
     <entry key='tk103.port'>5002</entry>
     <entry key='gl100.port'>5003</entry>
