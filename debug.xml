@@ -111,13 +111,13 @@
         serverTime TIMESTAMP NOT NULL,
         deviceTime TIMESTAMP NOT NULL,
         other VARCHAR(4096) NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES device (id));
+        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
 
         ALTER TABLE device ADD
-        FOREIGN KEY (positionId) REFERENCES position (id);
+        FOREIGN KEY (positionId) REFERENCES position (id) ON DELETE CASCADE;
 
         ALTER TABLE device ADD
-        FOREIGN KEY (dataId) REFERENCES data (id);
+        FOREIGN KEY (dataId) REFERENCES data (id) ON DELETE CASCADE;
 
         CREATE TABLE server (
         id INT PRIMARY KEY AUTO_INCREMENT,
