@@ -23,30 +23,35 @@
     <entry key='database.url'>jdbc:h2:[DATABASE]</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
+
     <entry key='database.checkTable'>traccar</entry>
 
+    <entry key='database.selectSchemaVersion'>
+        SELECT * FROM traccar;
+    </entry>
+
     <entry key='database.createSchema'>
-        CREATE TABLE user (
+        CREATE TABLE "user" (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(1024) NOT NULL,
-        email VARCHAR(256) NOT NULL UNIQUE,
-        hashedPassword VARCHAR(1024) NOT NULL,
-        salt VARCHAR(1024) DEFAULT '' NOT NULL,
-        readonly BOOLEAN DEFAULT false NOT NULL,
-        admin BOOLEAN DEFAULT false NOT NULL,
-        map VARCHAR(1024) DEFAULT 'osm' NOT NULL,
-        language VARCHAR(1024) DEFAULT 'en' NOT NULL,
-        distanceUnit VARCHAR(1024) DEFAULT 'km' NOT NULL,
-        speedUnit VARCHAR(1024) DEFAULT 'kmh' NOT NULL,
-        latitude DOUBLE DEFAULT 0 NOT NULL,
-        longitude DOUBLE DEFAULT 0 NOT NULL,
+        name VARCHAR(128) NOT NULL,
+        email VARCHAR(128) NOT NULL UNIQUE,
+        hashedPassword VARCHAR(128) NOT NULL,
+        salt VARCHAR(128) DEFAULT '' NOT NULL,
+        readonly BIT DEFAULT 0 NOT NULL,
+        admin BIT DEFAULT 0 NOT NULL,
+        map VARCHAR(128),
+        language VARCHAR(128),
+        distanceUnit VARCHAR(128),
+        speedUnit VARCHAR(128),
+        latitude FLOAT DEFAULT 0 NOT NULL,
+        longitude FLOAT DEFAULT 0 NOT NULL,
         zoom INT DEFAULT 0 NOT NULL);
 
         CREATE TABLE device (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(1024) NOT NULL,
-        uniqueId VARCHAR(256) NOT NULL UNIQUE,
-        status VARCHAR(1024),
+        name VARCHAR(128) NOT NULL,
+        uniqueId VARCHAR(128) NOT NULL UNIQUE,
+        status VARCHAR(128),
         lastUpdate TIMESTAMP,
         positionId INT,
         dataId INT);
@@ -54,54 +59,62 @@
         CREATE TABLE user_device (
         userId INT NOT NULL,
         deviceId INT NOT NULL,
-        `read` BOOLEAN DEFAULT true NOT NULL,
-        `write` BOOLEAN DEFAULT true NOT NULL,
-        FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE,
-        FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
+        "read" BIT DEFAULT 1 NOT NULL,
+        "write" BIT DEFAULT 1 NOT NULL,
+        FOREIGN KEY (userId) REFERENCES "user" (id) ON DELETE CASCADE,
+        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
 
-        CREATE INDEX user_device_user_id ON user_device(userId);
+        CREATE INDEX user_device_userId ON user_device(userId);
 
         CREATE TABLE position (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        protocol VARCHAR(1024),
+        protocol VARCHAR(128),
         deviceId INT NOT NULL,
         serverTime TIMESTAMP NOT NULL,
         deviceTime TIMESTAMP NOT NULL,
         fixTime TIMESTAMP NOT NULL,
-        valid BOOLEAN NOT NULL,
-        latitude DOUBLE NOT NULL,
-        longitude DOUBLE NOT NULL,
-        altitude DOUBLE NOT NULL,
-        speed DOUBLE NOT NULL,
-        course DOUBLE NOT NULL,
-        address VARCHAR(1024),
-        other VARCHAR(8192) NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES device(id) ON DELETE CASCADE);
+        valid BIT NOT NULL,
+        latitude FLOAT NOT NULL,
+        longitude FLOAT NOT NULL,
+        altitude FLOAT NOT NULL,
+        speed FLOAT NOT NULL,
+        course FLOAT NOT NULL,
+        address VARCHAR(512),
+        other VARCHAR(4096) NOT NULL,
+        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
+        
+        CREATE INDEX position_deviceId_fixTime ON position (deviceId, fixTime);
 
         CREATE TABLE data (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        protocol VARCHAR(1024),
+        protocol VARCHAR(128),
         deviceId INT NOT NULL,
         serverTime TIMESTAMP NOT NULL,
         deviceTime TIMESTAMP NOT NULL,
-        other VARCHAR(8192) NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES device(id));
+        other VARCHAR(4096) NOT NULL,
+        FOREIGN KEY (deviceId) REFERENCES device (id));
 
         ALTER TABLE device ADD
-        FOREIGN KEY (positionId) REFERENCES `position`(id);
+        FOREIGN KEY (positionId) REFERENCES position (id);
 
         ALTER TABLE device ADD
-        FOREIGN KEY (dataId) REFERENCES data(id);
+        FOREIGN KEY (dataId) REFERENCES data (id);
 
         CREATE TABLE server (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        registration BOOLEAN NOT NULL,
-        latitude DOUBLE NOT NULL,
-        longitude DOUBLE NOT NULL,
-        zoom INT NOT NULL);
+        registration BIT NOT NULL,
+        map VARCHAR(128),
+        language VARCHAR(128),
+        distanceUnit VARCHAR(128),
+        speedUnit VARCHAR(128),
+        latitude FLOAT DEFAULT 0 NOT NULL,
+        longitude FLOAT DEFAULT 0 NOT NULL,
+        zoom INT DEFAULT 0 NOT NULL);
 
         CREATE TABLE traccar (
-        id INT PRIMARY KEY AUTO_INCREMENT);
+        version INT DEFAULT 0 NOT NULL);
+
+        INSERT INTO traccar (version) VALUES (301);
     </entry>
 
     <entry key='database.selectServers'>
@@ -114,34 +127,58 @@
     </entry>
 
     <entry key='database.updateServer'>
-        UPDATE server SET registration = :registration WHERE id = :id;
+        UPDATE server SET
+        registration = :registration,
+        map = :map,
+        language = :language,
+        distanceUnit = :distanceUnit,
+        speedUnit = :speedUnit,
+        latitude = :latitude,
+        longitude = :longitude,
+        zoom = :zoom
+        WHERE id = :id;
     </entry>
 
     <entry key='database.loginUser'>
-        SELECT * FROM user
+        SELECT * FROM "user"
         WHERE email = :email;
     </entry>
 
+    <entry key='database.selectUser'>
+        SELECT * FROM "user"
+        WHERE id = :id;
+    </entry>
+
     <entry key='database.selectUsersAll'>
-        SELECT * FROM user;
+        SELECT * FROM "user";
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO user (name, email, hashedPassword, salt, admin)
+        INSERT INTO "user" (name, email, hashedPassword, salt, admin)
         VALUES (:name, :email, :hashedPassword, :salt, :admin);
     </entry>
 
     <entry key='database.updateUser'>
-        UPDATE user SET name = :name, email = :email, admin = :admin
+        UPDATE "user" SET
+        name = :name,
+        email = :email,
+        admin = :admin,
+        map = :map,
+        language = :language,
+        distanceUnit = :distanceUnit,
+        speedUnit = :speedUnit,
+        latitude = :latitude,
+        longitude = :longitude,
+        zoom = :zoom
         WHERE id = :id;
     </entry>
 
     <entry key='database.updateUserPassword'>
-        UPDATE user SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
+        UPDATE "user" SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
     </entry>
     
     <entry key='database.deleteUser'>
-        DELETE FROM user WHERE id = :id;
+        DELETE FROM "user" WHERE id = :id;
     </entry>
 
     <entry key='database.getPermissionsAll'>
@@ -177,8 +214,8 @@
     </entry>
 
     <entry key='database.insertPosition'>
-        INSERT INTO position (deviceId, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
-        VALUES (:deviceId, NOW(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
     </entry>
 
     <entry key='database.selectLatestPositions'>
@@ -221,9 +258,9 @@
     <entry key='gpsgate.port'>5026</entry>
     <entry key='teltonika.port'>5027</entry>
     <entry key='mta6.port'>5028</entry>
-    <entry key='mta6can.port'>5029</entry>
+    <entry key='tzone.port'>5029</entry>
     <entry key='tlt2h.port'>5030</entry>
-    <entry key='syrus.port'>5031</entry>
+    <entry key='taip.port'>5031</entry>
     <entry key='wondex.port'>5032</entry>
     <entry key='cellocator.port'>5033</entry>
     <entry key='galileo.port'>5034</entry>
@@ -242,7 +279,6 @@
     <entry key='topflytech.port'>5047</entry>
     <entry key='laipac.port'>5048</entry>
     <entry key='aplicom.port'>5049</entry>
-    <entry key='aplicom.can'>false</entry>
     <entry key='gotop.port'>5050</entry>
     <entry key='sanav.port'>5051</entry>
     <entry key='gator.port'>5052</entry>
@@ -250,7 +286,7 @@
     <entry key='m2m.port'>5054</entry>
     <entry key='osmand.port'>5055</entry>
     <entry key='easytrack.port'>5056</entry>
-    <entry key='taip.port'>5057</entry>
+    <entry key='gpsmarker.port'>5057</entry>
     <entry key='khd.port'>5058</entry>
     <entry key='piligrim.port'>5059</entry>
     <entry key='stl060.port'>5060</entry>
@@ -280,5 +316,7 @@
     <entry key='tytan.port'>5084</entry>
     <entry key='avl301.port'>5085</entry>
     <entry key='castel.port'>5086</entry>
+    <entry key='mxt.port'>5087</entry>
+    <entry key='cityeasy.port'>5088</entry>
 
 </properties>
