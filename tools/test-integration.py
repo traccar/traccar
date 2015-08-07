@@ -107,14 +107,21 @@ devices = {
     '123456' : add_device(cookie, '123456')
 }
 
-print 'Total: %d' % len(messages)
+
+all = set(ports.keys())
+protocols = set(messages.keys())
+
+print 'Total: %d' % len(all)
+print 'Missing: %d' % len(all - protocols)
+print 'Covered: %d' % len(protocols)
+
+#if all - protocols:
+#    print '\nMissing: %s\n' % repr(list((all - protocols)))
 
 for protocol in messages:
     send_message(ports[protocol], messages[protocol])
 
 time.sleep(5)
-
-protocols = set(messages.keys())
 
 for device in devices:
     protocols -= set(get_protocols(cookie, devices[device]))
