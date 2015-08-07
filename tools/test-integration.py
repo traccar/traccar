@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sys
 import os
 import xml.etree.ElementTree
 import urllib
@@ -46,6 +47,8 @@ messages = {
 baseUrl = 'http://localhost:8082'
 user = { 'email' : 'admin', 'password' : 'admin' }
 
+debug = '-v' in sys.argv
+
 def load_ports():
     ports = {}
     dir = os.path.dirname(os.path.abspath(__file__))
@@ -54,11 +57,15 @@ def load_ports():
         key = entry.attrib['key']
         if key.endswith('.port'):
             ports[key[:-5]] = int(entry.text)
+    if debug:
+        print '\nports: %s\n' % repr(ports)
     return ports
 
 def login():
     request = urllib2.Request(baseUrl + '/api/login')
     response = urllib2.urlopen(request, urllib.urlencode(user))
+    if debug:
+        print '\nlogin: %s\n' % repr(json.load(response))
     return response.headers.get('Set-Cookie')
 
 def remove_devices(cookie):
@@ -66,10 +73,14 @@ def remove_devices(cookie):
     request.add_header('cookie', cookie)
     response = urllib2.urlopen(request)
     data = json.load(response)
+    if debug:
+        print '\ndevices: %s\n' % repr(ports)
     for device in data['data']:
         request = urllib2.Request(baseUrl + '/api/device/remove')
         request.add_header('cookie', cookie)
         response = urllib2.urlopen(request, json.dumps(device))
+        if debug:
+            print '\nremove: %s\n' % repr(json.load(response))
 
 def add_device(cookie, unique_id):
     request = urllib2.Request(baseUrl + '/api/device/add')
