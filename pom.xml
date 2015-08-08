@@ -67,6 +67,7 @@
             <version>1.0.4</version>
         </dependency>
 
+        <!-- Jetty 9.3+ requires Java 8 -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
