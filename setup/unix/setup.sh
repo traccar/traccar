@@ -8,7 +8,7 @@ then
 else
   mkdir $UNIX_PATH
   cp -rf * $UNIX_PATH
-  chmod -R +r $UNIX_PATH
+  chmod -R +rX $UNIX_PATH
   $UNIX_PATH/bin/traccar install
   rm $UNIX_PATH/setup.sh
 fi

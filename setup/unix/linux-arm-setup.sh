@@ -8,7 +8,7 @@ then
 else
   mkdir $UNIX_PATH
   cp -rf * $UNIX_PATH
-  chmod -R +r $UNIX_PATH
+  chmod -R +rX $UNIX_PATH
   if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ]
   then
     mv $UNIX_PATH/bin/wrapper-linux-armel-32 $UNIX_PATH/bin/wrapper
