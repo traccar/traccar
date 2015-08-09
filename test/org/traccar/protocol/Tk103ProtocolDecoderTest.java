@@ -1,9 +1,8 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
-import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -76,6 +75,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
 
         assertNull(decoder.decode(null, null,
                 "(013632651491,ZC20,040613,040137,6,42,112,0)"));
+
+        verify(decoder.decode(null, null,
+                "(094050000111BP05000094050000111150808A3804.2418N04616.7468E000.0201447133.3501000011L0028019DT000)"));
 
     }
 
