@@ -30,7 +30,7 @@ var styles = {
     mapDefaultLon: 51.507222,
     mapDefaultZoom: 6,
 
-    mapMaxZoom: 16,
+    mapMaxZoom: 19,
     mapSelectColor: 'rgba(0, 255, 0, 1.0)',
     mapSelectRadius: 10,
     mapReportColor: 'rgba(0, 0, 255, 1.0)',
