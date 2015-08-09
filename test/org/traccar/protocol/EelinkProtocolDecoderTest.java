@@ -1,11 +1,10 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
 import org.jboss.netty.buffer.ChannelBuffers;
-import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class EelinkProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -13,6 +12,9 @@ public class EelinkProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(new EelinkProtocol());
+
+        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "676701000c002603541880486128290120"))));
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "676701000b001b035418804661834901"))));
