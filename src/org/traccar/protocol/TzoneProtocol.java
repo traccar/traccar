@@ -25,7 +25,7 @@ import org.traccar.TrackerServer;
 public class TzoneProtocol extends BaseProtocol {
 
     public TzoneProtocol() {
-        super("avl19");
+        super("tzone");
     }
 
     @Override
