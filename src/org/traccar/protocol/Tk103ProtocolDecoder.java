@@ -33,6 +33,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    //088048003342 BR00 150807 A 1352.9871 N 10030.9084 E 000.0 110718 000.0 001010000 L00000000
     private static final Pattern pattern = Pattern.compile(
             "(\\d+)(,)?" +                 // Device ID
             ".{4},?" +                     // Command
@@ -45,7 +46,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             "([EW]),?" +
             "(\\d+\\.\\d)(?:\\d*,)?" +     // Speed
             "(\\d{2})(\\d{2})(\\d{2}),?" + // Time (HHMMSS)
-            "(\\d+\\.?\\d+),?" +           // Course
+            "(\\d+\\.?\\d),?" +            // Course
             "([0-9a-fA-F]{8})?,?" +        // State
             "(?:L([0-9a-fA-F]+))?.*\\)?"); // Odometer
 

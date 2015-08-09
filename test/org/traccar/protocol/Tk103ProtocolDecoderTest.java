@@ -10,8 +10,12 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
+        
+        verify(decoder.decode(null, null,
+                "(088048003342BR00150807A1352.9871N10030.9084E000.0110718000.0001010000L00000000)"));
 
-        assertNull(decoder.decode(null, null, "(090411121854BP0000001234567890HSO"));
+        assertNull(decoder.decode(null, null,
+                "(090411121854BP0000001234567890HSO"));
 
         verify(decoder.decode(null, null,
                 "(01029131573BR00150428A3801.6382N02351.0159E000.0080729278.7800000000LEF9ECB9C)"));
