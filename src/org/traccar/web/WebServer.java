@@ -77,12 +77,6 @@ public class WebServer {
         servletHandler.addServlet(new ServletHolder(new CommandServlet()), "/command/*");
         servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
 
-        /*ResourceHandler mobileResourceHandler = new ResourceHandler();
-        mobileResourceHandler.setResourceBase(properties.getProperty("web.mobile"));
-        mobileResourceHandler.setWelcomeFiles(new String[] {"index.html"});
-        ContextHandler mobileContext = new ContextHandler("/m");
-        mobileContext.setHandler(mobileResourceHandler);*/
-
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setResourceBase(config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
