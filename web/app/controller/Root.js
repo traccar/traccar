@@ -28,7 +28,7 @@ Ext.define('Traccar.controller.Root', {
         var indicator = document.createElement('div');
         indicator.className = 'state-indicator';
         document.body.appendChild(indicator);
-        isPhone = parseInt(window.getComputedStyle(indicator).getPropertyValue('z-index'), 10);
+        this.isPhone = parseInt(window.getComputedStyle(indicator).getPropertyValue('z-index'), 10) !== 0;
     },
     
     onLaunch: function () {
@@ -67,7 +67,7 @@ Ext.define('Traccar.controller.Root', {
     loadApp: function() {
         Ext.getStore('Devices').load();
         Ext.getBody().empty();
-        if (isPhone) {
+        if (this.isPhone) {
             Ext.create('Traccar.view.main.MainMobile');
         } else {
             Ext.create('Traccar.view.main.Main');
