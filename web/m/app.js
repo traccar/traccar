@@ -8,7 +8,7 @@ Ext.application({
         toolbar = Ext.create('Ext.Toolbar', {
             docked: 'top',
             ui: 'light',
-            title: 'Traccar'
+            title: 'BlueSky'
         });
 
         mapPanel = Ext.create('Ext.Panel', {

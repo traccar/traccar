@@ -20,5 +20,13 @@ Ext.define('Traccar.store.DistanceUnits', {
     data: [
         {'key': 'km', 'name': strings.sharedKm},
         {'key': 'mi', 'name': strings.sharedMi}
-    ]
+    ],
+    
+    getUnitName: function(unit) {
+        if (unit) {
+            return this.findRecord('key', unit).get('name');
+        } else {
+            return '';
+        }
+    }
 });
