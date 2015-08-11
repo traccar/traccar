@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -88,19 +89,19 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
-            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+            time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
             position.setTime(time.getTime());
 
             // Location
-            position.setLatitude(Double.valueOf(parser.group(index++)));
-            position.setLongitude(Double.valueOf(parser.group(index++)));
-            position.setSpeed(Double.valueOf(parser.group(index++)));
-            position.setCourse(Double.valueOf(parser.group(index++)));
+            position.setLatitude(Double.parseDouble(parser.group(index++)));
+            position.setLongitude(Double.parseDouble(parser.group(index++)));
+            position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
+            position.setCourse(Double.parseDouble(parser.group(index++)));
             
             // Distance
             position.set(Event.KEY_ODOMETER, parser.group(index++));
@@ -109,7 +110,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_EVENT, parser.group(index++));
             
             // Status
-            int status = Integer.valueOf(parser.group(index++));
+            int status = Integer.parseInt(parser.group(index++));
             position.setValid((status & 0x04) == 0);
             position.set(Event.KEY_STATUS, status);
             return position;

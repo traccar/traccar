@@ -33,10 +33,11 @@ public class ODOMeterHandler extends BaseDataHandler {
 			double distance = DistanceCalculator.distance(
 					position.getLatitude(), position.getLongitude(),
 					last.getLatitude(), last.getLongitude());
-			distance = Math.round((distance + last.getOdoMeter()) * 100.0) / 100.0;
+			distance = Math.round((distance) * 100.0) / 100.0;
+			double odoMeter = distance + position.getOdoMeter();
 			Log.info("::: Device Course : " + position.getDeviceId()
-					+ ", ODO Meter :" + distance + "m ");
-			position.setOdoMeter(distance/1000.0);
+					+ ", Distance :" + distance + "m, ODO Meter :" + odoMeter + " m");
+			position.setOdoMeter(odoMeter);
 		} 
 		return position;
 	}
