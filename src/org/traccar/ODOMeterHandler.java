@@ -34,7 +34,7 @@ public class ODOMeterHandler extends BaseDataHandler {
 					position.getLatitude(), position.getLongitude(),
 					last.getLatitude(), last.getLongitude());
 			distance = Math.round((distance) * 100.0) / 100.0;
-			double odoMeter = distance + position.getOdoMeter();
+			double odoMeter = distance + last.getOdoMeter();
 			Log.info("::: Device Course : " + position.getDeviceId()
 					+ ", Distance :" + distance + "m, ODO Meter :" + odoMeter + " m");
 			position.setOdoMeter(odoMeter);
