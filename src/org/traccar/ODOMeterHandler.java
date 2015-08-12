@@ -42,13 +42,8 @@ public class ODOMeterHandler extends BaseDataHandler {
 		return position;
 	}
 
-	private void speedInKmH(Position position) {
-		position.setSpeed(position.getSpeed() * 1.852);
-	}
-
 	@Override
 	protected Position handlePosition(Position position) {
-		speedInKmH(position);
 		return calculateDistance(position);
 	}
 

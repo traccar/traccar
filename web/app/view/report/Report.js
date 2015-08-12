@@ -91,7 +91,13 @@ Ext.define('Traccar.view.report.Report', {
             }
         },
         /* { text: strings.positionCourse, dataIndex: 'course', flex: 1 },*/
-        { text: 'ODO Meter', dataIndex: 'odoMeter', flex: 1 },
+        { text: 'ODO Meter', dataIndex: 'odoMeter', flex: 1,
+        	renderer: function(value) {
+                var distanceUnits = Ext.getStore('DistanceUnits');
+                var unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
+                return value + ' ' + distanceUnits.getUnitName(unit);
+            }	
+        },
         { text: strings.positionAddress, dataIndex: 'address', flex: 1 }
     ]
 
