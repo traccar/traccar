@@ -25,9 +25,11 @@ Ext.define('Traccar.store.DistanceUnits', {
     convert: function(value, unit) {
         switch (unit) {
             case 'km':
-                return value * 0.001;
+            	value = value * 0.001;
+                return Math.round(value * 100) / 100;
             case 'mi':
-                return value * 0.000621371;
+            	value = value * 0.000621371;
+                return Math.round(value * 100) / 100;
         }
         return value;
     },
@@ -38,5 +40,7 @@ Ext.define('Traccar.store.DistanceUnits', {
         } else {
             return '';
         }
-    }
+    },
+    
+    
 });

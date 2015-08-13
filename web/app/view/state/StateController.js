@@ -89,9 +89,9 @@ Ext.define('Traccar.view.state.StateController', {
                 }
                 
                 if (key === 'odoMeter') {
-                    var distanceUnits = Ext.getStore('DistanceUnits');
-                   // var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
-                    value = value + ' ' + distanceUnits.getUnitName('km');
+                	 var distanceUnits = Ext.getStore('DistanceUnits');
+                     var unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
+                     value = distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
                 }
                 store.add(Ext.create('Traccar.model.Parameter', {
                     priority: this.keys[key].priority,
