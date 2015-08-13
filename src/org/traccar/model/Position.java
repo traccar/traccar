@@ -56,6 +56,10 @@ public class Position extends Event implements Factory {
     private double course;
     public double getCourse() { return course; }
     public void setCourse(double course) { this.course = course; }
+    
+    private double odoMeter; // value in meters
+    public double getOdoMeter() { return odoMeter; }
+    public void setOdoMeter(double odoMeter) { this.odoMeter = odoMeter; }
 
     private String address;
     public String getAddress() { return address; }

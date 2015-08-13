@@ -25,6 +25,8 @@
     <entry key='filter.duplicate'>true</entry>
     <entry key='filter.distance'>50</entry>-->
     
+    <entry key='system.odometer.enable'>true</entry>
+    
     <!--<entry key='forward.enable'>true</entry>
     <entry key='forward.url'>http://example.com:8080/gprmc/Data?id={uniqueId}&amp;code=0x0000&amp;gprmc={gprmc}</entry>-->
 
@@ -97,6 +99,7 @@
         altitude FLOAT NOT NULL,
         speed FLOAT NOT NULL,
         course FLOAT NOT NULL,
+        odoMeter FLOAT NOT NULL,
         address VARCHAR(512),
         other VARCHAR(4096) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
@@ -232,8 +235,8 @@
     </entry>
 
     <entry key='database.insertPosition'>
-        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
-        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, odoMeter, address, other)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :odoMeter, :address, :other);
     </entry>
 
     <entry key='database.selectLatestPositions'>

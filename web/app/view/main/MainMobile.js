@@ -40,6 +40,11 @@ Ext.define('Traccar.view.main.MainMobile', {
         xtype: 'deviceView',
         header: false,
         flex: 1
+    },{
+         region: 'east',
+         xtype: 'stateView',
+         header: false,
+         flex: 1
     }]
 
 });
