@@ -179,7 +179,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(longitude);
             
             if ((union & 0b0100_0000_0000_0000) != 0) {
-                position.set("acc", (union & 0b1000_0000_0000_0000) != 0);
+                position.set(Event.KEY_IGNITION, (union & 0b1000_0000_0000_0000) != 0);
             }
 
             buf.skipBytes(gpsLength - 12); // skip reserved
@@ -206,7 +206,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                     int flags = buf.readUnsignedByte();
 
-                    position.set("acc", (flags & 0x2) != 0);
+                    position.set(Event.KEY_IGNITION, (flags & 0x2) != 0);
                     // TODO parse other flags
 
                     // Voltage
