@@ -59,9 +59,9 @@ Ext.define('Traccar.view.state.StateController', {
             priority: 6,
             name: strings.positionSpeed
         },
-        'course': {
+        'odoMeter': {
             priority: 7,
-            name: strings.positionCourse
+            name: 'ODO Meter'
         },
         'address': {
             priority: 8,
@@ -86,6 +86,12 @@ Ext.define('Traccar.view.state.StateController', {
                     var speedUnits = Ext.getStore('SpeedUnits');
                     var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
                     value = speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
+                }
+                
+                if (key === 'odoMeter') {
+                	 var distanceUnits = Ext.getStore('DistanceUnits');
+                     var unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
+                     value = distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
                 }
                 store.add(Ext.create('Traccar.model.Parameter', {
                     priority: this.keys[key].priority,

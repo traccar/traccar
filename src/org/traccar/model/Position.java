@@ -52,6 +52,10 @@ public class Position extends Event implements Factory {
     private double speed; // value in knots
     public double getSpeed() { return speed; }
     public void setSpeed(double speed) { this.speed = speed; }
+    
+    private double odoMeter; // value in km
+    public double getOdoMeter() { return odoMeter; }
+    public void setOdoMeter(double odoMeter) { this.odoMeter = odoMeter; }
 
     private double course;
     public double getCourse() { return course; }
