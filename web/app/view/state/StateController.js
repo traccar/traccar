@@ -65,7 +65,7 @@ Ext.define('Traccar.view.state.StateController', {
         },*/
         'odoMeter': {
             priority: 7,
-            name: 'ODO Meter'
+            name: 'Odometer'
         },
         'address': {
             priority: 8,
