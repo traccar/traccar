@@ -25,7 +25,6 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.DownstreamMessageEvent;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
@@ -38,7 +37,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private int resetDelay;
 
     private FilterHandler filterHandler;
-    private ODOMeterHandler odoMeterHandler;
+    private OdometerHandler odometerHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
 
     protected class OpenChannelHandler extends SimpleChannelHandler {
@@ -93,10 +92,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             filterHandler = new FilterHandler();
         }
         
-        if (Context.getConfig().getBoolean("system.odometer.enable")) {
-        	odoMeterHandler = new ODOMeterHandler();
-        }
-        
         if (Context.getReverseGeocoder() != null) {
             reverseGeocoderHandler = new ReverseGeocoderHandler(
                     Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocode.processInvalidPositions"));
@@ -119,11 +114,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
         }
-        
-        if (odoMeterHandler != null) {
-            pipeline.addLast("odoMeter", odoMeterHandler);
+        if (odometerHandler != null) {
+            pipeline.addLast("odometer", odometerHandler);
         }
-        
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
         }

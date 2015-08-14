@@ -91,8 +91,8 @@ Ext.define('Traccar.view.report.Report', {
             }
         },
         /* { text: strings.positionCourse, dataIndex: 'course', flex: 1 }, */
-        { text: 'Odometer', dataIndex: 'odoMeter', flex: 1,
-        	renderer: function(value) {
+        { text: 'Odometer', dataIndex: 'odometer', flex: 1,
+            renderer: function(value) {
                 var distanceUnits = Ext.getStore('DistanceUnits');
                 var unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
                 return distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);

@@ -63,7 +63,7 @@ Ext.define('Traccar.view.state.StateController', {
             priority: 7,
             name: strings.positionCourse
         },*/
-        'odoMeter': {
+        'odometer': {
             priority: 7,
             name: 'Odometer'
         },
@@ -92,7 +92,7 @@ Ext.define('Traccar.view.state.StateController', {
                     value = speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
                 }
                 
-                if (key === 'odoMeter') {
+                if (key === 'odometer') {
                	    var distanceUnits = Ext.getStore('DistanceUnits');
                     var unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
                     value = distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
