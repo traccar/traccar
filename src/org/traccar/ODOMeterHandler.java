@@ -9,7 +9,7 @@ import org.traccar.model.Position;
 
 /**
  * <p>
- *  ODO Meter handler
+ *  Odometer handler
  * </p>
  * 
  * @author Amila Silva
@@ -18,7 +18,7 @@ import org.traccar.model.Position;
 public class ODOMeterHandler extends BaseDataHandler {
 
 	public ODOMeterHandler() {
-		Log.debug("System based ODO meter calculation enabled for all devices");
+		Log.debug("System based odometer calculation enabled for all devices");
 	}
 
 	private Position getLastPosition(long deviceId) {
