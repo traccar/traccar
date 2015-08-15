@@ -31,11 +31,17 @@ public class OdometerHandler extends BaseDataHandler {
     private Position calculateDistance(Position position) {
         Position last = getLastPosition(position.getDeviceId());
         if (last != null) {
-            double distance = DistanceCalculator.distance(
-                    position.getLatitude(), position.getLongitude(),
-                    last.getLatitude(), last.getLongitude());
-            distance = Math.round((distance) * 100.0) / 100.0;
-            double odometer = distance + last.getOdometer();
+            // set odometer only on movement
+            double odometer = 0.0;
+            if (last.getSpeed() == 0 && position.getSpeed() == 0) {
+                odometer = last.getOdometer();
+            } else {
+                double distance = DistanceCalculator.distance(
+                        position.getLatitude(), position.getLongitude(),
+                        last.getLatitude(), last.getLongitude());
+                distance = Math.round((distance) * 100.0) / 100.0;
+                odometer = distance + last.getOdometer();
+            }
             position.setOdometer(odometer);
         }
         return position;
