@@ -23,6 +23,7 @@ var availableLanguages = {
     'en': { name: 'English', code: 'en' },
     'es': { name: 'Español', code: 'es' },
     'fr': { name: 'Français', code: 'fr' },
+    'nl': { name: 'Nederlands', code: 'nl' },
     'pl': { name: 'Polski', code: 'pl' },
     'pt': { name: 'Português', code: 'pt' },
     'ru': { name: 'Русский', code: 'ru' },
