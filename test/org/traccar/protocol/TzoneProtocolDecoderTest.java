@@ -1,6 +1,8 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffers;
+
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
@@ -12,6 +14,9 @@ public class TzoneProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         TzoneProtocolDecoder decoder = new TzoneProtocolDecoder(new TzoneProtocol());
+
+        assertNotNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "545a00582424010b021e000008637710239476270f080b0a3228001600000000000000000000000000000000000000000000000401a00822001088c00020183701a6053800000000800000000000000000000000000000000077c9860d0a"))));
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "545A00912424010B021E000008661040203754350F061807083800160400CE5ADC041447620F0618070838000A0000060C7C0004253378370010AAC000000C37018504E500000000800000000000000000390B0A0014061113000000051200140610600014061220001000133800140610070010001473001000151100101500640010000920001000148400000000000000F2EF570D0A"))));

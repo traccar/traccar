@@ -15,11 +15,8 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.BaseProtocolEncoder;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
-
-import java.util.Map;
 
 public class SuntechProtocolEncoder extends StringProtocolEncoder {
 
@@ -28,9 +25,9 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "CMD;{%s};02;Enable1\r", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "SA200CMD;{%s};02;Enable1\r", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "CMD;{%s};02;Disable1\n", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "SA200CMD;{%s};02;Disable1\r", Command.KEY_UNIQUE_ID);
         }
         
         return null;
