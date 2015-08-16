@@ -18,16 +18,16 @@ package org.traccar.protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 
-public class Gps103ProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+public class MeitrackProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
 
     @Override
     protected Object encodeCommand(Command command) {
         
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "C01,0,12222", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "C01,0,12222");
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "C01,0,02222", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "C01,0,02222");
         }
         
         return null;
