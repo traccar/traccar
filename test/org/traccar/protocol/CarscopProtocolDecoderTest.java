@@ -21,6 +21,9 @@ public class CarscopProtocolDecoderTest extends ProtocolDecoderTest {
         verify(decoder.decode(null, null,
                 "*040331141830UA012Hi-jack061825A2934.0133N10627.2544E000.0040331309.6200000000L000000"));
 
+        verify(decoder.decode(null, null,
+                "*150817160254UB05CC8011400042499160254A2106.8799S14910.2583E000.0150817158.3511111111L000000"));
+
     }
 
 }
