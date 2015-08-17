@@ -26,8 +26,8 @@ var styles = {
     reportTime: 100,
     reportFormat: 'Y-m-d H:i:s',
 
-    mapDefaultLat: -0.1275,
-    mapDefaultLon: 51.507222,
+    mapDefaultLat: 51.507222,
+    mapDefaultLon: -0.1275,
     mapDefaultZoom: 6,
 
     mapMaxZoom: 19,

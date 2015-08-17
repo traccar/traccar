@@ -63,7 +63,7 @@ Ext.define('Traccar.view.map.Map', {
             var zoom = user.get('zoom') || server.get('zoom') || styles.mapDefaultZoom;
 
             this.mapView = new ol.View({
-                center: ol.proj.fromLonLat([lat, lon]),
+                center: ol.proj.fromLonLat([ lon, lat ]),
                 zoom: zoom,
                 maxZoom: styles.mapMaxZoom
             });
