@@ -20,6 +20,7 @@ Ext.Loader.setConfig({
 
 var availableLanguages = {
     'de': { name: 'Deutsch', code: 'de' },
+    'dk': { name: 'Dansk', code: 'dk' },
     'en': { name: 'English', code: 'en' },
     'es': { name: 'Español', code: 'es' },
     'fr': { name: 'Français', code: 'fr' },
