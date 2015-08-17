@@ -50,9 +50,9 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern patternGPGGA = Pattern.compile(
             "\\$GPGGA," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time
-            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Latitude
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude
+            "(\\d+)(\\d{2}\\.\\d+)," +     // Longitude
             "([EW])," +
             ".+");
 
