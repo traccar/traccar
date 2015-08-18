@@ -90,7 +90,14 @@ Ext.define('Traccar.view.report.Report', {
                 return speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
             }
         },
-        { text: strings.positionCourse, dataIndex: 'course', flex: 1 },
+        /* { text: strings.positionCourse, dataIndex: 'course', flex: 1 }, */
+        { text: 'Odometer', dataIndex: 'odometer', flex: 1,
+            renderer: function(value) {
+                var distanceUnits = Ext.getStore('DistanceUnits');
+                var unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
+                return distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
+            }	
+        },
         { text: strings.positionAddress, dataIndex: 'address', flex: 1 }
     ]
 

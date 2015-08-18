@@ -25,7 +25,6 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.DownstreamMessageEvent;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
@@ -38,6 +37,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private int resetDelay;
 
     private FilterHandler filterHandler;
+    private OdometerHandler odometerHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
 
     protected class OpenChannelHandler extends SimpleChannelHandler {
@@ -113,6 +113,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         addSpecificHandlers(pipeline);
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
+        }
+        if (odometerHandler != null) {
+            pipeline.addLast("odometer", odometerHandler);
         }
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
