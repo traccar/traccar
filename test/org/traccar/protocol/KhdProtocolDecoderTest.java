@@ -38,6 +38,9 @@ public class KhdProtocolDecoderTest extends ProtocolDecoderTest {
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "292980002822836665140825142037045343770193879200000050ffff000082fc000004b0780b170000002a0d"))));
 
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "292980002802425349120811032137022373011140211100000334FFFF000082FC0000001E780913000034DF0D"))));
+
     }
 
 }
