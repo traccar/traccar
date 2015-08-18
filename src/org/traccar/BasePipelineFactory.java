@@ -37,7 +37,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private int resetDelay;
 
     private FilterHandler filterHandler;
-    private OdometerHandler odometerHandler;
+    private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
 
     protected class OpenChannelHandler extends SimpleChannelHandler {
@@ -96,6 +96,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             reverseGeocoderHandler = new ReverseGeocoderHandler(
                     Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocode.processInvalidPositions"));
         }
+
+        if (Context.getConfig().getBoolean("distance.enable")) {
+            distanceHandler = new DistanceHandler();
+        }
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -114,8 +118,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
         }
-        if (odometerHandler != null) {
-            pipeline.addLast("odometer", odometerHandler);
+        if (distanceHandler != null) {
+            pipeline.addLast("distance", distanceHandler);
         }
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
