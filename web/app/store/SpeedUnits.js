@@ -25,11 +25,9 @@ Ext.define('Traccar.store.SpeedUnits', {
     convert: function(value, unit) {
         switch (unit) {
             case 'kmh':
-            	value = value * 1.852; 
-                return Math.round(value * 10) / 10;
+                return Math.round(value * 1.852 * 10) / 10;
             case 'mph':
-            	value = value *  1.15078; 
-                return Math.round(value * 10) / 10;
+                return Math.round(value * 1.15078 * 10) / 10;
         }
         return value;
     },
