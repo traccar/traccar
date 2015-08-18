@@ -25,6 +25,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -105,7 +106,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
 
             // Speed
-            position.setSpeed(buf.readUnsignedByte());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
             // Course
             position.setCourse(buf.readUnsignedShort());
