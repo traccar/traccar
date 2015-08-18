@@ -25,7 +25,6 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.DownstreamMessageEvent;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
@@ -38,6 +37,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private int resetDelay;
 
     private FilterHandler filterHandler;
+    private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
 
     protected class OpenChannelHandler extends SimpleChannelHandler {
@@ -96,6 +96,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             reverseGeocoderHandler = new ReverseGeocoderHandler(
                     Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocode.processInvalidPositions"));
         }
+
+        if (Context.getConfig().getBoolean("distance.enable")) {
+            distanceHandler = new DistanceHandler();
+        }
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -113,6 +117,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         addSpecificHandlers(pipeline);
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
+        }
+        if (distanceHandler != null) {
+            pipeline.addLast("distance", distanceHandler);
         }
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);

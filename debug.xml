@@ -18,13 +18,15 @@
     <entry key='geocoder.type'>nominatim</entry>
     <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
 
+    <entry key='distance.enable'>true</entry>
+
     <!--<entry key='filter.enable'>true</entry>
     <entry key='filter.limit'>3600</entry>
     <entry key='filter.invalid'>true</entry>
     <entry key='filter.zero'>true</entry>
     <entry key='filter.duplicate'>true</entry>
     <entry key='filter.distance'>50</entry>-->
-    
+
     <!--<entry key='forward.enable'>true</entry>
     <entry key='forward.url'>http://example.com:8080/gprmc/Data?id={uniqueId}&amp;code=0x0000&amp;gprmc={gprmc}</entry>-->
 

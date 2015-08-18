@@ -90,7 +90,6 @@ Ext.define('Traccar.view.report.Report', {
                 return speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
             }
         },
-        { text: strings.positionCourse, dataIndex: 'course', flex: 1 },
         { text: strings.positionAddress, dataIndex: 'address', flex: 1 }
     ]
 

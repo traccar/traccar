@@ -76,17 +76,20 @@ Ext.define('Traccar.view.state.StateController', {
     updatePosition: function(position) {
 
         var other;
+        var value;
+        var unit;
         var store = Ext.getStore('Parameters');
         store.removeAll();
 
         for (var key in position.data) {
             if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
-                var value = position.get(key);
+                value = position.get(key);
                 if (key === 'speed') {
                     var speedUnits = Ext.getStore('SpeedUnits');
-                    var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
+                    unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
                     value = speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
                 }
+                
                 store.add(Ext.create('Traccar.model.Parameter', {
                     priority: this.keys[key].priority,
                     name: this.keys[key].name,
@@ -103,12 +106,20 @@ Ext.define('Traccar.view.state.StateController', {
         }
         for (var key in other) {
             if (other.hasOwnProperty(key)) {
+
+                value = other[key];
+                if (key === 'distance' || key === 'odometer') {
+                    var distanceUnits = Ext.getStore('DistanceUnits');
+                    unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
+                    value = distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
+                }
+
                 store.add(Ext.create('Traccar.model.Parameter', {
                     priority: 999,
                     name: key.replace(/^./, function (match) {
                         return match.toUpperCase();
                     }),
-                    value: other[key]
+                    value: value
                 }));
             }
         }
