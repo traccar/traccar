@@ -25,13 +25,13 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
         
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "C01,0,12222");
+                return formatCommand(command, "@@M34,{%s},C01,0,12222*18\r\n", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "C01,0,02222");
+                return formatCommand(command, "@@M34,{%s},C01,0,02222*18\r\n", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, "C01,0,22122");
+                return formatCommand(command, "@@M34,{%s},C01,0,22122*18\r\n", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, "C01,0,22022");
+                return formatCommand(command, "@@M34,{%s},C01,0,22022*18\r\n", Command.KEY_UNIQUE_ID);
         }
         
         return null;
