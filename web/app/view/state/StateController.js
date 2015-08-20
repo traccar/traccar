@@ -73,6 +73,14 @@ Ext.define('Traccar.view.state.StateController', {
         }
     },
 
+    formatValue: function(value) {
+        if (typeof(id) === 'number') {
+            return +value.toFixed(2);
+        } else {
+            return value;
+        }
+    },
+
     updatePosition: function(position) {
 
         var other;
@@ -93,7 +101,7 @@ Ext.define('Traccar.view.state.StateController', {
                 store.add(Ext.create('Traccar.model.Parameter', {
                     priority: this.keys[key].priority,
                     name: this.keys[key].name,
-                    value: value
+                    value: this.formatValue(value)
                 }));
             }
         }
@@ -119,7 +127,7 @@ Ext.define('Traccar.view.state.StateController', {
                     name: key.replace(/^./, function (match) {
                         return match.toUpperCase();
                     }),
-                    value: value
+                    value: this.formatValue(value)
                 }));
             }
         }
