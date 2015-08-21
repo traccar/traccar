@@ -20,10 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -314,6 +311,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
         
+        }
+        
+        if (channel != null) {
+            channel.write("ACK OK\r\n");
         }
 
         return position;
