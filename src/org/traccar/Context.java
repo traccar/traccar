@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import com.ning.http.client.AsyncHttpClient;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
@@ -80,6 +81,12 @@ public class Context {
 
     public static ServerManager getServerManager() {
         return serverManager;
+    }
+    
+    private static final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+    
+    public static AsyncHttpClient getAsyncHttpClient() {
+        return asyncHttpClient;
     }
 
     public static void init(String[] arguments) throws Exception {

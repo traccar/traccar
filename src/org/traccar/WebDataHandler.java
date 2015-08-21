@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import com.ning.http.client.AsyncHttpClient;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
@@ -70,8 +69,7 @@ public class WebDataHandler extends BaseDataHandler {
                 replace("{longitude}", String.valueOf(position.getLongitude())).
                 replace("{gprmc}", formatSentence(position));
         
-        AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
-        asyncHttpClient.prepareGet(request).execute();
+        Context.getAsyncHttpClient().prepareGet(request).execute();
 
         return position;
     }

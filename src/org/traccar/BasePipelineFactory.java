@@ -34,7 +34,7 @@ import org.traccar.helper.Log;
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
-    private int resetDelay;
+    private final int resetDelay;
 
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
@@ -54,9 +54,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
     }
 
-    /**
-     * Logging using global logger
-     */
     protected class StandardLoggingHandler extends LoggingHandler {
 
         @Override
