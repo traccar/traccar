@@ -11,7 +11,10 @@ public class TotemProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         TotemProtocolDecoder decoder = new TotemProtocolDecoder(new TotemProtocol());
-        
+
+        verify(decoder.decode(null, null,
+                "$$BE863771024392112|AA$GPRMC,044704.000,A,1439.3334,N,12059.1417,E,0.00,0.00,200815,,,A*67|01.7|00.8|01.4|000000000000|20150820044704|14291265|00000000|4EECBF8B31|0000|0.0000|0002|00000|56E7"));
+
         verify(decoder.decode(null, null,
                 "$$AE860990002922822|AA$GPRMC,051002.00,A,0439.26245,N,10108.94448,E,0.023,,140315,,,A*71|02.98|01.95|02.26|000000000000|20150314051003|13841157|105A3B1C|0000|0.0000|0005|5324"));
 
