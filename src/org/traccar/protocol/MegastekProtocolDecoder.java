@@ -44,7 +44,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.\\d+)?," +            // Speed
             "(\\d+\\.\\d+)?," +            // Course
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
-            "[^\\*]+\\*[0-9a-fA-F]{2}");   // Checksum
+            ".*");                         // Checksum
 
     private static final Pattern patternSimple = Pattern.compile(
             "[FL]," +                      // Flag
@@ -143,10 +143,18 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             id = sentence.substring(beginIndex, endIndex);
 
             beginIndex = endIndex + 1;
-            endIndex = sentence.indexOf('*', beginIndex) + 3;
+            endIndex = sentence.indexOf('*', beginIndex);
+            if (endIndex != -1) {
+                endIndex += 3;
+            } else {
+                endIndex = sentence.length();
+            }
             gprmc = sentence.substring(beginIndex, endIndex);
 
             beginIndex = endIndex + 1;
+            if (beginIndex > sentence.length()) {
+                beginIndex = endIndex;
+            }
             status = sentence.substring(beginIndex);
 
         } else {
@@ -175,78 +183,67 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         if (simple) {
 
-            // Parse status
             Matcher parser = patternSimple.matcher(status);
-            if (!parser.matches()) {
-                return null;
-            }
+            if (parser.matches()) {
 
-            int index = 1;
+                int index = 1;
 
-            // Alarm
-            position.set(Event.KEY_ALARM, parser.group(index++));
+                position.set(Event.KEY_ALARM, parser.group(index++));
 
-            // IMEI
-            if (!identify(parser.group(index++), channel, null, false)) {
-                if (!identify(id, channel)) {
-                    return null;
+                // IMEI
+                if (!identify(parser.group(index++), channel, null, false)) {
+                    if (!identify(id, channel)) {
+                        return null;
+                    }
                 }
+                position.setDeviceId(getDeviceId());
+
+                position.set(Event.KEY_SATELLITES, parser.group(index++));
+
+                String altitude = parser.group(index++);
+                if (altitude != null) {
+                    position.setAltitude(Double.valueOf(altitude));
+                }
+
+                position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
+
+                String charger = parser.group(index++);
+                if (charger != null) {
+                    position.set(Event.KEY_CHARGE, Integer.valueOf(charger) == 1);
+                }
+
+                position.set(Event.KEY_MCC, parser.group(index++));
+                position.set(Event.KEY_MNC, parser.group(index++));
+                position.set(Event.KEY_LAC, parser.group(index++));
             }
-            position.setDeviceId(getDeviceId());
-
-            // Satellites
-            position.set(Event.KEY_SATELLITES, parser.group(index++));
-
-            // Altitude
-            String altitude = parser.group(index++);
-            if (altitude != null) {
-                position.setAltitude(Double.valueOf(altitude));
-            }
-
-            // Battery
-            position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
-
-            // Charger
-            String charger = parser.group(index++);
-            if (charger != null) {
-                position.set(Event.KEY_CHARGE, Integer.valueOf(charger) == 1);
-            }
-
-            position.set(Event.KEY_MCC, parser.group(index++));
-            position.set(Event.KEY_MNC, parser.group(index++));
-            position.set(Event.KEY_LAC, parser.group(index++));
 
         } else {
 
-            // Parse status
             Matcher parser = patternAlternative.matcher(status);
             if (!parser.matches()) {
-                return null;
+
+                int index = 1;
+
+                if (!identify(id, channel)) {
+                    return null;
+                }
+                position.setDeviceId(getDeviceId());
+
+                position.set(Event.KEY_MCC, parser.group(index++));
+                position.set(Event.KEY_MNC, parser.group(index++));
+                position.set(Event.KEY_LAC, parser.group(index++));
+                position.set(Event.KEY_GSM, parser.group(index++));
+
+                position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)));
+
+                position.set(Event.KEY_FLAGS, parser.group(index++));
+                position.set(Event.KEY_INPUT, parser.group(index++));
+                position.set(Event.KEY_OUTPUT, parser.group(index++));
+                position.set(Event.PREFIX_ADC + 1, parser.group(index++));
+                position.set(Event.PREFIX_ADC + 2, parser.group(index++));
+                position.set(Event.PREFIX_ADC + 3, parser.group(index++));
+                position.set(Event.KEY_ALARM, parser.group(index++));
             }
-
-            int index = 1;
-
-            if (!identify(id, channel)) {
-                return null;
-            }
-            position.setDeviceId(getDeviceId());
-
-            position.set(Event.KEY_MCC, parser.group(index++));
-            position.set(Event.KEY_MNC, parser.group(index++));
-            position.set(Event.KEY_LAC, parser.group(index++));
-            position.set(Event.KEY_GSM, parser.group(index++));
-
-            // Battery
-            position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)));
-
-            position.set(Event.KEY_FLAGS, parser.group(index++));
-            position.set(Event.KEY_INPUT, parser.group(index++));
-            position.set(Event.KEY_OUTPUT, parser.group(index++));
-            position.set(Event.PREFIX_ADC + 1, parser.group(index++));
-            position.set(Event.PREFIX_ADC + 2, parser.group(index++));
-            position.set(Event.PREFIX_ADC + 3, parser.group(index++));
-            position.set(Event.KEY_ALARM, parser.group(index++));
-
         }
 
         return position;
