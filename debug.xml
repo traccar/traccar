@@ -230,7 +230,7 @@
     </entry>
 
     <entry key='database.selectPositions'>
-        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to;    
+        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;    
     </entry>
 
     <entry key='database.insertPosition'>

@@ -128,9 +128,8 @@ Ext.define('Traccar.view.map.MapController', {
         
         var vectorSource = this.getView().vectorSource;
 
-        var data = Ext.getStore('Positions').getData().clone();
-        data.sort('fixTime');
-        
+        var data = Ext.getStore('Positions').getData();
+
         var index;
         var positions = [];
         this.reportRoutePoints = {};
