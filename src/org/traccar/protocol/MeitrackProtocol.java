@@ -20,14 +20,21 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
 import java.util.List;
+
 
 public class MeitrackProtocol extends BaseProtocol {
 
     public MeitrackProtocol() {
         super("meitrack");
+        setSupportedCommands(
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ALARM_ARM,
+                Command.TYPE_ALARM_DISARM);
     }
 
     @Override
