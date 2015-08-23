@@ -34,6 +34,10 @@ public class Server implements Factory {
     public String getMap() { return map; }
     public void setMap(String map) { this.map = map; }
 
+    private String bingKey;
+    public String getBingKey() { return bingKey; }
+    public void setBingKey(String bingKey) { this.bingKey = bingKey; }
+
     private String language;
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }

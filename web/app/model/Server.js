@@ -22,6 +22,7 @@ Ext.define('Traccar.model.Server', {
         { name: 'id', type: 'int' },
         { name: 'registration', type: 'boolean' },
         { name: 'map', type: 'string' },
+        { name: 'bingKey', type: 'string' },
         { name: 'language', type: 'string' },
         { name: 'distanceUnit', type: 'string' },
         { name: 'speedUnit', type: 'string' },

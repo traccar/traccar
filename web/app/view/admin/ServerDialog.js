@@ -43,6 +43,10 @@ Ext.define('Traccar.view.admin.ServerDialog', {
             displayField: 'name',
             valueField: 'key'
         }, {
+            xtype: 'textfield',
+            name: 'bingKey',
+            fieldLabel: strings.mapBingKey
+        }, {
             xtype: 'combobox',
             name: 'distanceUnit',
             fieldLabel: strings.settingsDistanceUnit,

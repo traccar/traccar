@@ -124,6 +124,7 @@
         id INT PRIMARY KEY AUTO_INCREMENT,
         registration BIT NOT NULL,
         map VARCHAR(128),
+        bingKey VARCHAR(128),
         language VARCHAR(128),
         distanceUnit VARCHAR(128),
         speedUnit VARCHAR(128),
@@ -150,6 +151,7 @@
         UPDATE server SET
         registration = :registration,
         map = :map,
+        bingKey = :bingKey,
         language = :language,
         distanceUnit = :distanceUnit,
         speedUnit = :speedUnit,

@@ -36,16 +36,16 @@ Ext.define('Traccar.view.map.Map', {
             var layer;
             var mapLayer = user.get('map') || server.get('map');
 
-            var bindKey = 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
+            var bingKey = server.get('bingKey');
 
             if (mapLayer === 'bingRoad') {
                 layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
-                    key: bindKey,
+                    key: bingKey,
                     imagerySet: 'Road'
                 })});
             } else if (mapLayer === 'bingAerial') {
                 layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
-                    key: bindKey,
+                    key: bingKey,
                     imagerySet: 'Aerial'
                 })});
             } else {

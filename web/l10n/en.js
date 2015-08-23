@@ -67,6 +67,7 @@ var strings = {
     mapTitle: 'Map',
     mapLayer: 'Map Layer',
     mapOsm: 'Open Street Map',
+    mapBingKey: 'Bing Maps Key',
     mapBingRoad: 'Bing Maps Road',
     mapBingAerial: 'Bing Maps Aerial',
 
