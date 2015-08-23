@@ -38,6 +38,10 @@ public class Server implements Factory {
     public String getBingKey() { return bingKey; }
     public void setBingKey(String bingKey) { this.bingKey = bingKey; }
 
+    private String mapUrl;
+    public String getMapUrl() { return mapUrl; }
+    public void setMapUrl(String mapUrl) { this.mapUrl = mapUrl; }
+
     private String language;
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }

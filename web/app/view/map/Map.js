@@ -38,7 +38,11 @@ Ext.define('Traccar.view.map.Map', {
 
             var bingKey = server.get('bingKey');
 
-            if (mapLayer === 'bingRoad') {
+            if (mapLayer === 'custom') {
+                layer = new ol.layer.Tile({ source: new ol.source.XYZ({
+                    url: server.get('mapUrl')
+                })});
+            } else if (mapLayer === 'bingRoad') {
                 layer = new ol.layer.Tile({ source: new ol.source.BingMaps({
                     key: bingKey,
                     imagerySet: 'Road'

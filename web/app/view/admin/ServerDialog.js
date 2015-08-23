@@ -47,6 +47,10 @@ Ext.define('Traccar.view.admin.ServerDialog', {
             name: 'bingKey',
             fieldLabel: strings.mapBingKey
         }, {
+            xtype: 'textfield',
+            name: 'mapUrl',
+            fieldLabel: strings.mapCustom
+        }, {
             xtype: 'combobox',
             name: 'distanceUnit',
             fieldLabel: strings.settingsDistanceUnit,
