@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -215,6 +213,14 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Event.KEY_MCC, parser.group(index++));
                 position.set(Event.KEY_MNC, parser.group(index++));
                 position.set(Event.KEY_LAC, parser.group(index++));
+
+            } else {
+
+                if (!identify(id, channel)) {
+                    return null;
+                }
+                position.setDeviceId(getDeviceId());
+                
             }
 
         } else {
