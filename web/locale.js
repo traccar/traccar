@@ -24,6 +24,7 @@ var availableLanguages = {
     'en': { name: 'English', code: 'en' },
     'es': { name: 'Español', code: 'es' },
     'fr': { name: 'Français', code: 'fr' },
+    'lt': { name: 'Lietuvių', code: 'lt' },
     'nl': { name: 'Nederlands', code: 'nl' },
     'pl': { name: 'Polski', code: 'pl' },
     'pt': { name: 'Português', code: 'pt' },
@@ -31,8 +32,7 @@ var availableLanguages = {
     'sk': { name: 'Slovenčina', code: 'sk' },
     'sr': { name: 'Srpski', code: 'sr' },
     'th': { name: 'ไทย', code: 'th' },
-    'zh': { name: '中文', code: 'zh_CN' },
-    'lt': { name: 'Lietuvių', code: 'lt' }
+    'zh': { name: '中文', code: 'zh_CN' }
 };
 
 var language = Ext.Object.fromQueryString(window.location.search.substring(1)).locale;
