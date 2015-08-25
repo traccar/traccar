@@ -44,7 +44,30 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(?:\\x00?\\x04,\\p{XDigit}{4},[01],))" +
             "GT...," +
             "(?:[0-9A-Z]{2}\\p{XDigit}{4})?," + // Protocol version
-            "([^,]+),.*," +                     // IMEI
+            "([^,]+)," +                        // IMEI
+
+            "(?:[0-9A-Z]{17}," +                // VIN
+            "[^,]{0,20}," +                     // Device name
+            "[01]," +                           // Report type
+            "\\p{XDigit}{1,8}," +               // Report mask
+            "[0-9A-Z]{17}," +                   // VIN
+            "[01]," +                           // ODB connect
+            "\\d{1,5}," +                       // ODB voltage
+            "\\p{XDigit}{8}," +                 // Support PIDs
+            "\\d{1,5}," +                       // Engine RPM
+            "\\d{1,3}," +                       // Speed
+            "-?\\d{1,3}," +                     // Coolant temp
+            "(\\d+\\.?\\d*|Inf|NaN)?," +        // Fuel consumption
+            "\\d{1,5}," +                       // Odometer
+            "\\d{1,5}," +
+            "[01]," +                           // ODB connect
+            "\\d{1,3}," +                       // Number of DTCs
+            "\\p{XDigit}*," +                   // DTCs
+            "\\d{1,3}," +                       // Throttle
+            "\\d{1,3}," +                       // Engine load
+            "(\\d{1,3})?,"+                     // Fuel level
+            "\\d+|.*)," +                       // Odometer
+
             "(\\d*)," +                         // GPS accuracy
             "(\\d+.\\d)?," +                    // Speed
             "(\\d+)?," +                        // Course
@@ -58,7 +81,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}{4}|\\p{XDigit}{8})?," + // LAC
             "(\\p{XDigit}{4})?," +              // Cell
             "(?:(\\d+\\.\\d)?," +               // Odometer
-            "(\\d{1,3})?,)?" +                  // Battery
+            "(\\d{1,3})?,)?" +                  // Battery*/
             ".*," +
             "(\\p{XDigit}{4})\\$?");
 
@@ -95,6 +118,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
+
+        // Fuel
+        position.set("fuel-consumption", parser.group(index++));
+        position.set(Event.KEY_FUEL, parser.group(index++));
 
         // Validity
         position.setValid(Integer.valueOf(parser.group(index++)) < 20);
