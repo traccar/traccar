@@ -31,7 +31,8 @@ var availableLanguages = {
     'sk': { name: 'Slovenčina', code: 'sk' },
     'sr': { name: 'Srpski', code: 'sr' },
     'th': { name: 'ไทย', code: 'th' },
-    'zh': { name: '中文', code: 'zh_CN' }
+    'zh': { name: '中文', code: 'zh_CN' },
+    'lt': { name: 'Lietuvių', code: 'lt' }
 };
 
 var language = Ext.Object.fromQueryString(window.location.search.substring(1)).locale;
