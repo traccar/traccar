@@ -61,13 +61,14 @@ public class WebDataHandler extends BaseDataHandler {
         
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
         
-        String request = url.
-                replace("{uniqueId}", device.getUniqueId()).
-                replace("{deviceId}", String.valueOf(device.getId())).
-                replace("{fixTime}", String.valueOf(position.getFixTime().getTime())).
-                replace("{latitude}", String.valueOf(position.getLatitude())).
-                replace("{longitude}", String.valueOf(position.getLongitude())).
-                replace("{gprmc}", formatSentence(position));
+        String request = url
+                .replace("{uniqueId}", device.getUniqueId())
+                .replace("{deviceId}", String.valueOf(device.getId()))
+                .replace("{fixTime}", String.valueOf(position.getFixTime().getTime()))
+                .replace("{latitude}", String.valueOf(position.getLatitude()))
+                .replace("{longitude}", String.valueOf(position.getLongitude()))
+                .replace("{gprmc}", formatSentence(position))
+                .replace("{statusCode}", position.getSpeed() < 1.0 ? "0xF020" : "0xF11C");
         
         Context.getAsyncHttpClient().prepareGet(request).execute();
 
