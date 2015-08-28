@@ -20,6 +20,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
+import java.nio.charset.Charset;
+
 import org.apache.log4j.Appender;
 import org.apache.log4j.DailyRollingFileAppender;
 import org.apache.log4j.Layout;
@@ -79,22 +81,26 @@ public class Log {
     public static void logSystemInfo() {
         try {
             OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
-            Log.info("Operating System" +
+            Log.info("Operating system" +
                 " name: " + operatingSystemBean.getName() +
                 " version: " + operatingSystemBean.getVersion() +
                 " architecture: " + operatingSystemBean.getArch());
 
             RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-            Log.info("Java Runtime" +
+            Log.info("Java runtime" +
                 " name: " + runtimeBean.getVmName() +
                 " vendor: " + runtimeBean.getVmVendor() +
                 " version: " + runtimeBean.getVmVersion());
 
             MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-            Log.info("Memory Limit" +
+            Log.info("Memory limit" +
                 " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb" +
                 " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
-        } catch (Exception e) {
+
+            Log.info("Character encoding: " +
+                    System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
+
+        } catch (Exception error) {
             Log.warning("Failed to get system info");
         }
     }

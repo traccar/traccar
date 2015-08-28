@@ -120,6 +120,7 @@ package_unix () {
 
   sed -i '/wrapper.java.classpath.1/i\wrapper.java.classpath.2=../tracker-server.jar' out/conf/wrapper.conf
   sed -i '/wrapper.app.parameter.1/i\wrapper.app.parameter.2=../conf/traccar.xml' out/conf/wrapper.conf
+  sed -i 's/wrapper.java.additional.1=/wrapper.java.additional.1=-Dfile.encoding=UTF-8/g' out/conf/wrapper.conf
   sed -i 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
   sed -i 's/@app.name@/traccar/g' out/conf/wrapper.conf
   sed -i 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
