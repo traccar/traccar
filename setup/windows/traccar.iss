@@ -65,6 +65,7 @@ begin
   LoadStringFromFile(ExpandConstant(CurrentFileName), S);
   Insert('wrapper.java.classpath.2=../tracker-server.jar' + #13#10, S, Pos('wrapper.java.classpath.1', S));
   Insert(ExpandConstant('wrapper.app.parameter.2="{app}\conf\traccar.xml"') + #13#10, S, Pos('wrapper.app.parameter.1', S));
+  StringChangeEx(S, 'wrapper.java.additional.1=', 'wrapper.java.additional.1=-Dfile.encoding=UTF-8', true);
   StringChangeEx(S, '<YourMainClass>', 'org.traccar.Main', true);
   StringChangeEx(S, '@app.name@', 'Traccar', true);
   StringChangeEx(S, '@app.long.name@', 'Traccar', true);
