@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
 import org.jboss.netty.buffer.ChannelBuffers;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
@@ -16,6 +15,9 @@ public class Gt06ProtocolDecoderTest extends ProtocolDecoderTest {
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "787811010123456789012345100B3201000171930D0A"))));
+        
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "787823120f081b121d37cb01c8e2cc08afd3c020d50201940701d600a1190041ee100576d1470d0a"))));
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "78781F120B081D112E10CC027AC7EB0C46584900148F01CC00287D001FB8000380810D0A"))));
