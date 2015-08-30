@@ -23,9 +23,11 @@ check_requirement () {
   fi 
 }
 
+check_requirement "ls ../../ext-*" "Missing ../../ext-X.X.X (https://www.sencha.com/legal/GPL/)"
 check_requirement "ls wrapper-delta-pack-*.tar.gz" "Missing wrapper-delta-pack-*.tar.gz (http://wrapper.tanukisoftware.com/doc/english/download.jsp)"
 check_requirement "ls wrapper-windows-x86-64-*.zip" "Missing wrapper-windows-x86-64-*.zip (http://www.krenger.ch/blog/tag/java-service-wrapper/)"
 check_requirement "ls isetup-*.exe" "Missing isetup-*.exe (http://www.jrsoftware.org/isdl.php)"
+check_requirement "which sencha" "Missing sencha cmd package (https://www.sencha.com/products/extjs/cmd-download/)"
 check_requirement "which wine" "Missing wine package"
 check_requirement "which innoextract" "Missing innoextract package"
 check_requirement "which makeself" "Missing makeself package"
