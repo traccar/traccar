@@ -13,31 +13,7 @@ Traccar is open source server for various GPS tracking devices. Project is writt
 
 ## Build
 
-Traccar is a Maven project. You need Java SDK version 6 or higher to build the project.
-
-### NetBeans (recommended)
-
-NetBeans comes pre-packaged with Maven plugin, so you don't need to install it separately.
-
-If your NetBeans doesn't have Maven plugin, then you need to download (`Tools > Plugins`) and configure (`Tools > Options > Miscellaneous > Maven`) it.
-
-To import project select `File > Open Project`, browse to the location of the project folder and click `Open Project`. To compile the project right click on the project and select `Build`.
-
-### Eclipse
-
-Eclipse is not recommended because of the number of reported problems with Eclipse Maven plugin.
-
-### IntelliJ IDEA
-
-Follow official instructions for <a href="https://www.jetbrains.com/idea/help/importing-project-from-maven-model.html">Importing Project from Maven Model</a>.
-
-### Command Line
-
-Make sure you have Maven and JDK installed. To generate binary files execute `mvn package` command in the terminal.
-
-### Create Installer
-
-Execute `setup/package.sh` shell script in the terminal.
+Please read <a href="https://www.traccar.org/build/">build from source</a> documentation from the official website.
 
 ## License
 
