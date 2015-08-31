@@ -20,6 +20,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -27,6 +28,9 @@ public class KhdProtocol extends BaseProtocol {
 
     public KhdProtocol() {
         super("khd");
+        setSupportedCommands(
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
@@ -34,8 +38,9 @@ public class KhdProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 3, 2));
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(512, 3, 2));
                 pipeline.addLast("objectDecoder", new KhdProtocolDecoder(KhdProtocol.this));
+                pipeline.addLast("objectEncoder", new KhdProtocolEncoder());
             }
         });
     }

@@ -130,14 +130,14 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(4); // serial number
             buf.readByte(); // reserved
             
-            ChannelBuffer response = ChannelBuffers.directBuffer(10);
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeByte(0x29); response.writeByte(0x29); // header
             response.writeByte(MSG_CONFIRMATION);
             response.writeShort(5); // size
             response.writeByte(buf.readUnsignedByte());
             response.writeByte(type);
             response.writeByte(0); // reserved
-            response.writeByte(Crc.xorChecksum(response.toByteBuffer(0, 8)));
+            response.writeByte(Crc.xorChecksum(response.toByteBuffer()));
             response.writeByte(0x0D); // ending
             channel.write(response);
 

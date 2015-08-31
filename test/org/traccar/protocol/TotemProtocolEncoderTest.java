@@ -21,7 +21,7 @@ import org.traccar.model.Command;
 
 public class TotemProtocolEncoderTest {
     @Test
-    public void testDecode() throws Exception {
+    public void testEncode() throws Exception {
 
         TotemProtocolEncoder encoder = new TotemProtocolEncoder();
         

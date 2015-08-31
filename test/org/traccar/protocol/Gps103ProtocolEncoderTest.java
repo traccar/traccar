@@ -7,7 +7,7 @@ import org.traccar.model.Command;
 public class Gps103ProtocolEncoderTest {
 
     @Test
-    public void testDecode() throws Exception {
+    public void testEncode() throws Exception {
 
         Gps103ProtocolEncoder encoder = new Gps103ProtocolEncoder();
         
