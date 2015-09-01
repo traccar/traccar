@@ -13,6 +13,9 @@ public class MeitrackProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         MeitrackProtocolDecoder decoder = new MeitrackProtocolDecoder(new MeitrackProtocol());
+
+        verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
+                "$$A158,79007001520234,AAA,35,40.996370,-8.575065,150730184834,A,8,24,0,1,1.3,173,32573389,31405012,268|3|2BC0|250B,2000,|||0A2D|0000,00000001,,50,,,,,,,,,,,,,*4A", Charset.defaultCharset())));
         
         verify(decoder.decode(null, null, ChannelBuffers.copiedBuffer(
                 "$$G145,862106024274815,AAA,35,-1.287125,36.906061,150530054639,A,10,13,12,67,0.8,1621,38359791,42330881,639|2|FB2|2F3,0000,3|0|0|A58|432,,,1,0009,*26", Charset.defaultCharset())));
