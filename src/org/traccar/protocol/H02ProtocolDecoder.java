@@ -27,6 +27,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -54,6 +55,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         result += degrees;
 
         return result;
+    }
+
+    private void processStatus(Position position, long status) {
+        if (!BitUtil.check(status, 0) || !BitUtil.check(status, 1) || !BitUtil.check(status, 3) || !BitUtil.check(status, 4)) {
+            position.set(Event.KEY_ALARM, true);
+        }
+        position.set(Event.KEY_IGNITION, !BitUtil.check(status, 10));
+        position.set(Event.KEY_STATUS, status);
     }
     
     private Position decodeBinary(ChannelBuffer buf, Channel channel) {
@@ -95,9 +104,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         // Speed and course
         position.setSpeed(ChannelBufferTools.readHexInteger(buf, 3));
         position.setCourse((buf.readUnsignedByte() & 0x0f) * 100.0 + ChannelBufferTools.readHexInteger(buf, 2));
-        
-        // Status
-        position.set(Event.KEY_STATUS, ChannelBufferTools.readHexString(buf, 8));
+
+        processStatus(position, buf.readUnsignedInt());
         return position;
     }
 
@@ -174,9 +182,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-        
-        // Status
-        position.set(Event.KEY_STATUS, parser.group(index++));
+
+        processStatus(position, Long.parseLong(parser.group(index++), 16));
         return position;
     }
 

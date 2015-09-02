@@ -79,6 +79,7 @@ public abstract class Event {
     public static final String KEY_IP = "ip";
     public static final String KEY_ARCHIVE = "archive";
     public static final String KEY_DISTANCE = "distance";
+    public static final String KEY_DOOR = "door";
 
     // Starts with 1 not 0
     public static final String PREFIX_TEMP = "temp";
