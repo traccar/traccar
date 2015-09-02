@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.traccar.helper.Crc;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class WebDataHandler extends BaseDataHandler {
@@ -56,6 +57,16 @@ public class WebDataHandler extends BaseDataHandler {
         return s.toString();
     }
 
+    private String calculateStatus(Position position) {
+        if (position.getOther().containsKey(Event.KEY_ALARM) && (Boolean) position.getOther().get(Event.KEY_ALARM)) {
+            return "0xF841"; // STATUS_PANIC_ON
+        } else if (position.getSpeed() < 1.0) {
+            return "0xF020"; // STATUS_LOCATION
+        } else {
+            return "0xF11C"; // STATUS_MOTION_MOVING
+        }
+    }
+
     @Override
     protected Position handlePosition(Position position) {
         
@@ -68,7 +79,7 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{latitude}", String.valueOf(position.getLatitude()))
                 .replace("{longitude}", String.valueOf(position.getLongitude()))
                 .replace("{gprmc}", formatSentence(position))
-                .replace("{statusCode}", position.getSpeed() < 1.0 ? "0xF020" : "0xF11C");
+                .replace("{statusCode}", calculateStatus(position));
         
         Context.getAsyncHttpClient().prepareGet(request).execute();
 
