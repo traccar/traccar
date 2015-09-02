@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -35,6 +36,12 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
     public TytanProtocolDecoder(TytanProtocol protocol) {
         super(protocol);
+    }
+
+    private static float readSwappedFloat(ChannelBuffer buf) {
+        byte[] bytes = new byte[4];
+        buf.readBytes(bytes);
+        return ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes).readFloat();
     }
 
     @Override
@@ -114,9 +121,9 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         {
                             int n = buf.readUnsignedByte() >> 4;
                             if (n < 2) {
-                                position.set(Event.PREFIX_ADC + n, buf.readFloat());
+                                position.set(Event.PREFIX_ADC + n, readSwappedFloat(buf));
                             } else {
-                                position.set("di" + (n - 2), buf.readFloat());
+                                position.set("di" + (n - 2), readSwappedFloat(buf));
                             }
                         }
                         break;
@@ -186,7 +193,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedInt(); // diagnostic
                         break;
                     case 90:
-                        position.set(Event.KEY_POWER, buf.readFloat());
+                        position.set(Event.KEY_POWER, readSwappedFloat(buf));
                         break;
                     case 99:
                         buf.readUnsignedInt(); // tachograph
