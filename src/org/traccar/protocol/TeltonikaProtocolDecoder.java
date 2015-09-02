@@ -160,7 +160,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            
             // Read 2 byte data
             if (BitUtil.check(globalMask, 2)) {
                 int cnt = buf.readUnsignedByte();
