@@ -18,7 +18,6 @@ package org.traccar.web;
 import java.net.InetSocketAddress;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -34,8 +33,11 @@ import org.traccar.helper.Log;
 public class WebServer {
 
     private Server server;
+    private final Config config;
+    private final DataSource dataSource;
+    private final HandlerList handlers = new HandlerList();
     
-    private void initServer(Config config) {
+    private void initServer() {
 
         String address = config.getString("web.address");
         int port = config.getInteger("web.port", 8082);
@@ -47,9 +49,41 @@ public class WebServer {
     }
     
     public WebServer(Config config, DataSource dataSource) {
-        
-        initServer(config);
-        
+        this.config = config;
+        this.dataSource = dataSource;
+
+        initServer();
+        switch (config.getString("web.type", "NEW")) {
+            case "API":
+                initApi();
+                break;
+            case "NEW":
+                initApi();
+                initWebApp();
+                break;
+            case "OLD":
+                initApi();
+                initOldWebApp();
+                break;
+            default:
+                Log.error("Unsupported web application type: " + config.getString("web.type"));
+                break;
+        }
+        server.setHandler(handlers);
+    }
+
+    private void initWebApp() {
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setResourceBase(config.getString("web.path"));
+        if (config.getBoolean("web.debug")) {
+            resourceHandler.setWelcomeFiles(new String[] { "debug.html" });
+        } else {
+            resourceHandler.setWelcomeFiles(new String[] { "release.html", "index.html" });
+        }
+        handlers.addHandler(resourceHandler);
+    }
+
+    private void initOldWebApp() {
         try {
             javax.naming.Context context = new InitialContext();
             context.bind("java:/DefaultDS", dataSource);
@@ -60,13 +94,10 @@ public class WebServer {
         WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/");
         webapp.setWar(config.getString("web.application"));
-        server.setHandler(webapp);        
+        handlers.addHandler(webapp);
     }
 
-    public WebServer(Config config) {
-        
-        initServer(config);
-
+    private void initApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
@@ -76,19 +107,7 @@ public class WebServer {
         servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
         servletHandler.addServlet(new ServletHolder(new CommandServlet()), "/command/*");
         servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
-
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setResourceBase(config.getString("web.path"));
-        if (config.getBoolean("web.debug")) {
-            resourceHandler.setWelcomeFiles(new String[] { "debug.html" });
-        } else {
-            resourceHandler.setWelcomeFiles(new String[] { "release.html", "index.html" });
-        }
-
-        HandlerList handlerList = new HandlerList();
-        handlerList.setHandlers(new Handler[] {servletHandler, resourceHandler});
-
-        server.setHandler(handlerList);
+        handlers.addHandler(servletHandler);
     }
 
     public void start() {

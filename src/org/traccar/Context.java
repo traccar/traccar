@@ -125,12 +125,10 @@ public class Context {
         }
 
         if (config.getBoolean("web.enable")) {
-            if (!config.getBoolean("web.old")) {
+            if (config.getString("web.type", "NEW").equals("NEW") || config.getString("web.type", "NEW").equals("API")) {
                 permissionsManager = new PermissionsManager(dataManager);
-                webServer = new WebServer(config);
-            } else {
-                webServer = new WebServer(config, dataManager.getDataSource());
             }
+            webServer = new WebServer(config, dataManager.getDataSource());
         }
 
         serverManager = new ServerManager();
