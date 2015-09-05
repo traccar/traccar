@@ -38,8 +38,8 @@ Ext.define('Traccar.view.device.DeviceController', {
 
     init: function() {
         if (Traccar.getApplication().getUser().get('admin')) {
-            this.lookupReference('settingsServerButton').setDisabled(false);
-            this.lookupReference('settingsUsersButton').setDisabled(false);
+            this.lookupReference('settingsServerButton').setHidden(false);
+            this.lookupReference('settingsUsersButton').setHidden(false);
         }
     },
     

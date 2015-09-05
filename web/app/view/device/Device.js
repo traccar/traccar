@@ -64,12 +64,12 @@ Ext.define('Traccar.view.device.Device', {
             handler: 'onUserClick'
         }, {
             text: strings.settingsServer,
-            disabled: true,
+            hidden: true,
             handler: 'onServerClick',
             reference: 'settingsServerButton'
         }, {
             text: strings.settingsUsers,
-            disabled: true,
+            hidden: true,
             handler: 'onUsersClick',
             reference: 'settingsUsersButton'
         }]
