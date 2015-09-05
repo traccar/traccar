@@ -32,6 +32,13 @@ Ext.define('Traccar.view.login.Login', {
         xtype: 'form',
         reference: 'form',
 
+        autoEl: {
+            tag: 'form',
+            method: 'POST',
+            action: 'blank.html',
+            target: 'submitTarget'
+        },
+
         items: [{
             xtype: 'combobox',
             name: 'language',
@@ -53,7 +60,8 @@ Ext.define('Traccar.view.login.Login', {
             listeners: {
                 specialKey: 'onSpecialKey',
                 afterrender: 'onAfterRender'
-            }
+            },
+            inputAttrTpl: ['autocomplete="on"']
         }, {
             xtype: 'textfield',
             name: 'password',
@@ -63,7 +71,14 @@ Ext.define('Traccar.view.login.Login', {
             enableKeyEvents: true,
             listeners: {
                 specialKey: 'onSpecialKey'
-            }
+            },
+            inputAttrTpl: ['autocomplete="on"']
+        }, {
+            xtype: 'component',
+            html: '<iframe id="submitTarget" name="submitTarget" style="display:none"></iframe>'
+        }, {
+            xtype: 'component',
+            html: '<input type="submit" id="submitButton" style="display:none">'
         }]
     },
 

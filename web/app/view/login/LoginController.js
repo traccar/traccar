@@ -61,6 +61,7 @@ Ext.define('Traccar.view.login.LoginController', {
     },
     
     onLoginClick: function() {
+        Ext.getElementById('submitButton').click();
         this.doLogin();
     },
     
