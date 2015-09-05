@@ -20,11 +20,14 @@ var styles = {
     windowWidth: 640,
     windowHeight: 480,
 
+    dateTimeFormat: 'Y-m-d H:i:s',
+    timeFormat: 'H:i',
+    weekStartDay: 1,
+
     deviceWidth: 350,
 
     reportHeight: 250,
     reportTime: 100,
-    reportFormat: 'Y-m-d H:i:s',
 
     mapDefaultLat: 51.507222,
     mapDefaultLon: -0.1275,
