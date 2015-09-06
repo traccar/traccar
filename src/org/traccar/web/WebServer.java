@@ -53,15 +53,15 @@ public class WebServer {
         this.dataSource = dataSource;
 
         initServer();
-        switch (config.getString("web.type", "NEW")) {
-            case "API":
+        switch (config.getString("web.type", "new")) {
+            case "api":
                 initApi();
                 break;
-            case "NEW":
+            case "new":
                 initApi();
                 initWebApp();
                 break;
-            case "OLD":
+            case "old":
                 initApi();
                 initOldWebApp();
                 break;

@@ -143,7 +143,7 @@ public class DataManager implements IdentityManager {
 
     private void initDatabaseSchema() throws SQLException {
 
-        if (config.getString("web.type", "NEW").equals("NEW") || config.getString("web.type", "NEW").equals("API")) {
+        if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
 
             Connection connection = dataSource.getConnection();
             ResultSet result = connection.getMetaData().getTables(

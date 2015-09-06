@@ -125,7 +125,7 @@ public class Context {
         }
 
         if (config.getBoolean("web.enable")) {
-            if (config.getString("web.type", "NEW").equals("NEW") || config.getString("web.type", "NEW").equals("API")) {
+            if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
                 permissionsManager = new PermissionsManager(dataManager);
             }
             webServer = new WebServer(config, dataManager.getDataSource());
