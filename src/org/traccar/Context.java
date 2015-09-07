@@ -106,8 +106,6 @@ public class Context {
         }
         identityManager = dataManager;
 
-        connectionManager = new ConnectionManager(dataManager);
-
         if (config.getBoolean("geocoder.enable")) {
             String type = config.getString("geocoder.type", "google");
             String url = config.getString("geocoder.url");
@@ -130,6 +128,8 @@ public class Context {
             }
             webServer = new WebServer(config, dataManager.getDataSource());
         }
+
+        connectionManager = new ConnectionManager(dataManager);
 
         serverManager = new ServerManager();
     }
