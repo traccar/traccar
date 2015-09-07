@@ -29,6 +29,7 @@ var availableLanguages = {
     'pl': { name: 'Polski', code: 'pl' },
     'pt': { name: 'Português', code: 'pt' },
     'ru': { name: 'Русский', code: 'ru' },
+    'si': { name: 'සිංහල', code: 'en' },
     'sk': { name: 'Slovenčina', code: 'sk' },
     'sr': { name: 'Srpski', code: 'sr' },
     'th': { name: 'ไทย', code: 'th' },
