@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -33,7 +34,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    //088048003342 BR00 150807 A 1352.9871 N 10030.9084 E 000.0 110718 000.0 001010000 L00000000
     private static final Pattern pattern = Pattern.compile(
             "(\\d+)(,)?" +                 // Device ID
             ".{4},?" +                     // Command
@@ -46,7 +46,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             "([EW]),?" +
             "(\\d+\\.\\d)(?:\\d*,)?" +     // Speed
             "(\\d{2})(\\d{2})(\\d{2}),?" + // Time (HHMMSS)
-            "(\\d+\\.?\\d),?" +            // Course
+            "(\\d+\\.?\\d+),?" +           // Course
             "([0-9a-fA-F]{8})?,?" +        // State
             "(?:L([0-9a-fA-F]+))?.*\\)?"); // Odometer
 
@@ -137,7 +137,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
         
         // State
-        position.set(Event.KEY_STATUS, parser.group(index++));
+        String status = parser.group(index++);
+        if (status != null) {
+            position.set(Event.KEY_STATUS, status);
+
+            int value = Integer.parseInt(status, 2);
+            position.set(Event.KEY_CHARGE, !BitUtil.check(value, 0));
+            position.set(Event.KEY_IGNITION, BitUtil.check(value, 1));
+        }
 
         // Odometer
         String odometer = parser.group(index++);
