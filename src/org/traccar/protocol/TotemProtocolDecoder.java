@@ -31,7 +31,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern patternFirst = Pattern.compile(
+    private static final Pattern pattern1 = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -64,7 +64,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\p{XDigit}{4}" +                  // Checksum
             "\r?\n?");
 
-    private static final Pattern patternSecond = Pattern.compile(
+    private static final Pattern pattern2 = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -91,7 +91,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\p{XDigit}{4}" +                  // Checksum
             "\r?\n?");
 
-    private static final Pattern patternThird = Pattern.compile(
+    private static final Pattern pattern3 = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -121,39 +121,26 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\p{XDigit}{4}" +                  // Checksum
             "\r?\n?");
 
-    private enum MessageFormat {
-        first,
-        second,
-        third
-    }
-    
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
-        
+
         String sentence = (String) msg;
 
         // Determine format
-        MessageFormat format = MessageFormat.third;
+        Pattern pattern = pattern3;
         if (sentence.contains("$GPRMC")) {
-            format = MessageFormat.first;
+            pattern = pattern1;
         } else {
             int index = sentence.indexOf('|');
             if (index != -1 && sentence.indexOf('|', index + 1) != -1) {
-                format = MessageFormat.second;
+                pattern = pattern2;
             }
         }
 
         // Parse message
-        Matcher parser = null;
-        if (format == MessageFormat.first) {
-            parser = patternFirst.matcher(sentence);
-        } else if (format == MessageFormat.second) {
-            parser = patternSecond.matcher(sentence);
-        } else if (format == MessageFormat.third) {
-            parser = patternThird.matcher(sentence);
-        }
+        Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -173,13 +160,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         // Alarm type
         position.set(Event.KEY_ALARM, parser.group(index++));
         
-        if (format == MessageFormat.first || format == MessageFormat.second) {
+        if (pattern == pattern1 || pattern == pattern2) {
 
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
             int year = 0;
-            if (format == MessageFormat.second) {
+            if (pattern == pattern2) {
                 time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
                 time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
                 year = Integer.valueOf(parser.group(index++));
@@ -217,7 +204,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Date
-            if (format == MessageFormat.first) {
+            if (pattern == pattern1) {
                 time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
                 time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
                 year = Integer.valueOf(parser.group(index++));
@@ -250,7 +237,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             // Odometer
             position.set(Event.KEY_ODOMETER, parser.group(index++));
         
-        } else if (format == MessageFormat.third) {
+        } else if (pattern == pattern3) {
 
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
