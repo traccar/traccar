@@ -63,11 +63,26 @@ Ext.define('Traccar.view.user.UserController', {
             }
         });
     },
+
+    onDevicesClick: function() {
+        // TODO show devices
+        /*Ext.create('Ext.window.Window', {
+            title: strings.settingsUsers,
+            width: styles.windowWidth,
+            height: styles.windowHeight,
+            layout: 'fit',
+            modal: true,
+            items: {
+                xtype: 'userView'
+            }
+        }).show();*/
+    },
     
     onSelectionChange: function(selected) {
         var disabled = selected.length > 0;
         this.lookupReference('userEditButton').setDisabled(disabled);
         this.lookupReference('userRemoveButton').setDisabled(disabled);
+        this.lookupReference('userDevicesButton').setDisabled(disabled);
     }
 
 });
