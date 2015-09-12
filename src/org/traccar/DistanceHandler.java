@@ -15,11 +15,11 @@
  */
 package org.traccar;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-
-import java.math.BigDecimal;
 
 public class DistanceHandler extends BaseDataHandler {
 
@@ -44,7 +44,7 @@ public class DistanceHandler extends BaseDataHandler {
                     position.getLatitude(), position.getLongitude(),
                     last.getLatitude(), last.getLongitude());
 
-            distance = BigDecimal.valueOf(distance).setScale(2).doubleValue();
+            distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
         }
 
         position.set(Event.KEY_DISTANCE, distance);
