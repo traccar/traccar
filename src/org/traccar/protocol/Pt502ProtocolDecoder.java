@@ -21,10 +21,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -51,7 +48,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             "./" +
             "([01])+," +                        // Input
             "([01])+/" +                        // Output
-            "([^/]+)/" +                        // ADC
+            "([^/]+)?/" +                       // ADC
             "(\\d+)" +                          // Odometer
             "(?:/([^/]+)?/" +                   // RFID
             "(\\p{XDigit}{3}))?" +              // State
