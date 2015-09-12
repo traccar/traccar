@@ -36,9 +36,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public Gt06ProtocolDecoder(Gt06Protocol protocol) {
         super(protocol);
         
-        if (Context.getConfig().hasKey(protocol + ".timezone")) {
+        if (Context.getConfig().hasKey(getProtocolName() + ".timezone")) {
             forceTimeZone = true;
-            timeZone.setRawOffset(Context.getConfig().getInteger(protocol + ".timezone") * 1000);
+            timeZone.setRawOffset(Context.getConfig().getInteger(getProtocolName() + ".timezone") * 1000);
         }
     }
 
