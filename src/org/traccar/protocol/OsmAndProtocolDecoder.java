@@ -69,7 +69,11 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
         if (params.containsKey("timestamp")) {
             try {
-                position.setTime(new Date(Long.valueOf(params.get("timestamp").get(0)) * 1000));
+                long timestamp = Long.valueOf(params.get("timestamp").get(0));
+                if (timestamp < Integer.MAX_VALUE) {
+                    timestamp *= 1000;
+                }
+                position.setTime(new Date(timestamp));
             } catch (NumberFormatException error) {
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 position.setTime(dateFormat.parse(params.get("timestamp").get(0)));

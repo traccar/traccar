@@ -1,11 +1,10 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
-import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class OsmAndProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -14,6 +13,9 @@ public class OsmAndProtocolDecoderTest extends ProtocolDecoderTest {
 
         OsmAndProtocolDecoder decoder = new OsmAndProtocolDecoder(new OsmAndProtocol());
         
+        verify(decoder.decode(null, null, new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
+                "/?id=902064&lat=42.06288&lon=-88.23412&timestamp=1442068686579&hdop=6.0&altitude=224.0&speed=0.0")));
+
         verify(decoder.decode(null, null, new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
                 "/?lat=49.60688&lon=6.15788&timestamp=2014-06-04+09%3A10%3A11&altitude=384.7&speed=0.0&id=353861053849681")));
         
