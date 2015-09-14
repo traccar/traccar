@@ -12,6 +12,9 @@ public class MegastekProtocolDecoderTest extends ProtocolDecoderTest {
         MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(new MegastekProtocol());
 
         verify(decoder.decode(null, null,
+                "STX,861001005215757,$GPRMC,180118.000,A,4241.330116,N,2321.931251,E,0.00,182.19,130915,,E,A,F,Nil-Alarms,imei:861001005215757,8,577.0,Battery=38%,0,284,03,03E8,3139;7A"));
+
+        verify(decoder.decode(null, null,
                 "STX,865067020439090,$GPRMC,171013.000,A,5919.1411,N,01804.1681,E,0.000,294.41,140815,,,A"));
 
         verify(decoder.decode(null, null,
