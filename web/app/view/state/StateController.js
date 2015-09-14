@@ -83,7 +83,7 @@ Ext.define('Traccar.view.state.StateController', {
 
     updatePosition: function(position) {
 
-        var other;
+        var attributes;
         var value;
         var unit;
         var store = Ext.getStore('Attributes');
@@ -108,16 +108,16 @@ Ext.define('Traccar.view.state.StateController', {
             }
         }
 
-        var xml = position.get('other');
+        var xml = position.get('attributes');
         if (typeof xml === 'string' || xml instanceof String) {
-            other = this.parseXml(xml);
+            attributes = this.parseXml(xml);
         } else {
-            other = xml;
+            attributes = xml;
         }
-        for (var key in other) {
-            if (other.hasOwnProperty(key)) {
+        for (var key in attributes) {
+            if (attributes.hasOwnProperty(key)) {
 
-                value = other[key];
+                value = attributes[key];
                 if (key === 'distance' || key === 'odometer') {
                     var distanceUnits = Ext.getStore('DistanceUnits');
                     unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';

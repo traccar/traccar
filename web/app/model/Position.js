@@ -58,6 +58,6 @@ Ext.define('Traccar.model.Position', {
         name: 'address',
         type: 'string'
     }, {
-        name: 'other'
+        name: 'attributes'
     }]
 });

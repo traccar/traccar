@@ -41,15 +41,15 @@ public abstract class Event {
     public Date getDeviceTime() { return deviceTime; }
     public void setDeviceTime(Date deviceTime) { this.deviceTime = deviceTime; }
 
-    private Map<String, Object> other = new LinkedHashMap<>();
-    public Map<String, Object> getOther() { return other; }
-    public void setOther(Map<String, Object> other) { this.other = other; }
+    private Map<String, Object> attributes = new LinkedHashMap<>();
+    public Map<String, Object> getAttributes() { return attributes; }
+    public void setAttributes(Map<String, Object> attributes) { this.attributes = attributes; }
 
-    public void set(String key, boolean value) { other.put(key, value); }
-    public void set(String key, int value) { other.put(key, value); }
-    public void set(String key, long value) { other.put(key, value); }
-    public void set(String key, double value) { other.put(key, value); }
-    public void set(String key, String value) { if (value != null && !value.isEmpty()) other.put(key, value); }
+    public void set(String key, boolean value) { attributes.put(key, value); }
+    public void set(String key, int value) { attributes.put(key, value); }
+    public void set(String key, long value) { attributes.put(key, value); }
+    public void set(String key, double value) { attributes.put(key, value); }
+    public void set(String key, String value) { if (value != null && !value.isEmpty()) attributes.put(key, value); }
 
     // Words separated by dashes (word-second-third)
     public static final String KEY_INDEX = "index";

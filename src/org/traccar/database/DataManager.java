@@ -331,7 +331,8 @@ public class DataManager implements IdentityManager {
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
                 .setLong("power", 0) // tmp
-                .setString("extended_info", MiscFormatter.toXmlString(position.getOther())) // tmp
+                .setString("extended_info", MiscFormatter.toXmlString(position.getAttributes())) // tmp
+                .setString("other", MiscFormatter.toXmlString(position.getAttributes())) // tmp
                 .executeUpdate());
     }
 
@@ -341,7 +342,8 @@ public class DataManager implements IdentityManager {
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
                 .setLong("power", 0) // tmp
-                .setString("extended_info", MiscFormatter.toXmlString(position.getOther())) // tmp
+                .setString("extended_info", MiscFormatter.toXmlString(position.getAttributes())) // tmp
+                .setString("other", MiscFormatter.toXmlString(position.getAttributes())) // tmp
                 .executeUpdate();
     }
 

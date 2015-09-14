@@ -13,7 +13,7 @@ public class MiscFormatterTest {
         position.set("b", "2");
         position.set("a", "3");
 
-        assertEquals("<info><a>3</a><b>2</b></info>", MiscFormatter.toXmlString(position.getOther()));
+        assertEquals("<info><a>3</a><b>2</b></info>", MiscFormatter.toXmlString(position.getAttributes()));
         
     }
 

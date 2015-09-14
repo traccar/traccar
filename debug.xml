@@ -100,7 +100,7 @@
         speed FLOAT NOT NULL,
         course FLOAT NOT NULL,
         address VARCHAR(512),
-        other VARCHAR(4096) NOT NULL,
+        attributes VARCHAR(4096) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
         
         CREATE INDEX position_deviceId_fixTime ON position (deviceId, fixTime);
@@ -111,7 +111,7 @@
         deviceId INT NOT NULL,
         serverTime TIMESTAMP NOT NULL,
         deviceTime TIMESTAMP NOT NULL,
-        other VARCHAR(4096) NOT NULL,
+        attributes VARCHAR(4096) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
 
         CREATE TABLE server (
@@ -232,8 +232,8 @@
     </entry>
 
     <entry key='database.insertPosition'>
-        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
-        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
 
     <entry key='database.selectLatestPositions'>

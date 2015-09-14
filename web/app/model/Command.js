@@ -25,6 +25,6 @@ Ext.define('Traccar.model.Command', {
         name: 'type',
         type: 'string'
     }, {
-        name: 'other'
+        name: 'attributes'
     }]
 });

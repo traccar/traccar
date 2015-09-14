@@ -36,8 +36,8 @@ public class DistanceHandler extends BaseDataHandler {
 
         Position last = getLastPosition(position.getDeviceId());
         if (last != null) {
-            if (last.getOther().containsKey(Event.KEY_DISTANCE)) {
-                distance = ((Number) last.getOther().get(Event.KEY_DISTANCE)).doubleValue();
+            if (last.getAttributes().containsKey(Event.KEY_DISTANCE)) {
+                distance = ((Number) last.getAttributes().get(Event.KEY_DISTANCE)).doubleValue();
             }
 
             distance += DistanceCalculator.distance(
