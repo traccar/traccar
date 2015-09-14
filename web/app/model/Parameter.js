@@ -17,9 +17,14 @@
 Ext.define('Traccar.model.Parameter', {
     extend: 'Ext.data.Model',
 
-    fields: [
-        { name: 'priority', type: 'int' },
-        { name: 'name', type: 'string' },
-        { name: 'value', type: 'string' }
-    ]
+    fields: [{
+        name: 'priority',
+        type: 'int'
+    }, {
+        name: 'name',
+        type: 'string'
+    }, {
+        name: 'value',
+        type: 'string'
+    }]
 });

@@ -18,9 +18,14 @@ Ext.define('Traccar.model.Device', {
     extend: 'Ext.data.Model',
     identifier: 'negative',
 
-    fields: [
-        { name: 'id', type: 'int' },
-        { name: 'name', type: 'string' },
-        { name: 'uniqueId', type: 'string' }
-    ]
+    fields: [{
+        name: 'id',
+        type: 'int'
+    }, {
+        name: 'name',
+        type: 'string'
+    }, {
+        name: 'uniqueId',
+        type: 'string'
+    }]
 });
