@@ -28,7 +28,7 @@ Ext.define('Traccar.Application', {
         'User',
         'Device',
         'Position',
-        'Parameter',
+        'Attribute',
         'Command'
     ],
     
@@ -37,7 +37,7 @@ Ext.define('Traccar.Application', {
         'Positions',
         'LiveData',
         'Users',
-        'Parameters',
+        'Attributes',
         'MapTypes',
         'DistanceUnits',
         'SpeedUnits',

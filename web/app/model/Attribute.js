@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.Parameters', {
-    extend: 'Ext.data.Store',
-    model: 'Traccar.model.Parameter',
+Ext.define('Traccar.model.Attribute', {
+    extend: 'Ext.data.Model',
 
-    sorters: [{
-        property: 'priority'
+    fields: [{
+        name: 'priority',
+        type: 'int'
+    }, {
+        name: 'name',
+        type: 'string'
+    }, {
+        name: 'value',
+        type: 'string'
     }]
 });

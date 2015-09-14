@@ -73,7 +73,7 @@ var strings = {
     mapBingAerial: 'Bing Maps Aerial',
 
     stateTitle: 'State',
-    stateName: 'Parameter',
+    stateName: 'Attribute',
     stateValue: 'Value',
 
     commandTitle: 'Command',

@@ -23,7 +23,7 @@ Ext.define('Traccar.view.state.State', {
     ],
     
     controller: 'state',
-    store: 'Parameters',
+    store: 'Attributes',
 
     title: strings.stateTitle,
 

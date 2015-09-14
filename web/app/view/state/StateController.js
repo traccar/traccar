@@ -86,7 +86,7 @@ Ext.define('Traccar.view.state.StateController', {
         var other;
         var value;
         var unit;
-        var store = Ext.getStore('Parameters');
+        var store = Ext.getStore('Attributes');
         store.removeAll();
 
         for (var key in position.data) {
@@ -100,7 +100,7 @@ Ext.define('Traccar.view.state.StateController', {
                     value = Ext.Date.format(value, styles.dateTimeFormat);
                 }
                 
-                store.add(Ext.create('Traccar.model.Parameter', {
+                store.add(Ext.create('Traccar.model.Attribute', {
                     priority: this.keys[key].priority,
                     name: this.keys[key].name,
                     value: this.formatValue(value)
@@ -124,7 +124,7 @@ Ext.define('Traccar.view.state.StateController', {
                     value = distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
                 }
 
-                store.add(Ext.create('Traccar.model.Parameter', {
+                store.add(Ext.create('Traccar.model.Attribute', {
                     priority: 999,
                     name: key.replace(/^./, function (match) {
                         return match.toUpperCase();
@@ -141,7 +141,7 @@ Ext.define('Traccar.view.state.StateController', {
         if (found.getCount() > 0) {
             this.updatePosition(found.first());
         } else {
-            Ext.getStore('Parameters').removeAll();
+            Ext.getStore('Attributes').removeAll();
         }
     },
 
