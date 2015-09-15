@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Crc;
 import org.traccar.model.Command;
 
@@ -39,13 +38,13 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         buf.writeInt(0);
         buf.writeBytes(content.getBytes()); // command
 
-        buf.writeShort(0); // message index
+        buf.writeShort(1); // message index
 
         buf.writeShort(Crc.crc16Ccitt(buf.toByteBuffer(2, buf.writerIndex() - 2)));
 
         buf.writeByte('\r');
         buf.writeByte('\n');
-
+        
         return buf;
     }
     
@@ -54,9 +53,9 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent("DYD,000000#");
+                return encodeContent("DYD#");
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent("HFYD,000000#");
+                return encodeContent("HFYD#");
         }
 
         return null;
