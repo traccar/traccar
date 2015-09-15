@@ -17,10 +17,18 @@
 Ext.define('Traccar.store.CommandTypes', {
     extend: 'Ext.data.Store',
     fields: ['key', 'name'],
-    data: [
-        {'key': 'positionPeriodic', 'name': strings.commandPositionPeriodic},
-        {'key': 'positionStop', 'name': strings.commandPositionStop},
-        {'key': 'engineStop', 'name': strings.commandEngineStop},
-        {'key': 'engineResume', 'name': strings.commandEngineResume}
-    ]
+
+    data: [{
+        key: 'positionPeriodic',
+        name: strings.commandPositionPeriodic
+    }, {
+        key: 'positionStop',
+        name: strings.commandPositionStop
+    }, {
+        key: 'engineStop',
+        name: strings.commandEngineStop
+    }, {
+        key: 'engineResume',
+        name: strings.commandEngineResume
+    }]
 });

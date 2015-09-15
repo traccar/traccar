@@ -16,27 +16,25 @@
 
 Ext.define('Traccar.store.SpeedUnits', {
     extend: 'Ext.data.Store',
-    fields: ['key', 'name'],
-    data: [
-        {'key': 'kmh', 'name': strings.sharedKmh},
-        {'key': 'mph', 'name': strings.sharedMph}
-    ],
+    fields: ['key', 'name', 'factor'],
 
-    convert: function(value, unit) {
-        switch (unit) {
-            case 'kmh':
-                return Math.round(value * 1.852 * 10) / 10;
-            case 'mph':
-                return Math.round(value * 1.15078 * 10) / 10;
-        }
-        return value;
-    },
+    data: [{
+        key: 'kmh',
+        name: strings.sharedKmh,
+        factor: 1.852
+    }, {
+        key: 'mph',
+        name: strings.sharedMph,
+        factor: 1.15078
+    }],
 
-    getUnitName: function(unit) {
+    formatValue: function(value, unit) {
+        var model;
         if (unit) {
-            return this.findRecord('key', unit).get('name');
+            model = this.findRecord('key', unit);
+            return Math.round(value * model.get('factor') * 10) / 10 + ' ' + model.get('name');
         } else {
-            return '';
+            return value;
         }
     }
 });

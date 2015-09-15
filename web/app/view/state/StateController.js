@@ -95,7 +95,7 @@ Ext.define('Traccar.view.state.StateController', {
                 if (key === 'speed') {
                     var speedUnits = Ext.getStore('SpeedUnits');
                     unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
-                    value = speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
+                    value = speedUnits.formatValue(value, unit);
                 } else if (value instanceof Date) {
                     value = Ext.Date.format(value, styles.dateTimeFormat);
                 }
@@ -121,7 +121,7 @@ Ext.define('Traccar.view.state.StateController', {
                 if (key === 'distance' || key === 'odometer') {
                     var distanceUnits = Ext.getStore('DistanceUnits');
                     unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
-                    value = distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
+                    value = distanceUnits.formatValue(value, unit);
                 }
 
                 store.add(Ext.create('Traccar.model.Attribute', {

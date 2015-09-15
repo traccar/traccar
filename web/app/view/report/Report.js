@@ -91,7 +91,7 @@ Ext.define('Traccar.view.report.Report', {
             renderer: function(value) {
                 var speedUnits = Ext.getStore('SpeedUnits');
                 var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
-                return speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
+                return speedUnits.formatValue(value, unit);
             }
         },
         { text: strings.positionAddress, dataIndex: 'address', flex: 1 }
