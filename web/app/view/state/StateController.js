@@ -91,19 +91,10 @@ Ext.define('Traccar.view.state.StateController', {
 
         for (var key in position.data) {
             if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
-                value = position.get(key);
-                if (key === 'speed') {
-                    var speedUnits = Ext.getStore('SpeedUnits');
-                    unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
-                    value = speedUnits.formatValue(value, unit);
-                } else if (value instanceof Date) {
-                    value = Ext.Date.format(value, styles.dateTimeFormat);
-                }
-                
                 store.add(Ext.create('Traccar.model.Attribute', {
                     priority: this.keys[key].priority,
                     name: this.keys[key].name,
-                    value: this.formatValue(value)
+                    value: Traccar.getApplication().getRenderer(key)(position.get(key))
                 }));
             }
         }
@@ -116,20 +107,12 @@ Ext.define('Traccar.view.state.StateController', {
         }
         for (var key in attributes) {
             if (attributes.hasOwnProperty(key)) {
-
-                value = attributes[key];
-                if (key === 'distance' || key === 'odometer') {
-                    var distanceUnits = Ext.getStore('DistanceUnits');
-                    unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
-                    value = distanceUnits.formatValue(value, unit);
-                }
-
                 store.add(Ext.create('Traccar.model.Attribute', {
-                    priority: 999,
+                    priority: 1024,
                     name: key.replace(/^./, function (match) {
                         return match.toUpperCase();
                     }),
-                    value: this.formatValue(value)
+                    value: Traccar.getApplication().getRenderer(key)(attributes[key])
                 }));
             }
         }

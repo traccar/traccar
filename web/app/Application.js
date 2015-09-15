@@ -64,6 +64,40 @@ Ext.define('Traccar.Application', {
     
     getServer: function() {
         return this.server;
+    },
+
+    getPreference: function(key, defaultValue) {
+        return this.getUser().get('distanceUnit') | this.getServer().get('distanceUnit') | defaultValue;
+    },
+
+    getRenderer: function(key) {
+        if (key === 'latitude' || key === 'longitude') {
+            return function(value) {
+                return value.toFixed(5);
+            }
+        } else if (key === 'speed') {
+            return function(value) {
+                return Ext.getStore('SpeedUnits').formatValue(value, this.getPreference('speedUnit'));
+            }
+        } else if (key === 'course') {
+            return function(value) {
+                var directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+                return directions[Math.floor(value / 45)];
+            }
+        } else if (key === 'distance' || key === 'odometer') {
+            return function(value) {
+                return Ext.getStore('DistanceUnits').formatValue(value, this.getPreference('distanceUnit'));
+            }
+        } else {
+            return function(value) {
+                if (value instanceof Number) {
+                    return value.toFixed(2);
+                } else if (value instanceof Date) {
+                    return Ext.Date.format(value, styles.dateTimeFormat);
+                }
+                return value;
+            }
+        }
     }
     
 });

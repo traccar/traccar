@@ -78,23 +78,39 @@ Ext.define('Traccar.view.report.Report', {
         selectionchange: 'onSelectionChange'
     },
 
-    columns: [
-        { text: strings.positionValid, dataIndex: 'valid', flex: 1 },
-        { text: strings.positionTime, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.dateTimeFormat },
-        { text: strings.positionLatitude, dataIndex: 'latitude', flex: 1 },
-        { text: strings.positionLongitude, dataIndex: 'longitude', flex: 1 },
-        { text: strings.positionAltitude, dataIndex: 'altitude', flex: 1 },
-        {
-            text: strings.positionSpeed,
-            dataIndex: 'speed',
-            flex: 1,
-            renderer: function(value) {
-                var speedUnits = Ext.getStore('SpeedUnits');
-                var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
-                return speedUnits.formatValue(value, unit);
-            }
-        },
-        { text: strings.positionAddress, dataIndex: 'address', flex: 1 }
-    ]
-
+    columns: [{
+        text: strings.positionValid,
+        dataIndex: 'valid',
+        flex: 1
+    }, {
+        text: strings.positionTime,
+        dataIndex: 'fixTime',
+        flex: 1,
+        xtype: 'datecolumn',
+        //renderer: Traccar.app.getRenderer()
+    }, {
+        text: strings.positionLatitude,
+        dataIndex: 'latitude',
+        flex: 1,
+        //renderer: Traccar.app.getRenderer('latitude')
+    }, {
+        text: strings.positionLongitude,
+        dataIndex: 'longitude',
+        flex: 1,
+        //renderer: Traccar.app.getRenderer('latitude')
+    }, {
+        text: strings.positionAltitude,
+        dataIndex: 'altitude',
+        flex: 1,
+        //renderer: Traccar.app.getRenderer('altitude')
+    }, {
+        text: strings.positionSpeed,
+        dataIndex: 'speed',
+        flex: 1,
+        //renderer: Traccar.app.getRenderer('speed')
+    }, {
+        text: strings.positionAddress,
+        dataIndex: 'address',
+        flex: 1
+    }]
 });
