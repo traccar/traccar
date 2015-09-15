@@ -56,7 +56,7 @@ Ext.define('Traccar.view.command.CommandDialog', {
                 name: 'unit',
                 store: 'TimeUnits',
                 displayField: 'name',
-                valueField: 'multiplier'
+                valueField: 'factor'
             }]
         }]
     },

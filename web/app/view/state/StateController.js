@@ -29,7 +29,7 @@ Ext.define('Traccar.view.state.StateController', {
     },
 
     init: function() {
-        var store = Ext.getStore('LiveData');
+        var store = Ext.getStore('LatestPositions');
         store.on('add', this.add, this);
         store.on('update', this.update, this);
     },
@@ -137,7 +137,7 @@ Ext.define('Traccar.view.state.StateController', {
 
     selectDevice: function(device) {
         this.deviceId = device.get('id');
-        var found = Ext.getStore('LiveData').query('deviceId', this.deviceId);
+        var found = Ext.getStore('LatestPositions').query('deviceId', this.deviceId);
         if (found.getCount() > 0) {
             this.updatePosition(found.first());
         } else {

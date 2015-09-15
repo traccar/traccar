@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.LiveData', {
+Ext.define('Traccar.store.LatestPositions', {
     extend: 'Ext.data.Store',
     model: 'Traccar.model.Position'
 });

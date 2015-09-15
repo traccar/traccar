@@ -49,7 +49,7 @@ Ext.define('Traccar.view.map.MapController', {
                 var i;
                 for (i = 0; i < data.length; i++) {
 
-                    var store = Ext.getStore('LiveData');
+                    var store = Ext.getStore('LatestPositions');
 
                     var found = store.query('deviceId', data[i].deviceId);
                     if (found.getCount() > 0) {

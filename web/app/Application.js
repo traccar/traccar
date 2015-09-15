@@ -35,7 +35,7 @@ Ext.define('Traccar.Application', {
     stores: [
         'Devices',
         'Positions',
-        'LiveData',
+        'LatestPositions',
         'Users',
         'Attributes',
         'MapTypes',
