@@ -24,14 +24,15 @@ Ext.define('Traccar.view.command.CommandDialogController', {
     },
 
     onSendClick: function(button) {
-        var attributes;
-        var form = button.up('window').down('form');
+        var attributes, value, record, form;
+
+        form = button.up('window').down('form');
         form.updateRecord();
-        var record = form.getRecord();
+        record = form.getRecord();
 
         if (record.get('type') === 'positionPeriodic') {
             attributes = this.lookupReference('paramPositionPeriodic');
-            var value = attributes.down('numberfield[name="frequency"]').getValue();
+            value = attributes.down('numberfield[name="frequency"]').getValue();
             value *= attributes.down('combobox[name="unit"]').getValue();
 
             record.set('attributes', {
@@ -49,8 +50,8 @@ Ext.define('Traccar.view.command.CommandDialogController', {
 
     onSendReturn: function(options, success, response) {
         if (Traccar.ErrorManager.check(success, response)) {
+            Ext.toast(strings.commandSent);
             this.closeView();
-            //TODO toast Ext.toast(strings.loginCreated);
         }
     },
 

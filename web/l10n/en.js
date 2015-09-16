@@ -79,6 +79,7 @@ var strings = {
     commandTitle: 'Command',
     commandSend: 'Send',
     commandType: 'Type',
+    commandSent: 'Command has been sent',
     commandPositionPeriodic: 'Periodic Reporting',
     commandPositionStop: 'Stop Reporting',
     commandEngineStop: 'Engine Stop',
