@@ -94,7 +94,7 @@ Ext.define('Traccar.view.state.StateController', {
                 store.add(Ext.create('Traccar.model.Attribute', {
                     priority: this.keys[key].priority,
                     name: this.keys[key].name,
-                    value: Traccar.getApplication().getRenderer(key)(position.get(key))
+                    value: Traccar.AttributeFormatter.getFormatter(key)(position.get(key))
                 }));
             }
         }
@@ -112,7 +112,7 @@ Ext.define('Traccar.view.state.StateController', {
                     name: key.replace(/^./, function (match) {
                         return match.toUpperCase();
                     }),
-                    value: Traccar.getApplication().getRenderer(key)(attributes[key])
+                    value: Traccar.AttributeFormatter.getFormatter(key)(attributes[key])
                 }));
             }
         }

@@ -87,27 +87,27 @@ Ext.define('Traccar.view.report.Report', {
         dataIndex: 'fixTime',
         flex: 1,
         xtype: 'datecolumn',
-        //renderer: Traccar.app.getRenderer()
+        renderer: Traccar.AttributeFormatter.getFormatter('fixTime')
     }, {
         text: strings.positionLatitude,
         dataIndex: 'latitude',
         flex: 1,
-        //renderer: Traccar.app.getRenderer('latitude')
+        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
     }, {
         text: strings.positionLongitude,
         dataIndex: 'longitude',
         flex: 1,
-        //renderer: Traccar.app.getRenderer('latitude')
+        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
     }, {
         text: strings.positionAltitude,
         dataIndex: 'altitude',
         flex: 1,
-        //renderer: Traccar.app.getRenderer('altitude')
+        renderer: Traccar.AttributeFormatter.getFormatter('altitude')
     }, {
         text: strings.positionSpeed,
         dataIndex: 'speed',
         flex: 1,
-        //renderer: Traccar.app.getRenderer('speed')
+        renderer: Traccar.AttributeFormatter.getFormatter('speed')
     }, {
         text: strings.positionAddress,
         dataIndex: 'address',
