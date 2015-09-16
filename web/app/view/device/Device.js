@@ -82,9 +82,12 @@ Ext.define('Traccar.view.device.Device', {
         selectionchange: 'onSelectionChange'
     },
     
-    columns: [
-        { text: strings.deviceName, dataIndex: 'name', flex: 1 },
-        { text: strings.deviceIdentifier, dataIndex: 'uniqueId', flex: 1 }
-    ]
+    columns: [{
+        text: strings.deviceName,
+        dataIndex: 'name', flex: 1
+    }, {
+        text: strings.deviceIdentifier,
+        dataIndex: 'uniqueId', flex: 1
+    }]
 
 });

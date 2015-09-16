@@ -21,8 +21,7 @@ Ext.define('Traccar.LoginManager', {
         var reader = Ext.create('Ext.data.reader.Json', {
             model: 'Traccar.model.User'
         });
-        Traccar.getApplication().setUser(
-                reader.readRecords(data).getRecords()[0]);
+        Traccar.app.setUser(reader.readRecords(data).getRecords()[0]);
     },
 
     server: function(options) {
@@ -42,8 +41,7 @@ Ext.define('Traccar.LoginManager', {
                 var reader = Ext.create('Ext.data.reader.Json', {
                     model: 'Traccar.model.Server'
                 });
-                Traccar.getApplication().setServer(
-                    reader.readRecords(result.data).getRecords()[0]);
+                Traccar.app.setServer(reader.readRecords(result.data).getRecords()[0]);
             }
             Ext.callback(options.callback, options.scope, [result.success]);
         }

@@ -30,8 +30,8 @@ Ext.define('Traccar.view.map.Map', {
     listeners: {
         afterrender: function() {
 
-            var user = Traccar.getApplication().getUser();
-            var server = Traccar.getApplication().getServer();
+            var user = Traccar.app.getUser();
+            var server = Traccar.app.getServer();
 
             var layer;
             var mapLayer = user.get('map') || server.get('map');
