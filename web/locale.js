@@ -19,6 +19,7 @@ Ext.Loader.setConfig({
 });
 
 var availableLanguages = {
+    'bg': { name: 'Български', code: 'bg' },
     'de': { name: 'Deutsch', code: 'de' },
     'dk': { name: 'Dansk', code: 'dk' },
     'en': { name: 'English', code: 'en' },
