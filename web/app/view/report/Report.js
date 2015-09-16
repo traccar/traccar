@@ -81,7 +81,8 @@ Ext.define('Traccar.view.report.Report', {
     columns: [{
         text: strings.positionValid,
         dataIndex: 'valid',
-        flex: 1
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('valid')
     }, {
         text: strings.positionTime,
         dataIndex: 'fixTime',
@@ -111,6 +112,7 @@ Ext.define('Traccar.view.report.Report', {
     }, {
         text: strings.positionAddress,
         dataIndex: 'address',
-        flex: 1
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('address')
     }]
 });

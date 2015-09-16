@@ -68,7 +68,7 @@ Ext.define('Traccar.Application', {
     },
 
     getPreference: function(key, defaultValue) {
-        return this.getUser().get('distanceUnit') | this.getServer().get('distanceUnit') | defaultValue;
+        return this.getUser().get(key) || this.getServer().get(key) || defaultValue;
     }
 
 });

@@ -18,17 +18,16 @@ Ext.define('Traccar.AttributeFormatter', {
     singleton: true,
 
     coordinateFormatter: function(value) {
-        return value.toFixed(5);
+        return value.toFixed(6);
     },
 
     speedFormatter: function(value) {
         return Ext.getStore('SpeedUnits').formatValue(value, Traccar.app.getPreference('speedUnit'));
     },
 
-    courseValues: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'],
-
     courseFormatter: function(value) {
-        return this.courseValues[Math.floor(value / 45)];
+        var courseValues = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        return courseValues[Math.floor(value / 45)];
     },
 
     distanceFormatter: function(value) {
@@ -36,8 +35,10 @@ Ext.define('Traccar.AttributeFormatter', {
     },
 
     defaultFormatter: function(value) {
-        if (value instanceof Number) {
+        if (typeof value === 'number') {
             return value.toFixed(2);
+        } else if (typeof value === 'boolean') {
+            return value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no;
         } else if (value instanceof Date) {
             return Ext.Date.format(value, styles.dateTimeFormat);
         }
