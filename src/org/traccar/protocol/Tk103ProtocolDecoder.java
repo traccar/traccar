@@ -44,10 +44,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             "([NS]),?" +
             "(\\d{3})(\\d{2}\\.\\d+)" +    // Longitude (DDDMM.MMMM)
             "([EW]),?" +
-            "(\\d+\\.\\d)(?:\\d*,)?" +     // Speed
+            "(\\d+\\.\\d{1,2}),?" +        // Speed
             "(\\d{2})(\\d{2})(\\d{2}),?" + // Time (HHMMSS)
-            "(\\d+\\.?\\d+),?" +           // Course
-            "([0-9a-fA-F]{8})?,?" +        // State
+            "(\\d+\\.?\\d{1,2}),?" +       // Course
+            "(?:([01]{8})|([0-9a-fA-F]{8}))?,?" + // State
             "(?:L([0-9a-fA-F]+))?.*\\)?"); // Odometer
 
     @Override
@@ -137,7 +137,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
         
         // State
-        String status = parser.group(index++);
+        String status = parser.group(index++); // binary status
         if (status != null) {
             position.set(Event.KEY_STATUS, status);
 
@@ -145,6 +145,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_CHARGE, !BitUtil.check(value, 0));
             position.set(Event.KEY_IGNITION, BitUtil.check(value, 1));
         }
+        position.set(Event.KEY_STATUS, parser.group(index++)); // hex status
 
         // Odometer
         String odometer = parser.group(index++);
