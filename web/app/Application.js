@@ -51,8 +51,11 @@ Ext.define('Traccar.Application', {
         'Root'
     ],
     
-    setUser: function(user) {
-        this.user = user;
+    setUser: function(data) {
+        var reader = Ext.create('Ext.data.reader.Json', {
+            model: 'Traccar.model.User'
+        });
+        this.user = reader.readRecords(data).getRecords()[0];
     },
     
     getUser: function() {

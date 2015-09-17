@@ -23,7 +23,8 @@ Ext.define('Traccar.view.device.DeviceController', {
         'Traccar.view.command.CommandDialog',
         'Traccar.view.user.UserDialog',
         'Traccar.view.admin.ServerDialog',
-        'Traccar.view.user.User'
+        'Traccar.view.user.User',
+        'Traccar.view.login.LoginController'
     ],
 
     config: {
@@ -44,7 +45,7 @@ Ext.define('Traccar.view.device.DeviceController', {
     },
     
     onLogoutClick: function() {
-        Traccar.LoginManager.logout();
+        Ext.create('Traccar.view.login.LoginController').logout();
     },
     
     onAddClick: function() {

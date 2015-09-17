@@ -24,10 +24,43 @@ Ext.define('Traccar.view.login.LoginController', {
 
     init: function() {
         this.lookupReference('registerButton').setDisabled(
-            !Traccar.app.getServer().get('registration')
-        );
+            !Traccar.app.getServer().get('registration'));
         this.lookupReference('languageField').setValue(language);
+    },
 
+    login: function() {
+        var form = this.lookupReference('form');
+        if (form.isValid()) {
+            Ext.getBody().mask(strings.sharedLoading);
+            Ext.Ajax.request({
+                scope: this,
+                url: '/api/login',
+                params: form.getValues(),
+                callback: function(options, success, response) {
+                    Ext.getBody().unmask();
+                    if (Traccar.ErrorManager.check(success, response)) {
+                        var result = Ext.decode(response.responseText);
+                        if (result.success) {
+                            Traccar.app.setUser(result.data);
+                            this.fireViewEvent('login');
+                        } else {
+                            Traccar.ErrorManager.error(strings.loginFailed);
+                        }
+                    }
+
+                }
+            });
+        }
+    },
+
+    logout: function() {
+        Ext.Ajax.request({
+            scope: this,
+            url: '/api/logout',
+            callback: function() {
+                window.location.reload();
+            }
+        });
     },
 
     onSelectLanguage: function(selected) {
@@ -56,37 +89,15 @@ Ext.define('Traccar.view.login.LoginController', {
 
     onSpecialKey: function(field, e) {
         if (e.getKey() === e.ENTER) {
-            this.doLogin();
+            this.login();
         }
     },
     
     onLoginClick: function() {
         Ext.getElementById('submitButton').click();
-        this.doLogin();
+        this.login();
     },
-    
-    doLogin: function() {
-        var form = this.lookupReference('form');
-        if (form.isValid()) {
-            Ext.getBody().mask(strings.sharedLoading);
-            
-            Traccar.LoginManager.login({
-                data: form.getValues(),
-                scope: this,
-                callback: 'onLoginReturn'
-            });
-        }
-    },
-    
-    onLoginReturn: function(success) {
-        Ext.getBody().unmask();
-        if (success) {
-            this.fireViewEvent('login');
-        } else {
-            Traccar.ErrorManager.error(strings.loginFailed);
-        }
-    },
-    
+
     onRegisterClick: function() {
         Ext.create('Traccar.view.login.Register').show();
     }

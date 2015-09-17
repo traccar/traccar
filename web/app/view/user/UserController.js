@@ -25,11 +25,7 @@ Ext.define('Traccar.view.user.UserController', {
     init: function() {
         Ext.getStore('Users').load();
     },
-    
-    onLogoutClick: function() {
-        Traccar.LoginManager.logout();
-    },
-    
+
     onAddClick: function() {
         var user = Ext.create('Traccar.model.User');
         var dialog = Ext.create('Traccar.view.user.UserDialog');
