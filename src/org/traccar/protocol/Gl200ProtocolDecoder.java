@@ -140,7 +140,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // Altitude
         String altitude = parser.group(index++);
-        if (speed != null) {
+        if (altitude != null) {
             position.setAltitude(Double.valueOf(altitude));
         }
 
