@@ -15,23 +15,26 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.Charset;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.Calendar; 
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
+    
+    private long defaultMask;
 
     public SkypatrolProtocolDecoder(SkypatrolProtocol protocol) {
         super(protocol);
+        defaultMask = Context.getConfig().getInteger(getProtocolName() + ".mask");
     }
 
     private static double convertCoordinate(long coordinate) {
@@ -59,7 +62,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
         int commandType = buf.readUnsignedByte();
         int messageType = buf.getUnsignedByte(buf.readerIndex()) >> 4;
         boolean needAck = (buf.readUnsignedByte() & 0xf) == 1;
-        long mask = 0;
+        long mask = defaultMask;
         if (buf.readUnsignedByte() == 4) {
             mask = buf.readUnsignedInt();
         }
