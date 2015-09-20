@@ -27,6 +27,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -52,6 +53,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
         
         buf.readUnsignedByte(); // protocol
+        buf.readUnsignedShort(); // length
         int index = buf.readUnsignedByte() >> 3;
         
         if (channel != null) {
@@ -67,7 +69,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
         List<Position> positions = new LinkedList<>();
         
-        while (buf.readable()) {
+        while (buf.readableBytes() > 2) {
             
             Position position = new Position();
             position.setProtocol(getProtocolName());
@@ -78,9 +80,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             
             int flags = buf.readUnsignedByte();
-            position.set(Event.KEY_GPS, flags >> 5);
-            position.set(Event.KEY_GSM, flags & 0x07);
-            position.setValid(((flags & 0x08) != 0) ^ ((flags & 0x10) != 0));
+            position.set(Event.KEY_SATELLITES, BitUtil.range(flags, 2));
+            position.setValid(BitUtil.range(flags, 0, 2) > 0);
             
             // Latitude
             double lat = buf.readUnsignedMedium();
@@ -95,9 +96,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             // Status
             flags = buf.readUnsignedByte();
             position.set(Event.KEY_STATUS, flags & 0x1f);
-            int course = (flags >> 5) * 45;
-            course = (course + 180) % 360;
-            position.setCourse(course);
+            position.setCourse((BitUtil.range(flags, 5) * 45 + 180) % 360);
             
             // Speed
             int speed = buf.readUnsignedByte();
@@ -106,13 +105,16 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             }
             
             while (buf.readerIndex() < end) {
-                int x = buf.getUnsignedByte(buf.readerIndex());
+
+                int type = buf.readUnsignedByte();
+                int length = buf.readUnsignedByte();
+                if (length == 255) {
+                    length += buf.readUnsignedByte();
+                }
+
                 switch (buf.readUnsignedByte()) {
                     case 2:
                         position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
-                        break;
-                    case 4:
-                        buf.readUnsignedShort(); // device start
                         break;
                     case 5:
                         position.set(Event.KEY_INPUT, buf.readUnsignedByte());
@@ -139,9 +141,6 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     case 10:
                         position.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
                         break;
-                    case 23:
-                        buf.skipBytes(9);
-                        break;
                     case 24:
                         {
                             Set<Integer> temps = new LinkedHashSet<>();
@@ -157,97 +156,25 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                             }
                         }
                         break;
-                    case 25:
-                        buf.readUnsignedByte();
-                        buf.readUnsignedShort(); // fuel
-                        break;
-                    case 26:
-                        buf.skipBytes(buf.readUnsignedByte() * 2); // flowmeter
-                        break;
                     case 28:
                         position.set("weight", buf.readUnsignedShort());
                         buf.readUnsignedByte();
                         break;
-                    case 29:
-                        buf.readUnsignedByte(); // diagnostics
-                        break;
-                    case 30:
-                        buf.readUnsignedByte(); // vending machine
-                        buf.readUnsignedInt();
-                        buf.readUnsignedInt();
-                        buf.readUnsignedInt();
-                        break;
-                    case 31:
-                        buf.readUnsignedByte(); // antihijack
-                        break;
-                    case 32:
-                        buf.readUnsignedByte(); // audio
-                        break;
-                    case 33:
-                        buf.readUnsignedByte(); // antihijack and authorization
-                        break;
-                    case 80:
-                    case 81:
-                    case 82:
-                    case 83:
-                        buf.readUnsignedInt(); // diagnostic
-                        break;
                     case 90:
                         position.set(Event.KEY_POWER, readSwappedFloat(buf));
-                        break;
-                    case 99:
-                        buf.readUnsignedInt(); // tachograph
-                        break;
-                    case 101:
-                        buf.readUnsignedByte(); // speed
-                        break;
-                    case 102:
-                        buf.readUnsignedByte(); // engine rpm
-                        break;
-                    case 103:
-                        buf.readUnsignedByte(); // engine temperature
-                        break;
-                    case 104:
-                        buf.readUnsignedByte(); // pedal position
-                        break;
-                    case 105:
-                        buf.readUnsignedByte(); // engine load
                         break;
                     case 107:
                         position.set(Event.KEY_FUEL, buf.readUnsignedShort() & 0x3fff);
                         break;
-                    case 108:
-                        buf.readUnsignedInt(); // total distance
-                        break;
-                    case 109:
-                        buf.readUnsignedByte(); // ambient temperature
-                        break;
-                    case 122:
-                        buf.readUnsignedByte(); // power take-off state
-                        break;
-                    case 127:
-                        buf.readUnsignedInt(); // total fuel used
-                        break;
-                    case 129:
-                        buf.readUnsignedInt(); // engine total hours
-                        break;
-                    case 130:
-                        buf.readUnsignedShort(); // distance to service
-                        break;
-                    case 131:
-                        buf.readUnsignedShort(); // axle weight
-                        buf.readUnsignedShort();
-                        buf.readUnsignedShort();
-                        buf.readUnsignedShort();
-                        break;
-                    case 136:
-                        buf.readUnsignedShort(); // fuel rate
-                        break;
                     case 150:
                         position.set("door", buf.readUnsignedByte());
                         break;
+                    default:
+                        buf.skipBytes(length);
+                        break;
                 }
             }
+
             positions.add(position);
         }
         
