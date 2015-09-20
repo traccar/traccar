@@ -25,17 +25,36 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.AbstractMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public abstract class JsonReverseGeocoder implements ReverseGeocoder {
 
     private final String url;
 
-    public JsonReverseGeocoder(String url) {
+    private Map<Map.Entry<Double, Double>, String> cache;
+
+    public JsonReverseGeocoder(String url, final int cacheSize) {
         this.url = url;
+        if (cacheSize > 0) {
+            this.cache = new LinkedHashMap<Map.Entry<Double, Double>, String>() {
+                protected boolean removeEldestEntry(Map.Entry eldest) {
+                    return size() > cacheSize;
+                }
+            };
+        }
     }
 
     @Override
     public String getAddress(AddressFormat format, double latitude, double longitude) {
+
+        if (cache != null) {
+            String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
+            if (cachedAddress != null) {
+                return cachedAddress;
+            }
+        }
 
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(String.format(url, latitude, longitude)).openConnection();
@@ -46,7 +65,13 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
                     Address address = parseAddress(reader.readObject());
                     while (streamReader.read() > 0); // make sure we reached the end
                     if (address != null) {
-                        return format.format(address);
+                        String formattedAddress = format.format(address);
+
+                        if (cache != null) {
+                            cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
+                        }
+
+                        return formattedAddress;
                     }
                 }
             } finally {

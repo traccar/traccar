@@ -22,7 +22,11 @@ import javax.json.JsonString;
 public class GoogleReverseGeocoder extends JsonReverseGeocoder {
 
     public GoogleReverseGeocoder() {
-        super("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f");
+        this(0);
+    }
+
+    public GoogleReverseGeocoder(int cacheSize) {
+        super("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f", cacheSize);
     }
 
     @Override

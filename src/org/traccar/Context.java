@@ -109,15 +109,16 @@ public class Context {
         if (config.getBoolean("geocoder.enable")) {
             String type = config.getString("geocoder.type", "google");
             String url = config.getString("geocoder.url");
+            int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
                 case "google":
-                    reverseGeocoder = new GoogleReverseGeocoder();
+                    reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
                     break;
                 case "nominatim":
-                    reverseGeocoder = new NominatimReverseGeocoder(url);
+                    reverseGeocoder = new NominatimReverseGeocoder(url, cacheSize);
                     break;
                 case "gisgraphy":
-                    reverseGeocoder = new GisgraphyReverseGeocoder(url);
+                    reverseGeocoder = new GisgraphyReverseGeocoder(url, cacheSize);
                     break;
             }
         }
