@@ -19,27 +19,31 @@ Ext.define('Traccar.view.main.MainMobile', {
 
     requires: [
         'Traccar.view.device.Device',
+        'Traccar.view.state.State',
         'Traccar.view.map.Map'
     ],
 
     layout: 'border',
 
     defaults: {
+        header: false,
         collapsible: true,
         split: true
     },
 
     items: [{
-        collapsible: false,
-        region: 'center',
+        xtype: 'stateView',
+        region: 'east',
+        collapsed:true,
+        flex: 4
+    }, {
         xtype: 'mapView',
-        header: false,
+        region: 'center',
+        collapsible: false,
         flex: 2
     }, {
-        region: 'south',
         xtype: 'deviceView',
-        header: false,
+        region: 'south',
         flex: 1
     }]
-
 });
