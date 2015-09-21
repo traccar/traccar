@@ -169,13 +169,13 @@ public class Log {
                     }
 
                     if (file.equals(element.getFileName())) {
-                        s.append("*:");
+                        s.append("*");
                     } else {
                         file = element.getFileName();
-                        s.append(file.substring(0, file.length() - 5)).append(":");
+                        s.append(file.substring(0, file.length() - 5)); // remove ".java"
                         count -= 1;
                     }
-                    s.append(element.getLineNumber());
+                    s.append(":").append(element.getLineNumber());
                 } else {
                     skip = true;
                 }

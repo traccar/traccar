@@ -7,7 +7,7 @@ public class LogTest {
     
     @Test
     public void testLog() {
-        Assert.assertEquals("test - Exception (LogTest.java:10 < ...)", Log.exceptionStack(new Exception("test")));
+        Assert.assertEquals("test - Exception (LogTest:10 < ...)", Log.exceptionStack(new Exception("test")));
     }
 
 }
