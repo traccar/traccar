@@ -1,0 +1,19 @@
+.state-indicator {
+    position: absolute;
+    top: -999em;
+    left: -999em;
+    z-index: 0;
+}
+
+@media all and (max-device-width: 768px) {
+    .state-indicator {
+        z-index: 1;
+    }
+}
+
+.attribution {
+    position: fixed;
+    bottom: 10px;
+    right: 15px;
+    font-size: x-small;
+}
