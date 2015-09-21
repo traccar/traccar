@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.command.CommandDialogController', {
-    extend: 'Ext.app.ViewController',
+Ext.define('Traccar.view.CommandDialogController', {
+    extend: 'Traccar.view.BaseDialogController',
     alias: 'controller.commandDialog',
 
     onSelect: function(selected) {
@@ -44,19 +44,14 @@ Ext.define('Traccar.view.command.CommandDialogController', {
             scope: this,
             url: '/api/command/send',
             jsonData: record.getData(),
-            callback: this.onSendReturn
+            callback: this.onSendResult
         });
     },
 
-    onSendReturn: function(options, success, response) {
+    onSendResult: function(options, success, response) {
         if (Traccar.ErrorManager.check(success, response)) {
             Ext.toast(strings.commandSent);
             this.closeView();
         }
-    },
-
-    onCancelClick: function(button) {
-        button.up('window').close();
     }
-
 });

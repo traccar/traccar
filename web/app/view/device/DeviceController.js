@@ -20,7 +20,7 @@ Ext.define('Traccar.view.device.DeviceController', {
     
     requires: [
         'Traccar.view.device.DeviceDialog',
-        'Traccar.view.command.CommandDialog',
+        'Traccar.view.CommandDialog',
         'Traccar.view.user.UserDialog',
         'Traccar.view.ServerDialog',
         'Traccar.view.user.User',
@@ -90,7 +90,7 @@ Ext.define('Traccar.view.device.DeviceController', {
         device = this.getView().getSelectionModel().getSelection()[0];
         command = Ext.create('Traccar.model.Command');
         command.set('deviceId', device.get('id'));
-        dialog = Ext.create('Traccar.view.command.CommandDialog');
+        dialog = Ext.create('Traccar.view.CommandDialog');
         dialog.down('form').loadRecord(command);
         dialog.show();
     },

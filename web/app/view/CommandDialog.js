@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.command.CommandDialog', {
-    extend: 'Ext.window.Window',
+Ext.define('Traccar.view.CommandDialog', {
+    extend: 'Traccar.view.BaseDialog',
 
     requires: [
-        'Traccar.view.command.CommandDialogController'
+        'Traccar.view.CommandDialogController'
     ],
 
     controller: 'commandDialog',
-    
-    bodyPadding: styles.panelPadding,
     title: strings.commandTitle,
-    resizable: false,
-    modal: true,
-    
+
     items: {
         xtype: 'form',
         items: [{
@@ -68,5 +64,4 @@ Ext.define('Traccar.view.command.CommandDialog', {
         text: strings.sharedCancel,
         handler: 'onCancelClick'
     }]
-
 });

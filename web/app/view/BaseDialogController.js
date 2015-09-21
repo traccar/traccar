@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.BaseEditDialogController', {
-    extend: 'Traccar.view.BaseDialogController',
-    alias: 'controller.baseEditDialog',
+Ext.define('Traccar.view.BaseDialogController', {
+    extend: 'Ext.app.ViewController',
 
-    onSaveClick: function(button) {
-        var dialog = button.up('window').down('form');
-        dialog.updateRecord();
-        dialog.getRecord().save();
+    onCancelClick: function(button) {
         button.up('window').close();
     }
 });
