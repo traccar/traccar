@@ -58,5 +58,4 @@ Ext.define('Traccar.AttributeFormatter', {
             return this.defaultFormatter;
         }
     }
-
 });

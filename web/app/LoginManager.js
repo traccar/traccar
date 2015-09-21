@@ -31,10 +31,7 @@ Ext.define('Traccar.LoginManager', {
         if (Traccar.ErrorManager.check(success, response)) {
             var result = Ext.decode(response.responseText);
             if (result.success) {
-                var reader = Ext.create('Ext.data.reader.Json', {
-                    model: 'Traccar.model.Server'
-                });
-                Traccar.app.setServer(reader.readRecords(result.data).getRecords()[0]);
+                Traccar.app.setServer(result.data);
             }
             Ext.callback(options.callback, options.scope, [result.success]);
         }

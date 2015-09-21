@@ -62,8 +62,11 @@ Ext.define('Traccar.Application', {
         return this.user;
     },
     
-    setServer: function(server) {
-        this.server = server;
+    setServer: function(data) {
+        var reader = Ext.create('Ext.data.reader.Json', {
+            model: 'Traccar.model.Server'
+        });
+        this.server = reader.readRecords(data).getRecords()[0];
     },
     
     getServer: function() {
@@ -73,5 +76,4 @@ Ext.define('Traccar.Application', {
     getPreference: function(key, defaultValue) {
         return this.getUser().get(key) || this.getServer().get(key) || defaultValue;
     }
-
 });
