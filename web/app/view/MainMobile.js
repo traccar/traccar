@@ -14,50 +14,35 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.main.Main', {
+Ext.define('Traccar.view.MainMobile', {
     extend: 'Ext.container.Viewport',
 
     requires: [
         'Traccar.view.device.Device',
         'Traccar.view.state.State',
-        'Traccar.view.report.Report',
         'Traccar.view.map.Map'
     ],
 
     layout: 'border',
 
     defaults: {
+        header: false,
         collapsible: true,
         split: true
     },
 
     items: [{
-        region:'west',
-        layout: 'border',
-        width: styles.deviceWidth,
-        header: false,
-        defaults: {
-            split: true
-        },
-        items: [{
-            collapsible: false,
-            region: 'center',
-            xtype: 'deviceView',
-            flex: 1
-        }, {
-            region: 'south',
-            xtype: 'stateView',
-            flex: 1
-        }]
-    }, {
-        region: 'south',
-        xtype: 'reportView',
-        header: false,
-        height: styles.reportHeight
+        region: 'east',
+        xtype: 'stateView',
+        flex: 4
     }, {
         region: 'center',
         xtype: 'mapView',
-        collapsible: false
+        collapsible: false,
+        flex: 2
+    }, {
+        region: 'south',
+        xtype: 'deviceView',
+        flex: 1
     }]
-
 });
