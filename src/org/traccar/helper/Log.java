@@ -172,7 +172,7 @@ public class Log {
                         s.append("*:");
                     } else {
                         file = element.getFileName();
-                        s.append(file).append(":");
+                        s.append(file.substring(0, file.length() - 5)).append(":");
                         count -= 1;
                     }
                     s.append(element.getLineNumber());
