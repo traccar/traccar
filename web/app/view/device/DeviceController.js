@@ -22,7 +22,7 @@ Ext.define('Traccar.view.device.DeviceController', {
         'Traccar.view.device.DeviceDialog',
         'Traccar.view.command.CommandDialog',
         'Traccar.view.user.UserDialog',
-        'Traccar.view.admin.ServerDialog',
+        'Traccar.view.ServerDialog',
         'Traccar.view.user.User',
         'Traccar.view.login.LoginController'
     ],
@@ -112,7 +112,7 @@ Ext.define('Traccar.view.device.DeviceController', {
     },
 
     onServerClick: function() {
-        var dialog = Ext.create('Traccar.view.admin.ServerDialog');
+        var dialog = Ext.create('Traccar.view.ServerDialog');
         dialog.down('form').loadRecord(Traccar.app.getServer());
         dialog.show();
     },

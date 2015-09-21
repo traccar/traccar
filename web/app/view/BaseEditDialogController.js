@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.admin.ServerDialogController', {
+Ext.define('Traccar.view.BaseEditDialogController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.serverDialog',
+    alias: 'controller.baseEditDialog',
 
     onSaveClick: function(button) {
         var dialog = button.up('window').down('form');
@@ -28,5 +28,4 @@ Ext.define('Traccar.view.admin.ServerDialogController', {
     onCancelClick: function(button) {
         button.up('window').close();
     }
-
 });
