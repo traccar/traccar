@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.Context;
 import org.traccar.helper.Crc;
 import org.traccar.model.Command;
 
@@ -34,7 +35,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeByte(0x80); // message type
 
-        buf.writeByte(content.length()); // command length
+        buf.writeByte(4 + content.length()); // command length
         buf.writeInt(0);
         buf.writeBytes(content.getBytes()); // command
 
