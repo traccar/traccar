@@ -25,6 +25,7 @@ import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.geocode.MapQuestReverseGeocoder;
+import org.traccar.geocode.OpenCageReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.web.WebServer;
 
@@ -110,6 +111,7 @@ public class Context {
         if (config.getBoolean("geocoder.enable")) {
             String type = config.getString("geocoder.type", "google");
             String url = config.getString("geocoder.url");
+	    String key = config.getString("geocoder.key");
             
 	    int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
@@ -123,9 +125,11 @@ public class Context {
                     reverseGeocoder = new GisgraphyReverseGeocoder(url, cacheSize);
                     break;
 		case "mapquest":
-		    String key = config.getString("geocoder.key");
 		    reverseGeocoder = new MapQuestReverseGeocoder(url, key, cacheSize);
 		    break;
+                case "opencage":
+                    reverseGeocoder = new OpenCageReverseGeocoder(url, key, cacheSize);
+                    break;
             }
         }
 
