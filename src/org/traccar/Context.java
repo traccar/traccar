@@ -127,9 +127,6 @@ public class Context {
                     break;
                 case "mapquest":
                     reverseGeocoder = new MapQuestReverseGeocoder(url, key, cacheSize);
-		case "mapquest":
-		    reverseGeocoder = new MapQuestReverseGeocoder(url, key, cacheSize);
-		    break;
                 case "opencage":
                     reverseGeocoder = new OpenCageReverseGeocoder(url, key, cacheSize);
                     break;
