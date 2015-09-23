@@ -199,11 +199,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Additional data
-        position.set(Event.PREFIX_IO + 1, parser.group(index++));
-        position.set(Event.PREFIX_IO + 2, parser.group(index++));
-        position.set(Event.PREFIX_IO + 3, parser.group(index++));
-        position.set(Event.PREFIX_IO + 4, parser.group(index++));
-        position.set(Event.PREFIX_IO + 5, parser.group(index++));
+        for (int i = 1; i <= 5; i++) {
+            position.set(Event.PREFIX_IO + 1, parser.group(index++));
+        }
 
         return position;
     }
