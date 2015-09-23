@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.main.Main', {
+Ext.define('Traccar.view.Main', {
     extend: 'Ext.container.Viewport',
 
     requires: [
@@ -27,6 +27,7 @@ Ext.define('Traccar.view.main.Main', {
     layout: 'border',
 
     defaults: {
+        header: false,
         collapsible: true,
         split: true
     },
@@ -35,29 +36,27 @@ Ext.define('Traccar.view.main.Main', {
         region:'west',
         layout: 'border',
         width: styles.deviceWidth,
-        header: false,
+
         defaults: {
-            split: true
-        },
-        items: [{
-            collapsible: false,
-            region: 'center',
-            xtype: 'deviceView',
+            split: true,
             flex: 1
+        },
+
+        items: [{
+            region: 'center',
+            xtype: 'deviceView'
         }, {
             region: 'south',
-            xtype: 'stateView',
-            flex: 1
+            xtype: 'stateView'
         }]
     }, {
         region: 'south',
         xtype: 'reportView',
-        header: false,
         height: styles.reportHeight
     }, {
         region: 'center',
         xtype: 'mapView',
+        header: true,
         collapsible: false
     }]
-
 });

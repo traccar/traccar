@@ -19,16 +19,20 @@ Ext.Loader.setConfig({
 });
 
 var availableLanguages = {
+    'bg': { name: 'Български', code: 'bg' },
+    'cs': { name: 'Čeština', code: 'cs' },
     'de': { name: 'Deutsch', code: 'de' },
     'dk': { name: 'Dansk', code: 'dk' },
     'en': { name: 'English', code: 'en' },
     'es': { name: 'Español', code: 'es' },
     'fr': { name: 'Français', code: 'fr' },
+    'hu': { name: 'Magyar', code: 'hu' },
     'lt': { name: 'Lietuvių', code: 'lt' },
     'nl': { name: 'Nederlands', code: 'nl' },
     'pl': { name: 'Polski', code: 'pl' },
     'pt': { name: 'Português', code: 'pt' },
     'ru': { name: 'Русский', code: 'ru' },
+    'si': { name: 'සිංහල', code: 'en' },
     'sk': { name: 'Slovenčina', code: 'sk' },
     'sr': { name: 'Srpski', code: 'sr' },
     'th': { name: 'ไทย', code: 'th' },

@@ -1,9 +1,8 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
-import static org.traccar.helper.DecoderVerifier.verify;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class T55ProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -19,6 +18,9 @@ public class T55ProtocolDecoderTest extends ProtocolDecoderTest {
         assertNull(decoder.decode(null, null, "$PCPTI,CradlePoint Test,184453,184453.0,6F*57"));
         
         assertNull(decoder.decode(null, null, "IMEI 351467108700000"));
+        
+        verify(decoder.decode(null, null,
+                "$GPRMC,012006,A,4828.10,N,1353.52,E,0.00,0.00,180915,020.3,E*42"));
 
         verify(decoder.decode(null, null,
                 "$GPRMC,094907.000,A,6000.5332,N,03020.5192,E,1.17,60.26,091111,,*33"));

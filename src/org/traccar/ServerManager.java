@@ -90,7 +90,7 @@ public class ServerManager {
         return Context.getConfig().hasKey(protocol + ".port");
     }
 
-    private void initProtocolDetector() throws SQLException {
+    private void initProtocolDetector() {
         String protocol = "detector";
         if (isProtocolEnabled(protocol)) {
             serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
@@ -108,7 +108,7 @@ public class ServerManager {
         }
     }
 
-    private void initProtocolServer(final Protocol protocol) throws SQLException {
+    private void initProtocolServer(final Protocol protocol) {
         if (isProtocolEnabled(protocol.getName())) {
             protocol.initTrackerServers(serverList);
         }

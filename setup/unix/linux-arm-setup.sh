@@ -6,7 +6,7 @@ if [ $(java -version 2>&1 | grep -i version | sed 's/.*version "\(.*\)\.\(.*\)\.
 then
   echo "Please install Java version 7 or higher"
 else
-  mkdir $UNIX_PATH
+  mkdir -p $UNIX_PATH
   cp -rf * $UNIX_PATH
   chmod -R go+rX $UNIX_PATH
   if [ -z "`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`" ]

@@ -15,11 +15,11 @@
  */
 package org.traccar;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-
-import java.math.BigDecimal;
 
 public class DistanceHandler extends BaseDataHandler {
 
@@ -36,15 +36,15 @@ public class DistanceHandler extends BaseDataHandler {
 
         Position last = getLastPosition(position.getDeviceId());
         if (last != null) {
-            if (last.getOther().containsKey(Event.KEY_DISTANCE)) {
-                distance = ((Number) last.getOther().get(Event.KEY_DISTANCE)).doubleValue();
+            if (last.getAttributes().containsKey(Event.KEY_DISTANCE)) {
+                distance = ((Number) last.getAttributes().get(Event.KEY_DISTANCE)).doubleValue();
             }
 
             distance += DistanceCalculator.distance(
                     position.getLatitude(), position.getLongitude(),
                     last.getLatitude(), last.getLongitude());
 
-            distance = BigDecimal.valueOf(distance).setScale(2).doubleValue();
+            distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
         }
 
         position.set(Event.KEY_DISTANCE, distance);

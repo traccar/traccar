@@ -30,7 +30,7 @@ public class Position extends Event implements Factory {
     
     public void setTime(Date time) {
         setDeviceTime(time);
-        fixTime = time;
+        setFixTime(time);
     }
 
     private boolean valid;

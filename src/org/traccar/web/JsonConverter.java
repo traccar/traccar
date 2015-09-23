@@ -19,9 +19,7 @@ import java.beans.Introspector;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -33,7 +31,6 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
-import org.apache.log4j.helpers.ISO8601DateFormat;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -44,7 +41,7 @@ public class JsonConverter {
 
     private static final DateTimeFormatter dateFormat = ISODateTimeFormat.dateTime();
 
-    public static Date parseDate(String value) throws ParseException {
+    public static Date parseDate(String value) {
         return dateFormat.parseDateTime(value).toDate();
     }
 
@@ -54,7 +51,7 @@ public class JsonConverter {
         }
     }
 
-    public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) throws ParseException {
+    public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) {
         T object = (T) prototype.create();
 
         Method[] methods = object.getClass().getMethods();

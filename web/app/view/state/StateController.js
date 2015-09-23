@@ -29,7 +29,7 @@ Ext.define('Traccar.view.state.StateController', {
     },
 
     init: function() {
-        var store = Ext.getStore('LiveData');
+        var store = Ext.getStore('LatestPositions');
         store.on('add', this.add, this);
         store.on('update', this.update, this);
     },
@@ -83,51 +83,36 @@ Ext.define('Traccar.view.state.StateController', {
 
     updatePosition: function(position) {
 
-        var other;
+        var attributes;
         var value;
         var unit;
-        var store = Ext.getStore('Parameters');
+        var store = Ext.getStore('Attributes');
         store.removeAll();
 
         for (var key in position.data) {
             if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
-                value = position.get(key);
-                if (key === 'speed') {
-                    var speedUnits = Ext.getStore('SpeedUnits');
-                    unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
-                    value = speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
-                }
-                
-                store.add(Ext.create('Traccar.model.Parameter', {
+                store.add(Ext.create('Traccar.model.Attribute', {
                     priority: this.keys[key].priority,
                     name: this.keys[key].name,
-                    value: this.formatValue(value)
+                    value: Traccar.AttributeFormatter.getFormatter(key)(position.get(key))
                 }));
             }
         }
 
-        var xml = position.get('other');
+        var xml = position.get('attributes');
         if (typeof xml === 'string' || xml instanceof String) {
-            other = this.parseXml(xml);
+            attributes = this.parseXml(xml);
         } else {
-            other = xml;
+            attributes = xml;
         }
-        for (var key in other) {
-            if (other.hasOwnProperty(key)) {
-
-                value = other[key];
-                if (key === 'distance' || key === 'odometer') {
-                    var distanceUnits = Ext.getStore('DistanceUnits');
-                    unit = Traccar.getApplication().getUser().get('distanceUnit') || Traccar.getApplication().getServer().get('distanceUnit') || '';
-                    value = distanceUnits.convert(value, unit) + ' ' + distanceUnits.getUnitName(unit);
-                }
-
-                store.add(Ext.create('Traccar.model.Parameter', {
-                    priority: 999,
+        for (var key in attributes) {
+            if (attributes.hasOwnProperty(key)) {
+                store.add(Ext.create('Traccar.model.Attribute', {
+                    priority: 1024,
                     name: key.replace(/^./, function (match) {
                         return match.toUpperCase();
                     }),
-                    value: this.formatValue(value)
+                    value: Traccar.AttributeFormatter.getFormatter(key)(attributes[key])
                 }));
             }
         }
@@ -135,11 +120,11 @@ Ext.define('Traccar.view.state.StateController', {
 
     selectDevice: function(device) {
         this.deviceId = device.get('id');
-        var found = Ext.getStore('LiveData').query('deviceId', this.deviceId);
+        var found = Ext.getStore('LatestPositions').query('deviceId', this.deviceId);
         if (found.getCount() > 0) {
             this.updatePosition(found.first());
         } else {
-            Ext.getStore('Parameters').removeAll();
+            Ext.getStore('Attributes').removeAll();
         }
     },
 

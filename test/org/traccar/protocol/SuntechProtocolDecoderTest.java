@@ -12,6 +12,12 @@ public class SuntechProtocolDecoderTest extends ProtocolDecoderTest {
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new SuntechProtocol());
         
         assertNull(decoder.decode(null, null, "SA200ALV;317652"));
+        
+        verify(decoder.decode(null, null,
+                "ST910;Alert;123456;410;20141018;18:30:12;+37.478774;+126.889690;000.000;000.00;0;4.0;1;6002"));
+
+        verify(decoder.decode(null, null,
+                "ST910;Alert;123456;410;20141018;18:30:12;+37.478774;+126.889690;000.000;000.00;0;4.0;1;6002;02;0;0310000100;450;01;-282;70;255;3;0"));
 
         verify(decoder.decode(null, null,
                 "SA200STT;317652;042;20120718;15:37:12;16d41;-15.618755;-056.083241;000.024;000.00;8;1;41548;12.17;100000;2;1979"));

@@ -15,22 +15,16 @@
  */
 package org.traccar.geocode;
 
-import org.traccar.helper.Log;
-
-import javax.json.Json;
 import javax.json.JsonObject;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class GisgraphyReverseGeocoder extends JsonReverseGeocoder {
 
     public GisgraphyReverseGeocoder() {
-        this("http://services.gisgraphy.com/street/streetsearch");
+        this("http://services.gisgraphy.com/street/streetsearch", 0);
     }
 
-    public GisgraphyReverseGeocoder(String url) {
-        super(url + "?format=json&lat=%f&lng=%f&from=1&to=1");
+    public GisgraphyReverseGeocoder(String url, int cacheSize) {
+        super(url + "?format=json&lat=%f&lng=%f&from=1&to=1", cacheSize);
     }
 
     @Override

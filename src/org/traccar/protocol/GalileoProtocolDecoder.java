@@ -91,8 +91,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // header
         int length = (buf.readUnsignedShort() & 0x7fff) + 3;
         
-        List<Position> positions = new LinkedList<Position>();
-        Set<Integer> tags = new HashSet<Integer>();
+        List<Position> positions = new LinkedList<>();
+        Set<Integer> tags = new HashSet<>();
         boolean hasLocation = false;
         Position position = new Position();
         position.setProtocol(getProtocolName());

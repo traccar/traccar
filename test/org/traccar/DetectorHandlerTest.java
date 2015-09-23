@@ -1,26 +1,6 @@
 package org.traccar;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
-import org.jboss.netty.handler.timeout.IdleStateHandler;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.traccar.helper.TestIdentityManager;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-import org.traccar.protocol.Gps103ProtocolDecoder;
-
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.List;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 public class DetectorHandlerTest {
 

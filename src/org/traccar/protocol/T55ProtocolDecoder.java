@@ -20,10 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -40,7 +37,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "([AV])," +                    // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
+            "(\\d{2,3})(\\d{2}\\.\\d+)," + // Longitude (DDDMM.MMMM)
             "([EW])," +
             "(\\d+\\.?\\d*)?," +           // Speed
             "(\\d+\\.?\\d*)?," +           // Course

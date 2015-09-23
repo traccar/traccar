@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.LiveData', {
+Ext.define('Traccar.store.Attributes', {
     extend: 'Ext.data.Store',
-    model: 'Traccar.model.Position'
+    model: 'Traccar.model.Attribute',
+
+    sorters: [{
+        property: 'priority'
+    }]
 });

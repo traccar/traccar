@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
@@ -30,14 +29,14 @@ import org.traccar.model.Position;
 
 public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
-    private boolean full;
+    private final boolean full;
 
     public XexunProtocolDecoder(XexunProtocol protocol, boolean full) {
         super(protocol);
         this.full = full;
     }
 
-    static private Pattern patternBasic = Pattern.compile(
+    private static final Pattern patternBasic = Pattern.compile(
             "G[PN]RMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
@@ -54,7 +53,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             ".*imei:" +
             "(\\d+),");                         // IMEI
 
-    static private Pattern patternFull = Pattern.compile(
+    private static final Pattern patternFull = Pattern.compile(
             "[\r\n]*" +
             "(\\d+)," +                         // Serial
             "([^,]+)?," +                       // Number

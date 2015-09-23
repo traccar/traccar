@@ -16,10 +16,14 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Date;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
+import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Crc;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -247,6 +251,82 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        if (Context.getConfig().getBoolean(getProtocolName() + ".can") &&
+                buf.readable() && (selector & 0x1000) != 0 && event == EVENT_DATA) {
+
+            buf.readUnsignedMedium(); // packet identifier
+            buf.readUnsignedByte(); // version
+            int count = buf.readUnsignedByte();
+            buf.readUnsignedByte(); // batch count
+            buf.readUnsignedShort(); // selector bit
+            buf.readUnsignedInt(); // timestamp
+
+            buf.skipBytes(8);
+
+            ArrayList<ChannelBuffer> values = new ArrayList<>(count);
+
+            for (int i = 0; i < count; i++) {
+                values.add(buf.readBytes(8));
+            }
+
+            for (int i = 0; i < count; i++) {
+                ChannelBuffer value = values.get(i);
+                switch (buf.readInt()) {
+                    case 0x20D:
+                        position.set("diesel-rpm", ChannelBuffers.swapShort(value.readShort()));
+                        position.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("battery-voltage", ChannelBuffers.swapShort(value.readShort()) * 0.01);
+                        position.set("supply-air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        break;
+                    case 0x30D:
+                        position.set("active-alarm", ChannelBufferTools.readHexString(value, 16));
+                        break;
+                    case 0x40C:
+                        position.set("air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("air-temp-dep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        break;
+                    case 0x40D:
+                        position.set("cold-unit-state", ChannelBufferTools.readHexString(value, 16));
+                        break;
+                    case 0x50C:
+                        position.set("defrost-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("defrost-temp-dep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        break;
+                    case 0x50D:
+                        position.set("condenser-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        position.set("suction-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                        break;
+                    case 0x58C:
+                        value.readByte();
+                        value.readShort(); // index
+                        switch (value.readByte()) {
+                            case 0x01:
+                                position.set("setpoint-zone1", ChannelBuffers.swapInt(value.readInt()) * 0.1);
+                                break;
+                            case 0x02:
+                                position.set("setpoint-zone2", ChannelBuffers.swapInt(value.readInt()) * 0.1);
+                                break;
+                            case 0x05:
+                                position.set("unit-type", ChannelBuffers.swapInt(value.readInt()));
+                                break;
+                            case 0x13:
+                                position.set("diesel-hours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
+                                break;
+                            case 0x14:
+                                position.set("electric-hours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
+                                break;
+                            case 0x17:
+                                position.set("service-indicator", ChannelBuffers.swapInt(value.readInt()));
+                                break;
+                            case 0x18:
+                                position.set("software-version", ChannelBuffers.swapInt(value.readInt()) * 0.01);
+                                break;
+                        }
+                        break;
+                }
+            }
+        }        
+        
         return position;
     }
 

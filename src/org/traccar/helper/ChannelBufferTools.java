@@ -15,14 +15,10 @@
  */
 package org.traccar.helper;
 
-import java.math.BigInteger;
-import java.util.Formatter;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.traccar.protocol.IntellitracFrameDecoder;
 
-/**
- * ChannelBuffer helper methods
- */
+import java.util.Formatter;
+
 public class ChannelBufferTools {
 
     public static Integer find(ChannelBuffer buf, int start, String subString) {

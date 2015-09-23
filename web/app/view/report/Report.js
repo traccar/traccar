@@ -44,23 +44,27 @@ Ext.define('Traccar.view.report.Report', {
     }, {
         xtype: 'datefield',
         reference: 'fromDateField',
-        value: new Date()
+        startDay: styles.weekStartDay,
+        value: new Date(new Date().getTime() - 30 * 60 * 1000)
     }, {
         xtype: 'timefield',
         reference: 'fromTimeField',
         maxWidth: styles.reportTime,
-        value: new Date()
+        format: styles.timeFormat,
+        value: new Date(new Date().getTime() - 30 * 60 * 1000)
     }, '-', {
         xtype: 'tbtext',
         html: strings.reportTo
     }, {
         xtype: 'datefield',
         reference: 'toDateField',
+        startDay: styles.weekStartDay,
         value: new Date()
     }, {
         xtype: 'timefield',
         reference: 'toTimeField',
         maxWidth: styles.reportTime,
+        format: styles.timeFormat,
         value: new Date()
     }, '-', {
         text: strings.reportShow,
@@ -74,23 +78,41 @@ Ext.define('Traccar.view.report.Report', {
         selectionchange: 'onSelectionChange'
     },
 
-    columns: [
-        { text: strings.positionValid, dataIndex: 'valid', flex: 1 },
-        { text: strings.positionTime, dataIndex: 'fixTime', flex: 1, xtype: 'datecolumn', format: styles.reportFormat },
-        { text: strings.positionLatitude, dataIndex: 'latitude', flex: 1 },
-        { text: strings.positionLongitude, dataIndex: 'longitude', flex: 1 },
-        { text: strings.positionAltitude, dataIndex: 'altitude', flex: 1 },
-        {
-            text: strings.positionSpeed,
-            dataIndex: 'speed',
-            flex: 1,
-            renderer: function(value) {
-                var speedUnits = Ext.getStore('SpeedUnits');
-                var unit = Traccar.getApplication().getUser().get('speedUnit') || Traccar.getApplication().getServer().get('speedUnit') || '';
-                return speedUnits.convert(value, unit) + ' ' + speedUnits.getUnitName(unit);
-            }
-        },
-        { text: strings.positionAddress, dataIndex: 'address', flex: 1 }
-    ]
-
+    columns: [{
+        text: strings.positionValid,
+        dataIndex: 'valid',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('valid')
+    }, {
+        text: strings.positionTime,
+        dataIndex: 'fixTime',
+        flex: 1,
+        xtype: 'datecolumn',
+        renderer: Traccar.AttributeFormatter.getFormatter('fixTime')
+    }, {
+        text: strings.positionLatitude,
+        dataIndex: 'latitude',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
+    }, {
+        text: strings.positionLongitude,
+        dataIndex: 'longitude',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
+    }, {
+        text: strings.positionAltitude,
+        dataIndex: 'altitude',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('altitude')
+    }, {
+        text: strings.positionSpeed,
+        dataIndex: 'speed',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('speed')
+    }, {
+        text: strings.positionAddress,
+        dataIndex: 'address',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('address')
+    }]
 });

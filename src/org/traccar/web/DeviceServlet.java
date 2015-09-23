@@ -51,8 +51,9 @@ public class DeviceServlet extends BaseServlet {
     
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
+        long userId = getUserId(req);
         Context.getDataManager().addDevice(device);
-        Context.getDataManager().linkDevice(getUserId(req), device.getId());
+        Context.getDataManager().linkDevice(userId, device.getId());
         Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
     }

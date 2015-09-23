@@ -1,9 +1,7 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-import org.traccar.helper.TestIdentityManager;
 
-import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
 public class Ardi01ProtocolDecoderTest extends ProtocolDecoderTest {

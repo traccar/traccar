@@ -15,7 +15,7 @@ public class DistanceHandlerTest {
 
         Position position = distanceHandler.calculateDistance(new Position());
 
-        assertEquals(0.0, position.getOther().get(Event.KEY_DISTANCE));
+        assertEquals(0.0, position.getAttributes().get(Event.KEY_DISTANCE));
 
     }
 

@@ -1,8 +1,7 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
-import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class MegastekProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -10,6 +9,15 @@ public class MegastekProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(new MegastekProtocol());
+
+        verify(decoder.decode(null, null,
+                "$MGV002,860719020193193,DeviceName,R,240214,104742,A,2238.20471,N,11401.97967,E,00,03,00,1.20,0.462,356.23,137.9,1.5,460,07,262C,0F54,25,0000,0000,0,0,0,28.5,28.3,,,100,Timer;!"));
+
+        verify(decoder.decode(null, null,
+                "STX2010101801      j$GPRMC,101053.000,A,2232.7607,N,11404.7669,E,0.00,,231110,,,A*7F,460,00,2795,0E6A,14,94,1000,0000,91,Timer;1D"));
+
+        verify(decoder.decode(null, null,
+                "STX,861001005215757,$GPRMC,180118.000,A,4241.330116,N,2321.931251,E,0.00,182.19,130915,,E,A,F,Nil-Alarms,imei:861001005215757,8,577.0,Battery=38%,0,284,03,03E8,3139;7A"));
 
         verify(decoder.decode(null, null,
                 "STX,865067020439090,$GPRMC,171013.000,A,5919.1411,N,01804.1681,E,0.000,294.41,140815,,,A"));

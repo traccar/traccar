@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.admin.ServerDialogController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.serverDialog',
-
-    onSaveClick: function(button) {
-        var dialog = button.up('window').down('form');
-        dialog.updateRecord();
-        dialog.getRecord().save();
-        button.up('window').close();
-    },
-
-    onCancelClick: function(button) {
-        button.up('window').close();
-    }
-
+Ext.define('Traccar.store.LatestPositions', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Position'
 });

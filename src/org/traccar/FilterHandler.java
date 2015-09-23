@@ -21,11 +21,11 @@ import org.traccar.model.Position;
 
 public class FilterHandler extends BaseDataHandler {
 
-    private boolean filterInvalid;
-    private boolean filterZero;
-    private boolean filterDuplicate;
-    private int filterDistance;
-    private long filterLimit;
+    private final boolean filterInvalid;
+    private final boolean filterZero;
+    private final boolean filterDuplicate;
+    private final int filterDistance;
+    private final long filterLimit;
     
     public FilterHandler(
             boolean filterInvalid,

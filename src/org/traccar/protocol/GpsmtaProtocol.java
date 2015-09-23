@@ -17,16 +17,16 @@ package org.traccar.protocol;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
 import java.util.List;
 
-public class Xt7Protocol extends BaseProtocol {
+public class GpsmtaProtocol extends BaseProtocol {
 
-    public Xt7Protocol() {
-        super("xt7");
+    public GpsmtaProtocol() {
+        super("gpsmta");
     }
 
     @Override
@@ -34,8 +34,8 @@ public class Xt7Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 20, 1, 5, 0));
-                pipeline.addLast("objectDecoder", new Xt7ProtocolDecoder(Xt7Protocol.this));
+                pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectDecoder", new GpsmtaProtocolDecoder(GpsmtaProtocol.this));
             }
         });
     }

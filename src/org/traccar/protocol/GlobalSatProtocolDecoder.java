@@ -35,8 +35,8 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     public GlobalSatProtocolDecoder(GlobalSatProtocol protocol) {
         super(protocol);
         
-        format0 = Context.getConfig().getString(protocol + ".format0", "TSPRXAB27GHKLMnaicz*U!");
-        format1 = Context.getConfig().getString(protocol + ".format1", "SARY*U!");
+        format0 = Context.getConfig().getString(getProtocolName() + ".format0", "TSPRXAB27GHKLMnaicz*U!");
+        format1 = Context.getConfig().getString(getProtocolName() + ".format1", "SARY*U!");
     }
 
     public void setFormat0(String format) {

@@ -25,7 +25,6 @@ import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
@@ -40,7 +39,7 @@ import org.traccar.model.Position;
 
 public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
-    private boolean simple;
+    private final boolean simple;
 
     public Mta6ProtocolDecoder(Protocol protocol, boolean simple) {
         super(protocol);

@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.admin.ServerDialog', {
-    extend: 'Ext.window.Window',
+Ext.define('Traccar.view.ServerDialog', {
+    extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.admin.ServerDialogController'
+        'Traccar.view.BaseEditDialogController'
     ],
 
-    controller: 'serverDialog',
-    
-    bodyPadding: styles.panelPadding,
+    controller: 'baseEditDialog',
     title: strings.serverTitle,
-    resizable: false,
-    modal: true,
-    
+
     items: {
         xtype: 'form',
         items: [{
@@ -77,14 +73,5 @@ Ext.define('Traccar.view.admin.ServerDialog', {
             name: 'zoom',
             fieldLabel: strings.serverZoom
         }]
-    },
-
-    buttons: [{
-        text: strings.sharedSave,
-        handler: 'onSaveClick'
-    }, {
-        text: strings.sharedCancel,
-        handler: 'onCancelClick'
-    }]
-
+    }
 });

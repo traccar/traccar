@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
@@ -34,11 +33,11 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private Pattern patternPing = Pattern.compile(
-            "\\%\\%[^,]+,(\\d+)");
+    private static final Pattern patternPing = Pattern.compile(
+            "%%[^,]+,(\\d+)");
 
-    static private Pattern patternData = Pattern.compile(
-            "\\%\\%" +
+    private static final Pattern patternData = Pattern.compile(
+            "%%" +
             "([^,]+)," +                   // Id
             "([AL])," +                    // Validity
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (YYMMDD)

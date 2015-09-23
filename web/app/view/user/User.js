@@ -41,6 +41,11 @@ Ext.define('Traccar.view.user.User', {
         disabled: true,
         handler: 'onRemoveClick',
         reference: 'userRemoveButton'
+    }, {
+        text: strings.deviceTitle,
+        disabled: true,
+        handler: 'onDevicesClick',
+        reference: 'userDevicesButton'
     }],
 
     listeners: {

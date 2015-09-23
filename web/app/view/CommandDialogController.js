@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.command.CommandDialogController', {
-    extend: 'Ext.app.ViewController',
+Ext.define('Traccar.view.CommandDialogController', {
+    extend: 'Traccar.view.BaseDialogController',
     alias: 'controller.commandDialog',
 
     onSelect: function(selected) {
@@ -24,17 +24,18 @@ Ext.define('Traccar.view.command.CommandDialogController', {
     },
 
     onSendClick: function(button) {
-        var other;
-        var form = button.up('window').down('form');
+        var attributes, value, record, form;
+
+        form = button.up('window').down('form');
         form.updateRecord();
-        var record = form.getRecord();
+        record = form.getRecord();
 
         if (record.get('type') === 'positionPeriodic') {
-            other = this.lookupReference('paramPositionPeriodic');
-            var value = other.down('numberfield[name="frequency"]').getValue();
-            value *= other.down('combobox[name="unit"]').getValue();
+            attributes = this.lookupReference('paramPositionPeriodic');
+            value = attributes.down('numberfield[name="frequency"]').getValue();
+            value *= attributes.down('combobox[name="unit"]').getValue();
 
-            record.set('other', {
+            record.set('attributes', {
                 frequency: value
             });
         }
@@ -43,19 +44,14 @@ Ext.define('Traccar.view.command.CommandDialogController', {
             scope: this,
             url: '/api/command/send',
             jsonData: record.getData(),
-            callback: this.onSendReturn
+            callback: this.onSendResult
         });
     },
 
-    onSendReturn: function(options, success, response) {
+    onSendResult: function(options, success, response) {
         if (Traccar.ErrorManager.check(success, response)) {
+            Ext.toast(strings.commandSent);
             this.closeView();
-            //TODO toast Ext.toast(strings.loginCreated);
         }
-    },
-
-    onCancelClick: function(button) {
-        button.up('window').close();
     }
-
 });

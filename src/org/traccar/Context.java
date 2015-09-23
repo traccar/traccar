@@ -22,7 +22,9 @@ import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
+import org.traccar.geocode.MapQuestReverseGeocoder;
 import org.traccar.geocode.NominatimReverseGeocoder;
+import org.traccar.geocode.OpenCageReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.web.WebServer;
@@ -106,32 +108,39 @@ public class Context {
         }
         identityManager = dataManager;
 
-        connectionManager = new ConnectionManager(dataManager);
-
         if (config.getBoolean("geocoder.enable")) {
             String type = config.getString("geocoder.type", "google");
             String url = config.getString("geocoder.url");
+            String key = config.getString("geocoder.key");
+            
+            int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
                 case "google":
-                    reverseGeocoder = new GoogleReverseGeocoder();
+                    reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
                     break;
                 case "nominatim":
-                    reverseGeocoder = new NominatimReverseGeocoder(url);
+                    reverseGeocoder = new NominatimReverseGeocoder(url, cacheSize);
                     break;
                 case "gisgraphy":
-                    reverseGeocoder = new GisgraphyReverseGeocoder(url);
+                    reverseGeocoder = new GisgraphyReverseGeocoder(url, cacheSize);
+                    break;
+                case "mapquest":
+                    reverseGeocoder = new MapQuestReverseGeocoder(url, key, cacheSize);
+                    break;
+                case "opencage":
+                    reverseGeocoder = new OpenCageReverseGeocoder(url, key, cacheSize);
                     break;
             }
         }
 
         if (config.getBoolean("web.enable")) {
-            if (!config.getBoolean("web.old")) {
+            if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
                 permissionsManager = new PermissionsManager(dataManager);
-                webServer = new WebServer(config);
-            } else {
-                webServer = new WebServer(config, dataManager.getDataSource());
             }
+            webServer = new WebServer(config, dataManager.getDataSource());
         }
+
+        connectionManager = new ConnectionManager(dataManager);
 
         serverManager = new ServerManager();
     }

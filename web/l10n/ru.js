@@ -44,7 +44,7 @@ var strings = {
     settingsSpeedUnit: 'Скорость',
 
     reportTitle: 'Отчеты',
-    reportDevice: 'Устройтво',
+    reportDevice: 'Устройство',
     reportFrom: 'С',
     reportTo: 'По',
     reportShow: 'Показать',

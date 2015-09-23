@@ -14,32 +14,10 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.main.MainMobile', {
-    extend: 'Ext.container.Viewport',
+Ext.define('Traccar.view.BaseDialog', {
+    extend: 'Ext.window.Window',
 
-    requires: [
-        'Traccar.view.device.Device',
-        'Traccar.view.map.Map'
-    ],
-
-    layout: 'border',
-
-    defaults: {
-        collapsible: true,
-        split: true
-    },
-
-    items: [{
-        collapsible: false,
-        region: 'center',
-        xtype: 'mapView',
-        header: false,
-        flex: 2
-    }, {
-        region: 'south',
-        xtype: 'deviceView',
-        header: false,
-        flex: 1
-    }]
-
+    bodyPadding: styles.panelPadding,
+    resizable: false,
+    modal: true
 });

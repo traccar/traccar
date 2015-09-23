@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Position;
@@ -42,7 +41,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{2})," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -55,7 +54,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");                         // Other (Checksumm)
 
-    static private Pattern gpfidPattern = Pattern.compile("\\$GPFID,(\\d+)$");
+    private static final Pattern gpfidPattern = Pattern.compile("\\$GPFID,(\\d+)$");
 
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)

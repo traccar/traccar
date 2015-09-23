@@ -34,7 +34,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern pattern = Pattern.compile(
             "S.\\d{3}(?:\\w{3})?;" +       // Header
-            "(?:[^;]+;)?" +
+            "(?:([^;]+);)?" +              // Type
             "(\\d{6,});" +                 // Device ID
             "(?:\\d+;)?" +
             "(\\d+);" +                    // Version
@@ -66,6 +66,11 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         int index = 1;
+        
+        String type = parser.group(index++);
+        if (type != null && (type.equals("Alert") || type.equals("Emergency"))) {
+            position.set(Event.KEY_ALARM, true);
+        }
 
         // Identifier
         if (!identify(parser.group(index++), channel)) {

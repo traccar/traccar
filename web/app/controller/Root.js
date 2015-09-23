@@ -18,10 +18,7 @@ Ext.define('Traccar.controller.Root', {
     extend: 'Ext.app.Controller',
     
     requires: [
-        'Traccar.LoginManager',
-        'Traccar.view.login.Login',
-        'Traccar.view.main.Main',
-        'Traccar.view.main.MainMobile'
+        'Traccar.LoginManager'
     ],
 
     init: function() {
@@ -68,10 +65,9 @@ Ext.define('Traccar.controller.Root', {
         Ext.getStore('Devices').load();
         Ext.getBody().empty();
         if (this.isPhone) {
-            Ext.create('Traccar.view.main.MainMobile');
+            Ext.create('Traccar.view.MainMobile');
         } else {
-            Ext.create('Traccar.view.main.Main');
+            Ext.create('Traccar.view.Main');
         }
     }
-
 });

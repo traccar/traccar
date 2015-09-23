@@ -23,9 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
+import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;

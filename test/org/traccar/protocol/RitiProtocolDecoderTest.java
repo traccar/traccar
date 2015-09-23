@@ -2,11 +2,9 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import org.jboss.netty.buffer.ChannelBuffers;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
-import org.traccar.helper.TestIdentityManager;
 
 public class RitiProtocolDecoderTest extends ProtocolDecoderTest {
 

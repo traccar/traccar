@@ -19,7 +19,7 @@ Ext.define('Traccar.view.user.UserDialogController', {
     alias: 'controller.userDialog',
 
     init: function() {
-        if (Traccar.getApplication().getUser().get('admin')) {
+        if (Traccar.app.getUser().get('admin')) {
             this.lookupReference('adminField').setDisabled(false);
         }
     },
@@ -28,7 +28,7 @@ Ext.define('Traccar.view.user.UserDialogController', {
         var dialog = button.up('window').down('form');
         dialog.updateRecord();
         var record = dialog.getRecord();
-        if (record === Traccar.getApplication().getUser()) {
+        if (record === Traccar.app.getUser()) {
             record.save();
         } else {
             var store = Ext.getStore('Users');

@@ -23,8 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -38,9 +36,9 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern pattern = Pattern.compile(
             "\\$\\$" +                                      // Header
             "(\\d+)\\?*" +                                  // Device ID
-            "\\&A" +
+            "&A" +
             "(\\d{4})" +                                    // Command - 2
-            "\\&B" +
+            "&B" +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," +        // HHMMSS.DDD
             "([AV])," +                                     // STATUS : A= Valid, V = Invalid
             "(\\d{2})(\\d{2}\\.\\d{4})," +                  // Lat : XXMM.DDDDD
@@ -51,10 +49,10 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+.\\d*)?," +                               // Heading
             "(\\d{2})(\\d{2})(\\d{2})" +                    // DDMMYY
             ".*" +
-            "\\&C(.*)" +                                    // IO Port Data
-            "\\&D(.*)" +                                    // Mile Meter Data
-            "\\&E(.*)" +                                    // Alarm Data
-            "(?:\\&Y)?(.*)");                               // AD Input Data
+            "&C(.*)" +                                      // IO Port Data
+            "&D(.*)" +                                      // Mile Meter Data
+            "&E(.*)" +                                      // Alarm Data
+            "(?:&Y)?(.*)");                                 // AD Input Data
 
     @Override
     protected Object decode(

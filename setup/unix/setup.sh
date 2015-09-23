@@ -6,7 +6,7 @@ if [ $(java -version 2>&1 | grep -i version | sed 's/.*version "\(.*\)\.\(.*\)\.
 then
   echo "Please install Java version 7 or higher"
 else
-  mkdir $UNIX_PATH
+  mkdir -p $UNIX_PATH
   cp -rf * $UNIX_PATH
   chmod -R go+rX $UNIX_PATH
   $UNIX_PATH/bin/traccar install

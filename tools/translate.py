@@ -13,6 +13,8 @@ files = [f for f in os.listdir(path) if os.path.isfile(path + f) and f.endswith(
 for f in files:
     f = path + f
 
+    print 'en -> ' + f[-5:-3]
+
     dict = {}
 
     for line in open(f).read().splitlines():
@@ -28,6 +30,7 @@ for f in files:
             if dict.has_key(match.group(1)):
                 value = dict[match.group(1)]
             else:
+                print '"' + match.group(2) + '"'
                 value = match.group(2) + ' (*)'
 
             out.write('    ' + match.group(1) + ": '" + value + "'")

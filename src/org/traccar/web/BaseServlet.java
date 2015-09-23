@@ -15,6 +15,8 @@
  */
 package org.traccar.web;
 
+import org.traccar.helper.Log;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.security.AccessControlException;
@@ -57,12 +59,6 @@ public abstract class BaseServlet extends HttpServlet {
         return userId;
     }
     
-    public void securityCheck(boolean check) throws SecurityException {
-        if (!check) {
-            throw new SecurityException("Access denied");
-        }
-    }
-    
     public void sendResponse(Writer writer, boolean success) throws IOException {
         JsonObjectBuilder result = Json.createObjectBuilder();
         result.add("success", success);
@@ -79,11 +75,7 @@ public abstract class BaseServlet extends HttpServlet {
     public void sendResponse(Writer writer, Exception error) throws IOException {
         JsonObjectBuilder result = Json.createObjectBuilder();
         result.add("success", false);
-        if (error.getMessage() != null) {
-            result.add("error", error.getMessage());
-        } else {
-            result.add("error", error.getClass().getSimpleName());
-        }
+        result.add("error", Log.exceptionStack(error));
         writer.write(result.build().toString());
     }
     

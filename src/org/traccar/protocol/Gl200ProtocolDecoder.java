@@ -34,7 +34,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern heartbeatPattern = Pattern.compile(
-            "\\+ACK\\:GTHBD," +
+            "\\+ACK:GTHBD," +
             "([0-9A-Z]{2}\\p{XDigit}{4})," +
             ".*," +
             "(\\p{XDigit}{4})\\$?");
@@ -140,7 +140,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // Altitude
         String altitude = parser.group(index++);
-        if (speed != null) {
+        if (altitude != null) {
             position.setAltitude(Double.valueOf(altitude));
         }
 

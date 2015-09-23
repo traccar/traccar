@@ -19,11 +19,10 @@ Ext.define('Traccar.view.device.DeviceController', {
     alias: 'controller.device',
     
     requires: [
-        'Traccar.view.device.DeviceDialog',
-        'Traccar.view.command.CommandDialog',
+        'Traccar.view.CommandDialog',
         'Traccar.view.user.UserDialog',
-        'Traccar.view.admin.ServerDialog',
-        'Traccar.view.user.User'
+        'Traccar.view.user.User',
+        'Traccar.view.login.LoginController'
     ],
 
     config: {
@@ -37,26 +36,29 @@ Ext.define('Traccar.view.device.DeviceController', {
     },
 
     init: function() {
-        if (Traccar.getApplication().getUser().get('admin')) {
-            this.lookupReference('settingsServerButton').setDisabled(false);
-            this.lookupReference('settingsUsersButton').setDisabled(false);
+        if (Traccar.app.getUser().get('admin')) {
+            this.lookupReference('settingsServerButton').setHidden(false);
+            this.lookupReference('settingsUsersButton').setHidden(false);
         }
     },
     
     onLogoutClick: function() {
-        Traccar.LoginManager.logout();
+        Ext.create('Traccar.view.login.LoginController').logout();
     },
     
     onAddClick: function() {
-        var device = Ext.create('Traccar.model.Device');
-        var dialog = Ext.create('Traccar.view.device.DeviceDialog');
+        var device, dialog;
+        device = Ext.create('Traccar.model.Device');
+        device.store = this.getView().getStore();
+        dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
     },
     
     onEditClick: function() {
-        var device = this.getView().getSelectionModel().getSelection()[0];
-        var dialog = Ext.create('Traccar.view.device.DeviceDialog');
+        var device, dialog;
+        device = this.getView().getSelectionModel().getSelection()[0];
+        dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
     },
@@ -72,8 +74,9 @@ Ext.define('Traccar.view.device.DeviceController', {
                 no: strings.sharedCancel
             },
             fn: function(btn) {
+                var store;
                 if (btn === 'yes') {
-                    var store = Ext.getStore('Devices');
+                    store = Ext.getStore('Devices');
                     store.remove(device);
                     store.sync();
                 }
@@ -82,10 +85,11 @@ Ext.define('Traccar.view.device.DeviceController', {
     },
 
     onCommandClick: function() {
-        var device = this.getView().getSelectionModel().getSelection()[0];
-        var command = Ext.create('Traccar.model.Command');
+        var device, command, dialog;
+        device = this.getView().getSelectionModel().getSelection()[0];
+        command = Ext.create('Traccar.model.Command');
         command.set('deviceId', device.get('id'));
-        var dialog = Ext.create('Traccar.view.command.CommandDialog');
+        dialog = Ext.create('Traccar.view.CommandDialog');
         dialog.down('form').loadRecord(command);
         dialog.show();
     },
@@ -101,16 +105,14 @@ Ext.define('Traccar.view.device.DeviceController', {
     },
 
     onUserClick: function() {
-        var user = Traccar.getApplication().getUser();
         var dialog = Ext.create('Traccar.view.user.UserDialog');
-        dialog.down('form').loadRecord(user);
+        dialog.down('form').loadRecord(Traccar.app.getUser());
         dialog.show();
     },
 
     onServerClick: function() {
-        var server = Traccar.getApplication().getServer();
-        var dialog = Ext.create('Traccar.view.admin.ServerDialog');
-        dialog.down('form').loadRecord(server);
+        var dialog = Ext.create('Traccar.view.ServerDialog');
+        dialog.down('form').loadRecord(Traccar.app.getServer());
         dialog.show();
     },
 
@@ -132,5 +134,4 @@ Ext.define('Traccar.view.device.DeviceController', {
             this.getView().getSelectionModel().deselectAll();
         }
     }
-
 });

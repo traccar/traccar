@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.Parameters', {
-    extend: 'Ext.data.Store',
-    model: 'Traccar.model.Parameter',
+Ext.define('Traccar.view.BaseDialogController', {
+    extend: 'Ext.app.ViewController',
 
-    sorters: [{
-        property: 'priority'
-    }]
+    onCancelClick: function(button) {
+        button.up('window').close();
+    }
 });

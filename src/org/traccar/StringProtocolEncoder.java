@@ -30,7 +30,7 @@ public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
         String result = String.format(format, (Object[]) keys);
 
         result = result.replaceAll("\\{" + Command.KEY_UNIQUE_ID + "}", getUniqueId(command.getDeviceId()));
-        for (Map.Entry<String, Object> entry : command.getOther().entrySet()) {
+        for (Map.Entry<String, Object> entry : command.getAttributes().entrySet()) {
             String value = null;
             if (valueFormatter != null) {
                 value = valueFormatter.formatValue(entry.getKey(), entry.getValue());

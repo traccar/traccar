@@ -2,7 +2,6 @@ package org.traccar.web;
 
 import java.io.StringReader;
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;

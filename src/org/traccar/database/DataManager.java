@@ -143,7 +143,7 @@ public class DataManager implements IdentityManager {
 
     private void initDatabaseSchema() throws SQLException {
 
-        if (!config.getBoolean("web.old")) {
+        if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
 
             Connection connection = dataSource.getConnection();
             ResultSet result = connection.getMetaData().getTables(
@@ -227,7 +227,7 @@ public class DataManager implements IdentityManager {
                 
                 updateLatestPosition(position);
 
-            } catch (SQLException | ParseException error) {
+            } catch (SQLException error) {
                 Log.warning(error);
             }
         }
@@ -331,7 +331,8 @@ public class DataManager implements IdentityManager {
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
                 .setLong("power", 0) // tmp
-                .setString("extended_info", MiscFormatter.toXmlString(position.getOther())) // tmp
+                .setString("extended_info", MiscFormatter.toXmlString(position.getAttributes())) // tmp
+                .setString("other", MiscFormatter.toXmlString(position.getAttributes())) // tmp
                 .executeUpdate());
     }
 
@@ -341,7 +342,8 @@ public class DataManager implements IdentityManager {
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
                 .setLong("power", 0) // tmp
-                .setString("extended_info", MiscFormatter.toXmlString(position.getOther())) // tmp
+                .setString("extended_info", MiscFormatter.toXmlString(position.getAttributes())) // tmp
+                .setString("other", MiscFormatter.toXmlString(position.getAttributes())) // tmp
                 .executeUpdate();
     }
 

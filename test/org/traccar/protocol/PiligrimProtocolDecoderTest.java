@@ -1,12 +1,11 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.traccar.helper.TestIdentityManager;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpVersion;
-import static org.junit.Assert.assertNull;
+
 import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;

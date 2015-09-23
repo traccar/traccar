@@ -7,11 +7,7 @@ import org.junit.Test;
 
 public class ChannelBufferToolsTest {
     
-    private ChannelBufferFactory factory = new HeapChannelBufferFactory();
-    
-    @Test
-    public void testFind() {
-    }
+    private final ChannelBufferFactory factory = new HeapChannelBufferFactory();
 
     @Test
     public void testReadHexInteger() {

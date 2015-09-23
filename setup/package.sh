@@ -131,7 +131,7 @@ package_unix () {
 
   eval $2
 
-  makeself out traccar.run "traccar" ./setup.sh
+  makeself out traccar.run "traccar" "chmod +x setup.sh ; ./setup.sh"
   zip -j traccar-$1-$VERSION.zip traccar.run README.txt
 
   rm traccar.run

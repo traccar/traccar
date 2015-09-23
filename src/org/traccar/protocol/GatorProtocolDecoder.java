@@ -21,7 +21,6 @@ import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
