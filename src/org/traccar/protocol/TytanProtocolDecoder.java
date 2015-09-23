@@ -112,7 +112,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     length += buf.readUnsignedByte();
                 }
 
-                switch (buf.readUnsignedByte()) {
+                switch (type) {
                     case 2:
                         position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
                         break;

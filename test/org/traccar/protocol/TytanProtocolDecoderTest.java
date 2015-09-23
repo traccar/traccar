@@ -1,6 +1,10 @@
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
+import org.traccar.helper.ChannelBufferTools;
+
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class TytanProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -8,9 +12,12 @@ public class TytanProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         TytanProtocolDecoder decoder = new TytanProtocolDecoder(new TytanProtocol());
-        
-        /*verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-                "d5300000689d65556877fbd437a09d8ea89360005a23124e410201213704000907000009ffffffffffffffff0affffffffffffffff18ff63ff7f7fff65ff66ff67ff68ff69ff6b00ff6cffffffff6dff7fffffffff81ffffffff82ffff83ffffffffffffffff88ffff9600"))));*/
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "b50028080000689d215602772f00378f1b8e9fdd98005a042efb3e4102030000000402140c070200000901"))));
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "b500280a0000689d215602772f00378f1b8e9fdd98005a042efb3e4102030000000402140c07020000da20"))));
 
     }
 
