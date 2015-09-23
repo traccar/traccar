@@ -33,7 +33,7 @@ public class ManPowerProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "simei:" +
             "(\\d+)," +                         // IMEI
             "[^,]*,[^,]*," +

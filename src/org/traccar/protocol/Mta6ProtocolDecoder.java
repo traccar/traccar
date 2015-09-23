@@ -39,7 +39,7 @@ import org.traccar.model.Position;
 
 public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
     
-    private boolean simple;
+    private final boolean simple;
 
     public Mta6ProtocolDecoder(Protocol protocol, boolean simple) {
         super(protocol);

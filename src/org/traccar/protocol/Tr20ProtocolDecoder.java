@@ -33,10 +33,10 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private Pattern patternPing = Pattern.compile(
+    private static final Pattern patternPing = Pattern.compile(
             "%%[^,]+,(\\d+)");
 
-    static private Pattern patternData = Pattern.compile(
+    private static final Pattern patternData = Pattern.compile(
             "%%" +
             "([^,]+)," +                   // Id
             "([AL])," +                    // Validity

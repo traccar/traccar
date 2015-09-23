@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
     
-    private long defaultMask;
+    private final long defaultMask;
 
     public SkypatrolProtocolDecoder(SkypatrolProtocol protocol) {
         super(protocol);

@@ -27,7 +27,7 @@ import java.util.List;
 
 public class DetectorHandler extends SimpleChannelHandler {
 
-    private List<TrackerServer> serverList;
+    private final List<TrackerServer> serverList;
     
     private boolean showFailed;
 

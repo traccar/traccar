@@ -32,7 +32,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\*..," +                          // Manufacturer
             "(\\d+)," +                         // IMEI
             "([^,]{2})," +                      // Command

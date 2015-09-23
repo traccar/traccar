@@ -41,7 +41,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{2})," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -54,7 +54,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");                         // Other (Checksumm)
 
-    static private Pattern gpfidPattern = Pattern.compile("\\$GPFID,(\\d+)$");
+    private static final Pattern gpfidPattern = Pattern.compile("\\$GPFID,(\\d+)$");
 
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)

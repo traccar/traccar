@@ -30,7 +30,7 @@ import org.traccar.model.Position;
 
 public class TaipProtocolDecoder extends BaseProtocolDecoder {
     
-    boolean sendResponse;
+    private final boolean sendResponse;
 
     public TaipProtocolDecoder(TaipProtocol protocol, boolean sendResponse) {
         super(protocol);

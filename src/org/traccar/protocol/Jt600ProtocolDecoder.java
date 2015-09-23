@@ -36,7 +36,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private Position decodeNormalMessage(ChannelBuffer buf, Channel channel) throws Exception {
+    private Position decodeNormalMessage(ChannelBuffer buf, Channel channel) {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -140,7 +140,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                  // Alert Type
             ".*\\)");
 
-    private Position decodeAlertMessage(ChannelBuffer buf, Channel channel) throws Exception {
+    private Position decodeAlertMessage(ChannelBuffer buf, Channel channel) {
 
         String message = buf.toString(Charset.defaultCharset());
 

@@ -47,7 +47,7 @@ public class Hashing {
         }
     }
 
-    private static SecureRandom random = new SecureRandom();
+    private static final SecureRandom random = new SecureRandom();
 
     public static HashingResult createHash(String password) {
         byte[] salt = new byte[SALT_SIZE]; random.nextBytes(salt);
