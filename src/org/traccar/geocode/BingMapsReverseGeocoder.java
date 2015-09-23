@@ -17,7 +17,6 @@ package org.traccar.geocode;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import org.traccar.helper.Log;
 
 public class BingMapsReverseGeocoder extends JsonReverseGeocoder {
 
@@ -36,7 +35,6 @@ public class BingMapsReverseGeocoder extends JsonReverseGeocoder {
             JsonObject location = result.getJsonObject(0).getJsonArray("resources").getJsonObject(0).getJsonObject("address");
             if (location != null) {
                 Address address = new Address();
-Log.info(location.toString());            
                 if (location.containsKey("addressLine")) {
                     address.setStreet(location.getString("addressLine"));
                 }    
