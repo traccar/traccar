@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.device.DeviceDialog', {
-    extend: 'Ext.window.Window',
+Ext.define('Traccar.view.DeviceDialog', {
+    extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.device.DeviceDialogController'
+        'Traccar.view.BaseEditDialogController'
     ],
 
-    controller: 'deviceDialog',
-    
-    bodyPadding: styles.panelPadding,
+    controller: 'baseEditDialog',
     title: strings.deviceDialog,
-    resizable: false,
-    modal: true,
-    
+
     items: {
         xtype: 'form',
         items: [{
@@ -41,14 +37,5 @@ Ext.define('Traccar.view.device.DeviceDialog', {
             fieldLabel: strings.deviceIdentifier,
             allowBlank: false
         }]
-    },
-
-    buttons: [{
-        text: strings.sharedSave,
-        handler: 'onSaveClick'
-    }, {
-        text: strings.sharedCancel,
-        handler: 'onCancelClick'
-    }]
-
+    }
 });

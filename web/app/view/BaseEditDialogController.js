@@ -19,9 +19,27 @@ Ext.define('Traccar.view.BaseEditDialogController', {
     alias: 'controller.baseEditDialog',
 
     onSaveClick: function(button) {
-        var dialog = button.up('window').down('form');
+        var dialog, store, record;
+        dialog = button.up('window').down('form');
         dialog.updateRecord();
-        dialog.getRecord().save();
+        record = dialog.getRecord();
+        store = record.store;
+        if (store) {
+            if (record.phantom) {
+                store.add(record);
+            }
+            store.sync({
+                success: function() {
+                    store.reload(); // workaround for selection problem
+                },
+                failure: function(batch) {
+                    store.rejectChanges();
+                    Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+                }
+            });
+        } else {
+            record.save();
+        }
         button.up('window').close();
     }
 });

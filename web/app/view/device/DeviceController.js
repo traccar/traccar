@@ -19,10 +19,8 @@ Ext.define('Traccar.view.device.DeviceController', {
     alias: 'controller.device',
     
     requires: [
-        'Traccar.view.device.DeviceDialog',
         'Traccar.view.CommandDialog',
         'Traccar.view.user.UserDialog',
-        'Traccar.view.ServerDialog',
         'Traccar.view.user.User',
         'Traccar.view.login.LoginController'
     ],
@@ -51,7 +49,8 @@ Ext.define('Traccar.view.device.DeviceController', {
     onAddClick: function() {
         var device, dialog;
         device = Ext.create('Traccar.model.Device');
-        dialog = Ext.create('Traccar.view.device.DeviceDialog');
+        device.store = this.getView().getStore();
+        dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
     },
@@ -59,7 +58,7 @@ Ext.define('Traccar.view.device.DeviceController', {
     onEditClick: function() {
         var device, dialog;
         device = this.getView().getSelectionModel().getSelection()[0];
-        dialog = Ext.create('Traccar.view.device.DeviceDialog');
+        dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
     },
@@ -135,5 +134,4 @@ Ext.define('Traccar.view.device.DeviceController', {
             this.getView().getSelectionModel().deselectAll();
         }
     }
-
 });
