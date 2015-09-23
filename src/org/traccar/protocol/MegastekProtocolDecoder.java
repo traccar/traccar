@@ -275,6 +275,20 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.\\d+)," +             // Course
             "(\\d+\\.\\d+)," +             // Altitude
             "(\\d+\\.\\d+)," +             // Odometer
+            "(\\d+)," +                    // MCC
+            "(\\d+)," +                    // MNC
+            "(\\p{XDigit}{4},\\p{XDigit}{4})," + // Cell
+            "(\\d+)?," +                   // GSM
+            "([01]+)," +                   // Input
+            "([01]+)," +                   // Output
+            "(\\d+)," +                    // ADC1
+            "(\\d+)," +                    // ADC2
+            "(\\d+)," +                    // ADC3
+            "(?:(-?\\d+\\.?\\d*)| )," +    // Temperature 1
+            "(?:(-?\\d+\\.?\\d*)| )," +    // Temperature 2
+            "(\\d+)?,," +                  // RFID
+            "(\\d+)?," +                   // Battery
+            "([^,]*);" +                   // Alert
             ".*");
 
     private Position decodeNew(Channel channel, String sentence) {
@@ -297,7 +311,6 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_ARCHIVE, true);
         }
 
-        // Date and Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
@@ -308,7 +321,6 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
 
-        // Validity
         position.setValid(parser.group(index++).equals("A"));
 
         // Latitude
@@ -331,6 +343,37 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(Double.parseDouble(parser.group(index++)));
 
         position.set(Event.KEY_ODOMETER, Double.parseDouble(parser.group(index++)));
+        position.set(Event.KEY_MCC, Integer.parseInt(parser.group(index++)));
+        position.set(Event.KEY_MNC, Integer.parseInt(parser.group(index++)));
+        position.set(Event.KEY_CELL, parser.group(index++));
+
+        String gsm = parser.group(index++);
+        if (gsm != null) {
+            position.set(Event.KEY_GSM, Integer.parseInt(gsm));
+        }
+
+        position.set(Event.KEY_INPUT, Integer.parseInt(parser.group(index++), 2));
+        position.set(Event.KEY_OUTPUT, Integer.parseInt(parser.group(index++), 2));
+
+        for (int i = 1; i <= 3; i++) {
+            position.set(Event.PREFIX_ADC + i, Integer.parseInt(parser.group(index++)));
+        }
+
+        for (int i = 1; i <= 2; i++) {
+            String adc = parser.group(index++);
+            if (adc != null) {
+                position.set(Event.PREFIX_TEMP + i, Double.parseDouble(adc));
+            }
+        }
+
+        position.set(Event.KEY_RFID, parser.group(index++));
+
+        String battery = parser.group(index++);
+        if (battery != null) {
+            position.set(Event.KEY_BATTERY, Integer.parseInt(battery));
+        }
+
+        position.set(Event.KEY_ALARM, parser.group(index++));
 
         return position;
     }
