@@ -1,8 +1,5 @@
 package org.traccar.geocode;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-
 public class ReverseGeocoderTest {
 
     /*@Test

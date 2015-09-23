@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Position;
@@ -34,7 +33,7 @@ public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     static private Pattern pattern = Pattern.compile(
-            "\\%(\\d+)," +                 // IMEI
+            "%(\\d+)," +                   // IMEI
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity

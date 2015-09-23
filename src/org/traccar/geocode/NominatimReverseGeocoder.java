@@ -15,17 +15,7 @@
  */
 package org.traccar.geocode;
 
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.traccar.helper.Log;
-import org.w3c.dom.Document;
 
 public class NominatimReverseGeocoder extends JsonReverseGeocoder {
 

@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.Context;
 import org.traccar.helper.Crc;
 import org.traccar.model.Command;
 

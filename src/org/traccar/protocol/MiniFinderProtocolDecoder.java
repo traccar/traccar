@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
@@ -35,7 +34,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern pattern = Pattern.compile(
-            "\\!D," +
+            "!D," +
             "(\\d+)/(\\d+)/(\\d+)," +      // Date
             "(\\d+):(\\d+):(\\d+)," +      // Time
             "(-?\\d+\\.\\d+)," +           // Latitude

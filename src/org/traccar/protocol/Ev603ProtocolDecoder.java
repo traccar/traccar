@@ -23,12 +23,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Position;
 
-public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
+public class Ev603ProtocolDecoder extends BaseProtocolDecoder {
 
     public Ev603ProtocolDecoder(Ev603Protocol protocol) {
         super(protocol);
@@ -36,7 +34,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder{
 
     private static final Pattern pattern = Pattern.compile(
             "!.," +                           // Type
-            "(\\d{2})\\/(\\d{2})\\/(\\d{2})," + // Date dd/mm/YY
+            "(\\d{2})/(\\d{2})/(\\d{2})," +   // Date dd/mm/YY
             "(\\d{2}):(\\d{2}):(\\d{2})," +   // Time hh:mm:ss
             "(-?\\d+\\.\\d+)," +              // Latitude
             "(-?\\d+\\.\\d+)," +              // Longitude

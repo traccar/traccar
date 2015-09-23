@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-import org.traccar.helper.TestIdentityManager;
 import java.nio.ByteOrder;
 import org.jboss.netty.buffer.ChannelBuffers;
 import static org.junit.Assert.assertNull;

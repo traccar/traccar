@@ -2,7 +2,6 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
 public class GpsmtaProtocolDecoderTest extends ProtocolDecoderTest {

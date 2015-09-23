@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import static org.traccar.helper.DecoderVerifier.verify;
-import org.traccar.helper.TestIdentityManager;
 
 public class Gt02ProtocolDecoderTest extends ProtocolDecoderTest {
 

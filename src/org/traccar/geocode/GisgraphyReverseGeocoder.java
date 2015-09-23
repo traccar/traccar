@@ -15,13 +15,7 @@
  */
 package org.traccar.geocode;
 
-import org.traccar.helper.Log;
-
-import javax.json.Json;
 import javax.json.JsonObject;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 
 public class GisgraphyReverseGeocoder extends JsonReverseGeocoder {
 
