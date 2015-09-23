@@ -117,12 +117,6 @@ public class Context {
             
             int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
-                case "bingmaps":
-                    reverseGeocoder = new BingMapsReverseGeocoder(url, key, cacheSize);
-                    break;
-                case "factual":
-                    reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
-                    break;
                 case "google":
                     reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
                     break;
@@ -137,6 +131,12 @@ public class Context {
                     break;
                 case "opencage":
                     reverseGeocoder = new OpenCageReverseGeocoder(url, key, cacheSize);
+                    break;
+                case "bingmaps":
+                    reverseGeocoder = new BingMapsReverseGeocoder(url, key, cacheSize);
+                    break;
+                case "factual":
+                    reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
                     break;
             }
         }

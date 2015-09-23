@@ -15,9 +15,7 @@
  */
 package org.traccar.geocode;
 
-import javax.json.JsonArray;
 import javax.json.JsonObject;
-import org.traccar.helper.Log;
 
 public class FactualReverseGeocoder extends JsonReverseGeocoder {
 
@@ -32,7 +30,6 @@ public class FactualReverseGeocoder extends JsonReverseGeocoder {
     @Override
     protected Address parseAddress(JsonObject json) {
         JsonObject result = json.getJsonObject("response").getJsonObject("data");
-	JsonObject dummy;
         if (result != null) {
                 Address address = new Address();
                 if (result.getJsonObject("street_number") != null) { 
@@ -60,4 +57,5 @@ public class FactualReverseGeocoder extends JsonReverseGeocoder {
         }
         return null;
     }
+
 }
