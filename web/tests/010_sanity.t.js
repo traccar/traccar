@@ -1,13 +1,14 @@
-// also supports: startTest(function(t) {
 StartTest(function(t) {
     t.diag("Sanity");
 
-    t.ok(Ext, 'ExtJS is here');
-    t.ok(Ext.Window, '.. indeed');
+    t.ok(Ext, 'Ext is defined');
+    t.ok(Ext.Window, 'Ext.Window is defined');
 
+    t.ok(Traccar, 'Traccar is defined');
+    t.ok(Traccar.Application, 'Traccar.Application is defined');
 
-    t.ok(Your.Project, 'My project is here');
-    t.ok(Your.Project.Util, '.. indeed');
+    t.ok(strings, 'strings are defined');
+    t.ok(styles, 'styles are defined');
 
-    t.done();   // Optional, marks the correct exit point from the test
-})
+    t.done();
+});

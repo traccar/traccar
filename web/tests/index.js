@@ -1,14 +1,14 @@
 var Harness = Siesta.Harness.Browser.ExtJS;
 
 Harness.configure({
-    title       : 'Awesome Test Suite',
-
-    preload     : [
+    title: 'Traccar Test Suite',
+    preload: [
         '//cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/ext-all.js',
-        '../app.min.js'
+        'locale.js',
+        'app.js'
     ]
 });
 
 Harness.start(
-    '010_sanity.t.js'
+    'tests/010_sanity.t.js'
 );
