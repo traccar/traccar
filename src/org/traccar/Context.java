@@ -20,6 +20,7 @@ import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
+import org.traccar.geocode.BingMapsReverseGeocoder;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.MapQuestReverseGeocoder;
@@ -115,6 +116,9 @@ public class Context {
             
             int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
+                case "bingmaps":
+                    reverseGeocoder = new BingMapsReverseGeocoder(url, key, cacheSize);
+                    break;
                 case "google":
                     reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
                     break;
