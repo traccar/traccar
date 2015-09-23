@@ -15,62 +15,51 @@
  */
 package org.traccar.geocode;
 
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.traccar.helper.Log;
-import org.w3c.dom.Document;
 
 public class OpenCageReverseGeocoder extends JsonReverseGeocoder {
+
     public OpenCageReverseGeocoder() {
         this("https://api.opencagedata.com/geocode/v1", "ABCDE", 0);
     }
+
     public OpenCageReverseGeocoder(String url, String key, int cacheSize) {
-        super(url +  "/json?q=%f,%f&key=" + key, cacheSize);
+        super(url + "/json?q=%f,%f&key=" + key, cacheSize);
     }
 
     @Override
     protected Address parseAddress(JsonObject json) {
-	JsonArray result = json.getJsonArray("results");
+        JsonArray result = json.getJsonArray("results");
         if (result != null) {
-	    JsonObject result1 = result.getJsonObject(0);
-	    JsonObject location = result1.getJsonObject("components");
-	    if (location != null) {
-        	Address address = new Address();
+            JsonObject location = result.getJsonObject(0).getJsonObject("components");
+            if (location != null) {
+                Address address = new Address();
+
                 if (location.containsKey("house_number")) {
                     address.setHouse(location.getString("house_number"));
                 }            
-
-		if (location.containsKey("road")) {
+                if (location.containsKey("road")) {
                     address.setStreet(location.getString("road"));
-            	}	
-
+                }    
                 if (location.containsKey("city_district")) {
                     address.setSettlement(location.getString("city_district"));
-            	}	
-
-            	if (location.containsKey("county")) {
+                }    
+                if (location.containsKey("county")) {
                     address.setDistrict(location.getString("county"));
-            	}
-
-            	if (location.containsKey("state")) {
+                }
+                if (location.containsKey("state")) {
                     address.setState(location.getString("state"));
-            	}
-
-            	if (location.containsKey("country_code")) {
+                }
+                if (location.containsKey("country_code")) {
                     address.setCountry(location.getString("country_code").toUpperCase());
-            	}
-
-            	if (location.containsKey("postcode")) {
+                }
+                if (location.containsKey("postcode")) {
                     address.setPostcode(location.getString("postcode"));
-            	} return address;
-	    }
+                }
+                
+                return address;
+            }
         }
         return null;
     }
