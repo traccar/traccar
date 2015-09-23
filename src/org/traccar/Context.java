@@ -21,6 +21,7 @@ import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.geocode.BingMapsReverseGeocoder;
+import org.traccar.geocode.FactualReverseGeocoder;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.MapQuestReverseGeocoder;
@@ -118,6 +119,9 @@ public class Context {
             switch (type) {
                 case "bingmaps":
                     reverseGeocoder = new BingMapsReverseGeocoder(url, key, cacheSize);
+                    break;
+                case "factual":
+                    reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
                     break;
                 case "google":
                     reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
