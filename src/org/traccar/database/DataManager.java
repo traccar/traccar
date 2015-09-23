@@ -227,7 +227,7 @@ public class DataManager implements IdentityManager {
                 
                 updateLatestPosition(position);
 
-            } catch (SQLException | ParseException error) {
+            } catch (SQLException error) {
                 Log.warning(error);
             }
         }
