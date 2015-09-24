@@ -15,17 +15,17 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.channel.Channel;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.PatternUtil;
+import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
@@ -45,16 +45,17 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             "([AV])," +                         // Validity
             "(\\d+)," +                         // GSM
             "(\\d+)," +                         // Speed
+            "(\\d+)," +                         // Distance
             "\\d+," +                           // Driver code
             "(\\d+)," +                         // Fuel
-            "(\\d+)," +                         // IO 1
+            "([01])," +                         // IO 1
             "[01]," +                           // Case open switch
             "[01]," +                           // Over speed start
             "[01]," +                           // Over speed end
-            "0,0,0," +                          // Reserved
+            "(?:\\d+,){3}" +                    // Reserved
             "([01])," +                         // Power status
             "([01])," +                         // IO 2
-            "0," +                              // Reserved
+            "\\d+," +                           // Reserved
             "([01])," +                         // Ignition
             "[01]," +                           // Ignition off event
             ".*");
@@ -65,6 +66,8 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
+        
+        String r = PatternUtil.checkPattern(pattern.pattern(), sentence);
 
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
@@ -103,6 +106,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
 
+        position.set(Event.KEY_ODOMETER, parser.group(index++));
         position.set(Event.KEY_FUEL, parser.group(index++));
         position.set(Event.PREFIX_IO + 1, parser.group(index++));
         position.set(Event.KEY_CHARGE, parser.group(index++));
