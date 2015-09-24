@@ -21,6 +21,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -92,6 +93,13 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                     position.setCourse(buf.readUnsignedShort());
                     position.set(Event.KEY_HDOP, buf.readUnsignedShort());
+                    break;
+
+                case DATA_STATUS:
+                    int status = buf.readUnsignedShort();
+                    position.set(Event.KEY_IGNITION, BitUtil.check(status, 6));
+
+                    buf.readUnsignedShort(); // alarm
                     break;
 
                 default:
