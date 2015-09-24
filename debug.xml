@@ -336,5 +336,6 @@
     <entry key='castel.port'>5086</entry>
     <entry key='mxt.port'>5087</entry>
     <entry key='cityeasy.port'>5088</entry>
+    <entry key='aquila.port'>5089</entry>
 
 </properties>
