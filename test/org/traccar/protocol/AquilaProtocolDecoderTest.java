@@ -1,7 +1,6 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-
 import static org.traccar.helper.DecoderVerifier.verify;
 
 public class AquilaProtocolDecoderTest extends ProtocolDecoderTest {
@@ -10,6 +9,9 @@ public class AquilaProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         AquilaProtocolDecoder decoder = new AquilaProtocolDecoder(new AquilaProtocol());
+        
+        verify(decoder.decode(null, null,
+                "$$SRINI_1MS,141214807,1,12.963515,77.533844,150925161628,A,27,0,8,0,68,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,*43"));
 
         verify(decoder.decode(null, null,
                 "$$CLIENT_1ZF,130329214,1,12.962985,77.576484,140127165433,A,22,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,*26"));

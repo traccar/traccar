@@ -22,7 +22,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -35,7 +34,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern pattern = Pattern.compile(
             "\\$\\$" +
-            "CLIENT_[^,]+," +                   // IMEI
+            "[^,]+," +                          // Client
             "(\\d+)," +                         // Device serial number
             "(\\d+)," +                         // Event
             "(-?\\d+\\.\\d+)," +                // Latitude
@@ -66,8 +65,6 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
-        String r = PatternUtil.checkPattern(pattern.pattern(), sentence);
 
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
