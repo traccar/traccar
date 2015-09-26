@@ -110,11 +110,11 @@ public class AsyncServlet extends BaseServlet {
             public void run(Timeout tmt) throws Exception {
                 synchronized (AsyncSession.this) {
                     logEvent("sessionTimeout");
-                    Context.getConnectionManager().removeListener(devices, dataListener);
-                    synchronized (asyncSessions) {
-                        asyncSessions.remove(userId);
-                    }
                     destroyed = true;
+                }
+                Context.getConnectionManager().removeListener(devices, dataListener);
+                synchronized (asyncSessions) {
+                    asyncSessions.remove(userId);
                 }
             }
         };
@@ -180,14 +180,18 @@ public class AsyncServlet extends BaseServlet {
     private static final Map<Long, AsyncSession> asyncSessions = new HashMap<>();
     
     public static void sessionRefreshUser(long userId) {
-        asyncSessions.remove(userId);
+        synchronized (asyncSessions) {
+            asyncSessions.remove(userId);
+        }
     }
     
     public static void sessionRefreshDevice(long deviceId) {
-        Iterator<Entry<Long, AsyncSession>> iterator = asyncSessions.entrySet().iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().getValue().hasDevice(deviceId)) {
-                iterator.remove();
+        synchronized (asyncSessions) {
+            Iterator<Entry<Long, AsyncSession>> iterator = asyncSessions.entrySet().iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().getValue().hasDevice(deviceId)) {
+                    iterator.remove();
+                }
             }
         }
     }
