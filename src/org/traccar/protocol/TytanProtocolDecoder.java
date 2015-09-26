@@ -115,7 +115,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
                 switch (type) {
                     case 2:
-                        position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
+                        position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium() * 5);
                         break;
                     case 5:
                         position.set(Event.KEY_INPUT, buf.readUnsignedByte());
@@ -131,7 +131,13 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         }
                         break;
                     case 7:
-                        position.set(Event.KEY_ALARM, buf.readUnsignedShort());
+                        {
+                            int alarm = buf.readUnsignedByte();
+                            buf.readUnsignedByte();
+                            if (BitUtil.check(alarm, 5)) {
+                                position.set(Event.KEY_ALARM, BitUtil.range(alarm, 0, 4));
+                            }
+                        }
                         break;
                     case 8:
                         position.set("antihijack", buf.readUnsignedByte());
@@ -165,7 +171,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Event.KEY_POWER, readSwappedFloat(buf));
                         break;
                     case 107:
-                        position.set(Event.KEY_FUEL, buf.readUnsignedShort() & 0x3fff);
+                        position.set(Event.KEY_FUEL, (buf.readUnsignedShort() & 0x3fff) * 0.5);
                         break;
                     case 150:
                         position.set("door", buf.readUnsignedByte());
