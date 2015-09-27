@@ -20,6 +20,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
@@ -124,7 +125,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             }
             
             if (BitUtil.check(infoGroups, 4)) {
-                buf.readUnsignedInt(); // hours
+                position.set("hours", buf.readUnsignedInt());
             }
             
             if (BitUtil.check(infoGroups, 5)) {
