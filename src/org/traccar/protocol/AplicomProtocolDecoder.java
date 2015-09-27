@@ -273,7 +273,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 ChannelBuffer value = values.get(i);
                 switch (buf.readInt()) {
                     case 0x20D:
-                        position.set("diesel-rpm", ChannelBuffers.swapShort(value.readShort()));
+                        position.set(Event.KEY_RPM, ChannelBuffers.swapShort(value.readShort()));
                         position.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                         position.set("battery-voltage", ChannelBuffers.swapShort(value.readShort()) * 0.01);
                         position.set("supply-air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);

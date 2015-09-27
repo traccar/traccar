@@ -120,8 +120,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // OBD
-        position.set("engine-rpm", parser.group(index++));
-        position.set("obd-speed", parser.group(index++));
+        position.set(Event.KEY_RPM, parser.group(index++));
+        position.set(Event.KEY_SPEED, parser.group(index++));
         position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
         position.set("fuel-consumption", parser.group(index++));
         position.set("dtcs-cleared-distance", parser.group(index++));
