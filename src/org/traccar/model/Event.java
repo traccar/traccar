@@ -81,7 +81,9 @@ public abstract class Event {
     public static final String KEY_DISTANCE = "distance";
     public static final String KEY_DOOR = "door";
     public static final String KEY_RPM = "rpm";
-    public static final String KEY_SPEED = "speed"; // OBD speed
+
+    public static final String KEY_OBD_SPEED = "speed";
+    public static final String KEY_OBD_ODOMETER = "odometer";
 
     // Starts with 1 not 0
     public static final String PREFIX_TEMP = "temp";

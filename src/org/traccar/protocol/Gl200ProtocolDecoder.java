@@ -121,7 +121,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // OBD
         position.set(Event.KEY_RPM, parser.group(index++));
-        position.set(Event.KEY_SPEED, parser.group(index++));
+        position.set(Event.KEY_OBD_SPEED, parser.group(index++));
         position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
         position.set("fuel-consumption", parser.group(index++));
         position.set("dtcs-cleared-distance", parser.group(index++));
@@ -130,7 +130,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set("dtcs-codes", parser.group(index++));
         position.set("throttle-position", parser.group(index++));
         position.set(Event.KEY_FUEL, parser.group(index++));
-        position.set("odb-odometer", parser.group(index++));
+        position.set(Event.KEY_OBD_ODOMETER, parser.group(index++));
 
         // Validity
         position.setValid(Integer.valueOf(parser.group(index++)) < 20);
