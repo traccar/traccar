@@ -124,5 +124,6 @@
     <entry key='tytan.port'>5084</entry>
     <entry key='avl301.port'>5085</entry>
     <entry key='castel.port'>5086</entry>
+    <entry key='blackkite.port'>5091</entry>
 
 </properties>

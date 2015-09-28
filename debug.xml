@@ -338,5 +338,6 @@
     <entry key='cityeasy.port'>5088</entry>
     <entry key='aquila.port'>5089</entry>
     <entry key='flextrack.port'>5090</entry>
+    <entry key='blackkite.port'>5091</entry>
 
 </properties>
