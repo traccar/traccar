@@ -317,6 +317,5 @@
     <entry key='castel.port'>5086</entry>
     <entry key='mxt.port'>5087</entry>
     <entry key='cityeasy.port'>5088</entry>
-    <entry key='blackkite.port'>5091</entry>
 
 </properties>

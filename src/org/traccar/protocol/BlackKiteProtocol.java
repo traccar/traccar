@@ -1,7 +1,5 @@
 /*
  * Copyright 2015 Vijay Kumar (vijaykumar@zilogic.com)
- *
- * Based on GalileoProtocol.java
  * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

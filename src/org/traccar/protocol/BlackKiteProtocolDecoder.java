@@ -1,7 +1,5 @@
 /*
  * Copyright 2015 Vijay Kumar (vijaykumar@zilogic.com)
- *
- * Based on GalileoProtocolDecoder.java
  * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +20,9 @@ import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -36,14 +32,6 @@ import org.traccar.helper.Log;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-
-
-class DecodeError extends Exception {
-    public DecodeError(String message) {
-	super(message);
-    }
-}
-
 
 public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
 
@@ -66,34 +54,6 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_XT1 = 0x60;
     private static final int TAG_XT2 = 0x61;
     private static final int TAG_XT3 = 0x62;
-    
-    private static final Map<Integer, Integer> tagLengthMap = new HashMap<>();
-    
-    static {
-        tagLengthMap.put(TAG_IMEI, 15);
-	tagLengthMap.put(TAG_DATE, 4);
-        tagLengthMap.put(TAG_COORDINATES, 9);
-	tagLengthMap.put(TAG_SPEED_COURSE, 4);
-	tagLengthMap.put(TAG_ALTITUDE, 2);
-	tagLengthMap.put(TAG_STATUS, 2);
-	tagLengthMap.put(TAG_DIGITAL_INPUTS, 2);
-	tagLengthMap.put(TAG_DIGITAL_OUTPUTS, 2);
-	tagLengthMap.put(TAG_INPUT_VOLTAGE1, 2);
-	tagLengthMap.put(TAG_INPUT_VOLTAGE2, 2);
-	tagLengthMap.put(TAG_INPUT_VOLTAGE3, 2);
-	tagLengthMap.put(TAG_INPUT_VOLTAGE4, 2);
-	tagLengthMap.put(TAG_XT1, 16);
-	tagLengthMap.put(TAG_XT2, 16);
-	tagLengthMap.put(TAG_XT3, 16);
-    }
-
-    private static int getTagLength(int tag) throws DecodeError {
-	Integer length = tagLengthMap.get(tag);
-	if (length == null)
-	    throw new DecodeError(String.format("invalid tag '%d'", tag));
-
-	return length;
-    }
 
     private void sendReply(Channel channel, int checksum) {
         ChannelBuffer reply = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 3);
@@ -114,8 +74,8 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // header
         int length = (buf.readUnsignedShort() & 0x7fff) + 3;
         
-        List<Position> positions = new LinkedList<Position>();
-        Set<Integer> tags = new HashSet<Integer>();
+        List<Position> positions = new LinkedList<>();
+        Set<Integer> tags = new HashSet<>();
         boolean hasLocation = false;
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -164,50 +124,51 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                                        
                 case TAG_STATUS:
                     int status = buf.readUnsignedShort();
-		    position.set(Event.KEY_IGNITION, BitUtil.check(status, 9));
-		    position.set(Event.KEY_ALARM, BitUtil.check(status, 15));
-                    position.set(Event.KEY_VBATT, BitUtil.check(status, 2));
+                    position.set(Event.KEY_IGNITION, BitUtil.check(status, 9));
+                    position.set(Event.KEY_ALARM, BitUtil.check(status, 15));
+                    position.set(Event.KEY_POWER, BitUtil.check(status, 2));
                     break;
                     
                 case TAG_DIGITAL_INPUTS:
-		    int input = buf.readUnsignedShort();
-		    for (int i = 0; i < 16; i++)
-			position.set(Event.PREFIX_IO + (i + 1), BitUtil.check(input, i));
+                    int input = buf.readUnsignedShort();
+                    for (int i = 0; i < 16; i++)
+                        position.set(Event.PREFIX_IO + (i + 1), BitUtil.check(input, i));
                     break;
 
                 case TAG_DIGITAL_OUTPUTS:
-		    int output = buf.readUnsignedShort();
-		    for (int i = 0; i < 16; i++)
-			position.set(Event.PREFIX_IO + (i + 17), BitUtil.check(output, i));
+                    int output = buf.readUnsignedShort();
+                    for (int i = 0; i < 16; i++)
+                        position.set(Event.PREFIX_IO + (i + 17), BitUtil.check(output, i));
                     break;
                                         
                 case TAG_INPUT_VOLTAGE1:
-		    position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() / 1000.0);
+                    position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() / 1000.0);
                     break;
                     
                 case TAG_INPUT_VOLTAGE2:
-		    position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort() / 1000.0);
+                    position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort() / 1000.0);
                     break;
                                         
                 case TAG_INPUT_VOLTAGE3:
-		    position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort() / 1000.0);
+                    position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort() / 1000.0);
                     break;
 
                 case TAG_INPUT_VOLTAGE4:
-		    position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort() / 1000.0);
+                    position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort() / 1000.0);
                     break;
-                   
+
+                case TAG_XT1:
+                case TAG_XT2:
+                case TAG_XT3:
+                    buf.skipBytes(16);
+                    break;
+
                 default:
-		    try {
-			buf.skipBytes(getTagLength(tag));
-		    } catch (DecodeError e) {
-			Log.warning("Error decoding packet: " + e.getMessage());
-			return null;
-		    }
                     break;
                     
             }
         }
+
         if (hasLocation && position.getFixTime() != null) {
             positions.add(position);
         }
@@ -226,6 +187,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
         if (positions.isEmpty()) {
             return null;
         }
+
         return positions;
     }
 
