@@ -57,7 +57,14 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             "\\d+," +                           // Reserved
             "([01])," +                         // Ignition
             "[01]," +                           // Ignition off event
-            ".*");
+            "(?:\\d+,){7}" +                    // Reserved
+            "[01]," +                           // Corner packet
+            "(?:\\d+,){8}" +                    // Reserved
+            "([01])," +                         // Course bit 0
+            "([01])," +                         // Course bit 1
+            "([01])," +                         // Course bit 2
+            "([01])," +                         // Course bit 3
+            "\\*(\\p{XDigit}{2})");             // Checksum
 
     @Override
     protected Object decode(
@@ -110,6 +117,16 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.PREFIX_IO + 2, parser.group(index++));
 
         position.set(Event.KEY_IGNITION, parser.group(index++).equals("1"));
+
+        int course =
+                (Integer.parseInt(parser.group(index++)) << 3) +
+                (Integer.parseInt(parser.group(index++)) << 2) +
+                (Integer.parseInt(parser.group(index++)) << 1) +
+                (Integer.parseInt(parser.group(index++)));
+
+        if (course > 0) {
+            position.setCourse((course - 1) * 45);
+        }
 
         return position;
     }
