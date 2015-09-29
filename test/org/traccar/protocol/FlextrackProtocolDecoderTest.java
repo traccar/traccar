@@ -15,6 +15,9 @@ public class FlextrackProtocolDecoderTest extends ProtocolDecoderTest {
         assertNull(decoder.decode(null, null,
                 "-1,LOGON,7000000123,8945000000"));
 
+        assertNull(decoder.decode(null, null,
+                "-1,LOGON,1080424008,8945020110126633198"));
+
         verify(decoder.decode(null, null,
                 "-2,UNITSTAT,20050205,181923,7000004634,N55.46.0812,E009.21.1665,122,198,6,3934,-81,01A8,23802,213,55,37FD,45,0055,12878"));
 

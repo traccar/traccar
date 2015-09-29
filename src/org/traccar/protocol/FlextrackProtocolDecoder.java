@@ -77,12 +77,10 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        String x = PatternUtil.checkPattern(pattern.pattern(), sentence);
-
         if (sentence.contains("LOGON")) {
 
             Matcher parser = patternLogon.matcher(sentence);
-            if (parser.matches()) {
+            if (!parser.matches()) {
                 return null;
             }
 
