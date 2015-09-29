@@ -11,6 +11,9 @@ public class XirgoProtocolDecoderTest extends ProtocolDecoderTest {
         XirgoProtocolDecoder decoder = new XirgoProtocolDecoder(new XirgoProtocol());
 
         verify(decoder.decode(null, null,
+                "$$354660046140722,6001,2013/01/22,15:36:18,25.80907,-80.32531,7.1,19,165.2,11,0.8,11.1,17,1,1,3.9,2##"));
+
+        verify(decoder.decode(null, null,
                 "$$357207059646786,4003,2015/05/19,15:54:56,-20.21422,-70.14927,37.5,1.8,0.0,11,0.8,12.9,31,297,1,0,0.0,0.0,0,1,1,1##"));
 
         verify(decoder.decode(null, null,
