@@ -12,6 +12,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
         verify(decoder.decode(null, null,
+                "(088047365460BP05354188047365460150929A3258.1754S02755.4323E009.4193927301.9000000000L00000000)"));
+
+        verify(decoder.decode(null, null,
                 "(088048003342BP05354188048003342150917A1352.9801N10030.9050E000.0103115265.5600010000L000003F9)"));
 
         verify(decoder.decode(null, null,
