@@ -124,7 +124,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
                 (Integer.parseInt(parser.group(index++)) << 1) +
                 (Integer.parseInt(parser.group(index++)));
 
-        if (course > 0) {
+        if (course > 0 && course <= 8) {
             position.setCourse((course - 1) * 45);
         }
 
