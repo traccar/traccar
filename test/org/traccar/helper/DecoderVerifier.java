@@ -13,7 +13,7 @@ public class DecoderVerifier {
         
         assertNotNull(position.getFixTime());
         assertTrue(position.getFixTime().after(new Date(946684800000L))); // 2000 year
-        assertTrue(position.getFixTime().getTime() < new Date().getTime() + 3600000); // 1 hour from now
+        assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 3600000); // 1 hour from now
 
         assertNotNull(position.getValid());
         

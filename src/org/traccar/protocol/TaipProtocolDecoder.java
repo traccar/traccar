@@ -75,7 +75,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         
         long millis = time.getTimeInMillis() + seconds * 1000;
         
-        long diff = new Date().getTime() - millis;
+        long diff = System.currentTimeMillis() - millis;
         
         if (diff > 12 * 60 * 60 * 1000) {
             millis += 24 * 60 * 60 * 1000;

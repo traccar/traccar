@@ -70,7 +70,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         header.writeShort(0);
         header.writeShort(Crc.crc16X25Ccitt(data.toByteBuffer()));
         header.writeInt(0);
-        header.writeInt((int) (new Date().getTime() / 1000) + LEAP_SECONDS_DELTA);
+        header.writeInt((int) (System.currentTimeMillis() / 1000) + LEAP_SECONDS_DELTA);
         
         if (channel != null) {
             channel.write(ChannelBuffers.copiedBuffer(header, data));

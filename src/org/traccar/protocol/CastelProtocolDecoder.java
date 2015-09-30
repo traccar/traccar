@@ -123,7 +123,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     response.writeShort(ChannelBuffers.swapShort(MSG_LOGIN_RESPONSE));
                     response.writeInt(0xFFFFFFFF);
                     response.writeShort(0);
-                    response.writeInt((int) (new Date().getTime() / 1000));
+                    response.writeInt((int) (System.currentTimeMillis() / 1000));
                     response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(0, response.writerIndex())));
                     response.writeByte(0x0D); response.writeByte(0x0A);
                     channel.write(response, remoteAddress);
