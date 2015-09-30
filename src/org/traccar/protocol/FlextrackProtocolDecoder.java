@@ -61,7 +61,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // HDOP
             "(\\p{XDigit}+)," +            // Cell
             "\\d+," +                      // GPS fix time
-            "(\\d+)," +                    // LAC
+            "(\\p{XDigit}+)," +            // LAC
             "(\\d+)");                     // Odometer
 
     private void sendAcknowledgement(Channel channel, String index) {
@@ -97,7 +97,9 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-        } else if (sentence.contains("UNITSTAT")) {
+        } else if (sentence.contains("UNITSTAT") && hasDeviceId()) {
+
+            String x = PatternUtil.checkPattern(pattern.pattern(), sentence);
 
             Matcher parser = pattern.matcher(sentence);
             if (!parser.matches()) {
@@ -106,6 +108,8 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+
             int index = 1;
 
             sendAcknowledgement(channel, parser.group(index++));
