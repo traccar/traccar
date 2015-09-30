@@ -62,6 +62,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
@@ -191,9 +192,11 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Event.KEY_STATUS, buf.readUnsignedByte());
             }
 
-            // Event code and status
+            // Event code
             if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
-                buf.readUnsignedByte();
+                if (type != MSG_MINI_EVENT_REPORT) {
+                    buf.readUnsignedByte(); // event index
+                }
                 position.set(Event.KEY_EVENT, buf.readUnsignedByte());
             }
 
@@ -202,7 +205,9 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             int accType = accCount >> 6;
             accCount &= 0x3f;
             
-            buf.readUnsignedByte(); // reserved
+            if (type != MSG_MINI_EVENT_REPORT) {
+                buf.readUnsignedByte(); // reserved
+            }
 
             if (accType == 1) {
                 buf.readUnsignedInt(); // threshold

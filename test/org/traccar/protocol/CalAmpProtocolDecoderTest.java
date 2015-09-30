@@ -12,6 +12,9 @@ public class CalAmpProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         CalAmpProtocolDecoder decoder = new CalAmpProtocolDecoder(new CalAmpProtocol());
+        
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "830543321494860101010a0080560b5a5e0eadd0291becf3c500f005090f1f3305000003010040c0a600000000000000008b12a102"))));
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "830543321494860101010a0c215608b6680ead5ada1bed88d300000049801f000500000300003cf33200000000000000008b0ce101"))));
