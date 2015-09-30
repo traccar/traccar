@@ -18,7 +18,7 @@ public class Gt06ProtocolEncoderTest {
         command.setType(Command.TYPE_ENGINE_STOP);
 
         Assert.assertEquals(encoder.encodeCommand(command), ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-                "78780e800800000000445944230001d09e0d0a")));
+                "787812800c0000000052454c41592c312300001c300d0a")));
 
     }
 
