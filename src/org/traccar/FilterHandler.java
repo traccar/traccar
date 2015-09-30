@@ -19,18 +19,24 @@ import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.util.Date;
+
 public class FilterHandler extends BaseDataHandler {
+
+    private static final long FILTER_FUTURE_LIMIT = 5 * 60 * 1000;
 
     private final boolean filterInvalid;
     private final boolean filterZero;
     private final boolean filterDuplicate;
+    private final boolean filterFuture;
     private final int filterDistance;
     private final long filterLimit;
-    
+
     public FilterHandler(
             boolean filterInvalid,
             boolean filterZero,
             boolean filterDuplicate,
+            boolean filterFuture,
             int filterDistance,
             long filterLimit) {
 
@@ -38,6 +44,7 @@ public class FilterHandler extends BaseDataHandler {
         this.filterZero = filterZero;
         this.filterDuplicate = filterDuplicate;
         this.filterDistance = filterDistance;
+        this.filterFuture = filterFuture;
         this.filterLimit = filterLimit;
     }
     
@@ -47,6 +54,7 @@ public class FilterHandler extends BaseDataHandler {
         filterInvalid = config.getBoolean("filter.invalid");
         filterZero = config.getBoolean("filter.zero");
         filterDuplicate = config.getBoolean("filter.duplicate");
+        filterFuture = config.getBoolean("filter.future");
         filterDistance = config.getInteger("filter.distance");
         filterLimit = config.getLong("filter.limit") * 1000;
     }
@@ -79,6 +87,10 @@ public class FilterHandler extends BaseDataHandler {
         } else {
             return false;
         }
+    }
+
+    private boolean filterFuture(Position position) {
+        return filterFuture && (position.getFixTime().getTime() > System.currentTimeMillis() + FILTER_FUTURE_LIMIT);
     }
     
     private boolean filterDistance(Position position) {
@@ -116,6 +128,7 @@ public class FilterHandler extends BaseDataHandler {
                 filterInvalid(p) ||
                 filterZero(p) ||
                 filterDuplicate(p) ||
+                filterFuture(p) ||
                 filterDistance(p);
         
         if (filterLimit(p)) {

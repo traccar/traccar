@@ -15,8 +15,8 @@ public class FilterHandlerTest {
 
     @Before
     public void setUp() {
-        filtingHandler = new FilterHandler(true, true, true, 10, 10);
-        passingHandler = new FilterHandler(false, false, false, 0, 0);
+        filtingHandler = new FilterHandler(true, true, true, true, 10, 10);
+        passingHandler = new FilterHandler(false, false, false, false, 0, 0);
     }
 
     @After
@@ -53,6 +53,11 @@ public class FilterHandlerTest {
         Position position = createPosition(0, new Date(), true, 10, 10, 10, 10, 10);
 
         assertNotNull(filtingHandler.decode(null, null, position));
+        assertNotNull(passingHandler.decode(null, null, position));
+
+        position = createPosition(0, new Date(Long.MAX_VALUE), true, 10, 10, 10, 10, 10);
+
+        assertNull(filtingHandler.decode(null, null, position));
         assertNotNull(passingHandler.decode(null, null, position));
 
         position = createPosition(0, new Date(), false, 10, 10, 10, 10, 10);
