@@ -14,6 +14,9 @@ public class MeiligaoProtocolDecoderTest extends ProtocolDecoderTest {
         MeiligaoProtocolDecoder decoder = new MeiligaoProtocolDecoder(new MeiligaoProtocol());
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "242400706796502079108999553131333131382e3030302c412c313033372e393637382c4e2c30363132312e353637392c572c302e35342c322e34322c3330303931352c2c2c412a37307c302e37377c392e397c303030307c303030302c303161327c3030313138373132374cae0d0a"))));
+
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "24240074630700194707719966009E1F7F00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007C3132303334302C3238303630362C323430302E303030302C4E2C31323130302E303030302C458F7E0D0A"))));
 
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(

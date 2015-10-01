@@ -80,7 +80,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int MSG_RFID = 0x9966;
     
-    private String getImei(ChannelBuffer buf) {
+    private boolean identify(ChannelBuffer buf, Channel channel) {
         String id = "";
 
         for (int i = 0; i < 7; i++) {
@@ -98,12 +98,17 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (id.length() == 14) {
-            id += Crc.luhnChecksum(Long.valueOf(id)); // IMEI checksum
+            // Sometimes first digit is cut, so this won't work
+            if (identify(id + Crc.luhnChecksum(Long.valueOf(id)), channel, null, false)) {
+                return true;
+            }
+        } else if (id.length() > 15) {
+            if (identify(id.substring(0, 15), channel, null, false)) {
+                return true;
+            }
         }
-        if (id.length() > 15) {
-            id = id.substring(0, 15);
-        }
-        return id;
+
+        return identify(id, channel);
     }
     
     private static void sendResponse(
@@ -189,7 +194,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Get device by id
-        if (!identify(getImei(id), channel)) {
+        if (!identify(id, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
