@@ -26,9 +26,6 @@ public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "F8010108621060211481299C4249FA010E015EE27506BDE80900020000008F030402420000040400523CAF05060392173F220706080000000000000000071131058E410C0E40310D48312F8E41310884080402CA60E43872F8"))));
 
-        //verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-        //        "F801010863070018987298729619022701CC0000285534BA4F28553AB14C2855BC9C572855BC9D5B28553AB25C2855445861285544586303040000000004040000076F0508033A18CF220D3DE6A638F8"))));
-
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "f8010108653280262660481cdacf830209ffffffffffffffff780304000300000404000000030506017418a021f99697f8"))));
 
