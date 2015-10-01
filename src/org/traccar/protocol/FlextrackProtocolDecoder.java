@@ -143,6 +143,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setLongitude(lon);
 
+            position.setValid(true);
             position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(parser.group(index++))));
             position.setCourse(Integer.parseInt(parser.group(index++)));
 
