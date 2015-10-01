@@ -172,7 +172,7 @@ public class Crc {
             remain /= 10;
         }
 
-        return 10 - (checksum % 10);
+        return (10 - (checksum % 10)) % 10;
     }
     
 }

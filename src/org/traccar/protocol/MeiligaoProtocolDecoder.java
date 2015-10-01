@@ -98,12 +98,9 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (id.length() == 14) {
+            // Try to recreate full IMEI number
             // Sometimes first digit is cut, so this won't work
             if (identify(id + Crc.luhnChecksum(Long.valueOf(id)), channel, null, false)) {
-                return true;
-            }
-        } else if (id.length() > 15) {
-            if (identify(id.substring(0, 15), channel, null, false)) {
                 return true;
             }
         }
