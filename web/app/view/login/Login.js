@@ -16,6 +16,7 @@
 
 Ext.define('Traccar.view.login.Login', {
     extend: 'Ext.window.Window',
+    alias: 'widget.login',
     
     requires: [
         'Traccar.view.login.LoginController'

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.device.Device', {
+Ext.define('Traccar.view.Device', {
     extend: 'Ext.grid.Panel',
     xtype: 'deviceView',
 
     requires: [
-        'Traccar.view.device.DeviceController'
+        'Traccar.view.DeviceController'
     ],
     
     controller: 'device',
