@@ -20,7 +20,7 @@ Ext.define('Traccar.view.Main', {
 
     requires: [
         'Traccar.view.Device',
-        'Traccar.view.state.State',
+        'Traccar.view.State',
         'Traccar.view.report.Report',
         'Traccar.view.map.Map'
     ],
