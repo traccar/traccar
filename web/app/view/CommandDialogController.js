@@ -15,7 +15,7 @@
  */
 
 Ext.define('Traccar.view.CommandDialogController', {
-    extend: 'Traccar.view.BaseDialogController',
+    extend: 'Ext.app.ViewController',
     alias: 'controller.commandDialog',
 
     onSelect: function(selected) {

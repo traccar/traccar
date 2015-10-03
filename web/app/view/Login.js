@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.login.Login', {
-    extend: 'Ext.window.Window',
+Ext.define('Traccar.view.Login', {
+    extend: 'Traccar.view.BaseDialog',
     alias: 'widget.login',
     
     requires: [
-        'Traccar.view.login.LoginController'
+        'Traccar.view.LoginController'
     ],
     
     controller: 'login',
 
-    bodyPadding: styles.panelPadding,
-    title: strings.loginTitle,
     closable: false,
-    resizable: false,
 
     items: {
         xtype: 'form',
@@ -91,5 +88,4 @@ Ext.define('Traccar.view.login.Login', {
         text: strings.loginLogin,
         handler: 'onLoginClick'
     }]
-
 });

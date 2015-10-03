@@ -21,8 +21,8 @@ Ext.define('Traccar.view.Main', {
     requires: [
         'Traccar.view.Device',
         'Traccar.view.State',
-        'Traccar.view.report.Report',
-        'Traccar.view.map.Map'
+        'Traccar.view.Report',
+        'Traccar.view.Map'
     ],
 
     layout: 'border',

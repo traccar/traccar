@@ -19,7 +19,7 @@ Ext.define('Traccar.controller.Root', {
     
     requires: [
         'Traccar.LoginManager',
-        'Traccar.view.login.Login',
+        'Traccar.view.Login',
         'Traccar.view.Main',
         'Traccar.view.MainMobile'
     ],

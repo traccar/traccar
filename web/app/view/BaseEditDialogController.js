@@ -15,7 +15,7 @@
  */
 
 Ext.define('Traccar.view.BaseEditDialogController', {
-    extend: 'Traccar.view.BaseDialogController',
+    extend: 'Ext.app.ViewController',
     alias: 'controller.baseEditDialog',
 
     onSaveClick: function(button) {

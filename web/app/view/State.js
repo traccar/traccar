@@ -14,10 +14,26 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.BaseDialogController', {
-    extend: 'Ext.app.ViewController',
+Ext.define('Traccar.view.State', {
+    extend: 'Ext.grid.Panel',
+    xtype: 'stateView',
+    
+    requires: [
+        'Traccar.view.StateController'
+    ],
+    
+    controller: 'state',
+    store: 'Attributes',
 
-    onCancelClick: function(button) {
-        button.up('window').close();
-    }
+    title: strings.stateTitle,
+
+    columns: [{
+        text: strings.stateName,
+        dataIndex: 'name',
+        flex: 1
+    }, {
+        text: strings.stateValue,
+        dataIndex: 'value',
+        flex: 1
+    }]
 });

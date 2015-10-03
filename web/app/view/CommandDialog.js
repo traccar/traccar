@@ -62,6 +62,6 @@ Ext.define('Traccar.view.CommandDialog', {
         handler: 'onSendClick'
     }, {
         text: strings.sharedCancel,
-        handler: 'onCancelClick'
+        handler: 'closeView'
     }]
 });

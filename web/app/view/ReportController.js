@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.report.ReportController', {
+Ext.define('Traccar.view.ReportController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.report',
 
@@ -29,23 +29,25 @@ Ext.define('Traccar.view.report.ReportController', {
     },
 
     onShowClick: function() {
-        var deviceId = this.lookupReference('deviceField').getValue();
+        var deviceId, fromDate, fromTime, from, toDate, toTime, to, store;
 
-        var fromDate = this.lookupReference('fromDateField').getValue();
-        var fromTime = this.lookupReference('fromTimeField').getValue();
+        deviceId = this.lookupReference('deviceField').getValue();
 
-        var from = new Date(
+        fromDate = this.lookupReference('fromDateField').getValue();
+        fromTime = this.lookupReference('fromTimeField').getValue();
+
+        from = new Date(
             fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(),
             fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
 
-        var toDate = this.lookupReference('toDateField').getValue();
-        var toTime = this.lookupReference('toTimeField').getValue();
+        toDate = this.lookupReference('toDateField').getValue();
+        toTime = this.lookupReference('toTimeField').getValue();
 
-        var to = new Date(
+        to = new Date(
             toDate.getFullYear(), toDate.getMonth(), toDate.getDate(),
             toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
 
-        var store = Ext.getStore('Positions');
+        store = Ext.getStore('Positions');
         store.load({
             params:{
                 deviceId: deviceId,
@@ -75,5 +77,4 @@ Ext.define('Traccar.view.report.ReportController', {
             this.getView().getSelectionModel().deselectAll();
         }
     }
-
 });

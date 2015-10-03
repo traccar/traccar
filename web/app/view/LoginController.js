@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.login.LoginController', {
+Ext.define('Traccar.view.LoginController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.login',
     
     requires: [
-        'Traccar.view.login.Register'
+        'Traccar.view.Register'
     ],
 
     init: function() {
@@ -101,5 +101,4 @@ Ext.define('Traccar.view.login.LoginController', {
     onRegisterClick: function() {
         Ext.create('Traccar.view.login.Register').show();
     }
-
 });

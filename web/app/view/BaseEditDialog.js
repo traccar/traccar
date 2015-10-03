@@ -22,6 +22,6 @@ Ext.define('Traccar.view.BaseEditDialog', {
         handler: 'onSaveClick'
     }, {
         text: strings.sharedCancel,
-        handler: 'onCancelClick'
+        handler: 'closeView'
     }]
 });

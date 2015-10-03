@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.map.Map', {
+Ext.define('Traccar.view.Map', {
     extend: 'Ext.form.Panel',
     xtype: 'mapView',
 
     requires: [
-        'Traccar.view.map.MapController'
+        'Traccar.view.MapController'
     ],
 
     controller: 'map',
@@ -36,7 +36,7 @@ Ext.define('Traccar.view.map.Map', {
             var layer;
             var mapLayer = user.get('map') || server.get('map');
 
-            var bingKey = server.get('bingKey') || 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F';
+            var bingKey = server.get('bingKey');
 
             if (mapLayer === 'custom') {
                 layer = new ol.layer.Tile({ source: new ol.source.XYZ({

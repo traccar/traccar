@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.login.RegisterController', {
+Ext.define('Traccar.view.RegisterController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.register',
 

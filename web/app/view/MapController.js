@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.map.MapController', {
+Ext.define('Traccar.view.MapController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.map',
     

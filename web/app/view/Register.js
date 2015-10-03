@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.login.Register', {
-    extend: 'Ext.window.Window',
+Ext.define('Traccar.view.Register', {
+    extend: 'Traccar.view.BaseDialog',
     
     requires: [
-        'Traccar.view.login.RegisterController'
+        'Traccar.view.RegisterController'
     ],
     
     controller: 'register',
 
-    bodyPadding: styles.panelPadding,
-    title: strings.loginRegister,
-    resizable: false,
-    modal: true,
-    
     items: {
         xtype: 'form',
         reference: 'form',
@@ -60,5 +55,4 @@ Ext.define('Traccar.view.login.Register', {
         text: strings.sharedCancel,
         handler: 'closeView'
     }]
-
 });

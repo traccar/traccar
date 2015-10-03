@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.report.Report', {
+Ext.define('Traccar.view.Report', {
     extend: 'Ext.grid.Panel',
     xtype: 'reportView',
 
     requires: [
-        'Traccar.view.report.ReportController'
+        'Traccar.view.ReportController'
     ],
 
     controller: 'report',
