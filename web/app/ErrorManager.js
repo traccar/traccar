@@ -17,7 +17,7 @@
 Ext.define('Traccar.ErrorManager', {
     singleton: true,
     
-    check: function(success, response) {
+    check: function (success, response) {
         if (success) {
             var result = Ext.decode(response.responseText);
             if (result.success || result.error === undefined) {
@@ -36,7 +36,7 @@ Ext.define('Traccar.ErrorManager', {
         }
     },
 
-    error: function(message) {
+    error: function (message) {
         Ext.Msg.alert(strings.errorTitle, message);
     }
 

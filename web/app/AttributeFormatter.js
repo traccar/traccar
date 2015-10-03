@@ -17,24 +17,24 @@
 Ext.define('Traccar.AttributeFormatter', {
     singleton: true,
 
-    coordinateFormatter: function(value) {
+    coordinateFormatter: function (value) {
         return value.toFixed(6);
     },
 
-    speedFormatter: function(value) {
+    speedFormatter: function (value) {
         return Ext.getStore('SpeedUnits').formatValue(value, Traccar.app.getPreference('speedUnit'));
     },
 
-    courseFormatter: function(value) {
+    courseFormatter: function (value) {
         var courseValues = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
         return courseValues[Math.floor(value / 45)];
     },
 
-    distanceFormatter: function(value) {
+    distanceFormatter: function (value) {
         return Ext.getStore('DistanceUnits').formatValue(value, Traccar.app.getPreference('distanceUnit'));
     },
 
-    defaultFormatter: function(value) {
+    defaultFormatter: function (value) {
         if (typeof value === 'number') {
             return value.toFixed(2);
         } else if (typeof value === 'boolean') {
@@ -45,7 +45,7 @@ Ext.define('Traccar.AttributeFormatter', {
         return value;
     },
 
-    getFormatter: function(key) {
+    getFormatter: function (key) {
         if (key === 'latitude' || key === 'longitude') {
             return this.coordinateFormatter;
         } else if (key === 'speed') {

@@ -24,7 +24,7 @@ Ext.define('Traccar.controller.Root', {
         'Traccar.view.MainMobile'
     ],
 
-    init: function() {
+    init: function () {
         var indicator = document.createElement('div');
         indicator.className = 'state-indicator';
         document.body.appendChild(indicator);
@@ -38,14 +38,14 @@ Ext.define('Traccar.controller.Root', {
         });
     },
 
-    onServer: function() {
+    onServer: function () {
         Traccar.LoginManager.session({
             scope: this,
             callback: 'onSession'
         });
     },
     
-    onSession: function(success) {
+    onSession: function (success) {
         if (success) {
             this.loadApp();
         } else {
@@ -59,12 +59,12 @@ Ext.define('Traccar.controller.Root', {
         }
     },
 
-    onLogin: function() {
+    onLogin: function () {
         this.login.close();
         this.loadApp();
     },
     
-    loadApp: function() {
+    loadApp: function () {
         Ext.getStore('Devices').load();
         Ext.getBody().empty();
         if (this.isPhone) {

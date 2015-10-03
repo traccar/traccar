@@ -28,7 +28,7 @@ Ext.define('Traccar.store.DistanceUnits', {
         factor: 0.00621371
     }],
 
-    formatValue: function(value, unit) {
+    formatValue: function (value, unit) {
         var model;
         if (unit) {
             model = this.findRecord('key', unit);

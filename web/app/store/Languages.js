@@ -18,7 +18,7 @@ Ext.define('Traccar.store.Languages', {
     extend: 'Ext.data.Store',
     fields: ['code', 'name'],
 
-    data: function() {
+    data: function () {
         var data = [];
         for (var code in availableLanguages) {
             if (availableLanguages.hasOwnProperty(code)) {

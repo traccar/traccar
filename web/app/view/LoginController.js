@@ -22,13 +22,13 @@ Ext.define('Traccar.view.LoginController', {
         'Traccar.view.Register'
     ],
 
-    init: function() {
+    init: function () {
         this.lookupReference('registerButton').setDisabled(
             !Traccar.app.getServer().get('registration'));
         this.lookupReference('languageField').setValue(language);
     },
 
-    login: function() {
+    login: function () {
         var form = this.lookupReference('form');
         if (form.isValid()) {
             Ext.getBody().mask(strings.sharedLoading);
@@ -36,7 +36,7 @@ Ext.define('Traccar.view.LoginController', {
                 scope: this,
                 url: '/api/login',
                 params: form.getValues(),
-                callback: function(options, success, response) {
+                callback: function (options, success, response) {
                     Ext.getBody().unmask();
                     if (Traccar.ErrorManager.check(success, response)) {
                         var result = Ext.decode(response.responseText);
@@ -53,17 +53,17 @@ Ext.define('Traccar.view.LoginController', {
         }
     },
 
-    logout: function() {
+    logout: function () {
         Ext.Ajax.request({
             scope: this,
             url: '/api/logout',
-            callback: function() {
+            callback: function () {
                 window.location.reload();
             }
         });
     },
 
-    onSelectLanguage: function(selected) {
+    onSelectLanguage: function (selected) {
         var paramName = 'locale';
         var paramValue = selected.getValue();
         var url = window.location.href;
@@ -83,22 +83,22 @@ Ext.define('Traccar.view.LoginController', {
         window.location.href = url;
     },
 
-    onAfterRender: function(field) {
+    onAfterRender: function (field) {
         field.focus();
     },
 
-    onSpecialKey: function(field, e) {
+    onSpecialKey: function (field, e) {
         if (e.getKey() === e.ENTER) {
             this.login();
         }
     },
     
-    onLoginClick: function() {
+    onLoginClick: function () {
         Ext.getElementById('submitButton').click();
         this.login();
     },
 
-    onRegisterClick: function() {
+    onRegisterClick: function () {
         Ext.create('Traccar.view.login.Register').show();
     }
 });

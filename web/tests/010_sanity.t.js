@@ -1,4 +1,4 @@
-StartTest(function(t) {
+StartTest(function (t) {
     t.diag("Sanity");
 
     t.ok(Ext, 'Ext is defined');

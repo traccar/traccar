@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function() {
+(function () {
     "use strict";
 
     Ext.define('Traccar.Application', {
@@ -53,29 +53,29 @@
             'Root'
         ],
 
-        setUser: function(data) {
+        setUser: function (data) {
             var reader = Ext.create('Ext.data.reader.Json', {
                 model: 'Traccar.model.User'
             });
             this.user = reader.readRecords(data).getRecords()[0];
         },
 
-        getUser: function() {
+        getUser: function () {
             return this.user;
         },
 
-        setServer: function(data) {
+        setServer: function (data) {
             var reader = Ext.create('Ext.data.reader.Json', {
                 model: 'Traccar.model.Server'
             });
             this.server = reader.readRecords(data).getRecords()[0];
         },
 
-        getServer: function() {
+        getServer: function () {
             return this.server;
         },
 
-        getPreference: function(key, defaultValue) {
+        getPreference: function (key, defaultValue) {
             return this.getUser().get(key) || this.getServer().get(key) || defaultValue;
         }
     });

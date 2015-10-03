@@ -28,7 +28,7 @@ Ext.define('Traccar.view.ReportController', {
         }
     },
 
-    onShowClick: function() {
+    onShowClick: function () {
         var deviceId, fromDate, fromTime, from, toDate, toTime, to, store;
 
         deviceId = this.lookupReference('deviceField').getValue();
@@ -55,24 +55,24 @@ Ext.define('Traccar.view.ReportController', {
                 to: to.toISOString()
             },
             scope: this,
-            callback: function() {
+            callback: function () {
                 this.fireEvent("reportShow");
             }
         });
     },
 
-    onClearClick: function() {
+    onClearClick: function () {
         Ext.getStore('Positions').removeAll();
         this.fireEvent("reportClear");
     },
 
-    onSelectionChange: function(selected) {
+    onSelectionChange: function (selected) {
         if (selected.getCount() > 0) {
             this.fireEvent("selectReport", selected.getLastSelected());
         }
     },
 
-    selectDevice: function(device) {
+    selectDevice: function (device) {
         if (device !== undefined) {
             this.getView().getSelectionModel().deselectAll();
         }

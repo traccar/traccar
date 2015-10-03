@@ -17,7 +17,7 @@
 Ext.define('Traccar.LoginManager', {
     singleton: true,
     
-    server: function(options) {
+    server: function (options) {
         Ext.Ajax.request({
             scope: this,
             url: '/api/server/get',
@@ -26,7 +26,7 @@ Ext.define('Traccar.LoginManager', {
         });
     },
 
-    onServerReturn: function(options, success, response) {
+    onServerReturn: function (options, success, response) {
         options = options.original;
         if (Traccar.ErrorManager.check(success, response)) {
             var result = Ext.decode(response.responseText);
@@ -37,7 +37,7 @@ Ext.define('Traccar.LoginManager', {
         }
     },
 
-    session: function(options) {
+    session: function (options) {
         Ext.Ajax.request({
             scope: this,
             url: '/api/session',
@@ -46,7 +46,7 @@ Ext.define('Traccar.LoginManager', {
         });
     },
     
-    onSessionReturn: function(options, success, response) {
+    onSessionReturn: function (options, success, response) {
         options = options.original;
         if (Traccar.ErrorManager.check(success, response)) {
             var result = Ext.decode(response.responseText);

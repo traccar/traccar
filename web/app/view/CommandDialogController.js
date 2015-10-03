@@ -18,12 +18,12 @@ Ext.define('Traccar.view.CommandDialogController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.commandDialog',
 
-    onSelect: function(selected) {
+    onSelect: function (selected) {
         this.lookupReference('paramPositionPeriodic').setHidden(
                 selected.getValue() !== 'positionPeriodic');
     },
 
-    onSendClick: function(button) {
+    onSendClick: function (button) {
         var attributes, value, record, form;
 
         form = button.up('window').down('form');
@@ -48,7 +48,7 @@ Ext.define('Traccar.view.CommandDialogController', {
         });
     },
 
-    onSendResult: function(options, success, response) {
+    onSendResult: function (options, success, response) {
         if (Traccar.ErrorManager.check(success, response)) {
             Ext.toast(strings.commandSent);
             this.closeView();

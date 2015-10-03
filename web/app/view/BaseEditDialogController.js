@@ -18,7 +18,7 @@ Ext.define('Traccar.view.BaseEditDialogController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.baseEditDialog',
 
-    onSaveClick: function(button) {
+    onSaveClick: function (button) {
         var dialog, store, record;
         dialog = button.up('window').down('form');
         dialog.updateRecord();
@@ -29,10 +29,10 @@ Ext.define('Traccar.view.BaseEditDialogController', {
                 store.add(record);
             }
             store.sync({
-                success: function() {
+                success: function () {
                     store.reload(); // workaround for selection problem
                 },
-                failure: function(batch) {
+                failure: function (batch) {
                     store.rejectChanges();
                     Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
                 }

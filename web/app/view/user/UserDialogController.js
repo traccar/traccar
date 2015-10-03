@@ -18,13 +18,13 @@ Ext.define('Traccar.view.user.UserDialogController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.userDialog',
 
-    init: function() {
+    init: function () {
         if (Traccar.app.getUser().get('admin')) {
             this.lookupReference('adminField').setDisabled(false);
         }
     },
 
-    onSaveClick: function(button) {
+    onSaveClick: function (button) {
         var dialog = button.up('window').down('form');
         dialog.updateRecord();
         var record = dialog.getRecord();
@@ -36,7 +36,7 @@ Ext.define('Traccar.view.user.UserDialogController', {
                 store.add(record);
             }
             store.sync({
-                failure: function(batch) {
+                failure: function (batch) {
                     store.rejectChanges(); // TODO
                     Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
                 }
@@ -45,7 +45,7 @@ Ext.define('Traccar.view.user.UserDialogController', {
         button.up('window').close();
     },
 
-    onCancelClick: function(button) {
+    onCancelClick: function (button) {
         button.up('window').close();
     }
 

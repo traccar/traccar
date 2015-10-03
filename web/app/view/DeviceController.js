@@ -36,18 +36,18 @@ Ext.define('Traccar.view.DeviceController', {
         }
     },
 
-    init: function() {
+    init: function () {
         if (Traccar.app.getUser().get('admin')) {
             this.lookupReference('settingsServerButton').setHidden(false);
             this.lookupReference('settingsUsersButton').setHidden(false);
         }
     },
     
-    onLogoutClick: function() {
+    onLogoutClick: function () {
         Ext.create('Traccar.view.LoginController').logout();
     },
     
-    onAddClick: function() {
+    onAddClick: function () {
         var device, dialog;
         device = Ext.create('Traccar.model.Device');
         device.store = this.getView().getStore();
@@ -56,7 +56,7 @@ Ext.define('Traccar.view.DeviceController', {
         dialog.show();
     },
     
-    onEditClick: function() {
+    onEditClick: function () {
         var device, dialog;
         device = this.getView().getSelectionModel().getSelection()[0];
         dialog = Ext.create('Traccar.view.DeviceDialog');
@@ -64,7 +64,7 @@ Ext.define('Traccar.view.DeviceController', {
         dialog.show();
     },
     
-    onRemoveClick: function() {
+    onRemoveClick: function () {
         var device = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
             title: strings.deviceDialog,
@@ -74,7 +74,7 @@ Ext.define('Traccar.view.DeviceController', {
                 yes: strings.sharedRemove,
                 no: strings.sharedCancel
             },
-            fn: function(btn) {
+            fn: function (btn) {
                 var store;
                 if (btn === 'yes') {
                     store = Ext.getStore('Devices');
@@ -85,7 +85,7 @@ Ext.define('Traccar.view.DeviceController', {
         });
     },
 
-    onCommandClick: function() {
+    onCommandClick: function () {
         var device, command, dialog;
         device = this.getView().getSelectionModel().getSelection()[0];
         command = Ext.create('Traccar.model.Command');
@@ -95,7 +95,7 @@ Ext.define('Traccar.view.DeviceController', {
         dialog.show();
     },
 
-    onSelectionChange: function(selected) {
+    onSelectionChange: function (selected) {
         var empty = selected.getCount() === 0;
         this.lookupReference('deviceEditButton').setDisabled(empty);
         this.lookupReference('deviceRemoveButton').setDisabled(empty);
@@ -105,19 +105,19 @@ Ext.define('Traccar.view.DeviceController', {
         }
     },
 
-    onUserClick: function() {
+    onUserClick: function () {
         var dialog = Ext.create('Traccar.view.user.UserDialog');
         dialog.down('form').loadRecord(Traccar.app.getUser());
         dialog.show();
     },
 
-    onServerClick: function() {
+    onServerClick: function () {
         var dialog = Ext.create('Traccar.view.ServerDialog');
         dialog.down('form').loadRecord(Traccar.app.getServer());
         dialog.show();
     },
 
-    onUsersClick: function() {
+    onUsersClick: function () {
         Ext.create('Ext.window.Window', {
             title: strings.settingsUsers,
             width: styles.windowWidth,
@@ -130,7 +130,7 @@ Ext.define('Traccar.view.DeviceController', {
         }).show();
     },
 
-    selectReport: function(position) {
+    selectReport: function (position) {
         if (position !== undefined) {
             this.getView().getSelectionModel().deselectAll();
         }

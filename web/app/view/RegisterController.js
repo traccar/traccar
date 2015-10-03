@@ -18,7 +18,7 @@ Ext.define('Traccar.view.RegisterController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.register',
 
-    onCreateClick: function() {
+    onCreateClick: function () {
         var form = this.lookupReference('form');
         if (form.isValid()) {
             Ext.Ajax.request({
@@ -30,7 +30,7 @@ Ext.define('Traccar.view.RegisterController', {
         }
     },
     
-    onCreateReturn: function(options, success, response) {
+    onCreateReturn: function (options, success, response) {
         if (Traccar.ErrorManager.check(success, response)) {
             this.closeView();
             Ext.toast(strings.loginCreated);

@@ -28,7 +28,7 @@ Ext.define('Traccar.view.Map', {
     layout: 'fit',
 
     listeners: {
-        afterrender: function() {
+        afterrender: function () {
 
             var user = Traccar.app.getUser();
             var server = Traccar.app.getServer();
@@ -79,7 +79,7 @@ Ext.define('Traccar.view.Map', {
             });
         },
 
-        resize: function() {
+        resize: function () {
             this.map.updateSize();
         }
     }

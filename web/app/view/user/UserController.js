@@ -22,25 +22,25 @@ Ext.define('Traccar.view.user.UserController', {
         'Traccar.view.user.UserDialog'
     ],
 
-    init: function() {
+    init: function () {
         Ext.getStore('Users').load();
     },
 
-    onAddClick: function() {
+    onAddClick: function () {
         var user = Ext.create('Traccar.model.User');
         var dialog = Ext.create('Traccar.view.user.UserDialog');
         dialog.down('form').loadRecord(user);
         dialog.show();
     },
     
-    onEditClick: function() {
+    onEditClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         var dialog = Ext.create('Traccar.view.user.UserDialog');
         dialog.down('form').loadRecord(user);
         dialog.show();
     },
     
-    onRemoveClick: function() {
+    onRemoveClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
             title: strings.settingsUser,
@@ -50,7 +50,7 @@ Ext.define('Traccar.view.user.UserController', {
                 yes: strings.sharedRemove,
                 no: strings.sharedCancel
             },
-            fn: function(btn) {
+            fn: function (btn) {
                 if (btn === 'yes') {
                     var store = Ext.getStore('Users');
                     store.remove(user);
@@ -60,7 +60,7 @@ Ext.define('Traccar.view.user.UserController', {
         });
     },
 
-    onDevicesClick: function() {
+    onDevicesClick: function () {
         // TODO show devices
         /*Ext.create('Ext.window.Window', {
             title: strings.settingsUsers,
@@ -74,7 +74,7 @@ Ext.define('Traccar.view.user.UserController', {
         }).show();*/
     },
     
-    onSelectionChange: function(selected) {
+    onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
         this.lookupReference('userEditButton').setDisabled(disabled);
         this.lookupReference('userRemoveButton').setDisabled(disabled);

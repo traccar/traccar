@@ -31,19 +31,19 @@ Ext.define('Traccar.view.MapController', {
         }
     },
     
-    init: function() {
+    init: function () {
         this.liveData = {};
         this.update(true);
     },
     
-    update: function(first) {
+    update: function (first) {
         Ext.Ajax.request({
             scope: this,
             url: '/api/async',
             params: {
                 first: first
             },
-            success: function(response) {
+            success: function (response) {
                 var data = Ext.decode(response.responseText).data;
                 
                 var i;
@@ -79,13 +79,13 @@ Ext.define('Traccar.view.MapController', {
                 
                 this.update(false);
             },
-            failure: function() {
+            failure: function () {
                 // TODO: error
             }
         });
     },
 
-    getLineStyle: function() {
+    getLineStyle: function () {
         return new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: styles.mapStrokeColor,
@@ -94,7 +94,7 @@ Ext.define('Traccar.view.MapController', {
         });
     },
 
-    getMarkerStyle: function(radius, color) {
+    getMarkerStyle: function (radius, color) {
         /*return new ol.style.Style({
             text: new ol.style.Text({
                 text: '\uf041',
@@ -123,7 +123,7 @@ Ext.define('Traccar.view.MapController', {
         });
     },
     
-    reportShow: function() {
+    reportShow: function () {
         this.reportClear();
         
         var vectorSource = this.getView().vectorSource;
@@ -163,7 +163,7 @@ Ext.define('Traccar.view.MapController', {
         }
     },
 
-    reportClear: function() {
+    reportClear: function () {
         var index;
         var vectorSource = this.getView().vectorSource;
 
@@ -182,7 +182,7 @@ Ext.define('Traccar.view.MapController', {
         }
     },
 
-    selectPosition: function(feature) {
+    selectPosition: function (feature) {
         if (this.currentFeature !== undefined) {
             this.currentFeature.setStyle(this.currentFeature.get('originalStyle'));
         }
@@ -201,11 +201,11 @@ Ext.define('Traccar.view.MapController', {
         this.currentFeature = feature;
     },
 
-    selectDevice: function(device) {
+    selectDevice: function (device) {
         this.selectPosition(this.liveData[device.get('id')]);
     },
 
-    selectReport: function(position) {
+    selectReport: function (position) {
         if (this.reportRoutePoints[position.get('id')] !== undefined) {
             this.selectPosition(this.reportRoutePoints[position.get('id')]);
         }
