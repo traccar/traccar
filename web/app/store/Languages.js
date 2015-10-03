@@ -22,16 +22,16 @@
 
         data: (function () {
             var code, data = [];
-            for (code in availableLanguages) {
-                if (availableLanguages.hasOwnProperty(code)) {
+            for (code in Locale.languages) {
+                if (Locale.languages.hasOwnProperty(code)) {
                     data.push({
                         code: code,
-                        name: availableLanguages[code].name
+                        name: Locale.languages[code].name
                     });
                 }
             }
             return data;
-        }())
+        })()
     });
 
 })();

@@ -27,7 +27,7 @@
         init: function () {
             this.lookupReference('registerButton').setDisabled(
                 !Traccar.app.getServer().get('registration'));
-            this.lookupReference('languageField').setValue(language);
+            this.lookupReference('languageField').setValue(Locale.language);
         },
 
         login: function () {

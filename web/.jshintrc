@@ -68,8 +68,8 @@
     "globals"       : {
         "Ext"       : false,
         "ol"        : false,
-        "styles"    : false,
-        "strings"   : false,
-        "Traccar"   : false
+        "Traccar"   : false,
+        "Strings"   : false,
+        "Locale"    : false
     }
 }
