@@ -58,19 +58,19 @@
                 },
                 scope: this,
                 callback: function () {
-                    this.fireEvent("reportShow");
+                    this.fireEvent('reportShow');
                 }
             });
         },
 
         onClearClick: function () {
             Ext.getStore('Positions').removeAll();
-            this.fireEvent("reportClear");
+            this.fireEvent('reportClear');
         },
 
         onSelectionChange: function (selected) {
             if (selected.getCount() > 0) {
-                this.fireEvent("selectReport", selected.getLastSelected());
+                this.fireEvent('selectReport', selected.getLastSelected());
             }
         },
 

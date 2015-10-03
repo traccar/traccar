@@ -103,7 +103,7 @@
             this.lookupReference('deviceRemoveButton').setDisabled(empty);
             this.lookupReference('deviceCommandButton').setDisabled(empty);
             if (!empty) {
-                this.fireEvent("selectDevice", selected.getLastSelected());
+                this.fireEvent('selectDevice', selected.getLastSelected());
             }
         },
 

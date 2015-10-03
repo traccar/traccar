@@ -84,7 +84,7 @@
         },
 
         updatePosition: function (position) {
-            var attributes, value, unit, store, key;
+            var attributes, store, key;
             store = Ext.getStore('Attributes');
             store.removeAll();
 

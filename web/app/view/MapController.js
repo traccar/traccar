@@ -166,7 +166,6 @@
         },
 
         reportClear: function () {
-            var index;
             var vectorSource = this.getView().vectorSource;
 
             if (this.reportRoute !== undefined) {
