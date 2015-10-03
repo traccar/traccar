@@ -42,7 +42,7 @@
             } else if (typeof value === 'boolean') {
                 return value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no;
             } else if (value instanceof Date) {
-                return Ext.Date.format(value, styles.dateTimeFormat);
+                return Ext.Date.format(value, Traccar.Style.dateTimeFormat);
             }
             return value;
         },

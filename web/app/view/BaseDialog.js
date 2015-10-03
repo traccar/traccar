@@ -19,7 +19,7 @@
     Ext.define('Traccar.view.BaseDialog', {
         extend: 'Ext.window.Window',
 
-        bodyPadding: styles.panelPadding,
+        bodyPadding: Traccar.Style.panelPadding,
         resizable: false,
         modal: true
     });

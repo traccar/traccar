@@ -68,7 +68,7 @@
                         if (data[i].deviceId in this.liveData) {
                             this.liveData[data[i].deviceId].setGeometry(geometry);
                         } else {
-                            var style = this.getMarkerStyle(styles.mapLiveRadius, styles.mapLiveColor);
+                            var style = this.getMarkerStyle(Traccar.Style.mapLiveRadius, Traccar.Style.mapLiveColor);
                             var marker = new ol.Feature({
                                 geometry: geometry,
                                 originalStyle: style
@@ -90,8 +90,8 @@
         getLineStyle: function () {
             return new ol.style.Style({
                 stroke: new ol.style.Stroke({
-                    color: styles.mapStrokeColor,
-                    width: styles.mapRouteWidth
+                    color: Traccar.Style.mapStrokeColor,
+                    width: Traccar.Style.mapRouteWidth
                 })
             });
         },
@@ -118,8 +118,8 @@
                         color: color
                     }),
                     stroke: new ol.style.Stroke({
-                        color: styles.mapStrokeColor,
-                        width: styles.mapMarkerStroke
+                        color: Traccar.Style.mapStrokeColor,
+                        width: Traccar.Style.mapMarkerStroke
                     })
                 })
             });
@@ -143,7 +143,7 @@
                 ]);
                 positions.push(point);
 
-                var style = this.getMarkerStyle(styles.mapReportRadius, styles.mapReportColor);
+                var style = this.getMarkerStyle(Traccar.Style.mapReportRadius, Traccar.Style.mapReportColor);
                 var feature = new ol.Feature({
                     geometry: new ol.geom.Point(positions[index]),
                     originalStyle: style
@@ -189,10 +189,10 @@
             }
 
             if (feature !== undefined) {
-                feature.setStyle(this.getMarkerStyle(styles.mapSelectRadius, styles.mapSelectColor));
+                feature.setStyle(this.getMarkerStyle(Traccar.Style.mapSelectRadius, Traccar.Style.mapSelectColor));
 
                 var pan = ol.animation.pan({
-                    duration: styles.mapDelay,
+                    duration: Traccar.Style.mapDelay,
                     source: this.getView().mapView.getCenter()
                 });
                 this.getView().map.beforeRender(pan);

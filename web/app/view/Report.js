@@ -46,13 +46,13 @@
         }, {
             xtype: 'datefield',
             reference: 'fromDateField',
-            startDay: styles.weekStartDay,
+            startDay: Traccar.Style.weekStartDay,
             value: new Date(new Date().getTime() - 30 * 60 * 1000)
         }, {
             xtype: 'timefield',
             reference: 'fromTimeField',
-            maxWidth: styles.reportTime,
-            format: styles.timeFormat,
+            maxWidth: Traccar.Style.reportTime,
+            format: Traccar.Style.timeFormat,
             value: new Date(new Date().getTime() - 30 * 60 * 1000)
         }, '-', {
             xtype: 'tbtext',
@@ -60,13 +60,13 @@
         }, {
             xtype: 'datefield',
             reference: 'toDateField',
-            startDay: styles.weekStartDay,
+            startDay: Traccar.Style.weekStartDay,
             value: new Date()
         }, {
             xtype: 'timefield',
             reference: 'toTimeField',
-            maxWidth: styles.reportTime,
-            format: styles.timeFormat,
+            maxWidth: Traccar.Style.reportTime,
+            format: Traccar.Style.timeFormat,
             value: new Date()
         }, '-', {
             text: strings.reportShow,

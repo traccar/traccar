@@ -66,8 +66,8 @@
             // TODO show devices
             /*Ext.create('Ext.window.Window', {
              title: strings.settingsUsers,
-             width: styles.windowWidth,
-             height: styles.windowHeight,
+             width: Traccar.Style.windowWidth,
+             height: Traccar.Style.windowHeight,
              layout: 'fit',
              modal: true,
              items: {

@@ -70,14 +70,14 @@
                     source: this.vectorSource
                 });
 
-                var lat = user.get('latitude') || server.get('latitude') || styles.mapDefaultLat;
-                var lon = user.get('longitude') || server.get('longitude') || styles.mapDefaultLon;
-                var zoom = user.get('zoom') || server.get('zoom') || styles.mapDefaultZoom;
+                var lat = user.get('latitude') || server.get('latitude') || Traccar.Style.mapDefaultLat;
+                var lon = user.get('longitude') || server.get('longitude') || Traccar.Style.mapDefaultLon;
+                var zoom = user.get('zoom') || server.get('zoom') || Traccar.Style.mapDefaultZoom;
 
                 this.mapView = new ol.View({
                     center: ol.proj.fromLonLat([lon, lat]),
                     zoom: zoom,
-                    maxZoom: styles.mapMaxZoom
+                    maxZoom: Traccar.Style.mapMaxZoom
                 });
 
                 this.map = new ol.Map({

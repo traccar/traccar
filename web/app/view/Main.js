@@ -38,7 +38,7 @@
         items: [{
             region: 'west',
             layout: 'border',
-            width: styles.deviceWidth,
+            width: Traccar.Style.deviceWidth,
 
             defaults: {
                 split: true,
@@ -55,7 +55,7 @@
         }, {
             region: 'south',
             xtype: 'reportView',
-            height: styles.reportHeight
+            height: Traccar.Style.reportHeight
         }, {
             region: 'center',
             xtype: 'mapView',
