@@ -1,5 +1,5 @@
 {
-
+    // Enforcing
     "bitwise"       : true,     // true: Prohibit bitwise operators (&, |, ^, etc.)
     "camelcase"     : true,     // true: Identifiers must be in camelCase
     "curly"         : true,     // true: Require {} for every new block or scope
@@ -13,7 +13,7 @@
     "noarg"         : true,     // true: Prohibit use of `arguments.caller` and `arguments.callee`
     "noempty"       : true,     // true: Prohibit use of empty blocks
     "nonbsp"        : true,     // true: Prohibit "non-breaking whitespace" characters.
-    "nonew"         : false,    // true: Prohibit use of constructors for side-effects (without assignment)
+    "nonew"         : true,     // true: Prohibit use of constructors for side-effects (without assignment)
     "plusplus"      : false,    // true: Prohibit use of `++` and `--`
     "quotmark"      : "single", // Quotation mark consistency:
                                 //   false    : do nothing (default)
@@ -21,7 +21,7 @@
                                 //   "single" : require single quotes
                                 //   "double" : require double quotes
     "undef"         : true,     // true: Require all non-global variables to be declared (prevents global leaks)
-    "unused"        : true,     // Unused variables:
+    "unused"        : "vars",   // Unused variables:
                                 //   true     : all variables, last function parameter
                                 //   "vars"   : all variables only
                                 //   "strict" : all variables, all function parameters
@@ -40,7 +40,6 @@
     "eqnull"        : false,     // true: Tolerate use of `== null`
     "esnext"        : false,     // true: Allow ES.next (ES6) syntax (ex: `const`)
     "moz"           : false,     // true: Allow Mozilla specific syntax (extends and overrides esnext features)
-                                 // (ex: `for each`, multiple try/catch, function expression…)
     "evil"          : false,     // true: Tolerate use of `eval` and `new Function()`
     "expr"          : false,     // true: Tolerate `ExpressionStatement` as Programs
     "funcscope"     : false,     // true: Tolerate defining variables inside control statements
@@ -62,25 +61,8 @@
 
     // Environments
     "browser"       : true,     // Web Browser (window, document, etc)
-    "browserify"    : false,    // Browserify (node.js code in the browser)
-    "couch"         : false,    // CouchDB
     "devel"         : true,     // Development/debugging (alert, confirm, etc)
-    "dojo"          : false,    // Dojo Toolkit
-    "jasmine"       : false,    // Jasmine
-    "jquery"        : false,    // jQuery
-    "mocha"         : false,    // Mocha
-    "mootools"      : false,    // MooTools
-    "node"          : false,    // Node.js
-    "nonstandard"   : false,    // Widely adopted globals (escape, unescape, etc)
-    "phantom"       : false,    // PhantomJS
-    "prototypejs"   : false,    // Prototype and Scriptaculous
-    "qunit"         : false,    // QUnit
-    "rhino"         : false,    // Rhino
-    "shelljs"       : false,    // ShellJS
-    "typed"         : false,    // Globals for typed array constructions
-    "worker"        : false,    // Web Workers
-    "wsh"           : false,    // Windows Scripting Host
-    "yui"           : false,    // Yahoo User Interface
+    "node"          : true,     // Node.js
 
     // Custom Globals
     "globals"       : {
@@ -89,5 +71,4 @@
         "styles"    : false,
         "strings"   : false
     }
-
 }
