@@ -21,7 +21,7 @@
         name: 'Traccar',
 
         requires: [
-            'Traccar.Resources',
+            'Traccar.Style',
             'Traccar.ErrorManager',
             'Traccar.AttributeFormatter'
         ],

@@ -24,56 +24,56 @@
         ],
 
         controller: 'baseEditDialog',
-        title: strings.serverTitle,
+        title: Strings.serverTitle,
 
         items: {
             xtype: 'form',
             items: [{
                 xtype: 'checkboxfield',
                 name: 'registration',
-                fieldLabel: strings.serverRegistration,
+                fieldLabel: Strings.serverRegistration,
                 allowBlank: false
             }, {
                 xtype: 'combobox',
                 name: 'map',
-                fieldLabel: strings.mapLayer,
+                fieldLabel: Strings.mapLayer,
                 store: 'MapTypes',
                 displayField: 'name',
                 valueField: 'key'
             }, {
                 xtype: 'textfield',
                 name: 'bingKey',
-                fieldLabel: strings.mapBingKey
+                fieldLabel: Strings.mapBingKey
             }, {
                 xtype: 'textfield',
                 name: 'mapUrl',
-                fieldLabel: strings.mapCustom
+                fieldLabel: Strings.mapCustom
             }, {
                 xtype: 'combobox',
                 name: 'distanceUnit',
-                fieldLabel: strings.settingsDistanceUnit,
+                fieldLabel: Strings.settingsDistanceUnit,
                 store: 'DistanceUnits',
                 displayField: 'name',
                 valueField: 'key'
             }, {
                 xtype: 'combobox',
                 name: 'speedUnit',
-                fieldLabel: strings.settingsSpeedUnit,
+                fieldLabel: Strings.settingsSpeedUnit,
                 store: 'SpeedUnits',
                 displayField: 'name',
                 valueField: 'key'
             }, {
                 xtype: 'numberfield',
                 name: 'latitude',
-                fieldLabel: strings.positionLatitude
+                fieldLabel: Strings.positionLatitude
             }, {
                 xtype: 'numberfield',
                 name: 'longitude',
-                fieldLabel: strings.positionLongitude
+                fieldLabel: Strings.positionLongitude
             }, {
                 xtype: 'numberfield',
                 name: 'zoom',
-                fieldLabel: strings.serverZoom
+                fieldLabel: Strings.serverZoom
             }]
         }
     });

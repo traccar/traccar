@@ -24,19 +24,19 @@
         ],
 
         controller: 'baseEditDialog',
-        title: strings.deviceDialog,
+        title: Strings.deviceDialog,
 
         items: {
             xtype: 'form',
             items: [{
                 xtype: 'textfield',
                 name: 'name',
-                fieldLabel: strings.deviceName,
+                fieldLabel: Strings.deviceName,
                 allowBlank: false
             }, {
                 xtype: 'textfield',
                 name: 'uniqueId',
-                fieldLabel: strings.deviceIdentifier,
+                fieldLabel: Strings.deviceIdentifier,
                 allowBlank: false
             }]
         }

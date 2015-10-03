@@ -22,11 +22,11 @@
 
         data: [{
             key: 'km',
-            name: strings.sharedKm,
+            name: Strings.sharedKm,
             factor: 0.001
         }, {
             key: 'mi',
-            name: strings.sharedMi,
+            name: Strings.sharedMi,
             factor: 0.00621371
         }],
 

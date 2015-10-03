@@ -22,11 +22,11 @@
 
         data: [{
             key: 'kmh',
-            name: strings.sharedKmh,
+            name: Strings.sharedKmh,
             factor: 1.852
         }, {
             key: 'mph',
-            name: strings.sharedMph,
+            name: Strings.sharedMph,
             factor: 1.15078
         }],
 

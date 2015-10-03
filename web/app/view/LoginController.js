@@ -33,7 +33,7 @@
         login: function () {
             var form = this.lookupReference('form');
             if (form.isValid()) {
-                Ext.getBody().mask(strings.sharedLoading);
+                Ext.getBody().mask(Strings.sharedLoading);
                 Ext.Ajax.request({
                     scope: this,
                     url: '/api/login',
@@ -46,7 +46,7 @@
                                 Traccar.app.setUser(result.data);
                                 this.fireViewEvent('login');
                             } else {
-                                Traccar.ErrorManager.error(strings.loginFailed);
+                                Traccar.ErrorManager.error(Strings.loginFailed);
                             }
                         }
 

@@ -1,4 +1,4 @@
-var strings = {
+var Strings = {
     sharedLoading: '加载',
     sharedSave: '保存',
     sharedCancel: '取消',

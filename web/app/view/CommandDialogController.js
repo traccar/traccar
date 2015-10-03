@@ -52,7 +52,7 @@
 
         onSendResult: function (options, success, response) {
             if (Traccar.ErrorManager.check(success, response)) {
-                Ext.toast(strings.commandSent);
+                Ext.toast(Strings.commandSent);
                 this.closeView();
             }
         }

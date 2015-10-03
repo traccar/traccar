@@ -30,21 +30,21 @@
         selType: 'rowmodel',
 
         tbar: [{
-            text: strings.sharedAdd,
+            text: Strings.sharedAdd,
             handler: 'onAddClick',
             reference: 'deviceAddButton'
         }, {
-            text: strings.sharedEdit,
+            text: Strings.sharedEdit,
             disabled: true,
             handler: 'onEditClick',
             reference: 'userEditButton'
         }, {
-            text: strings.sharedRemove,
+            text: Strings.sharedRemove,
             disabled: true,
             handler: 'onRemoveClick',
             reference: 'userRemoveButton'
         }, {
-            text: strings.deviceTitle,
+            text: Strings.deviceTitle,
             disabled: true,
             handler: 'onDevicesClick',
             reference: 'userDevicesButton'
@@ -55,9 +55,9 @@
         },
 
         columns: [
-            {text: strings.userName, dataIndex: 'name', flex: 1},
-            {text: strings.userEmail, dataIndex: 'email', flex: 1},
-            {text: strings.userAdmin, dataIndex: 'admin', flex: 1}
+            {text: Strings.userName, dataIndex: 'name', flex: 1},
+            {text: Strings.userEmail, dataIndex: 'email', flex: 1},
+            {text: Strings.userAdmin, dataIndex: 'admin', flex: 1}
         ]
     });
 

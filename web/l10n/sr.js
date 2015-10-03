@@ -1,4 +1,4 @@
-var strings = {
+var Strings = {
     sharedLoading: 'Učitava...',
     sharedSave: 'Sačuvaj',
     sharedCancel: 'Odustani',

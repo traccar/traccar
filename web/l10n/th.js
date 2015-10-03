@@ -1,4 +1,4 @@
-var strings = {
+var Strings = {
     sharedLoading: 'โหลด',
     sharedSave: 'เก็บ (แฟ้มข้อมูล)',
     sharedCancel: 'ยกเลิก',

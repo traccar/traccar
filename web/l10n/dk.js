@@ -1,4 +1,4 @@
-var strings = {
+var Strings = {
     sharedLoading: 'Loading...',
     sharedSave: 'Gem',
     sharedCancel: 'Fortryd',

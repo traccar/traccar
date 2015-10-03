@@ -33,28 +33,28 @@
             items: [{
                 xtype: 'textfield',
                 name: 'name',
-                fieldLabel: strings.userName,
+                fieldLabel: Strings.userName,
                 allowBlank: false
             }, {
                 xtype: 'textfield',
                 name: 'email',
-                fieldLabel: strings.userEmail,
+                fieldLabel: Strings.userEmail,
                 vtype: 'email',
                 allowBlank: false
             }, {
                 xtype: 'textfield',
                 name: 'password',
-                fieldLabel: strings.userPassword,
+                fieldLabel: Strings.userPassword,
                 inputType: 'password',
                 allowBlank: false
             }]
         },
 
         buttons: [{
-            text: strings.sharedSave,
+            text: Strings.sharedSave,
             handler: 'onCreateClick'
         }, {
-            text: strings.sharedCancel,
+            text: Strings.sharedCancel,
             handler: 'closeView'
         }]
     });

@@ -39,39 +39,39 @@
         keys: {
             fixTime: {
                 priority: 1,
-                name: strings.positionTime
+                name: Strings.positionTime
             },
             latitude: {
                 priority: 2,
-                name: strings.positionLatitude
+                name: Strings.positionLatitude
             },
             longitude: {
                 priority: 3,
-                name: strings.positionLongitude
+                name: Strings.positionLongitude
             },
             valid: {
                 priority: 4,
-                name: strings.positionValid
+                name: Strings.positionValid
             },
             altitude: {
                 priority: 5,
-                name: strings.positionAltitude
+                name: Strings.positionAltitude
             },
             speed: {
                 priority: 6,
-                name: strings.positionSpeed
+                name: Strings.positionSpeed
             },
             course: {
                 priority: 7,
-                name: strings.positionCourse
+                name: Strings.positionCourse
             },
             address: {
                 priority: 8,
-                name: strings.positionAddress
+                name: Strings.positionAddress
             },
             protocol: {
                 priority: 9,
-                name: strings.positionProtocol
+                name: Strings.positionProtocol
             }
         },
 

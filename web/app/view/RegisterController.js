@@ -35,7 +35,7 @@
         onCreateReturn: function (options, success, response) {
             if (Traccar.ErrorManager.check(success, response)) {
                 this.closeView();
-                Ext.toast(strings.loginCreated);
+                Ext.toast(Strings.loginCreated);
             }
         }
 

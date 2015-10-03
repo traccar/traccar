@@ -26,7 +26,7 @@
 
         controller: 'map',
 
-        title: strings.mapTitle,
+        title: Strings.mapTitle,
         layout: 'fit',
 
         listeners: {

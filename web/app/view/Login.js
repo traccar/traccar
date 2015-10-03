@@ -42,7 +42,7 @@
             items: [{
                 xtype: 'combobox',
                 name: 'language',
-                fieldLabel: strings.loginLanguage,
+                fieldLabel: Strings.loginLanguage,
                 store: 'Languages',
                 displayField: 'name',
                 valueField: 'code',
@@ -54,7 +54,7 @@
             }, {
                 xtype: 'textfield',
                 name: 'email',
-                fieldLabel: strings.userEmail,
+                fieldLabel: Strings.userEmail,
                 allowBlank: false,
                 enableKeyEvents: true,
                 listeners: {
@@ -65,7 +65,7 @@
             }, {
                 xtype: 'textfield',
                 name: 'password',
-                fieldLabel: strings.userPassword,
+                fieldLabel: Strings.userPassword,
                 inputType: 'password',
                 allowBlank: false,
                 enableKeyEvents: true,
@@ -83,11 +83,11 @@
         },
 
         buttons: [{
-            text: strings.loginRegister,
+            text: Strings.loginRegister,
             handler: 'onRegisterClick',
             reference: 'registerButton'
         }, {
-            text: strings.loginLogin,
+            text: Strings.loginLogin,
             handler: 'onLoginClick'
         }]
     });

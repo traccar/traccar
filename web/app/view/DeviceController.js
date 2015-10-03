@@ -69,12 +69,12 @@
         onRemoveClick: function () {
             var device = this.getView().getSelectionModel().getSelection()[0];
             Ext.Msg.show({
-                title: strings.deviceDialog,
-                message: strings.sharedRemoveConfirm,
+                title: Strings.deviceDialog,
+                message: Strings.sharedRemoveConfirm,
                 buttons: Ext.Msg.YESNO,
                 buttonText: {
-                    yes: strings.sharedRemove,
-                    no: strings.sharedCancel
+                    yes: Strings.sharedRemove,
+                    no: Strings.sharedCancel
                 },
                 fn: function (btn) {
                     var store;
@@ -121,7 +121,7 @@
 
         onUsersClick: function () {
             Ext.create('Ext.window.Window', {
-                title: strings.settingsUsers,
+                title: Strings.settingsUsers,
                 width: Traccar.Style.windowWidth,
                 height: Traccar.Style.windowHeight,
                 layout: 'fit',

@@ -1,4 +1,4 @@
-var strings = {
+var Strings = {
     sharedLoading: 'පූරණය ...',
     sharedSave: 'සුරකින්න',
     sharedCancel: 'අවලංගු කරන්න',

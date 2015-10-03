@@ -22,16 +22,16 @@
 
         data: [{
             key: 'positionPeriodic',
-            name: strings.commandPositionPeriodic
+            name: Strings.commandPositionPeriodic
         }, {
             key: 'positionStop',
-            name: strings.commandPositionStop
+            name: Strings.commandPositionStop
         }, {
             key: 'engineStop',
-            name: strings.commandEngineStop
+            name: Strings.commandEngineStop
         }, {
             key: 'engineResume',
-            name: strings.commandEngineResume
+            name: Strings.commandEngineResume
         }]
     });
 

@@ -27,56 +27,56 @@
         controller: 'device',
         store: 'Devices',
 
-        title: strings.deviceTitle,
+        title: Strings.deviceTitle,
         selType: 'rowmodel',
 
         tbar: [{
             handler: 'onAddClick',
             reference: 'deviceAddButton',
             glyph: 'xf067@FontAwesome',
-            tooltip: strings.sharedAdd,
+            tooltip: Strings.sharedAdd,
             tooltipType: 'title'
         }, {
             disabled: true,
             handler: 'onEditClick',
             reference: 'deviceEditButton',
             glyph: 'xf040@FontAwesome',
-            tooltip: strings.sharedEdit,
+            tooltip: Strings.sharedEdit,
             tooltipType: 'title'
         }, {
             disabled: true,
             handler: 'onRemoveClick',
             reference: 'deviceRemoveButton',
             glyph: 'xf00d@FontAwesome',
-            tooltip: strings.sharedRemove,
+            tooltip: Strings.sharedRemove,
             tooltipType: 'title'
         }, {
             disabled: true,
             handler: 'onCommandClick',
             reference: 'deviceCommandButton',
             glyph: 'xf093@FontAwesome',
-            tooltip: strings.deviceCommand,
+            tooltip: Strings.deviceCommand,
             tooltipType: 'title'
         }, {
             xtype: 'tbfill'
         }, {
-            text: strings.settingsTitle,
+            text: Strings.settingsTitle,
             menu: [{
-                text: strings.settingsUser,
+                text: Strings.settingsUser,
                 handler: 'onUserClick'
             }, {
-                text: strings.settingsServer,
+                text: Strings.settingsServer,
                 hidden: true,
                 handler: 'onServerClick',
                 reference: 'settingsServerButton'
             }, {
-                text: strings.settingsUsers,
+                text: Strings.settingsUsers,
                 hidden: true,
                 handler: 'onUsersClick',
                 reference: 'settingsUsersButton'
             }]
         }, {
-            text: strings.loginLogout,
+            text: Strings.loginLogout,
             handler: 'onLogoutClick'
         }],
 
@@ -85,10 +85,10 @@
         },
 
         columns: [{
-            text: strings.deviceName,
+            text: Strings.deviceName,
             dataIndex: 'name', flex: 1
         }, {
-            text: strings.deviceIdentifier,
+            text: Strings.deviceIdentifier,
             dataIndex: 'uniqueId', flex: 1
         }]
 

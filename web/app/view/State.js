@@ -27,14 +27,14 @@
         controller: 'state',
         store: 'Attributes',
 
-        title: strings.stateTitle,
+        title: Strings.stateTitle,
 
         columns: [{
-            text: strings.stateName,
+            text: Strings.stateName,
             dataIndex: 'name',
             flex: 1
         }, {
-            text: strings.stateValue,
+            text: Strings.stateValue,
             dataIndex: 'value',
             flex: 1
         }]

@@ -21,13 +21,13 @@
         fields: ['name', 'factor'],
 
         data: [{
-            name: strings.sharedSecond,
+            name: Strings.sharedSecond,
             factor: 1
         }, {
-            name: strings.sharedMinute,
+            name: Strings.sharedMinute,
             factor: 60
         }, {
-            name: strings.sharedHour,
+            name: Strings.sharedHour,
             factor: 3600
         }]
     });

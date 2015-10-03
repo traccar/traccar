@@ -22,16 +22,16 @@
 
         data: [{
             key: 'osm',
-            name: strings.mapOsm
+            name: Strings.mapOsm
         }, {
             key: 'bingRoad',
-            name: strings.mapBingRoad
+            name: Strings.mapBingRoad
         }, {
             key: 'bingAerial',
-            name: strings.mapBingAerial
+            name: Strings.mapBingAerial
         }, {
             key: 'custom',
-            name: strings.mapCustom
+            name: Strings.mapCustom
         }]
     });
 

@@ -20,10 +20,10 @@
         extend: 'Traccar.view.BaseDialog',
 
         buttons: [{
-            text: strings.sharedSave,
+            text: Strings.sharedSave,
             handler: 'onSaveClick'
         }, {
-            text: strings.sharedCancel,
+            text: Strings.sharedCancel,
             handler: 'closeView'
         }]
     });

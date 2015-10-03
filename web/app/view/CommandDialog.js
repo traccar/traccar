@@ -24,14 +24,14 @@
         ],
 
         controller: 'commandDialog',
-        title: strings.commandTitle,
+        title: Strings.commandTitle,
 
         items: {
             xtype: 'form',
             items: [{
                 xtype: 'combobox',
                 name: 'type',
-                fieldLabel: strings.commandType,
+                fieldLabel: Strings.commandType,
                 store: 'CommandTypes',
                 displayField: 'name',
                 valueField: 'key',
@@ -46,11 +46,11 @@
 
                 items: [{
                     xtype: 'numberfield',
-                    fieldLabel: strings.commandFrequency,
+                    fieldLabel: Strings.commandFrequency,
                     name: 'frequency'
                 }, {
                     xtype: 'combobox',
-                    fieldLabel: strings.commandUnit,
+                    fieldLabel: Strings.commandUnit,
                     name: 'unit',
                     store: 'TimeUnits',
                     displayField: 'name',
@@ -60,10 +60,10 @@
         },
 
         buttons: [{
-            text: strings.commandSend,
+            text: Strings.commandSend,
             handler: 'onSendClick'
         }, {
-            text: strings.sharedCancel,
+            text: Strings.sharedCancel,
             handler: 'closeView'
         }]
     });
