@@ -13,64 +13,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.controller.Root', {
-    extend: 'Ext.app.Controller',
-    
-    requires: [
-        'Traccar.LoginManager',
-        'Traccar.view.Login',
-        'Traccar.view.Main',
-        'Traccar.view.MainMobile'
-    ],
+    Ext.define('Traccar.controller.Root', {
+        extend: 'Ext.app.Controller',
 
-    init: function () {
-        var indicator = document.createElement('div');
-        indicator.className = 'state-indicator';
-        document.body.appendChild(indicator);
-        this.isPhone = parseInt(window.getComputedStyle(indicator).getPropertyValue('z-index'), 10) !== 0;
-    },
-    
-    onLaunch: function () {
-        Traccar.LoginManager.server({
-            scope: this,
-            callback: 'onServer'
-        });
-    },
+        requires: [
+            'Traccar.LoginManager',
+            'Traccar.view.Login',
+            'Traccar.view.Main',
+            'Traccar.view.MainMobile'
+        ],
 
-    onServer: function () {
-        Traccar.LoginManager.session({
-            scope: this,
-            callback: 'onSession'
-        });
-    },
-    
-    onSession: function (success) {
-        if (success) {
-            this.loadApp();
-        } else {
-            this.login = Ext.create('widget.login', {
-                listeners: {
-                    scope: this,
-                    login: 'onLogin'
-                }
+        init: function () {
+            var indicator = document.createElement('div');
+            indicator.className = 'state-indicator';
+            document.body.appendChild(indicator);
+            this.isPhone = parseInt(window.getComputedStyle(indicator).getPropertyValue('z-index'), 10) !== 0;
+        },
+
+        onLaunch: function () {
+            Traccar.LoginManager.server({
+                scope: this,
+                callback: 'onServer'
             });
-            this.login.show();
-        }
-    },
+        },
 
-    onLogin: function () {
-        this.login.close();
-        this.loadApp();
-    },
-    
-    loadApp: function () {
-        Ext.getStore('Devices').load();
-        Ext.getBody().empty();
-        if (this.isPhone) {
-            Ext.create('widget.mainMobile');
-        } else {
-            Ext.create('widget.main');
+        onServer: function () {
+            Traccar.LoginManager.session({
+                scope: this,
+                callback: 'onSession'
+            });
+        },
+
+        onSession: function (success) {
+            if (success) {
+                this.loadApp();
+            } else {
+                this.login = Ext.create('widget.login', {
+                    listeners: {
+                        scope: this,
+                        login: 'onLogin'
+                    }
+                });
+                this.login.show();
+            }
+        },
+
+        onLogin: function () {
+            this.login.close();
+            this.loadApp();
+        },
+
+        loadApp: function () {
+            Ext.getStore('Devices').load();
+            Ext.getBody().empty();
+            if (this.isPhone) {
+                Ext.create('widget.mainMobile');
+            } else {
+                Ext.create('widget.main');
+            }
         }
-    }
-});
+    });
+
+})();

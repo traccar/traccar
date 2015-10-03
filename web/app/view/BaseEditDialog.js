@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.BaseEditDialog', {
-    extend: 'Traccar.view.BaseDialog',
+    Ext.define('Traccar.view.BaseEditDialog', {
+        extend: 'Traccar.view.BaseDialog',
 
-    buttons: [{
-        text: strings.sharedSave,
-        handler: 'onSaveClick'
-    }, {
-        text: strings.sharedCancel,
-        handler: 'closeView'
-    }]
-});
+        buttons: [{
+            text: strings.sharedSave,
+            handler: 'onSaveClick'
+        }, {
+            text: strings.sharedCancel,
+            handler: 'closeView'
+        }]
+    });
+
+})();

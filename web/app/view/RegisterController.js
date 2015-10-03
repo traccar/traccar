@@ -13,28 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.RegisterController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.register',
+    Ext.define('Traccar.view.RegisterController', {
+        extend: 'Ext.app.ViewController',
+        alias: 'controller.register',
 
-    onCreateClick: function () {
-        var form = this.lookupReference('form');
-        if (form.isValid()) {
-            Ext.Ajax.request({
-                scope: this,
-                url: '/api/register',
-                jsonData: form.getValues(),
-                callback: this.onCreateReturn
-            });
+        onCreateClick: function () {
+            var form = this.lookupReference('form');
+            if (form.isValid()) {
+                Ext.Ajax.request({
+                    scope: this,
+                    url: '/api/register',
+                    jsonData: form.getValues(),
+                    callback: this.onCreateReturn
+                });
+            }
+        },
+
+        onCreateReturn: function (options, success, response) {
+            if (Traccar.ErrorManager.check(success, response)) {
+                this.closeView();
+                Ext.toast(strings.loginCreated);
+            }
         }
-    },
-    
-    onCreateReturn: function (options, success, response) {
-        if (Traccar.ErrorManager.check(success, response)) {
-            this.closeView();
-            Ext.toast(strings.loginCreated);
-        }
-    }
 
-});
+    });
+
+})();

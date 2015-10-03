@@ -13,79 +13,83 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.Login', {
-    extend: 'Traccar.view.BaseDialog',
-    alias: 'widget.login',
-    
-    requires: [
-        'Traccar.view.LoginController'
-    ],
-    
-    controller: 'login',
+    Ext.define('Traccar.view.Login', {
+        extend: 'Traccar.view.BaseDialog',
+        alias: 'widget.login',
 
-    closable: false,
+        requires: [
+            'Traccar.view.LoginController'
+        ],
 
-    items: {
-        xtype: 'form',
-        reference: 'form',
+        controller: 'login',
 
-        autoEl: {
-            tag: 'form',
-            method: 'POST',
-            action: 'blank',
-            target: 'submitTarget'
+        closable: false,
+
+        items: {
+            xtype: 'form',
+            reference: 'form',
+
+            autoEl: {
+                tag: 'form',
+                method: 'POST',
+                action: 'blank',
+                target: 'submitTarget'
+            },
+
+            items: [{
+                xtype: 'combobox',
+                name: 'language',
+                fieldLabel: strings.loginLanguage,
+                store: 'Languages',
+                displayField: 'name',
+                valueField: 'code',
+                submitValue: false,
+                listeners: {
+                    select: 'onSelectLanguage'
+                },
+                reference: 'languageField'
+            }, {
+                xtype: 'textfield',
+                name: 'email',
+                fieldLabel: strings.userEmail,
+                allowBlank: false,
+                enableKeyEvents: true,
+                listeners: {
+                    specialKey: 'onSpecialKey',
+                    afterrender: 'onAfterRender'
+                },
+                inputAttrTpl: ['autocomplete="on"']
+            }, {
+                xtype: 'textfield',
+                name: 'password',
+                fieldLabel: strings.userPassword,
+                inputType: 'password',
+                allowBlank: false,
+                enableKeyEvents: true,
+                listeners: {
+                    specialKey: 'onSpecialKey'
+                },
+                inputAttrTpl: ['autocomplete="on"']
+            }, {
+                xtype: 'component',
+                html: '<iframe id="submitTarget" name="submitTarget" style="display:none"></iframe>'
+            }, {
+                xtype: 'component',
+                html: '<input type="submit" id="submitButton" style="display:none">'
+            }]
         },
 
-        items: [{
-            xtype: 'combobox',
-            name: 'language',
-            fieldLabel: strings.loginLanguage,
-            store: 'Languages',
-            displayField: 'name',
-            valueField: 'code',
-            submitValue: false,
-            listeners: {
-                select: 'onSelectLanguage'
-            },
-            reference: 'languageField'
+        buttons: [{
+            text: strings.loginRegister,
+            handler: 'onRegisterClick',
+            reference: 'registerButton'
         }, {
-            xtype: 'textfield',
-            name: 'email',
-            fieldLabel: strings.userEmail,
-            allowBlank: false,
-            enableKeyEvents: true,
-            listeners: {
-                specialKey: 'onSpecialKey',
-                afterrender: 'onAfterRender'
-            },
-            inputAttrTpl: ['autocomplete="on"']
-        }, {
-            xtype: 'textfield',
-            name: 'password',
-            fieldLabel: strings.userPassword,
-            inputType: 'password',
-            allowBlank: false,
-            enableKeyEvents: true,
-            listeners: {
-                specialKey: 'onSpecialKey'
-            },
-            inputAttrTpl: ['autocomplete="on"']
-        }, {
-            xtype: 'component',
-            html: '<iframe id="submitTarget" name="submitTarget" style="display:none"></iframe>'
-        }, {
-            xtype: 'component',
-            html: '<input type="submit" id="submitButton" style="display:none">'
+            text: strings.loginLogin,
+            handler: 'onLoginClick'
         }]
-    },
+    });
 
-    buttons: [{
-        text: strings.loginRegister,
-        handler: 'onRegisterClick',
-        reference: 'registerButton'
-    }, {
-        text: strings.loginLogin,
-        handler: 'onLoginClick'
-    }]
-});
+})();

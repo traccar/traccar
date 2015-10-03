@@ -13,65 +13,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.ServerDialog', {
-    extend: 'Traccar.view.BaseEditDialog',
+    Ext.define('Traccar.view.ServerDialog', {
+        extend: 'Traccar.view.BaseEditDialog',
 
-    requires: [
-        'Traccar.view.BaseEditDialogController'
-    ],
+        requires: [
+            'Traccar.view.BaseEditDialogController'
+        ],
 
-    controller: 'baseEditDialog',
-    title: strings.serverTitle,
+        controller: 'baseEditDialog',
+        title: strings.serverTitle,
 
-    items: {
-        xtype: 'form',
-        items: [{
-            xtype: 'checkboxfield',
-            name: 'registration',
-            fieldLabel: strings.serverRegistration,
-            allowBlank: false
-        }, {
-            xtype: 'combobox',
-            name: 'map',
-            fieldLabel: strings.mapLayer,
-            store: 'MapTypes',
-            displayField: 'name',
-            valueField: 'key'
-        }, {
-            xtype: 'textfield',
-            name: 'bingKey',
-            fieldLabel: strings.mapBingKey
-        }, {
-            xtype: 'textfield',
-            name: 'mapUrl',
-            fieldLabel: strings.mapCustom
-        }, {
-            xtype: 'combobox',
-            name: 'distanceUnit',
-            fieldLabel: strings.settingsDistanceUnit,
-            store: 'DistanceUnits',
-            displayField: 'name',
-            valueField: 'key'
-        }, {
-            xtype: 'combobox',
-            name: 'speedUnit',
-            fieldLabel: strings.settingsSpeedUnit,
-            store: 'SpeedUnits',
-            displayField: 'name',
-            valueField: 'key'
-        }, {
-            xtype: 'numberfield',
-            name: 'latitude',
-            fieldLabel: strings.positionLatitude
-        }, {
-            xtype: 'numberfield',
-            name: 'longitude',
-            fieldLabel: strings.positionLongitude
-        }, {
-            xtype: 'numberfield',
-            name: 'zoom',
-            fieldLabel: strings.serverZoom
-        }]
-    }
-});
+        items: {
+            xtype: 'form',
+            items: [{
+                xtype: 'checkboxfield',
+                name: 'registration',
+                fieldLabel: strings.serverRegistration,
+                allowBlank: false
+            }, {
+                xtype: 'combobox',
+                name: 'map',
+                fieldLabel: strings.mapLayer,
+                store: 'MapTypes',
+                displayField: 'name',
+                valueField: 'key'
+            }, {
+                xtype: 'textfield',
+                name: 'bingKey',
+                fieldLabel: strings.mapBingKey
+            }, {
+                xtype: 'textfield',
+                name: 'mapUrl',
+                fieldLabel: strings.mapCustom
+            }, {
+                xtype: 'combobox',
+                name: 'distanceUnit',
+                fieldLabel: strings.settingsDistanceUnit,
+                store: 'DistanceUnits',
+                displayField: 'name',
+                valueField: 'key'
+            }, {
+                xtype: 'combobox',
+                name: 'speedUnit',
+                fieldLabel: strings.settingsSpeedUnit,
+                store: 'SpeedUnits',
+                displayField: 'name',
+                valueField: 'key'
+            }, {
+                xtype: 'numberfield',
+                name: 'latitude',
+                fieldLabel: strings.positionLatitude
+            }, {
+                xtype: 'numberfield',
+                name: 'longitude',
+                fieldLabel: strings.positionLongitude
+            }, {
+                xtype: 'numberfield',
+                name: 'zoom',
+                fieldLabel: strings.serverZoom
+            }]
+        }
+    });
+
+})();

@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.model.Attribute', {
-    extend: 'Ext.data.Model',
+    Ext.define('Traccar.model.Attribute', {
+        extend: 'Ext.data.Model',
 
-    fields: [{
-        name: 'priority',
-        type: 'int'
-    }, {
-        name: 'name',
-        type: 'string'
-    }, {
-        name: 'value',
-        type: 'string'
-    }]
-});
+        fields: [{
+            name: 'priority',
+            type: 'int'
+        }, {
+            name: 'name',
+            type: 'string'
+        }, {
+            name: 'value',
+            type: 'string'
+        }]
+    });
+
+})();

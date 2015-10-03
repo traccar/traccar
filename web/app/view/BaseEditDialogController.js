@@ -13,33 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.BaseEditDialogController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.baseEditDialog',
+    Ext.define('Traccar.view.BaseEditDialogController', {
+        extend: 'Ext.app.ViewController',
+        alias: 'controller.baseEditDialog',
 
-    onSaveClick: function (button) {
-        var dialog, store, record;
-        dialog = button.up('window').down('form');
-        dialog.updateRecord();
-        record = dialog.getRecord();
-        store = record.store;
-        if (store) {
-            if (record.phantom) {
-                store.add(record);
-            }
-            store.sync({
-                success: function () {
-                    store.reload(); // workaround for selection problem
-                },
-                failure: function (batch) {
-                    store.rejectChanges();
-                    Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+        onSaveClick: function (button) {
+            var dialog, store, record;
+            dialog = button.up('window').down('form');
+            dialog.updateRecord();
+            record = dialog.getRecord();
+            store = record.store;
+            if (store) {
+                if (record.phantom) {
+                    store.add(record);
                 }
-            });
-        } else {
-            record.save();
+                store.sync({
+                    success: function () {
+                        store.reload(); // workaround for selection problem
+                    },
+                    failure: function (batch) {
+                        store.rejectChanges();
+                        Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+                    }
+                });
+            } else {
+                record.save();
+            }
+            button.up('window').close();
         }
-        button.up('window').close();
-    }
-});
+    });
+
+})();

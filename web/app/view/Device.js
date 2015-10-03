@@ -13,81 +13,85 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.Device', {
-    extend: 'Ext.grid.Panel',
-    xtype: 'deviceView',
+    Ext.define('Traccar.view.Device', {
+        extend: 'Ext.grid.Panel',
+        xtype: 'deviceView',
 
-    requires: [
-        'Traccar.view.DeviceController'
-    ],
-    
-    controller: 'device',
-    store: 'Devices',
+        requires: [
+            'Traccar.view.DeviceController'
+        ],
 
-    title: strings.deviceTitle,
-    selType: 'rowmodel',
-    
-    tbar: [{
-        handler: 'onAddClick',
-        reference: 'deviceAddButton',
-        glyph: 'xf067@FontAwesome',
-        tooltip: strings.sharedAdd,
-        tooltipType: 'title'
-    }, {
-        disabled: true,
-        handler: 'onEditClick',
-        reference: 'deviceEditButton',
-        glyph: 'xf040@FontAwesome',
-        tooltip: strings.sharedEdit,
-        tooltipType: 'title'
-    }, {
-        disabled: true,
-        handler: 'onRemoveClick',
-        reference: 'deviceRemoveButton',
-        glyph: 'xf00d@FontAwesome',
-        tooltip: strings.sharedRemove,
-        tooltipType: 'title'
-    }, {
-        disabled: true,
-        handler: 'onCommandClick',
-        reference: 'deviceCommandButton',
-        glyph: 'xf093@FontAwesome',
-        tooltip: strings.deviceCommand,
-        tooltipType: 'title'
-    }, {
-        xtype: 'tbfill'
-    }, {
-        text: strings.settingsTitle,
-        menu: [{
-            text: strings.settingsUser,
-            handler: 'onUserClick'
+        controller: 'device',
+        store: 'Devices',
+
+        title: strings.deviceTitle,
+        selType: 'rowmodel',
+
+        tbar: [{
+            handler: 'onAddClick',
+            reference: 'deviceAddButton',
+            glyph: 'xf067@FontAwesome',
+            tooltip: strings.sharedAdd,
+            tooltipType: 'title'
         }, {
-            text: strings.settingsServer,
-            hidden: true,
-            handler: 'onServerClick',
-            reference: 'settingsServerButton'
+            disabled: true,
+            handler: 'onEditClick',
+            reference: 'deviceEditButton',
+            glyph: 'xf040@FontAwesome',
+            tooltip: strings.sharedEdit,
+            tooltipType: 'title'
         }, {
-            text: strings.settingsUsers,
-            hidden: true,
-            handler: 'onUsersClick',
-            reference: 'settingsUsersButton'
+            disabled: true,
+            handler: 'onRemoveClick',
+            reference: 'deviceRemoveButton',
+            glyph: 'xf00d@FontAwesome',
+            tooltip: strings.sharedRemove,
+            tooltipType: 'title'
+        }, {
+            disabled: true,
+            handler: 'onCommandClick',
+            reference: 'deviceCommandButton',
+            glyph: 'xf093@FontAwesome',
+            tooltip: strings.deviceCommand,
+            tooltipType: 'title'
+        }, {
+            xtype: 'tbfill'
+        }, {
+            text: strings.settingsTitle,
+            menu: [{
+                text: strings.settingsUser,
+                handler: 'onUserClick'
+            }, {
+                text: strings.settingsServer,
+                hidden: true,
+                handler: 'onServerClick',
+                reference: 'settingsServerButton'
+            }, {
+                text: strings.settingsUsers,
+                hidden: true,
+                handler: 'onUsersClick',
+                reference: 'settingsUsersButton'
+            }]
+        }, {
+            text: strings.loginLogout,
+            handler: 'onLogoutClick'
+        }],
+
+        listeners: {
+            selectionchange: 'onSelectionChange'
+        },
+
+        columns: [{
+            text: strings.deviceName,
+            dataIndex: 'name', flex: 1
+        }, {
+            text: strings.deviceIdentifier,
+            dataIndex: 'uniqueId', flex: 1
         }]
-    }, {
-        text: strings.loginLogout,
-        handler: 'onLogoutClick'
-    }],
 
-    listeners: {
-        selectionchange: 'onSelectionChange'
-    },
-    
-    columns: [{
-        text: strings.deviceName,
-        dataIndex: 'name', flex: 1
-    }, {
-        text: strings.deviceIdentifier,
-        dataIndex: 'uniqueId', flex: 1
-    }]
+    });
 
-});
+})();

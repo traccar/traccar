@@ -13,48 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.User', {
-    extend: 'Ext.grid.Panel',
-    xtype: 'userView',
+    Ext.define('Traccar.view.User', {
+        extend: 'Ext.grid.Panel',
+        xtype: 'userView',
 
-    requires: [
-        'Traccar.view.UserController'
-    ],
+        requires: [
+            'Traccar.view.UserController'
+        ],
 
-    controller: 'user',
-    store: 'Users',
+        controller: 'user',
+        store: 'Users',
 
-    selType: 'rowmodel',
+        selType: 'rowmodel',
 
-    tbar: [{
-        text: strings.sharedAdd,
-        handler: 'onAddClick',
-        reference: 'deviceAddButton'
-    }, {
-        text: strings.sharedEdit,
-        disabled: true,
-        handler: 'onEditClick',
-        reference: 'userEditButton'
-    }, {
-        text: strings.sharedRemove,
-        disabled: true,
-        handler: 'onRemoveClick',
-        reference: 'userRemoveButton'
-    }, {
-        text: strings.deviceTitle,
-        disabled: true,
-        handler: 'onDevicesClick',
-        reference: 'userDevicesButton'
-    }],
+        tbar: [{
+            text: strings.sharedAdd,
+            handler: 'onAddClick',
+            reference: 'deviceAddButton'
+        }, {
+            text: strings.sharedEdit,
+            disabled: true,
+            handler: 'onEditClick',
+            reference: 'userEditButton'
+        }, {
+            text: strings.sharedRemove,
+            disabled: true,
+            handler: 'onRemoveClick',
+            reference: 'userRemoveButton'
+        }, {
+            text: strings.deviceTitle,
+            disabled: true,
+            handler: 'onDevicesClick',
+            reference: 'userDevicesButton'
+        }],
 
-    listeners: {
-        selectionchange: 'onSelectionChange'
-    },
+        listeners: {
+            selectionchange: 'onSelectionChange'
+        },
 
-    columns: [
-        { text: strings.userName, dataIndex: 'name', flex: 1 },
-        { text: strings.userEmail, dataIndex: 'email', flex: 1 },
-        { text: strings.userAdmin, dataIndex: 'admin', flex: 1 }
-    ]
-});
+        columns: [
+            {text: strings.userName, dataIndex: 'name', flex: 1},
+            {text: strings.userEmail, dataIndex: 'email', flex: 1},
+            {text: strings.userAdmin, dataIndex: 'admin', flex: 1}
+        ]
+    });
+
+})();

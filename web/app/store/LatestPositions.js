@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.store.LatestPositions', {
-    extend: 'Ext.data.Store',
-    model: 'Traccar.model.Position'
-});
+    Ext.define('Traccar.store.LatestPositions', {
+        extend: 'Ext.data.Store',
+        model: 'Traccar.model.Position'
+    });
+
+})();

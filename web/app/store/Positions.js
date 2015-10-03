@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.store.Positions', {
-    extend: 'Ext.data.Store',
-    model: 'Traccar.model.Position',
+    Ext.define('Traccar.store.Positions', {
+        extend: 'Ext.data.Store',
+        model: 'Traccar.model.Position',
 
-    proxy: {
-        type: 'ajax',
-        url: '/api/position/get',
-        reader: {
-            type: 'json',
-            rootProperty: 'data'
+        proxy: {
+            type: 'ajax',
+            url: '/api/position/get',
+            reader: {
+                type: 'json',
+                rootProperty: 'data'
+            }
         }
-    }
-});
+    });
+
+})();

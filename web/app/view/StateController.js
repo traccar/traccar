@@ -13,125 +13,129 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.StateController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.state',
+    Ext.define('Traccar.view.StateController', {
+        extend: 'Ext.app.ViewController',
+        alias: 'controller.state',
 
-    config: {
-        listen: {
-            controller: {
-                '*': {
-                    selectDevice: 'selectDevice'
+        config: {
+            listen: {
+                controller: {
+                    '*': {
+                        selectDevice: 'selectDevice'
+                    }
                 }
             }
-        }
-    },
+        },
 
-    init: function () {
-        var store = Ext.getStore('LatestPositions');
-        store.on('add', this.add, this);
-        store.on('update', this.update, this);
-    },
+        init: function () {
+            var store = Ext.getStore('LatestPositions');
+            store.on('add', this.add, this);
+            store.on('update', this.update, this);
+        },
 
-    keys: {
-        fixTime: {
-            priority: 1,
-            name: strings.positionTime
-        },
-        latitude: {
-            priority: 2,
-            name: strings.positionLatitude
-        },
-        longitude: {
-            priority: 3,
-            name: strings.positionLongitude
-        },
-        valid: {
-            priority: 4,
-            name: strings.positionValid
-        },
-        altitude: {
-            priority: 5,
-            name: strings.positionAltitude
-        },
-        speed: {
-            priority: 6,
-            name: strings.positionSpeed
-        },
-        course: {
-            priority: 7,
-            name: strings.positionCourse
-        },
-        address: {
-            priority: 8,
-            name: strings.positionAddress
-        },
-        protocol: {
-            priority: 9,
-            name: strings.positionProtocol
-        }
-    },
-
-    formatValue: function (value) {
-        if (typeof(id) === 'number') {
-            return value.toFixed(2);
-        } else {
-            return value;
-        }
-    },
-
-    updatePosition: function (position) {
-        var attributes, value, unit, store, key;
-        store = Ext.getStore('Attributes');
-        store.removeAll();
-
-        for (key in position.data) {
-            if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
-                store.add(Ext.create('Traccar.model.Attribute', {
-                    priority: this.keys[key].priority,
-                    name: this.keys[key].name,
-                    value: Traccar.AttributeFormatter.getFormatter(key)(position.get(key))
-                }));
+        keys: {
+            fixTime: {
+                priority: 1,
+                name: strings.positionTime
+            },
+            latitude: {
+                priority: 2,
+                name: strings.positionLatitude
+            },
+            longitude: {
+                priority: 3,
+                name: strings.positionLongitude
+            },
+            valid: {
+                priority: 4,
+                name: strings.positionValid
+            },
+            altitude: {
+                priority: 5,
+                name: strings.positionAltitude
+            },
+            speed: {
+                priority: 6,
+                name: strings.positionSpeed
+            },
+            course: {
+                priority: 7,
+                name: strings.positionCourse
+            },
+            address: {
+                priority: 8,
+                name: strings.positionAddress
+            },
+            protocol: {
+                priority: 9,
+                name: strings.positionProtocol
             }
-        }
+        },
 
-        attributes = position.get('attributes');
-        if (attributes instanceof Object) {
-            for (key in attributes) {
-                if (attributes.hasOwnProperty(key)) {
+        formatValue: function (value) {
+            if (typeof(id) === 'number') {
+                return value.toFixed(2);
+            } else {
+                return value;
+            }
+        },
+
+        updatePosition: function (position) {
+            var attributes, value, unit, store, key;
+            store = Ext.getStore('Attributes');
+            store.removeAll();
+
+            for (key in position.data) {
+                if (position.data.hasOwnProperty(key) && this.keys[key] !== undefined) {
                     store.add(Ext.create('Traccar.model.Attribute', {
-                        priority: 1024,
-                        name: key.replace(/^./, function (match) {
-                            return match.toUpperCase();
-                        }),
-                        value: Traccar.AttributeFormatter.getFormatter(key)(attributes[key])
+                        priority: this.keys[key].priority,
+                        name: this.keys[key].name,
+                        value: Traccar.AttributeFormatter.getFormatter(key)(position.get(key))
                     }));
                 }
             }
-        }
-    },
 
-    selectDevice: function (device) {
-        var found;
-        this.deviceId = device.get('id');
-        found = Ext.getStore('LatestPositions').query('deviceId', this.deviceId);
-        if (found.getCount() > 0) {
-            this.updatePosition(found.first());
-        } else {
-            Ext.getStore('Attributes').removeAll();
-        }
-    },
+            attributes = position.get('attributes');
+            if (attributes instanceof Object) {
+                for (key in attributes) {
+                    if (attributes.hasOwnProperty(key)) {
+                        store.add(Ext.create('Traccar.model.Attribute', {
+                            priority: 1024,
+                            name: key.replace(/^./, function (match) {
+                                return match.toUpperCase();
+                            }),
+                            value: Traccar.AttributeFormatter.getFormatter(key)(attributes[key])
+                        }));
+                    }
+                }
+            }
+        },
 
-    add: function (store, data) {
-        if (this.deviceId === data[0].get('deviceId')) {
-            this.updatePosition(data[0]);
-        }
-    },
+        selectDevice: function (device) {
+            var found;
+            this.deviceId = device.get('id');
+            found = Ext.getStore('LatestPositions').query('deviceId', this.deviceId);
+            if (found.getCount() > 0) {
+                this.updatePosition(found.first());
+            } else {
+                Ext.getStore('Attributes').removeAll();
+            }
+        },
 
-    update: function (store, data) {
-        if (this.deviceId === data.get('deviceId')) {
-            this.updatePosition(data);
+        add: function (store, data) {
+            if (this.deviceId === data[0].get('deviceId')) {
+                this.updatePosition(data[0]);
+            }
+        },
+
+        update: function (store, data) {
+            if (this.deviceId === data.get('deviceId')) {
+                this.updatePosition(data);
+            }
         }
-    }
-});
+    });
+
+})();

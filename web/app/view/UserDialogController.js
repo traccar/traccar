@@ -13,35 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.UserDialogController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.userDialog',
+    Ext.define('Traccar.view.UserDialogController', {
+        extend: 'Ext.app.ViewController',
+        alias: 'controller.userDialog',
 
-    init: function () {
-        if (Traccar.app.getUser().get('admin')) {
-            this.lookupReference('adminField').setDisabled(false);
-        }
-    },
-
-    onSaveClick: function (button) {
-        var dialog = button.up('window').down('form');
-        dialog.updateRecord();
-        var record = dialog.getRecord();
-        if (record === Traccar.app.getUser()) {
-            record.save();
-        } else {
-            var store = Ext.getStore('Users');
-            if (record.phantom) {
-                store.add(record);
+        init: function () {
+            if (Traccar.app.getUser().get('admin')) {
+                this.lookupReference('adminField').setDisabled(false);
             }
-            store.sync({
-                failure: function (batch) {
-                    store.rejectChanges(); // TODO
-                    Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+        },
+
+        onSaveClick: function (button) {
+            var dialog = button.up('window').down('form');
+            dialog.updateRecord();
+            var record = dialog.getRecord();
+            if (record === Traccar.app.getUser()) {
+                record.save();
+            } else {
+                var store = Ext.getStore('Users');
+                if (record.phantom) {
+                    store.add(record);
                 }
-            });
+                store.sync({
+                    failure: function (batch) {
+                        store.rejectChanges(); // TODO
+                        Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+                    }
+                });
+            }
+            button.up('window').close();
         }
-        button.up('window').close();
-    }
-});
+    });
+
+})();

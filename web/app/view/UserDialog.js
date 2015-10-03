@@ -13,75 +13,79 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.UserDialog', {
-    extend: 'Traccar.view.BaseEditDialog',
+    Ext.define('Traccar.view.UserDialog', {
+        extend: 'Traccar.view.BaseEditDialog',
 
-    requires: [
-        'Traccar.view.UserDialogController'
-    ],
+        requires: [
+            'Traccar.view.UserDialogController'
+        ],
 
-    controller: 'userDialog',
+        controller: 'userDialog',
 
-    title: strings.settingsUser,
+        title: strings.settingsUser,
 
-    items: {
-        xtype: 'form',
-        items: [{
-            xtype: 'textfield',
-            name: 'name',
-            fieldLabel: strings.userName
-        }, {
-            xtype: 'textfield',
-            name: 'email',
-            fieldLabel: strings.userEmail,
-            allowBlank: false
-        }, {
-            xtype: 'textfield',
-            name: 'password',
-            fieldLabel: strings.userPassword,
-            inputType: 'password',
-            allowBlank: false
-        }, {
-            xtype: 'checkboxfield',
-            name: 'admin',
-            fieldLabel: strings.userAdmin,
-            allowBlank: false,
-            disabled: true,
-            reference: 'adminField'
-        }, {
-            xtype: 'combobox',
-            name: 'map',
-            fieldLabel: strings.mapLayer,
-            store: 'MapTypes',
-            displayField: 'name',
-            valueField: 'key'
-        }, {
-            xtype: 'combobox',
-            name: 'distanceUnit',
-            fieldLabel: strings.settingsDistanceUnit,
-            store: 'DistanceUnits',
-            displayField: 'name',
-            valueField: 'key'
-        }, {
-            xtype: 'combobox',
-            name: 'speedUnit',
-            fieldLabel: strings.settingsSpeedUnit,
-            store: 'SpeedUnits',
-            displayField: 'name',
-            valueField: 'key'
-        }, {
-            xtype: 'numberfield',
-            name: 'latitude',
-            fieldLabel: strings.positionLatitude
-        }, {
-            xtype: 'numberfield',
-            name: 'longitude',
-            fieldLabel: strings.positionLongitude
-        }, {
-            xtype: 'numberfield',
-            name: 'zoom',
-            fieldLabel: strings.serverZoom
-        }]
-    }
-});
+        items: {
+            xtype: 'form',
+            items: [{
+                xtype: 'textfield',
+                name: 'name',
+                fieldLabel: strings.userName
+            }, {
+                xtype: 'textfield',
+                name: 'email',
+                fieldLabel: strings.userEmail,
+                allowBlank: false
+            }, {
+                xtype: 'textfield',
+                name: 'password',
+                fieldLabel: strings.userPassword,
+                inputType: 'password',
+                allowBlank: false
+            }, {
+                xtype: 'checkboxfield',
+                name: 'admin',
+                fieldLabel: strings.userAdmin,
+                allowBlank: false,
+                disabled: true,
+                reference: 'adminField'
+            }, {
+                xtype: 'combobox',
+                name: 'map',
+                fieldLabel: strings.mapLayer,
+                store: 'MapTypes',
+                displayField: 'name',
+                valueField: 'key'
+            }, {
+                xtype: 'combobox',
+                name: 'distanceUnit',
+                fieldLabel: strings.settingsDistanceUnit,
+                store: 'DistanceUnits',
+                displayField: 'name',
+                valueField: 'key'
+            }, {
+                xtype: 'combobox',
+                name: 'speedUnit',
+                fieldLabel: strings.settingsSpeedUnit,
+                store: 'SpeedUnits',
+                displayField: 'name',
+                valueField: 'key'
+            }, {
+                xtype: 'numberfield',
+                name: 'latitude',
+                fieldLabel: strings.positionLatitude
+            }, {
+                xtype: 'numberfield',
+                name: 'longitude',
+                fieldLabel: strings.positionLongitude
+            }, {
+                xtype: 'numberfield',
+                name: 'zoom',
+                fieldLabel: strings.serverZoom
+            }]
+        }
+    });
+
+})();

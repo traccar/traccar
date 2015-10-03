@@ -13,51 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.Main', {
-    extend: 'Ext.container.Viewport',
-    alias: 'widget.main',
+    Ext.define('Traccar.view.Main', {
+        extend: 'Ext.container.Viewport',
+        alias: 'widget.main',
 
-    requires: [
-        'Traccar.view.Device',
-        'Traccar.view.State',
-        'Traccar.view.Report',
-        'Traccar.view.Map'
-    ],
+        requires: [
+            'Traccar.view.Device',
+            'Traccar.view.State',
+            'Traccar.view.Report',
+            'Traccar.view.Map'
+        ],
 
-    layout: 'border',
-
-    defaults: {
-        header: false,
-        collapsible: true,
-        split: true
-    },
-
-    items: [{
-        region:'west',
         layout: 'border',
-        width: styles.deviceWidth,
 
         defaults: {
-            split: true,
-            flex: 1
+            header: false,
+            collapsible: true,
+            split: true
         },
 
         items: [{
-            region: 'center',
-            xtype: 'deviceView'
+            region: 'west',
+            layout: 'border',
+            width: styles.deviceWidth,
+
+            defaults: {
+                split: true,
+                flex: 1
+            },
+
+            items: [{
+                region: 'center',
+                xtype: 'deviceView'
+            }, {
+                region: 'south',
+                xtype: 'stateView'
+            }]
         }, {
             region: 'south',
-            xtype: 'stateView'
+            xtype: 'reportView',
+            height: styles.reportHeight
+        }, {
+            region: 'center',
+            xtype: 'mapView',
+            header: true,
+            collapsible: false
         }]
-    }, {
-        region: 'south',
-        xtype: 'reportView',
-        height: styles.reportHeight
-    }, {
-        region: 'center',
-        xtype: 'mapView',
-        header: true,
-        collapsible: false
-    }]
-});
+    });
+
+})();

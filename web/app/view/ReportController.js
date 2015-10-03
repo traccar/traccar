@@ -13,68 +13,72 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.ReportController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.report',
+    Ext.define('Traccar.view.ReportController', {
+        extend: 'Ext.app.ViewController',
+        alias: 'controller.report',
 
-    config: {
-        listen: {
-            controller: {
-                '*': {
-                    selectDevice: 'selectDevice'
+        config: {
+            listen: {
+                controller: {
+                    '*': {
+                        selectDevice: 'selectDevice'
+                    }
                 }
             }
-        }
-    },
+        },
 
-    onShowClick: function () {
-        var deviceId, fromDate, fromTime, from, toDate, toTime, to, store;
+        onShowClick: function () {
+            var deviceId, fromDate, fromTime, from, toDate, toTime, to, store;
 
-        deviceId = this.lookupReference('deviceField').getValue();
+            deviceId = this.lookupReference('deviceField').getValue();
 
-        fromDate = this.lookupReference('fromDateField').getValue();
-        fromTime = this.lookupReference('fromTimeField').getValue();
+            fromDate = this.lookupReference('fromDateField').getValue();
+            fromTime = this.lookupReference('fromTimeField').getValue();
 
-        from = new Date(
-            fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(),
-            fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
+            from = new Date(
+                fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(),
+                fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
 
-        toDate = this.lookupReference('toDateField').getValue();
-        toTime = this.lookupReference('toTimeField').getValue();
+            toDate = this.lookupReference('toDateField').getValue();
+            toTime = this.lookupReference('toTimeField').getValue();
 
-        to = new Date(
-            toDate.getFullYear(), toDate.getMonth(), toDate.getDate(),
-            toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
+            to = new Date(
+                toDate.getFullYear(), toDate.getMonth(), toDate.getDate(),
+                toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
 
-        store = Ext.getStore('Positions');
-        store.load({
-            params:{
-                deviceId: deviceId,
-                from: from.toISOString(),
-                to: to.toISOString()
-            },
-            scope: this,
-            callback: function () {
-                this.fireEvent("reportShow");
+            store = Ext.getStore('Positions');
+            store.load({
+                params: {
+                    deviceId: deviceId,
+                    from: from.toISOString(),
+                    to: to.toISOString()
+                },
+                scope: this,
+                callback: function () {
+                    this.fireEvent("reportShow");
+                }
+            });
+        },
+
+        onClearClick: function () {
+            Ext.getStore('Positions').removeAll();
+            this.fireEvent("reportClear");
+        },
+
+        onSelectionChange: function (selected) {
+            if (selected.getCount() > 0) {
+                this.fireEvent("selectReport", selected.getLastSelected());
             }
-        });
-    },
+        },
 
-    onClearClick: function () {
-        Ext.getStore('Positions').removeAll();
-        this.fireEvent("reportClear");
-    },
-
-    onSelectionChange: function (selected) {
-        if (selected.getCount() > 0) {
-            this.fireEvent("selectReport", selected.getLastSelected());
+        selectDevice: function (device) {
+            if (device !== undefined) {
+                this.getView().getSelectionModel().deselectAll();
+            }
         }
-    },
+    });
 
-    selectDevice: function (device) {
-        if (device !== undefined) {
-            this.getView().getSelectionModel().deselectAll();
-        }
-    }
-});
+})();

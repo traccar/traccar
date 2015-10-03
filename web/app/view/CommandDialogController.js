@@ -13,45 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.CommandDialogController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.commandDialog',
+    Ext.define('Traccar.view.CommandDialogController', {
+        extend: 'Ext.app.ViewController',
+        alias: 'controller.commandDialog',
 
-    onSelect: function (selected) {
-        this.lookupReference('paramPositionPeriodic').setHidden(
+        onSelect: function (selected) {
+            this.lookupReference('paramPositionPeriodic').setHidden(
                 selected.getValue() !== 'positionPeriodic');
-    },
+        },
 
-    onSendClick: function (button) {
-        var attributes, value, record, form;
+        onSendClick: function (button) {
+            var attributes, value, record, form;
 
-        form = button.up('window').down('form');
-        form.updateRecord();
-        record = form.getRecord();
+            form = button.up('window').down('form');
+            form.updateRecord();
+            record = form.getRecord();
 
-        if (record.get('type') === 'positionPeriodic') {
-            attributes = this.lookupReference('paramPositionPeriodic');
-            value = attributes.down('numberfield[name="frequency"]').getValue();
-            value *= attributes.down('combobox[name="unit"]').getValue();
+            if (record.get('type') === 'positionPeriodic') {
+                attributes = this.lookupReference('paramPositionPeriodic');
+                value = attributes.down('numberfield[name="frequency"]').getValue();
+                value *= attributes.down('combobox[name="unit"]').getValue();
 
-            record.set('attributes', {
-                frequency: value
+                record.set('attributes', {
+                    frequency: value
+                });
+            }
+
+            Ext.Ajax.request({
+                scope: this,
+                url: '/api/command/send',
+                jsonData: record.getData(),
+                callback: this.onSendResult
             });
-        }
+        },
 
-        Ext.Ajax.request({
-            scope: this,
-            url: '/api/command/send',
-            jsonData: record.getData(),
-            callback: this.onSendResult
-        });
-    },
-
-    onSendResult: function (options, success, response) {
-        if (Traccar.ErrorManager.check(success, response)) {
-            Ext.toast(strings.commandSent);
-            this.closeView();
+        onSendResult: function (options, success, response) {
+            if (Traccar.ErrorManager.check(success, response)) {
+                Ext.toast(strings.commandSent);
+                this.closeView();
+            }
         }
-    }
-});
+    });
+
+})();

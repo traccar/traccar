@@ -13,28 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.store.SpeedUnits', {
-    extend: 'Ext.data.Store',
-    fields: ['key', 'name', 'factor'],
+    Ext.define('Traccar.store.SpeedUnits', {
+        extend: 'Ext.data.Store',
+        fields: ['key', 'name', 'factor'],
 
-    data: [{
-        key: 'kmh',
-        name: strings.sharedKmh,
-        factor: 1.852
-    }, {
-        key: 'mph',
-        name: strings.sharedMph,
-        factor: 1.15078
-    }],
+        data: [{
+            key: 'kmh',
+            name: strings.sharedKmh,
+            factor: 1.852
+        }, {
+            key: 'mph',
+            name: strings.sharedMph,
+            factor: 1.15078
+        }],
 
-    formatValue: function (value, unit) {
-        var model;
-        if (unit) {
-            model = this.findRecord('key', unit);
-            return (value * model.get('factor')).toFixed(1) + ' ' + model.get('name');
-        } else {
-            return value;
+        formatValue: function (value, unit) {
+            var model;
+            if (unit) {
+                model = this.findRecord('key', unit);
+                return (value * model.get('factor')).toFixed(1) + ' ' + model.get('name');
+            } else {
+                return value;
+            }
         }
-    }
-});
+    });
+
+})();

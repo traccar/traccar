@@ -13,46 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.Register', {
-    extend: 'Traccar.view.BaseDialog',
-    
-    requires: [
-        'Traccar.view.RegisterController'
-    ],
-    
-    controller: 'register',
+    Ext.define('Traccar.view.Register', {
+        extend: 'Traccar.view.BaseDialog',
 
-    items: {
-        xtype: 'form',
-        reference: 'form',
-        jsonSubmit: true,
+        requires: [
+            'Traccar.view.RegisterController'
+        ],
 
-        items: [{
-            xtype: 'textfield',
-            name: 'name',
-            fieldLabel: strings.userName,
-            allowBlank: false
+        controller: 'register',
+
+        items: {
+            xtype: 'form',
+            reference: 'form',
+            jsonSubmit: true,
+
+            items: [{
+                xtype: 'textfield',
+                name: 'name',
+                fieldLabel: strings.userName,
+                allowBlank: false
+            }, {
+                xtype: 'textfield',
+                name: 'email',
+                fieldLabel: strings.userEmail,
+                vtype: 'email',
+                allowBlank: false
+            }, {
+                xtype: 'textfield',
+                name: 'password',
+                fieldLabel: strings.userPassword,
+                inputType: 'password',
+                allowBlank: false
+            }]
+        },
+
+        buttons: [{
+            text: strings.sharedSave,
+            handler: 'onCreateClick'
         }, {
-            xtype: 'textfield',
-            name: 'email',
-            fieldLabel: strings.userEmail,
-            vtype: 'email',
-            allowBlank: false
-        }, {
-            xtype: 'textfield',
-            name: 'password',
-            fieldLabel: strings.userPassword,
-            inputType: 'password',
-            allowBlank: false
+            text: strings.sharedCancel,
+            handler: 'closeView'
         }]
-    },
+    });
 
-    buttons: [{
-        text: strings.sharedSave,
-        handler: 'onCreateClick'
-    }, {
-        text: strings.sharedCancel,
-        handler: 'closeView'
-    }]
-});
+})();

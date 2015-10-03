@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 (function () {
-    "use strict";
+    'use strict';
 
     Ext.define('Traccar.Application', {
         extend: 'Ext.app.Application',

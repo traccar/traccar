@@ -13,72 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.view.UserController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.user',
+    Ext.define('Traccar.view.UserController', {
+        extend: 'Ext.app.ViewController',
+        alias: 'controller.user',
 
-    requires: [
-        'Traccar.view.UserDialog'
-    ],
+        requires: [
+            'Traccar.view.UserDialog'
+        ],
 
-    init: function () {
-        Ext.getStore('Users').load();
-    },
+        init: function () {
+            Ext.getStore('Users').load();
+        },
 
-    onAddClick: function () {
-        var user = Ext.create('Traccar.model.User');
-        var dialog = Ext.create('Traccar.view.UserDialog');
-        dialog.down('form').loadRecord(user);
-        dialog.show();
-    },
+        onAddClick: function () {
+            var user = Ext.create('Traccar.model.User');
+            var dialog = Ext.create('Traccar.view.UserDialog');
+            dialog.down('form').loadRecord(user);
+            dialog.show();
+        },
 
-    onEditClick: function () {
-        var user = this.getView().getSelectionModel().getSelection()[0];
-        var dialog = Ext.create('Traccar.view.UserDialog');
-        dialog.down('form').loadRecord(user);
-        dialog.show();
-    },
+        onEditClick: function () {
+            var user = this.getView().getSelectionModel().getSelection()[0];
+            var dialog = Ext.create('Traccar.view.UserDialog');
+            dialog.down('form').loadRecord(user);
+            dialog.show();
+        },
 
-    onRemoveClick: function () {
-        var user = this.getView().getSelectionModel().getSelection()[0];
-        Ext.Msg.show({
-            title: strings.settingsUser,
-            message: strings.sharedRemoveConfirm,
-            buttons: Ext.Msg.YESNO,
-            buttonText: {
-                yes: strings.sharedRemove,
-                no: strings.sharedCancel
-            },
-            fn: function (btn) {
-                if (btn === 'yes') {
-                    var store = Ext.getStore('Users');
-                    store.remove(user);
-                    store.sync();
+        onRemoveClick: function () {
+            var user = this.getView().getSelectionModel().getSelection()[0];
+            Ext.Msg.show({
+                title: strings.settingsUser,
+                message: strings.sharedRemoveConfirm,
+                buttons: Ext.Msg.YESNO,
+                buttonText: {
+                    yes: strings.sharedRemove,
+                    no: strings.sharedCancel
+                },
+                fn: function (btn) {
+                    if (btn === 'yes') {
+                        var store = Ext.getStore('Users');
+                        store.remove(user);
+                        store.sync();
+                    }
                 }
-            }
-        });
-    },
+            });
+        },
 
-    onDevicesClick: function () {
-        // TODO show devices
-        /*Ext.create('Ext.window.Window', {
-            title: strings.settingsUsers,
-            width: styles.windowWidth,
-            height: styles.windowHeight,
-            layout: 'fit',
-            modal: true,
-            items: {
-                xtype: 'userView'
-            }
-        }).show();*/
-    },
+        onDevicesClick: function () {
+            // TODO show devices
+            /*Ext.create('Ext.window.Window', {
+             title: strings.settingsUsers,
+             width: styles.windowWidth,
+             height: styles.windowHeight,
+             layout: 'fit',
+             modal: true,
+             items: {
+             xtype: 'userView'
+             }
+             }).show();*/
+        },
 
-    onSelectionChange: function (selected) {
-        var disabled = selected.length > 0;
-        this.lookupReference('userEditButton').setDisabled(disabled);
-        this.lookupReference('userRemoveButton').setDisabled(disabled);
-        this.lookupReference('userDevicesButton').setDisabled(disabled);
-    }
+        onSelectionChange: function (selected) {
+            var disabled = selected.length > 0;
+            this.lookupReference('userEditButton').setDisabled(disabled);
+            this.lookupReference('userRemoveButton').setDisabled(disabled);
+            this.lookupReference('userDevicesButton').setDisabled(disabled);
+        }
 
-});
+    });
+
+})();

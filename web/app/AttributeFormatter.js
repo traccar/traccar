@@ -13,49 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+(function () {
+    'use strict';
 
-Ext.define('Traccar.AttributeFormatter', {
-    singleton: true,
+    Ext.define('Traccar.AttributeFormatter', {
+        singleton: true,
 
-    coordinateFormatter: function (value) {
-        return value.toFixed(6);
-    },
+        coordinateFormatter: function (value) {
+            return value.toFixed(6);
+        },
 
-    speedFormatter: function (value) {
-        return Ext.getStore('SpeedUnits').formatValue(value, Traccar.app.getPreference('speedUnit'));
-    },
+        speedFormatter: function (value) {
+            return Ext.getStore('SpeedUnits').formatValue(value, Traccar.app.getPreference('speedUnit'));
+        },
 
-    courseFormatter: function (value) {
-        var courseValues = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-        return courseValues[Math.floor(value / 45)];
-    },
+        courseFormatter: function (value) {
+            var courseValues = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            return courseValues[Math.floor(value / 45)];
+        },
 
-    distanceFormatter: function (value) {
-        return Ext.getStore('DistanceUnits').formatValue(value, Traccar.app.getPreference('distanceUnit'));
-    },
+        distanceFormatter: function (value) {
+            return Ext.getStore('DistanceUnits').formatValue(value, Traccar.app.getPreference('distanceUnit'));
+        },
 
-    defaultFormatter: function (value) {
-        if (typeof value === 'number') {
-            return value.toFixed(2);
-        } else if (typeof value === 'boolean') {
-            return value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no;
-        } else if (value instanceof Date) {
-            return Ext.Date.format(value, styles.dateTimeFormat);
+        defaultFormatter: function (value) {
+            if (typeof value === 'number') {
+                return value.toFixed(2);
+            } else if (typeof value === 'boolean') {
+                return value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no;
+            } else if (value instanceof Date) {
+                return Ext.Date.format(value, styles.dateTimeFormat);
+            }
+            return value;
+        },
+
+        getFormatter: function (key) {
+            if (key === 'latitude' || key === 'longitude') {
+                return this.coordinateFormatter;
+            } else if (key === 'speed') {
+                return this.speedFormatter;
+            } else if (key === 'course') {
+                return this.courseFormatter;
+            } else if (key === 'distance' || key === 'odometer') {
+                return this.distanceFormatter;
+            } else {
+                return this.defaultFormatter;
+            }
         }
-        return value;
-    },
+    });
 
-    getFormatter: function (key) {
-        if (key === 'latitude' || key === 'longitude') {
-            return this.coordinateFormatter;
-        } else if (key === 'speed') {
-            return this.speedFormatter;
-        } else if (key === 'course') {
-            return this.courseFormatter;
-        } else if (key === 'distance' || key === 'odometer') {
-            return this.distanceFormatter;
-        } else {
-            return this.defaultFormatter;
-        }
-    }
-});
+})();
