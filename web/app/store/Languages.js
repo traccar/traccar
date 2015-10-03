@@ -18,9 +18,9 @@ Ext.define('Traccar.store.Languages', {
     extend: 'Ext.data.Store',
     fields: ['code', 'name'],
 
-    data: function () {
-        var data = [];
-        for (var code in availableLanguages) {
+    data: (function () {
+        var code, data = [];
+        for (code in availableLanguages) {
             if (availableLanguages.hasOwnProperty(code)) {
                 data.push({
                     code: code,
@@ -29,5 +29,5 @@ Ext.define('Traccar.store.Languages', {
             }
         }
         return data;
-    }()
+    }())
 });

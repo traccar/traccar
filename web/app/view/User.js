@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.user.User', {
+Ext.define('Traccar.view.User', {
     extend: 'Ext.grid.Panel',
     xtype: 'userView',
 
     requires: [
-        'Traccar.view.user.UserController'
+        'Traccar.view.UserController'
     ],
-    
+
     controller: 'user',
     store: 'Users',
 
     selType: 'rowmodel',
-    
+
     tbar: [{
         text: strings.sharedAdd,
         handler: 'onAddClick',
@@ -57,5 +57,4 @@ Ext.define('Traccar.view.user.User', {
         { text: strings.userEmail, dataIndex: 'email', flex: 1 },
         { text: strings.userAdmin, dataIndex: 'admin', flex: 1 }
     ]
-
 });

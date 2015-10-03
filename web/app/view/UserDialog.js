@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.user.UserDialog', {
-    extend: 'Ext.window.Window',
+Ext.define('Traccar.view.UserDialog', {
+    extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.user.UserDialogController'
+        'Traccar.view.UserDialogController'
     ],
 
     controller: 'userDialog',
-    
-    bodyPadding: styles.panelPadding,
+
     title: strings.settingsUser,
-    resizable: false,
-    modal: true,
-    
+
     items: {
         xtype: 'form',
         items: [{
@@ -86,14 +83,5 @@ Ext.define('Traccar.view.user.UserDialog', {
             name: 'zoom',
             fieldLabel: strings.serverZoom
         }]
-    },
-
-    buttons: [{
-        text: strings.sharedSave,
-        handler: 'onSaveClick'
-    }, {
-        text: strings.sharedCancel,
-        handler: 'onCancelClick'
-    }]
-
+    }
 });

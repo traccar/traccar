@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.user.UserController', {
+Ext.define('Traccar.view.UserController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.user',
-    
+
     requires: [
-        'Traccar.view.user.UserDialog'
+        'Traccar.view.UserDialog'
     ],
 
     init: function () {
@@ -28,18 +28,18 @@ Ext.define('Traccar.view.user.UserController', {
 
     onAddClick: function () {
         var user = Ext.create('Traccar.model.User');
-        var dialog = Ext.create('Traccar.view.user.UserDialog');
+        var dialog = Ext.create('Traccar.view.UserDialog');
         dialog.down('form').loadRecord(user);
         dialog.show();
     },
-    
+
     onEditClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
-        var dialog = Ext.create('Traccar.view.user.UserDialog');
+        var dialog = Ext.create('Traccar.view.UserDialog');
         dialog.down('form').loadRecord(user);
         dialog.show();
     },
-    
+
     onRemoveClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
@@ -73,7 +73,7 @@ Ext.define('Traccar.view.user.UserController', {
             }
         }).show();*/
     },
-    
+
     onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
         this.lookupReference('userEditButton').setDisabled(disabled);

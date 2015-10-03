@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.user.UserDialogController', {
+Ext.define('Traccar.view.UserDialogController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.userDialog',
 
@@ -43,10 +43,5 @@ Ext.define('Traccar.view.user.UserDialogController', {
             });
         }
         button.up('window').close();
-    },
-
-    onCancelClick: function (button) {
-        button.up('window').close();
     }
-
 });

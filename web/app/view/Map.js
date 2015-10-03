@@ -29,7 +29,6 @@ Ext.define('Traccar.view.Map', {
 
     listeners: {
         afterrender: function () {
-
             var user = Traccar.app.getUser();
             var server = Traccar.app.getServer();
 
@@ -67,14 +66,14 @@ Ext.define('Traccar.view.Map', {
             var zoom = user.get('zoom') || server.get('zoom') || styles.mapDefaultZoom;
 
             this.mapView = new ol.View({
-                center: ol.proj.fromLonLat([ lon, lat ]),
+                center: ol.proj.fromLonLat([lon, lat]),
                 zoom: zoom,
                 maxZoom: styles.mapMaxZoom
             });
 
             this.map = new ol.Map({
                 target: this.body.dom.id,
-                layers: [ layer, vectorLayer ],
+                layers: [layer, vectorLayer],
                 view: this.mapView
             });
         },
@@ -83,5 +82,4 @@ Ext.define('Traccar.view.Map', {
             this.map.updateSize();
         }
     }
-
 });

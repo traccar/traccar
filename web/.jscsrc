@@ -1,3 +1,4 @@
 {
-    "preset": "crockford"
+    "preset": "crockford",
+    "maxErrors": 100
 }

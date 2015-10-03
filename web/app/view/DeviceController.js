@@ -21,8 +21,8 @@ Ext.define('Traccar.view.DeviceController', {
     requires: [
         'Traccar.view.CommandDialog',
         'Traccar.view.DeviceDialog',
-        'Traccar.view.user.UserDialog',
-        'Traccar.view.user.User',
+        'Traccar.view.UserDialog',
+        'Traccar.view.User',
         'Traccar.view.LoginController'
     ],
 
@@ -106,7 +106,7 @@ Ext.define('Traccar.view.DeviceController', {
     },
 
     onUserClick: function () {
-        var dialog = Ext.create('Traccar.view.user.UserDialog');
+        var dialog = Ext.create('Traccar.view.UserDialog');
         dialog.down('form').loadRecord(Traccar.app.getUser());
         dialog.show();
     },

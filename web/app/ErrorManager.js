@@ -16,10 +16,11 @@
 
 Ext.define('Traccar.ErrorManager', {
     singleton: true,
-    
+
     check: function (success, response) {
+        var result;
         if (success) {
-            var result = Ext.decode(response.responseText);
+            result = Ext.decode(response.responseText);
             if (result.success || result.error === undefined) {
                 return true;
             } else {

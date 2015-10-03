@@ -16,7 +16,7 @@
 
 Ext.define('Traccar.LoginManager', {
     singleton: true,
-    
+
     server: function (options) {
         Ext.Ajax.request({
             scope: this,
@@ -45,16 +45,16 @@ Ext.define('Traccar.LoginManager', {
             original: options
         });
     },
-    
+
     onSessionReturn: function (options, success, response) {
+        var result;
         options = options.original;
         if (Traccar.ErrorManager.check(success, response)) {
-            var result = Ext.decode(response.responseText);
+            result = Ext.decode(response.responseText);
             if (result.success) {
                 Traccar.app.setUser(result.data);
             }
             Ext.callback(options.callback, options.scope, [result.success]);
         }
     }
-
 });
