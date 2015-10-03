@@ -76,7 +76,7 @@
         },
 
         formatValue: function (value) {
-            if (typeof(id) === 'number') {
+            if (typeof (id) === 'number') {
                 return value.toFixed(2);
             } else {
                 return value;

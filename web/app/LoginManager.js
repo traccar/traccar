@@ -29,9 +29,10 @@
         },
 
         onServerReturn: function (options, success, response) {
+            var result;
             options = options.original;
             if (Traccar.ErrorManager.check(success, response)) {
-                var result = Ext.decode(response.responseText);
+                result = Ext.decode(response.responseText);
                 if (result.success) {
                     Traccar.app.setServer(result.data);
                 }

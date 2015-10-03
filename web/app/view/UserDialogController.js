@@ -27,13 +27,14 @@
         },
 
         onSaveClick: function (button) {
-            var dialog = button.up('window').down('form');
+            var dialog, record, store;
+            dialog = button.up('window').down('form');
             dialog.updateRecord();
-            var record = dialog.getRecord();
+            record = dialog.getRecord();
             if (record === Traccar.app.getUser()) {
                 record.save();
             } else {
-                var store = Ext.getStore('Users');
+                store = Ext.getStore('Users');
                 if (record.phantom) {
                     store.add(record);
                 }

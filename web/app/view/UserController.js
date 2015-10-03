@@ -29,15 +29,17 @@
         },
 
         onAddClick: function () {
-            var user = Ext.create('Traccar.model.User');
-            var dialog = Ext.create('Traccar.view.UserDialog');
+            var user, dialog;
+            user = Ext.create('Traccar.model.User'),
+            dialog = Ext.create('Traccar.view.UserDialog');
             dialog.down('form').loadRecord(user);
             dialog.show();
         },
 
         onEditClick: function () {
-            var user = this.getView().getSelectionModel().getSelection()[0];
-            var dialog = Ext.create('Traccar.view.UserDialog');
+            var user, dialog;
+            user = this.getView().getSelectionModel().getSelection()[0];
+            dialog = Ext.create('Traccar.view.UserDialog');
             dialog.down('form').loadRecord(user);
             dialog.show();
         },

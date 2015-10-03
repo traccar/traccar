@@ -39,9 +39,10 @@
                     url: '/api/login',
                     params: form.getValues(),
                     callback: function (options, success, response) {
+                        var result;
                         Ext.getBody().unmask();
                         if (Traccar.ErrorManager.check(success, response)) {
-                            var result = Ext.decode(response.responseText);
+                            result = Ext.decode(response.responseText);
                             if (result.success) {
                                 Traccar.app.setUser(result.data);
                                 this.fireViewEvent('login');
