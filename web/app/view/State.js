@@ -13,31 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.State', {
-        extend: 'Ext.grid.Panel',
-        xtype: 'stateView',
+Ext.define('Traccar.view.State', {
+    extend: 'Ext.grid.Panel',
+    xtype: 'stateView',
 
-        requires: [
-            'Traccar.view.StateController'
-        ],
+    requires: [
+        'Traccar.view.StateController'
+    ],
 
-        controller: 'state',
-        store: 'Attributes',
+    controller: 'state',
+    store: 'Attributes',
 
-        title: Strings.stateTitle,
+    title: Strings.stateTitle,
 
-        columns: [{
-            text: Strings.stateName,
-            dataIndex: 'name',
-            flex: 1
-        }, {
-            text: Strings.stateValue,
-            dataIndex: 'value',
-            flex: 1
-        }]
-    });
-
-})();
+    columns: [{
+        text: Strings.stateName,
+        dataIndex: 'name',
+        flex: 1
+    }, {
+        text: Strings.stateValue,
+        dataIndex: 'value',
+        flex: 1
+    }]
+});

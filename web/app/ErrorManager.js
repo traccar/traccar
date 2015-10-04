@@ -13,36 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.ErrorManager', {
-        singleton: true,
+Ext.define('Traccar.ErrorManager', {
+    singleton: true,
 
-        check: function (success, response) {
-            var result;
-            if (success) {
-                result = Ext.decode(response.responseText);
-                if (result.success || result.error === undefined) {
-                    return true;
-                } else {
-                    Ext.Msg.alert(Strings.errorTitle, result.error);
-                    return false;
-                }
+    check: function (success, response) {
+        var result;
+        if (success) {
+            result = Ext.decode(response.responseText);
+            if (result.success || result.error === undefined) {
+                return true;
             } else {
-                if (response.statusText) {
-                    Ext.Msg.alert(Strings.errorTitle, response.statusText);
-                } else {
-                    Ext.Msg.alert(Strings.errorTitle, response.status.toString()); // TODO: text message
-                }
+                Ext.Msg.alert(Strings.errorTitle, result.error);
                 return false;
             }
-        },
-
-        error: function (message) {
-            Ext.Msg.alert(Strings.errorTitle, message);
+        } else {
+            if (response.statusText) {
+                Ext.Msg.alert(Strings.errorTitle, response.statusText);
+            } else {
+                Ext.Msg.alert(Strings.errorTitle, response.status.toString()); // TODO: text message
+            }
+            return false;
         }
+    },
 
-    });
+    error: function (message) {
+        Ext.Msg.alert(Strings.errorTitle, message);
+    }
 
-})();
+});

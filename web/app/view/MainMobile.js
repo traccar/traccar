@@ -13,41 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.MainMobile', {
-        extend: 'Ext.container.Viewport',
-        alias: 'widget.mainMobile',
+Ext.define('Traccar.view.MainMobile', {
+    extend: 'Ext.container.Viewport',
+    alias: 'widget.mainMobile',
 
-        requires: [
-            'Traccar.view.Device',
-            'Traccar.view.State',
-            'Traccar.view.Map'
-        ],
+    requires: [
+        'Traccar.view.Device',
+        'Traccar.view.State',
+        'Traccar.view.Map'
+    ],
 
-        layout: 'border',
+    layout: 'border',
 
-        defaults: {
-            header: false,
-            collapsible: true,
-            split: true
-        },
+    defaults: {
+        header: false,
+        collapsible: true,
+        split: true
+    },
 
-        items: [{
-            region: 'east',
-            xtype: 'stateView',
-            flex: 4
-        }, {
-            region: 'center',
-            xtype: 'mapView',
-            collapsible: false,
-            flex: 2
-        }, {
-            region: 'south',
-            xtype: 'deviceView',
-            flex: 1
-        }]
-    });
-
-})();
+    items: [{
+        region: 'east',
+        xtype: 'stateView',
+        flex: 4
+    }, {
+        region: 'center',
+        xtype: 'mapView',
+        collapsible: false,
+        flex: 2
+    }, {
+        region: 'south',
+        xtype: 'deviceView',
+        flex: 1
+    }]
+});

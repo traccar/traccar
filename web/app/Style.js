@@ -13,41 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.Style', {
-        singleton: true,
+Ext.define('Traccar.Style', {
+    singleton: true,
 
-        panelPadding: 10,
+    panelPadding: 10,
 
-        windowWidth: 640,
-        windowHeight: 480,
+    windowWidth: 640,
+    windowHeight: 480,
 
-        dateTimeFormat: 'Y-m-d H:i:s',
-        timeFormat: 'H:i',
-        weekStartDay: 1,
+    dateTimeFormat: 'Y-m-d H:i:s',
+    timeFormat: 'H:i',
+    weekStartDay: 1,
 
-        deviceWidth: 350,
+    deviceWidth: 350,
 
-        reportHeight: 250,
-        reportTime: 100,
+    reportHeight: 250,
+    reportTime: 100,
 
-        mapDefaultLat: 51.507222,
-        mapDefaultLon: -0.1275,
-        mapDefaultZoom: 6,
+    mapDefaultLat: 51.507222,
+    mapDefaultLon: -0.1275,
+    mapDefaultZoom: 6,
 
-        mapMaxZoom: 19,
-        mapSelectColor: 'rgba(0, 255, 0, 1.0)',
-        mapSelectRadius: 10,
-        mapReportColor: 'rgba(0, 0, 255, 1.0)',
-        mapReportRadius: 5,
-        mapLiveColor: 'rgba(255, 0, 0, 1.0)',
-        mapLiveRadius: 7,
-        mapStrokeColor: 'rgba(50, 50, 50, 1.0)',
-        mapRouteWidth: 5,
-        mapMarkerStroke: 2,
-        mapDelay: 500
-    });
-
-})();
+    mapMaxZoom: 19,
+    mapSelectColor: 'rgba(0, 255, 0, 1.0)',
+    mapSelectRadius: 10,
+    mapReportColor: 'rgba(0, 0, 255, 1.0)',
+    mapReportRadius: 5,
+    mapLiveColor: 'rgba(255, 0, 0, 1.0)',
+    mapLiveRadius: 7,
+    mapStrokeColor: 'rgba(50, 50, 50, 1.0)',
+    mapRouteWidth: 5,
+    mapMarkerStroke: 2,
+    mapDelay: 500
+});

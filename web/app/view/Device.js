@@ -13,85 +13,107 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.Device', {
-        extend: 'Ext.grid.Panel',
-        xtype: 'deviceView',
+Ext.define('Traccar.view.Device', {
+    extend: 'Ext.grid.Panel',
+    xtype: 'deviceView',
 
-        requires: [
-            'Traccar.view.DeviceController'
-        ],
+    requires: [
+        'Traccar.view.DeviceController',
+        'Traccar.view.BaseEditToolbar'
+    ],
 
-        controller: 'device',
-        store: 'Devices',
+    controller: 'device',
+    store: 'Devices',
 
-        title: Strings.deviceTitle,
-        selType: 'rowmodel',
+    title: Strings.deviceTitle,
+    selType: 'rowmodel',
 
-        tbar: [{
-            handler: 'onAddClick',
-            reference: 'deviceAddButton',
-            glyph: 'xf067@FontAwesome',
-            tooltip: Strings.sharedAdd,
-            tooltipType: 'title'
-        }, {
-            disabled: true,
-            handler: 'onEditClick',
-            reference: 'deviceEditButton',
-            glyph: 'xf040@FontAwesome',
-            tooltip: Strings.sharedEdit,
-            tooltipType: 'title'
-        }, {
-            disabled: true,
-            handler: 'onRemoveClick',
-            reference: 'deviceRemoveButton',
-            glyph: 'xf00d@FontAwesome',
-            tooltip: Strings.sharedRemove,
-            tooltipType: 'title'
-        }, {
+    dockedItems: [{
+        xtype : 'baseEditToolbar',
+        dock : "top",
+        items: [{
             disabled: true,
             handler: 'onCommandClick',
             reference: 'deviceCommandButton',
             glyph: 'xf093@FontAwesome',
             tooltip: Strings.deviceCommand,
             tooltipType: 'title'
-        }, {
-            xtype: 'tbfill'
-        }, {
-            text: Strings.settingsTitle,
-            menu: [{
-                text: Strings.settingsUser,
-                handler: 'onUserClick'
-            }, {
-                text: Strings.settingsServer,
-                hidden: true,
-                handler: 'onServerClick',
-                reference: 'settingsServerButton'
-            }, {
-                text: Strings.settingsUsers,
-                hidden: true,
-                handler: 'onUsersClick',
-                reference: 'settingsUsersButton'
-            }]
-        }, {
-            text: Strings.loginLogout,
-            handler: 'onLogoutClick'
-        }],
-
-        listeners: {
-            selectionchange: 'onSelectionChange'
-        },
-
-        columns: [{
-            text: Strings.deviceName,
-            dataIndex: 'name', flex: 1
-        }, {
-            text: Strings.deviceIdentifier,
-            dataIndex: 'uniqueId', flex: 1
         }]
+    }],
 
-    });
+    //tbar: {
+      //  xtype: 'baseEditToolbar',
+        /*items: [{
+            disabled: true,
+            handler: 'onCommandClick',
+            reference: 'deviceCommandButton',
+            glyph: 'xf093@FontAwesome',
+            tooltip: Strings.deviceCommand,
+            tooltipType: 'title'
+        }]*/
+    //},
 
-})();
+    /*tbar: [{
+        handler: 'onAddClick',
+        reference: 'deviceAddButton',
+        glyph: 'xf067@FontAwesome',
+        tooltip: Strings.sharedAdd,
+        tooltipType: 'title'
+    }, {
+        disabled: true,
+        handler: 'onEditClick',
+        reference: 'deviceEditButton',
+        glyph: 'xf040@FontAwesome',
+        tooltip: Strings.sharedEdit,
+        tooltipType: 'title'
+    }, {
+        disabled: true,
+        handler: 'onRemoveClick',
+        reference: 'deviceRemoveButton',
+        glyph: 'xf00d@FontAwesome',
+        tooltip: Strings.sharedRemove,
+        tooltipType: 'title'
+    }, {
+        disabled: true,
+        handler: 'onCommandClick',
+        reference: 'deviceCommandButton',
+        glyph: 'xf093@FontAwesome',
+        tooltip: Strings.deviceCommand,
+        tooltipType: 'title'
+    }, {
+        xtype: 'tbfill'
+    }, {
+        text: Strings.settingsTitle,
+        menu: [{
+            text: Strings.settingsUser,
+            handler: 'onUserClick'
+        }, {
+            text: Strings.settingsServer,
+            hidden: true,
+            handler: 'onServerClick',
+            reference: 'settingsServerButton'
+        }, {
+            text: Strings.settingsUsers,
+            hidden: true,
+            handler: 'onUsersClick',
+            reference: 'settingsUsersButton'
+        }]
+    }, {
+        text: Strings.loginLogout,
+        handler: 'onLogoutClick'
+    }],*/
+
+    listeners: {
+        selectionchange: 'onSelectionChange'
+    },
+
+    columns: [{
+        text: Strings.deviceName,
+        dataIndex: 'name', flex: 1
+    }, {
+        text: Strings.deviceIdentifier,
+        dataIndex: 'uniqueId', flex: 1
+    }]
+
+});

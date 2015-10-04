@@ -13,33 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.DeviceDialog', {
-        extend: 'Traccar.view.BaseEditDialog',
+Ext.define('Traccar.view.DeviceDialog', {
+    extend: 'Traccar.view.BaseEditDialog',
 
-        requires: [
-            'Traccar.view.BaseEditDialogController'
-        ],
+    requires: [
+        'Traccar.view.BaseEditDialogController'
+    ],
 
-        controller: 'baseEditDialog',
-        title: Strings.deviceDialog,
+    controller: 'baseEditDialog',
+    title: Strings.deviceDialog,
 
-        items: {
-            xtype: 'form',
-            items: [{
-                xtype: 'textfield',
-                name: 'name',
-                fieldLabel: Strings.deviceName,
-                allowBlank: false
-            }, {
-                xtype: 'textfield',
-                name: 'uniqueId',
-                fieldLabel: Strings.deviceIdentifier,
-                allowBlank: false
-            }]
-        }
-    });
-
-})();
+    items: {
+        xtype: 'form',
+        items: [{
+            xtype: 'textfield',
+            name: 'name',
+            fieldLabel: Strings.deviceName,
+            allowBlank: false
+        }, {
+            xtype: 'textfield',
+            name: 'uniqueId',
+            fieldLabel: Strings.deviceIdentifier,
+            allowBlank: false
+        }]
+    }
+});

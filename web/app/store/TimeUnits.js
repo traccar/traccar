@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.store.TimeUnits', {
-        extend: 'Ext.data.Store',
-        fields: ['name', 'factor'],
+Ext.define('Traccar.store.TimeUnits', {
+    extend: 'Ext.data.Store',
+    fields: ['name', 'factor'],
 
-        data: [{
-            name: Strings.sharedSecond,
-            factor: 1
-        }, {
-            name: Strings.sharedMinute,
-            factor: 60
-        }, {
-            name: Strings.sharedHour,
-            factor: 3600
-        }]
-    });
-
-})();
+    data: [{
+        name: Strings.sharedSecond,
+        factor: 1
+    }, {
+        name: Strings.sharedMinute,
+        factor: 60
+    }, {
+        name: Strings.sharedHour,
+        factor: 3600
+    }]
+});

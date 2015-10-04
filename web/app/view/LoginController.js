@@ -13,97 +13,93 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.LoginController', {
-        extend: 'Ext.app.ViewController',
-        alias: 'controller.login',
+Ext.define('Traccar.view.LoginController', {
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.login',
 
-        requires: [
-            'Traccar.view.Register'
-        ],
+    requires: [
+        'Traccar.view.Register'
+    ],
 
-        init: function () {
-            this.lookupReference('registerButton').setDisabled(
-                !Traccar.app.getServer().get('registration'));
-            this.lookupReference('languageField').setValue(Locale.language);
-        },
+    init: function () {
+        this.lookupReference('registerButton').setDisabled(
+            !Traccar.app.getServer().get('registration'));
+        this.lookupReference('languageField').setValue(Locale.language);
+    },
 
-        login: function () {
-            var form = this.lookupReference('form');
-            if (form.isValid()) {
-                Ext.getBody().mask(Strings.sharedLoading);
-                Ext.Ajax.request({
-                    scope: this,
-                    url: '/api/login',
-                    params: form.getValues(),
-                    callback: function (options, success, response) {
-                        var result;
-                        Ext.getBody().unmask();
-                        if (Traccar.ErrorManager.check(success, response)) {
-                            result = Ext.decode(response.responseText);
-                            if (result.success) {
-                                Traccar.app.setUser(result.data);
-                                this.fireViewEvent('login');
-                            } else {
-                                Traccar.ErrorManager.error(Strings.loginFailed);
-                            }
-                        }
-
-                    }
-                });
-            }
-        },
-
-        logout: function () {
+    login: function () {
+        var form = this.lookupReference('form');
+        if (form.isValid()) {
+            Ext.getBody().mask(Strings.sharedLoading);
             Ext.Ajax.request({
                 scope: this,
-                url: '/api/logout',
-                callback: function () {
-                    window.location.reload();
+                url: '/api/login',
+                params: form.getValues(),
+                callback: function (options, success, response) {
+                    var result;
+                    Ext.getBody().unmask();
+                    if (Traccar.ErrorManager.check(success, response)) {
+                        result = Ext.decode(response.responseText);
+                        if (result.success) {
+                            Traccar.app.setUser(result.data);
+                            this.fireViewEvent('login');
+                        } else {
+                            Traccar.ErrorManager.error(Strings.loginFailed);
+                        }
+                    }
+
                 }
             });
-        },
-
-        onSelectLanguage: function (selected) {
-            var paramName = 'locale';
-            var paramValue = selected.getValue();
-            var url = window.location.href;
-            if (url.indexOf(paramName + '=') >= 0) {
-                var prefix = url.substring(0, url.indexOf(paramName));
-                var suffix = url.substring(url.indexOf(paramName));
-                suffix = suffix.substring(suffix.indexOf('=') + 1);
-                suffix = (suffix.indexOf('&') >= 0) ? suffix.substring(suffix.indexOf('&')) : '';
-                url = prefix + paramName + '=' + paramValue + suffix;
-            } else {
-                if (url.indexOf('?') < 0) {
-                    url += '?' + paramName + '=' + paramValue;
-                } else {
-                    url += '&' + paramName + '=' + paramValue;
-                }
-            }
-            window.location.href = url;
-        },
-
-        onAfterRender: function (field) {
-            field.focus();
-        },
-
-        onSpecialKey: function (field, e) {
-            if (e.getKey() === e.ENTER) {
-                this.login();
-            }
-        },
-
-        onLoginClick: function () {
-            Ext.getElementById('submitButton').click();
-            this.login();
-        },
-
-        onRegisterClick: function () {
-            Ext.create('Traccar.view.Register').show();
         }
-    });
+    },
 
-})();
+    logout: function () {
+        Ext.Ajax.request({
+            scope: this,
+            url: '/api/logout',
+            callback: function () {
+                window.location.reload();
+            }
+        });
+    },
+
+    onSelectLanguage: function (selected) {
+        var paramName = 'locale';
+        var paramValue = selected.getValue();
+        var url = window.location.href;
+        if (url.indexOf(paramName + '=') >= 0) {
+            var prefix = url.substring(0, url.indexOf(paramName));
+            var suffix = url.substring(url.indexOf(paramName));
+            suffix = suffix.substring(suffix.indexOf('=') + 1);
+            suffix = (suffix.indexOf('&') >= 0) ? suffix.substring(suffix.indexOf('&')) : '';
+            url = prefix + paramName + '=' + paramValue + suffix;
+        } else {
+            if (url.indexOf('?') < 0) {
+                url += '?' + paramName + '=' + paramValue;
+            } else {
+                url += '&' + paramName + '=' + paramValue;
+            }
+        }
+        window.location.href = url;
+    },
+
+    onAfterRender: function (field) {
+        field.focus();
+    },
+
+    onSpecialKey: function (field, e) {
+        if (e.getKey() === e.ENTER) {
+            this.login();
+        }
+    },
+
+    onLoginClick: function () {
+        Ext.getElementById('submitButton').click();
+        this.login();
+    },
+
+    onRegisterClick: function () {
+        Ext.create('Traccar.view.Register').show();
+    }
+});

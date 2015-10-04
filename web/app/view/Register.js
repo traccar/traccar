@@ -13,50 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.Register', {
-        extend: 'Traccar.view.BaseDialog',
+Ext.define('Traccar.view.Register', {
+    extend: 'Traccar.view.BaseDialog',
 
-        requires: [
-            'Traccar.view.RegisterController'
-        ],
+    requires: [
+        'Traccar.view.RegisterController'
+    ],
 
-        controller: 'register',
+    controller: 'register',
 
-        items: {
-            xtype: 'form',
-            reference: 'form',
-            jsonSubmit: true,
+    items: {
+        xtype: 'form',
+        reference: 'form',
+        jsonSubmit: true,
 
-            items: [{
-                xtype: 'textfield',
-                name: 'name',
-                fieldLabel: Strings.userName,
-                allowBlank: false
-            }, {
-                xtype: 'textfield',
-                name: 'email',
-                fieldLabel: Strings.userEmail,
-                vtype: 'email',
-                allowBlank: false
-            }, {
-                xtype: 'textfield',
-                name: 'password',
-                fieldLabel: Strings.userPassword,
-                inputType: 'password',
-                allowBlank: false
-            }]
-        },
-
-        buttons: [{
-            text: Strings.sharedSave,
-            handler: 'onCreateClick'
+        items: [{
+            xtype: 'textfield',
+            name: 'name',
+            fieldLabel: Strings.userName,
+            allowBlank: false
         }, {
-            text: Strings.sharedCancel,
-            handler: 'closeView'
+            xtype: 'textfield',
+            name: 'email',
+            fieldLabel: Strings.userEmail,
+            vtype: 'email',
+            allowBlank: false
+        }, {
+            xtype: 'textfield',
+            name: 'password',
+            fieldLabel: Strings.userPassword,
+            inputType: 'password',
+            allowBlank: false
         }]
-    });
+    },
 
-})();
+    buttons: [{
+        text: Strings.sharedSave,
+        handler: 'onCreateClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
+    }]
+});

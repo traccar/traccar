@@ -13,25 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.store.Languages', {
-        extend: 'Ext.data.Store',
-        fields: ['code', 'name'],
+Ext.define('Traccar.store.Languages', {
+    extend: 'Ext.data.Store',
+    fields: ['code', 'name'],
 
-        data: (function () {
-            var code, data = [];
-            for (code in Locale.languages) {
-                if (Locale.languages.hasOwnProperty(code)) {
-                    data.push({
-                        code: code,
-                        name: Locale.languages[code].name
-                    });
-                }
+    data: (function () {
+        var code, data = [];
+        for (code in Locale.languages) {
+            if (Locale.languages.hasOwnProperty(code)) {
+                data.push({
+                    code: code,
+                    name: Locale.languages[code].name
+                });
             }
-            return data;
-        })()
-    });
-
-})();
+        }
+        return data;
+    })()
+});

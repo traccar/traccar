@@ -13,71 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.Application', {
-        extend: 'Ext.app.Application',
-        name: 'Traccar',
+Ext.define('Traccar.Application', {
+    extend: 'Ext.app.Application',
+    name: 'Traccar',
 
-        requires: [
-            'Traccar.Style',
-            'Traccar.ErrorManager',
-            'Traccar.AttributeFormatter'
-        ],
+    requires: [
+        'Traccar.Style',
+        'Traccar.ErrorManager',
+        'Traccar.AttributeFormatter'
+    ],
 
-        models: [
-            'Server',
-            'User',
-            'Device',
-            'Position',
-            'Attribute',
-            'Command'
-        ],
+    models: [
+        'Server',
+        'User',
+        'Device',
+        'Position',
+        'Attribute',
+        'Command'
+    ],
 
-        stores: [
-            'Devices',
-            'Positions',
-            'LatestPositions',
-            'Users',
-            'Attributes',
-            'MapTypes',
-            'DistanceUnits',
-            'SpeedUnits',
-            'CommandTypes',
-            'TimeUnits',
-            'Languages'
-        ],
+    stores: [
+        'Devices',
+        'Positions',
+        'LatestPositions',
+        'Users',
+        'Attributes',
+        'MapTypes',
+        'DistanceUnits',
+        'SpeedUnits',
+        'CommandTypes',
+        'TimeUnits',
+        'Languages'
+    ],
 
-        controllers: [
-            'Root'
-        ],
+    controllers: [
+        'Root'
+    ],
 
-        setUser: function (data) {
-            var reader = Ext.create('Ext.data.reader.Json', {
-                model: 'Traccar.model.User'
-            });
-            this.user = reader.readRecords(data).getRecords()[0];
-        },
+    setUser: function (data) {
+        var reader = Ext.create('Ext.data.reader.Json', {
+            model: 'Traccar.model.User'
+        });
+        this.user = reader.readRecords(data).getRecords()[0];
+    },
 
-        getUser: function () {
-            return this.user;
-        },
+    getUser: function () {
+        return this.user;
+    },
 
-        setServer: function (data) {
-            var reader = Ext.create('Ext.data.reader.Json', {
-                model: 'Traccar.model.Server'
-            });
-            this.server = reader.readRecords(data).getRecords()[0];
-        },
+    setServer: function (data) {
+        var reader = Ext.create('Ext.data.reader.Json', {
+            model: 'Traccar.model.Server'
+        });
+        this.server = reader.readRecords(data).getRecords()[0];
+    },
 
-        getServer: function () {
-            return this.server;
-        },
+    getServer: function () {
+        return this.server;
+    },
 
-        getPreference: function (key, defaultValue) {
-            return this.getUser().get(key) || this.getServer().get(key) || defaultValue;
-        }
-    });
-
-})();
+    getPreference: function (key, defaultValue) {
+        return this.getUser().get(key) || this.getServer().get(key) || defaultValue;
+    }
+});

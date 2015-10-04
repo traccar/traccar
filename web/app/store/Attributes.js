@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.store.Attributes', {
-        extend: 'Ext.data.Store',
-        model: 'Traccar.model.Attribute',
+Ext.define('Traccar.store.Attributes', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Attribute',
 
-        sorters: [{
-            property: 'priority'
-        }]
-    });
-
-})();
+    sorters: [{
+        property: 'priority'
+    }]
+});

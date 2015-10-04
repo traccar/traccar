@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.BaseDialog', {
-        extend: 'Ext.window.Window',
+Ext.define('Traccar.view.BaseDialog', {
+    extend: 'Ext.window.Window',
 
-        bodyPadding: Traccar.Style.panelPadding,
-        resizable: false,
-        modal: true
-    });
-
-})();
+    bodyPadding: Traccar.Style.panelPadding,
+    resizable: false,
+    modal: true
+});

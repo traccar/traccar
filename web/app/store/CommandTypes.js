@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.store.CommandTypes', {
-        extend: 'Ext.data.Store',
-        fields: ['key', 'name'],
+Ext.define('Traccar.store.CommandTypes', {
+    extend: 'Ext.data.Store',
+    fields: ['key', 'name'],
 
-        data: [{
-            key: 'positionPeriodic',
-            name: Strings.commandPositionPeriodic
-        }, {
-            key: 'positionStop',
-            name: Strings.commandPositionStop
-        }, {
-            key: 'engineStop',
-            name: Strings.commandEngineStop
-        }, {
-            key: 'engineResume',
-            name: Strings.commandEngineResume
-        }]
-    });
-
-})();
+    data: [{
+        key: 'positionPeriodic',
+        name: Strings.commandPositionPeriodic
+    }, {
+        key: 'positionStop',
+        name: Strings.commandPositionStop
+    }, {
+        key: 'engineStop',
+        name: Strings.commandEngineStop
+    }, {
+        key: 'engineResume',
+        name: Strings.commandEngineResume
+    }]
+});

@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.model.Device', {
-        extend: 'Ext.data.Model',
-        identifier: 'negative',
+Ext.define('Traccar.model.Device', {
+    extend: 'Ext.data.Model',
+    identifier: 'negative',
 
-        fields: [{
-            name: 'id',
-            type: 'int'
-        }, {
-            name: 'name',
-            type: 'string'
-        }, {
-            name: 'uniqueId',
-            type: 'string'
-        }]
-    });
-
-})();
+    fields: [{
+        name: 'id',
+        type: 'int'
+    }, {
+        name: 'name',
+        type: 'string'
+    }, {
+        name: 'uniqueId',
+        type: 'string'
+    }]
+});

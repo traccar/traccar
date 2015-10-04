@@ -13,69 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.ServerDialog', {
-        extend: 'Traccar.view.BaseEditDialog',
+Ext.define('Traccar.view.ServerDialog', {
+    extend: 'Traccar.view.BaseEditDialog',
 
-        requires: [
-            'Traccar.view.BaseEditDialogController'
-        ],
+    requires: [
+        'Traccar.view.BaseEditDialogController'
+    ],
 
-        controller: 'baseEditDialog',
-        title: Strings.serverTitle,
+    controller: 'baseEditDialog',
+    title: Strings.serverTitle,
 
-        items: {
-            xtype: 'form',
-            items: [{
-                xtype: 'checkboxfield',
-                name: 'registration',
-                fieldLabel: Strings.serverRegistration,
-                allowBlank: false
-            }, {
-                xtype: 'combobox',
-                name: 'map',
-                fieldLabel: Strings.mapLayer,
-                store: 'MapTypes',
-                displayField: 'name',
-                valueField: 'key'
-            }, {
-                xtype: 'textfield',
-                name: 'bingKey',
-                fieldLabel: Strings.mapBingKey
-            }, {
-                xtype: 'textfield',
-                name: 'mapUrl',
-                fieldLabel: Strings.mapCustom
-            }, {
-                xtype: 'combobox',
-                name: 'distanceUnit',
-                fieldLabel: Strings.settingsDistanceUnit,
-                store: 'DistanceUnits',
-                displayField: 'name',
-                valueField: 'key'
-            }, {
-                xtype: 'combobox',
-                name: 'speedUnit',
-                fieldLabel: Strings.settingsSpeedUnit,
-                store: 'SpeedUnits',
-                displayField: 'name',
-                valueField: 'key'
-            }, {
-                xtype: 'numberfield',
-                name: 'latitude',
-                fieldLabel: Strings.positionLatitude
-            }, {
-                xtype: 'numberfield',
-                name: 'longitude',
-                fieldLabel: Strings.positionLongitude
-            }, {
-                xtype: 'numberfield',
-                name: 'zoom',
-                fieldLabel: Strings.serverZoom
-            }]
-        }
-    });
-
-})();
+    items: {
+        xtype: 'form',
+        items: [{
+            xtype: 'checkboxfield',
+            name: 'registration',
+            fieldLabel: Strings.serverRegistration,
+            allowBlank: false
+        }, {
+            xtype: 'combobox',
+            name: 'map',
+            fieldLabel: Strings.mapLayer,
+            store: 'MapTypes',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
+            xtype: 'textfield',
+            name: 'bingKey',
+            fieldLabel: Strings.mapBingKey
+        }, {
+            xtype: 'textfield',
+            name: 'mapUrl',
+            fieldLabel: Strings.mapCustom
+        }, {
+            xtype: 'combobox',
+            name: 'distanceUnit',
+            fieldLabel: Strings.settingsDistanceUnit,
+            store: 'DistanceUnits',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
+            xtype: 'combobox',
+            name: 'speedUnit',
+            fieldLabel: Strings.settingsSpeedUnit,
+            store: 'SpeedUnits',
+            displayField: 'name',
+            valueField: 'key'
+        }, {
+            xtype: 'numberfield',
+            name: 'latitude',
+            fieldLabel: Strings.positionLatitude
+        }, {
+            xtype: 'numberfield',
+            name: 'longitude',
+            fieldLabel: Strings.positionLongitude
+        }, {
+            xtype: 'numberfield',
+            name: 'zoom',
+            fieldLabel: Strings.serverZoom
+        }]
+    }
+});

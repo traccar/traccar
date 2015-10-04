@@ -13,81 +13,77 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.controller.Root', {
-        extend: 'Ext.app.Controller',
+Ext.define('Traccar.controller.Root', {
+    extend: 'Ext.app.Controller',
 
-        requires: [
-            'Traccar.view.Login',
-            'Traccar.view.Main',
-            'Traccar.view.MainMobile'
-        ],
+    requires: [
+        'Traccar.view.Login',
+        'Traccar.view.Main',
+        'Traccar.view.MainMobile'
+    ],
 
-        init: function () {
-            var indicator = document.createElement('div');
-            indicator.className = 'state-indicator';
-            document.body.appendChild(indicator);
-            this.isPhone = parseInt(window.getComputedStyle(indicator).getPropertyValue('z-index'), 10) !== 0;
-        },
+    init: function () {
+        var indicator = document.createElement('div');
+        indicator.className = 'state-indicator';
+        document.body.appendChild(indicator);
+        this.isPhone = parseInt(window.getComputedStyle(indicator).getPropertyValue('z-index'), 10) !== 0;
+    },
 
-        onLaunch: function () {
-            Ext.Ajax.request({
-                scope: this,
-                url: '/api/server/get',
-                callback: this.onServerReturn
-            });
-        },
+    onLaunch: function () {
+        Ext.Ajax.request({
+            scope: this,
+            url: '/api/server/get',
+            callback: this.onServerReturn
+        });
+    },
 
-        onServerReturn: function (options, success, response) {
-            var result;
-            if (Traccar.ErrorManager.check(success, response)) {
-                result = Ext.decode(response.responseText);
-                if (result.success) {
-                    Traccar.app.setServer(result.data);
-                    Ext.Ajax.request({
-                        scope: this,
-                        url: '/api/session',
-                        callback: this.onSessionReturn
-                    });
-                }
-            }
-        },
-
-        onSessionReturn: function (options, success, response) {
-            var result;
-            if (Traccar.ErrorManager.check(success, response)) {
-                result = Ext.decode(response.responseText);
-                if (result.success) {
-                    Traccar.app.setUser(result.data);
-                    this.loadApp();
-                } else {
-                    this.login = Ext.create('widget.login', {
-                        listeners: {
-                            scope: this,
-                            login: this.onLogin
-                        }
-                    });
-                    this.login.show();
-                }
-            }
-        },
-
-        onLogin: function () {
-            this.login.close();
-            this.loadApp();
-        },
-
-        loadApp: function () {
-            Ext.getStore('Devices').load();
-            Ext.getBody().empty();
-            if (this.isPhone) {
-                Ext.create('widget.mainMobile');
-            } else {
-                Ext.create('widget.main');
+    onServerReturn: function (options, success, response) {
+        var result;
+        if (Traccar.ErrorManager.check(success, response)) {
+            result = Ext.decode(response.responseText);
+            if (result.success) {
+                Traccar.app.setServer(result.data);
+                Ext.Ajax.request({
+                    scope: this,
+                    url: '/api/session',
+                    callback: this.onSessionReturn
+                });
             }
         }
-    });
+    },
 
-})();
+    onSessionReturn: function (options, success, response) {
+        var result;
+        if (Traccar.ErrorManager.check(success, response)) {
+            result = Ext.decode(response.responseText);
+            if (result.success) {
+                Traccar.app.setUser(result.data);
+                this.loadApp();
+            } else {
+                this.login = Ext.create('widget.login', {
+                    listeners: {
+                        scope: this,
+                        login: this.onLogin
+                    }
+                });
+                this.login.show();
+            }
+        }
+    },
+
+    onLogin: function () {
+        this.login.close();
+        this.loadApp();
+    },
+
+    loadApp: function () {
+        Ext.getStore('Devices').load();
+        Ext.getBody().empty();
+        if (this.isPhone) {
+            Ext.create('widget.mainMobile');
+        } else {
+            Ext.create('widget.main');
+        }
+    }
+});

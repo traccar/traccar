@@ -13,26 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.store.MapTypes', {
-        extend: 'Ext.data.Store',
-        fields: ['key', 'name'],
+Ext.define('Traccar.store.MapTypes', {
+    extend: 'Ext.data.Store',
+    fields: ['key', 'name'],
 
-        data: [{
-            key: 'osm',
-            name: Strings.mapOsm
-        }, {
-            key: 'bingRoad',
-            name: Strings.mapBingRoad
-        }, {
-            key: 'bingAerial',
-            name: Strings.mapBingAerial
-        }, {
-            key: 'custom',
-            name: Strings.mapCustom
-        }]
-    });
-
-})();
+    data: [{
+        key: 'osm',
+        name: Strings.mapOsm
+    }, {
+        key: 'bingRoad',
+        name: Strings.mapBingRoad
+    }, {
+        key: 'bingAerial',
+        name: Strings.mapBingAerial
+    }, {
+        key: 'custom',
+        name: Strings.mapCustom
+    }]
+});

@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.store.Devices', {
-        extend: 'Ext.data.Store',
-        model: 'Traccar.model.Device',
+Ext.define('Traccar.store.Devices', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Device',
 
-        proxy: {
-            type: 'ajax',
-            api: {
-                create: '/api/device/add',
-                read: '/api/device/get',
-                update: '/api/device/update',
-                destroy: '/api/device/remove'
-            },
-            reader: {
-                type: 'json',
-                rootProperty: 'data'
-            },
-            writer: {
-                type: 'json',
-                writeAllFields: true
-            }
+    proxy: {
+        type: 'ajax',
+        api: {
+            create: '/api/device/add',
+            read: '/api/device/get',
+            update: '/api/device/update',
+            destroy: '/api/device/remove'
+        },
+        reader: {
+            type: 'json',
+            rootProperty: 'data'
+        },
+        writer: {
+            type: 'json',
+            writeAllFields: true
         }
-    });
-
-})();
+    }
+});

@@ -13,59 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.CommandDialog', {
-        extend: 'Traccar.view.BaseDialog',
+Ext.define('Traccar.view.CommandDialog', {
+    extend: 'Traccar.view.BaseDialog',
 
-        requires: [
-            'Traccar.view.CommandDialogController'
-        ],
+    requires: [
+        'Traccar.view.CommandDialogController'
+    ],
 
-        controller: 'commandDialog',
-        title: Strings.commandTitle,
+    controller: 'commandDialog',
+    title: Strings.commandTitle,
 
-        items: {
-            xtype: 'form',
-            items: [{
-                xtype: 'combobox',
-                name: 'type',
-                fieldLabel: Strings.commandType,
-                store: 'CommandTypes',
-                displayField: 'name',
-                valueField: 'key',
-                listeners: {
-                    select: 'onSelect'
-                }
-            }, {
-                xtype: 'fieldcontainer',
-                reference: 'paramPositionPeriodic',
-                name: 'attributes',
-                hidden: true,
-
-                items: [{
-                    xtype: 'numberfield',
-                    fieldLabel: Strings.commandFrequency,
-                    name: 'frequency'
-                }, {
-                    xtype: 'combobox',
-                    fieldLabel: Strings.commandUnit,
-                    name: 'unit',
-                    store: 'TimeUnits',
-                    displayField: 'name',
-                    valueField: 'factor'
-                }]
-            }]
-        },
-
-        buttons: [{
-            text: Strings.commandSend,
-            handler: 'onSendClick'
+    items: {
+        xtype: 'form',
+        items: [{
+            xtype: 'combobox',
+            name: 'type',
+            fieldLabel: Strings.commandType,
+            store: 'CommandTypes',
+            displayField: 'name',
+            valueField: 'key',
+            listeners: {
+                select: 'onSelect'
+            }
         }, {
-            text: Strings.sharedCancel,
-            handler: 'closeView'
-        }]
-    });
+            xtype: 'fieldcontainer',
+            reference: 'paramPositionPeriodic',
+            name: 'attributes',
+            hidden: true,
 
-})();
+            items: [{
+                xtype: 'numberfield',
+                fieldLabel: Strings.commandFrequency,
+                name: 'frequency'
+            }, {
+                xtype: 'combobox',
+                fieldLabel: Strings.commandUnit,
+                name: 'unit',
+                store: 'TimeUnits',
+                displayField: 'name',
+                valueField: 'factor'
+            }]
+        }]
+    },
+
+    buttons: [{
+        text: Strings.commandSend,
+        handler: 'onSendClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
+    }]
+});

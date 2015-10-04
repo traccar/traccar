@@ -13,110 +13,106 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-(function () {
-    'use strict';
 
-    Ext.define('Traccar.view.Report', {
-        extend: 'Ext.grid.Panel',
-        xtype: 'reportView',
+Ext.define('Traccar.view.Report', {
+    extend: 'Ext.grid.Panel',
+    xtype: 'reportView',
 
-        requires: [
-            'Traccar.view.ReportController'
-        ],
+    requires: [
+        'Traccar.view.ReportController'
+    ],
 
-        controller: 'report',
-        store: 'Positions',
+    controller: 'report',
+    store: 'Positions',
 
-        title: Strings.reportTitle,
+    title: Strings.reportTitle,
 
-        tbar: [{
-            xtype: 'tbtext',
-            html: Strings.reportDevice
-        }, {
-            xtype: 'combobox',
-            reference: 'deviceField',
-            store: 'Devices',
-            valueField: 'id',
-            displayField: 'name',
-            typeAhead: true,
-            queryMode: 'local'
-        }, '-', {
-            xtype: 'tbtext',
-            html: Strings.reportFrom
-        }, {
-            xtype: 'datefield',
-            reference: 'fromDateField',
-            startDay: Traccar.Style.weekStartDay,
-            value: new Date(new Date().getTime() - 30 * 60 * 1000)
-        }, {
-            xtype: 'timefield',
-            reference: 'fromTimeField',
-            maxWidth: Traccar.Style.reportTime,
-            format: Traccar.Style.timeFormat,
-            value: new Date(new Date().getTime() - 30 * 60 * 1000)
-        }, '-', {
-            xtype: 'tbtext',
-            html: Strings.reportTo
-        }, {
-            xtype: 'datefield',
-            reference: 'toDateField',
-            startDay: Traccar.Style.weekStartDay,
-            value: new Date()
-        }, {
-            xtype: 'timefield',
-            reference: 'toTimeField',
-            maxWidth: Traccar.Style.reportTime,
-            format: Traccar.Style.timeFormat,
-            value: new Date()
-        }, '-', {
-            text: Strings.reportShow,
-            handler: 'onShowClick'
-        }, {
-            text: Strings.reportClear,
-            handler: 'onClearClick'
-        }],
+    tbar: [{
+        xtype: 'tbtext',
+        html: Strings.reportDevice
+    }, {
+        xtype: 'combobox',
+        reference: 'deviceField',
+        store: 'Devices',
+        valueField: 'id',
+        displayField: 'name',
+        typeAhead: true,
+        queryMode: 'local'
+    }, '-', {
+        xtype: 'tbtext',
+        html: Strings.reportFrom
+    }, {
+        xtype: 'datefield',
+        reference: 'fromDateField',
+        startDay: Traccar.Style.weekStartDay,
+        value: new Date(new Date().getTime() - 30 * 60 * 1000)
+    }, {
+        xtype: 'timefield',
+        reference: 'fromTimeField',
+        maxWidth: Traccar.Style.reportTime,
+        format: Traccar.Style.timeFormat,
+        value: new Date(new Date().getTime() - 30 * 60 * 1000)
+    }, '-', {
+        xtype: 'tbtext',
+        html: Strings.reportTo
+    }, {
+        xtype: 'datefield',
+        reference: 'toDateField',
+        startDay: Traccar.Style.weekStartDay,
+        value: new Date()
+    }, {
+        xtype: 'timefield',
+        reference: 'toTimeField',
+        maxWidth: Traccar.Style.reportTime,
+        format: Traccar.Style.timeFormat,
+        value: new Date()
+    }, '-', {
+        text: Strings.reportShow,
+        handler: 'onShowClick'
+    }, {
+        text: Strings.reportClear,
+        handler: 'onClearClick'
+    }],
 
-        listeners: {
-            selectionchange: 'onSelectionChange'
-        },
+    listeners: {
+        selectionchange: 'onSelectionChange'
+    },
 
-        columns: [{
-            text: Strings.positionValid,
-            dataIndex: 'valid',
-            flex: 1,
-            renderer: Traccar.AttributeFormatter.getFormatter('valid')
-        }, {
-            text: Strings.positionTime,
-            dataIndex: 'fixTime',
-            flex: 1,
-            xtype: 'datecolumn',
-            renderer: Traccar.AttributeFormatter.getFormatter('fixTime')
-        }, {
-            text: Strings.positionLatitude,
-            dataIndex: 'latitude',
-            flex: 1,
-            renderer: Traccar.AttributeFormatter.getFormatter('latitude')
-        }, {
-            text: Strings.positionLongitude,
-            dataIndex: 'longitude',
-            flex: 1,
-            renderer: Traccar.AttributeFormatter.getFormatter('latitude')
-        }, {
-            text: Strings.positionAltitude,
-            dataIndex: 'altitude',
-            flex: 1,
-            renderer: Traccar.AttributeFormatter.getFormatter('altitude')
-        }, {
-            text: Strings.positionSpeed,
-            dataIndex: 'speed',
-            flex: 1,
-            renderer: Traccar.AttributeFormatter.getFormatter('speed')
-        }, {
-            text: Strings.positionAddress,
-            dataIndex: 'address',
-            flex: 1,
-            renderer: Traccar.AttributeFormatter.getFormatter('address')
-        }]
-    });
-
-})();
+    columns: [{
+        text: Strings.positionValid,
+        dataIndex: 'valid',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('valid')
+    }, {
+        text: Strings.positionTime,
+        dataIndex: 'fixTime',
+        flex: 1,
+        xtype: 'datecolumn',
+        renderer: Traccar.AttributeFormatter.getFormatter('fixTime')
+    }, {
+        text: Strings.positionLatitude,
+        dataIndex: 'latitude',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
+    }, {
+        text: Strings.positionLongitude,
+        dataIndex: 'longitude',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
+    }, {
+        text: Strings.positionAltitude,
+        dataIndex: 'altitude',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('altitude')
+    }, {
+        text: Strings.positionSpeed,
+        dataIndex: 'speed',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('speed')
+    }, {
+        text: Strings.positionAddress,
+        dataIndex: 'address',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('address')
+    }]
+});
