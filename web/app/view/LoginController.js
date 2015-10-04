@@ -102,7 +102,7 @@
         },
 
         onRegisterClick: function () {
-            Ext.create('Traccar.view.login.Register').show();
+            Ext.create('Traccar.view.Register').show();
         }
     });
 

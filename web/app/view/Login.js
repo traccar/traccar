@@ -27,6 +27,7 @@
         controller: 'login',
 
         closable: false,
+        modal: false,
 
         items: {
             xtype: 'form',

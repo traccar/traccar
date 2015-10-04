@@ -20,7 +20,6 @@
         extend: 'Ext.app.Controller',
 
         requires: [
-            'Traccar.LoginManager',
             'Traccar.view.Login',
             'Traccar.view.Main',
             'Traccar.view.MainMobile'
@@ -34,30 +33,44 @@
         },
 
         onLaunch: function () {
-            Traccar.LoginManager.server({
+            Ext.Ajax.request({
                 scope: this,
-                callback: 'onServer'
+                url: '/api/server/get',
+                callback: this.onServerReturn
             });
         },
 
-        onServer: function () {
-            Traccar.LoginManager.session({
-                scope: this,
-                callback: 'onSession'
-            });
-        },
-
-        onSession: function (success) {
-            if (success) {
-                this.loadApp();
-            } else {
-                this.login = Ext.create('widget.login', {
-                    listeners: {
+        onServerReturn: function (options, success, response) {
+            var result;
+            if (Traccar.ErrorManager.check(success, response)) {
+                result = Ext.decode(response.responseText);
+                if (result.success) {
+                    Traccar.app.setServer(result.data);
+                    Ext.Ajax.request({
                         scope: this,
-                        login: 'onLogin'
-                    }
-                });
-                this.login.show();
+                        url: '/api/session',
+                        callback: this.onSessionReturn
+                    });
+                }
+            }
+        },
+
+        onSessionReturn: function (options, success, response) {
+            var result;
+            if (Traccar.ErrorManager.check(success, response)) {
+                result = Ext.decode(response.responseText);
+                if (result.success) {
+                    Traccar.app.setUser(result.data);
+                    this.loadApp();
+                } else {
+                    this.login = Ext.create('widget.login', {
+                        listeners: {
+                            scope: this,
+                            login: this.onLogin
+                        }
+                    });
+                    this.login.show();
+                }
             }
         },
 
