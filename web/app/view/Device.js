@@ -29,9 +29,8 @@ Ext.define('Traccar.view.Device', {
     title: Strings.deviceTitle,
     selType: 'rowmodel',
 
-    dockedItems: [{
-        xtype : 'baseEditToolbar',
-        dock : "top",
+    tbar: {
+        xtype: 'baseEditToolbar',
         items: [{
             disabled: true,
             handler: 'onCommandClick',
@@ -39,70 +38,31 @@ Ext.define('Traccar.view.Device', {
             glyph: 'xf093@FontAwesome',
             tooltip: Strings.deviceCommand,
             tooltipType: 'title'
-        }]
-    }],
-
-    //tbar: {
-      //  xtype: 'baseEditToolbar',
-        /*items: [{
-            disabled: true,
-            handler: 'onCommandClick',
-            reference: 'deviceCommandButton',
-            glyph: 'xf093@FontAwesome',
-            tooltip: Strings.deviceCommand,
-            tooltipType: 'title'
-        }]*/
-    //},
-
-    /*tbar: [{
-        handler: 'onAddClick',
-        reference: 'deviceAddButton',
-        glyph: 'xf067@FontAwesome',
-        tooltip: Strings.sharedAdd,
-        tooltipType: 'title'
-    }, {
-        disabled: true,
-        handler: 'onEditClick',
-        reference: 'deviceEditButton',
-        glyph: 'xf040@FontAwesome',
-        tooltip: Strings.sharedEdit,
-        tooltipType: 'title'
-    }, {
-        disabled: true,
-        handler: 'onRemoveClick',
-        reference: 'deviceRemoveButton',
-        glyph: 'xf00d@FontAwesome',
-        tooltip: Strings.sharedRemove,
-        tooltipType: 'title'
-    }, {
-        disabled: true,
-        handler: 'onCommandClick',
-        reference: 'deviceCommandButton',
-        glyph: 'xf093@FontAwesome',
-        tooltip: Strings.deviceCommand,
-        tooltipType: 'title'
-    }, {
-        xtype: 'tbfill'
-    }, {
-        text: Strings.settingsTitle,
-        menu: [{
-            text: Strings.settingsUser,
-            handler: 'onUserClick'
         }, {
-            text: Strings.settingsServer,
-            hidden: true,
-            handler: 'onServerClick',
-            reference: 'settingsServerButton'
+            xtype: 'tbfill'
         }, {
-            text: Strings.settingsUsers,
-            hidden: true,
-            handler: 'onUsersClick',
-            reference: 'settingsUsersButton'
+            glyph: 'xf013@FontAwesome',
+            tooltip: Strings.settingsTitle,
+            tooltipType: 'title',
+            menu: [{
+                text: Strings.settingsUser,
+                handler: 'onUserClick'
+            }, {
+                text: Strings.settingsServer,
+                hidden: true,
+                handler: 'onServerClick',
+                reference: 'settingsServerButton'
+            }, {
+                text: Strings.settingsUsers,
+                hidden: true,
+                handler: 'onUsersClick',
+                reference: 'settingsUsersButton'
+            }, {
+                text: Strings.loginLogout,
+                handler: 'onLogoutClick'
+            }]
         }]
-    }, {
-        text: Strings.loginLogout,
-        handler: 'onLogoutClick'
-    }],*/
+    },
 
     listeners: {
         selectionchange: 'onSelectionChange'

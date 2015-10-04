@@ -78,8 +78,8 @@ Ext.define('Traccar.view.UserController', {
 
     onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
-        this.lookupReference('userEditButton').setDisabled(disabled);
-        this.lookupReference('userRemoveButton').setDisabled(disabled);
+        this.lookupReference('toolbarEditButton').setDisabled(disabled);
+        this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
         this.lookupReference('userDevicesButton').setDisabled(disabled);
     }
 

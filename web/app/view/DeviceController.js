@@ -97,8 +97,8 @@ Ext.define('Traccar.view.DeviceController', {
 
     onSelectionChange: function (selected) {
         var empty = selected.getCount() === 0;
-        this.lookupReference('deviceEditButton').setDisabled(empty);
-        this.lookupReference('deviceRemoveButton').setDisabled(empty);
+        this.lookupReference('toolbarEditButton').setDisabled(empty);
+        this.lookupReference('toolbarRemoveButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty);
         if (!empty) {
             this.fireEvent('selectDevice', selected.getLastSelected());

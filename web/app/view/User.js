@@ -19,7 +19,8 @@ Ext.define('Traccar.view.User', {
     xtype: 'userView',
 
     requires: [
-        'Traccar.view.UserController'
+        'Traccar.view.UserController',
+        'Traccar.view.BaseEditToolbar'
     ],
 
     controller: 'user',
@@ -27,26 +28,15 @@ Ext.define('Traccar.view.User', {
 
     selType: 'rowmodel',
 
-    tbar: [{
-        text: Strings.sharedAdd,
-        handler: 'onAddClick',
-        reference: 'deviceAddButton'
-    }, {
-        text: Strings.sharedEdit,
-        disabled: true,
-        handler: 'onEditClick',
-        reference: 'userEditButton'
-    }, {
-        text: Strings.sharedRemove,
-        disabled: true,
-        handler: 'onRemoveClick',
-        reference: 'userRemoveButton'
-    }, {
-        text: Strings.deviceTitle,
-        disabled: true,
-        handler: 'onDevicesClick',
-        reference: 'userDevicesButton'
-    }],
+    tbar: {
+        xtype: 'baseEditToolbar',
+        items: [{
+            text: Strings.deviceTitle,
+            disabled: true,
+            handler: 'onDevicesClick',
+            reference: 'userDevicesButton'
+        }]
+    },
 
     listeners: {
         selectionchange: 'onSelectionChange'
