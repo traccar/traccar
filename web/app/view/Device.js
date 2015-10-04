@@ -20,7 +20,8 @@ Ext.define('Traccar.view.Device', {
 
     requires: [
         'Traccar.view.DeviceController',
-        'Traccar.view.BaseEditToolbar'
+        'Traccar.view.EditToolbar',
+        'Traccar.view.SettingsMenu'
     ],
 
     controller: 'device',
@@ -30,7 +31,7 @@ Ext.define('Traccar.view.Device', {
     selType: 'rowmodel',
 
     tbar: {
-        xtype: 'baseEditToolbar',
+        xtype: 'editToolbar',
         items: [{
             disabled: true,
             handler: 'onCommandClick',
@@ -41,26 +42,7 @@ Ext.define('Traccar.view.Device', {
         }, {
             xtype: 'tbfill'
         }, {
-            glyph: 'xf013@FontAwesome',
-            tooltip: Strings.settingsTitle,
-            tooltipType: 'title',
-            menu: [{
-                text: Strings.settingsUser,
-                handler: 'onUserClick'
-            }, {
-                text: Strings.settingsServer,
-                hidden: true,
-                handler: 'onServerClick',
-                reference: 'settingsServerButton'
-            }, {
-                text: Strings.settingsUsers,
-                hidden: true,
-                handler: 'onUsersClick',
-                reference: 'settingsUsersButton'
-            }, {
-                text: Strings.loginLogout,
-                handler: 'onLogoutClick'
-            }]
+            xtype: 'settingsMenu'
         }]
     },
 

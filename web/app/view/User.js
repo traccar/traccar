@@ -20,7 +20,7 @@ Ext.define('Traccar.view.User', {
 
     requires: [
         'Traccar.view.UserController',
-        'Traccar.view.BaseEditToolbar'
+        'Traccar.view.EditToolbar'
     ],
 
     controller: 'user',
@@ -29,7 +29,7 @@ Ext.define('Traccar.view.User', {
     selType: 'rowmodel',
 
     tbar: {
-        xtype: 'baseEditToolbar',
+        xtype: 'editToolbar',
         items: [{
             text: Strings.deviceTitle,
             disabled: true,

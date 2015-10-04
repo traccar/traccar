@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.BaseEditToolbar', {
+Ext.define('Traccar.view.EditToolbar', {
     extend: 'Ext.toolbar.Toolbar',
-    xtype: 'baseEditToolbar',
+    xtype: 'editToolbar',
 
     initComponent: function () {
         this.callParent(arguments);

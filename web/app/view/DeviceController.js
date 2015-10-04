@@ -22,8 +22,7 @@ Ext.define('Traccar.view.DeviceController', {
         'Traccar.view.CommandDialog',
         'Traccar.view.DeviceDialog',
         'Traccar.view.UserDialog',
-        'Traccar.view.User',
-        'Traccar.view.LoginController'
+        'Traccar.view.User'
     ],
 
     config: {
@@ -34,17 +33,6 @@ Ext.define('Traccar.view.DeviceController', {
                 }
             }
         }
-    },
-
-    init: function () {
-        if (Traccar.app.getUser().get('admin')) {
-            this.lookupReference('settingsServerButton').setHidden(false);
-            this.lookupReference('settingsUsersButton').setHidden(false);
-        }
-    },
-
-    onLogoutClick: function () {
-        Ext.create('Traccar.view.LoginController').logout();
     },
 
     onAddClick: function () {
@@ -103,31 +91,6 @@ Ext.define('Traccar.view.DeviceController', {
         if (!empty) {
             this.fireEvent('selectDevice', selected.getLastSelected());
         }
-    },
-
-    onUserClick: function () {
-        var dialog = Ext.create('Traccar.view.UserDialog');
-        dialog.down('form').loadRecord(Traccar.app.getUser());
-        dialog.show();
-    },
-
-    onServerClick: function () {
-        var dialog = Ext.create('Traccar.view.ServerDialog');
-        dialog.down('form').loadRecord(Traccar.app.getServer());
-        dialog.show();
-    },
-
-    onUsersClick: function () {
-        Ext.create('Ext.window.Window', {
-            title: Strings.settingsUsers,
-            width: Traccar.Style.windowWidth,
-            height: Traccar.Style.windowHeight,
-            layout: 'fit',
-            modal: true,
-            items: {
-                xtype: 'userView'
-            }
-        }).show();
     },
 
     selectReport: function (position) {
