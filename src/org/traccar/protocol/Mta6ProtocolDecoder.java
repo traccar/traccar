@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.Charset;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -31,8 +31,8 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BitUtil;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -301,7 +301,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         short offset = buf.readUnsignedByte(); // dataOffset
         short packetCount = buf.readUnsignedByte();
         buf.readUnsignedByte(); // reserved
-        short parameters = buf.readUnsignedByte(); // TODO: handle timezone
+        buf.readUnsignedByte(); // TODO: handle timezone
         buf.skipBytes(offset - 5);
 
         // Send response

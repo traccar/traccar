@@ -15,18 +15,16 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -74,7 +72,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
         // Authentication
         if (type == MSG_IDENT || type == MSG_IDENT_FULL) {
-            long id = buf.readUnsignedInt();
+            buf.readUnsignedInt(); // id
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();

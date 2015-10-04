@@ -19,8 +19,6 @@ import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-import java.util.Date;
-
 public class FilterHandler extends BaseDataHandler {
 
     private static final long FILTER_FUTURE_LIMIT = 5 * 60 * 1000;
@@ -72,8 +70,8 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filterZero(Position position) {
         return filterZero &&
-                (position.getLatitude() == 0.0) &&
-                (position.getLongitude() == 0.0);
+                position.getLatitude() == 0.0 &&
+                position.getLongitude() == 0.0;
     }
 
     private boolean filterDuplicate(Position position) {

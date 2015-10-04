@@ -32,18 +32,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private String readImei(ChannelBuffer buf) {
-        int b = buf.readUnsignedByte();
-        StringBuilder imei = new StringBuilder();
-        imei.append(b & 0x0F);
-        for (int i = 0; i < 7; i++) {
-            b = buf.readUnsignedByte();
-            imei.append((b & 0xF0) >> 4);
-            imei.append(b & 0x0F);
-        }
-        return imei.toString();
-    }
-
     private static final int MSG_LOGIN = 0x01;
     private static final int MSG_GPS = 0x02;
     private static final int MSG_HEARTBEAT = 0x03;

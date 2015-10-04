@@ -15,16 +15,15 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.channel.Channel;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
 
@@ -51,8 +50,6 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
             "(\\d)" +                           // Output
             "(\\d{3})" +                        // Temperature
             ".*");
-
-    private static final Pattern handshakePattern = Pattern.compile("##,imei:(\\d+),A");
 
     @Override
     protected Object decode(

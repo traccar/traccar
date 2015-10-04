@@ -15,14 +15,12 @@
  */
 package org.traccar.protocol;
 
-import java.nio.ByteOrder;
 import java.net.SocketAddress;
+import java.nio.ByteOrder;
 import java.util.Calendar;
 import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
@@ -33,18 +31,6 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
     public CellocatorProtocolDecoder(CellocatorProtocol protocol) {
         super(protocol);
-    }
-
-    private String readImei(ChannelBuffer buf) {
-        int b = buf.readUnsignedByte();
-        StringBuilder imei = new StringBuilder();
-        imei.append(b & 0x0F);
-        for (int i = 0; i < 7; i++) {
-            b = buf.readUnsignedByte();
-            imei.append((b & 0xF0) >> 4);
-            imei.append(b & 0x0F);
-        }
-        return imei.toString();
     }
 
     static final int MSG_CLIENT_STATUS = 0;

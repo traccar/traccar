@@ -188,7 +188,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         short flags = buf.readUnsignedByte();
         position.setValid((flags & 0x80) == 0x80 && (flags & 0x40) == 0x40);
 
-        int x = buf.readUnsignedByte(); // satellites in fix
+        position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
         buf.readUnsignedInt(); // distance
         return position;
     }

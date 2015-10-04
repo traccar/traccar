@@ -15,19 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Crc;
-import org.traccar.helper.PatternUtil;
-import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.channel.Channel;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
@@ -98,8 +95,6 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             }
 
         } else if (sentence.contains("UNITSTAT") && hasDeviceId()) {
-
-            String x = PatternUtil.checkPattern(pattern.pattern(), sentence);
 
             Matcher parser = pattern.matcher(sentence);
             if (!parser.matches()) {
