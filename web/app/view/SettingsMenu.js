@@ -23,8 +23,7 @@ Ext.define('Traccar.view.SettingsMenu', {
     ],
 
     glyph: 'xf013@FontAwesome',
-    tooltip: Strings.settingsTitle,
-    tooltipType: 'title',
+    text: Strings.settingsTitle,
 
     menu: {
         controller: 'settings',
