@@ -138,7 +138,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             // Send response
             if (type == MSG_ASYNC_STACK && channel != null) {
                 ChannelBuffer response = ChannelBuffers.buffer(ByteOrder.LITTLE_ENDIAN, 8 + 2 + 2 + 1);
-                response.writeLong(Long.valueOf(imei));
+                response.writeLong(Long.parseLong(imei));
                 response.writeShort(2);
                 response.writeByte(MSG_STACK_COFIRM);
                 response.writeByte(confirmKey);

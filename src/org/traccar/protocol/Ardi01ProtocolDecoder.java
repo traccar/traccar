@@ -15,17 +15,16 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.channel.Channel;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.netty.channel.Channel;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -74,23 +73,23 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
         position.setTime(time.getTime());
 
         // Location data
-        position.setLongitude(Double.valueOf(parser.group(index++)));
-        position.setLatitude(Double.valueOf(parser.group(index++)));
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
-        position.setCourse(Double.valueOf(parser.group(index++)));
-        position.setAltitude(Double.valueOf(parser.group(index++)));
+        position.setLongitude(Double.parseDouble(parser.group(index++)));
+        position.setLatitude(Double.parseDouble(parser.group(index++)));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
+        position.setAltitude(Double.parseDouble(parser.group(index++)));
 
         // Satellites
-        int satellites = Integer.valueOf(parser.group(index++));
+        int satellites = Integer.parseInt(parser.group(index++));
         position.setValid(satellites >= 3);
         position.set(Event.KEY_SATELLITES, satellites);
 

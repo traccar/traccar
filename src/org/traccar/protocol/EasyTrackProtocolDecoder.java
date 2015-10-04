@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
@@ -118,7 +117,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set("signal", parser.group(index++));
 
         // Power
-        position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
+        position.set(Event.KEY_POWER, Double.parseDouble(parser.group(index++)));
 
         // Oil
         position.set("oil", Integer.parseInt(parser.group(index++), 16));
@@ -129,7 +128,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         // Altitude
         String altitude = parser.group(index++);
         if (altitude != null) {
-            position.setAltitude(Double.valueOf(altitude));
+            position.setAltitude(Double.parseDouble(altitude));
         }
         return position;
     }

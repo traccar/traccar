@@ -32,7 +32,7 @@ public class Config {
     }
 
     public boolean getBoolean(String key) {
-        return Boolean.valueOf(properties.getProperty(key));
+        return Boolean.parseBoolean(properties.getProperty(key));
     }
 
     public int getInteger(String key) {
@@ -41,7 +41,7 @@ public class Config {
 
     public int getInteger(String key, int defaultValue) {
         if (properties.containsKey(key)) {
-            return Integer.valueOf(properties.getProperty(key));
+            return Integer.parseInt(properties.getProperty(key));
         } else {
             return defaultValue;
         }
@@ -53,7 +53,7 @@ public class Config {
 
     public long getLong(String key, long defaultValue) {
         if (properties.containsKey(key)) {
-            return Long.valueOf(properties.getProperty(key));
+            return Long.parseLong(properties.getProperty(key));
         } else {
             return defaultValue;
         }
