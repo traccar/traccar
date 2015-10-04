@@ -15,14 +15,13 @@
  */
 package org.traccar;
 
-import org.traccar.model.Command;
-
 import java.util.Map;
+import org.traccar.model.Command;
 
 public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 
     public interface ValueFormatter {
-        public String formatValue(String key, Object value);
+        String formatValue(String key, Object value);
     }
 
     protected String formatCommand(Command command, String format, ValueFormatter valueFormatter, String... keys) {

@@ -6,7 +6,7 @@ import org.traccar.model.Command;
 
 public interface Protocol {
 
-    public String getName();
+    String getName();
 
     void sendCommand(ActiveDevice activeDevice, Command command);
 

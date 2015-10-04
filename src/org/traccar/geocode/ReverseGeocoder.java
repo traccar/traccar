@@ -17,6 +17,6 @@ package org.traccar.geocode;
 
 public interface ReverseGeocoder {
 
-    public String getAddress(AddressFormat format, double latitude, double longitude);
+    String getAddress(AddressFormat format, double latitude, double longitude);
 
 }

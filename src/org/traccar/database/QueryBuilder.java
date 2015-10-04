@@ -36,7 +36,6 @@ import javax.json.Json;
 import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 import javax.sql.DataSource;
-
 import org.traccar.Context;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
@@ -267,7 +266,7 @@ public class QueryBuilder {
     }
 
     private interface ResultSetProcessor<T> {
-        public void process(T object, ResultSet resultSet) throws SQLException;
+        void process(T object, ResultSet resultSet) throws SQLException;
     }
 
     public <T extends Factory> T executeQuerySingle(T prototype) throws SQLException {

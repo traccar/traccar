@@ -17,6 +17,6 @@ package org.traccar.model;
 
 public interface Factory {
 
-    public Object create();
+    Object create();
 
 }

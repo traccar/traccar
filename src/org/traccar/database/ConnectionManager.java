@@ -91,8 +91,8 @@ public class ConnectionManager {
         return result;
     }
 
-    public static interface DataCacheListener {
-        public void onUpdate(Position position);
+    public interface DataCacheListener {
+        void onUpdate(Position position);
     }
 
     public void addListener(Collection<Long> devices, DataCacheListener listener) {
