@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -57,7 +57,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
         return false;
     }
-    
+
     private class ParseResult {
         private final long id;
         private final Position position;
@@ -300,7 +300,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         // Read message type
         String type = buf.toString(buf.readerIndex(), 3, charset);
         buf.skipBytes(type.length());
-        
+
         switch (type) {
             case "*>T":
                 return processSingle(channel, buf);

@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -102,33 +102,33 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             // Flags
             int flags = buf.readUnsignedByte();
             position.setValid((flags & 0x80) != 0);
-            
+
             if (type == MSG_ALARM) {
-                
+
                 buf.skipBytes(2);
 
             } else {
 
                 // Odometer
                 position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
-            
+
                 // Status
                 buf.skipBytes(4);
-                
+
                 // Other
                 buf.skipBytes(8);
 
             }
-            
+
             // TODO: parse extra data
             return position;
         }
 
         else if (type == MSG_LOGIN && channel != null) {
-            
+
             buf.skipBytes(4); // serial number
             buf.readByte(); // reserved
-            
+
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeByte(0x29); response.writeByte(0x29); // header
             response.writeByte(MSG_CONFIRMATION);
@@ -141,7 +141,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response);
 
         }
-        
+
         return null;
     }
 

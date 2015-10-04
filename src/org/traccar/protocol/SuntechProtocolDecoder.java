@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,7 +66,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         int index = 1;
-        
+
         String type = parser.group(index++);
         if (type != null && (type.equals("Alert") || type.equals("Emergency"))) {
             position.set(Event.KEY_ALARM, true);
@@ -77,7 +77,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
-        
+
         // Version
         position.set(Event.KEY_VERSION, parser.group(index++));
 
@@ -91,7 +91,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-        
+
         // Cell
         position.set(Event.KEY_CELL, parser.group(index++));
 
@@ -105,7 +105,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
-        
+
         // Battery
         position.set(Event.KEY_BATTERY, parser.group(index++));
 

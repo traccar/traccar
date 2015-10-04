@@ -47,11 +47,11 @@ import org.traccar.web.JsonConverter;
 public class DataManager implements IdentityManager {
 
     private static final long DEFAULT_REFRESH_DELAY = 300;
-    
+
     private final Config config;
-    
+
     private DataSource dataSource;
-    
+
     private final Map<Long, Device> devicesById = new HashMap<>();
     private final Map<String, Device> devicesByUniqueId = new HashMap<>();
     private long devicesLastUpdate;
@@ -65,13 +65,13 @@ public class DataManager implements IdentityManager {
 
         devicesRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
     }
-    
+
     public DataSource getDataSource() {
         return dataSource;
     }
 
     private void initDatabase() throws Exception {
-        
+
         String jndiName = config.getString("database.jndi");
 
         if (jndiName != null) {
@@ -110,7 +110,7 @@ public class DataManager implements IdentityManager {
             dataSource = ds;
         }
     }
-    
+
     @Override
     public Device getDeviceById(long id) {
         return devicesById.get(id);
@@ -132,7 +132,7 @@ public class DataManager implements IdentityManager {
 
         return devicesByUniqueId.get(uniqueId);
     }
-    
+
     private String getQuery(String key) {
         String query = config.getString(key);
         if (query == null) {
@@ -158,10 +158,10 @@ public class DataManager implements IdentityManager {
                 }
             }
             if (exist) {
-                
+
                 String schemaVersionQuery = getQuery("database.selectSchemaVersion");
                 if (schemaVersionQuery != null) {
-                
+
                     Schema schema = QueryBuilder.create(dataSource, schemaVersionQuery).executeQuerySingle(new Schema());
 
                     int version = 0;
@@ -174,7 +174,7 @@ public class DataManager implements IdentityManager {
                         throw new RuntimeException();
                     }
                 }
-                
+
                 return;
             }
 
@@ -196,7 +196,7 @@ public class DataManager implements IdentityManager {
             mockData(admin.getId());
         }
     }
-    
+
     private void mockData(long userId) {
         if (config.getBoolean("database.mock")) {
             try {
@@ -224,7 +224,7 @@ public class DataManager implements IdentityManager {
                 position.setLatitude(-36.8932371);
                 position.setLongitude(174.7743053);
                 addPosition(position);
-                
+
                 updateLatestPosition(position);
 
             } catch (SQLException error) {
@@ -256,7 +256,7 @@ public class DataManager implements IdentityManager {
                 .setObject(user)
                 .executeUpdate());
     }
-    
+
     public void updateUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateUser"))
                 .setObject(user)
@@ -289,26 +289,26 @@ public class DataManager implements IdentityManager {
                 .setLong("userId", userId)
                 .executeQuery(new Device());
     }
-    
+
     public void addDevice(Device device) throws SQLException {
         device.setId(QueryBuilder.create(dataSource, getQuery("database.insertDevice"), true)
                 .setObject(device)
                 .executeUpdate());
     }
-    
+
     public void updateDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateDevice"))
                 .setObject(device)
                 .executeUpdate();
     }
-    
+
     public void removeDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
         AsyncServlet.sessionRefreshDevice(device.getId());
     }
-    
+
     public void linkDevice(long userId, long deviceId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkDevice"))
                 .setLong("userId", userId)

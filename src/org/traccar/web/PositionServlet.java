@@ -39,9 +39,9 @@ public class PositionServlet extends BaseServlet {
             default:
                 return false;
         }
-        return true;        
+        return true;
     }
-    
+
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         long deviceId = Long.valueOf(req.getParameter("deviceId"));
         Context.getPermissionsManager().checkDevice(getUserId(req), deviceId);

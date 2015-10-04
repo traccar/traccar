@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 package org.traccar.protocol;
- 
-import org.traccar.StringProtocolEncoder; 
+
+import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 
 public class TotemProtocolEncoder extends StringProtocolEncoder{
-    
+
     @Override
     protected Object encodeCommand(Command command) {
 
         // Temporary put default password
         command.set(Command.KEY_DEVICE_PASSWORD, "000000");
-        
+
         switch (command.getType()) {
             //Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
             case Command.TYPE_ENGINE_STOP:
@@ -34,7 +34,7 @@ public class TotemProtocolEncoder extends StringProtocolEncoder{
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(command, "*{%s},025,C,0#", Command.KEY_DEVICE_PASSWORD);
         }
-        
+
         return null;
     }
 }

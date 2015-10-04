@@ -33,7 +33,7 @@ public class TramigoFrameDecoder extends LengthFieldBasedFrameDecoder {
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         if (buf.readableBytes() < 20) {
             return null;
         }
@@ -43,7 +43,7 @@ public class TramigoFrameDecoder extends LengthFieldBasedFrameDecoder {
             int length = buf.readableBytes();
             byte bytes[] = new byte[length];
             buf.getBytes(buf.readerIndex(), bytes);
-            
+
             ChannelBuffer result = (ChannelBuffer) super.decode(
                     ctx, channel, ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes));
             if (result != null) {

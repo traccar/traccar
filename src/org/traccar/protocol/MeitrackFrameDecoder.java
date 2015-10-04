@@ -23,7 +23,7 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.traccar.helper.ChannelBufferTools;
 
 public class MeitrackFrameDecoder extends FrameDecoder {
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
@@ -33,7 +33,7 @@ public class MeitrackFrameDecoder extends FrameDecoder {
         if (buf.readableBytes() < 10) {
             return null;
         }
-        
+
         Integer index = ChannelBufferTools.find(buf, buf.readerIndex(), buf.writerIndex(), ",");
         if (index != null)
         {

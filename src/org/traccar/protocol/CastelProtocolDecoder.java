@@ -86,9 +86,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         int version = buf.readUnsignedByte();
         ChannelBuffer id = buf.readBytes(20);
         int type = ChannelBuffers.swapShort(buf.readShort());
-        
+
         if (type == MSG_HEARTBEAT) {
-            
+
             if (channel != null) {
                 ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 31);
                 response.writeByte(0x40); response.writeByte(0x40);
@@ -107,7 +107,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 type == MSG_GPS ||
                 type == MSG_ALARM ||
                 type == MSG_CURRENT_LOCATION) {
-            
+
             if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
 
                 return null;
@@ -128,7 +128,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     response.writeByte(0x0D); response.writeByte(0x0A);
                     channel.write(response, remoteAddress);
                 }
-            
+
             }
 
             if (type == MSG_GPS) {
@@ -138,7 +138,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             } else if (type == MSG_CURRENT_LOCATION) {
                 buf.readUnsignedShort();
             }
-            
+
             buf.readUnsignedInt(); // ACC ON time
             buf.readUnsignedInt(); // UTC time
             long odometer = buf.readUnsignedInt();
@@ -147,7 +147,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // current fuel consumption
             long status = buf.readUnsignedInt();
             buf.skipBytes(8);
-            
+
             int count = buf.readUnsignedByte();
 
             List<Position> positions = new LinkedList<>();
@@ -184,7 +184,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
         }
-        
+
         return null;
     }
 

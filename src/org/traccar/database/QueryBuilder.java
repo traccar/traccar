@@ -42,13 +42,13 @@ import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
 public class QueryBuilder {
-    
+
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
     private PreparedStatement statement;
     private final String query;
     private final boolean returnGeneratedKeys;
-    
+
     private QueryBuilder(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
         this.query = query;
         this.returnGeneratedKeys = returnGeneratedKeys;
@@ -67,7 +67,7 @@ public class QueryBuilder {
             }
         }
     }
-    
+
     private static String parse(String query, Map<String, List<Integer>> paramMap) {
 
         int length = query.length();
@@ -135,7 +135,7 @@ public class QueryBuilder {
     public static QueryBuilder create(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
         return new QueryBuilder(dataSource, query, returnGeneratedKeys);
     }
-    
+
     private List<Integer> indexes(String name) {
         name = name.toLowerCase();
         List<Integer> result = indexMap.get(name);
@@ -144,7 +144,7 @@ public class QueryBuilder {
         }
         return result;
     }
-    
+
     public QueryBuilder setBoolean(String name, boolean value) throws SQLException {
         for (int i : indexes(name)) {
             try {
@@ -157,7 +157,7 @@ public class QueryBuilder {
         }
         return this;
     }
-    
+
     public QueryBuilder setInteger(String name, int value) throws SQLException {
         for (int i : indexes(name)) {
             try {
@@ -170,7 +170,7 @@ public class QueryBuilder {
         }
         return this;
     }
-    
+
     public QueryBuilder setLong(String name, long value) throws SQLException {
         for (int i : indexes(name)) {
             try {
@@ -183,7 +183,7 @@ public class QueryBuilder {
         }
         return this;
     }
-    
+
     public QueryBuilder setDouble(String name, double value) throws SQLException {
         for (int i : indexes(name)) {
             try {
@@ -196,7 +196,7 @@ public class QueryBuilder {
         }
         return this;
     }
-    
+
     public QueryBuilder setString(String name, String value) throws SQLException {
         for (int i : indexes(name)) {
             try {
@@ -213,7 +213,7 @@ public class QueryBuilder {
         }
         return this;
     }
-    
+
     public QueryBuilder setDate(String name, Date value) throws SQLException {
         for (int i : indexes(name)) {
             try {
@@ -230,11 +230,11 @@ public class QueryBuilder {
         }
         return this;
     }
-    
+
     public QueryBuilder setObject(Object object) throws SQLException {
-        
+
         Method[] methods = object.getClass().getMethods();
-        
+
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = method.getName().substring(3);
@@ -262,14 +262,14 @@ public class QueryBuilder {
                 }
             }
         }
-        
+
         return this;
     }
-    
+
     private interface ResultSetProcessor<T> {
         public void process(T object, ResultSet resultSet) throws SQLException;
     }
-    
+
     public <T extends Factory> T executeQuerySingle(T prototype) throws SQLException {
         Collection<T> result = executeQuery(prototype);
         if (!result.isEmpty()) {
@@ -278,12 +278,12 @@ public class QueryBuilder {
             return null;
         }
     }
-    
+
     public <T extends Factory> Collection<T> executeQuery(T prototype) throws SQLException {
         List<T> result = new LinkedList<>();
-        
+
         if (query != null) {
-        
+
             try {
 
                 try (ResultSet resultSet = statement.executeQuery()) {
@@ -406,7 +406,7 @@ public class QueryBuilder {
     }
 
     public long executeUpdate() throws SQLException {
-        
+
         if (query != null) {
             try {
                 statement.executeUpdate();
@@ -423,5 +423,5 @@ public class QueryBuilder {
         }
         return 0;
     }
-    
+
 }

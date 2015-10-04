@@ -23,13 +23,13 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 public class CellocatorFrameDecoder extends FrameDecoder {
 
     private static final int MESSAGE_MINIMUM_LENGTH = 15;
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         // Check minimum length
         int available = buf.readableBytes();
         if (available < MESSAGE_MINIMUM_LENGTH) {
@@ -63,7 +63,7 @@ public class CellocatorFrameDecoder extends FrameDecoder {
         if (length > 0 && available >= length) {
             return buf.readBytes(length);
         }
-        
+
         return null;
     }
 

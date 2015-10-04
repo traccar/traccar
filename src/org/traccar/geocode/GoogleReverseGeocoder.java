@@ -44,7 +44,7 @@ public class GoogleReverseGeocoder extends JsonReverseGeocoder {
                 String value = component.getString("short_name");
 
                 for (JsonString type : component.getJsonArray("types").getValuesAs(JsonString.class)) {
-                    
+
                     switch (type.getString()) {
                         case "street_number":
                             address.setHouse(value);
@@ -70,7 +70,7 @@ public class GoogleReverseGeocoder extends JsonReverseGeocoder {
                         default:
                             continue;
                     }
-                    
+
                     break;
                 }
             }

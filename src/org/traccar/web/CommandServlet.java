@@ -12,7 +12,7 @@ public class CommandServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        
+
         switch (command) {
             case "/send":
                 send(req, resp);

@@ -119,10 +119,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        
+
         int localHours = Integer.valueOf(parser.group(index++));
         int localMinutes = Integer.valueOf(parser.group(index++));
-        
+
         String utcHours = parser.group(index++);
         String utcMinutes = parser.group(index++);
 
@@ -137,7 +137,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         if (milliseconds != null) {
             time.set(Calendar.MILLISECOND, Integer.valueOf(milliseconds));
         }
-        
+
         // Timezone calculation
         if (utcHours != null && utcMinutes != null) {
             int deltaMinutes = (localHours - Integer.valueOf(utcHours)) * 60;
@@ -181,11 +181,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         // Speed
-        String speed = parser.group(index++);        
+        String speed = parser.group(index++);
         if (speed != null) {
             position.setSpeed(Double.valueOf(speed));
         }
-        
+
         // Course
         String course = parser.group(index++);
         if (course != null) {

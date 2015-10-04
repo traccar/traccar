@@ -29,9 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public abstract class BaseServlet extends HttpServlet {
-    
+
     public static final String USER_KEY = "user";
-    
+
     @Override
     protected final void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String command = req.getPathInfo();
@@ -51,9 +51,9 @@ public abstract class BaseServlet extends HttpServlet {
             sendResponse(resp.getWriter(), error);
         }
     }
-    
+
     protected abstract boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception;
-    
+
     public long getUserId(HttpServletRequest req) {
         Long userId = (Long) req.getSession().getAttribute(USER_KEY);
         if (userId == null) {
@@ -61,25 +61,25 @@ public abstract class BaseServlet extends HttpServlet {
         }
         return userId;
     }
-    
+
     public void sendResponse(Writer writer, boolean success) throws IOException {
         JsonObjectBuilder result = Json.createObjectBuilder();
         result.add("success", success);
         writer.write(result.build().toString());
     }
-    
+
     public void sendResponse(Writer writer, JsonStructure json) throws IOException {
         JsonObjectBuilder result = Json.createObjectBuilder();
         result.add("success", true);
         result.add("data", json);
         writer.write(result.build().toString());
     }
-    
+
     public void sendResponse(Writer writer, Exception error) throws IOException {
         JsonObjectBuilder result = Json.createObjectBuilder();
         result.add("success", false);
         result.add("error", Log.exceptionStack(error));
         writer.write(result.build().toString());
     }
-    
+
 }

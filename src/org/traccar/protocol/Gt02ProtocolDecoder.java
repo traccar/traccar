@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;

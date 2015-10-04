@@ -51,60 +51,60 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-        
+
         buf.readUnsignedByte(); // protocol
         buf.readUnsignedShort(); // length
         int index = buf.readUnsignedByte() >> 3;
-        
+
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.copiedBuffer(
                     "^" + index, Charset.defaultCharset());
             channel.write(response, remoteAddress);
         }
-        
+
         String id = String.valueOf(buf.readUnsignedInt());
         if (!identify(id, channel, remoteAddress)) {
             return null;
         }
 
         List<Position> positions = new LinkedList<>();
-        
+
         while (buf.readableBytes() > 2) {
-            
+
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
-            
+
             int end = buf.readerIndex() + buf.readUnsignedByte();
-            
+
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
-            
+
             int flags = buf.readUnsignedByte();
             position.set(Event.KEY_SATELLITES, BitUtil.range(flags, 2));
             position.setValid(BitUtil.range(flags, 0, 2) > 0);
-            
+
             // Latitude
             double lat = buf.readUnsignedMedium();
             lat = lat * -180 / 16777216 + 90;
             position.setLatitude(lat);
-            
+
             // Longitude
             double lon = buf.readUnsignedMedium();
             lon = lon * 360 / 16777216 - 180;
             position.setLongitude(lon);
-            
+
             // Status
             flags = buf.readUnsignedByte();
             position.set(Event.KEY_IGNITION, BitUtil.check(flags, 0));
             position.set(Event.KEY_GSM, BitUtil.range(flags, 2, 3));
             position.setCourse((BitUtil.range(flags, 5) * 45 + 180) % 360);
-            
+
             // Speed
             int speed = buf.readUnsignedByte();
             if (speed < 250) {
                 position.setSpeed(UnitsConverter.knotsFromKph(speed));
             }
-            
+
             while (buf.readerIndex() < end) {
 
                 int type = buf.readUnsignedByte();
@@ -193,7 +193,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
             positions.add(position);
         }
-        
+
         return positions;
     }
 

@@ -47,7 +47,7 @@ public class FilterHandler extends BaseDataHandler {
         this.filterFuture = filterFuture;
         this.filterLimit = filterLimit;
     }
-    
+
     public FilterHandler() {
         Config config = Context.getConfig();
 
@@ -58,24 +58,24 @@ public class FilterHandler extends BaseDataHandler {
         filterDistance = config.getInteger("filter.distance");
         filterLimit = config.getLong("filter.limit") * 1000;
     }
-    
+
     private Position getLastPosition(long deviceId) {
         if (Context.getConnectionManager() != null) {
             return Context.getConnectionManager().getLastPosition(deviceId);
         }
         return null;
     }
-    
+
     private boolean filterInvalid(Position position) {
         return filterInvalid && !position.getValid();
     }
-    
+
     private boolean filterZero(Position position) {
         return filterZero &&
                 (position.getLatitude() == 0.0) &&
                 (position.getLongitude() == 0.0);
     }
-    
+
     private boolean filterDuplicate(Position position) {
         if (filterDuplicate) {
             Position last = getLastPosition(position.getDeviceId());
@@ -92,7 +92,7 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterFuture(Position position) {
         return filterFuture && (position.getFixTime().getTime() > System.currentTimeMillis() + FILTER_FUTURE_LIMIT);
     }
-    
+
     private boolean filterDistance(Position position) {
         if (filterDistance != 0) {
             Position last = getLastPosition(position.getDeviceId());
@@ -108,7 +108,7 @@ public class FilterHandler extends BaseDataHandler {
             return false;
         }
     }
-    
+
     private boolean filterLimit(Position position) {
         if (filterLimit != 0) {
             Position last = getLastPosition(position.getDeviceId());
@@ -121,20 +121,20 @@ public class FilterHandler extends BaseDataHandler {
             return false;
         }
     }
-    
+
     private boolean filter(Position p) {
-        
+
         boolean result =
                 filterInvalid(p) ||
                 filterZero(p) ||
                 filterDuplicate(p) ||
                 filterFuture(p) ||
                 filterDistance(p);
-        
+
         if (filterLimit(p)) {
             result = false;
         }
-        
+
         if (result) {
             Log.info("Position filtered from " + p.getDeviceId());
         }

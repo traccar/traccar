@@ -53,7 +53,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         if (channel != null) {
             channel.write("1234");
         }

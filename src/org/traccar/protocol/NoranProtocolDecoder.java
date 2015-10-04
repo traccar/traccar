@@ -45,20 +45,20 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_SHAKE_HAND_RESPONSE = 0x8000;
     private static final int MSG_IMAGE_SIZE = 0x0200;
     private static final int MSG_IMAGE_PACKET = 0x0201;
-    
+
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
-        
+
         ChannelBuffer buf = (ChannelBuffer) msg;
-        
+
         buf.readUnsignedShort(); // length
         int type = buf.readUnsignedShort();
-        
+
         if (type == MSG_SHAKE_HAND && channel != null) {
-            
+
             ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 13);
             response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", Charset.defaultCharset()));
             response.writeByte(0);
@@ -66,10 +66,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(MSG_SHAKE_HAND_RESPONSE);
             response.writeByte(1); // status
             response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
-            
+
             channel.write(response, remoteAddress);
         }
-        
+
         else if (type == MSG_UPLOAD_POSITION ||
                  type == MSG_UPLOAD_POSITION_NEW ||
                  type == MSG_CONTROL_RESPONSE ||
@@ -89,7 +89,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             // Create new position
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            
+
             if (type == MSG_CONTROL_RESPONSE) {
                 buf.readUnsignedInt(); // GIS ip
                 buf.readUnsignedInt(); // GIS port

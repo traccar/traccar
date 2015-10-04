@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,14 +51,14 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             channel.write(message + Crc.nmeaChecksum(message) + "\r\n");
         }
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         // Process login
         if (sentence.startsWith("$FRLIN,")) {
             int beginIndex = sentence.indexOf(',', 7);

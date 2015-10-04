@@ -39,7 +39,7 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
 
     @Override
     protected Object encodeCommand(Command command) {
-        
+
         switch (command.getType()) {
             case Command.TYPE_POSITION_STOP:
                 return formatCommand(command, "**,imei:{%s},A", Command.KEY_UNIQUE_ID);
@@ -56,7 +56,7 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(command, "**,imei:{%s},M", Command.KEY_UNIQUE_ID);
         }
-        
+
         return null;
     }
 

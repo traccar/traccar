@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,7 +87,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);
-        
+
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -107,7 +107,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         hemisphere = parser.group(index++).equals("8") ? -1 : 1;
         position.setLongitude(
                 hemisphere * Integer.parseInt(parser.group(index++), 16) / 600000.0);
-        
+
         position.setSpeed(Integer.parseInt(parser.group(index++), 16) / 100.0);
         position.setCourse(Integer.parseInt(parser.group(index++), 16) / 100.0);
 
@@ -125,7 +125,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Odometer
         position.set(Event.KEY_ODOMETER, Integer.parseInt(parser.group(index++), 16));
-        
+
         // Altitude
         String altitude = parser.group(index++);
         if (altitude != null) {

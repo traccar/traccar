@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,7 +48,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             "(.)," +                       // Type
             "[^\\*]+\\*" +
             "(\\p{XDigit}{2})");           // Checksum
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
@@ -61,7 +61,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             channel.write(sentence + "\r\n");
             return null;
         }
-        
+
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
@@ -129,7 +129,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         } else if (type.equals("X") || type.equals("4")) {
             response = "$AVCFG,00000000,x*2D";
         }
-        
+
         if (response != null && channel != null) {
             channel.write(response + "\r\n");
         }

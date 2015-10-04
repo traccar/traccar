@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -46,7 +46,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
         return imei.toString();
     }
-    
+
     static final int MSG_CLIENT_STATUS = 0;
     static final int MSG_CLIENT_PROGRAMMING = 3;
     static final int MSG_CLIENT_SERIAL_LOG = 7;
@@ -54,9 +54,9 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     static final int MSG_CLIENT_MODULAR = 9;
 
     private static final int MSG_SERVER_ACKNOWLEDGE = 4;
-    
+
     private byte commandCount;
-    
+
     private void sendReply(Channel channel, long deviceId, byte packetNumber) {
         ChannelBuffer reply = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 28);
         reply.writeByte('M');
@@ -81,7 +81,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             channel.write(reply);
         }
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
@@ -92,7 +92,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(4); // system code
         int type = buf.readUnsignedByte();
         long deviceUniqueId = buf.readUnsignedInt();
-        
+
         if (type != MSG_CLIENT_SERIAL) {
             buf.readUnsignedShort(); // communication control
         }
@@ -105,7 +105,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_CLIENT_STATUS) {
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            
+
             // Device identifier
             if (!identify(String.valueOf(deviceUniqueId), channel)) {
                 return null;
@@ -118,23 +118,23 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
             // Status
             position.set(Event.KEY_STATUS, buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
-            
+
             int operator = (buf.readUnsignedByte() & 0xf0) << 4;
             operator += buf.readUnsignedByte();
-            
+
             buf.readUnsignedByte(); // reason data
             buf.readUnsignedByte(); // reason
             buf.readUnsignedByte(); // mode
             buf.readUnsignedInt(); // IO
-            
+
             operator <<= 8;
             operator += buf.readUnsignedByte();
             position.set("operator", operator);
-            
+
             buf.readUnsignedInt(); // ADC
             buf.readUnsignedMedium(); // Odometer
             buf.skipBytes(6); // multi-purpose data
-            
+
             buf.readUnsignedShort(); // gps fix
             buf.readUnsignedByte(); // location status
             buf.readUnsignedByte(); // mode 1
@@ -148,7 +148,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readInt() * 0.01);
             position.setSpeed(UnitsConverter.knotsFromMps(buf.readInt() * 0.01));
             position.setCourse(buf.readUnsignedShort() / Math.PI * 180.0 / 1000.0);
-            
+
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();

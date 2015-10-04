@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -139,7 +139,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set("runtime", parser.group(index++));
         position.set(Event.KEY_CELL, parser.group(index++));
         position.set(Event.KEY_STATUS, parser.group(index++));
-        
+
         // ADC
         String adc1 = parser.group(index++);
         if (adc1 != null) {
@@ -178,10 +178,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
     private List<Position> decodeBinaryMessage(Channel channel, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<>();
-        
+
         String flag = buf.toString(2, 1, Charset.defaultCharset());
         int index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
-        
+
         // Identification
         String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
         if (!identify(imei, channel)) {
@@ -189,20 +189,20 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         buf.skipBytes(index + 1 + 15 + 1 + 3 + 1 + 2 + 2 + 4);
-        
+
         while (buf.readableBytes() >= 0x34) {
-            
+
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
-            
+
             // Event
             position.set(Event.KEY_EVENT, buf.readUnsignedByte());
-            
+
             // Location
             position.setLatitude(buf.readInt() * 0.000001);
             position.setLongitude(buf.readInt() * 0.000001);
-            
+
             // Time (946684800 - timestamp for 2000-01-01)
             position.setTime(new Date((946684800 + buf.readUnsignedInt()) * 1000));
 
@@ -211,7 +211,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             // Satellites
             position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
-            
+
             // GSM Signal
             position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
@@ -234,16 +234,16 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort() + "|" +
                     buf.readUnsignedShort() + "|" + buf.readUnsignedShort());
             position.set(Event.KEY_STATUS, buf.readUnsignedShort());
-        
+
             // ADC
             position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
             position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
             position.set(Event.KEY_POWER, buf.readUnsignedShort());
-            
+
             buf.readUnsignedInt(); // geo-fence
             positions.add(position);
         }
-        
+
         // Delete recorded data
         if (channel != null) {
             StringBuilder command = new StringBuilder("@@");
@@ -254,21 +254,21 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             command.append(String.format("%02x\r\n", checksum & 0xff).toUpperCase());
             channel.write(command.toString());
         }
-        
+
         return positions;
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
-        
+
         ChannelBuffer buf = (ChannelBuffer) msg;
-        
+
         // Find type
         Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
         index = ChannelBufferTools.find(buf, index + 1, buf.readableBytes(), ",");
-        
+
         String type = buf.toString(index + 1, 3, Charset.defaultCharset());
         if (type.equals("CCC")) {
             return decodeBinaryMessage(channel, buf);

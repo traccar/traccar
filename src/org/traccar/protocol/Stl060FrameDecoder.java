@@ -25,21 +25,21 @@ import org.traccar.helper.ChannelBufferTools;
 public class Stl060FrameDecoder extends DelimiterBasedFrameDecoder {
 
     private static final byte delimiter[] = { (byte) '#' };
-    
+
     public Stl060FrameDecoder(int maxFrameLength) {
         super(maxFrameLength, ChannelBuffers.wrappedBuffer(delimiter));
     }
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         ChannelBuffer result = (ChannelBuffer) super.decode(ctx, channel, buf);
-        
+
         if (result != null) {
-            
+
             Integer beginIndex = ChannelBufferTools.find(
                     result, 0, result.readableBytes(), "$");
             if (beginIndex == null) {

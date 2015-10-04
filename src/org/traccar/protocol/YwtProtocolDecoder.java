@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,17 +68,17 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
             if (end == -1) {
                 end = sentence.length();
             }
-            
+
             channel.write("%AT+SN=" + sentence.substring(start, end));
             return null;
         }
-        
+
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }
-        
+
         // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -90,7 +90,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
-        
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -113,7 +113,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         Double latitude = Double.valueOf(parser.group(index++));
         if (hemisphere.compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
-        
+
         // Altitude
         String altitude = parser.group(index++);
         if (altitude != null) {
@@ -125,15 +125,15 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)));
-        
+
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
         position.set(Event.KEY_SATELLITES, satellites);
-        
+
         // Report identifier
         String reportId = parser.group(index++);
-        
+
         // Status
         position.set(Event.KEY_STATUS, parser.group(index++));
 

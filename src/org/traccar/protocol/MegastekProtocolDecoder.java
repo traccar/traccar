@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,7 +73,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             ".*");                         // Checksum
 
     private boolean parseGPRMC(String gprmc, Position position) {
-        
+
         // Parse message
         Matcher parser = patternGPRMC.matcher(gprmc);
         if (!parser.matches()) {
@@ -120,7 +120,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-        position.setTime(time.getTime());        
+        position.setTime(time.getTime());
 
         return true;
     }
@@ -220,7 +220,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                     return null;
                 }
                 position.setDeviceId(getDeviceId());
-                
+
             }
 
         } else {
@@ -377,7 +377,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)

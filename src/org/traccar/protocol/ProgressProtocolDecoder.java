@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;

@@ -17,7 +17,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,7 +60,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
@@ -88,7 +88,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.MILLISECOND, Integer.valueOf(parser.group(index++)));
-        
+
         // Validity
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
@@ -121,7 +121,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
         time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-        
+
         // State
         position.set(Event.PREFIX_IO + 1, parser.group(index++));
 

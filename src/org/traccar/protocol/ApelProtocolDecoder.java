@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.net.SocketAddress;
-import java.util.Calendar;    
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -103,11 +103,11 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         boolean alarm = (type & 0x8000) != 0;
         type = type & 0x7FFF;
         buf.readUnsignedShort(); // length
-        
+
         if (alarm) {
             sendSimpleMessage(channel, MSG_TYPE_ACK_ALARM);
         }
-        
+
         if (type == MSG_TYPE_TRACKER_ID) {
             Log.warning("Unsupported authentication type");
             return null;
@@ -120,7 +120,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             length = buf.readUnsignedShort();
             identify(buf.readBytes(length).toString(Charset.defaultCharset()), channel);
         }
-        
+
         else if (type == MSG_TYPE_LAST_LOG_INDEX) {
             long index = buf.readUnsignedInt();
             if (index > 0) {
@@ -192,7 +192,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
                     // Satellites
                     position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
-                    
+
                     // Cell signal
                     position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
@@ -205,12 +205,12 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                     // Input/Output
                     position.set(Event.KEY_INPUT, buf.readUnsignedByte());
                     position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
-                    
+
                     // Analog sensors
                     for (int i = 1; i <= 8; i++) {
                         position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
                     }
-                    
+
                     // Counters
                     position.set(Event.PREFIX_COUNT + 1, buf.readUnsignedInt());
                     position.set(Event.PREFIX_COUNT + 2, buf.readUnsignedInt());
@@ -222,7 +222,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
             // Skip CRC
             buf.readUnsignedInt();
-            
+
             if (type == MSG_TYPE_LOG_RECORDS) {
                 requestArchive(channel);
             } else {

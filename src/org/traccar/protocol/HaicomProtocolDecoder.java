@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,7 +79,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Firmware version
         position.set(Event.KEY_VERSION, parser.group(index++));
-        
+
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -112,7 +112,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.valueOf(parser.group(index++)) / 10);
-        
+
         // Additional data
         position.set(Event.KEY_STATUS, parser.group(index++));
         position.set(Event.KEY_GSM, parser.group(index++));

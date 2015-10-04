@@ -99,7 +99,7 @@ public class Crc {
 
     private static int crc16Unreflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
-        
+
         for (int i = 0; i < buf.remaining(); i++) {
             crc16 = table[((crc16 >> 8) ^ buf.get(i)) & 0xff] ^ (crc16 << 8);
         }
@@ -109,7 +109,7 @@ public class Crc {
 
     private static int crc16Reflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
-        
+
         for (int i = 0; i < buf.remaining(); i++) {
             crc16 = table[(crc16 ^ buf.get(i)) & 0xff] ^ (crc16 >> 8);
         }
@@ -144,7 +144,7 @@ public class Crc {
         }
         return checksum;
     }
-    
+
     public static String nmeaChecksum(String msg) {
         int checksum = 0;
         byte bytes[] = msg.getBytes(Charset.defaultCharset());
@@ -174,5 +174,5 @@ public class Crc {
 
         return (10 - (checksum % 10)) % 10;
     }
-    
+
 }

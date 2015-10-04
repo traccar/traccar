@@ -29,8 +29,8 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(command, "SA200CMD;{%s};02;Disable1\r", Command.KEY_UNIQUE_ID);
         }
-        
+
         return null;
     }
-    
+
 }

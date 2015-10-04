@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,20 +34,20 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     public H02ProtocolDecoder(H02Protocol protocol) {
         super(protocol);
     }
-    
+
     private static double readCoordinate(ChannelBuffer buf, boolean lon) {
-        
+
         int degrees = ChannelBufferTools.readHexInteger(buf, 2);
         if (lon) {
             degrees = degrees * 10 + (buf.getUnsignedByte(buf.readerIndex()) >> 4);
         }
-        
+
         double result = 0;
         if (lon) {
             result = buf.readUnsignedByte() & 0x0f;
         }
         result = result * 10 + ChannelBufferTools.readHexInteger(buf, lon ? 5 : 6) * 0.0001;
-        
+
         result /= 60;
         result += degrees;
 
@@ -61,13 +61,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_IGNITION, !BitUtil.check(status, 10));
         position.set(Event.KEY_STATUS, status);
     }
-    
+
     private Position decodeBinary(ChannelBuffer buf, Channel channel) {
-        
+
         // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        
+
         buf.readByte(); // marker
 
         // Identification
@@ -86,7 +86,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
         time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
         position.setTime(time.getTime());
-        
+
         // Location
         double latitude = readCoordinate(buf, false);
         position.set(Event.KEY_POWER, buf.readByte());
@@ -122,7 +122,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             "(\\p{XDigit}{8})" +                // Status
             ".*");
-    
+
     private Position decodeText(String sentence, Channel channel) {
 
         // Parse message
@@ -188,10 +188,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
-        
+
         ChannelBuffer buf = (ChannelBuffer) msg;
         String marker = buf.toString(0, 1, Charset.defaultCharset());
-        
+
         // TODO X mode?
 
         if (marker.equals("*")) {

@@ -23,17 +23,17 @@ import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 public class AtrackFrameDecoder extends LengthFieldBasedFrameDecoder {
 
     private static final int KEEPALIVE_LENGTH = 12;
-    
+
     public AtrackFrameDecoder() {
         super(1024, 4, 2);
     }
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         // Keep alive message
         if (buf.readableBytes() >= KEEPALIVE_LENGTH &&
             buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {

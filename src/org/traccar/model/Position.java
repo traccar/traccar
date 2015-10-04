@@ -27,7 +27,7 @@ public class Position extends Event implements Factory {
     private Date fixTime;
     public Date getFixTime() { return fixTime; }
     public void setFixTime(Date fixTime) { this.fixTime = fixTime; }
-    
+
     public void setTime(Date time) {
         setDeviceTime(time);
         setFixTime(time);

@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,7 +96,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         // Speed
         position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
-        
+
         // Status
         position.set(Event.KEY_STATUS, parser.group(index++));
 

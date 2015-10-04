@@ -24,26 +24,26 @@ import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 public class IntellitracFrameDecoder extends DelimiterBasedFrameDecoder {
 
     private static final int MESSAGE_MINIMUM_LENGTH = 0;
-    
+
     private static final byte delimiter[] = { (byte) '\r', (byte) '\n' };
-    
+
     public IntellitracFrameDecoder(int maxFrameLength) {
         super(maxFrameLength, ChannelBuffers.wrappedBuffer(delimiter));
     }
-    
+
     // example of sync header: 0xFA 0xF8 0x1B 0x01 0x81 0x60 0x33 0x3C
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         // Check minimum length
         if (buf.readableBytes() < MESSAGE_MINIMUM_LENGTH) {
             return null;
         }
-        
+
         // Check for sync packet
         if (buf.getUnsignedShort(buf.readerIndex()) == 0xFAF8) {
             ChannelBuffer syncMessage = buf.readBytes(8);

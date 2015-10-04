@@ -21,13 +21,13 @@ public class Permission implements Factory {
     public Permission create() {
         return new Permission();
     }
-    
+
     private long userId;
     public long getUserId() { return userId; }
     public void setUserId(long userId) { this.userId = userId; }
-    
+
     private long deviceId;
     public long getDeviceId() { return deviceId; }
     public void setDeviceId(long deviceId) { this.deviceId = deviceId; }
-    
+
 }

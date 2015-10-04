@@ -41,15 +41,15 @@ public class UserServlet extends BaseServlet {
             default:
                 return false;
         }
-        return true;        
+        return true;
     }
-    
+
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Context.getPermissionsManager().checkAdmin(getUserId(req));
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getUsers()));
     }
-    
+
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
@@ -57,7 +57,7 @@ public class UserServlet extends BaseServlet {
         Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
     }
-    
+
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         if (user.getAdmin()) {
@@ -69,7 +69,7 @@ public class UserServlet extends BaseServlet {
         Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), true);
     }
-    
+
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         User user = JsonConverter.objectFromJson(req.getReader(), new User());
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());

@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,7 +63,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)?," +           // Speed
             "(\\d+\\.?\\d*)?," +           // Course
             ".+");
-    
+
     private static final Pattern patternTRCCR = Pattern.compile(
             "\\$TRCCR," +
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
@@ -83,7 +83,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         if (!sentence.startsWith("$") && sentence.contains("$")) {
             int index = sentence.indexOf("$");
             String id = sentence.substring(0, index);

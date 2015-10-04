@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,7 +47,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)," +                    // Satellites in use
             "(\\d+)," +                    // Satellites in view
             "0");
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
@@ -92,7 +92,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(Double.valueOf(parser.group(index++)));
             position.setSpeed(Double.valueOf(parser.group(index++)));
             position.setCourse(Double.valueOf(parser.group(index++)));
-            
+
             // Flags
             String flags = parser.group(index++);
             position.set(Event.KEY_FLAGS, flags);

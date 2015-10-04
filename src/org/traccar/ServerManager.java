@@ -43,7 +43,7 @@ public class ServerManager {
         if (packageUrl.getProtocol().equals("jar")) {
             String jarFileName = URLDecoder.decode(packageUrl.getFile(), "UTF-8");
             JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")));
-            
+
             Enumeration<JarEntry> jarEntries = jf.entries();
             while(jarEntries.hasMoreElements()){
                 String entryName = jarEntries.nextElement().getName();
@@ -59,7 +59,7 @@ public class ServerManager {
                 names.add(entryName.substring(0, entryName.lastIndexOf('.')));
             }
         }
-        
+
         for (String name : names) {
             Class protocolClass = Class.forName(packageName + '.' + name);
             if (BaseProtocol.class.isAssignableFrom(protocolClass)) {

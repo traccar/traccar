@@ -36,7 +36,7 @@ public class WebServer {
     private final Config config;
     private final DataSource dataSource;
     private final HandlerList handlers = new HandlerList();
-    
+
     private void initServer() {
 
         String address = config.getString("web.address");
@@ -47,7 +47,7 @@ public class WebServer {
             server = new Server(new InetSocketAddress(address, port));
         }
     }
-    
+
     public WebServer(Config config, DataSource dataSource) {
         this.config = config;
         this.dataSource = dataSource;

@@ -35,16 +35,16 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
-    
+
     public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
         super(protocol);
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
-        
+
         HttpRequest request = (HttpRequest) msg;
         QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
         Map<String, List<String>> params = decoder.getParameters();

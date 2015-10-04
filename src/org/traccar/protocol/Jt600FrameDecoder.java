@@ -35,10 +35,10 @@ public class Jt600FrameDecoder extends FrameDecoder {
         if (available < 10) {
             return null;
         }
-        
+
         // Message identifier
         char first = (char) buf.getByte(buf.readerIndex());
-        
+
         if (first == '$') {
             // Check length
             int length = buf.getUnsignedShort(buf.readerIndex() + 7) + 10;

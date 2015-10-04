@@ -42,7 +42,7 @@ public class GlobalChannelFactory {
         }
         return channelFactory;
     }
-    
+
     public static DatagramChannelFactory getDatagramFactory() {
         if (datagramChannelFactory == null) {
             datagramChannelFactory = new NioDatagramChannelFactory();

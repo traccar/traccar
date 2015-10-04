@@ -28,10 +28,10 @@ public abstract class BaseDataHandler extends OneToOneDecoder {
         if (msg instanceof Position) {
             return handlePosition((Position) msg);
         }
-        
+
         return msg;
     }
-    
+
     protected abstract Position handlePosition(Position position);
 
 }

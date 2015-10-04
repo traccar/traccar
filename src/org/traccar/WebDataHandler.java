@@ -31,7 +31,7 @@ public class WebDataHandler extends BaseDataHandler {
     public WebDataHandler(String url) {
         this.url = url;
     }
-    
+
     private static String formatSentence(Position position) {
 
         StringBuilder s = new StringBuilder("$GPRMC,");
@@ -40,14 +40,14 @@ public class WebDataHandler extends BaseDataHandler {
 
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
             calendar.setTimeInMillis(position.getFixTime().getTime());
-            
+
             f.format("%1$tH%1$tM%1$tS.%1$tL,A,", calendar);
-            
+
             double lat = position.getLatitude();
             double lon = position.getLongitude();
             f.format("%02d%07.4f,%c,", (int) Math.abs(lat), Math.abs(lat) % 1 * 60, lat < 0 ? 'S' : 'N');
             f.format("%03d%07.4f,%c,", (int) Math.abs(lon), Math.abs(lon) % 1 * 60, lon < 0 ? 'W' : 'E');
-            
+
             f.format("%.2f,%.2f,", position.getSpeed(), position.getCourse());
             f.format("%1$td%1$tm%1$ty,,", calendar);
         }
@@ -69,9 +69,9 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        
+
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
-        
+
         String request = url
                 .replace("{uniqueId}", device.getUniqueId())
                 .replace("{deviceId}", String.valueOf(device.getId()))
@@ -80,7 +80,7 @@ public class WebDataHandler extends BaseDataHandler {
                 .replace("{longitude}", String.valueOf(position.getLongitude()))
                 .replace("{gprmc}", formatSentence(position))
                 .replace("{statusCode}", calculateStatus(position));
-        
+
         Context.getAsyncHttpClient().prepareGet(request).execute();
 
         return position;

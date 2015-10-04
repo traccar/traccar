@@ -29,7 +29,7 @@ public class RemoteAddressHandler extends ExtendedObjectDecoder {
             throws Exception {
 
         String hostAddress = ((InetSocketAddress) remoteAddress).getAddress().getHostAddress();
-        
+
         if (msg instanceof Position) {
             Position position = (Position) msg;
             position.set(Event.KEY_IP, hostAddress);

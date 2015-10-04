@@ -56,13 +56,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             if (validateImei(imei)) {
                 return imei;
             }
-            
+
             // Try TC65 v2.8
             imei = IMEI_BASE_TC65_V28 + ((unitId + 0xA8180) & 0xFFFFFF);
             if (validateImei(imei)) {
                 return imei;
             }
-            
+
             // Try TC65 v2.0
             imei = IMEI_BASE_TC65_V20 + unitId;
             if (validateImei(imei)) {
@@ -70,7 +70,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             }
 
         }
-        
+
         return unitId;
     }
 
@@ -148,7 +148,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x0040) != 0) {
             position.set(Event.KEY_INPUT, buf.readUnsignedByte());
         }
-        
+
         // ADC
         if ((selector & 0x0020) != 0) {
             position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
@@ -162,13 +162,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_POWER, buf.readUnsignedShort() / 1000.0);
             position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
         }
-        
+
         // Pulse rate 1
         if ((selector & 0x10000) != 0) {
             buf.readUnsignedShort();
             buf.readUnsignedInt();
         }
-        
+
         // Pulse rate 2
         if ((selector & 0x20000) != 0) {
             buf.readUnsignedShort();
@@ -189,17 +189,17 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x0040) != 0) {
             position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
         }
-        
+
         // Button
         if ((selector & 0x0200) != 0) {
             buf.skipBytes(6);
         }
-        
+
         // Keypad
         if ((selector & 0x0400) != 0) {
             buf.readUnsignedByte();
         }
-        
+
         // Altitude
         if ((selector & 0x0800) != 0) {
             position.setAltitude(buf.readShort());
@@ -325,8 +325,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                         break;
                 }
             }
-        }        
-        
+        }
+
         return position;
     }
 

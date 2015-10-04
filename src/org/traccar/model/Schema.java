@@ -21,9 +21,9 @@ public class Schema implements Factory {
     public Schema create() {
         return new Schema();
     }
-    
+
     private int version;
     public int getVersion() { return version; }
     public void setVersion(int version) { this.version = version; }
-    
+
 }

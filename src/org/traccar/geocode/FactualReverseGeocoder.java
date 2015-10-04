@@ -32,15 +32,15 @@ public class FactualReverseGeocoder extends JsonReverseGeocoder {
         JsonObject result = json.getJsonObject("response").getJsonObject("data");
         if (result != null) {
                 Address address = new Address();
-                if (result.getJsonObject("street_number") != null) { 
+                if (result.getJsonObject("street_number") != null) {
                     address.setHouse(result.getJsonObject("street_number").getString("name"));
                 }
                 if (result.getJsonObject("street_name") != null) {
                     address.setStreet(result.getJsonObject("street_name").getString("name"));
-                }  
+                }
                 if (result.getJsonObject("locality") != null) {
                     address.setSettlement(result.getJsonObject("locality").getString("name"));
-                }    
+                }
                 if (result.getJsonObject("county") != null) {
                     address.setDistrict(result.getJsonObject("county").getString("name"));
                 }

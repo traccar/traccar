@@ -25,7 +25,7 @@ public class Server implements Factory {
     private long id;
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
-    
+
     private boolean registration;
     public boolean getRegistration() { return registration; }
     public void setRegistration(boolean registration) { this.registration = registration; }
@@ -61,7 +61,7 @@ public class Server implements Factory {
     private double longitude;
     public double getLongitude() { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
-    
+
     private int zoom;
     public int getZoom() { return zoom; }
     public void setZoom(int zoom) { this.zoom = zoom; }

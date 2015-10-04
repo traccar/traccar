@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +62,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         if (beginIndex != -1) {
             sentence = sentence.substring(beginIndex + 1);
         }
-        
+
         // Send response
         if (channel != null) {
             String id = sentence.substring(0, 12);
@@ -135,7 +135,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Course
         position.setCourse(Double.parseDouble(parser.group(index++)));
-        
+
         // State
         String status = parser.group(index++); // binary status
         if (status != null) {

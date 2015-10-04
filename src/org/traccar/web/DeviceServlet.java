@@ -43,12 +43,12 @@ public class DeviceServlet extends BaseServlet {
         }
         return true;
     }
-    
+
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getDevices(getUserId(req))));
     }
-    
+
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         long userId = getUserId(req);
@@ -57,14 +57,14 @@ public class DeviceServlet extends BaseServlet {
         Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
     }
-    
+
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
         Context.getDataManager().updateDevice(device);
         sendResponse(resp.getWriter(), true);
     }
-    
+
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());

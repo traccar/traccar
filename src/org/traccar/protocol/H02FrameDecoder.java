@@ -23,7 +23,7 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.traccar.helper.ChannelBufferTools;
 
 public class H02FrameDecoder extends FrameDecoder {
-    
+
     private static final int MESSAGE_LENGTH = 32;
 
     @Override
@@ -31,7 +31,7 @@ public class H02FrameDecoder extends FrameDecoder {
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         String marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
 
         while (!marker.equals("*") && !marker.equals("$") && buf.readableBytes() > 0) {
@@ -40,7 +40,7 @@ public class H02FrameDecoder extends FrameDecoder {
                 marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
             }
         }
-        
+
         if (marker.equals("*")) {
 
             // Return text message
@@ -48,14 +48,14 @@ public class H02FrameDecoder extends FrameDecoder {
             if (index != null) {
                 return buf.readBytes(index + 1 - buf.readerIndex());
             }
-            
+
         } else if (marker.equals("$")) {
 
             // Return binary message
             if (buf.readableBytes() >= MESSAGE_LENGTH) {
                 return buf.readBytes(MESSAGE_LENGTH);
             }
-            
+
         }
 
         return null;

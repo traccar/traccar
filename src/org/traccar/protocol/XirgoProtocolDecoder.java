@@ -77,7 +77,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         position.set(Event.KEY_EVENT, parser.group(index++));
-        
+
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -102,7 +102,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_BATTERY, parser.group(index++));
         position.set(Event.KEY_GSM, parser.group(index++));
         position.set(Event.KEY_ODOMETER, parser.group(index++));
-        
+
         // Validity
         position.setValid(Integer.valueOf(parser.group(index++)) == 1);
 

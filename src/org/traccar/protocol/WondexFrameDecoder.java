@@ -22,7 +22,7 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.traccar.helper.ChannelBufferTools;
 
 public class WondexFrameDecoder extends FrameDecoder {
-    
+
     private static final int KEEP_ALIVE_LENGTH = 8;
 
     @Override
@@ -30,7 +30,7 @@ public class WondexFrameDecoder extends FrameDecoder {
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         if (buf.readableBytes() < KEEP_ALIVE_LENGTH) {
             return null;
         }
@@ -51,7 +51,7 @@ public class WondexFrameDecoder extends FrameDecoder {
                 buf.skipBytes(2);
                 return frame;
             }
-        
+
         }
 
         return null;

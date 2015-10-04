@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,9 +53,9 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         if (sentence.startsWith("H,")) {
-            
+
             int index = sentence.indexOf(',', 2) + 1;
             String id = sentence.substring(index, sentence.indexOf(',', index));
             identify(id, channel);
@@ -68,7 +68,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             }
 
         }
-        
+
         else if (sentence.startsWith("L,") && hasDeviceId()) {
 
             // Parse message
@@ -100,20 +100,20 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(Double.parseDouble(parser.group(index++)));
             position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
             position.setCourse(Double.parseDouble(parser.group(index++)));
-            
+
             // Distance
             position.set(Event.KEY_ODOMETER, parser.group(index++));
-            
+
             // Event
             position.set(Event.KEY_EVENT, parser.group(index++));
-            
+
             // Status
             int status = Integer.parseInt(parser.group(index++));
             position.setValid((status & 0x04) == 0);
             position.set(Event.KEY_STATUS, status);
             return position;
         }
-        
+
         return null;
     }
 

@@ -22,9 +22,9 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.traccar.helper.ChannelBufferTools;
 
 public class Pt502FrameDecoder extends FrameDecoder {
-    
+
     private static final int BINARY_HEADER = 5;
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
@@ -36,7 +36,7 @@ public class Pt502FrameDecoder extends FrameDecoder {
         }
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0xbf && buf.getUnsignedByte(buf.readerIndex() + 1) == 0xfb) {
-            
+
             int length = buf.getShort(buf.readerIndex() + 3);
             if (buf.readableBytes() >= length) {
                 buf.skipBytes(BINARY_HEADER);
@@ -44,16 +44,16 @@ public class Pt502FrameDecoder extends FrameDecoder {
                 buf.skipBytes(2);
                 return result;
             }
-            
+
         } else {
-            
+
             Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), "\n");
             if (index != null) {
                 ChannelBuffer result = buf.readBytes(index - 1);
                 buf.skipBytes(2);
                 return result;
             }
-            
+
         }
 
         return null;

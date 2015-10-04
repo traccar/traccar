@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -66,9 +66,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response.toString());
         }
     }
-    
+
     private Position decodePosition(String substring) {
-        
+
         // Parse message
         Matcher parser = pattern.matcher(substring);
         if (!hasDeviceId() || !parser.matches()) {
@@ -183,7 +183,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         else if (sentence.startsWith("#P#")) {
             sendResponse(channel, "#AP#", null);
         }
-        
+
         // Parse message
         else if (sentence.startsWith("#SD#") || sentence.startsWith("#D#")) {
 
@@ -195,9 +195,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 return position;
             }
         }
-        
+
         else if (sentence.startsWith("#B#")) {
-            
+
             String[] messages = sentence.substring(sentence.indexOf('#', 1) + 1).split("\\|");
             List<Position> positions = new LinkedList<>();
 

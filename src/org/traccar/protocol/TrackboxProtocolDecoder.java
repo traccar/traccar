@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,7 +28,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
-    
+
     public TrackboxProtocolDecoder(TrackboxProtocol protocol) {
         super(protocol);
     }
@@ -51,7 +51,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             channel.write("=OK=\r\n");
         }
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
@@ -65,7 +65,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel);
             }
         }
-        
+
         else {
             // Parse message
             Matcher parser = pattern.matcher(sentence);
@@ -100,13 +100,13 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             longitude += Double.valueOf(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
-            
+
             // HDOP
             position.set(Event.KEY_HDOP, parser.group(index++));
 
             // Altitude
             position.setAltitude(Double.valueOf(parser.group(index++)));
-            
+
             // Validity
             int fix = Integer.valueOf(parser.group(index++));
             position.set(Event.KEY_GPS, fix);
@@ -130,7 +130,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
         }
-        
+
         return null;
     }
 

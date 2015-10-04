@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,13 +73,13 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_SERVER = 0x0002;
     private static final int MSG_LOGIN = 0x5000;
     private static final int MSG_LOGIN_RESPONSE = 0x4000;
-    
+
     private static final int MSG_POSITION = 0x9955;
     private static final int MSG_POSITION_LOGGED = 0x9016;
     private static final int MSG_ALARM = 0x9999;
 
     private static final int MSG_RFID = 0x9966;
-    
+
     private boolean identify(ChannelBuffer buf, Channel channel) {
         String id = "";
 
@@ -107,14 +107,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         return identify(id, channel);
     }
-    
+
     private static void sendResponse(
             Channel channel, ChannelBuffer id, int type, ChannelBuffer msg) {
-        
+
         if (channel != null) {
             ChannelBuffer buf = ChannelBuffers.buffer(
                     2 + 2 + id.readableBytes() + 2 + msg.readableBytes() + 2 + 2);
-            
+
             buf.writeByte('@');
             buf.writeByte('@');
             buf.writeShort(buf.capacity());
@@ -128,7 +128,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             channel.write(buf);
         }
     }
-    
+
     private String getMeiligaoServer(Channel channel) {
         String server = Context.getConfig().getString(getProtocolName() + ".server");
         if (server == null) {
@@ -142,14 +142,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
-        
+
         ChannelBuffer buf = (ChannelBuffer) msg;
         buf.skipBytes(2); // header
         buf.readShort(); // length
         ChannelBuffer id = buf.readBytes(7);
         int command = buf.readUnsignedShort();
         ChannelBuffer response;
-        
+
         switch (command) {
             case MSG_LOGIN:
                 if (channel != null) {

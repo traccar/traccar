@@ -46,18 +46,18 @@ public class MiscFormatter {
 
     public static String toXmlString(Map<String, Object> attributes) {
         StringBuilder result = new StringBuilder();
-        
+
         result.append("<").append(xmlRootNode).append(">");
-        
+
         for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-         
+
             result.append("<").append(entry.getKey()).append(">");
             result.append(format(entry.getValue()));
             result.append("</").append(entry.getKey()).append(">");
         }
 
         result.append("</").append(xmlRootNode).append(">");
-        
+
         return result.toString();
     }
 
@@ -84,11 +84,11 @@ public class MiscFormatter {
 
         return json.build();
     }
-    
+
     public static Map<String, Object> fromJson(JsonObject json) {
-        
+
         Map<String, Object> attributes = new LinkedHashMap<>();
-        
+
         for (Map.Entry<String, JsonValue> entry : json.entrySet()) {
             switch (entry.getValue().getValueType()) {
                 case STRING:
@@ -110,10 +110,10 @@ public class MiscFormatter {
                     break;
             }
         }
-        
+
         return attributes;
     }
-    
+
     public static String toJsonString(Map<String, Object> attributes) {
         return toJson(attributes).toString();
     }

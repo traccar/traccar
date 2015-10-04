@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,7 +45,7 @@ public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)?," +           // Course
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
@@ -70,7 +70,7 @@ public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
-        
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();

@@ -30,7 +30,7 @@ public class MxtFrameDecoder extends FrameDecoder {
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         if (buf.readableBytes() < 2) {
             return null;
         }

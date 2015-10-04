@@ -35,15 +35,15 @@ public class MapQuestReverseGeocoder extends JsonReverseGeocoder {
             JsonArray locations = result.getJsonObject(0).getJsonArray("locations");
             if (locations != null) {
                 JsonObject location = locations.getJsonObject(0);
-    
+
                 Address address = new Address();
-            
+
                 if (location.containsKey("street")) {
                     address.setStreet(location.getString("street"));
-                }    
+                }
                 if (location.containsKey("adminArea5")) {
                     address.setSettlement(location.getString("adminArea5"));
-                }    
+                }
                 if (location.containsKey("adminArea4")) {
                     address.setDistrict(location.getString("adminArea4"));
                 }
@@ -56,7 +56,7 @@ public class MapQuestReverseGeocoder extends JsonReverseGeocoder {
                 if (location.containsKey("postalCode")) {
                     address.setPostcode(location.getString("postalCode"));
                 }
-                
+
                 return address;
             }
         }

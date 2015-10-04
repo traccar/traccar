@@ -23,7 +23,7 @@ import org.traccar.model.Position;
 
 import java.text.ParseException;
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

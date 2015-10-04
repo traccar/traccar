@@ -22,7 +22,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +53,7 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
@@ -81,19 +81,19 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-        
+
         // Location data
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setLatitude(Double.valueOf(parser.group(index++)));
         position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
         position.setCourse(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
-        
+
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
         position.set(Event.KEY_SATELLITES, satellites);
-        
+
         // Event
         position.set(Event.KEY_EVENT, parser.group(index++));
 

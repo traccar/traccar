@@ -70,16 +70,16 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-        
+
         buf.readUnsignedByte(); // header
         int length = (buf.readUnsignedShort() & 0x7fff) + 3;
-        
+
         List<Position> positions = new LinkedList<>();
         Set<Integer> tags = new HashSet<>();
         boolean hasLocation = false;
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        
+
         while (buf.readerIndex() < length) {
 
             // Check if new message started
@@ -93,7 +93,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                 position = new Position();
             }
             tags.add(tag);
-            
+
             switch (tag) {
 
                 case TAG_IMEI:
@@ -105,30 +105,30 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                 case TAG_DATE:
                     position.setTime(new Date(buf.readUnsignedInt() * 1000));
                     break;
-                    
+
                 case TAG_COORDINATES:
                     hasLocation = true;
                     position.setValid((buf.readUnsignedByte() & 0xf0) == 0x00);
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
                     break;
-                    
+
                 case TAG_SPEED_COURSE:
                     position.setSpeed(buf.readUnsignedShort() * 0.0539957);
                     position.setCourse(buf.readUnsignedShort() * 0.1);
                     break;
-                    
+
                 case TAG_ALTITUDE:
                     position.setAltitude(buf.readShort());
                     break;
-                                       
+
                 case TAG_STATUS:
                     int status = buf.readUnsignedShort();
                     position.set(Event.KEY_IGNITION, BitUtil.check(status, 9));
                     position.set(Event.KEY_ALARM, BitUtil.check(status, 15));
                     position.set(Event.KEY_POWER, BitUtil.check(status, 2));
                     break;
-                    
+
                 case TAG_DIGITAL_INPUTS:
                     int input = buf.readUnsignedShort();
                     for (int i = 0; i < 16; i++)
@@ -140,15 +140,15 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                     for (int i = 0; i < 16; i++)
                         position.set(Event.PREFIX_IO + (i + 17), BitUtil.check(output, i));
                     break;
-                                        
+
                 case TAG_INPUT_VOLTAGE1:
                     position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() / 1000.0);
                     break;
-                    
+
                 case TAG_INPUT_VOLTAGE2:
                     position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort() / 1000.0);
                     break;
-                                        
+
                 case TAG_INPUT_VOLTAGE3:
                     position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort() / 1000.0);
                     break;
@@ -165,14 +165,14 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
 
                 default:
                     break;
-                    
+
             }
         }
 
         if (hasLocation && position.getFixTime() != null) {
             positions.add(position);
         }
-        
+
         if (!hasDeviceId()) {
             Log.warning("Unknown device");
             return null;

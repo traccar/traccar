@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,7 +74,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
 
         // Message type
         position.set(Event.KEY_TYPE, parser.group(index++));
-        
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -85,7 +85,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-        
+
         // Location
         position.setLongitude(Double.valueOf(parser.group(index++)) / 10000);
         position.setLatitude(Double.valueOf(parser.group(index++)) / 10000);

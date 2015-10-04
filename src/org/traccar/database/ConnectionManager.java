@@ -34,7 +34,7 @@ public class ConnectionManager {
     private final Map<Long, ActiveDevice> activeDevices = new HashMap<>();
     private final Map<Long, Position> positions = new HashMap<>();
     private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<>();
-    
+
     public ConnectionManager(DataManager dataManager) {
         if (dataManager != null) {
             try {
@@ -50,7 +50,7 @@ public class ConnectionManager {
     public void setActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
     }
-    
+
     public void removeActiveDevice(Channel channel) {
         for (ActiveDevice activeDevice : activeDevices.values()) {
             if (activeDevice.getChannel() == channel) {
@@ -73,52 +73,52 @@ public class ConnectionManager {
             }
         }
     }
-    
+
     public Position getLastPosition(long deviceId) {
         return positions.get(deviceId);
     }
-    
+
     public synchronized Collection<Position> getInitialState(Collection<Long> devices) {
-        
+
         List<Position> result = new LinkedList<>();
-        
+
         for (long device : devices) {
             if (positions.containsKey(device)) {
                 result.add(positions.get(device));
             }
         }
-        
+
         return result;
     }
-    
+
     public static interface DataCacheListener {
         public void onUpdate(Position position);
     }
-    
+
     public void addListener(Collection<Long> devices, DataCacheListener listener) {
         for (long deviceId : devices) {
             addListener(deviceId, listener);
         }
     }
-    
+
     public synchronized void addListener(long deviceId, DataCacheListener listener) {
         if (!listeners.containsKey(deviceId)) {
             listeners.put(deviceId, new HashSet<DataCacheListener>());
         }
         listeners.get(deviceId).add(listener);
     }
-    
+
     public void removeListener(Collection<Long> devices, DataCacheListener listener) {
         for (long deviceId : devices) {
             removeListener(deviceId, listener);
         }
     }
-    
+
     public synchronized void removeListener(long deviceId, DataCacheListener listener) {
         if (!listeners.containsKey(deviceId)) {
             listeners.put(deviceId, new HashSet<DataCacheListener>());
         }
         listeners.get(deviceId).remove(listener);
     }
-    
+
 }

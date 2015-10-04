@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -156,10 +156,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
-        
+
         // Alarm type
         position.set(Event.KEY_ALARM, parser.group(index++));
-        
+
         if (pattern == pattern1 || pattern == pattern2) {
 
             // Time
@@ -236,7 +236,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             // Odometer
             position.set(Event.KEY_ODOMETER, parser.group(index++));
-        
+
         } else if (pattern == pattern3) {
 
             // Time
@@ -249,7 +249,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
             time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
             position.setTime(time.getTime());
-            
+
             // IO Status
             position.set(Event.PREFIX_IO + 1, parser.group(index++));
 
@@ -297,9 +297,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             longitude += Double.valueOf(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
-        
+
         }
-        
+
         if (channel != null) {
             channel.write("ACK OK\r\n");
         }

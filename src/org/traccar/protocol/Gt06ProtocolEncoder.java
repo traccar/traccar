@@ -44,13 +44,13 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeByte('\r');
         buf.writeByte('\n');
-        
+
         return buf;
     }
-    
+
     @Override
     protected Object encodeCommand(Command command) {
-        
+
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
                 return encodeContent("RELAY,1#");
@@ -60,5 +60,5 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         return null;
     }
-    
+
 }

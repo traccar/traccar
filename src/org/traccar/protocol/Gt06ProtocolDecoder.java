@@ -35,7 +35,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     public Gt06ProtocolDecoder(Gt06Protocol protocol) {
         super(protocol);
-        
+
         if (Context.getConfig().hasKey(getProtocolName() + ".timezone")) {
             forceTimeZone = true;
             timeZone.setRawOffset(Context.getConfig().getInteger(getProtocolName() + ".timezone") * 1000);
@@ -98,12 +98,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (buf.readByte() != 0x78 || buf.readByte() != 0x78) {
             return null;
         }
-        
+
         int length = buf.readUnsignedByte(); // size
         int dataLength = length - 5;
 
         int type = buf.readUnsignedByte();
-        
+
         if (type == MSG_LOGIN) {
 
             String imei = readImei(buf);
@@ -177,7 +177,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(latitude);
             position.setLongitude(longitude);
-            
+
             if ((union & 0b0100_0000_0000_0000) != 0) {
                 position.set(Event.KEY_IGNITION, (union & 0b1000_0000_0000_0000) != 0);
             }
@@ -218,7 +218,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Event.KEY_GSM, buf.readUnsignedByte());
                 }
             }
-            
+
             if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
                 position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
             }
@@ -232,7 +232,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, type, index);
             return position;
         }
-        
+
         else {
             buf.skipBytes(dataLength);
             if (type != MSG_COMMAND_0 && type != MSG_COMMAND_1 && type != MSG_COMMAND_2) {

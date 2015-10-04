@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,7 +59,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
         sentence = sentence.trim();
-       
+
         // Detect device ID
         if (sentence.length() == 16) {
             String imei = sentence.substring(1, sentence.length());
@@ -145,7 +145,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
             return position;
         }
-        
+
         return null;
     }
 

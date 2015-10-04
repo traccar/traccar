@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -97,23 +97,23 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
         position.set(Event.KEY_SATELLITES, satellites);
-        
+
         // Event
         position.set(Event.KEY_EVENT, parser.group(index++));
-        
+
         // Battery
         position.set(Event.KEY_BATTERY, parser.group(index++));
-        
+
         // Odometer
         position.set(Event.KEY_ODOMETER, parser.group(index++));
-        
+
         // Input
         position.set(Event.KEY_INPUT, parser.group(index++));
-        
+
         // ADC
         position.set(Event.PREFIX_ADC + 1, parser.group(index++));
         position.set(Event.PREFIX_ADC + 2, parser.group(index++));
-        
+
         // Output
         position.set(Event.KEY_OUTPUT, parser.group(index++));
         return position;

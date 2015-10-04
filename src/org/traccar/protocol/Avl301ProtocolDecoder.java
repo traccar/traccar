@@ -23,7 +23,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 
 public class Avl301ProtocolDecoder extends BaseProtocolDecoder {

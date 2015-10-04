@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -45,12 +45,12 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     private static final int PACKET_PICTURE_FRAME = 0x54;
     private static final int PACKET_CAMERA_RESPONSE = 0x56;
     private static final int PACKET_PICTURE_DATA = 0x57;
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
-        
+
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         buf.skipBytes(2); // header
@@ -62,12 +62,12 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(), buf.readUnsignedByte(),
                 buf.readUnsignedByte(), buf.readUnsignedByte());
         id = id.replaceFirst("^0+(?!$)", "");
-        
+
         if (type == PACKET_POSITION_DATA ||
             type == PACKET_ROLLCALL_RESPONSE ||
             type == PACKET_ALARM_DATA ||
             type == PACKET_BLIND_AREA) {
-            
+
             // Create new position
             Position position = new Position();
             position.setProtocol(getProtocolName());

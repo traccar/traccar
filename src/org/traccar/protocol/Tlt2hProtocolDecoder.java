@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -78,10 +78,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
         // Get status
         String status = parser.group(2);
-        
+
         String[] messages = sentence.substring(sentence.indexOf('\n') + 1).split("\r\n");
         List<Position> positions = new LinkedList<>();
-        
+
         for (String message : messages) {
             parser = patternPosition.matcher(message);
             if (parser.matches()) {
@@ -90,7 +90,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(getDeviceId());
 
                 Integer index = 1;
-                
+
                 // Cell
                 position.set(Event.KEY_CELL, parser.group(index++));
 
@@ -134,7 +134,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
                 time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
                 position.setTime(time.getTime());
-                
+
                 // Status
                 position.set(Event.KEY_STATUS, status);
                 positions.add(position);

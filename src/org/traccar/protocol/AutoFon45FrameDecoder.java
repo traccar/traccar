@@ -30,7 +30,7 @@ public class AutoFon45FrameDecoder extends FrameDecoder {
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         // Check minimum length
         if (buf.readableBytes() < 12) {
             return null;
@@ -45,7 +45,7 @@ public class AutoFon45FrameDecoder extends FrameDecoder {
                 length = 34;
                 break;
         }
-        
+
         // Check length and return buffer
         if (length != 0 && buf.readableBytes() >= length) {
             return buf.readBytes(length);

@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,14 +71,14 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         position.set("mode", buf.readUnsignedByte());
         position.set("command", buf.readUnsignedByte());
         position.set(Event.KEY_POWER, buf.readUnsignedShort());
-        
+
         buf.skipBytes(5);
         buf.readUnsignedShort();
         buf.readUnsignedShort();
-        
+
         position.set("distance", buf.readUnsignedInt());
         position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
-        
+
         // Parse GPRMC
         Integer end = ChannelBufferTools.find(buf, buf.readerIndex(), buf.readerIndex() + 80, "*");
         String gprmc = buf.toString(

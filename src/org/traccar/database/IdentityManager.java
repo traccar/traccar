@@ -18,9 +18,9 @@ package org.traccar.database;
 import org.traccar.model.Device;
 
 public interface IdentityManager {
-    
+
     public Device getDeviceById(long id);
-    
+
     public Device getDeviceByUniqueId(String uniqueId) throws Exception;
 
 }

@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import java.nio.charset.Charset;
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

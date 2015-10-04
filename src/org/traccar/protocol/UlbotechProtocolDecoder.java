@@ -81,7 +81,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         seconds += 946684800l; // 2000-01-01 00:00
         seconds -= timeZone;
         position.setTime(new Date(seconds * 1000));
-        
+
         boolean hasLocation = false;
 
         while (buf.readableBytes() > 3) {

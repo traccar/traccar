@@ -24,7 +24,7 @@ public class MainServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        
+
         switch (command) {
             case "/session":
                 session(req, resp);
@@ -41,7 +41,7 @@ public class MainServlet extends BaseServlet {
             default:
                 return false;
         }
-        return true;        
+        return true;
     }
 
     private void session(HttpServletRequest req, HttpServletResponse resp) throws Exception {

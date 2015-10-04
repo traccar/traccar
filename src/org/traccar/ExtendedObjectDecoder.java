@@ -49,7 +49,7 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
             }
         }
     }
-    
+
     protected abstract Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception;
 
 }

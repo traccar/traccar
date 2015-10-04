@@ -76,45 +76,45 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         buf.readShort(); // length
         int index = buf.readUnsignedShort();
-        
+
         if (type != MSG_GPS && type != MSG_DATA) {
             sendResponse(channel, type, index);
         }
-        
+
         if (type == MSG_LOGIN) {
             identify(ChannelBufferTools.readHexString(buf, 16).substring(1), channel);
         }
-        
+
         else if (hasDeviceId() &&
                 (type == MSG_GPS ||
                  type == MSG_ALARM ||
                  type == MSG_STATE ||
                  type == MSG_SMS)) {
-            
+
             // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
-            
+
             position.setProtocol(getProtocolName());
             position.set(Event.KEY_INDEX, index);
-            
+
             // Location
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1800000.0);
             position.setLongitude(buf.readInt() / 1800000.0);
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             position.setCourse(buf.readUnsignedShort());
-            
+
             // Cell
             position.set(Event.KEY_CELL, ChannelBufferTools.readHexString(buf, 18));
-            
+
             // Validity
             position.setValid((buf.readUnsignedByte() & 0x01) != 0);
-            
+
             if (type == MSG_ALARM) {
                 position.set(Event.KEY_ALARM, buf.readUnsignedByte());
             }
-            
+
             if (type == MSG_STATE) {
                 position.set(Event.KEY_STATUS, buf.readUnsignedByte());
             }

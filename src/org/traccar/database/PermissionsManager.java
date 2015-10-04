@@ -26,25 +26,25 @@ import org.traccar.model.Permission;
 import org.traccar.model.User;
 
 public class PermissionsManager {
-    
+
     private final DataManager dataManager;
-    
+
     private final Map<Long, User> users = new HashMap<>();
-    
+
     private final Map<Long, Set<Long>> permissions = new HashMap<>();
-    
+
     private Set<Long> getNotNull(long userId) {
         if (!permissions.containsKey(userId)) {
             permissions.put(userId, new HashSet<Long>());
         }
         return permissions.get(userId);
     }
-    
+
     public PermissionsManager(DataManager dataManager) {
         this.dataManager = dataManager;
         refresh();
     }
-    
+
     public final void refresh() {
         users.clear();
         permissions.clear();
@@ -59,27 +59,27 @@ public class PermissionsManager {
             Log.warning(error);
         }
     }
-    
+
     public void checkAdmin(long userId) throws SecurityException {
         if (!users.containsKey(userId) || !users.get(userId).getAdmin()) {
             throw new SecurityException("Admin access required");
         }
     }
-    
+
     public void checkUser(long userId, long otherUserId) throws SecurityException {
         if (userId != otherUserId) {
             checkAdmin(userId);
         }
     }
-    
+
     public Collection<Long> allowedDevices(long userId) {
         return getNotNull(userId);
     }
-    
+
     public void checkDevice(long userId, long deviceId) throws SecurityException {
         if (!getNotNull(userId).contains(deviceId)) {
             throw new SecurityException("Device access denied");
         }
     }
-    
+
 }

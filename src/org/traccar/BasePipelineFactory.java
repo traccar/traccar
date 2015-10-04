@@ -82,13 +82,13 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
-        
+
         resetDelay = Context.getConfig().getInteger(protocol + ".resetDelay", 0);
 
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
         }
-        
+
         if (Context.getReverseGeocoder() != null) {
             reverseGeocoderHandler = new ReverseGeocoderHandler(
                     Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocode.processInvalidPositions"));

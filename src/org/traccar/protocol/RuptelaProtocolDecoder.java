@@ -28,13 +28,13 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
-    
+
     public RuptelaProtocolDecoder(RuptelaProtocol protocol) {
         super(protocol);
     }
 
     private static final int COMMAND_RECORDS = 0x01;
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
@@ -51,7 +51,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int type = buf.readUnsignedByte();
-        
+
         if (type == COMMAND_RECORDS) {
             List<Position> positions = new LinkedList<>();
 
@@ -68,7 +68,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // timestamp extension
 
                 buf.readUnsignedByte(); // priority (reserved)
-                
+
                 // Location
                 position.setLongitude(buf.readInt() / 10000000.0);
                 position.setLatitude(buf.readInt() / 10000000.0);
@@ -120,7 +120,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             return positions;
         }
-        
+
         return null;
     }
 

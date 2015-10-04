@@ -37,10 +37,10 @@ public class BingMapsReverseGeocoder extends JsonReverseGeocoder {
                 Address address = new Address();
                 if (location.containsKey("addressLine")) {
                     address.setStreet(location.getString("addressLine"));
-                }    
+                }
                 if (location.containsKey("locality")) {
                     address.setSettlement(location.getString("locality"));
-                }    
+                }
                 if (location.containsKey("adminDistrict2")) {
                     address.setDistrict(location.getString("adminDistrict2"));
                 }

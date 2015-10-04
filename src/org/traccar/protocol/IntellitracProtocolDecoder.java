@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +67,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         // Parse message
         Matcher parser = pattern.matcher(sentence);
         if (!parser.matches()) {
@@ -84,7 +84,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
-        
+
         // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -95,19 +95,19 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
         position.setTime(time.getTime());
-        
+
         // Location data
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setLatitude(Double.valueOf(parser.group(index++)));
         position.setSpeed(Double.valueOf(parser.group(index++)));
         position.setCourse(Double.valueOf(parser.group(index++)));
         position.setAltitude(Double.valueOf(parser.group(index++)));
-        
+
         // Satellites
         int satellites = Integer.valueOf(parser.group(index++));
         position.setValid(satellites >= 3);
         position.set(Event.KEY_SATELLITES, satellites);
-        
+
         // Report identifier
         position.set(Event.KEY_INDEX, Long.valueOf(parser.group(index++)));
 

@@ -22,7 +22,7 @@ public class NominatimReverseGeocoder extends JsonReverseGeocoder {
     public NominatimReverseGeocoder() {
         this("http://nominatim.openstreetmap.org/reverse", 0);
     }
-    
+
     public NominatimReverseGeocoder(String url, int cacheSize) {
         super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1", cacheSize);
     }

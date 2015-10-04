@@ -43,7 +43,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
         return buf;
     }
-    
+
     @Override
     protected Object encodeCommand(Command command) {
 
@@ -56,5 +56,5 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
         return null;
     }
-    
+
 }

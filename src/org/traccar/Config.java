@@ -22,23 +22,23 @@ import java.util.Properties;
 public class Config {
 
     private final Properties properties = new Properties();
-    
+
     public void load(String file) throws IOException {
         properties.loadFromXML(new FileInputStream(file));
     }
-    
+
     public boolean hasKey(String key) {
         return properties.containsKey(key);
     }
-    
+
     public boolean getBoolean(String key) {
         return Boolean.valueOf(properties.getProperty(key));
     }
-    
+
     public int getInteger(String key) {
         return getInteger(key, 0);
     }
-    
+
     public int getInteger(String key, int defaultValue) {
         if (properties.containsKey(key)) {
             return Integer.valueOf(properties.getProperty(key));
@@ -46,11 +46,11 @@ public class Config {
             return defaultValue;
         }
     }
-    
+
     public long getLong(String key) {
         return getLong(key, 0);
     }
-    
+
     public long getLong(String key, long defaultValue) {
         if (properties.containsKey(key)) {
             return Long.valueOf(properties.getProperty(key));
@@ -58,11 +58,11 @@ public class Config {
             return defaultValue;
         }
     }
-    
+
     public String getString(String key) {
         return properties.getProperty(key);
     }
-    
+
     public String getString(String key, String defaultValue) {
         if (properties.containsKey(key)) {
             return properties.getProperty(key);
@@ -70,5 +70,5 @@ public class Config {
             return defaultValue;
         }
     }
-    
+
 }

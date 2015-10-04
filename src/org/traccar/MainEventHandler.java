@@ -29,7 +29,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        
+
         if (e.getMessage() != null) {
             if (e.getMessage() instanceof Position) {
 
@@ -50,7 +50,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             }
         }
     }
-    
+
     private static String formatChannel(Channel channel) {
         return String.format("[%08X]", channel.getId());
     }
@@ -64,7 +64,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
         e.getChannel().close();
-        
+
         Context.getConnectionManager().removeActiveDevice(e.getChannel());
     }
 

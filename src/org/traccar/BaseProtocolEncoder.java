@@ -21,21 +21,21 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.traccar.model.Command;
 
 public abstract class BaseProtocolEncoder extends OneToOneEncoder {
-    
+
     protected String getUniqueId(long deviceId) {
         return Context.getIdentityManager().getDeviceById(deviceId).getUniqueId();
     }
 
     @Override
     protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
-        
+
         if (msg instanceof Command) {
             return encodeCommand((Command) msg);
         }
-        
+
         return msg;
     }
-    
+
     protected abstract Object encodeCommand(Command command);
-    
+
 }

@@ -48,7 +48,7 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-        
+
         String imei = String.format("%015d", buf.readLong());
         if (!identify(imei, channel)) {
             return null;

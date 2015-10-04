@@ -38,13 +38,13 @@ public class OpenCageReverseGeocoder extends JsonReverseGeocoder {
 
                 if (location.containsKey("house_number")) {
                     address.setHouse(location.getString("house_number"));
-                }            
+                }
                 if (location.containsKey("road")) {
                     address.setStreet(location.getString("road"));
-                }    
+                }
                 if (location.containsKey("city_district")) {
                     address.setSettlement(location.getString("city_district"));
-                }    
+                }
                 if (location.containsKey("county")) {
                     address.setDistrict(location.getString("county"));
                 }
@@ -57,7 +57,7 @@ public class OpenCageReverseGeocoder extends JsonReverseGeocoder {
                 if (location.containsKey("postcode")) {
                     address.setPostcode(location.getString("postcode"));
                 }
-                
+
                 return address;
             }
         }

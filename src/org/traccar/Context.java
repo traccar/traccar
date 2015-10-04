@@ -32,9 +32,9 @@ import org.traccar.helper.Log;
 import org.traccar.web.WebServer;
 
 public class Context {
-    
+
     private static Config config;
-    
+
     public static Config getConfig() {
         return config;
     }
@@ -44,9 +44,9 @@ public class Context {
     public static boolean isLoggerEnabled() {
         return loggerEnabled;
     }
-    
+
     private static IdentityManager identityManager;
-    
+
     public static IdentityManager getIdentityManager() {
         return identityManager;
     }
@@ -86,9 +86,9 @@ public class Context {
     public static ServerManager getServerManager() {
         return serverManager;
     }
-    
+
     private static final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
-    
+
     public static AsyncHttpClient getAsyncHttpClient() {
         return asyncHttpClient;
     }
@@ -114,7 +114,7 @@ public class Context {
             String type = config.getString("geocoder.type", "google");
             String url = config.getString("geocoder.url");
             String key = config.getString("geocoder.key");
-            
+
             int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
                 case "google":

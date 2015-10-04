@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +34,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
     public GlobalSatProtocolDecoder(GlobalSatProtocol protocol) {
         super(protocol);
-        
+
         format0 = Context.getConfig().getString(getProtocolName() + ".format0", "TSPRXAB27GHKLMnaicz*U!");
         format1 = Context.getConfig().getString(getProtocolName() + ".format1", "SARY*U!");
     }
@@ -169,7 +169,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         }
         return position;
     }
-    
+
     private static final Pattern pattern = Pattern.compile(
             "\\$" +
             "(\\d+)," +                    // IMEI
@@ -186,7 +186,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)," +            // Course
             "(\\d+)," +                    // Satellites
             "(\\d+\\.?\\d*)");             // HDOP
-    
+
     private Position decodeAlternative(Channel channel, String sentence) {
 
         // Parse message
@@ -208,7 +208,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") != 0);
-        
+
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
@@ -257,13 +257,13 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-        
+
         if (sentence.startsWith("GS")) {
             return decodeOriginal(channel, sentence);
         } else if (sentence.startsWith("$")) {
             return decodeAlternative(channel, sentence);
         }
-        
+
         return null;
     }
 

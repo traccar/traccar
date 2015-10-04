@@ -45,9 +45,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response, remoteAddress);
         }
     }
-    
+
     private static String readString(ChannelBuffer buf) {
-        
+
         String result = null;
         int length = 0;
         while (buf.getByte(buf.readerIndex() + length) != 0) {
@@ -58,10 +58,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(length);
         }
         buf.readByte();
-        
+
         return result;
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
@@ -76,7 +76,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             }
             return null;
         }
-        
+
         buf.skipBytes(2); // prefix
         buf.readUnsignedShort(); // checksum
         buf.readUnsignedShort(); // length

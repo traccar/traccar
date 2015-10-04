@@ -22,7 +22,7 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        
+
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
                 return formatCommand(command, "@@M33,{%s},C01,0,12222*18\r\n", Command.KEY_UNIQUE_ID);
@@ -33,7 +33,7 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(command, "@@M33,{%s},C01,0,22022*18\r\n", Command.KEY_UNIQUE_ID);
         }
-        
+
         return null;
     }
 

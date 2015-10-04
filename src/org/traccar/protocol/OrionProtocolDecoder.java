@@ -16,7 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar; 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -34,7 +34,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
     public OrionProtocolDecoder(OrionProtocol protocol) {
         super(protocol);
     }
-    
+
     private static final int TYPE_USERLOG = 0;
     private static final int TYPE_SYSLOG = 3;
 
@@ -47,27 +47,27 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response);
         }
     }
-    
+
     private static double convertCoordinate(int value) {
         double degrees = value / 1000000;
         double minutes = (value % 1000000) / 10000.0;
         return degrees + minutes / 60;
     }
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-        
+
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte() & 0x0f;
-        
+
         if (type == TYPE_USERLOG) {
-            
+
             int header = buf.readUnsignedByte();
-            
+
             if ((header & 0x40) != 0) {
                 sendResponse(channel, buf);
             }
@@ -77,14 +77,14 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
             }
 
             List<Position> positions = new LinkedList<>();
-            
+
             for (int i = 0; i < (header & 0x0f); i++) {
-                
+
                 // Create new position
                 Position position = new Position();
                 position.setDeviceId(getDeviceId());
                 position.setProtocol(getProtocolName());
-                
+
                 position.set(Event.KEY_EVENT, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length
                 position.set(Event.KEY_FLAGS, buf.readUnsignedShort());
@@ -95,7 +95,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 position.setAltitude(buf.readShort()/ 10.0);
                 position.setCourse(buf.readUnsignedShort());
                 position.setSpeed(buf.readUnsignedShort() * 0.0539957);
-                
+
                 // Date and time
                 Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 time.clear();
@@ -106,14 +106,14 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 time.set(Calendar.MINUTE, buf.readUnsignedByte());
                 time.set(Calendar.SECOND, buf.readUnsignedByte());
                 position.setTime(time.getTime());
-                
+
                 // Accuracy
                 int satellites = buf.readUnsignedByte();
                 position.set(Event.KEY_SATELLITES, satellites);
                 position.setValid(satellites >= 3);
                 positions.add(position);
             }
-            
+
             return positions;
         }
 

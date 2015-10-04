@@ -23,13 +23,13 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 public class TeltonikaFrameDecoder extends FrameDecoder {
 
     private static final int MESSAGE_MINIMUM_LENGTH = 12;
-    
+
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
             Channel channel,
             ChannelBuffer buf) throws Exception {
-        
+
         // Check minimum length
         if (buf.readableBytes() < MESSAGE_MINIMUM_LENGTH) {
             return null;
@@ -47,7 +47,7 @@ public class TeltonikaFrameDecoder extends FrameDecoder {
                 return buf.readBytes(dataLength + 12);
             }
         }
-        
+
         return null;
     }
 

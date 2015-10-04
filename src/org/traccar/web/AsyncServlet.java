@@ -41,20 +41,20 @@ import org.traccar.model.Position;
 public class AsyncServlet extends BaseServlet {
 
     private static final long ASYNC_TIMEOUT = 120000;
-    
+
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
         async(req.startAsync(), getUserId(req));
         return true;
     }
-    
+
     public class AsyncSession {
-        
+
         private static final boolean DEBUG_ASYNC = false;
-        
+
         private static final long SESSION_TIMEOUT = 30;
         private static final long REQUEST_TIMEOUT = 20;
-        
+
         private boolean destroyed;
         private final long userId;
         private final Set<Long> devices = new HashSet<>();
@@ -62,13 +62,13 @@ public class AsyncServlet extends BaseServlet {
         private Timeout requestTimeout;
         private final Map<Long, Position> positions = new HashMap<>();
         private AsyncContext activeContext;
-        
+
         private void logEvent(String message) {
             if (DEBUG_ASYNC) {
                 Log.debug("AsyncSession: " + this.hashCode() + " destroyed: " + destroyed + " " + message);
             }
         }
-        
+
         public AsyncSession(long userId, Collection<Long> devices) {
             logEvent("create userId: " + userId + " devices: " + devices.size());
             this.userId = userId;
@@ -78,14 +78,14 @@ public class AsyncServlet extends BaseServlet {
             for (Position position : initialPositions) {
                 positions.put(position.getDeviceId(), position);
             }
-            
+
             Context.getConnectionManager().addListener(devices, dataListener);
         }
-        
+
         public boolean hasDevice(long deviceId) {
             return devices.contains(deviceId);
         }
-        
+
         private final ConnectionManager.DataCacheListener dataListener = new ConnectionManager.DataCacheListener() {
             @Override
             public void onUpdate(Position position) {
@@ -104,7 +104,7 @@ public class AsyncServlet extends BaseServlet {
                 }
             }
         };
-        
+
         private final TimerTask sessionTimer = new TimerTask() {
             @Override
             public void run(Timeout tmt) throws Exception {
@@ -118,7 +118,7 @@ public class AsyncServlet extends BaseServlet {
                 }
             }
         };
-                
+
         private final TimerTask requestTimer = new TimerTask() {
             @Override
             public void run(Timeout tmt) throws Exception {
@@ -132,7 +132,7 @@ public class AsyncServlet extends BaseServlet {
                 }
             }
         };
-        
+
         public synchronized void request(AsyncContext context) {
             logEvent("request context: " + context.hashCode());
             if (!destroyed) {
@@ -150,7 +150,7 @@ public class AsyncServlet extends BaseServlet {
                 }
             }
         }
-        
+
         private synchronized void response() {
             logEvent("response context: " + activeContext.hashCode());
             if (!destroyed) {
@@ -174,17 +174,17 @@ public class AsyncServlet extends BaseServlet {
                         sessionTimer, SESSION_TIMEOUT, TimeUnit.SECONDS);
             }
         }
-        
+
     }
-    
+
     private static final Map<Long, AsyncSession> asyncSessions = new HashMap<>();
-    
+
     public static void sessionRefreshUser(long userId) {
         synchronized (asyncSessions) {
             asyncSessions.remove(userId);
         }
     }
-    
+
     public static void sessionRefreshDevice(long deviceId) {
         synchronized (asyncSessions) {
             Iterator<Entry<Long, AsyncSession>> iterator = asyncSessions.entrySet().iterator();
@@ -195,19 +195,19 @@ public class AsyncServlet extends BaseServlet {
             }
         }
     }
-    
+
     private void async(final AsyncContext context, long userId) {
-        
+
         context.setTimeout(ASYNC_TIMEOUT);
         HttpServletRequest req = (HttpServletRequest) context.getRequest();
 
         synchronized (asyncSessions) {
-            
+
             if (Boolean.valueOf(req.getParameter("first")) || !asyncSessions.containsKey(userId)) {
                 Collection<Long> devices = Context.getPermissionsManager().allowedDevices(userId);
                 asyncSessions.put(userId, new AsyncSession(userId, devices));
             }
-            
+
             asyncSessions.get(userId).request(context);
         }
     }

@@ -27,7 +27,7 @@ public class Command implements Factory {
     public void set(String key, long value) { attributes.put(key, value); }
     public void set(String key, double value) { attributes.put(key, value); }
     public void set(String key, String value) { if (value != null && !value.isEmpty()) attributes.put(key, value); }
-    
+
     public static final String TYPE_POSITION_SINGLE = "positionSingle";
     public static final String TYPE_POSITION_PERIODIC = "positionPeriodic";
     public static final String TYPE_POSITION_STOP = "positionStop";
@@ -39,5 +39,5 @@ public class Command implements Factory {
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";
-    
+
 }
