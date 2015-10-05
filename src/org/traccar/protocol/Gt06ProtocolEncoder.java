@@ -53,9 +53,9 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent("RELAY,1#");
+                return encodeContent("Relay,1#");
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent("RELAY,0#");
+                return encodeContent("Relay,0#");
         }
 
         return null;

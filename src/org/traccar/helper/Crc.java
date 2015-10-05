@@ -99,21 +99,17 @@ public class Crc {
 
     private static int crc16Unreflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
-
-        for (int i = 0; i < buf.remaining(); i++) {
-            crc16 = table[((crc16 >> 8) ^ buf.get(i)) & 0xff] ^ (crc16 << 8);
+        while (buf.hasRemaining()) {
+            crc16 = table[((crc16 >> 8) ^ buf.get()) & 0xff] ^ (crc16 << 8);
         }
-
         return crc16 & 0xFFFF;
     }
 
     private static int crc16Reflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
-
-        for (int i = 0; i < buf.remaining(); i++) {
-            crc16 = table[(crc16 ^ buf.get(i)) & 0xff] ^ (crc16 >> 8);
+        while (buf.hasRemaining()) {
+            crc16 = table[(crc16 ^ buf.get()) & 0xff] ^ (crc16 >> 8);
         }
-
         return crc16 & 0xFFFF;
     }
 
@@ -131,16 +127,16 @@ public class Crc {
 
     public static int crc32(ByteBuffer buf) {
         CRC32 checksum = new CRC32();
-        for (int i = 0; i < buf.remaining(); i++) {
-            checksum.update(buf.get(i));
+        while (buf.hasRemaining()) {
+            checksum.update(buf.get());
         }
         return (int) checksum.getValue();
     }
 
     public static int xorChecksum(ByteBuffer buf) {
         int checksum = 0;
-        for (int i = 0; i < buf.remaining(); i++) {
-            checksum ^= buf.get(i);
+        while (buf.hasRemaining()) {
+            checksum ^= buf.get();
         }
         return checksum;
     }
