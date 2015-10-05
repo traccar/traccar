@@ -112,7 +112,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             "V\\d," +                           // Version?
             ".*" +
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
-            "([AV])," +                         // Validity
+            "([AV])?," +                        // Validity
             "-?(\\d+)-?(\\d{2}.\\d+)," +        // Latitude (DDMM.MMMM)
             "([NS])," +
             "-?(\\d+)-?(\\d{2}.\\d+)," +        // Longitude (DDMM.MMMM)
@@ -151,7 +151,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
 
         // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        String valid = parser.group(index++);
+        if (valid != null) {
+            position.setValid(valid.compareTo("A") == 0);
+        }
 
         // Latitude
         Double latitude = Double.valueOf(parser.group(index++));
