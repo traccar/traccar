@@ -14,7 +14,7 @@
     <entry key='web.path'>web</entry>
     <entry key='web.debug'>true</entry>
 
-    <entry key='geocoder.enable'>false</entry>
+    <entry key='geocoder.enable'>true</entry>
     <entry key='geocoder.type'>nominatim</entry>
     <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
 

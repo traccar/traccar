@@ -15,29 +15,51 @@
  */
 package org.traccar;
 
+import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelUpstreamHandler;
+import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.MessageEvent;
 import org.traccar.geocode.AddressFormat;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.model.Position;
 
-public class ReverseGeocoderHandler extends BaseDataHandler {
+public class ReverseGeocoderHandler implements ChannelUpstreamHandler {
 
     private final ReverseGeocoder geocoder;
     private final boolean processInvalidPositions;
     private final AddressFormat addressFormat;
 
-    public ReverseGeocoderHandler(ReverseGeocoder geocoder, boolean processInvalidPositions ) {
+    public ReverseGeocoderHandler(ReverseGeocoder geocoder, boolean processInvalidPositions) {
         this.geocoder = geocoder;
         this.processInvalidPositions = processInvalidPositions;
         addressFormat = new AddressFormat();
     }
 
     @Override
-    protected Position handlePosition(Position position) {
-        if (geocoder != null && (processInvalidPositions || position.getValid())) {
-            position.setAddress(geocoder.getAddress(
-                    addressFormat, position.getLatitude(), position.getLongitude()));
+    public void handleUpstream(final ChannelHandlerContext ctx, ChannelEvent evt) throws Exception {
+        if (!(evt instanceof MessageEvent)) {
+            ctx.sendUpstream(evt);
+            return;
         }
-        return position;
+
+        final MessageEvent e = (MessageEvent) evt;
+        Object message = e.getMessage();
+        if (message instanceof Position) {
+            final Position position = (Position) message;
+            if (geocoder != null && (processInvalidPositions || position.getValid())) {
+                geocoder.getAddress(addressFormat, position.getLatitude(), position.getLongitude(),
+                        new ReverseGeocoder.ReverseGeocoderCallback() {
+                    @Override
+                    public void onResult(String address) {
+                        position.setAddress(address);
+                        Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                    }
+                });
+            }
+        } else {
+            Channels.fireMessageReceived(ctx, message, e.getRemoteAddress());
+        }
     }
 
 }

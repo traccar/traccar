@@ -15,6 +15,9 @@
  */
 package org.traccar.geocode;
 
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.Response;
+import org.traccar.Context;
 import org.traccar.helper.Log;
 
 import javax.json.Json;
@@ -24,6 +27,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,50 +40,48 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
     public JsonReverseGeocoder(String url, final int cacheSize) {
         this.url = url;
         if (cacheSize > 0) {
-            this.cache = new LinkedHashMap<Map.Entry<Double, Double>, String>() {
+            this.cache = Collections.synchronizedMap(new LinkedHashMap<Map.Entry<Double, Double>, String>() {
                 protected boolean removeEldestEntry(Map.Entry eldest) {
                     return size() > cacheSize;
                 }
-            };
+            });
         }
     }
 
     @Override
-    public String getAddress(AddressFormat format, double latitude, double longitude) {
+    public void getAddress(final AddressFormat format, final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
 
         if (cache != null) {
             String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
             if (cachedAddress != null) {
-                return cachedAddress;
+                callback.onResult(cachedAddress);
+                return;
             }
         }
 
-        try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(String.format(url, latitude, longitude)).openConnection();
-            conn.setRequestProperty("Connection", "close"); // don't keep-alive connections
-            try {
-                InputStreamReader streamReader = new InputStreamReader(conn.getInputStream());
-                try (JsonReader reader = Json.createReader(streamReader)) {
+        Context.getAsyncHttpClient().prepareGet(String.format(url, latitude, longitude)).execute(new AsyncCompletionHandler() {
+            @Override
+            public Object onCompleted(Response response) throws Exception {
+                try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
                     Address address = parseAddress(reader.readObject());
-                    while (streamReader.read() > 0); // make sure we reached the end
                     if (address != null) {
                         String formattedAddress = format.format(address);
-
                         if (cache != null) {
                             cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
                         }
-
-                        return formattedAddress;
+                        callback.onResult(formattedAddress);
+                    } else {
+                        callback.onResult(null);
                     }
                 }
-            } finally {
-                conn.disconnect();
+                return null;
             }
-        } catch(Exception error) {
-            Log.warning(error);
-        }
 
-        return null;
+            @Override
+            public void onThrowable(Throwable t) {
+                callback.onResult(null);
+            }
+        });
     }
 
     protected abstract Address parseAddress(JsonObject json);

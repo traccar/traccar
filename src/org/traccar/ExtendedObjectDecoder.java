@@ -21,7 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
-import static org.jboss.netty.channel.Channels.fireMessageReceived;
+import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 
 public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
@@ -42,10 +42,10 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
         } else if (decodedMessage != null) {
             if (decodedMessage instanceof Collection) {
                 for (Object o : (Collection) decodedMessage) {
-                    fireMessageReceived(ctx, o, e.getRemoteAddress());
+                    Channels.fireMessageReceived(ctx, o, e.getRemoteAddress());
                 }
             } else {
-                fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
+                Channels.fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
             }
         }
     }
