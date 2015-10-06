@@ -136,7 +136,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(buf.readUnsignedByte());
             response.writeByte(type);
             response.writeByte(0); // reserved
-            response.writeByte(Checksum.xorChecksum(response.toByteBuffer()));
+            response.writeByte(Checksum.xor(response.toByteBuffer()));
             response.writeByte(0x0D); // ending
             channel.write(response);
 

@@ -40,7 +40,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
     private static final long IMEI_BASE_TC65I_V11 = 0x14143B4000000L;
 
     private static boolean validateImei(long imei) {
-        return Checksum.luhnChecksum(imei / 10) == imei % 10;
+        return Checksum.luhn(imei / 10) == imei % 10;
     }
 
     private static long imeiFromUnitId(long unitId) {

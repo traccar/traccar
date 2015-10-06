@@ -38,7 +38,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeInt(0); // terminal id
 
-        buf.writeByte(Checksum.xorChecksum(buf.toByteBuffer()));
+        buf.writeByte(Checksum.xor(buf.toByteBuffer()));
         buf.writeByte(0x0D); // ending
 
         return buf;

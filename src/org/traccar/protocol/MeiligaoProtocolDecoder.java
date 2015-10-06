@@ -100,7 +100,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         if (id.length() == 14) {
             // Try to recreate full IMEI number
             // Sometimes first digit is cut, so this won't work
-            if (identify(id + Checksum.luhnChecksum(Long.valueOf(id)), channel, null, false)) {
+            if (identify(id + Checksum.luhn(Long.valueOf(id)), channel, null, false)) {
                 return true;
             }
         }

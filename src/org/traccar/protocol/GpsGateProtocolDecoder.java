@@ -48,7 +48,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
     private void send(Channel channel, String message) {
         if (channel != null) {
-            channel.write(message + Checksum.nmeaChecksum(message) + "\r\n");
+            channel.write(message + Checksum.nmea(message) + "\r\n");
         }
     }
 

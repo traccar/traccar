@@ -121,7 +121,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("0") && Character.isLowerCase(status.charAt(0))) {
             response = "$EAVACK,0," + checksum;
-            response += Checksum.nmeaChecksum(response);
+            response += Checksum.nmea(response);
         } else if (type.equals("S") || type.equals("T")) {
             response = "$AVCFG,00000000,t*21";
         } else if (type.equals("3")) {

@@ -91,8 +91,8 @@ public class Checksum {
         0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
     };
 
-    private static final int CRC16_CCITT_START = 0xFFFF;
-    private static final int CRC16_CCITT_XOROUT = 0xFFFF;
+    public static final int CRC16_CCITT = 0xFFFF;
+    public static final int CRC16_CCITT_XOROUT = 0xFFFF;
 
     private static int crc16Unreflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
@@ -111,11 +111,11 @@ public class Checksum {
     }
 
     public static int crc16Ccitt(ByteBuffer buf) {
-        return crc16Reflected(buf, CRC16_CCITT_START, CRC16_CCITT_TABLE_REVERSE) ^ CRC16_CCITT_XOROUT;
+        return crc16Reflected(buf, 0xFFFF, CRC16_CCITT_TABLE_REVERSE) ^ 0xFFFF;
     }
 
     public static int crc16X25Ccitt(ByteBuffer buf) {
-        return crc16Unreflected(buf, CRC16_CCITT_START, CRC16_CCITT_TABLE);
+        return crc16Unreflected(buf, 0xFFFF, CRC16_CCITT_TABLE);
     }
 
     public static int crc16Ccitt(ByteBuffer buf, int seed, int xorout) {
@@ -130,7 +130,7 @@ public class Checksum {
         return (int) checksum.getValue();
     }
 
-    public static int xorChecksum(ByteBuffer buf) {
+    public static int xor(ByteBuffer buf) {
         int checksum = 0;
         while (buf.hasRemaining()) {
             checksum ^= buf.get();
@@ -138,7 +138,7 @@ public class Checksum {
         return checksum;
     }
 
-    public static String nmeaChecksum(String msg) {
+    public static String nmea(String msg) {
         int checksum = 0;
         byte bytes[] = msg.getBytes(Charset.defaultCharset());
         for (int i = 1; i < msg.length(); i++) {
@@ -147,7 +147,7 @@ public class Checksum {
         return String.format("*%02x", checksum).toUpperCase();
     }
 
-    public static long luhnChecksum(long imei) {
+    public static long luhn(long imei) {
         long checksum = 0;
         long remain = imei;
 
