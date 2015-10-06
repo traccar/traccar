@@ -28,6 +28,10 @@ public class PatternBuilder {
         return this;
     }
 
+    public PatternBuilder opx(String s) {
+        return xpr("(?:").xpr(s).xpr(")?");
+    }
+
     public PatternBuilder txt(String s) {
         pattern.append(s.replaceAll("([\\\\\\.\\[\\{\\(\\*\\+\\?\\^\\$\\|])", "\\\\$1"));
         return this;
@@ -42,13 +46,17 @@ public class PatternBuilder {
         return this;
     }
 
+    public PatternBuilder opn(String s) {
+        return xpr("(?:").num(s).xpr(")?");
+    }
+
     public PatternBuilder any() {
         pattern.append(".*");
         return this;
     }
 
     public PatternBuilder not(String s) {
-        return xpr("[^").txt(s).xpr("]+");
+        return xpr("[^").txt(s).xpr("]*");
     }
 
     public PatternBuilder nxt(String s) {

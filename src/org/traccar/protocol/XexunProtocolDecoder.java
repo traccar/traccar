@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -36,47 +37,43 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         this.full = full;
     }
 
-    private static final Pattern patternBasic = Pattern.compile(
-            "G[PN]RMC," +
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
-            "([AV])," +                         // Validity
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
-            "([EW])?," +
-            "(\\d+\\.?\\d*)," +                 // Speed
-            "(\\d+\\.?\\d*)?," +                // Course
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            "[^\\*]*\\*..,"       +             // Checksum
-            "([FL])," +                         // Signal
-            "(?:([^,]*),)?" +                   // Alarm
-            ".*imei:" +
-            "(\\d+),");                         // IMEI
+    private static final Pattern patternBasic = new PatternBuilder()
+            .xpr("G[PN]RMC,")
+            .num("(dd)(dd)(dd).(d+),")           // time
+            .xpr("([AV]),")                      // validity
+            .num("(d+)(dd.d+),([NS]),")          // latitude
+            .num("(d+)(dd.d+),([EW])?,")         // longitude
+            .num("(d+.?d*),")                    // speed
+            .num("(d+.?d*)?,")                   // course
+            .num("(dd)(dd)(dd),")                // date
+            .nxt("*")
+            .num("xx,")                          // checksum
+            .xpr("([FL]),")                      // signal
+            .opx("([^,]*),")                     // alarm
+            .any()
+            .num("imei:(d+),")                   // imei
+            .compile();
 
-    private static final Pattern patternFull = Pattern.compile(
-            "[\r\n]*" +
-            "(\\d+)," +                         // Serial
-            "([^,]+)?," +                       // Number
-            patternBasic.pattern() +
-            "(\\d+)," +                         // Satellites
-            "(-?\\d+\\.\\d+)?," +               // Altitude
-            "[FL]:(\\d+\\.\\d+)V" +             // Power
-            ".*" +
-            "[\r\n]*");
+    private static final Pattern patternFull = new PatternBuilder()
+            .any()
+            .num("(d+),")                        // serial
+            .xpr("([^,]+)?,")                    // phone number
+            .xpr(patternBasic.pattern())
+            .num("(d+),")                        // satellites
+            .num("(-?d+.d+)?,")                  // altitude
+            .num("[FL]:(d+.d+)V")                // power
+            .any()
+            .compile();
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        // Parse message
         Pattern pattern = full ? patternFull : patternBasic;
         Matcher parser = pattern.matcher((String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
@@ -143,7 +140,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         if (full) {
 
             // Satellites
-            position.set(Event.KEY_SATELLITES, parser.group(index++).replaceFirst ("^0*(?![\\.$])", ""));
+            position.set(Event.KEY_SATELLITES, parser.group(index++).replaceFirst("^0*(?![\\.$])", ""));
 
             // Altitude
             String altitude = parser.group(index++);
