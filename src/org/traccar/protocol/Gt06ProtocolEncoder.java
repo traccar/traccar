@@ -40,7 +40,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeShort(0); // message index
 
-        buf.writeShort(Checksum.crc16Ccitt(buf.toByteBuffer(2, buf.writerIndex() - 2)));
+        buf.writeShort(Checksum.crc16(Checksum.CRC16_X25, buf.toByteBuffer(2, buf.writerIndex() - 2)));
 
         buf.writeByte('\r');
         buf.writeByte('\n');

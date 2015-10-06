@@ -91,8 +91,14 @@ public class Checksum {
         0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
     };
 
-    public static final int CRC16_CCITT = 0xFFFF;
-    public static final int CRC16_CCITT_XOROUT = 0xFFFF;
+    // More info: http://reveng.sourceforge.net/crc-catalogue/16.htm
+    public static final String CRC16_X25 = "X-25";
+    public static final String CRC16_CCITT_FALSE = "CCITT-FALSE";
+    public static final String CRC16_KERMIT = "KERMIT";
+    public static final String CRC16_XMODEM = "XMODEM";
+    public static final String CRC16_AUG_CCITT = "AUG-CCITT";
+    public static final String CRC16_GENIBUS = "GENIBUS";
+    public static final String CRC16_MCRF4XX = "MCRF4XX";
 
     private static int crc16Unreflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
@@ -110,16 +116,24 @@ public class Checksum {
         return crc16 & 0xFFFF;
     }
 
-    public static int crc16Ccitt(ByteBuffer buf) {
-        return crc16Reflected(buf, 0xFFFF, CRC16_CCITT_TABLE_REVERSE) ^ 0xFFFF;
-    }
-
-    public static int crc16X25Ccitt(ByteBuffer buf) {
-        return crc16Unreflected(buf, 0xFFFF, CRC16_CCITT_TABLE);
-    }
-
-    public static int crc16Ccitt(ByteBuffer buf, int seed, int xorout) {
-        return crc16Reflected(buf, seed, CRC16_CCITT_TABLE_REVERSE) ^ xorout;
+    public static int crc16(String type, ByteBuffer buf) {
+        switch (type) {
+            case CRC16_X25:
+                return crc16Reflected(buf, 0xFFFF, CRC16_CCITT_TABLE_REVERSE) ^ 0xFFFF;
+            case CRC16_CCITT_FALSE:
+                return crc16Unreflected(buf, 0xFFFF, CRC16_CCITT_TABLE);
+            case CRC16_KERMIT:
+                return crc16Reflected(buf, 0, CRC16_CCITT_TABLE_REVERSE);
+            case CRC16_XMODEM:
+                return crc16Unreflected(buf, 0, CRC16_CCITT_TABLE);
+            case CRC16_AUG_CCITT:
+                return crc16Unreflected(buf, 0x1d0f, CRC16_CCITT_TABLE);
+            case CRC16_GENIBUS:
+                return crc16Unreflected(buf, 0xFFFF, CRC16_CCITT_TABLE) ^ 0xFFFF;
+            case CRC16_MCRF4XX:
+                return crc16Reflected(buf, 0xFFFF, CRC16_CCITT_TABLE_REVERSE);
+        }
+        throw new UnsupportedOperationException();
     }
 
     public static int crc32(ByteBuffer buf) {

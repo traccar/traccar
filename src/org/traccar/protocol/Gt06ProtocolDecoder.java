@@ -81,7 +81,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(0x05); // size
             response.writeByte(type);
             response.writeShort(index);
-            response.writeShort(Checksum.crc16Ccitt(response.toByteBuffer(2, 4)));
+            response.writeShort(Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(2, 4)));
             response.writeByte(0x0D); response.writeByte(0x0A); // ending
             channel.write(response);
         }

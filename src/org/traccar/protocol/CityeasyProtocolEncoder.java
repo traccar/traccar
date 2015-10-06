@@ -33,7 +33,7 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShort(type);
         buf.writeBytes(content);
         buf.writeInt(0x0B);
-        buf.writeShort(Checksum.crc16Ccitt(buf.toByteBuffer(), 0, 0));
+        buf.writeShort(Checksum.crc16(Checksum.CRC16_KERMIT, buf.toByteBuffer()));
         buf.writeByte('\r');
         buf.writeByte('\n');
 

@@ -121,7 +121,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             buf.writeBytes(id);
             buf.writeShort(type);
             buf.writeBytes(msg);
-            buf.writeShort(Checksum.crc16X25Ccitt(buf.toByteBuffer()));
+            buf.writeShort(Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.toByteBuffer()));
             buf.writeByte('\r');
             buf.writeByte('\n');
 
