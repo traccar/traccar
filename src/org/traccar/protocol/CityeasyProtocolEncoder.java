@@ -49,11 +49,13 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_POSITION_SINGLE:
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_REQUEST, content);
             case Command.TYPE_POSITION_PERIODIC:
+                content.writeShort(((Number) command.getAttributes().get(Command.KEY_FREQUENCY)).intValue());
+                return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_INTERVAL, content);
             case Command.TYPE_POSITION_STOP:
-                content.writeShort(((Number) command.getAttributes().getOrDefault(Command.KEY_FREQUENCY, 0)).intValue());
+                content.writeShort(0);
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_INTERVAL, content);
             case Command.TYPE_SET_TIMEZONE:
-                int timezone = ((Number) command.getAttributes().getOrDefault(Command.KEY_TIMEZONE, 0)).intValue();
+                int timezone = ((Number) command.getAttributes().get(Command.KEY_TIMEZONE)).intValue();
                 content.writeByte(timezone < 0 ? 1 : 0);
                 content.writeShort(Math.abs(timezone) / 60);
                 return encodeContent(CityeasyProtocolDecoder.MSG_TIMEZONE, content);
