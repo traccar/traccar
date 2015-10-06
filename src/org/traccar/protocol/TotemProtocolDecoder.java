@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -31,38 +32,38 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern1 = Pattern.compile(
-            "\\$\\$" +                          // Header
-            "\\p{XDigit}{2}" +                  // Length
-            "(\\d+)\\|" +                       // IMEI
-            "(..)" +                            // Alarm Type
-            "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2})\\.\\d+," + // Time (HHMMSS.SS)
-            "([AV])," +                         // Validity
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+\\.?\\d*)?," +                // Speed
-            "(\\d+\\.?\\d*)?," +                // Course
-            "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
-            "[^\\*]+\\*\\p{XDigit}{2}\\|" +     // Checksum
-            "\\d+\\.\\d+\\|" +                  // PDOP
-            "(\\d+\\.\\d+)\\|" +                // HDOP
-            "\\d+\\.\\d+\\|" +                  // VDOP
-            "(\\d+)\\|" +                       // IO Status
-            "\\d+\\|" +                         // Time
-            "\\d" +                             // Charged
-            "(\\d{3})" +                        // Battery
-            "(\\d{4})\\|" +                     // External Power
-            "(?:(\\d+)\\|)?" +                  // ADC
-            "(\\p{XDigit}+)\\|" +               // Location Code
-            "(\\d+)\\|" +                       // Temperature
-            "(\\d+.\\d+)\\|" +                  // Odometer
-            "\\d+\\|" +                         // Serial Number
-            ".*\\|?" +
-            "\\p{XDigit}{4}" +                  // Checksum
-            "\r?\n?");
+    private static final Pattern pattern1 = new PatternBuilder()
+            .txt("$$")                           // header
+            .num("xx")                           // length
+            .num("(d+)|")                        // imei
+            .xpr("(..)")                         // alarm
+            .txt("$GPRMC,")
+            .num("(dd)(dd)(dd).d+,")             // time
+            .xpr("([AV]),")                      // validity
+            .num("(d+)(dd.d+),([NS]),")          // latitude
+            .num("(d+)(dd.d+),([EW]),")          // longitude
+            .num("(d+.?d*)?,")                   // speed
+            .num("(d+.?d*)?,")                   // course
+            .num("(dd)(dd)(dd)")                 // date
+            .nxt("*")
+            .num("xx|")                          // checksum
+            .num("d+.d+|")                       // pdop
+            .num("(d+.d+)|")                     // hdop
+            .num("d+.d+|")                       // vdop
+            .num("(d+)|")                        // io status
+            .num("d+|")                          // time
+            .num("d")                            // charged
+            .num("(ddd)")                        // battery
+            .num("(dddd)|")                      // power
+            .num("(?:(d+)|)?")                   // adc
+            .num("(x+)|")                        // location code
+            .num("(d+)|")                        // temperature
+            .num("(d+.d+)|")                     // odometer
+            .num("d+|")                          // serial number
+            .any()
+            .num("xxxx")                         // checksum
+            .any()
+            .compile();
 
     private static final Pattern pattern2 = Pattern.compile(
             "\\$\\$" +                          // Header
