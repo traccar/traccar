@@ -27,7 +27,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -100,7 +100,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         if (id.length() == 14) {
             // Try to recreate full IMEI number
             // Sometimes first digit is cut, so this won't work
-            if (identify(id + Crc.luhnChecksum(Long.valueOf(id)), channel, null, false)) {
+            if (identify(id + Checksum.luhnChecksum(Long.valueOf(id)), channel, null, false)) {
                 return true;
             }
         }
@@ -121,7 +121,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             buf.writeBytes(id);
             buf.writeShort(type);
             buf.writeBytes(msg);
-            buf.writeShort(Crc.crc16X25Ccitt(buf.toByteBuffer()));
+            buf.writeShort(Checksum.crc16X25Ccitt(buf.toByteBuffer()));
             buf.writeByte('\r');
             buf.writeByte('\n');
 

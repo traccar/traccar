@@ -25,7 +25,7 @@ import org.jboss.netty.channel.Channel;
 
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -136,7 +136,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(buf.readUnsignedByte());
             response.writeByte(type);
             response.writeByte(0); // reserved
-            response.writeByte(Crc.xorChecksum(response.toByteBuffer()));
+            response.writeByte(Checksum.xorChecksum(response.toByteBuffer()));
             response.writeByte(0x0D); // ending
             channel.write(response);
 

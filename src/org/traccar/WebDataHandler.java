@@ -19,7 +19,8 @@ import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
-import org.traccar.helper.Crc;
+
+import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -52,7 +53,7 @@ public class WebDataHandler extends BaseDataHandler {
             f.format("%1$td%1$tm%1$ty,,", calendar);
         }
 
-        s.append(Crc.nmeaChecksum(s.toString()));
+        s.append(Checksum.nmeaChecksum(s.toString()));
 
         return s.toString();
     }

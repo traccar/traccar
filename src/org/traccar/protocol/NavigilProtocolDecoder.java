@@ -22,7 +22,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -68,7 +68,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         header.writeShort(MESSAGE_ACKNOWLEDGEMENT);
         header.writeShort(header.capacity() + data.capacity());
         header.writeShort(0);
-        header.writeShort(Crc.crc16X25Ccitt(data.toByteBuffer()));
+        header.writeShort(Checksum.crc16X25Ccitt(data.toByteBuffer()));
         header.writeInt(0);
         header.writeInt((int) (System.currentTimeMillis() / 1000) + LEAP_SECONDS_DELTA);
 

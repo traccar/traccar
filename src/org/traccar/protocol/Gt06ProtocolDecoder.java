@@ -23,7 +23,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -81,7 +81,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(0x05); // size
             response.writeByte(type);
             response.writeShort(index);
-            response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(2, 4)));
+            response.writeShort(Checksum.crc16Ccitt(response.toByteBuffer(2, 4)));
             response.writeByte(0x0D); response.writeByte(0x0A); // ending
             channel.write(response);
         }

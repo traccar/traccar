@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
 public class KhdProtocolEncoder extends BaseProtocolEncoder {
@@ -38,7 +38,7 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeInt(0); // terminal id
 
-        buf.writeByte(Crc.xorChecksum(buf.toByteBuffer()));
+        buf.writeByte(Checksum.xorChecksum(buf.toByteBuffer()));
         buf.writeByte(0x0D); // ending
 
         return buf;

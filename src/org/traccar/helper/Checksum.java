@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.zip.CRC32;
 
-/**
- * CRC functions
- */
-public class Crc {
+public class Checksum {
 
-    private static final int crc16CcittTableReverse[] = {
+    private static final int CRC16_CCITT_TABLE_REVERSE[] = {
         0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF,
         0x8C48, 0x9DC1, 0xAF5A, 0xBED3, 0xCA6C, 0xDBE5, 0xE97E, 0xF8F7,
         0x1081, 0x0108, 0x3393, 0x221A, 0x56A5, 0x472C, 0x75B7, 0x643E,
@@ -59,7 +56,7 @@ public class Crc {
         0x7BC7, 0x6A4E, 0x58D5, 0x495C, 0x3DE3, 0x2C6A, 0x1EF1, 0x0F78
     };
 
-    private static final int crc16CcittTable[] = {
+    private static final int CRC16_CCITT_TABLE[] = {
         0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
         0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
         0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
@@ -94,8 +91,8 @@ public class Crc {
         0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
     };
 
-    private static final int crc16CcittStart = 0xFFFF;
-    private static final int crc16CcittXorout = 0xFFFF;
+    private static final int CRC16_CCITT_START = 0xFFFF;
+    private static final int CRC16_CCITT_XOROUT = 0xFFFF;
 
     private static int crc16Unreflected(ByteBuffer buf, int crc_in, int[] table) {
         int crc16 = crc_in;
@@ -114,15 +111,15 @@ public class Crc {
     }
 
     public static int crc16Ccitt(ByteBuffer buf) {
-        return crc16Reflected(buf, crc16CcittStart, crc16CcittTableReverse) ^ crc16CcittXorout;
+        return crc16Reflected(buf, CRC16_CCITT_START, CRC16_CCITT_TABLE_REVERSE) ^ CRC16_CCITT_XOROUT;
     }
 
     public static int crc16X25Ccitt(ByteBuffer buf) {
-        return crc16Unreflected(buf, crc16CcittStart, crc16CcittTable);
+        return crc16Unreflected(buf, CRC16_CCITT_START, CRC16_CCITT_TABLE);
     }
 
-    public static int crc16CcittSeed(ByteBuffer buf, int seed) {
-        return crc16Reflected(buf, seed, crc16CcittTableReverse) ^ crc16CcittXorout;
+    public static int crc16Ccitt(ByteBuffer buf, int seed, int xorout) {
+        return crc16Reflected(buf, seed, CRC16_CCITT_TABLE_REVERSE) ^ xorout;
     }
 
     public static int crc32(ByteBuffer buf) {

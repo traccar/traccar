@@ -24,7 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -40,7 +40,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
     private static final long IMEI_BASE_TC65I_V11 = 0x14143B4000000L;
 
     private static boolean validateImei(long imei) {
-        return Crc.luhnChecksum(imei / 10) == imei % 10;
+        return Checksum.luhnChecksum(imei / 10) == imei % 10;
     }
 
     private static long imeiFromUnitId(long unitId) {

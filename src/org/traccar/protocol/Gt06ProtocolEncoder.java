@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
 public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
@@ -40,7 +40,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeShort(0); // message index
 
-        buf.writeShort(Crc.crc16Ccitt(buf.toByteBuffer(2, buf.writerIndex() - 2)));
+        buf.writeShort(Checksum.crc16Ccitt(buf.toByteBuffer(2, buf.writerIndex() - 2)));
 
         buf.writeByte('\r');
         buf.writeByte('\n');

@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
 public class LaipacProtocolDecoder extends BaseProtocolDecoder {
@@ -121,7 +121,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("0") && Character.isLowerCase(status.charAt(0))) {
             response = "$EAVACK,0," + checksum;
-            response += Crc.nmeaChecksum(response);
+            response += Checksum.nmeaChecksum(response);
         } else if (type.equals("S") || type.equals("T")) {
             response = "$AVCFG,00000000,t*21";
         } else if (type.equals("3")) {

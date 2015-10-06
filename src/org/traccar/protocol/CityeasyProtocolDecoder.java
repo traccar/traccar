@@ -25,7 +25,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -51,8 +51,14 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)" +                          // Cell
             ".*");
 
-    private static final int MSG_LOCATION_REPORT = 0x0003;
-    private static final int MSG_LOCATION_INQUIRY_RESPONSE = 0x0004;
+    public static final int MSG_ADDRESS_REQUEST = 0x0001;
+    public static final int MSG_STATUS = 0x0002;
+    public static final int MSG_LOCATION_REPORT = 0x0003;
+    public static final int MSG_LOCATION_REQUEST = 0x0004;
+    public static final int MSG_LOCATION_INTERVAL = 0x0005;
+    public static final int MSG_PHONE_NUMBER = 0x0006;
+    public static final int MSG_MONITORING = 0x0007;
+    public static final int MSG_TIMEZONE = 0x0008;
 
     @Override
     protected Object decode(
@@ -66,14 +72,14 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
         String imei = ChannelBufferTools.readHexString(buf, 14);
         if (!identify(imei, channel, null, false)) {
-            if (!identify(imei + Crc.luhnChecksum(Long.parseLong(imei)), channel)) {
+            if (!identify(imei + Checksum.luhnChecksum(Long.parseLong(imei)), channel)) {
                 return null;
             }
         }
 
         int type = buf.readUnsignedShort();
 
-        if (type == MSG_LOCATION_REPORT || type == MSG_LOCATION_INQUIRY_RESPONSE) {
+        if (type == MSG_LOCATION_REPORT || type == MSG_LOCATION_REQUEST) {
 
             String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 8, Charset.defaultCharset());
             Matcher parser = pattern.matcher(sentence);

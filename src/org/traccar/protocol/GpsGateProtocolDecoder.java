@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
 public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
@@ -48,7 +48,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
     private void send(Channel channel, String message) {
         if (channel != null) {
-            channel.write(message + Crc.nmeaChecksum(message) + "\r\n");
+            channel.write(message + Checksum.nmeaChecksum(message) + "\r\n");
         }
     }
 

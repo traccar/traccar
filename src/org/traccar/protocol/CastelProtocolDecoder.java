@@ -26,7 +26,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Crc;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -95,7 +95,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(version);
                 response.writeBytes(id);
                 response.writeShort(ChannelBuffers.swapShort(MSG_HEARTBEAT_RESPONSE));
-                response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(0, response.writerIndex())));
+                response.writeShort(Checksum.crc16Ccitt(response.toByteBuffer(0, response.writerIndex())));
                 response.writeByte(0x0D); response.writeByte(0x0A);
                 channel.write(response, remoteAddress);
             }
@@ -123,7 +123,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     response.writeInt(0xFFFFFFFF);
                     response.writeShort(0);
                     response.writeInt((int) (System.currentTimeMillis() / 1000));
-                    response.writeShort(Crc.crc16Ccitt(response.toByteBuffer(0, response.writerIndex())));
+                    response.writeShort(Checksum.crc16Ccitt(response.toByteBuffer(0, response.writerIndex())));
                     response.writeByte(0x0D); response.writeByte(0x0A);
                     channel.write(response, remoteAddress);
                 }
