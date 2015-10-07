@@ -104,27 +104,27 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
 
         // Longitude
         String hemisphere = parser.group(index++);
-        Double longitude = Double.valueOf(parser.group(index++));
+        Double longitude = Double.parseDouble(parser.group(index++));
         if (hemisphere.compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Latitude
         hemisphere = parser.group(index++);
-        Double latitude = Double.valueOf(parser.group(index++));
+        Double latitude = Double.parseDouble(parser.group(index++));
         if (hemisphere.compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Altitude
         String altitude = parser.group(index++);
         if (altitude != null) {
-            position.setAltitude(Double.valueOf(altitude));
+            position.setAltitude(Double.parseDouble(altitude));
         }
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.parseDouble(parser.group(index++)));
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // Satellites
         int satellites = Integer.parseInt(parser.group(index++));

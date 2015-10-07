@@ -92,20 +92,20 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         // Latitude
         String hemisphere = parser.group(index++);
-        Double latitude = Double.valueOf(parser.group(index++));
+        Double latitude = Double.parseDouble(parser.group(index++));
         if (hemisphere.compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
         hemisphere = parser.group(index++);
-        Double longitude = Double.valueOf(parser.group(index++));
+        Double longitude = Double.parseDouble(parser.group(index++));
         if (hemisphere.compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Other
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(Double.valueOf(parser.group(index++)));
-        position.setAltitude(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.parseDouble(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
+        position.setAltitude(Double.parseDouble(parser.group(index++)));
         position.set(Event.KEY_HDOP, parser.group(index++));
 
         return position;

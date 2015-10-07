@@ -90,14 +90,14 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.MILLISECOND, Integer.parseInt(parser.group(index++)));
 
             // Latitude
-            Double latitude = Double.valueOf(parser.group(index++));
-            latitude += Double.valueOf(parser.group(index++)) / 60;
+            Double latitude = Double.parseDouble(parser.group(index++));
+            latitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
             position.setLatitude(latitude);
 
             // Longitude
-            Double longitude = Double.valueOf(parser.group(index++));
-            longitude += Double.valueOf(parser.group(index++)) / 60;
+            Double longitude = Double.parseDouble(parser.group(index++));
+            longitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
 
@@ -105,7 +105,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_HDOP, parser.group(index++));
 
             // Altitude
-            position.setAltitude(Double.valueOf(parser.group(index++)));
+            position.setAltitude(Double.parseDouble(parser.group(index++)));
 
             // Validity
             int fix = Integer.parseInt(parser.group(index++));
@@ -113,11 +113,11 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(fix > 0);
 
             // Course
-            position.setCourse(Double.valueOf(parser.group(index++)));
+            position.setCourse(Double.parseDouble(parser.group(index++)));
 
             // Speed
             index += 1; // speed in kph
-            position.setSpeed(Double.valueOf(parser.group(index++)));
+            position.setSpeed(Double.parseDouble(parser.group(index++)));
 
             // Date
             time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));

@@ -99,8 +99,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_EVENT, event);
 
         // Coordinates
-        position.setLatitude(Double.valueOf(parser.group(index++)));
-        position.setLongitude(Double.valueOf(parser.group(index++)));
+        position.setLatitude(Double.parseDouble(parser.group(index++)));
+        position.setLongitude(Double.parseDouble(parser.group(index++)));
 
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -123,16 +123,16 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_GSM, parser.group(index++));
 
         // Speed
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // HDOP
         position.set(Event.KEY_HDOP, parser.group(index++));
 
         // Altitude
-        position.setAltitude(Double.valueOf(parser.group(index++)));
+        position.setAltitude(Double.parseDouble(parser.group(index++)));
 
         // Other
         position.set(Event.KEY_ODOMETER, parser.group(index++));

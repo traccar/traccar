@@ -85,17 +85,17 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
+        Double latitude = Double.parseDouble(parser.group(index++));
         if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
-        Double longitude = Double.valueOf(parser.group(index++));
+        Double longitude = Double.parseDouble(parser.group(index++));
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
 
         // Status
         position.set(Event.KEY_STATUS, parser.group(index++));
@@ -103,7 +103,7 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
         // Course
         String course = parser.group(index++);
         if (course != null) {
-            position.setCourse(Double.valueOf(course));
+            position.setCourse(Double.parseDouble(course));
         }
         return position;
     }

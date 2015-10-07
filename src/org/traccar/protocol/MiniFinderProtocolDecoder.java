@@ -88,10 +88,10 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
 
             // Location
-            position.setLatitude(Double.valueOf(parser.group(index++)));
-            position.setLongitude(Double.valueOf(parser.group(index++)));
-            position.setSpeed(Double.valueOf(parser.group(index++)));
-            position.setCourse(Double.valueOf(parser.group(index++)));
+            position.setLatitude(Double.parseDouble(parser.group(index++)));
+            position.setLongitude(Double.parseDouble(parser.group(index++)));
+            position.setSpeed(Double.parseDouble(parser.group(index++)));
+            position.setCourse(Double.parseDouble(parser.group(index++)));
 
             // Flags
             String flags = parser.group(index++);
@@ -99,7 +99,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.setValid((Integer.parseInt(flags, 16) & 0x01) != 0);
 
             // Altitude
-            position.setAltitude(Double.valueOf(parser.group(index++)));
+            position.setAltitude(Double.parseDouble(parser.group(index++)));
 
             // Battery
             position.set(Event.KEY_BATTERY, parser.group(index++));

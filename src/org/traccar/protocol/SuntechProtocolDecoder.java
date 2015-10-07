@@ -96,15 +96,15 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_CELL, parser.group(index++));
 
         // Coordinates
-        position.setLatitude(Double.valueOf(parser.group(index++)));
-        position.setLongitude(Double.valueOf(parser.group(index++)));
+        position.setLatitude(Double.parseDouble(parser.group(index++)));
+        position.setLongitude(Double.parseDouble(parser.group(index++)));
         position.setValid(true); // wrong?
 
         // Speed
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(parser.group(index++))));
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // Battery
         position.set(Event.KEY_BATTERY, parser.group(index++));

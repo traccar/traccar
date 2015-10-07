@@ -87,17 +87,17 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Location
-        position.setLongitude(Double.valueOf(parser.group(index++)) / 10000);
-        position.setLatitude(Double.valueOf(parser.group(index++)) / 10000);
+        position.setLongitude(Double.parseDouble(parser.group(index++)) / 10000);
+        position.setLatitude(Double.parseDouble(parser.group(index++)) / 10000);
 
         // Validity
         position.setValid(parser.group(index++).compareTo("1") != 0);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.parseDouble(parser.group(index++)));
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // Satellites
         position.set(Event.KEY_SATELLITES, parser.group(index++));

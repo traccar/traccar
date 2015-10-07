@@ -94,28 +94,28 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++).replace(".", "")) / 600000;
+        Double latitude = Double.parseDouble(parser.group(index++));
+        latitude += Double.parseDouble(parser.group(index++).replace(".", "")) / 600000;
         if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
-        Double longitude = Double.valueOf(parser.group(index++));
-        longitude += Double.valueOf(parser.group(index++).replace(".", "")) / 600000;
+        Double longitude = Double.parseDouble(parser.group(index++));
+        longitude += Double.parseDouble(parser.group(index++).replace(".", "")) / 600000;
         if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(
+        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(
                 parser.group(index++).replace(".", "")) / 10));
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // Altitude
         String altitude = parser.group(index++);
         if (altitude != null) {
-            position.setAltitude(Double.valueOf(altitude));
+            position.setAltitude(Double.parseDouble(altitude));
         }
 
         // Additional data

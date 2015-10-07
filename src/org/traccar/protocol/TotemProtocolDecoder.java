@@ -181,27 +181,27 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(parser.group(index++).compareTo("A") == 0);
 
             // Latitude
-            Double latitude = Double.valueOf(parser.group(index++));
-            latitude += Double.valueOf(parser.group(index++)) / 60;
+            Double latitude = Double.parseDouble(parser.group(index++));
+            latitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
             position.setLatitude(latitude);
 
             // Longitude
-            Double longitude = Double.valueOf(parser.group(index++));
-            longitude += Double.valueOf(parser.group(index++)) / 60;
+            Double longitude = Double.parseDouble(parser.group(index++));
+            longitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
 
             // Speed
             String speed = parser.group(index++);
             if (speed != null) {
-                position.setSpeed(Double.valueOf(speed));
+                position.setSpeed(Double.parseDouble(speed));
             }
 
             // Course
             String course = parser.group(index++);
             if (course != null) {
-                position.setCourse(Double.valueOf(course));
+                position.setCourse(Double.parseDouble(course));
             }
 
             // Date
@@ -224,7 +224,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             // Power
             position.set(Event.KEY_BATTERY, parser.group(index++));
-            position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
+            position.set(Event.KEY_POWER, Double.parseDouble(parser.group(index++)));
 
             // ADC
             position.set(Event.PREFIX_ADC + 1, parser.group(index++));
@@ -255,8 +255,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.PREFIX_IO + 1, parser.group(index++));
 
             // Power
-            position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)) / 10);
-            position.set(Event.KEY_POWER, Double.valueOf(parser.group(index++)));
+            position.set(Event.KEY_BATTERY, Double.parseDouble(parser.group(index++)) / 10);
+            position.set(Event.KEY_POWER, Double.parseDouble(parser.group(index++)));
 
             // ADC
             position.set(Event.PREFIX_ADC + 1, parser.group(index++));
@@ -276,10 +276,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_SATELLITES, parser.group(index++));
 
             // Course
-            position.setCourse(Double.valueOf(parser.group(index++)));
+            position.setCourse(Double.parseDouble(parser.group(index++)));
 
             // Speed
-            position.setSpeed(Double.valueOf(parser.group(index++)));
+            position.setSpeed(Double.parseDouble(parser.group(index++)));
 
             // PDOP
             position.set("pdop", parser.group(index++));
@@ -288,14 +288,14 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_ODOMETER, parser.group(index++));
 
             // Latitude
-            Double latitude = Double.valueOf(parser.group(index++));
-            latitude += Double.valueOf(parser.group(index++)) / 60;
+            Double latitude = Double.parseDouble(parser.group(index++));
+            latitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
             position.setLatitude(latitude);
 
             // Longitude
-            Double longitude = Double.valueOf(parser.group(index++));
-            longitude += Double.valueOf(parser.group(index++)) / 60;
+            Double longitude = Double.parseDouble(parser.group(index++));
+            longitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
 

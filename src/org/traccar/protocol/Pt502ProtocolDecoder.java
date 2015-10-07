@@ -91,16 +91,16 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.group(index++).compareTo("A") == 0);
 
         // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 60;
+        Double latitude = Double.parseDouble(parser.group(index++));
+        latitude += Double.parseDouble(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("S") == 0) {
             latitude = -latitude;
         }
         position.setLatitude(latitude);
 
         // Longitude
-        Double longitude = Double.valueOf(parser.group(index++));
-        longitude += Double.valueOf(parser.group(index++)) / 60;
+        Double longitude = Double.parseDouble(parser.group(index++));
+        longitude += Double.parseDouble(parser.group(index++)) / 60;
         if (parser.group(index++).compareTo("W") == 0) {
             longitude = -longitude;
         }
@@ -109,13 +109,13 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         // Speed
         String speed = parser.group(index++);
         if (speed != null) {
-            position.setSpeed(Double.valueOf(speed));
+            position.setSpeed(Double.parseDouble(speed));
         }
 
         // Course
         String course = parser.group(index++);
         if (course != null) {
-            position.setCourse(Double.valueOf(course));
+            position.setCourse(Double.parseDouble(course));
         }
 
         // Date

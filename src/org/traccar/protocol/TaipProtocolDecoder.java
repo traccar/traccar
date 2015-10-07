@@ -161,16 +161,16 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         // Latitude
         String latitude = parser.group(index) + '.' + parser.group(index + 1);
         index += 2;
-        position.setLatitude(Double.valueOf(latitude));
+        position.setLatitude(Double.parseDouble(latitude));
 
         // Latitude
         String longitude = parser.group(index) + '.' + parser.group(index + 1);
         index += 2;
-        position.setLongitude(Double.valueOf(longitude));
+        position.setLongitude(Double.parseDouble(longitude));
 
         // Speed and Course
-        position.setSpeed(UnitsConverter.knotsFromMph(Double.valueOf(parser.group(index++))));
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setSpeed(UnitsConverter.knotsFromMph(Double.parseDouble(parser.group(index++))));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // Validity
         position.setValid(Integer.parseInt(parser.group(index++)) != 0);

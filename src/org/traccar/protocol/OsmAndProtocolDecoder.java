@@ -81,22 +81,22 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         } else {
             position.setTime(new Date());
         }
-        position.setLatitude(Double.valueOf(params.get("lat").get(0)));
-        position.setLongitude(Double.valueOf(params.get("lon").get(0)));
+        position.setLatitude(Double.parseDouble(params.get("lat").get(0)));
+        position.setLongitude(Double.parseDouble(params.get("lon").get(0)));
 
         // Optional parameters
         if (params.containsKey("speed")) {
-            position.setSpeed(Double.valueOf(params.get("speed").get(0)));
+            position.setSpeed(Double.parseDouble(params.get("speed").get(0)));
         }
 
         if (params.containsKey("bearing")) {
-            position.setCourse(Double.valueOf(params.get("bearing").get(0)));
+            position.setCourse(Double.parseDouble(params.get("bearing").get(0)));
         } else if (params.containsKey("heading")) {
-            position.setCourse(Double.valueOf(params.get("heading").get(0)));
+            position.setCourse(Double.parseDouble(params.get("heading").get(0)));
         }
 
         if (params.containsKey("altitude")) {
-            position.setAltitude(Double.valueOf(params.get("altitude").get(0)));
+            position.setAltitude(Double.parseDouble(params.get("altitude").get(0)));
         }
 
         if (params.containsKey("hdop")) {

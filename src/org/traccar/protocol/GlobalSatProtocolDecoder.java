@@ -115,47 +115,47 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     valueIndex += 1;
                     break;
                 case '1':
-                    double longitude = Double.valueOf(value.substring(1));
+                    double longitude = Double.parseDouble(value.substring(1));
                     if (value.charAt(0) == 'W') longitude = -longitude;
                     position.setLongitude(longitude);
                     break;
                 case '2':
-                    longitude = Double.valueOf(value.substring(4)) / 60;
+                    longitude = Double.parseDouble(value.substring(4)) / 60;
                     longitude += Integer.parseInt(value.substring(1, 4));
                     if (value.charAt(0) == 'W') longitude = -longitude;
                     position.setLongitude(longitude);
                     break;
                 case '3':
-                    position.setLongitude(Double.valueOf(value) * 0.000001);
+                    position.setLongitude(Double.parseDouble(value) * 0.000001);
                     break;
                 case '6':
-                    double latitude = Double.valueOf(value.substring(1));
+                    double latitude = Double.parseDouble(value.substring(1));
                     if (value.charAt(0) == 'S') latitude = -latitude;
                     position.setLatitude(latitude);
                     break;
                 case '7':
-                    latitude = Double.valueOf(value.substring(3)) / 60;
+                    latitude = Double.parseDouble(value.substring(3)) / 60;
                     latitude += Integer.parseInt(value.substring(1, 3));
                     if (value.charAt(0) == 'S') latitude = -latitude;
                     position.setLatitude(latitude);
                     break;
                 case '8':
-                    position.setLatitude(Double.valueOf(value) * 0.000001);
+                    position.setLatitude(Double.parseDouble(value) * 0.000001);
                     break;
                 case 'G':
-                    position.setAltitude(Double.valueOf(value));
+                    position.setAltitude(Double.parseDouble(value));
                     break;
                 case 'H':
-                    position.setSpeed(Double.valueOf(value));
+                    position.setSpeed(Double.parseDouble(value));
                     break;
                 case 'I':
-                    position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(value)));
+                    position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(value)));
                     break;
                 case 'J':
-                    position.setSpeed(UnitsConverter.knotsFromMph(Double.valueOf(value)));
+                    position.setSpeed(UnitsConverter.knotsFromMph(Double.parseDouble(value)));
                     break;
                 case 'K':
-                    position.setCourse(Double.valueOf(value));
+                    position.setCourse(Double.parseDouble(value));
                     break;
                 case 'N':
                     position.set(Event.KEY_BATTERY, value);
@@ -222,26 +222,26 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
         // Longitude
         String hemisphere = parser.group(index++);
-        Double longitude = Double.valueOf(parser.group(index++));
-        longitude += Double.valueOf(parser.group(index++)) / 60;
+        Double longitude = Double.parseDouble(parser.group(index++));
+        longitude += Double.parseDouble(parser.group(index++)) / 60;
         if (hemisphere.compareTo("W") == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Latitude
         hemisphere = parser.group(index++);
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 60;
+        Double latitude = Double.parseDouble(parser.group(index++));
+        latitude += Double.parseDouble(parser.group(index++)) / 60;
         if (hemisphere.compareTo("S") == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Altitude
-        position.setAltitude(Double.valueOf(parser.group(index++)));
+        position.setAltitude(Double.parseDouble(parser.group(index++)));
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)));
+        position.setSpeed(Double.parseDouble(parser.group(index++)));
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // Satellites
         position.set(Event.KEY_SATELLITES, Integer.parseInt(parser.group(index++)));

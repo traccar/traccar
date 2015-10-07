@@ -107,23 +107,23 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
             // Longitude
             String lon = parser.group(index++);
-            Double longitude = (lon != null) ? Double.valueOf(lon) : 0.0;
-            longitude += Double.valueOf(parser.group(index++)) / 60;
+            Double longitude = (lon != null) ? Double.parseDouble(lon) : 0.0;
+            longitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
 
             // Latitude
             String lat = parser.group(index++);
-            Double latitude = (lat != null) ? Double.valueOf(lat) : 0.0;
-            latitude += Double.valueOf(parser.group(index++)) / 60;
+            Double latitude = (lat != null) ? Double.parseDouble(lat) : 0.0;
+            latitude += Double.parseDouble(parser.group(index++)) / 60;
             if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
             position.setLatitude(latitude);
 
             // Speed and Course
-            position.setSpeed(Double.valueOf(parser.group(index++)));
+            position.setSpeed(Double.parseDouble(parser.group(index++)));
             String course = parser.group(index++);
             if (course != null) {
-                position.setCourse(Double.valueOf(course));
+                position.setCourse(Double.parseDouble(course));
             }
 
             // Date

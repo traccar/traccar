@@ -138,24 +138,24 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         // Speed
         String speed = parser.group(index++);
         if (speed != null) {
-            position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(speed)));
+            position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(speed)));
         }
 
         // Course
         String course = parser.group(index++);
         if (speed != null) {
-            position.setCourse(Double.valueOf(course));
+            position.setCourse(Double.parseDouble(course));
         }
 
         // Altitude
         String altitude = parser.group(index++);
         if (altitude != null) {
-            position.setAltitude(Double.valueOf(altitude));
+            position.setAltitude(Double.parseDouble(altitude));
         }
 
         // Coordinates
-        position.setLongitude(Double.valueOf(parser.group(index++)));
-        position.setLatitude(Double.valueOf(parser.group(index++)));
+        position.setLongitude(Double.parseDouble(parser.group(index++)));
+        position.setLatitude(Double.parseDouble(parser.group(index++)));
 
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -178,7 +178,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // Other
         String odometer = parser.group(index++);
-        if (odometer != null && Double.valueOf(odometer) != 0) {
+        if (odometer != null && Double.parseDouble(odometer) != 0) {
             position.set(Event.KEY_ODOMETER, odometer);
         }
         position.set(Event.KEY_BATTERY, parser.group(index++));

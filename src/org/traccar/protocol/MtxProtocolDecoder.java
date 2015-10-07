@@ -94,13 +94,13 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
 
         // Location
         position.setValid(true);
-        position.setLatitude(Double.valueOf(parser.group(index++)));
-        position.setLongitude(Double.valueOf(parser.group(index++)));
-        position.setSpeed(Double.valueOf(parser.group(index++)));
-        position.setCourse(Double.valueOf(parser.group(index++)));
+        position.setLatitude(Double.parseDouble(parser.group(index++)));
+        position.setLongitude(Double.parseDouble(parser.group(index++)));
+        position.setSpeed(Double.parseDouble(parser.group(index++)));
+        position.setCourse(Double.parseDouble(parser.group(index++)));
 
         // Other
-        position.set(Event.KEY_ODOMETER, Double.valueOf(parser.group(index++)));
+        position.set(Event.KEY_ODOMETER, Double.parseDouble(parser.group(index++)));
         position.set(Event.KEY_INPUT, parser.group(index++));
         position.set(Event.KEY_OUTPUT, parser.group(index++));
         position.set(Event.PREFIX_ADC + 1, parser.group(index++));

@@ -96,22 +96,22 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.setValid((flags & 0x1) != 0);
 
         // Latitude
-        Double latitude = Double.valueOf(parser.group(index++));
-        latitude += Double.valueOf(parser.group(index++)) / 60000;
+        Double latitude = Double.parseDouble(parser.group(index++));
+        latitude += Double.parseDouble(parser.group(index++)) / 60000;
         if ((flags & 0x4) == 0) latitude = -latitude;
         position.setLatitude(latitude);
 
         // Longitude
-        Double longitude = Double.valueOf(parser.group(index++));
-        longitude += Double.valueOf(parser.group(index++)) / 60000;
+        Double longitude = Double.parseDouble(parser.group(index++));
+        longitude += Double.parseDouble(parser.group(index++)) / 60000;
         if ((flags & 0x2) == 0) longitude = -longitude;
         position.setLongitude(longitude);
 
         // Speed
-        position.setSpeed(Double.valueOf(parser.group(index++)) / 10);
+        position.setSpeed(Double.parseDouble(parser.group(index++)) / 10);
 
         // Course
-        position.setCourse(Double.valueOf(parser.group(index++)) / 10);
+        position.setCourse(Double.parseDouble(parser.group(index++)) / 10);
 
         // Additional data
         position.set(Event.KEY_STATUS, parser.group(index++));
@@ -119,7 +119,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_GPS, parser.group(index++));
         position.set(Event.KEY_INPUT, parser.group(index++));
         position.set(Event.KEY_OUTPUT, parser.group(index++));
-        position.set(Event.KEY_BATTERY, Double.valueOf(parser.group(index++)) / 10);
+        position.set(Event.KEY_BATTERY, Double.parseDouble(parser.group(index++)) / 10);
 
         return position;
     }

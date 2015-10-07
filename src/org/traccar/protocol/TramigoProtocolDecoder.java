@@ -113,14 +113,14 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             if (!matcher.find()) {
                 return null;
             }
-            position.setLatitude(Double.valueOf(matcher.group(1)));
-            position.setLongitude(Double.valueOf(matcher.group(2)));
+            position.setLatitude(Double.parseDouble(matcher.group(1)));
+            position.setLongitude(Double.parseDouble(matcher.group(2)));
 
             // Speed and Course
             pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
             matcher = pattern.matcher(sentence);
             if (matcher.find()) {
-                position.setSpeed(UnitsConverter.knotsFromKph(Double.valueOf(matcher.group(2))));
+                position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(matcher.group(2))));
                 position.setCourse(0); // matcher.group(1) for course
             }
 
