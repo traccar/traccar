@@ -32,7 +32,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\$\\$" +
             "[^,]+," +                          // Client
             "(\\d+)," +                         // Device serial number
@@ -73,7 +73,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -33,7 +31,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time
             "(\\d{2})(\\d{2}\\.\\d{4})([NS])," + // Latitude (DDMM.MMMM)
             "(\\d{3})(\\d{2}\\.\\d{4})([EW])," + // Longitude (DDDMM.MMMM)
@@ -68,7 +66,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
 
         else {
             // Parse message
-            Matcher parser = pattern.matcher(sentence);
+            Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }

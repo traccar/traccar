@@ -31,10 +31,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    //$1,357804047969310,D001,AP29AW0963,01/01/13,13:24:47,1723.9582N,07834.0945E
-    //,00100,010,0,0,0,0,
-    //0,0008478660,1450,40,34,0,0,0,A
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             ".*\\$1," +
             "(\\d+)," +                         // IMEI
             "D001," +                           // Type
@@ -75,7 +72,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -33,10 +31,10 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern patternPing = Pattern.compile(
+    private static final Pattern PATTERN_PING = Pattern.compile(
             "%%[^,]+,(\\d+)");
 
-    private static final Pattern patternData = Pattern.compile(
+    private static final Pattern PATTERN_DATA = Pattern.compile(
             "%%" +
             "([^,]+)," +                   // Id
             "([AL])," +                    // Validity
@@ -58,7 +56,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Keep alive message
-        Matcher parser = patternPing.matcher(sentence);
+        Matcher parser = PATTERN_PING.matcher(sentence);
         if (parser.matches()) {
 
             // Send response
@@ -68,7 +66,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             // Data message parse
-            parser = patternData.matcher(sentence);
+            parser = PATTERN_DATA.matcher(sentence);
 
             // Unknown message
             if (!parser.matches()) {

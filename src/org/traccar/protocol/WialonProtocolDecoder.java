@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -36,7 +34,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2});" +  // Date (DDMMYY)
             "(\\d{2})(\\d{2})(\\d{2});" +  // Time (HHMMSS)
             "(\\d{2})(\\d{2}\\.\\d+);" +   // Latitude (DDMM.MMMM)
@@ -70,7 +68,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     private Position decodePosition(String substring) {
 
         // Parse message
-        Matcher parser = pattern.matcher(substring);
+        Matcher parser = PATTERN.matcher(substring);
         if (!hasDeviceId() || !parser.matches()) {
             return null;
         }

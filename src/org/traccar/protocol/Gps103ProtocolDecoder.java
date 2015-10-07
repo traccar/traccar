@@ -31,7 +31,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "imei:" +
             "(\\d+)," +                         // IMEI
             "([^,]+)," +                        // Alarm
@@ -58,7 +58,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             "([^,;]+)?,?" +
             ".*");
 
-    private static final Pattern handshakePattern = Pattern.compile("##,imei:(\\d+),A");
+    private static final Pattern PATTERN_HANDSHAKE = Pattern.compile("##,imei:(\\d+),A");
 
     @Override
     protected Object decode(
@@ -71,7 +71,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.contains("##")) {
             if (channel != null) {
                 channel.write("LOAD", remoteAddress);
-                Matcher handshakeMatcher = handshakePattern.matcher(sentence);
+                Matcher handshakeMatcher = PATTERN_HANDSHAKE.matcher(sentence);
                 if (handshakeMatcher.matches()) {
                     identify(handshakeMatcher.group(1), channel);
                 }
@@ -88,7 +88,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

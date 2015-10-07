@@ -32,7 +32,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\$\\$" +
             "(\\d+)," +                         // IMEI
             "(\\d+)," +                         // Event
@@ -59,7 +59,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

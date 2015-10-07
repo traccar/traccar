@@ -21,7 +21,6 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Position;
@@ -32,7 +31,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "!.," +                           // Type
             "(\\d{2})/(\\d{2})/(\\d{2})," +   // Date dd/mm/YY
             "(\\d{2}):(\\d{2}):(\\d{2})," +   // Time hh:mm:ss
@@ -57,7 +56,7 @@ public class Ev603ProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             // Parse message
-            Matcher parser = pattern.matcher(sentence);
+            Matcher parser = PATTERN.matcher(sentence);
             if (!hasDeviceId() || !parser.matches()) {
                 return null;
             }

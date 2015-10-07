@@ -34,7 +34,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "(\\d+)(,)?" +                 // Device ID
             ".{4},?" +                     // Command
             "\\d*" +                       // IMEI (?)
@@ -76,7 +76,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

@@ -37,7 +37,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "(\\d{2})(\\d{2})(\\d{2})\\.?(\\d+)?," + // Time (HHMMSS.SSS)
             "([AV])," +                         // Validity
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
@@ -61,7 +61,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(?:\\|(\\p{XDigit}{5,}))?)?)?)?)?" + // RFID
             ".*");
 
-    private static final Pattern rfidPattern = Pattern.compile(
+    private static final Pattern PATTERN_RFID = Pattern.compile(
             "\\|(\\d{2})(\\d{2})(\\d{2})," +    // Time (HHMMSS)
             "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
             "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
@@ -210,7 +210,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse message
         String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset());
-        Matcher parser = (command == MSG_RFID ? rfidPattern : pattern).matcher(sentence);
+        Matcher parser = (command == MSG_RFID ? PATTERN_RFID : PATTERN).matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

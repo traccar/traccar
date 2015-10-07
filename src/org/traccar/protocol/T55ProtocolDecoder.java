@@ -31,7 +31,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern patternGPRMC = Pattern.compile(
+    private static final Pattern PATTERN_GPRMC = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -44,7 +44,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");
 
-    private static final Pattern patternGPGGA = Pattern.compile(
+    private static final Pattern PATTERN_GPGGA = Pattern.compile(
             "\\$GPGGA," +
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time
             "(\\d+)(\\d{2}\\.\\d+)," +     // Latitude
@@ -53,7 +53,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "([EW])," +
             ".+");
 
-    private static final Pattern patternGPRMA = Pattern.compile(
+    private static final Pattern PATTERN_GPRMA = Pattern.compile(
             "\\$GPRMA," +
             "([AV])," +                    // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude
@@ -64,7 +64,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+\\.?\\d*)?," +           // Course
             ".+");
 
-    private static final Pattern patternTRCCR = Pattern.compile(
+    private static final Pattern PATTERN_TRCCR = Pattern.compile(
             "\\$TRCCR," +
             "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
             "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time (HHMMSS.SSS)
@@ -128,7 +128,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Parse message
-            Matcher parser = patternGPRMC.matcher(sentence);
+            Matcher parser = PATTERN_GPRMC.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -186,7 +186,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
 
             // Parse message
-            Matcher parser = patternGPGGA.matcher(sentence);
+            Matcher parser = PATTERN_GPGGA.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -227,7 +227,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         else if (sentence.startsWith("$GPRMA") && hasDeviceId()) {
 
             // Parse message
-            Matcher parser = patternGPRMA.matcher(sentence);
+            Matcher parser = PATTERN_GPRMA.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -275,7 +275,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         else if (sentence.startsWith("$TRCCR") && hasDeviceId()) {
 
             // Parse message
-            Matcher parser = patternTRCCR.matcher(sentence);
+            Matcher parser = PATTERN_TRCCR.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }

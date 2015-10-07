@@ -15,18 +15,17 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-
-import java.text.ParseException;
-import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -34,7 +33,7 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "(?:HI,\\d+)?" +
             "TK," +
             "(\\d+)," +                         // IMEI
@@ -64,7 +63,7 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse message
         String sentence = (String) msg;
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             throw new ParseException(null, 0);
         }

@@ -35,7 +35,7 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "(\\d{4})(\\d{2})(\\d{2})" +        // Date
             "(\\d{2})(\\d{2})(\\d{2})," +       // Time
             "([AV])," +                         // Validity
@@ -82,7 +82,7 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_LOCATION_REPORT || type == MSG_LOCATION_REQUEST) {
 
             String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 8, Charset.defaultCharset());
-            Matcher parser = pattern.matcher(sentence);
+            Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }

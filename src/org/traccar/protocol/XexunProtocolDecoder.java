@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
@@ -37,7 +35,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         this.full = full;
     }
 
-    private static final Pattern patternBasic = new PatternBuilder()
+    private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .xpr("G[PN]RMC,")
             .num("(dd)(dd)(dd).(d+),")           // time
             .xpr("([AV]),")                      // validity
@@ -54,11 +52,11 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             .num("imei:(d+),")                   // imei
             .compile();
 
-    private static final Pattern patternFull = new PatternBuilder()
+    private static final Pattern PATTERN_FULL = new PatternBuilder()
             .any()
             .num("(d+),")                        // serial
             .xpr("([^,]+)?,")                    // phone number
-            .xpr(patternBasic.pattern())
+            .xpr(PATTERN_BASIC.pattern())
             .num("(d+),")                        // satellites
             .num("(-?d+.d+)?,")                  // altitude
             .num("[FL]:(d+.d+)V")                // power
@@ -68,7 +66,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Pattern pattern = full ? patternFull : patternBasic;
+        Pattern pattern = full ? PATTERN_FULL : PATTERN_BASIC;
         Matcher parser = pattern.matcher((String) msg);
         if (!parser.matches()) {
             return null;

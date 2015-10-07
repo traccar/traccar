@@ -170,7 +170,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\$" +
             "(\\d+)," +                    // IMEI
             "\\d+," +                      // mode
@@ -190,7 +190,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeAlternative(Channel channel, String sentence) {
 
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

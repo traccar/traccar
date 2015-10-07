@@ -15,8 +15,8 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.Charset;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -24,10 +24,8 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.UnitsConverter;
@@ -40,7 +38,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\$\\$." +                         // Flag
             "\\d+," +                           // Length
             "(\\d+)," +                         // IMEI
@@ -77,7 +75,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse message
         String sentence = buf.toString(Charset.defaultCharset());
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

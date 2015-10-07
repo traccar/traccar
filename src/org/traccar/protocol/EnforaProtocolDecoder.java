@@ -34,7 +34,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2}).(\\d+)," + // Time (HHMMSS.SS)
             "([AV])," +                  // Validity
@@ -85,7 +85,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         String sentence = buf.toString(start, buf.readableBytes() - start, Charset.defaultCharset());
 
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

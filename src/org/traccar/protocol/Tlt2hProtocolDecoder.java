@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -35,14 +33,14 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern patternHeader = Pattern.compile(
+    private static final Pattern PATTERN_HEADER = Pattern.compile(
             "#(\\d+)#" +                   // IMEI
             "[^#]+#" +
             "\\d+#" +
             "([^#]+)#" +                   // Status
             "\\d+");                       // Number of records
 
-    private static final Pattern patternPosition = Pattern.compile(
+    private static final Pattern PATTERN_POSITION = Pattern.compile(
             "#([0-9a-f]+)?" +              // Cell info
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d+)," + // Time (HHMMSS.SSS)
@@ -66,7 +64,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
         // Decode header
         String header = sentence.substring(0, sentence.indexOf('\r'));
-        Matcher parser = patternHeader.matcher(header);
+        Matcher parser = PATTERN_HEADER.matcher(header);
         if (!parser.matches()) {
             return null;
         }
@@ -83,7 +81,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         for (String message : messages) {
-            parser = patternPosition.matcher(message);
+            parser = PATTERN_POSITION.matcher(message);
             if (parser.matches()) {
                 Position position = new Position();
                 position.setProtocol(getProtocolName());

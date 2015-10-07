@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Position;
 
@@ -32,7 +30,7 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "IMEI," +
             "(\\d+)," +                           // IMEI
             "(\\d{4}).(\\d{2}).(\\d{2}), " +      // Date
@@ -48,7 +46,7 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         // Parse message
-        Matcher parser = pattern.matcher((String) msg);
+        Matcher parser = PATTERN.matcher((String) msg);
         if (!parser.matches()) {
             return null;
         }

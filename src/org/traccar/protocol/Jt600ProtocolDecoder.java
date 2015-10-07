@@ -15,16 +15,14 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.Charset;
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Event;
@@ -121,7 +119,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\(" +
             "([\\d]+)," +                // Id
             "W01," +                     // Type
@@ -145,7 +143,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         String message = buf.toString(Charset.defaultCharset());
 
         // Parse message
-        Matcher parser = pattern.matcher(message);
+        Matcher parser = PATTERN.matcher(message);
         if (!parser.matches()) {
             return null;
         }

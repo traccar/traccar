@@ -106,7 +106,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\*..," +                          // Manufacturer
             "(\\d+)," +                         // IMEI
             "V\\d," +                           // Version?
@@ -126,7 +126,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeText(String sentence, Channel channel) {
 
         // Parse message
-        Matcher parser = pattern.matcher(sentence);
+        Matcher parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

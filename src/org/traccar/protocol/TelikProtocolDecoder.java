@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -33,7 +31,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\d{4}" +
             "(\\d{6})" +                  // Device ID
             "(\\d+)," +                   // Type
@@ -55,7 +53,7 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         // Parse message
-        Matcher parser = pattern.matcher((String) msg);
+        Matcher parser = PATTERN.matcher((String) msg);
         if (!parser.matches()) {
             return null;
         }

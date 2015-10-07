@@ -32,7 +32,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern1 = new PatternBuilder()
+    private static final Pattern PATTERN1 = new PatternBuilder()
             .txt("$$")                           // header
             .num("xx")                           // length
             .num("(d+)|")                        // imei
@@ -65,7 +65,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private static final Pattern pattern2 = Pattern.compile(
+    private static final Pattern PATTERN2 = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -92,7 +92,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\\p{XDigit}{4}" +                  // Checksum
             "\r?\n?");
 
-    private static final Pattern pattern3 = Pattern.compile(
+    private static final Pattern PATTERN3 = Pattern.compile(
             "\\$\\$" +                          // Header
             "\\p{XDigit}{2}" +                  // Length
             "(\\d+)\\|" +                       // IMEI
@@ -130,13 +130,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Determine format
-        Pattern pattern = pattern3;
+        Pattern pattern = PATTERN3;
         if (sentence.contains("$GPRMC")) {
-            pattern = pattern1;
+            pattern = PATTERN1;
         } else {
             int index = sentence.indexOf('|');
             if (index != -1 && sentence.indexOf('|', index + 1) != -1) {
-                pattern = pattern2;
+                pattern = PATTERN2;
             }
         }
 
@@ -161,13 +161,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         // Alarm type
         position.set(Event.KEY_ALARM, parser.group(index++));
 
-        if (pattern == pattern1 || pattern == pattern2) {
+        if (pattern == PATTERN1 || pattern == PATTERN2) {
 
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
             int year = 0;
-            if (pattern == pattern2) {
+            if (pattern == PATTERN2) {
                 time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
                 time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
                 year = Integer.parseInt(parser.group(index++));
@@ -205,7 +205,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Date
-            if (pattern == pattern1) {
+            if (pattern == PATTERN1) {
                 time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
                 time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
                 year = Integer.parseInt(parser.group(index++));
@@ -238,7 +238,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             // Odometer
             position.set(Event.KEY_ODOMETER, parser.group(index++));
 
-        } else if (pattern == pattern3) {
+        } else if (pattern == PATTERN3) {
 
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));

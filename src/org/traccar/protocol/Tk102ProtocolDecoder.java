@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Position;
 
@@ -32,7 +30,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\[.\\d{10}.\\(\\p{Upper}+" +
             "(\\d{2})(\\d{2})(\\d{2})" +   // Time (HHMMSS)
             "([AV])" +                     // Validity
@@ -71,7 +69,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
         else if (hasDeviceId()) {
 
             // Parse message
-            Matcher parser = pattern.matcher(sentence);
+            Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }

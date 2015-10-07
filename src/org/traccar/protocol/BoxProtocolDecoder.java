@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
@@ -33,7 +32,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "L," +
             "(\\d{2})(\\d{2})(\\d{2})" +  // Date
             "(\\d{2})(\\d{2})(\\d{2})," + // Time
@@ -72,7 +71,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
         else if (sentence.startsWith("L,") && hasDeviceId()) {
 
             // Parse message
-            Matcher parser = pattern.matcher(sentence);
+            Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }

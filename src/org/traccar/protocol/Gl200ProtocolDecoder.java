@@ -33,13 +33,13 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern heartbeatPattern = Pattern.compile(
+    private static final Pattern PATTERN_HEARTBEAT = Pattern.compile(
             "\\+ACK:GTHBD," +
             "([0-9A-Z]{2}\\p{XDigit}{4})," +
             ".*," +
             "(\\p{XDigit}{4})\\$?");
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "(?:(?:\\+(?:RESP|BUFF):)|" +
             "(?:\\x00?\\x04,\\p{XDigit}{4},[01],))" +
             "GT...," +
@@ -93,7 +93,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         // Handle heartbeat
-        Matcher parser = heartbeatPattern.matcher(sentence);
+        Matcher parser = PATTERN_HEARTBEAT.matcher(sentence);
         if (parser.matches()) {
             if (channel != null) {
                 channel.write("+SACK:GTHBD," + parser.group(1) + "," + parser.group(2) + "$", remoteAddress);
@@ -102,7 +102,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Parse message
-        parser = pattern.matcher(sentence);
+        parser = PATTERN.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }

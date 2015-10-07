@@ -20,9 +20,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Position;
 
@@ -41,7 +39,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern pattern = Pattern.compile(
+    private static final Pattern PATTERN = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{2})," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -54,11 +52,10 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".+");                         // Other (Checksumm)
 
-    private static final Pattern gpfidPattern = Pattern.compile("\\$GPFID,(\\d+)$");
+    private static final Pattern PATTERN_GPFID = Pattern.compile("\\$GPFID,(\\d+)$");
 
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+    @Override
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
@@ -67,7 +64,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.contains("$GPRMC")) {
 
             // Parse message
-            Matcher parser = pattern.matcher(sentence);
+            Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -119,7 +116,7 @@ public class MaxonProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time.getTime());
 
         } else if (sentence.contains("$GPFID") && position != null) {
-            Matcher parser = gpfidPattern.matcher(sentence);
+            Matcher parser = PATTERN_GPFID.matcher(sentence);
 
             if (parser.matches()) {
                 if (!identify(parser.group(1), channel)) {

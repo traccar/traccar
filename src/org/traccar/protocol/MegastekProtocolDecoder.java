@@ -31,7 +31,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern patternGPRMC = Pattern.compile(
+    private static final Pattern PATTERN_GPRMC = Pattern.compile(
             "\\$GPRMC," +
             "(\\d{2})(\\d{2})(\\d{2})\\.\\d+," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
@@ -44,7 +44,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
             ".*");                         // Checksum
 
-    private static final Pattern patternSimple = Pattern.compile(
+    private static final Pattern PATTERN_SIMPLE = Pattern.compile(
             "[FL]," +                      // Flag
             "([^,]*)," +                   // Alarm
             "imei:(\\d+)," +               // IMEI
@@ -57,7 +57,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}{4},\\p{XDigit}{4});" + // Location code
             ".+");                         // Checksum
 
-    private static final Pattern patternAlternative = Pattern.compile(
+    private static final Pattern PATTERN_ALTERNATIVE = Pattern.compile(
             "(\\d+)," +                    // MCC
             "(\\d+)," +                    // MNC
             "(\\p{XDigit}{4},\\p{XDigit}{4})," + // Location code
@@ -75,7 +75,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     private boolean parseGPRMC(String gprmc, Position position) {
 
         // Parse message
-        Matcher parser = patternGPRMC.matcher(gprmc);
+        Matcher parser = PATTERN_GPRMC.matcher(gprmc);
         if (!parser.matches()) {
             return false;
         }
@@ -181,7 +181,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         if (simple) {
 
-            Matcher parser = patternSimple.matcher(status);
+            Matcher parser = PATTERN_SIMPLE.matcher(status);
             if (parser.matches()) {
 
                 int index = 1;
@@ -225,7 +225,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            Matcher parser = patternAlternative.matcher(status);
+            Matcher parser = PATTERN_ALTERNATIVE.matcher(status);
             if (!parser.matches()) {
 
                 int index = 1;
@@ -255,7 +255,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern patternNew = Pattern.compile(
+    private static final Pattern PATTERN_NEW = Pattern.compile(
             "\\$MGV\\d{3}," +
             "(\\d+)," +                    // IMEI
             "[^,]*," +                     // Name
@@ -293,7 +293,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeNew(Channel channel, String sentence) {
 
-        Matcher parser = patternNew.matcher(sentence);
+        Matcher parser = PATTERN_NEW.matcher(sentence);
         if (!parser.matches()) {
             return null;
         }
