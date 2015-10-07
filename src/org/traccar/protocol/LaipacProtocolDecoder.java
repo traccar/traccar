@@ -82,9 +82,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
 
         // Validity
         String status = parser.group(index++);
@@ -109,9 +109,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Date
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
         position.setTime(time.getTime());
 
         // Response

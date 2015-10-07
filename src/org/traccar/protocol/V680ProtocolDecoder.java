@@ -91,7 +91,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.set("user", parser.group(index++));
 
             // Validity
-            position.setValid(Integer.valueOf(parser.group(index++)) > 0);
+            position.setValid(Integer.parseInt(parser.group(index++)) > 0);
 
             // Password
             position.set("password", parser.group(index++));
@@ -129,19 +129,19 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             // Date
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
-            int day = Integer.valueOf(parser.group(index++));
-            int month = Integer.valueOf(parser.group(index++));
+            int day = Integer.parseInt(parser.group(index++));
+            int month = Integer.parseInt(parser.group(index++));
             if (day == 0 && month == 0) {
                 return null; // invalid date
             }
             time.set(Calendar.DAY_OF_MONTH, day);
             time.set(Calendar.MONTH, month - 1);
-            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
 
             // Time
-            time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
             position.setTime(time.getTime());
             return position;
         }

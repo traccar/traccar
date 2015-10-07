@@ -78,12 +78,12 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
         position.setTime(time.getTime());
 
         // Position data
@@ -94,7 +94,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(Double.valueOf(parser.group(index++)));
 
         // Satellites
-        int satellites = Integer.valueOf(parser.group(index++));
+        int satellites = Integer.parseInt(parser.group(index++));
         position.setValid(satellites >= 3);
         position.set(Event.KEY_SATELLITES, satellites);
 

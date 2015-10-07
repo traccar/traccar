@@ -85,12 +85,12 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         // Date and Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
         position.setTime(time.getTime());
 
         // Latitude
@@ -126,7 +126,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         // Satellites
         String satellites = parser.group(index++);
         if (satellites != null) {
-            position.setValid(Integer.valueOf(satellites) >= 3);
+            position.setValid(Integer.parseInt(satellites) >= 3);
             position.set(Event.KEY_SATELLITES, satellites);
         } else {
             position.setValid(false);

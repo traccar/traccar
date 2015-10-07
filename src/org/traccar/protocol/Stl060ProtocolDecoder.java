@@ -95,14 +95,14 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
 
         // Time
-        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
         position.setTime(time.getTime());
 
         // Latitude
@@ -125,25 +125,25 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
         // Old format
         if (parser.group(index) != null) {
-            position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
-            position.set(Event.KEY_IGNITION, Integer.valueOf(parser.group(index++)));
-            position.set(Event.KEY_INPUT, Integer.valueOf(parser.group(index++)) + Integer.valueOf(parser.group(index++)) << 1);
-            position.set(Event.KEY_FUEL, Integer.valueOf(parser.group(index++)));
+            position.set(Event.KEY_ODOMETER, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_IGNITION, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_INPUT, Integer.parseInt(parser.group(index++)) + Integer.parseInt(parser.group(index++)) << 1);
+            position.set(Event.KEY_FUEL, Integer.parseInt(parser.group(index++)));
         } else {
             index += 5;
         }
 
         // New format
         if (parser.group(index) != null) {
-            position.set(Event.KEY_CHARGE, Integer.valueOf(parser.group(index++)) == 1);
-            position.set(Event.KEY_IGNITION, Integer.valueOf(parser.group(index++)));
-            position.set(Event.KEY_INPUT, Integer.valueOf(parser.group(index++)));
+            position.set(Event.KEY_CHARGE, Integer.parseInt(parser.group(index++)) == 1);
+            position.set(Event.KEY_IGNITION, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_INPUT, Integer.parseInt(parser.group(index++)));
             position.set(Event.KEY_RFID, parser.group(index++));
-            position.set(Event.KEY_ODOMETER, Integer.valueOf(parser.group(index++)));
-            position.set(Event.PREFIX_TEMP + 1, Integer.valueOf(parser.group(index++)));
-            position.set(Event.KEY_FUEL, Integer.valueOf(parser.group(index++)));
-            position.set("accel", Integer.valueOf(parser.group(index++)) == 1);
-            position.set(Event.KEY_OUTPUT, Integer.valueOf(parser.group(index++)) + Integer.valueOf(parser.group(index++)) << 1);
+            position.set(Event.KEY_ODOMETER, Integer.parseInt(parser.group(index++)));
+            position.set(Event.PREFIX_TEMP + 1, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_FUEL, Integer.parseInt(parser.group(index++)));
+            position.set("accel", Integer.parseInt(parser.group(index++)) == 1);
+            position.set(Event.KEY_OUTPUT, Integer.parseInt(parser.group(index++)) + Integer.parseInt(parser.group(index++)) << 1);
         } else {
             index += 10;
         }

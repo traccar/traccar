@@ -37,7 +37,7 @@ public class MeitrackFrameDecoder extends FrameDecoder {
         Integer index = ChannelBufferTools.find(buf, buf.readerIndex(), buf.writerIndex(), ",");
         if (index != null)
         {
-            int length = index - buf.readerIndex() + Integer.valueOf(buf.toString(buf.readerIndex() + 3, index - buf.readerIndex() - 3, Charset.defaultCharset()));
+            int length = index - buf.readerIndex() + Integer.parseInt(buf.toString(buf.readerIndex() + 3, index - buf.readerIndex() - 3, Charset.defaultCharset()));
             if (buf.readableBytes() >= length) {
                 return buf.readBytes(length);
             }
