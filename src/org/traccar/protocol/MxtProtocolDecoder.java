@@ -34,9 +34,9 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_ACK = 0x02;
-    private static final int MSG_NACK = 0x03;
-    private static final int MSG_POSITION = 0x31;
+    public static final int MSG_ACK = 0x02;
+    public static final int MSG_NACK = 0x03;
+    public static final int MSG_POSITION = 0x31;
 
     @Override
     protected Object decode(

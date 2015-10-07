@@ -54,25 +54,25 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return imei.toString();
     }
 
-    private static final int MSG_LOGIN = 0x01;
-    private static final int MSG_GPS = 0x10;
-    private static final int MSG_LBS = 0x11;
-    private static final int MSG_GPS_LBS_1 = 0x12;
-    private static final int MSG_GPS_LBS_2 = 0x22;
-    private static final int MSG_STATUS = 0x13;
-    private static final int MSG_SATELLITE = 0x14;
-    private static final int MSG_STRING = 0x15;
-    private static final int MSG_GPS_LBS_STATUS_1 = 0x16;
-    private static final int MSG_GPS_LBS_STATUS_2 = 0x26;
-    private static final int MSG_GPS_LBS_STATUS_3 = 0x27;
-    private static final int MSG_LBS_PHONE = 0x17;
-    private static final int MSG_LBS_EXTEND = 0x18;
-    private static final int MSG_LBS_STATUS = 0x19;
-    private static final int MSG_GPS_PHONE = 0x1A;
-    private static final int MSG_GPS_LBS_EXTEND = 0x1E;
-    private static final int MSG_COMMAND_0 = 0x80;
-    private static final int MSG_COMMAND_1 = 0x81;
-    private static final int MSG_COMMAND_2 = 0x82;
+    public static final int MSG_LOGIN = 0x01;
+    public static final int MSG_GPS = 0x10;
+    public static final int MSG_LBS = 0x11;
+    public static final int MSG_GPS_LBS_1 = 0x12;
+    public static final int MSG_GPS_LBS_2 = 0x22;
+    public static final int MSG_STATUS = 0x13;
+    public static final int MSG_SATELLITE = 0x14;
+    public static final int MSG_STRING = 0x15;
+    public static final int MSG_GPS_LBS_STATUS_1 = 0x16;
+    public static final int MSG_GPS_LBS_STATUS_2 = 0x26;
+    public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
+    public static final int MSG_LBS_PHONE = 0x17;
+    public static final int MSG_LBS_EXTEND = 0x18;
+    public static final int MSG_LBS_STATUS = 0x19;
+    public static final int MSG_GPS_PHONE = 0x1A;
+    public static final int MSG_GPS_LBS_EXTEND = 0x1E;
+    public static final int MSG_COMMAND_0 = 0x80;
+    public static final int MSG_COMMAND_1 = 0x81;
+    public static final int MSG_COMMAND_2 = 0x82;
 
     private static void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {

@@ -38,15 +38,15 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_NULL = 0;
-    private static final int MSG_IDENT = 1;
-    private static final int MSG_IDENT_FULL = 2;
-    private static final int MSG_POINT = 10;
-    private static final int MSG_LOG_SYNC = 100;
-    private static final int MSG_LOGMSG = 101;
-    private static final int MSG_TEXT = 102;
-    private static final int MSG_ALARM = 200;
-    private static final int MSG_ALARM_RECIEVED = 201;
+    public static final int MSG_NULL = 0;
+    public static final int MSG_IDENT = 1;
+    public static final int MSG_IDENT_FULL = 2;
+    public static final int MSG_POINT = 10;
+    public static final int MSG_LOG_SYNC = 100;
+    public static final int MSG_LOGMSG = 101;
+    public static final int MSG_TEXT = 102;
+    public static final int MSG_ALARM = 200;
+    public static final int MSG_ALARM_RECIEVED = 201;
 
     private static final String HEX_CHARS = "0123456789ABCDEF";
 

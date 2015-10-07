@@ -22,9 +22,6 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class OrionFrameDecoder extends FrameDecoder {
 
-    private static final int TYPE_USERLOG = 0;
-    private static final int TYPE_SYSLOG = 3;
-
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
@@ -37,7 +34,7 @@ public class OrionFrameDecoder extends FrameDecoder {
 
             int type = buf.getUnsignedByte(buf.readerIndex() + 2) & 0x0f;
 
-            if (type == TYPE_USERLOG) {
+            if (type == OrionProtocolDecoder.MSG_USERLOG) {
                 if (buf.readableBytes() >= length + 5) {
 
                     int index = buf.readerIndex() + 3;
@@ -58,7 +55,7 @@ public class OrionFrameDecoder extends FrameDecoder {
                         return buf.readBytes(length);
                     }
                 }
-            } else if (type == TYPE_SYSLOG) {
+            } else if (type == OrionProtocolDecoder.MSG_SYSLOG) {
                 if (buf.readableBytes() >= length + 12) {
                     length += buf.getUnsignedShort(buf.readerIndex() + 8);
                     if (buf.readableBytes() >= length) {

@@ -44,9 +44,9 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
         return imei.toString();
     }
 
-    private static final int MSG_LOGIN = 'L';
-    private static final int MSG_STATUS = 'H';
-    private static final int MSG_GPS_LBS_STATUS = '$';
+    public static final int MSG_LOGIN = 'L';
+    public static final int MSG_STATUS = 'H';
+    public static final int MSG_GPS_LBS_STATUS = '$';
 
     private static void sendResponse(Channel channel, int type) {
         if (channel != null) {

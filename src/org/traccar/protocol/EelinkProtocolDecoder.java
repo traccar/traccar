@@ -32,15 +32,15 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_LOGIN = 0x01;
-    private static final int MSG_GPS = 0x02;
-    private static final int MSG_HEARTBEAT = 0x03;
-    private static final int MSG_ALARM = 0x04;
-    private static final int MSG_STATE = 0x05;
-    private static final int MSG_SMS = 0x06;
-    private static final int MSG_OBD = 0x07;
-    private static final int MSG_INTERACTIVE = 0x80;
-    private static final int MSG_DATA = 0x81;
+    public static final int MSG_LOGIN = 0x01;
+    public static final int MSG_GPS = 0x02;
+    public static final int MSG_HEARTBEAT = 0x03;
+    public static final int MSG_ALARM = 0x04;
+    public static final int MSG_STATE = 0x05;
+    public static final int MSG_SMS = 0x06;
+    public static final int MSG_OBD = 0x07;
+    public static final int MSG_INTERACTIVE = 0x80;
+    public static final int MSG_DATA = 0x81;
 
     private void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {

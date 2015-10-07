@@ -36,11 +36,11 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int DATA_TYPE = 7;
 
-    private static final int MSG_ASYNC_STACK = 0xA5;
-    private static final int MSG_STACK_COFIRM = 0x19;
-    private static final int MSG_TIME_TRIGGERED = 0xA0;
-    private static final int MSG_OUTPUT_CONTROL = 0x41;
-    private static final int MSG_OUTPUT_CONTROL_ACK = 0xC1;
+    public static final int MSG_ASYNC_STACK = 0xA5;
+    public static final int MSG_STACK_COFIRM = 0x19;
+    public static final int MSG_TIME_TRIGGERED = 0xA0;
+    public static final int MSG_OUTPUT_CONTROL = 0x41;
+    public static final int MSG_OUTPUT_CONTROL_ACK = 0xC1;
 
     @Override
     protected Object decode(

@@ -69,16 +69,16 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
             "([EW])");
 
-    private static final int MSG_HEARTBEAT = 0x0001;
-    private static final int MSG_SERVER = 0x0002;
-    private static final int MSG_LOGIN = 0x5000;
-    private static final int MSG_LOGIN_RESPONSE = 0x4000;
+    public static final int MSG_HEARTBEAT = 0x0001;
+    public static final int MSG_SERVER = 0x0002;
+    public static final int MSG_LOGIN = 0x5000;
+    public static final int MSG_LOGIN_RESPONSE = 0x4000;
 
-    private static final int MSG_POSITION = 0x9955;
-    private static final int MSG_POSITION_LOGGED = 0x9016;
-    private static final int MSG_ALARM = 0x9999;
+    public static final int MSG_POSITION = 0x9955;
+    public static final int MSG_POSITION_LOGGED = 0x9016;
+    public static final int MSG_ALARM = 0x9999;
 
-    private static final int MSG_RFID = 0x9966;
+    public static final int MSG_RFID = 0x9966;
 
     private boolean identify(ChannelBuffer buf, Channel channel) {
         String id = "";

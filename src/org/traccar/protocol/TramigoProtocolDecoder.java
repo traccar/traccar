@@ -38,8 +38,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_COMPACT = 0x0100;
-    private static final int MSG_FULL = 0x00FE;
+    public static final int MSG_COMPACT = 0x0100;
+    public static final int MSG_FULL = 0x00FE;
 
     @Override
     protected Object decode(

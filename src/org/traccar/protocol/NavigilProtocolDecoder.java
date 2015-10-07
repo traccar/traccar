@@ -35,21 +35,21 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int LEAP_SECONDS_DELTA = 25;
 
-    private static final int MESSAGE_ERROR = 2;
-    private static final int MESSAGE_INDICATION = 4;
-    private static final int MESSAGE_CONN_OPEN = 5;
-    private static final int MESSAGE_CONN_CLOSE = 6;
-    private static final int MESSAGE_SYSTEM_REPORT = 7;
-    private static final int MESSAGE_UNIT_REPORT = 8;
-    private static final int MESSAGE_GEOFENCE_ALARM = 10;
-    private static final int MESSAGE_INPUT_ALARM = 11;
-    private static final int MESSAGE_TG2_REPORT = 12;
-    private static final int MESSAGE_POSITION_REPORT = 13;
-    private static final int MESSAGE_POSITION_REPORT_2 = 15;
-    private static final int MESSAGE_SNAPSHOT4 = 17;
-    private static final int MESSAGE_TRACKING_DATA = 18;
-    private static final int MESSAGE_MOTION_ALARM = 19;
-    private static final int MESSAGE_ACKNOWLEDGEMENT = 255;
+    public static final int MSG_ERROR = 2;
+    public static final int MSG_INDICATION = 4;
+    public static final int MSG_CONN_OPEN = 5;
+    public static final int MSG_CONN_CLOSE = 6;
+    public static final int MSG_SYSTEM_REPORT = 7;
+    public static final int MSG_UNIT_REPORT = 8;
+    public static final int MSG_GEOFENCE_ALARM = 10;
+    public static final int MSG_INPUT_ALARM = 11;
+    public static final int MSG_TG2_REPORT = 12;
+    public static final int MSG_POSITION_REPORT = 13;
+    public static final int MSG_POSITION_REPORT_2 = 15;
+    public static final int MSG_SNAPSHOT4 = 17;
+    public static final int MSG_TRACKING_DATA = 18;
+    public static final int MSG_MOTION_ALARM = 19;
+    public static final int MSG_ACKNOWLEDGEMENT = 255;
 
     private static Date convertTimestamp(long timestamp) {
         return new Date((timestamp - LEAP_SECONDS_DELTA) * 1000l);
@@ -65,7 +65,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer header = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 20);
         header.writeByte(1); header.writeByte(0);
         header.writeShort(senderSequenceNumber++);
-        header.writeShort(MESSAGE_ACKNOWLEDGEMENT);
+        header.writeShort(MSG_ACKNOWLEDGEMENT);
         header.writeShort(header.capacity() + data.capacity());
         header.writeShort(0);
         header.writeShort(Checksum.crc16(Checksum.CRC16_CCITT_FALSE, data.toByteBuffer()));
@@ -290,17 +290,17 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse messages
         switch (messageId) {
-            case MESSAGE_UNIT_REPORT:
+            case MSG_UNIT_REPORT:
                 return parseUnitReport(buf, sequenceNumber);
-            case MESSAGE_TG2_REPORT:
+            case MSG_TG2_REPORT:
                 return parseTg2Report(buf, sequenceNumber);
-            case MESSAGE_POSITION_REPORT:
+            case MSG_POSITION_REPORT:
                 return parsePositionReport(buf, sequenceNumber, timestamp);
-            case MESSAGE_POSITION_REPORT_2:
+            case MSG_POSITION_REPORT_2:
                 return parsePositionReport2(buf, sequenceNumber, timestamp);
-            case MESSAGE_SNAPSHOT4:
+            case MSG_SNAPSHOT4:
                 return parseSnapshot4(buf, sequenceNumber);
-            case MESSAGE_TRACKING_DATA:
+            case MSG_TRACKING_DATA:
                 return parseTrackingData(buf, sequenceNumber, timestamp);
         }
 

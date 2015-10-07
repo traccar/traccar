@@ -34,17 +34,17 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int PACKET_HEARTBEAT = 0x21;
-    private static final int PACKET_POSITION_DATA = 0x80;
-    private static final int PACKET_ROLLCALL_RESPONSE = 0x81;
-    private static final int PACKET_ALARM_DATA = 0x82;
-    private static final int PACKET_TERMINAL_STATUS = 0x83;
-    private static final int PACKET_MESSAGE = 0x84;
-    private static final int PACKET_TERMINAL_ANSWER = 0x85;
-    private static final int PACKET_BLIND_AREA = 0x8E;
-    private static final int PACKET_PICTURE_FRAME = 0x54;
-    private static final int PACKET_CAMERA_RESPONSE = 0x56;
-    private static final int PACKET_PICTURE_DATA = 0x57;
+    public static final int MSG_HEARTBEAT = 0x21;
+    public static final int MSG_POSITION_DATA = 0x80;
+    public static final int MSG_ROLLCALL_RESPONSE = 0x81;
+    public static final int MSG_ALARM_DATA = 0x82;
+    public static final int MSG_TERMINAL_STATUS = 0x83;
+    public static final int MSG_MESSAGE = 0x84;
+    public static final int MSG_TERMINAL_ANSWER = 0x85;
+    public static final int MSG_BLIND_AREA = 0x8E;
+    public static final int MSG_PICTURE_FRAME = 0x54;
+    public static final int MSG_CAMERA_RESPONSE = 0x56;
+    public static final int MSG_PICTURE_DATA = 0x57;
 
     @Override
     protected Object decode(
@@ -63,10 +63,10 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(), buf.readUnsignedByte());
         id = id.replaceFirst("^0+(?!$)", "");
 
-        if (type == PACKET_POSITION_DATA ||
-            type == PACKET_ROLLCALL_RESPONSE ||
-            type == PACKET_ALARM_DATA ||
-            type == PACKET_BLIND_AREA) {
+        if (type == MSG_POSITION_DATA ||
+            type == MSG_ROLLCALL_RESPONSE ||
+            type == MSG_ALARM_DATA ||
+            type == MSG_BLIND_AREA) {
 
             // Create new position
             Position position = new Position();

@@ -37,14 +37,14 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
     private static final DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
-    private static final int MSG_UPLOAD_POSITION = 0x0008;
-    private static final int MSG_UPLOAD_POSITION_NEW = 0x0032;
-    private static final int MSG_CONTROL_RESPONSE = 0x8009;
-    private static final int MSG_ALARM = 0x0003;
-    private static final int MSG_SHAKE_HAND = 0x0000;
-    private static final int MSG_SHAKE_HAND_RESPONSE = 0x8000;
-    private static final int MSG_IMAGE_SIZE = 0x0200;
-    private static final int MSG_IMAGE_PACKET = 0x0201;
+    public static final int MSG_UPLOAD_POSITION = 0x0008;
+    public static final int MSG_UPLOAD_POSITION_NEW = 0x0032;
+    public static final int MSG_CONTROL_RESPONSE = 0x8009;
+    public static final int MSG_ALARM = 0x0003;
+    public static final int MSG_SHAKE_HAND = 0x0000;
+    public static final int MSG_SHAKE_HAND_RESPONSE = 0x8000;
+    public static final int MSG_IMAGE_SIZE = 0x0200;
+    public static final int MSG_IMAGE_PACKET = 0x0201;
 
 
     @Override

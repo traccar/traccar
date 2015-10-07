@@ -35,8 +35,8 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int TYPE_USERLOG = 0;
-    private static final int TYPE_SYSLOG = 3;
+    public static final int MSG_USERLOG = 0;
+    public static final int MSG_SYSLOG = 3;
 
     private static void sendResponse(Channel channel, ChannelBuffer buf) {
         if (channel != null) {
@@ -64,7 +64,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
         int type = buf.readUnsignedByte() & 0x0f;
 
-        if (type == TYPE_USERLOG) {
+        if (type == MSG_USERLOG) {
 
             int header = buf.readUnsignedByte();
 

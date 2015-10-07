@@ -45,14 +45,14 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         return String.valueOf(Long.parseLong(serialNumber));
     }
 
-    private static final int MSG_LOGIN = 0xB1;
-    private static final int MSG_CONFIRMATION = 0x21;
-    private static final int MSG_ON_DEMAND = 0x81;
-    private static final int MSG_POSITION_UPLOAD = 0x80;
-    private static final int MSG_POSITION_REUPLOAD = 0x8E;
-    private static final int MSG_ALARM = 0x82;
-    private static final int MSG_REPLY = 0x85;
-    private static final int MSG_PERIPHERAL = 0xA3;
+    public static final int MSG_LOGIN = 0xB1;
+    public static final int MSG_CONFIRMATION = 0x21;
+    public static final int MSG_ON_DEMAND = 0x81;
+    public static final int MSG_POSITION_UPLOAD = 0x80;
+    public static final int MSG_POSITION_REUPLOAD = 0x8E;
+    public static final int MSG_ALARM = 0x82;
+    public static final int MSG_REPLY = 0x85;
+    public static final int MSG_PERIPHERAL = 0xA3;
 
     @Override
     protected Object decode(

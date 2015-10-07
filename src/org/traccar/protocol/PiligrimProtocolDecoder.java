@@ -53,9 +53,9 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private static final int MSG_GPS = 0xF1;
-    private static final int MSG_GPS_SENSORS = 0xF2;
-    private static final int MSG_EVENTS = 0xF3;
+    public static final int MSG_GPS = 0xF1;
+    public static final int MSG_GPS_SENSORS = 0xF2;
+    public static final int MSG_EVENTS = 0xF3;
 
     @Override
     protected Object decode(

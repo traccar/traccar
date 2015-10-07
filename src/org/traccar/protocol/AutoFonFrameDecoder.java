@@ -22,9 +22,9 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class AutoFonFrameDecoder extends FrameDecoder {
 
-    private static final int MSG_LOGIN = 0x10;
-    private static final int MSG_LOCATION = 0x11;
-    private static final int MSG_HISTORY = 0x12;
+    public static final int MSG_LOGIN = 0x10;
+    public static final int MSG_LOCATION = 0x11;
+    public static final int MSG_HISTORY = 0x12;
 
     @Override
     protected Object decode(

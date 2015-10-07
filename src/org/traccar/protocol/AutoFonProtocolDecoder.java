@@ -34,9 +34,9 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_LOGIN = 0x10;
-    private static final int MSG_LOCATION = 0x11;
-    private static final int MSG_HISTORY = 0x12;
+    public static final int MSG_LOGIN = 0x10;
+    public static final int MSG_LOCATION = 0x11;
+    public static final int MSG_HISTORY = 0x12;
 
     private static double convertCoordinate(int raw) {
         double result = raw / 1000000;

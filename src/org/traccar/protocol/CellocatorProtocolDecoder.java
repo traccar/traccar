@@ -39,7 +39,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     static final int MSG_CLIENT_SERIAL = 8;
     static final int MSG_CLIENT_MODULAR = 9;
 
-    private static final int MSG_SERVER_ACKNOWLEDGE = 4;
+    public static final int MSG_SERVER_ACKNOWLEDGE = 4;
 
     private byte commandCount;
 

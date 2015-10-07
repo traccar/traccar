@@ -31,18 +31,18 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_NULL = 0;
-    private static final int MSG_ACK = 1;
-    private static final int MSG_EVENT_REPORT = 2;
-    private static final int MSG_ID_REPORT = 3;
-    private static final int MSG_USER_DATA = 4;
-    private static final int MSG_APP_DATA = 5;
-    private static final int MSG_CONFIG = 6;
-    private static final int MSG_UNIT_REQUEST = 7;
-    private static final int MSG_LOCATE_REPORT = 8;
-    private static final int MSG_USER_DATA_ACC = 9;
-    private static final int MSG_MINI_EVENT_REPORT = 10;
-    private static final int MSG_MINI_USER_DATA = 11;
+    public static final int MSG_NULL = 0;
+    public static final int MSG_ACK = 1;
+    public static final int MSG_EVENT_REPORT = 2;
+    public static final int MSG_ID_REPORT = 3;
+    public static final int MSG_USER_DATA = 4;
+    public static final int MSG_APP_DATA = 5;
+    public static final int MSG_CONFIG = 6;
+    public static final int MSG_UNIT_REQUEST = 7;
+    public static final int MSG_LOCATE_REPORT = 8;
+    public static final int MSG_USER_DATA_ACC = 9;
+    public static final int MSG_MINI_EVENT_REPORT = 10;
+    public static final int MSG_MINI_USER_DATA = 11;
 
     private static final int SERVICE_UNACKNOWLEDGED = 0;
     private static final int SERVICE_ACKNOWLEDGED = 1;

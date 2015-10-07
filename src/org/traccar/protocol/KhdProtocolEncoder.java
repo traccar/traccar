@@ -23,8 +23,8 @@ import org.traccar.model.Command;
 
 public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
-    private static final int MSG_CUT_OIL = 0x39;
-    private static final int MSG_RESUME_OIL = 0x38;
+    public static final int MSG_CUT_OIL = 0x39;
+    public static final int MSG_RESUME_OIL = 0x38;
 
     private ChannelBuffer encodeCommand(int command) {
 
