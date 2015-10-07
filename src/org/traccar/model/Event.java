@@ -16,40 +16,8 @@
 package org.traccar.model;
 
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-public abstract class Event {
-
-    private long id;
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
-
-    private String protocol;
-    public String getProtocol() { return protocol; }
-    public void setProtocol(String protocol) { this.protocol = protocol; }
-
-    private long deviceId;
-    public long getDeviceId() { return deviceId; }
-    public void setDeviceId(long deviceId) { this.deviceId = deviceId; }
-
-    private Date serverTime;
-    public Date getServerTime() { return serverTime; }
-    public void setServerTime(Date serverTime) { this.serverTime = serverTime; }
-
-    private Date deviceTime;
-    public Date getDeviceTime() { return deviceTime; }
-    public void setDeviceTime(Date deviceTime) { this.deviceTime = deviceTime; }
-
-    private Map<String, Object> attributes = new LinkedHashMap<>();
-    public Map<String, Object> getAttributes() { return attributes; }
-    public void setAttributes(Map<String, Object> attributes) { this.attributes = attributes; }
-
-    public void set(String key, boolean value) { attributes.put(key, value); }
-    public void set(String key, int value) { attributes.put(key, value); }
-    public void set(String key, long value) { attributes.put(key, value); }
-    public void set(String key, double value) { attributes.put(key, value); }
-    public void set(String key, String value) { if (value != null && !value.isEmpty()) attributes.put(key, value); }
+public abstract class Event extends Extensible {
 
     // Words separated by dashes (word-second-third)
     public static final String KEY_INDEX = "index";
@@ -90,5 +58,55 @@ public abstract class Event {
     public static final String PREFIX_ADC = "adc";
     public static final String PREFIX_IO = "io";
     public static final String PREFIX_COUNT = "count";
+
+    private long id;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    private String protocol;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    private long deviceId;
+
+    public long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    private Date serverTime;
+
+    public Date getServerTime() {
+        return serverTime;
+    }
+
+    public void setServerTime(Date serverTime) {
+        this.serverTime = serverTime;
+    }
+
+    private Date deviceTime;
+
+    public Date getDeviceTime() {
+        return deviceTime;
+    }
+
+    public void setDeviceTime(Date deviceTime) {
+        this.deviceTime = deviceTime;
+    }
 
 }

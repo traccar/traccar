@@ -22,12 +22,12 @@ import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 public class CharacterDelimiterFrameDecoder extends DelimiterBasedFrameDecoder {
 
     private static ChannelBuffer createDelimiter(char delimiter) {
-        byte buf[] = { (byte) delimiter };
+        byte[] buf = {(byte) delimiter};
         return ChannelBuffers.wrappedBuffer(buf);
     }
 
     private static ChannelBuffer createDelimiter(String delimiter) {
-        byte buf[] = new byte[delimiter.length()];
+        byte[] buf = new byte[delimiter.length()];
         for (int i = 0; i < delimiter.length(); i++) {
             buf[i] = (byte) delimiter.charAt(i);
         }
@@ -35,7 +35,7 @@ public class CharacterDelimiterFrameDecoder extends DelimiterBasedFrameDecoder {
     }
 
     private static ChannelBuffer[] convertDelimiters(String[] delimiters) {
-        ChannelBuffer result[] = new ChannelBuffer[delimiters.length];
+        ChannelBuffer[] result = new ChannelBuffer[delimiters.length];
         for (int i = 0; i < delimiters.length; i++) {
             result[i] = createDelimiter(delimiters[i]);
         }

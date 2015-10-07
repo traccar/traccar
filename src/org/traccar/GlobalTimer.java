@@ -18,10 +18,7 @@ package org.traccar;
 import org.jboss.netty.util.HashedWheelTimer;
 import org.jboss.netty.util.Timer;
 
-/**
- * Global idle timer
- */
-public class GlobalTimer {
+public final class GlobalTimer {
 
     private static Timer instance = null;
 
@@ -36,9 +33,10 @@ public class GlobalTimer {
     }
 
     public static Timer getTimer() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new HashedWheelTimer();
         }
         return instance;
     }
+
 }
