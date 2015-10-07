@@ -25,8 +25,14 @@ public class Position extends Event implements Factory {
     }
 
     private Date fixTime;
-    public Date getFixTime() { return fixTime; }
-    public void setFixTime(Date fixTime) { this.fixTime = fixTime; }
+
+    public Date getFixTime() {
+        return fixTime;
+    }
+
+    public void setFixTime(Date fixTime) {
+        this.fixTime = fixTime;
+    }
 
     public void setTime(Date time) {
         setDeviceTime(time);
@@ -34,31 +40,73 @@ public class Position extends Event implements Factory {
     }
 
     private boolean valid;
-    public boolean getValid() { return valid; }
-    public void setValid(boolean valid) { this.valid = valid; }
+
+    public boolean getValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
 
     private double latitude;
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
 
     private double longitude;
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
     private double altitude;
-    public double getAltitude() { return altitude; }
-    public void setAltitude(double altitude) { this.altitude = altitude; }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
+    }
 
     private double speed; // value in knots
-    public double getSpeed() { return speed; }
-    public void setSpeed(double speed) { this.speed = speed; }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
 
     private double course;
-    public double getCourse() { return course; }
-    public void setCourse(double course) { this.course = course; }
+
+    public double getCourse() {
+        return course;
+    }
+
+    public void setCourse(double course) {
+        this.course = course;
+    }
 
     private String address;
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
 }

@@ -25,16 +25,34 @@ public class Device implements Factory {
     }
 
     private long id;
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     private String name;
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     private String uniqueId;
-    public String getUniqueId() { return uniqueId; }
-    public void setUniqueId(String uniqueId) { this.uniqueId = uniqueId; }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
+    }
 
     private String status;
 

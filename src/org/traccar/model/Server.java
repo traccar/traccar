@@ -23,47 +23,113 @@ public class Server implements Factory {
     }
 
     private long id;
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     private boolean registration;
-    public boolean getRegistration() { return registration; }
-    public void setRegistration(boolean registration) { this.registration = registration; }
+
+    public boolean getRegistration() {
+        return registration;
+    }
+
+    public void setRegistration(boolean registration) {
+        this.registration = registration;
+    }
 
     private String map;
-    public String getMap() { return map; }
-    public void setMap(String map) { this.map = map; }
+
+    public String getMap() {
+        return map;
+    }
+
+    public void setMap(String map) {
+        this.map = map;
+    }
 
     private String bingKey;
-    public String getBingKey() { return bingKey; }
-    public void setBingKey(String bingKey) { this.bingKey = bingKey; }
+
+    public String getBingKey() {
+        return bingKey;
+    }
+
+    public void setBingKey(String bingKey) {
+        this.bingKey = bingKey;
+    }
 
     private String mapUrl;
-    public String getMapUrl() { return mapUrl; }
-    public void setMapUrl(String mapUrl) { this.mapUrl = mapUrl; }
+
+    public String getMapUrl() {
+        return mapUrl;
+    }
+
+    public void setMapUrl(String mapUrl) {
+        this.mapUrl = mapUrl;
+    }
 
     private String language;
-    public String getLanguage() { return language; }
-    public void setLanguage(String language) { this.language = language; }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 
     private String distanceUnit;
-    public String getDistanceUnit() { return distanceUnit; }
-    public void setDistanceUnit(String distanceUnit) { this.distanceUnit = distanceUnit; }
+
+    public String getDistanceUnit() {
+        return distanceUnit;
+    }
+
+    public void setDistanceUnit(String distanceUnit) {
+        this.distanceUnit = distanceUnit;
+    }
 
     private String speedUnit;
-    public String getSpeedUnit() { return speedUnit; }
-    public void setSpeedUnit(String speedUnit) { this.speedUnit = speedUnit; }
+
+    public String getSpeedUnit() {
+        return speedUnit;
+    }
+
+    public void setSpeedUnit(String speedUnit) {
+        this.speedUnit = speedUnit;
+    }
 
     private double latitude;
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
 
     private double longitude;
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
     private int zoom;
-    public int getZoom() { return zoom; }
-    public void setZoom(int zoom) { this.zoom = zoom; }
+
+    public int getZoom() {
+        return zoom;
+    }
+
+    public void setZoom(int zoom) {
+        this.zoom = zoom;
+    }
 
 }

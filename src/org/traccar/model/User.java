@@ -26,53 +26,123 @@ public class User implements Factory {
     }
 
     private long id;
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     private String name;
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     private String email;
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     private boolean readonly;
 
     private boolean admin;
-    public boolean getAdmin() { return admin; }
-    public void setAdmin(boolean admin) { this.admin = admin; }
+
+    public boolean getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
 
     private String map;
-    public String getMap() { return map; }
-    public void setMap(String map) { this.map = map; }
+
+    public String getMap() {
+        return map;
+    }
+
+    public void setMap(String map) {
+        this.map = map;
+    }
 
     private String language;
-    public String getLanguage() { return language; }
-    public void setLanguage(String language) { this.language = language; }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 
     private String distanceUnit;
-    public String getDistanceUnit() { return distanceUnit; }
-    public void setDistanceUnit(String distanceUnit) { this.distanceUnit = distanceUnit; }
+
+    public String getDistanceUnit() {
+        return distanceUnit;
+    }
+
+    public void setDistanceUnit(String distanceUnit) {
+        this.distanceUnit = distanceUnit;
+    }
 
     private String speedUnit;
-    public String getSpeedUnit() { return speedUnit; }
-    public void setSpeedUnit(String speedUnit) { this.speedUnit = speedUnit; }
+
+    public String getSpeedUnit() {
+        return speedUnit;
+    }
+
+    public void setSpeedUnit(String speedUnit) {
+        this.speedUnit = speedUnit;
+    }
 
     private double latitude;
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
 
     private double longitude;
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
     private int zoom;
-    public int getZoom() { return zoom; }
-    public void setZoom(int zoom) { this.zoom = zoom; }
+
+    public int getZoom() {
+        return zoom;
+    }
+
+    public void setZoom(int zoom) {
+        this.zoom = zoom;
+    }
 
     private String password;
-    public String getPassword() { return password; }
+
+    public String getPassword() {
+        return password;
+    }
+
     public void setPassword(String password) {
         this.password = password;
         if (password != null && !password.isEmpty()) {
@@ -83,14 +153,26 @@ public class User implements Factory {
     }
 
     private String hashedPassword;
+
     @JsonIgnore
-    public String getHashedPassword() { return hashedPassword; }
-    public void setHashedPassword(String hashedPassword) { this.hashedPassword = hashedPassword; }
+    public String getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
+    }
 
     private String salt;
+
     @JsonIgnore
-    public String getSalt() { return salt; }
-    public void setSalt(String salt) { this.salt = salt; }
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
 
     public boolean isPasswordValid(String password) {
         return Hashing.validatePassword(password, hashedPassword, salt);
