@@ -84,7 +84,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Validity
-        position.setValid(Integer.valueOf(parser.group(index++)) == 0);
+        position.setValid(Integer.parseInt(parser.group(index++)) == 0);
 
         // Position info
         position.setSpeed(Double.valueOf(parser.group(index++)));
@@ -93,18 +93,17 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(Double.valueOf(parser.group(index++)));
         position.setLatitude(Double.valueOf(parser.group(index++)));
 
-        // Date
+        // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.YEAR, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-
-        // Time
-        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
         position.setTime(time.getTime());
+
         return position;
     }
 

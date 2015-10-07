@@ -116,12 +116,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         // Date
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
 
-        int localHours = Integer.valueOf(parser.group(index++));
-        int localMinutes = Integer.valueOf(parser.group(index++));
+        int localHours = Integer.parseInt(parser.group(index++));
+        int localMinutes = Integer.parseInt(parser.group(index++));
 
         String utcHours = parser.group(index++);
         String utcMinutes = parser.group(index++);
@@ -131,17 +131,17 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.MINUTE, localMinutes);
         String seconds = parser.group(index++);
         if (seconds != null) {
-            time.set(Calendar.SECOND, Integer.valueOf(seconds));
+            time.set(Calendar.SECOND, Integer.parseInt(seconds));
         }
         String milliseconds = parser.group(index++);
         if (milliseconds != null) {
-            time.set(Calendar.MILLISECOND, Integer.valueOf(milliseconds));
+            time.set(Calendar.MILLISECOND, Integer.parseInt(milliseconds));
         }
 
         // Timezone calculation
         if (utcHours != null && utcMinutes != null) {
-            int deltaMinutes = (localHours - Integer.valueOf(utcHours)) * 60;
-            deltaMinutes += localMinutes - Integer.valueOf(utcMinutes);
+            int deltaMinutes = (localHours - Integer.parseInt(utcHours)) * 60;
+            deltaMinutes += localMinutes - Integer.parseInt(utcMinutes);
             if (deltaMinutes <= -12 * 60) {
                 deltaMinutes += 24 * 60;
             } else if (deltaMinutes > 12 * 60) {

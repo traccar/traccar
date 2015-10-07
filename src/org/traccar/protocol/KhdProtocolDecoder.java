@@ -42,7 +42,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         int b3 = buf.readUnsignedByte(); if (b3 > 0x80) b3 -= 0x80;
         int b4 = buf.readUnsignedByte();
         String serialNumber = String.format("%02d%02d%02d%02d", b1, b2, b3, b4);
-        return String.valueOf(Long.valueOf(serialNumber));
+        return String.valueOf(Long.parseLong(serialNumber));
     }
 
     private static final int MSG_LOGIN = 0xB1;

@@ -43,7 +43,7 @@ public class PositionServlet extends BaseServlet {
     }
 
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        long deviceId = Long.valueOf(req.getParameter("deviceId"));
+        long deviceId = Long.parseLong(req.getParameter("deviceId"));
         Context.getPermissionsManager().checkDevice(getUserId(req), deviceId);
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getPositions(

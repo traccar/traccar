@@ -96,19 +96,19 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     if (value.isEmpty()) {
                         position.setValid(false);
                     } else {
-                        position.setValid(Integer.valueOf(value) != 1);
+                        position.setValid(Integer.parseInt(value) != 1);
                     }
                     break;
                 case 'B':
                     Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                     time.clear();
-                    time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(value.substring(0, 2)));
-                    time.set(Calendar.MONTH, Integer.valueOf(value.substring(2, 4)) - 1);
-                    time.set(Calendar.YEAR, 2000 + Integer.valueOf(value.substring(4)));
+                    time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(value.substring(0, 2)));
+                    time.set(Calendar.MONTH, Integer.parseInt(value.substring(2, 4)) - 1);
+                    time.set(Calendar.YEAR, 2000 + Integer.parseInt(value.substring(4)));
                     value = values[++valueIndex];
-                    time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(value.substring(0, 2)));
-                    time.set(Calendar.MINUTE, Integer.valueOf(value.substring(2, 4)));
-                    time.set(Calendar.SECOND, Integer.valueOf(value.substring(4)));
+                    time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(value.substring(0, 2)));
+                    time.set(Calendar.MINUTE, Integer.parseInt(value.substring(2, 4)));
+                    time.set(Calendar.SECOND, Integer.parseInt(value.substring(4)));
                     position.setTime(time.getTime());
                     break;
                 case 'C':
@@ -121,7 +121,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case '2':
                     longitude = Double.valueOf(value.substring(4)) / 60;
-                    longitude += Integer.valueOf(value.substring(1, 4));
+                    longitude += Integer.parseInt(value.substring(1, 4));
                     if (value.charAt(0) == 'W') longitude = -longitude;
                     position.setLongitude(longitude);
                     break;
@@ -135,7 +135,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case '7':
                     latitude = Double.valueOf(value.substring(3)) / 60;
-                    latitude += Integer.valueOf(value.substring(1, 3));
+                    latitude += Integer.parseInt(value.substring(1, 3));
                     if (value.charAt(0) == 'S') latitude = -latitude;
                     position.setLatitude(latitude);
                     break;
@@ -212,12 +212,12 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         // Time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
+        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
         position.setTime(time.getTime());
 
         // Longitude
@@ -244,7 +244,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Double.valueOf(parser.group(index++)));
 
         // Satellites
-        position.set(Event.KEY_SATELLITES, Integer.valueOf(parser.group(index++)));
+        position.set(Event.KEY_SATELLITES, Integer.parseInt(parser.group(index++)));
 
         // HDOP
         position.set(Event.KEY_HDOP, parser.group(index++));

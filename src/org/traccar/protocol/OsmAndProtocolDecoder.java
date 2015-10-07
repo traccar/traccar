@@ -69,7 +69,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(true);
         if (params.containsKey("timestamp")) {
             try {
-                long timestamp = Long.valueOf(params.get("timestamp").get(0));
+                long timestamp = Long.parseLong(params.get("timestamp").get(0));
                 if (timestamp < Integer.MAX_VALUE) {
                     timestamp *= 1000;
                 }

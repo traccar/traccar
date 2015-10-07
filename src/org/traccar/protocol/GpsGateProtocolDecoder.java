@@ -35,7 +35,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern pattern = Pattern.compile(
             "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2})\\.?(\\d+)?," + // Time (HHMMSS.SSS)
+            "(\\d{2})(\\d{2})(\\d{2})\\.?(?:\\d+)?," + // Time (HHMMSS.SSS)
             "([AV])," +                    // Validity
             "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
             "([NS])," +
@@ -106,10 +106,9 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             // Time
             Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             time.clear();
-            time.set(Calendar.HOUR_OF_DAY, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.valueOf(parser.group(index++)));
-            index += 1; // Skip milliseconds
+            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
 
             // Validity
             position.setValid(parser.group(index++).compareTo("A") == 0);
@@ -139,10 +138,11 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Date
-            time.set(Calendar.DAY_OF_MONTH, Integer.valueOf(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.valueOf(parser.group(index++)) - 1);
-            time.set(Calendar.YEAR, 2000 + Integer.valueOf(parser.group(index++)));
+            time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
+            time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
+            time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
             position.setTime(time.getTime());
+
             return position;
         }
 

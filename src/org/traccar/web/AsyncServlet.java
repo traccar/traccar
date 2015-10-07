@@ -203,7 +203,7 @@ public class AsyncServlet extends BaseServlet {
 
         synchronized (asyncSessions) {
 
-            if (Boolean.valueOf(req.getParameter("first")) || !asyncSessions.containsKey(userId)) {
+            if (Boolean.parseBoolean(req.getParameter("first")) || !asyncSessions.containsKey(userId)) {
                 Collection<Long> devices = Context.getPermissionsManager().allowedDevices(userId);
                 asyncSessions.put(userId, new AsyncSession(userId, devices));
             }
