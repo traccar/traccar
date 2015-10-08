@@ -26,7 +26,7 @@ import org.traccar.helper.ChannelBufferTools;
 public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
 
     public Stl060FrameDecoder(int maxFrameLength) {
-        super('#');
+        super(maxFrameLength, '#');
     }
 
     @Override
