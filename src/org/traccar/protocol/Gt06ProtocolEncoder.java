@@ -21,6 +21,8 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
+import java.nio.charset.Charset;
+
 public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
     private ChannelBuffer encodeContent(String content) {
@@ -36,7 +38,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeByte(4 + content.length()); // command length
         buf.writeInt(0);
-        buf.writeBytes(content.getBytes()); // command
+        buf.writeBytes(content.getBytes(Charset.defaultCharset())); // command
 
         buf.writeShort(0); // message index
 

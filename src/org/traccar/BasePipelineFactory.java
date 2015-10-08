@@ -40,7 +40,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
 
-    protected class OpenChannelHandler extends SimpleChannelHandler {
+    private static class OpenChannelHandler extends SimpleChannelHandler {
 
         private final TrackerServer server;
 
@@ -54,7 +54,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
     }
 
-    protected class StandardLoggingHandler extends LoggingHandler {
+    private static class StandardLoggingHandler extends LoggingHandler {
 
         @Override
         public void log(ChannelEvent e) {

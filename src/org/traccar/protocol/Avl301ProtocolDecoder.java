@@ -101,7 +101,6 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             // GPS length and Satellites count
             int gpsLength = buf.readUnsignedByte();
             position.set(Event.KEY_SATELLITES, gpsLength & 0xf);
-            gpsLength >>= 4;
 
             //Skip Satellite numbers
             buf.skipBytes(1);

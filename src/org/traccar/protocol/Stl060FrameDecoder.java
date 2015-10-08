@@ -20,14 +20,13 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
+import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.helper.ChannelBufferTools;
 
-public class Stl060FrameDecoder extends DelimiterBasedFrameDecoder {
-
-    private static final byte delimiter[] = { (byte) '#' };
+public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
 
     public Stl060FrameDecoder(int maxFrameLength) {
-        super(maxFrameLength, ChannelBuffers.wrappedBuffer(delimiter));
+        super('#');
     }
 
     @Override

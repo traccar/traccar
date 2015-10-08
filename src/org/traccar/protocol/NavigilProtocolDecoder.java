@@ -90,7 +90,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(buf.readInt() * 0.0000001);
         position.setLongitude(buf.readInt() * 0.0000001);
-        position.setAltitude( buf.readUnsignedShort());
+        position.setAltitude(buf.readUnsignedShort());
 
         buf.readUnsignedShort(); // satellites in fix
         buf.readUnsignedShort(); // satellites in track

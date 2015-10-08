@@ -129,4 +129,5 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
         }
         return GPRS_CRC;
     }
+
 }

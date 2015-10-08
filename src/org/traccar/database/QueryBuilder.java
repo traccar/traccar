@@ -41,7 +41,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
-public class QueryBuilder {
+public final class QueryBuilder {
 
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;

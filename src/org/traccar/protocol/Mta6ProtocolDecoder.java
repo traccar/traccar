@@ -72,8 +72,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         private int previousFloat;
 
         public float readFloat(ChannelBuffer buf) {
-            switch (buf.getUnsignedByte(buf.readerIndex()) >> 6)
-            {
+            switch (buf.getUnsignedByte(buf.readerIndex()) >> 6) {
                 case 0:
                     previousFloat = buf.readInt() << 2;
                     break;

@@ -155,8 +155,8 @@ public class User implements Factory {
         this.password = password;
         if (password != null && !password.isEmpty()) {
             Hashing.HashingResult hashingResult = Hashing.createHash(password);
-            hashedPassword = hashingResult.hash;
-            salt = hashingResult.salt;
+            hashedPassword = hashingResult.getHash();
+            salt = hashingResult.getSalt();
         }
     }
 

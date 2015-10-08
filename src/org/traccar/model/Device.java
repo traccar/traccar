@@ -67,11 +67,19 @@ public class Device implements Factory {
     private Date lastUpdate;
 
     public Date getLastUpdate() {
-        return lastUpdate;
+        if (lastUpdate != null) {
+            return new Date(lastUpdate.getTime());
+        } else {
+            return null;
+        }
     }
 
     public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
+        if (lastUpdate != null) {
+            this.lastUpdate = new Date(lastUpdate.getTime());
+        } else {
+            this.lastUpdate = null;
+        }
     }
 
     private long positionId;

@@ -144,18 +144,20 @@ public class DataManager implements IdentityManager {
 
         if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
 
-            Connection connection = dataSource.getConnection();
-            ResultSet result = connection.getMetaData().getTables(
-                    connection.getCatalog(), null, null, null);
-
             boolean exist = false;
-            String checkTable = config.getString("database.checkTable");
-            while (result.next()) {
-                if (result.getString("TABLE_NAME").equalsIgnoreCase(checkTable)) {
-                    exist = true;
-                    break;
+
+            try (Connection connection = dataSource.getConnection();
+                 ResultSet result = connection.getMetaData().getTables(connection.getCatalog(), null, null, null)) {
+
+                String checkTable = config.getString("database.checkTable");
+                while (result.next()) {
+                    if (result.getString("TABLE_NAME").equalsIgnoreCase(checkTable)) {
+                        exist = true;
+                        break;
+                    }
                 }
             }
+
             if (exist) {
 
                 String schemaVersionQuery = getQuery("database.selectSchemaVersion");
@@ -174,25 +176,26 @@ public class DataManager implements IdentityManager {
                     }
                 }
 
-                return;
+            } else {
+
+                QueryBuilder.create(dataSource, getQuery("database.createSchema")).executeUpdate();
+
+                User admin = new User();
+                admin.setName("admin");
+                admin.setEmail("admin");
+                admin.setAdmin(true);
+                admin.setPassword("admin");
+                addUser(admin);
+
+                Server server = new Server();
+                server.setRegistration(true);
+                QueryBuilder.create(dataSource, getQuery("database.insertServer"))
+                        .setObject(server)
+                        .executeUpdate();
+
+                mockData(admin.getId());
+
             }
-
-            QueryBuilder.create(dataSource, getQuery("database.createSchema")).executeUpdate();
-
-            User admin = new User();
-            admin.setName("admin");
-            admin.setEmail("admin");
-            admin.setAdmin(true);
-            admin.setPassword("admin");
-            addUser(admin);
-
-            Server server = new Server();
-            server.setRegistration(true);
-            QueryBuilder.create(dataSource, getQuery("database.insertServer"))
-                    .setObject(server)
-                    .executeUpdate();
-
-            mockData(admin.getId());
         }
     }
 

@@ -37,7 +37,7 @@ public class AutoFonFrameDecoder extends FrameDecoder {
             return null;
         }
 
-        int length = 0;
+        int length;
         switch (buf.getUnsignedByte(buf.readerIndex())) {
             case MSG_LOGIN:
                 length = 12;
@@ -47,6 +47,9 @@ public class AutoFonFrameDecoder extends FrameDecoder {
                 break;
             case MSG_HISTORY:
                 length = 257;
+                break;
+            default:
+                length = 0;
                 break;
         }
 

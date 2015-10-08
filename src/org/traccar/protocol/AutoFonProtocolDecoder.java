@@ -129,7 +129,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
             // Send response
             if (channel != null) {
-                channel.write(ChannelBuffers.wrappedBuffer(new byte[] { buf.readByte() }));
+                channel.write(ChannelBuffers.wrappedBuffer(new byte[] {buf.readByte()}));
             }
 
         } else if (type == MSG_LOCATION) {

@@ -136,7 +136,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_STATUS, parser.group(index++));
 
         // Send response
-        if ((type.equals("KP") || type.equals("EP") || type.equals("EP")) && channel != null) {
+        if ((type.equals("KP") || type.equals("EP")) && channel != null) {
             channel.write("%AT+" + type + "=" + reportId + "\r\n");
         }
 

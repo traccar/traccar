@@ -196,7 +196,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Event.KEY_MCC, buf.readUnsignedShort());
                 position.set(Event.KEY_MNC, buf.readUnsignedByte());
                 position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                position.set(Event.KEY_CELL, buf.readUnsignedShort() << 8 + buf.readUnsignedByte());
+                position.set(Event.KEY_CELL, (buf.readUnsignedShort() << 8) + buf.readUnsignedByte());
                 if (lbsLength > 0) {
                     buf.skipBytes(lbsLength - 9);
                 }

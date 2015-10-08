@@ -21,8 +21,6 @@ public class PatternBuilder {
 
     private final StringBuilder pattern = new StringBuilder();
 
-    private final boolean collapse = true;
-
     public PatternBuilder xpr(String s) {
         pattern.append(s);
         return this;
@@ -38,10 +36,9 @@ public class PatternBuilder {
     }
 
     public PatternBuilder num(String s) {
-        if (collapse) {
-            s = s.replace("dddd", "d{4}").replace("ddd", "d{3}").replace("dd", "d{2}");
-            s = s.replace("xxxx", "x{4}").replace("xxx", "x{3}").replace("xx", "x{2}");
-        }
+        s = s.replace("dddd", "d{4}").replace("ddd", "d{3}").replace("dd", "d{2}");
+        s = s.replace("xxxx", "x{4}").replace("xxx", "x{3}").replace("xx", "x{2}");
+
         pattern.append(s.replace("d", "\\d").replace("x", "\\p{XDigit}").replaceAll("([\\.\\|])", "\\\\$1"));
         return this;
     }

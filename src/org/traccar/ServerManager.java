@@ -41,21 +41,23 @@ public class ServerManager {
 
         if (packageUrl.getProtocol().equals("jar")) {
             String jarFileName = URLDecoder.decode(packageUrl.getFile(), "UTF-8");
-            JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")));
-
-            Enumeration<JarEntry> jarEntries = jf.entries();
-            while(jarEntries.hasMoreElements()){
-                String entryName = jarEntries.nextElement().getName();
-                if (entryName.startsWith(packagePath) && entryName.length() > packagePath.length() + 5) {
-                    names.add(entryName.substring(packagePath.length() + 1, entryName.lastIndexOf('.')));
+            try (JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")))) {
+                Enumeration<JarEntry> jarEntries = jf.entries();
+                while(jarEntries.hasMoreElements()){
+                    String entryName = jarEntries.nextElement().getName();
+                    if (entryName.startsWith(packagePath) && entryName.length() > packagePath.length() + 5) {
+                        names.add(entryName.substring(packagePath.length() + 1, entryName.lastIndexOf('.')));
+                    }
                 }
             }
         } else {
             File folder = new File(new URI(packageUrl.toString()));
             File[] files = folder.listFiles();
-            for (File actual: files) {
-                String entryName = actual.getName();
-                names.add(entryName.substring(0, entryName.lastIndexOf('.')));
+            if (files != null) {
+                for (File actual: files) {
+                    String entryName = actual.getName();
+                    names.add(entryName.substring(0, entryName.lastIndexOf('.')));
+                }
             }
         }
 

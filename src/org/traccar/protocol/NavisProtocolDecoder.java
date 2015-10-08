@@ -58,7 +58,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return false;
     }
 
-    private class ParseResult {
+    private static class ParseResult {
         private final long id;
         private final Position position;
 

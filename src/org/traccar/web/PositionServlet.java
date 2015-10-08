@@ -56,7 +56,7 @@ public class PositionServlet extends BaseServlet {
         long userId = getUserId(req);
         Map<String, Object> positions = new HashMap<>();
 
-        for(String deviceIdString : req.getParameterValues("devicesId")) {
+        for (String deviceIdString : req.getParameterValues("devicesId")) {
             Long deviceId = Long.parseLong(deviceIdString);
 
             Context.getPermissionsManager().checkDevice(userId, deviceId);

@@ -100,16 +100,16 @@ public class Checksum {
     public static final String CRC16_GENIBUS = "GENIBUS";
     public static final String CRC16_MCRF4XX = "MCRF4XX";
 
-    private static int crc16Unreflected(ByteBuffer buf, int crc_in, int[] table) {
-        int crc16 = crc_in;
+    private static int crc16Unreflected(ByteBuffer buf, int crcIn, int[] table) {
+        int crc16 = crcIn;
         while (buf.hasRemaining()) {
             crc16 = table[((crc16 >> 8) ^ buf.get()) & 0xff] ^ (crc16 << 8);
         }
         return crc16 & 0xFFFF;
     }
 
-    private static int crc16Reflected(ByteBuffer buf, int crc_in, int[] table) {
-        int crc16 = crc_in;
+    private static int crc16Reflected(ByteBuffer buf, int crcIn, int[] table) {
+        int crc16 = crcIn;
         while (buf.hasRemaining()) {
             crc16 = table[(crc16 ^ buf.get()) & 0xff] ^ (crc16 >> 8);
         }

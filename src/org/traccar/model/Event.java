@@ -92,21 +92,37 @@ public abstract class Event extends Extensible {
     private Date serverTime;
 
     public Date getServerTime() {
-        return serverTime;
+        if (serverTime != null) {
+            return new Date(serverTime.getTime());
+        } else {
+            return null;
+        }
     }
 
     public void setServerTime(Date serverTime) {
-        this.serverTime = serverTime;
+        if (serverTime != null) {
+            this.serverTime = new Date(serverTime.getTime());
+        } else {
+            this.serverTime = null;
+        }
     }
 
     private Date deviceTime;
 
     public Date getDeviceTime() {
-        return deviceTime;
+        if (deviceTime != null) {
+            return new Date(deviceTime.getTime());
+        } else {
+            return null;
+        }
     }
 
     public void setDeviceTime(Date deviceTime) {
-        this.deviceTime = deviceTime;
+        if (deviceTime != null) {
+            this.deviceTime = new Date(deviceTime.getTime());
+        } else {
+            this.deviceTime = null;
+        }
     }
 
 }

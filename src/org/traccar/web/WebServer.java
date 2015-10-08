@@ -76,9 +76,9 @@ public class WebServer {
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setResourceBase(config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
-            resourceHandler.setWelcomeFiles(new String[] { "debug.html" });
+            resourceHandler.setWelcomeFiles(new String[] {"debug.html"});
         } else {
-            resourceHandler.setWelcomeFiles(new String[] { "release.html", "index.html" });
+            resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         }
         handlers.addHandler(resourceHandler);
     }

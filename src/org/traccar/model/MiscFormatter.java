@@ -15,6 +15,7 @@
  */
 package org.traccar.model;
 
+import org.traccar.helper.Log;
 import org.traccar.web.JsonConverter;
 
 import java.text.DecimalFormat;
@@ -107,6 +108,9 @@ public class MiscFormatter {
                     break;
                 case FALSE:
                     attributes.put(entry.getKey(), false);
+                    break;
+                default:
+                    Log.warning(new IllegalArgumentException());
                     break;
             }
         }

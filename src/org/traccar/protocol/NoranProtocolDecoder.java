@@ -35,8 +35,6 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-
     public static final int MSG_UPLOAD_POSITION = 0x0008;
     public static final int MSG_UPLOAD_POSITION_NEW = 0x0032;
     public static final int MSG_CONTROL_RESPONSE = 0x8009;
@@ -133,6 +131,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             // Time
             if (newFormat) {
+                DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
                 position.setTime(dateFormat.parse(buf.readBytes(17).toString(Charset.defaultCharset())));
                 buf.readByte();
             }

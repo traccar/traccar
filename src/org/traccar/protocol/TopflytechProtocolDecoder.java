@@ -32,7 +32,7 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    static private final Pattern pattern = Pattern.compile(
+    private static final Pattern pattern = Pattern.compile(
             "\\(" +
             "(\\d+)" +                     // IMEI
             ".*" +

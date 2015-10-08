@@ -117,9 +117,6 @@ public class Context {
 
             int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
-                case "google":
-                    reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
-                    break;
                 case "nominatim":
                     reverseGeocoder = new NominatimReverseGeocoder(url, cacheSize);
                     break;
@@ -137,6 +134,9 @@ public class Context {
                     break;
                 case "factual":
                     reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
+                    break;
+                default:
+                    reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
                     break;
             }
         }

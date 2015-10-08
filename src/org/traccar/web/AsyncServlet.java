@@ -48,7 +48,7 @@ public class AsyncServlet extends BaseServlet {
         return true;
     }
 
-    public class AsyncSession {
+    public static class AsyncSession {
 
         private static final boolean DEBUG_ASYNC = false;
 

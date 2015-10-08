@@ -28,12 +28,20 @@ public class Hashing {
 
     public static class HashingResult {
 
-        public final String hash;
-        public final String salt;
+        private final String hash;
+        private final String salt;
 
         public HashingResult(String hash, String salt) {
             this.hash = hash;
             this.salt = salt;
+        }
+
+        public String getHash() {
+            return hash;
+        }
+
+        public String getSalt() {
+            return salt;
         }
     }
 

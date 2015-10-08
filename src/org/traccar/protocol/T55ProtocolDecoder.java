@@ -115,7 +115,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Identification
-        else if (Character.isDigit(sentence.charAt(0)) & sentence.length() == 15) {
+        else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
             identify(sentence, channel);
         }
 

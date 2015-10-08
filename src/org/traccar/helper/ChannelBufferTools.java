@@ -71,7 +71,7 @@ public class ChannelBufferTools {
             result += b & 0x0f;
         }
 
-        if (length % 2 == 1) {
+        if (length % 2 != 0) {
             int b = buf.getUnsignedByte(buf.readerIndex());
             result *= 10;
             result += b >>> 4;
@@ -92,7 +92,7 @@ public class ChannelBufferTools {
             formatter.format("%02x", buf.readByte());
         }
 
-        if (length % 2 == 1) {
+        if (length % 2 != 0) {
             int b = buf.getUnsignedByte(buf.readerIndex());
             formatter.format("%01x", b >>> 4);
         }
