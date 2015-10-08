@@ -97,7 +97,7 @@ public class JsonConverter {
         Method[] methods = object.getClass().getMethods();
 
         for (Method method : methods) {
-            if(method.isAnnotationPresent(JsonIgnore.class)) {
+            if (method.isAnnotationPresent(JsonIgnore.class)) {
                 continue;
             }
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {

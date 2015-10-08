@@ -183,7 +183,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
                 // Send response for alarm message
                 if (type == MSG_ALARM) {
-                    byte[] response = {(byte)0xC9,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+                    byte[] response = {(byte) 0xC9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
                     channel.write(ChannelBuffers.wrappedBuffer(response));
 
                     position.set(Event.KEY_ALARM, true);

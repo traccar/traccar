@@ -16,10 +16,8 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.helper.ChannelBufferTools;
 

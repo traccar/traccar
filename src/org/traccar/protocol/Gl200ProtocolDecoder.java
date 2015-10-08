@@ -65,7 +65,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             "(\\p{XDigit}*)," +                 // DTCs
             "(\\d{1,3})," +                     // Throttle
             "\\d{1,3}," +                       // Engine load
-            "(\\d{1,3})?,"+                     // Fuel level
+            "(\\d{1,3})?," +                    // Fuel level
             "(\\d+)|.*)," +                     // Odometer
 
             "(\\d*)," +                         // GPS accuracy

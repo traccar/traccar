@@ -104,7 +104,7 @@ public class DetectorHandler extends SimpleChannelHandler {
                     if (!server.getProtocol().equals("detector")) {
                         checkPipeline(server.getProtocol(), server.getPipelineFactory().getPipeline(), buf);
                     }
-                } catch(Exception error) {
+                } catch (Exception error) {
                     if (showFailed) {
                         Log.info("Protocol " + server.getProtocol() + " error");
                     }

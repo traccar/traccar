@@ -43,7 +43,7 @@ public class ServerManager {
             String jarFileName = URLDecoder.decode(packageUrl.getFile(), "UTF-8");
             try (JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")))) {
                 Enumeration<JarEntry> jarEntries = jf.entries();
-                while(jarEntries.hasMoreElements()){
+                while (jarEntries.hasMoreElements()) {
                     String entryName = jarEntries.nextElement().getName();
                     if (entryName.startsWith(packagePath) && entryName.length() > packagePath.length() + 5) {
                         names.add(entryName.substring(packagePath.length() + 1, entryName.lastIndexOf('.')));

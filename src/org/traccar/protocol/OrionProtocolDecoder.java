@@ -92,7 +92,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 // Location
                 position.setLatitude(convertCoordinate(buf.readInt()));
                 position.setLongitude(convertCoordinate(buf.readInt()));
-                position.setAltitude(buf.readShort()/ 10.0);
+                position.setAltitude(buf.readShort() / 10.0);
                 position.setCourse(buf.readUnsignedShort());
                 position.setSpeed(buf.readUnsignedShort() * 0.0539957);
 

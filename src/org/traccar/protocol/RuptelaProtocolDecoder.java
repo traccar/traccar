@@ -114,7 +114,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             // Acknowledgement
             if (channel != null) {
-                byte[] response = {0x00, 0x02, 0x64, 0x01, 0x13, (byte)0xbc};
+                byte[] response = {0x00, 0x02, 0x64, 0x01, 0x13, (byte) 0xbc};
                 channel.write(ChannelBuffers.wrappedBuffer(response));
             }
 

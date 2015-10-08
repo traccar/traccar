@@ -19,7 +19,7 @@ package org.traccar.protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 
-public class TotemProtocolEncoder extends StringProtocolEncoder{
+public class TotemProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {

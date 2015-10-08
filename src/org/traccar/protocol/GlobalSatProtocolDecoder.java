@@ -85,7 +85,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length() && valueIndex < values.length; formatIndex++) {
             String value = values[valueIndex];
 
-            switch(format.charAt(formatIndex)) {
+            switch (format.charAt(formatIndex)) {
                 case 'S':
                     if (!identify(value, channel)) {
                         return null;
