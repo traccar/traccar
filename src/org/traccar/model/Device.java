@@ -56,10 +56,42 @@ public class Device implements Factory {
 
     private String status;
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     private Date lastUpdate;
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
 
     private long positionId;
 
+    public long getPositionId() {
+        return positionId;
+    }
+
+    public void setPositionId(long positionId) {
+        this.positionId = positionId;
+    }
+
     private long dataId;
+
+    public long getDataId() {
+        return dataId;
+    }
+
+    public void setDataId(long dataId) {
+        this.dataId = dataId;
+    }
 
 }

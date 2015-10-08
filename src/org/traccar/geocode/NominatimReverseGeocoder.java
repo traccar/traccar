@@ -28,7 +28,7 @@ public class NominatimReverseGeocoder extends JsonReverseGeocoder {
     }
 
     @Override
-    protected Address parseAddress(JsonObject json) {
+    public Address parseAddress(JsonObject json) {
         JsonObject result = json.getJsonObject("address");
 
         if (result != null) {

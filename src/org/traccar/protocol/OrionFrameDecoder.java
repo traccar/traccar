@@ -34,34 +34,33 @@ public class OrionFrameDecoder extends FrameDecoder {
 
             int type = buf.getUnsignedByte(buf.readerIndex() + 2) & 0x0f;
 
-            if (type == OrionProtocolDecoder.MSG_USERLOG) {
-                if (buf.readableBytes() >= length + 5) {
+            if (type == OrionProtocolDecoder.MSG_USERLOG && buf.readableBytes() >= length + 5) {
 
-                    int index = buf.readerIndex() + 3;
-                    int count = buf.getUnsignedByte(index) & 0x0f;
-                    index += 5;
-                    length += 5;
+                int index = buf.readerIndex() + 3;
+                int count = buf.getUnsignedByte(index) & 0x0f;
+                index += 5;
+                length += 5;
 
-                    for (int i = 0; i < count; i++) {
-                        if (buf.readableBytes() < length) {
-                            return null;
-                        }
-                        int logLength = buf.getUnsignedByte(index + 1);
-                        index += logLength;
-                        length += logLength;
+                for (int i = 0; i < count; i++) {
+                    if (buf.readableBytes() < length) {
+                        return null;
                     }
-
-                    if (buf.readableBytes() >= length) {
-                        return buf.readBytes(length);
-                    }
+                    int logLength = buf.getUnsignedByte(index + 1);
+                    index += logLength;
+                    length += logLength;
                 }
-            } else if (type == OrionProtocolDecoder.MSG_SYSLOG) {
-                if (buf.readableBytes() >= length + 12) {
-                    length += buf.getUnsignedShort(buf.readerIndex() + 8);
-                    if (buf.readableBytes() >= length) {
-                        return buf.readBytes(length);
-                    }
+
+                if (buf.readableBytes() >= length) {
+                    return buf.readBytes(length);
                 }
+
+            } else if (type == OrionProtocolDecoder.MSG_SYSLOG && buf.readableBytes() >= length + 12) {
+
+                length += buf.getUnsignedShort(buf.readerIndex() + 8);
+                if (buf.readableBytes() >= length) {
+                    return buf.readBytes(length);
+                }
+
             }
         }
 

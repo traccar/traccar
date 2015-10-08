@@ -29,7 +29,7 @@ public class MapQuestReverseGeocoder extends JsonReverseGeocoder {
     }
 
     @Override
-    protected Address parseAddress(JsonObject json) {
+    public Address parseAddress(JsonObject json) {
         JsonArray result = json.getJsonArray("results");
         if (result != null) {
             JsonArray locations = result.getJsonObject(0).getJsonArray("locations");

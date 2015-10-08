@@ -50,7 +50,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         // Protocol and type
         int version = ChannelBufferTools.readHexInteger(buf, 1);
-        int type = buf.readUnsignedByte() & 0xf;
+        buf.readUnsignedByte(); // type
 
         buf.readBytes(2); // length
 

@@ -168,7 +168,7 @@ public class Checksum {
         for (int i = 0; remain != 0; i++) {
             long digit = remain % 10;
 
-            if ((i % 2) == 0) {
+            if (i % 2 == 0) {
                 digit *= 2;
                 if (digit >= 10) {
                     digit = 1 + (digit % 10);

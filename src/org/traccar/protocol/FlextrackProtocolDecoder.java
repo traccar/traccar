@@ -88,10 +88,8 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             String id = parser.group(index++);
             String iccid = parser.group(index++);
 
-            if (!identify(iccid, channel, null, false)) {
-                if (!identify(id, channel)) {
-                    return null;
-                }
+            if (!identify(iccid, channel, null, false) && !identify(id, channel)) {
+                return null;
             }
 
         } else if (sentence.contains("UNITSTAT") && hasDeviceId()) {

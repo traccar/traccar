@@ -29,7 +29,7 @@ public class BingMapsReverseGeocoder extends JsonReverseGeocoder {
     }
 
     @Override
-    protected Address parseAddress(JsonObject json) {
+    public Address parseAddress(JsonObject json) {
         JsonArray result = json.getJsonArray("resourceSets");
         if (result != null) {
             JsonObject location = result.getJsonObject(0).getJsonArray("resources").getJsonObject(0).getJsonObject("address");

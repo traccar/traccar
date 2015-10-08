@@ -34,6 +34,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -195,6 +196,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 positions.add(position);
             }
         } catch (IndexOutOfBoundsException error) {
+            Log.warning(error);
         }
 
         return positions;

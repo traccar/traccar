@@ -124,10 +124,8 @@ public class AsyncServlet extends BaseServlet {
             public void run(Timeout tmt) throws Exception {
                 synchronized (AsyncSession.this) {
                     logEvent("requestTimeout");
-                    if (!destroyed) {
-                        if (activeContext != null) {
-                            response();
-                        }
+                    if (!destroyed && activeContext != null) {
+                        response();
                     }
                 }
             }

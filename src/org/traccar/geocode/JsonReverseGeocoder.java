@@ -18,14 +18,10 @@ package org.traccar.geocode;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -84,6 +80,6 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
         });
     }
 
-    protected abstract Address parseAddress(JsonObject json);
+    public abstract Address parseAddress(JsonObject json);
 
 }

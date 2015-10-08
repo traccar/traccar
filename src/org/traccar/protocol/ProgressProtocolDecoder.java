@@ -173,7 +173,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     for (int i = buf.readerIndex(); i < buf.readerIndex() + size; i++) {
                         byte b = buf.getByte(i);
                         hex.append(HEX_CHARS.charAt((b & 0xf0) >> 4));
-                        hex.append(HEX_CHARS.charAt((b & 0x0F)));
+                        hex.append(HEX_CHARS.charAt(b & 0x0F));
                     }
 
                     position.set("passenger", hex.toString());

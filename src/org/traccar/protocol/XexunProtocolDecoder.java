@@ -103,8 +103,8 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         Double longitude = Double.parseDouble(parser.group(index++));
         longitude += Double.parseDouble(parser.group(index++)) / 60;
         String hemisphere = parser.group(index++);
-        if (hemisphere != null) {
-            if (hemisphere.compareTo("W") == 0) longitude = -longitude;
+        if (hemisphere != null && hemisphere.compareTo("W") == 0) {
+            longitude = -longitude;
         }
         position.setLongitude(longitude);
 

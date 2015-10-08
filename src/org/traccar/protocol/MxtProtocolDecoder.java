@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
@@ -100,7 +99,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-            int inputMask = buf.readUnsignedByte();
+            buf.readUnsignedByte(); // input mask
 
             if (BitUtil.check(infoGroups, 0)) {
                 buf.skipBytes(8); // waypoints

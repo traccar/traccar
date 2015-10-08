@@ -118,7 +118,7 @@ public class DataManager implements IdentityManager {
     @Override
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
 
-        if ((System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay) || !devicesByUniqueId.containsKey(uniqueId)) {
+        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay || !devicesByUniqueId.containsKey(uniqueId)) {
 
             devicesById.clear();
             devicesByUniqueId.clear();

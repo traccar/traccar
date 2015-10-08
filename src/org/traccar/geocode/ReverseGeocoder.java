@@ -17,7 +17,7 @@ package org.traccar.geocode;
 
 public interface ReverseGeocoder {
 
-    public interface ReverseGeocoderCallback {
+    interface ReverseGeocoderCallback {
 
         void onResult(String address);
 

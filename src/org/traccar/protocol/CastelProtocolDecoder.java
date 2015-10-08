@@ -111,22 +111,20 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
                 return null;
 
-            } else if (type == MSG_LOGIN) {
+            } else if (type == MSG_LOGIN && channel != null) {
 
-                if (channel != null) {
-                    ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 41);
-                    response.writeByte(0x40); response.writeByte(0x40);
-                    response.writeShort(response.capacity());
-                    response.writeByte(version);
-                    response.writeBytes(id);
-                    response.writeShort(ChannelBuffers.swapShort(MSG_LOGIN_RESPONSE));
-                    response.writeInt(0xFFFFFFFF);
-                    response.writeShort(0);
-                    response.writeInt((int) (System.currentTimeMillis() / 1000));
-                    response.writeShort(Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
-                    response.writeByte(0x0D); response.writeByte(0x0A);
-                    channel.write(response, remoteAddress);
-                }
+                ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 41);
+                response.writeByte(0x40); response.writeByte(0x40);
+                response.writeShort(response.capacity());
+                response.writeByte(version);
+                response.writeBytes(id);
+                response.writeShort(ChannelBuffers.swapShort(MSG_LOGIN_RESPONSE));
+                response.writeInt(0xFFFFFFFF);
+                response.writeShort(0);
+                response.writeInt((int) (System.currentTimeMillis() / 1000));
+                response.writeShort(Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
+                response.writeByte(0x0D); response.writeByte(0x0A);
+                channel.write(response, remoteAddress);
 
             }
 

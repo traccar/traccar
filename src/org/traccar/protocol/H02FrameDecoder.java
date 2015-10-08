@@ -49,12 +49,10 @@ public class H02FrameDecoder extends FrameDecoder {
                 return buf.readBytes(index + 1 - buf.readerIndex());
             }
 
-        } else if (marker.equals("$")) {
+        } else if (marker.equals("$") && buf.readableBytes() >= MESSAGE_LENGTH) {
 
             // Return binary message
-            if (buf.readableBytes() >= MESSAGE_LENGTH) {
-                return buf.readBytes(MESSAGE_LENGTH);
-            }
+            return buf.readBytes(MESSAGE_LENGTH);
 
         }
 

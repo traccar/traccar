@@ -28,7 +28,7 @@ public class FactualReverseGeocoder extends JsonReverseGeocoder {
     }
 
     @Override
-    protected Address parseAddress(JsonObject json) {
+    public Address parseAddress(JsonObject json) {
         JsonObject result = json.getJsonObject("response").getJsonObject("data");
         if (result != null) {
                 Address address = new Address();

@@ -28,7 +28,7 @@ public class GisgraphyReverseGeocoder extends JsonReverseGeocoder {
     }
 
     @Override
-    protected Address parseAddress(JsonObject json) {
+    public Address parseAddress(JsonObject json) {
         Address address = new Address();
 
         JsonObject result = json.getJsonArray("result").getJsonObject(0);

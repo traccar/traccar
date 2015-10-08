@@ -88,7 +88,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filterFuture(Position position) {
-        return filterFuture && (position.getFixTime().getTime() > System.currentTimeMillis() + FILTER_FUTURE_LIMIT);
+        return filterFuture && position.getFixTime().getTime() > System.currentTimeMillis() + FILTER_FUTURE_LIMIT;
     }
 
     private boolean filterDistance(Position position) {

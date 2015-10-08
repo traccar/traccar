@@ -109,7 +109,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_TRACKER_ID_EXT) {
-            long id = buf.readUnsignedInt();
+            buf.readUnsignedInt(); // id
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();

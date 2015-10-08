@@ -29,7 +29,7 @@ public class OpenCageReverseGeocoder extends JsonReverseGeocoder {
     }
 
     @Override
-    protected Address parseAddress(JsonObject json) {
+    public Address parseAddress(JsonObject json) {
         JsonArray result = json.getJsonArray("results");
         if (result != null) {
             JsonObject location = result.getJsonObject(0).getJsonObject("components");

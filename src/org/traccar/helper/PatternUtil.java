@@ -31,7 +31,8 @@ public class PatternUtil {
                 if (matcher.matches()) {
                     match = pattern.substring(0, i);
                 }
-            } catch (PatternSyntaxException e) {
+            } catch (PatternSyntaxException error) {
+                Log.warning(error);
             }
         }
 

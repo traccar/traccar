@@ -25,7 +25,7 @@ public class BitUtil {
     }
 
     public static int range(int number, int index) {
-        return (number >> index);
+        return number >> index;
     }
 
     public static int range(int number, int index, int length) {
@@ -33,7 +33,7 @@ public class BitUtil {
     }
 
     public static long range(long number, int index) {
-        return (number >> index);
+        return number >> index;
     }
 
     public static long range(long number, int index, int length) {

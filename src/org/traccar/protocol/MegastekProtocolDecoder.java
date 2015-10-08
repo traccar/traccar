@@ -128,7 +128,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeOld(Channel channel, String sentence) {
 
         // Detect type
-        boolean simple = (sentence.charAt(3) == ',' || sentence.charAt(6) == ',');
+        boolean simple = sentence.charAt(3) == ',' || sentence.charAt(6) == ',';
 
         // Split message
         String id;
@@ -189,10 +189,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Event.KEY_ALARM, parser.group(index++));
 
                 // IMEI
-                if (!identify(parser.group(index++), channel, null, false)) {
-                    if (!identify(id, channel)) {
-                        return null;
-                    }
+                if (!identify(parser.group(index++), channel, null, false) && !identify(id, channel)) {
+                    return null;
                 }
                 position.setDeviceId(getDeviceId());
 

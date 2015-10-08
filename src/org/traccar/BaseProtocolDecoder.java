@@ -31,7 +31,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private long deviceId;
 
     public boolean hasDeviceId() {
-        return (deviceId != 0);
+        return deviceId != 0;
     }
 
     public long getDeviceId() {

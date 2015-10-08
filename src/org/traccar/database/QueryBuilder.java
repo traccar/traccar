@@ -37,6 +37,7 @@ import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 import javax.sql.DataSource;
 import org.traccar.Context;
+import org.traccar.helper.Log;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
@@ -258,6 +259,7 @@ public class QueryBuilder {
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
+                    Log.warning(error);
                 }
             }
         }
@@ -319,6 +321,7 @@ public class QueryBuilder {
                                         try {
                                             method.invoke(object, resultSet.getBoolean(name));
                                         } catch (IllegalAccessException | InvocationTargetException error) {
+                                            Log.warning(error);
                                         }
                                     }
                                 });
@@ -329,6 +332,7 @@ public class QueryBuilder {
                                         try {
                                             method.invoke(object, resultSet.getInt(name));
                                         } catch (IllegalAccessException | InvocationTargetException error) {
+                                            Log.warning(error);
                                         }
                                     }
                                 });
@@ -339,6 +343,7 @@ public class QueryBuilder {
                                         try {
                                             method.invoke(object, resultSet.getLong(name));
                                         } catch (IllegalAccessException | InvocationTargetException error) {
+                                            Log.warning(error);
                                         }
                                     }
                                 });
@@ -349,6 +354,7 @@ public class QueryBuilder {
                                         try {
                                             method.invoke(object, resultSet.getDouble(name));
                                         } catch (IllegalAccessException | InvocationTargetException error) {
+                                            Log.warning(error);
                                         }
                                     }
                                 });
@@ -359,6 +365,7 @@ public class QueryBuilder {
                                         try {
                                             method.invoke(object, resultSet.getString(name));
                                         } catch (IllegalAccessException | InvocationTargetException error) {
+                                            Log.warning(error);
                                         }
                                     }
                                 });
@@ -369,6 +376,7 @@ public class QueryBuilder {
                                         try {
                                             method.invoke(object, new Date(resultSet.getTimestamp(name).getTime()));
                                         } catch (IllegalAccessException | InvocationTargetException error) {
+                                            Log.warning(error);
                                         }
                                     }
                                 });
@@ -379,6 +387,7 @@ public class QueryBuilder {
                                         try (JsonReader reader = Json.createReader(new StringReader(resultSet.getString(name)))) {
                                             method.invoke(object, MiscFormatter.fromJson(reader.readObject()));
                                         } catch (IllegalAccessException | InvocationTargetException | JsonParsingException error) {
+                                            Log.warning(error);
                                         }
                                     }
                                 });

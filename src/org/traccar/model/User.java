@@ -57,6 +57,14 @@ public class User implements Factory {
 
     private boolean readonly;
 
+    public boolean getReadonly() {
+        return readonly;
+    }
+
+    public void setReadonly(boolean readonly) {
+        this.readonly = readonly;
+    }
+
     private boolean admin;
 
     public boolean getAdmin() {

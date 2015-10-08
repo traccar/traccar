@@ -44,9 +44,9 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MINI_EVENT_REPORT = 10;
     public static final int MSG_MINI_USER_DATA = 11;
 
-    private static final int SERVICE_UNACKNOWLEDGED = 0;
-    private static final int SERVICE_ACKNOWLEDGED = 1;
-    private static final int SERVICE_RESPONSE = 2;
+    public static final int SERVICE_UNACKNOWLEDGED = 0;
+    public static final int SERVICE_ACKNOWLEDGED = 1;
+    public static final int SERVICE_RESPONSE = 2;
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, int type, int index, int result) {
         if (channel != null) {

@@ -34,6 +34,7 @@ import javax.json.JsonValue;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.traccar.helper.Log;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
@@ -81,6 +82,7 @@ public class JsonConverter {
                         method.invoke(object, MiscFormatter.fromJson(json.getJsonObject(name)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
+                    Log.warning(error);
                 }
             }
         }
@@ -123,6 +125,7 @@ public class JsonConverter {
                         json.add(name, MiscFormatter.toJson((Map) method.invoke(object)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
+                    Log.warning(error);
                 }
             }
         }

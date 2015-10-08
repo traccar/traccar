@@ -92,17 +92,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             id += d1;
 
             // Second digit
-            int d2 = (b & 0x0f);
+            int d2 = b & 0x0f;
             if (d2 == 0xf) break;
             id += d2;
         }
 
-        if (id.length() == 14) {
-            // Try to recreate full IMEI number
-            // Sometimes first digit is cut, so this won't work
-            if (identify(id + Checksum.luhn(Long.parseLong(id)), channel, null, false)) {
-                return true;
-            }
+        // Try to recreate full IMEI number
+        // Sometimes first digit is cut, so this won't work
+        if (id.length() == 14 && identify(id + Checksum.luhn(Long.parseLong(id)), channel, null, false)) {
+            return true;
         }
 
         return identify(id, channel);
