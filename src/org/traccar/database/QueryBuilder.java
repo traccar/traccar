@@ -374,7 +374,10 @@ public class QueryBuilder {
                                     @Override
                                     public void process(T object, ResultSet resultSet) throws SQLException {
                                         try {
-                                            method.invoke(object, new Date(resultSet.getTimestamp(name).getTime()));
+                                            Timestamp timestamp = resultSet.getTimestamp(name);
+                                            if (timestamp != null) {
+                                                method.invoke(object, new Date(timestamp.getTime()));
+                                            }
                                         } catch (IllegalAccessException | InvocationTargetException error) {
                                             Log.warning(error);
                                         }
