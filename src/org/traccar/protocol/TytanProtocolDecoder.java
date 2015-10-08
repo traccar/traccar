@@ -177,7 +177,20 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Event.KEY_RPM, buf.readUnsignedByte() * 50);
                         break;
                     case 107:
-                        position.set(Event.KEY_FUEL, (buf.readUnsignedShort() & 0x3fff) * 0.5);
+                        {
+                            int fuel = buf.readUnsignedShort();
+                            switch (fuel >> 16) {
+                                case 1:
+                                    position.set(Event.KEY_FUEL, (buf.readUnsignedShort() & 0x3fff) * 0.4 + "%");
+                                    break;
+                                case 2:
+                                    position.set(Event.KEY_FUEL, (buf.readUnsignedShort() & 0x3fff) * 0.5 + "l");
+                                    break;
+                                case 3:
+                                    position.set(Event.KEY_FUEL, (buf.readUnsignedShort() & 0x3fff) * -0.5 + "l");
+                                    break;
+                            }
+                        }
                         break;
                     case 108:
                         position.set(Event.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
