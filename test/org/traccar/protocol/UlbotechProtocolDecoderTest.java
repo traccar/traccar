@@ -1,10 +1,9 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffers;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
-
-import static org.junit.Assert.assertNull;
 import static org.traccar.helper.DecoderVerifier.verify;
 
 public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
@@ -13,6 +12,9 @@ public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(new UlbotechProtocol());
+        
+        verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "f8010103596580419465449da8564e010efe55a1800923d04b0000000000710304000000000404000178d2050603571876220ec3caf8"))));
         
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "f8010103545500500179009ccb4b62010e00144db906310d3f0000000000cb0304000000000404000a8123050603211860221006080000000100000000ef97f8"))));
