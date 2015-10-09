@@ -21,6 +21,10 @@ public class PatternBuilder {
 
     private final StringBuilder pattern = new StringBuilder();
 
+    public interface Builder {
+        void build(PatternBuilder builder);
+    }
+
     public PatternBuilder xpr(String s) {
         pattern.append(s);
         return this;
@@ -58,6 +62,14 @@ public class PatternBuilder {
 
     public PatternBuilder nxt(String s) {
         return not(s).txt(s);
+    }
+
+    public PatternBuilder groupBegin() {
+        return xpr("(?:");
+    }
+
+    public PatternBuilder groupEnd(boolean optional) {
+        return xpr(optional ? ")?" : ")");
     }
 
     public Pattern compile() {
