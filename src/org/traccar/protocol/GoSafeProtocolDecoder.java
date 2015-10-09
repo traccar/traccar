@@ -16,11 +16,16 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -61,40 +66,34 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd(false)
             .groupBegin()
             .txt("COT:")
-            .num("(d+);")                        // odometer
-            .not("(d+):d+:d+")                   // engine hours
+            .num("(d+)")                         // odometer
+            .opn(";d+:d+:d+")                    // engine hours
             .xpr(",?")
-            .groupEnd(true)
+            .groupEnd(false)
             .groupBegin()
             .txt("ADC:")
             .num("(d+.d+);")                     // power
-            .num("(d+.d+)")                      // battery
-            .xpr(",?")
+            .num("(d+.d+),?")                    // battery
             .groupEnd(true)
             .groupBegin()
             .txt("DTT:")
-            .not(",")
-            .xpr(",?")
+            .num("(x+);")                        // status
+            .nxt(";")
+            .num("x+;")                          // geo-fence 0-119
+            .num("x+;")                          // geo-fence 120-155
+            .num("x+,?")                         // event status
             .groupEnd(true)
             .groupBegin()
-            .txt("ETD:")
-            .not(",")
-            .xpr(",?")
+            .txt("ETD:").not(",").xpr(",?")
             .groupEnd(true)
             .groupBegin()
-            .txt("OBD:")
-            .not(",")
-            .xpr(",?")
+            .txt("OBD:").not(",").xpr(",?")
             .groupEnd(true)
             .groupBegin()
-            .txt("FUL:")
-            .not(",")
-            .xpr(",?")
+            .txt("FUL:").not(",").xpr(",?")
             .groupEnd(true)
             .groupBegin()
-            .txt("TRU:")
-            .not(",")
-            .xpr(",?")
+            .txt("TRU:").not(",").xpr(",?")
             .groupEnd(true)
             .compile();
 
@@ -131,7 +130,15 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_HDOP, parser.group(index++));
 
         position.set(Event.KEY_ODOMETER, parser.group(index++));
-        position.set("hours", parser.group(index++));
+        
+        position.set(Event.KEY_POWER, parser.group(index++));
+        position.set(Event.KEY_BATTERY, parser.group(index++));
+        
+        String status = parser.group(index++);
+        if (status != null) {
+            position.set(Event.KEY_IGNITION, BitUtil.check(Integer.parseInt(status, 16), 13));
+            position.set(Event.KEY_STATUS, status);
+        }
 
         return position;
     }
@@ -142,7 +149,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         String sentence = (String) msg;
-
+        
         if (channel != null) {
             channel.write("1234");
         }
