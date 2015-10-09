@@ -156,7 +156,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                             }
                         }
                         for (int i : temps) {
-                            position.set(Event.PREFIX_TEMP + n, buf.readUnsignedByte());
+                            position.set(Event.PREFIX_TEMP + i, buf.readUnsignedByte());
                         }
                         break;
                     case 28:
