@@ -61,6 +61,92 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response, remoteAddress);
         }
     }
+    
+    private Position decodePosition(int type, ChannelBuffer buf) {
+
+        Position position = new Position();
+        position.setDeviceId(getDeviceId());
+        position.setProtocol(getProtocolName());
+
+        // Location data
+        position.setTime(new Date(buf.readUnsignedInt() * 1000));
+        if (type != MSG_MINI_EVENT_REPORT) {
+            buf.readUnsignedInt(); // fix time
+        }
+        position.setLatitude(buf.readInt() * 0.0000001);
+        position.setLongitude(buf.readInt() * 0.0000001);
+        if (type != MSG_MINI_EVENT_REPORT) {
+            position.setAltitude(buf.readInt() * 0.01);
+            position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedInt()));
+        }
+        position.setCourse(buf.readShort());
+        if (type == MSG_MINI_EVENT_REPORT) {
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+        }
+
+        // Fix status
+        if (type == MSG_MINI_EVENT_REPORT) {
+            position.set(Event.KEY_SATELLITES, buf.getUnsignedByte(buf.readerIndex()) & 0xf);
+            position.setValid((buf.readUnsignedByte() & 0x20) == 0);
+        } else {
+            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
+            position.setValid((buf.readUnsignedByte() & 0x08) == 0);
+        }
+
+        if (type != MSG_MINI_EVENT_REPORT) {
+
+            // Carrier
+            position.set("carrier", buf.readUnsignedShort());
+
+            // Cell signal
+            position.set(Event.KEY_GSM, buf.readShort());
+
+        }
+
+        // Modem state
+        position.set("modem", buf.readUnsignedByte());
+
+        // HDOP
+        if (type != MSG_MINI_EVENT_REPORT) {
+            position.set(Event.KEY_HDOP, buf.readUnsignedByte());
+        }
+
+        // Inputs
+        position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+
+        // Unit status
+        if (type != MSG_MINI_EVENT_REPORT) {
+            position.set(Event.KEY_STATUS, buf.readUnsignedByte());
+        }
+
+        // Event code
+        if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
+            if (type != MSG_MINI_EVENT_REPORT) {
+                buf.readUnsignedByte(); // event index
+            }
+            position.set(Event.KEY_EVENT, buf.readUnsignedByte());
+        }
+
+        // Accumulators
+        int accCount = buf.readUnsignedByte();
+        int accType = accCount >> 6;
+        accCount &= 0x3f;
+
+        if (type != MSG_MINI_EVENT_REPORT) {
+            buf.readUnsignedByte(); // reserved
+        }
+
+        if (accType == 1) {
+            buf.readUnsignedInt(); // threshold
+            buf.readUnsignedInt(); // mask
+        }
+
+        for (int i = 0; i < accCount; i++) {
+            position.set("acc" + i, buf.readUnsignedInt());
+        }
+
+        return position;
+    }
 
     @Override
     protected Object decode(
@@ -132,93 +218,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, remoteAddress, type, index, 0);
         }
 
-        if (type == MSG_EVENT_REPORT ||
-            type == MSG_LOCATE_REPORT ||
-            type == MSG_MINI_EVENT_REPORT) {
-
-            // Create new position
-            Position position = new Position();
-            position.setDeviceId(getDeviceId());
-            position.setProtocol(getProtocolName());
-
-            // Location data
-            position.setTime(new Date(buf.readUnsignedInt() * 1000));
-            if (type != MSG_MINI_EVENT_REPORT) {
-                buf.readUnsignedInt(); // fix time
-            }
-            position.setLatitude(buf.readInt() * 0.0000001);
-            position.setLongitude(buf.readInt() * 0.0000001);
-            if (type != MSG_MINI_EVENT_REPORT) {
-                position.setAltitude(buf.readInt() * 0.01);
-                position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedInt()));
-            }
-            position.setCourse(buf.readShort());
-            if (type == MSG_MINI_EVENT_REPORT) {
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-            }
-
-            // Fix status
-            if (type == MSG_MINI_EVENT_REPORT) {
-                position.set(Event.KEY_SATELLITES, buf.getUnsignedByte(buf.readerIndex()) & 0xf);
-                position.setValid((buf.readUnsignedByte() & 0x20) == 0);
-            } else {
-                position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
-                position.setValid((buf.readUnsignedByte() & 0x08) == 0);
-            }
-
-            if (type != MSG_MINI_EVENT_REPORT) {
-
-                // Carrier
-                position.set("carrier", buf.readUnsignedShort());
-
-                // Cell signal
-                position.set(Event.KEY_GSM, buf.readShort());
-
-            }
-
-            // Modem state
-            position.set("modem", buf.readUnsignedByte());
-
-            // HDOP
-            if (type != MSG_MINI_EVENT_REPORT) {
-                position.set(Event.KEY_HDOP, buf.readUnsignedByte());
-            }
-
-            // Inputs
-            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
-
-            // Unit status
-            if (type != MSG_MINI_EVENT_REPORT) {
-                position.set(Event.KEY_STATUS, buf.readUnsignedByte());
-            }
-
-            // Event code
-            if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
-                if (type != MSG_MINI_EVENT_REPORT) {
-                    buf.readUnsignedByte(); // event index
-                }
-                position.set(Event.KEY_EVENT, buf.readUnsignedByte());
-            }
-
-            // Accumulators
-            int accCount = buf.readUnsignedByte();
-            int accType = accCount >> 6;
-            accCount &= 0x3f;
-
-            if (type != MSG_MINI_EVENT_REPORT) {
-                buf.readUnsignedByte(); // reserved
-            }
-
-            if (accType == 1) {
-                buf.readUnsignedInt(); // threshold
-                buf.readUnsignedInt(); // mask
-            }
-
-            for (int i = 0; i < accCount; i++) {
-                position.set("acc" + i, buf.readUnsignedInt());
-            }
-            return position;
-
+        if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT || type == MSG_MINI_EVENT_REPORT) {
+            return decodePosition(type, buf);
         }
 
         return null;

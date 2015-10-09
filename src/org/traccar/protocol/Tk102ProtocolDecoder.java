@@ -49,26 +49,22 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Login
         if (sentence.startsWith("[!")) {
+
+            // Login
             if (!identify(sentence.substring(14, 14 + 15), channel)) {
                 return null;
             }
-
             if (channel != null) {
                 channel.write("[”0000000001" + sentence.substring(13) + "]");
             }
-        }
 
-        // Quit
-        else if (sentence.startsWith("[#")) {
-            // TODO: Send response
-        }
+        } else if (sentence.startsWith("[#")) {
 
-        // Parse message
-        else if (hasDeviceId()) {
+            // TODO: EXIT Send response
+        
+        } else if (hasDeviceId()) {
 
-            // Parse message
             Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;

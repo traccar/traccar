@@ -21,13 +21,11 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class AplicomFrameDecoder extends FrameDecoder {
-    
+
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
-        
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
+
         // Check minimum length
         if (buf.readableBytes() < 11) {
             return null;

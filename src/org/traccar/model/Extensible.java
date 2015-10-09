@@ -19,7 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class Extensible {
-    
+
     private Map<String, Object> attributes = new LinkedHashMap<>();
 
     public Map<String, Object> getAttributes() {

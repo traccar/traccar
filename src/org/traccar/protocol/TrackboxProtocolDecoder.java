@@ -58,21 +58,20 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("a=connect")) {
+
             String id = sentence.substring(sentence.indexOf("i=") + 2);
             if (identify(id, channel)) {
                 sendResponse(channel);
             }
-        }
+        
+        } else {
 
-        else {
-            // Parse message
             Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;
             }
             sendResponse(channel);
 
-            // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
             position.setProtocol(getProtocolName());

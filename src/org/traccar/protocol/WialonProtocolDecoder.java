@@ -169,21 +169,20 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Detect device ID
         if (sentence.startsWith("#L#")) {
+
+            // Detect device ID
             String imei = sentence.substring(3, sentence.indexOf(';'));
             if (identify(imei, channel)) {
                 sendResponse(channel, "#AL#", 1);
             }
-        }
 
-        // Heartbeat
-        else if (sentence.startsWith("#P#")) {
+        } else if (sentence.startsWith("#P#")) {
+
+            // Heartbeat
             sendResponse(channel, "#AP#", null);
-        }
 
-        // Parse message
-        else if (sentence.startsWith("#SD#") || sentence.startsWith("#D#")) {
+        } else if (sentence.startsWith("#SD#") || sentence.startsWith("#D#")) {
 
             Position position = decodePosition(
                     sentence.substring(sentence.indexOf('#', 1) + 1));
@@ -192,9 +191,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, "#AD#", 1);
                 return position;
             }
-        }
 
-        else if (sentence.startsWith("#B#")) {
+        } else if (sentence.startsWith("#B#")) {
 
             String[] messages = sentence.substring(sentence.indexOf('#', 1) + 1).split("\\|");
             List<Position> positions = new LinkedList<>();

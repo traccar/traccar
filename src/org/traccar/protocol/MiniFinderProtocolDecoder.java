@@ -53,15 +53,14 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Identification
         if (sentence.startsWith("!1")) {
+
+            // Identification
             identify(sentence.substring(3, sentence.length()), channel);
-        }
 
-        // Location
-        else if (sentence.startsWith("!D") && hasDeviceId()) {
+        } else if (sentence.startsWith("!D") && hasDeviceId()) {
 
-            // Parse message
+            // Location
             Matcher parser = PATTERN.matcher(sentence);
             if (!parser.matches()) {
                 return null;
@@ -104,6 +103,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             // Satellites
             position.set(Event.KEY_SATELLITES, parser.group(index++));
+
             return position;
         }
 

@@ -130,10 +130,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_HDOP, parser.group(index++));
 
         position.set(Event.KEY_ODOMETER, parser.group(index++));
-        
+
         position.set(Event.KEY_POWER, parser.group(index++));
         position.set(Event.KEY_BATTERY, parser.group(index++));
-        
+
         String status = parser.group(index++);
         if (status != null) {
             position.set(Event.KEY_IGNITION, BitUtil.check(Integer.parseInt(status, 16), 13));
@@ -145,11 +145,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        
+
         if (channel != null) {
             channel.write("1234");
         }

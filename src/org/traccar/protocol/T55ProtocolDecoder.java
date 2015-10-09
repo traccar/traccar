@@ -94,33 +94,17 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(index);
         }
 
-        // Identification
         if (sentence.startsWith("$PGID")) {
             identify(sentence.substring(6, sentence.length() - 3), channel);
-        }
-
-        // Identification
-        else if (sentence.startsWith("$PCPTI")) {
+        } else if (sentence.startsWith("$PCPTI")) {
             identify(sentence.substring(7, sentence.indexOf(",", 7)), channel);
-        }
-
-        // Identification
-        else if (sentence.startsWith("IMEI")) {
+        } else if (sentence.startsWith("IMEI")) {
             identify(sentence.substring(5, sentence.length()), channel);
-        }
-
-        // Identification
-        else if (sentence.startsWith("$GPFID")) {
+        } else if (sentence.startsWith("$GPFID")) {
             identify(sentence.substring(6, sentence.length()), channel);
-        }
-
-        // Identification
-        else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
+        } else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
             identify(sentence, channel);
-        }
-
-        // Location
-        else if (sentence.startsWith("$GPRMC") && hasDeviceId()) {
+        } else if (sentence.startsWith("$GPRMC") && hasDeviceId()) {
 
             // Send response
             if (channel != null) {
@@ -180,10 +164,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
             position.setTime(time.getTime());
             return position;
-        }
 
-        // Location
-        else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
+        } else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = PATTERN_GPGGA.matcher(sentence);
@@ -221,10 +203,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
             position.setLongitude(longitude);
             return position;
-        }
 
-        // Location
-        else if (sentence.startsWith("$GPRMA") && hasDeviceId()) {
+        } else if (sentence.startsWith("$GPRMA") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = PATTERN_GPRMA.matcher(sentence);
@@ -269,10 +249,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(Double.parseDouble(course));
             }
             return position;
-        }
 
-        // Location
-        else if (sentence.startsWith("$TRCCR") && hasDeviceId()) {
+        } else if (sentence.startsWith("$TRCCR") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = PATTERN_TRCCR.matcher(sentence);

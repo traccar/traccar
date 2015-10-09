@@ -231,9 +231,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_INDEX, index);
             sendResponse(channel, type, index);
             return position;
-        }
 
-        else {
+        } else {
+
             buf.skipBytes(dataLength);
             if (type != MSG_COMMAND_0 && type != MSG_COMMAND_1 && type != MSG_COMMAND_2) {
                 sendResponse(channel, type, buf.readUnsignedShort());

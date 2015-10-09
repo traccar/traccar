@@ -58,17 +58,14 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             int index = sentence.indexOf(',', 2) + 1;
             String id = sentence.substring(index, sentence.indexOf(',', index));
             identify(id, channel);
-        }
 
-        else if (sentence.startsWith("E,")) {
+        } else if (sentence.startsWith("E,")) {
 
             if (channel != null) {
                 channel.write("A," + sentence.substring(2) + "\r");
             }
 
-        }
-
-        else if (sentence.startsWith("L,") && hasDeviceId()) {
+        } else if (sentence.startsWith("L,") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = PATTERN.matcher(sentence);

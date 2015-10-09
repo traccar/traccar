@@ -18,11 +18,9 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Checksum;
@@ -122,9 +120,8 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             // TODO: parse extra data
             return position;
-        }
 
-        else if (type == MSG_LOGIN && channel != null) {
+        } else if (type == MSG_LOGIN && channel != null) {
 
             buf.skipBytes(4); // serial number
             buf.readByte(); // reserved

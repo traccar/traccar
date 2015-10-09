@@ -57,8 +57,9 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Process login
         if (sentence.startsWith("$FRLIN,")) {
+
+            // Login
             int beginIndex = sentence.indexOf(',', 7);
             if (beginIndex != -1) {
                 beginIndex += 1;
@@ -78,15 +79,13 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 send(channel, "$FRERR,AuthError,Parse error");
             }
-        }
 
-        // Protocol version check
-        else if (sentence.startsWith("$FRVER,")) {
+        } else if (sentence.startsWith("$FRVER,")) {
+            
+            // Version check
             send(channel, "$FRVER,1,0,GpsGate Server 1.0");
-        }
 
-        // Process data
-        else if (sentence.startsWith("$GPRMC,") && hasDeviceId()) {
+        } else if (sentence.startsWith("$GPRMC,") && hasDeviceId()) {
 
             // Parse message
             Matcher parser = PATTERN.matcher(sentence);

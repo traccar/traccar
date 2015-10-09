@@ -15,9 +15,9 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,23 +109,24 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_TRACKER_ID_EXT) {
+
             buf.readUnsignedInt(); // id
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             identify(buf.readBytes(length).toString(Charset.defaultCharset()), channel);
-        }
 
-        else if (type == MSG_LAST_LOG_INDEX) {
+        } else if (type == MSG_LAST_LOG_INDEX) {
+
             long index = buf.readUnsignedInt();
             if (index > 0) {
                 newIndex = index;
                 requestArchive(channel);
             }
-        }
 
-        // Position
-        else if (hasDeviceId() && (type == MSG_CURRENT_GPS_DATA || type == MSG_STATE_FULL_INFO_T104 || type == MSG_LOG_RECORDS)) {
+        } else if (hasDeviceId()
+                && (type == MSG_CURRENT_GPS_DATA || type == MSG_STATE_FULL_INFO_T104 || type == MSG_LOG_RECORDS)) {
+
             List<Position> positions = new LinkedList<>();
 
             int recordCount = 1;

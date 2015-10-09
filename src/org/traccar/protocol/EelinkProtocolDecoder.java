@@ -70,14 +70,11 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_LOGIN) {
-            identify(ChannelBufferTools.readHexString(buf, 16).substring(1), channel);
-        }
 
-        else if (hasDeviceId() &&
-                (type == MSG_GPS ||
-                 type == MSG_ALARM ||
-                 type == MSG_STATE ||
-                 type == MSG_SMS)) {
+            identify(ChannelBufferTools.readHexString(buf, 16).substring(1), channel);
+
+        } else if (hasDeviceId()
+                && (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS)) {
 
             // Create new position
             Position position = new Position();
@@ -108,64 +105,6 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
             return position;
         }
-
-        /*
-        if (type == MSG_HEARTBEAT) {
-            if (channel != null) {
-                byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(ChannelBuffers.wrappedBuffer(response));
-            }
-        }
-
-        else if (type == MSG_DATA) {
-
-            // Create new position
-            Position position = new Position();
-            ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter("gt02");
-            position.set(Event.KEY_INDEX, index);
-
-            // Get device id
-            try {
-                position.setDeviceId(getDataManager().getDeviceByImei(imei).getId());
-            } catch(Exception error) {
-                Log.warning("Unknown device - " + imei);
-            }
-
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
-            position.setTime(time.getTime());
-
-            // Latitude
-            double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-
-            // Longitude
-            double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-
-            // Speed
-            position.setSpeed(buf.readUnsignedByte());
-
-            // Course
-            position.setCourse(buf.readUnsignedShort());
-
-            buf.skipBytes(3); // reserved
-
-            // Flags
-            long flags = buf.readUnsignedInt();
-            position.setValid((flags & 0x1) == 0x1);
-            if ((flags & 0x2) == 0) latitude = -latitude;
-            if ((flags & 0x4) == 0) longitude = -longitude;
-
-            position.setLatitude(latitude);
-            position.setLongitude(longitude);
-            return position;
-        }*/
 
         return null;
     }

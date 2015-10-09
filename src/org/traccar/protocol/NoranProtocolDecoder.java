@@ -66,9 +66,8 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
 
             channel.write(response, remoteAddress);
-        }
 
-        else if (type == MSG_UPLOAD_POSITION ||
+        } else if (type == MSG_UPLOAD_POSITION ||
                  type == MSG_UPLOAD_POSITION_NEW ||
                  type == MSG_CONTROL_RESPONSE ||
                  type == MSG_ALARM) {

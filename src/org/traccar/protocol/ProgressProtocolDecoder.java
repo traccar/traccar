@@ -70,8 +70,8 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedShort();
         buf.readUnsignedShort(); // length
 
-        // Authentication
         if (type == MSG_IDENT || type == MSG_IDENT_FULL) {
+
             buf.readUnsignedInt(); // id
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
@@ -80,10 +80,9 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
             identify(imei, channel);
-        }
 
-        // Position
-        else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
+        } else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
+
             List<Position> positions = new LinkedList<>();
 
             int recordCount = 1;

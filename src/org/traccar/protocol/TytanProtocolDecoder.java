@@ -112,6 +112,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                 if (length == 255) {
                     length += buf.readUnsignedByte();
                 }
+                
+                int n = 0;
 
                 switch (type) {
                     case 2:
@@ -121,22 +123,18 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Event.KEY_INPUT, buf.readUnsignedByte());
                         break;
                     case 6:
-                        {
-                            int n = buf.readUnsignedByte() >> 4;
-                            if (n < 2) {
-                                position.set(Event.PREFIX_ADC + n, readSwappedFloat(buf));
-                            } else {
-                                position.set("di" + (n - 2), readSwappedFloat(buf));
-                            }
+                        n = buf.readUnsignedByte() >> 4;
+                        if (n < 2) {
+                            position.set(Event.PREFIX_ADC + n, readSwappedFloat(buf));
+                        } else {
+                            position.set("di" + (n - 2), readSwappedFloat(buf));
                         }
                         break;
                     case 7:
-                        {
-                            int alarm = buf.readUnsignedByte();
-                            buf.readUnsignedByte();
-                            if (BitUtil.check(alarm, 5)) {
-                                position.set(Event.KEY_ALARM, BitUtil.range(alarm, 0, 4));
-                            }
+                        int alarm = buf.readUnsignedByte();
+                        buf.readUnsignedByte();
+                        if (BitUtil.check(alarm, 5)) {
+                            position.set(Event.KEY_ALARM, BitUtil.range(alarm, 0, 4));
                         }
                         break;
                     case 8:
@@ -149,18 +147,16 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         position.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
                         break;
                     case 24:
-                        {
-                            Set<Integer> temps = new LinkedHashSet<>();
-                            int temp = buf.readUnsignedByte();
-                            for (int i = 3; i >= 0; i--) {
-                                int n = (temp >> (2 * i)) & 0x03;
-                                if (!temps.contains(n)) {
-                                    temps.add(n);
-                                }
+                        Set<Integer> temps = new LinkedHashSet<>();
+                        int temp = buf.readUnsignedByte();
+                        for (int i = 3; i >= 0; i--) {
+                            n = (temp >> (2 * i)) & 0x03;
+                            if (!temps.contains(n)) {
+                                temps.add(n);
                             }
-                            for (int n : temps) {
-                                position.set(Event.PREFIX_TEMP + n, buf.readUnsignedByte());
-                            }
+                        }
+                        for (int i : temps) {
+                            position.set(Event.PREFIX_TEMP + n, buf.readUnsignedByte());
                         }
                         break;
                     case 28:
@@ -177,19 +173,17 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Event.KEY_RPM, buf.readUnsignedByte() * 50);
                         break;
                     case 107:
-                        {
-                            int fuel = buf.readUnsignedShort();
-                            switch (fuel >> 14) {
-                                case 1:
-                                    position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.4 + "%");
-                                    break;
-                                case 2:
-                                    position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.5 + " l");
-                                    break;
-                                case 3:
-                                    position.set(Event.KEY_FUEL, (fuel & 0x3fff) * -0.5 + " l");
-                                    break;
-                            }
+                        int fuel = buf.readUnsignedShort();
+                        switch (fuel >> 14) {
+                            case 1:
+                                position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.4 + "%");
+                                break;
+                            case 2:
+                                position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.5 + " l");
+                                break;
+                            case 3:
+                                position.set(Event.KEY_FUEL, (fuel & 0x3fff) * -0.5 + " l");
+                                break;
                         }
                         break;
                     case 108:
