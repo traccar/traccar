@@ -18,7 +18,7 @@ package org.traccar.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class Extensible {
+public abstract class Extensible extends Message {
 
     private Map<String, Object> attributes = new LinkedHashMap<>();
 

@@ -111,6 +111,7 @@
         deviceId INT NOT NULL,
         serverTime TIMESTAMP NOT NULL,
         deviceTime TIMESTAMP NOT NULL,
+        type VARCHAR(128),
         attributes VARCHAR(4096) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
 
@@ -242,6 +243,23 @@
 
     <entry key='database.updateLatestPosition'>
         UPDATE device SET positionId = :id WHERE id = :deviceId;
+    </entry>
+
+    <entry key='database.selectData'>
+        SELECT * FROM data WHERE deviceId = :deviceId AND deviceTime BETWEEN :from AND :to ORDER BY deviceTime;
+    </entry>
+
+    <entry key='database.insertData'>
+        INSERT INTO data (deviceId, protocol, serverTime, deviceTime, type, attributes)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :type, :attributes);
+    </entry>
+
+    <entry key='database.selectLatestData'>
+        SELECT * FROM data WHERE id IN (SELECT dataId FROM device);
+    </entry>
+
+    <entry key='database.updateLatestData'>
+        UPDATE device SET dataId = :id WHERE id = :deviceId;
     </entry>
 
     <!-- PROTOCOL CONFIG -->

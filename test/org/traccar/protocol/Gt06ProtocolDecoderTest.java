@@ -15,7 +15,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolDecoderTest {
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "787811010123456789012345100B3201000171930D0A"))));
-        
+
+        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
+                "78780a13440604000201baaf540d0a"))));
+
         verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "787823120f081b121d37cb01c8e2cc08afd3c020d50201940701d600a1190041ee100576d1470d0a"))));
 

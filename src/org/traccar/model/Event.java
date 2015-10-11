@@ -80,16 +80,6 @@ public abstract class Event extends Extensible {
         this.protocol = protocol;
     }
 
-    private long deviceId;
-
-    public long getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
-    }
-
     private Date serverTime;
 
     public Date getServerTime() {
