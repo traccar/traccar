@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
+import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class MeitrackProtocolEncoder extends StringProtocolEncoder {
@@ -32,6 +33,9 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "@@M33,{%s},C01,0,22122*18\r\n", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(command, "@@M33,{%s},C01,0,22022*18\r\n", Command.KEY_UNIQUE_ID);
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                break;
         }
 
         return null;

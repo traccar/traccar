@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.charset.Charset;
@@ -58,6 +59,10 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent("Relay,1#");
             case Command.TYPE_ENGINE_RESUME:
                 return encodeContent("Relay,0#");
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                break;
+
         }
 
         return null;

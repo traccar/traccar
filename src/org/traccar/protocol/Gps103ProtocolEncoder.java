@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
+import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class Gps103ProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
@@ -55,6 +56,10 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
                 return formatCommand(command, "**,imei:{%s},L", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(command, "**,imei:{%s},M", Command.KEY_UNIQUE_ID);
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                break;
+
         }
 
         return null;

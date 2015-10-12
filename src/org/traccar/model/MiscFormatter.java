@@ -91,7 +91,8 @@ public class MiscFormatter {
         Map<String, Object> attributes = new LinkedHashMap<>();
 
         for (Map.Entry<String, JsonValue> entry : json.entrySet()) {
-            switch (entry.getValue().getValueType()) {
+            JsonValue.ValueType type = entry.getValue().getValueType();
+            switch (type) {
                 case STRING:
                     attributes.put(entry.getKey(), ((JsonString) entry.getValue()).getString());
                     break;
@@ -110,7 +111,7 @@ public class MiscFormatter {
                     attributes.put(entry.getKey(), false);
                     break;
                 default:
-                    Log.warning(new IllegalArgumentException());
+                    Log.warning(new IllegalArgumentException(type.name()));
                     break;
             }
         }

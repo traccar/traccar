@@ -39,7 +39,8 @@ public class CellocatorFrameDecoder extends FrameDecoder {
 
         // Size depending on message type
         int length = 0;
-        switch (buf.getUnsignedByte(4)) {
+        int type = buf.getUnsignedByte(4);
+        switch (type) {
             case CellocatorProtocolDecoder.MSG_CLIENT_STATUS:
                 length = 70;
                 break;
@@ -58,7 +59,7 @@ public class CellocatorFrameDecoder extends FrameDecoder {
                 length = 15 + buf.getUnsignedByte(13);
                 break;
             default:
-                Log.warning(new UnsupportedOperationException());
+                Log.warning(new UnsupportedOperationException(String.valueOf(type)));
                 break;
         }
 
