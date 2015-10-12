@@ -85,6 +85,9 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 case 3:
                     previousFloat = (previousFloat & 0xff000000) + ((buf.readUnsignedMedium() & 0x3fffff) << 2);
                     break;
+                default:
+                    Log.warning(new IllegalArgumentException());
+                    break;
             }
             return Float.intBitsToFloat(previousFloat);
         }

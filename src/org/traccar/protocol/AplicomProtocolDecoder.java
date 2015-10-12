@@ -248,6 +248,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 case 130:
                     buf.readUnsignedInt(); // incorrect
                     break;
+                default:
+                    break;
             }
         }
 
@@ -320,6 +322,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                                 break;
                             case 0x18:
                                 position.set("software-version", ChannelBuffers.swapInt(value.readInt()) * 0.01);
+                                break;
+                            default:
                                 break;
                         }
                         break;
