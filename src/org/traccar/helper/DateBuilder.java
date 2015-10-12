@@ -55,6 +55,18 @@ public class DateBuilder {
         return setYear(year).setMonth(month).setDay(day);
     }
 
+    public DateBuilder setDateReverse(int day, int month, int year) {
+        return setDate(year, month, day);
+    }
+
+    public DateBuilder setDate(String year, String month, String day) {
+        return setDate(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+    }
+
+    public DateBuilder setDateReverse(String day, String month, String year) {
+        return setDate(year, month, day);
+    }
+
     public DateBuilder setHour(int hour) {
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         return this;
@@ -79,6 +91,10 @@ public class DateBuilder {
         return setHour(hour).setMinute(minute).setSecond(second);
     }
 
+    public DateBuilder setTime(String hour, String minute, String second) {
+        return setTime(Integer.parseInt(hour), Integer.parseInt(minute), Integer.parseInt(second));
+    }
+
     public DateBuilder setTime(int hour, int minute, int second, int millis) {
         return setHour(hour).setMinute(minute).setSecond(second).setMillis(millis);
     }
@@ -87,7 +103,7 @@ public class DateBuilder {
         return setDate(year, month, day).setTime(hour, minute, second);
     }
 
-    public Date build() {
+    public Date getDate() {
         return calendar.getTime();
     }
 

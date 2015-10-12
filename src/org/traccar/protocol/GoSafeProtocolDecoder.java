@@ -16,16 +16,15 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -164,20 +163,15 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.group(index++), parser.group(index++), parser.group(index++))
+                .setDateReverse(parser.group(index++), parser.group(index++), parser.group(index++));
 
         List<Position> positions = new LinkedList<>();
         Matcher itemParser = PATTERN_ITEM.matcher(parser.group(index++));
 
         while (itemParser.find()) {
-            positions.add(decodePosition(itemParser, time.getTime()));
+            positions.add(decodePosition(itemParser, dateBuilder.getDate()));
         }
 
         return positions;

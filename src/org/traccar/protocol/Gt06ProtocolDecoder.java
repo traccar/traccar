@@ -161,7 +161,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 DateBuilder dateBuilder = new DateBuilder(timeZone)
                         .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                         .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-                position.setTime(dateBuilder.build());
+                position.setTime(dateBuilder.getDate());
 
                 // GPS length and Satellites count
                 int gpsLength = buf.readUnsignedByte();
