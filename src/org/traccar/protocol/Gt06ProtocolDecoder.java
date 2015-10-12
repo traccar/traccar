@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -157,16 +158,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(getDeviceId());
                 position.setProtocol(getProtocolName());
 
-                // Date and time
-                Calendar time = Calendar.getInstance(timeZone);
-                time.clear();
-                time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-                time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-                time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-                time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-                time.set(Calendar.MINUTE, buf.readUnsignedByte());
-                time.set(Calendar.SECOND, buf.readUnsignedByte());
-                position.setTime(time.getTime());
+                DateBuilder dateBuilder = new DateBuilder(timeZone)
+                        .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                        .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                position.setTime(dateBuilder.build());
 
                 // GPS length and Satellites count
                 int gpsLength = buf.readUnsignedByte();
