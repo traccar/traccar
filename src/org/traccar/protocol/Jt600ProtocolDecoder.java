@@ -34,6 +34,12 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private static double convertCoordinate(int raw) {
+        int degrees = raw / 1000000;
+        double minutes = (raw % 1000000) / 10000.0;
+        return degrees + minutes / 60;
+    }
+
     private Position decodeNormalMessage(ChannelBuffer buf, Channel channel) {
 
         Position position = new Position();
@@ -66,14 +72,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(time.getTime());
 
         // Coordinates
-        int temp = ChannelBufferTools.readHexInteger(buf, 8);
-        double latitude = temp % 1000000;
-        latitude /= 60 * 10000;
-        latitude += temp / 1000000;
-        temp = ChannelBufferTools.readHexInteger(buf, 9);
-        double longitude = temp % 1000000;
-        longitude /= 60 * 10000;
-        longitude += temp / 1000000;
+        double latitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 8));
+        double longitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 9));
 
         // Flags
         byte flags = buf.readByte();

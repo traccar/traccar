@@ -16,9 +16,12 @@
 package org.traccar;
 
 import java.net.SocketAddress;
+import java.util.Date;
+
 import org.jboss.netty.channel.Channel;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Position;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
@@ -69,6 +72,21 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
+    }
+
+    public void initPositionDetails(Position position) {
+        Position last = Context.getConnectionManager().getLastPosition(getDeviceId());
+        if (last != null) {
+            position.setFixTime(last.getFixTime());
+            position.setValid(last.getValid());
+            position.setLatitude(last.getLatitude());
+            position.setLongitude(last.getLongitude());
+            position.setAltitude(last.getAltitude());
+            position.setSpeed(last.getSpeed());
+            position.setCourse(last.getCourse());
+        } else {
+            position.setFixTime(new Date(0));
+        }
     }
 
 }

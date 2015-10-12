@@ -48,9 +48,9 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private static double convertCoordinate(int value) {
-        double degrees = value / 1000000;
-        double minutes = (value % 1000000) / 10000.0;
+    private static double convertCoordinate(int raw) {
+        int degrees = raw / 1000000;
+        double minutes = (raw % 1000000) / 10000.0;
         return degrees + minutes / 60;
     }
 

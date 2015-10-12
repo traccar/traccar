@@ -252,7 +252,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             command.append(imei).append(",CCC,").append(positions.size()).append("*");
             int checksum = 0;
             for (int i = 0; i < command.length(); i += 1) checksum += command.charAt(i);
-            command.append(String.format("%02x\r\n", checksum & 0xff).toUpperCase());
+            command.append(String.format("%02x", checksum & 0xff).toUpperCase());
+            command.append("\r\n");
             channel.write(command.toString());
         }
 

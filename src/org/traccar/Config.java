@@ -17,6 +17,7 @@ package org.traccar;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class Config {
@@ -24,7 +25,9 @@ public class Config {
     private final Properties properties = new Properties();
 
     public void load(String file) throws IOException {
-        properties.loadFromXML(new FileInputStream(file));
+        try (InputStream inputStream = new FileInputStream(file)) {
+            properties.loadFromXML(inputStream);
+        }
     }
 
     public boolean hasKey(String key) {

@@ -39,9 +39,9 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_HISTORY = 0x12;
 
     private static double convertCoordinate(int raw) {
-        double result = raw / 1000000;
-        result += (raw % 1000000) / 600000.0;
-        return result;
+        int degrees = raw / 1000000;
+        double minutes = (raw % 1000000) / 10000.0;
+        return degrees + minutes / 60;
     }
 
     private Position decodePosition(ChannelBuffer buf, boolean history) {

@@ -5,7 +5,6 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.traccar.model.Data;
 import org.traccar.model.Position;
 
 public class DecoderVerifier {
@@ -43,14 +42,6 @@ public class DecoderVerifier {
         assertNotNull(position.getAttributes());
 
     }
-    
-    private static void verifyData(Data data) {
-
-        assertNotNull(data.getDeviceId());
-
-        assertNotNull(data.getAttributes());
-
-    }
 
     public static void verify(Object object) {
         
@@ -58,19 +49,13 @@ public class DecoderVerifier {
         
         if (object instanceof Position) {
             verifyPosition((Position) object);
-        } else if (object instanceof Data) {
-            verifyData((Data) object);
         } else if (object instanceof List) {
-            List positions = (List) object;
+            List<Position> positions = (List<Position>) object;
             
             assertFalse(positions.isEmpty());
             
-            for (Object item : positions) {
-                if (item instanceof Position) {
-                    verifyPosition((Position) item);
-                } else if (item instanceof Data) {
-                    verifyData((Data) item);
-                }
+            for (Position position : positions) {
+                verifyPosition(position);
             }
         }
         

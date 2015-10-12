@@ -44,10 +44,10 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             coordinate = 0xffffffffl - coordinate;
         }
 
-        double degrees = coordinate / 1000000;
-        degrees += (coordinate % 1000000) / 600000.0;
+        long degrees = coordinate / 1000000;
+        double minutes = (coordinate % 1000000) / 10000.0;
 
-        return sign * degrees;
+        return sign * (degrees + minutes / 60);
     }
 
     @Override
