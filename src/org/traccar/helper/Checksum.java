@@ -21,7 +21,7 @@ import java.util.zip.CRC32;
 
 public class Checksum {
 
-    private static final int CRC16_CCITT_TABLE_REVERSE[] = {
+    private static final int[] CRC16_CCITT_TABLE_REVERSE = {
         0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF,
         0x8C48, 0x9DC1, 0xAF5A, 0xBED3, 0xCA6C, 0xDBE5, 0xE97E, 0xF8F7,
         0x1081, 0x0108, 0x3393, 0x221A, 0x56A5, 0x472C, 0x75B7, 0x643E,
@@ -56,7 +56,7 @@ public class Checksum {
         0x7BC7, 0x6A4E, 0x58D5, 0x495C, 0x3DE3, 0x2C6A, 0x1EF1, 0x0F78
     };
 
-    private static final int CRC16_CCITT_TABLE[] = {
+    private static final int[] CRC16_CCITT_TABLE = {
         0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
         0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
         0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
@@ -154,7 +154,7 @@ public class Checksum {
 
     public static String nmea(String msg) {
         int checksum = 0;
-        byte bytes[] = msg.getBytes(Charset.defaultCharset());
+        byte[] bytes = msg.getBytes(Charset.defaultCharset());
         for (int i = 1; i < msg.length(); i++) {
             checksum ^= bytes[i];
         }

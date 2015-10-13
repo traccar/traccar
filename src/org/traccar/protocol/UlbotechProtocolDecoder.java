@@ -77,8 +77,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         // Time
-        long seconds = buf.readUnsignedInt() & 0x7fffffffl;
-        seconds += 946684800l; // 2000-01-01 00:00
+        long seconds = buf.readUnsignedInt() & 0x7fffffffL;
+        seconds += 946684800L; // 2000-01-01 00:00
         seconds -= timeZone;
         position.setTime(new Date(seconds * 1000));
 

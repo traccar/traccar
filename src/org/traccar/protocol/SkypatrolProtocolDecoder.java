@@ -39,9 +39,9 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
     private static double convertCoordinate(long coordinate) {
         int sign = 1;
-        if (coordinate > 0x7fffffffl) {
+        if (coordinate > 0x7fffffffL) {
             sign = -1;
-            coordinate = 0xffffffffl - coordinate;
+            coordinate = 0xffffffffL - coordinate;
         }
 
         long degrees = coordinate / 1000000;

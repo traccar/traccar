@@ -23,6 +23,8 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import javafx.geometry.Pos;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -45,10 +47,101 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         return ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes).readFloat();
     }
 
+    private void decodeExtraData(Position position, ChannelBuffer buf, int end) {
+        while (buf.readerIndex() < end) {
+
+            int type = buf.readUnsignedByte();
+            int length = buf.readUnsignedByte();
+            if (length == 255) {
+                length += buf.readUnsignedByte();
+            }
+
+            int n;
+
+            switch (type) {
+                case 2:
+                    position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
+                    break;
+                case 5:
+                    position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+                    break;
+                case 6:
+                    n = buf.readUnsignedByte() >> 4;
+                    if (n < 2) {
+                        position.set(Event.PREFIX_ADC + n, readSwappedFloat(buf));
+                    } else {
+                        position.set("di" + (n - 2), readSwappedFloat(buf));
+                    }
+                    break;
+                case 7:
+                    int alarm = buf.readUnsignedByte();
+                    buf.readUnsignedByte();
+                    if (BitUtil.check(alarm, 5)) {
+                        position.set(Event.KEY_ALARM, BitUtil.range(alarm, 0, 4));
+                    }
+                    break;
+                case 8:
+                    position.set("antihijack", buf.readUnsignedByte());
+                    break;
+                case 9:
+                    position.set("authorized", ChannelBufferTools.readHexString(buf, 16));
+                    break;
+                case 10:
+                    position.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
+                    break;
+                case 24:
+                    Set<Integer> temps = new LinkedHashSet<>();
+                    int temp = buf.readUnsignedByte();
+                    for (int i = 3; i >= 0; i--) {
+                        n = (temp >> (2 * i)) & 0x03;
+                        if (!temps.contains(n)) {
+                            temps.add(n);
+                        }
+                    }
+                    for (int i : temps) {
+                        position.set(Event.PREFIX_TEMP + i, buf.readUnsignedByte());
+                    }
+                    break;
+                case 28:
+                    position.set("weight", buf.readUnsignedShort());
+                    buf.readUnsignedByte();
+                    break;
+                case 90:
+                    position.set(Event.KEY_POWER, readSwappedFloat(buf));
+                    break;
+                case 101:
+                    position.set(Event.KEY_OBD_SPEED, buf.readUnsignedByte());
+                    break;
+                case 102:
+                    position.set(Event.KEY_RPM, buf.readUnsignedByte() * 50);
+                    break;
+                case 107:
+                    int fuel = buf.readUnsignedShort();
+                    int fuelFormat = fuel >> 14;
+                    if (fuelFormat == 1) {
+                        position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.4 + "%");
+                    } else if (fuelFormat == 2) {
+                        position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.5 + " l");
+                    } else if (fuelFormat == 3) {
+                        position.set(Event.KEY_FUEL, (fuel & 0x3fff) * -0.5 + " l");
+                    }
+                    break;
+                case 108:
+                    position.set(Event.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
+                    break;
+                case 150:
+                    position.set("door", buf.readUnsignedByte());
+                    break;
+                default:
+                    buf.skipBytes(length);
+                    break;
+            }
+        }
+    }
+
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -105,95 +198,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                 position.setSpeed(UnitsConverter.knotsFromKph(speed));
             }
 
-            while (buf.readerIndex() < end) {
-
-                int type = buf.readUnsignedByte();
-                int length = buf.readUnsignedByte();
-                if (length == 255) {
-                    length += buf.readUnsignedByte();
-                }
-                
-                int n = 0;
-
-                switch (type) {
-                    case 2:
-                        position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
-                        break;
-                    case 5:
-                        position.set(Event.KEY_INPUT, buf.readUnsignedByte());
-                        break;
-                    case 6:
-                        n = buf.readUnsignedByte() >> 4;
-                        if (n < 2) {
-                            position.set(Event.PREFIX_ADC + n, readSwappedFloat(buf));
-                        } else {
-                            position.set("di" + (n - 2), readSwappedFloat(buf));
-                        }
-                        break;
-                    case 7:
-                        int alarm = buf.readUnsignedByte();
-                        buf.readUnsignedByte();
-                        if (BitUtil.check(alarm, 5)) {
-                            position.set(Event.KEY_ALARM, BitUtil.range(alarm, 0, 4));
-                        }
-                        break;
-                    case 8:
-                        position.set("antihijack", buf.readUnsignedByte());
-                        break;
-                    case 9:
-                        position.set("authorized", ChannelBufferTools.readHexString(buf, 16));
-                        break;
-                    case 10:
-                        position.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
-                        break;
-                    case 24:
-                        Set<Integer> temps = new LinkedHashSet<>();
-                        int temp = buf.readUnsignedByte();
-                        for (int i = 3; i >= 0; i--) {
-                            n = (temp >> (2 * i)) & 0x03;
-                            if (!temps.contains(n)) {
-                                temps.add(n);
-                            }
-                        }
-                        for (int i : temps) {
-                            position.set(Event.PREFIX_TEMP + i, buf.readUnsignedByte());
-                        }
-                        break;
-                    case 28:
-                        position.set("weight", buf.readUnsignedShort());
-                        buf.readUnsignedByte();
-                        break;
-                    case 90:
-                        position.set(Event.KEY_POWER, readSwappedFloat(buf));
-                        break;
-                    case 101:
-                        position.set(Event.KEY_OBD_SPEED, buf.readUnsignedByte());
-                        break;
-                    case 102:
-                        position.set(Event.KEY_RPM, buf.readUnsignedByte() * 50);
-                        break;
-                    case 107:
-                        int fuel = buf.readUnsignedShort();
-                        int fuelFormat = fuel >> 14;
-                        if (fuelFormat == 1) {
-                            position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.4 + "%");
-                        } else if (fuelFormat == 2) {
-                            position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.5 + " l");
-                        } else if (fuelFormat == 3) {
-                            position.set(Event.KEY_FUEL, (fuel & 0x3fff) * -0.5 + " l");
-                        }
-                        break;
-                    case 108:
-                        position.set(Event.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
-                        break;
-                    case 150:
-                        position.set("door", buf.readUnsignedByte());
-                        break;
-                    default:
-                        buf.skipBytes(length);
-                        break;
-                }
-            }
+            decodeExtraData(position, buf, end);
 
             positions.add(position);
         }

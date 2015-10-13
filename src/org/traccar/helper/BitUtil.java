@@ -37,7 +37,7 @@ public class BitUtil {
     }
 
     public static long range(long number, int index, int length) {
-        return (number >> index) & ((1l << length) - 1);
+        return (number >> index) & ((1L << length) - 1);
     }
 
 }

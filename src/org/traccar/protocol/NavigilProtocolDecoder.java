@@ -23,6 +23,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -52,7 +53,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ACKNOWLEDGEMENT = 255;
 
     private static Date convertTimestamp(long timestamp) {
-        return new Date((timestamp - LEAP_SECONDS_DELTA) * 1000l);
+        return new Date((timestamp - LEAP_SECONDS_DELTA) * 1000);
     }
 
     private int senderSequenceNumber = 1;
@@ -108,7 +109,6 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(convertTimestamp(buf.readUnsignedInt()));
 
-        // TODO: a lot of other stuff
         return position;
     }
 
@@ -145,7 +145,6 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // solar voltage
         position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
-        // TODO: a lot of other stuff
         return position;
     }
 
@@ -228,7 +227,6 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // supply voltage 2
         position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
-        // TODO: a lot of other stuff
         return position;
     }
 
@@ -302,6 +300,9 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
                 return parseSnapshot4(buf, sequenceNumber);
             case MSG_TRACKING_DATA:
                 return parseTrackingData(buf, sequenceNumber, timestamp);
+            default:
+                Log.warning(new UnsupportedOperationException(String.valueOf(messageId)));
+                break;
         }
 
         return null;

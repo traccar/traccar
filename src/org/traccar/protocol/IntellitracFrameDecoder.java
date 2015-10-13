@@ -25,7 +25,7 @@ public class IntellitracFrameDecoder extends DelimiterBasedFrameDecoder {
 
     private static final int MESSAGE_MINIMUM_LENGTH = 0;
 
-    private static final byte delimiter[] = {(byte) '\r', (byte) '\n'};
+    private static final byte[] delimiter = {(byte) '\r', (byte) '\n'};
 
     public IntellitracFrameDecoder(int maxFrameLength) {
         super(maxFrameLength, ChannelBuffers.wrappedBuffer(delimiter));
