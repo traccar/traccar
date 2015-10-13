@@ -59,10 +59,12 @@ public class DateBuilder {
         return setDate(year, month, day);
     }
 
+    @Deprecated
     public DateBuilder setDate(String year, String month, String day) {
         return setDate(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
     }
 
+    @Deprecated
     public DateBuilder setDateReverse(String day, String month, String year) {
         return setDate(year, month, day);
     }
@@ -91,6 +93,7 @@ public class DateBuilder {
         return setHour(hour).setMinute(minute).setSecond(second);
     }
 
+    @Deprecated
     public DateBuilder setTime(String hour, String minute, String second) {
         return setTime(Integer.parseInt(hour), Integer.parseInt(minute), Integer.parseInt(second));
     }

@@ -28,6 +28,8 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -208,130 +210,73 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        // Parse message
-        String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset());
-        Matcher parser = (command == MSG_RFID ? PATTERN_RFID : PATTERN).matcher(sentence);
+        Parser parser = new Parser(command == MSG_RFID ? PATTERN_RFID : PATTERN,
+                buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset()));
         if (!parser.matches()) {
             return null;
         }
-        Integer index = 1;
 
         if (command == MSG_RFID) {
 
-            // Time and date
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-            time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-            position.setTime(time.getTime());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
 
-            // Latitude
-            Double latitude = Double.parseDouble(parser.group(index++));
-            latitude += Double.parseDouble(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-            position.setLatitude(latitude);
-
-            // Longitude
-            Double longitude = Double.parseDouble(parser.group(index++));
-            longitude += Double.parseDouble(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-            position.setLongitude(longitude);
+            position.setLatitude(parser.nextCoordinate());
+            position.setLongitude(parser.nextCoordinate());
 
         } else {
 
-            // Time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-            String mseconds = parser.group(index++);
-            if (mseconds != null) {
-                time.set(Calendar.MILLISECOND, Integer.parseInt(mseconds));
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (parser.hasNext()) {
+                dateBuilder.setMillis(parser.nextInt());
             }
 
-            // Validity
-            position.setValid(parser.group(index++).compareTo("A") == 0);
+            position.setValid(parser.next().equals("A"));
+            position.setLatitude(parser.nextCoordinate());
+            position.setLongitude(parser.nextCoordinate());
 
-            // Latitude
-            Double latitude = Double.parseDouble(parser.group(index++));
-            latitude += Double.parseDouble(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-            position.setLatitude(latitude);
-
-            // Longitude
-            Double longitude = Double.parseDouble(parser.group(index++));
-            longitude += Double.parseDouble(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-            position.setLongitude(longitude);
-
-            // Speed
-            String speed = parser.group(index++);
-            if (speed != null) {
-                position.setSpeed(Double.parseDouble(speed));
+            if (parser.hasNext()) {
+                position.setSpeed(parser.nextDouble());
             }
 
-            // Course
-            String course = parser.group(index++);
-            if (course != null) {
-                position.setCourse(Double.parseDouble(course));
+            if (parser.hasNext()) {
+                position.setCourse(parser.nextDouble());
             }
 
-            // Date
-            time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-            time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-            position.setTime(time.getTime());
+            dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
 
-            // HDOP
-            position.set(Event.KEY_HDOP, parser.group(index++));
+            position.set(Event.KEY_HDOP, parser.next());
 
-            // Altitude
-            String altitude = parser.group(index++);
-            if (altitude != null) {
-                position.setAltitude(Double.parseDouble(altitude));
+            if (parser.hasNext()) {
+                position.setAltitude(parser.nextDouble());
             }
 
-            // State
-            String state = parser.group(index++);
-            if (state != null) {
-                position.set(Event.KEY_STATUS, state);
-            }
+            position.set(Event.KEY_STATUS, parser.next());
 
-            // ADC
             for (int i = 1; i <= 8; i++) {
-                String adc = parser.group(index++);
-                if (adc != null) {
-                    position.set(Event.PREFIX_ADC + i, Integer.parseInt(adc, 16));
+                if (parser.hasNext()) {
+                    position.set(Event.PREFIX_ADC + i, parser.nextInt(16));
                 }
             }
 
-            // Cell identifier
-            position.set(Event.KEY_CELL, parser.group(index++));
+            position.set(Event.KEY_CELL, parser.next());
 
-            // GSM signal
-            String gsm = parser.group(index++);
-            if (gsm != null) {
-                position.set(Event.KEY_GSM, Integer.parseInt(gsm, 16));
+            if (parser.hasNext()) {
+                position.set(Event.KEY_GSM, parser.nextInt(16));
             }
 
-            // Odometer
-            String odometer = parser.group(index++);
-            if (odometer == null) {
-                odometer = parser.group(index++);
-            }
-            if (odometer != null) {
-                position.set(Event.KEY_ODOMETER, Integer.parseInt(odometer, 16));
+            if (parser.hasNext()) {
+                position.set(Event.KEY_ODOMETER, parser.nextInt(16));
+            } else if (parser.hasNext()) {
+                position.set(Event.KEY_ODOMETER, parser.nextInt(16));
             }
 
-            // RFID
-            String rfid = parser.group(index++);
-            if (rfid != null) {
-                position.set(Event.KEY_RFID, Integer.parseInt(rfid, 16));
+            if (parser.hasNext()) {
+                position.set(Event.KEY_RFID, parser.nextInt(16));
             }
 
         }
