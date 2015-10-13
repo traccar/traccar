@@ -132,7 +132,8 @@ public final class QueryBuilder {
         return new QueryBuilder(dataSource, query, false);
     }
 
-    public static QueryBuilder create(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
+    public static QueryBuilder create(
+            DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
         return new QueryBuilder(dataSource, query, returnGeneratedKeys);
     }
 

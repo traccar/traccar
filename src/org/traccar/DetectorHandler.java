@@ -46,11 +46,13 @@ public class DetectorHandler extends SimpleChannelHandler {
         FrameDecoder frameDecoder = (FrameDecoder) pipeline.get("frameDecoder");
         if (frameDecoder != null) {
             try {
-                Method method = frameDecoder.getClass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, ChannelBuffer.class);
+                Method method = frameDecoder.getClass().getDeclaredMethod(
+                        "decode", ChannelHandlerContext.class, Channel.class, ChannelBuffer.class);
                 method.setAccessible(true);
                 tmp = method.invoke(frameDecoder, null, null, tmp);
             } catch (NoSuchMethodException error) {
-                Method method = frameDecoder.getClass().getSuperclass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, ChannelBuffer.class);
+                Method method = frameDecoder.getClass().getSuperclass().getDeclaredMethod(
+                        "decode", ChannelHandlerContext.class, Channel.class, ChannelBuffer.class);
                 method.setAccessible(true);
                 tmp = method.invoke(frameDecoder, null, null, tmp);
             }
@@ -61,11 +63,13 @@ public class DetectorHandler extends SimpleChannelHandler {
             StringDecoder stringDecoder = new StringDecoder();
             if (tmp != null) {
                 try {
-                    Method method = stringDecoder.getClass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, Object.class);
+                    Method method = stringDecoder.getClass().getDeclaredMethod(
+                            "decode", ChannelHandlerContext.class, Channel.class, Object.class);
                     method.setAccessible(true);
                     tmp = method.invoke(stringDecoder, null, null, tmp);
                 } catch (NoSuchMethodException error) {
-                    Method method = stringDecoder.getClass().getSuperclass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, Object.class);
+                    Method method = stringDecoder.getClass().getSuperclass().getDeclaredMethod(
+                            "decode", ChannelHandlerContext.class, Channel.class, Object.class);
                     method.setAccessible(true);
                     tmp = method.invoke(stringDecoder, null, null, tmp);
                 }
@@ -76,11 +80,13 @@ public class DetectorHandler extends SimpleChannelHandler {
         BaseProtocolDecoder protocolDecoder = (BaseProtocolDecoder) pipeline.get("objectDecoder");
         if (tmp != null) {
             try {
-                Method method = protocolDecoder.getClass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, SocketAddress.class, Object.class);
+                Method method = protocolDecoder.getClass().getDeclaredMethod(
+                        "decode", ChannelHandlerContext.class, Channel.class, SocketAddress.class, Object.class);
                 method.setAccessible(true);
                 tmp = method.invoke(protocolDecoder, null, null, null, tmp);
             } catch (NoSuchMethodException error) {
-                Method method = protocolDecoder.getClass().getSuperclass().getDeclaredMethod("decode", ChannelHandlerContext.class, Channel.class, SocketAddress.class, Object.class);
+                Method method = protocolDecoder.getClass().getSuperclass().getDeclaredMethod(
+                        "decode", ChannelHandlerContext.class, Channel.class, SocketAddress.class, Object.class);
                 method.setAccessible(true);
                 tmp = method.invoke(protocolDecoder, null, null, null, tmp);
             }

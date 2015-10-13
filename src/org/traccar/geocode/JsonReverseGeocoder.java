@@ -45,7 +45,9 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
     }
 
     @Override
-    public void getAddress(final AddressFormat format, final double latitude, final double longitude, final ReverseGeocoderCallback callback) {
+    public void getAddress(
+            final AddressFormat format, final double latitude,
+            final double longitude, final ReverseGeocoderCallback callback) {
 
         if (cache != null) {
             String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
@@ -55,7 +57,8 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
             }
         }
 
-        Context.getAsyncHttpClient().prepareGet(String.format(url, latitude, longitude)).execute(new AsyncCompletionHandler() {
+        Context.getAsyncHttpClient().prepareGet(String.format(url, latitude, longitude))
+                .execute(new AsyncCompletionHandler() {
             @Override
             public Object onCompleted(Response response) throws Exception {
                 try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {

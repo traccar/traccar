@@ -31,7 +31,10 @@ import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.web.WebServer;
 
-public class Context {
+public final class Context {
+
+    private Context() {
+    }
 
     private static Config config;
 
@@ -87,10 +90,10 @@ public class Context {
         return serverManager;
     }
 
-    private static final AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = new AsyncHttpClient();
 
     public static AsyncHttpClient getAsyncHttpClient() {
-        return asyncHttpClient;
+        return ASYNC_HTTP_CLIENT;
     }
 
     public static void init(String[] arguments) throws Exception {
@@ -142,7 +145,8 @@ public class Context {
         }
 
         if (config.getBoolean("web.enable")) {
-            if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
+            if (config.getString("web.type", "new").equals("new")
+                    || config.getString("web.type", "new").equals("api")) {
                 permissionsManager = new PermissionsManager(dataManager);
             }
             webServer = new WebServer(config, dataManager.getDataSource());

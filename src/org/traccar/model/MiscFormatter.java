@@ -30,7 +30,10 @@ import org.traccar.web.JsonConverter;
 /**
  * Format extended tracker status
  */
-public class MiscFormatter {
+public final class MiscFormatter {
+
+    private MiscFormatter() {
+    }
 
     private static final String XML_ROOT_NODE = "info";
 

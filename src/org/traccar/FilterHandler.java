@@ -31,12 +31,8 @@ public class FilterHandler extends BaseDataHandler {
     private final long filterLimit;
 
     public FilterHandler(
-            boolean filterInvalid,
-            boolean filterZero,
-            boolean filterDuplicate,
-            boolean filterFuture,
-            int filterDistance,
-            long filterLimit) {
+            boolean filterInvalid, boolean filterZero, boolean filterDuplicate,
+            boolean filterFuture, int filterDistance, long filterLimit) {
 
         this.filterInvalid = filterInvalid;
         this.filterZero = filterZero;
@@ -69,9 +65,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filterZero(Position position) {
-        return filterZero &&
-                position.getLatitude() == 0.0 &&
-                position.getLongitude() == 0.0;
+        return filterZero && position.getLatitude() == 0.0 && position.getLongitude() == 0.0;
     }
 
     private boolean filterDuplicate(Position position) {
@@ -122,12 +116,8 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filter(Position p) {
 
-        boolean result =
-                filterInvalid(p) ||
-                filterZero(p) ||
-                filterDuplicate(p) ||
-                filterFuture(p) ||
-                filterDistance(p);
+        boolean result = filterInvalid(p) || filterZero(p)
+                || filterDuplicate(p) || filterFuture(p) || filterDistance(p);
 
         if (filterLimit(p)) {
             result = false;
@@ -142,7 +132,10 @@ public class FilterHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        return filter(position) ? null : position;
+        if (filter(position)) {
+            return null;
+        }
+        return position;
     }
 
 }

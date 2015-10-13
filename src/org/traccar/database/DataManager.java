@@ -118,7 +118,8 @@ public class DataManager implements IdentityManager {
     @Override
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
 
-        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay || !devicesByUniqueId.containsKey(uniqueId)) {
+        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay
+                || !devicesByUniqueId.containsKey(uniqueId)) {
 
             devicesById.clear();
             devicesByUniqueId.clear();
@@ -163,7 +164,8 @@ public class DataManager implements IdentityManager {
                 String schemaVersionQuery = getQuery("database.selectSchemaVersion");
                 if (schemaVersionQuery != null) {
 
-                    Schema schema = QueryBuilder.create(dataSource, schemaVersionQuery).executeQuerySingle(new Schema());
+                    Schema schema = QueryBuilder.create(dataSource, schemaVersionQuery)
+                            .executeQuerySingle(new Schema());
 
                     int version = 0;
                     if (schema != null) {

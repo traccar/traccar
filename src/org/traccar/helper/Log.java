@@ -35,7 +35,10 @@ import org.jboss.netty.logging.InternalLogger;
 import org.jboss.netty.logging.InternalLoggerFactory;
 import org.traccar.Config;
 
-public class Log {
+public final class Log {
+
+    private Log() {
+    }
 
     private static final String LOGGER_NAME = "traccar";
 
@@ -81,24 +84,24 @@ public class Log {
     public static void logSystemInfo() {
         try {
             OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
-            Log.info("Operating system" +
-                " name: " + operatingSystemBean.getName() +
-                " version: " + operatingSystemBean.getVersion() +
-                " architecture: " + operatingSystemBean.getArch());
+            Log.info("Operating system"
+                    + " name: " + operatingSystemBean.getName()
+                    + " version: " + operatingSystemBean.getVersion()
+                    + " architecture: " + operatingSystemBean.getArch());
 
             RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-            Log.info("Java runtime" +
-                " name: " + runtimeBean.getVmName() +
-                " vendor: " + runtimeBean.getVmVendor() +
-                " version: " + runtimeBean.getVmVersion());
+            Log.info("Java runtime"
+                    + " name: " + runtimeBean.getVmName()
+                    + " vendor: " + runtimeBean.getVmVendor()
+                    + " version: " + runtimeBean.getVmVersion());
 
             MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-            Log.info("Memory limit" +
-                " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb" +
-                " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
+            Log.info("Memory limit"
+                    + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
+                    + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
 
-            Log.info("Character encoding: " +
-                    System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
+            Log.info("Character encoding: "
+                    + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
 
         } catch (Exception error) {
             Log.warning("Failed to get system info");
