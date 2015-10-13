@@ -51,7 +51,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_REFRIGERATOR = 0x5b;
     private static final int TAG_PRESSURE = 0x5c;
 
-    private static final Map<Integer, Integer> tagLengthMap = new HashMap<>();
+    private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
     static {
         int[] l1 = {
@@ -80,25 +80,25 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             0xf6, 0xf7, 0xf8
         };
         for (int i : l1) {
-            tagLengthMap.put(i, 1);
+            TAG_LENGTH_MAP.put(i, 1);
         }
         for (int i : l2) {
-            tagLengthMap.put(i, 2);
+            TAG_LENGTH_MAP.put(i, 2);
         }
         for (int i : l3) {
-            tagLengthMap.put(i, 3);
+            TAG_LENGTH_MAP.put(i, 3);
         }
         for (int i : l4) {
-            tagLengthMap.put(i, 4);
+            TAG_LENGTH_MAP.put(i, 4);
         }
-        tagLengthMap.put(TAG_COORDINATES, 9);
-        tagLengthMap.put(TAG_IMEI, 15);
-        tagLengthMap.put(TAG_REFRIGERATOR, 7); // variable length
-        tagLengthMap.put(TAG_PRESSURE, 68);
+        TAG_LENGTH_MAP.put(TAG_COORDINATES, 9);
+        TAG_LENGTH_MAP.put(TAG_IMEI, 15);
+        TAG_LENGTH_MAP.put(TAG_REFRIGERATOR, 7); // variable length
+        TAG_LENGTH_MAP.put(TAG_PRESSURE, 68);
     }
 
     private static int getTagLength(int tag) {
-        return tagLengthMap.get(tag);
+        return TAG_LENGTH_MAP.get(tag);
     }
 
     private void sendReply(Channel channel, int checksum) {

@@ -15,7 +15,10 @@
  */
 package org.traccar.helper;
 
-public class UnitsConverter {
+public final class UnitsConverter {
+
+    private UnitsConverter() {
+    }
 
     public static double knotsFromKph(double value) { // km/h
         return value * 0.539957;

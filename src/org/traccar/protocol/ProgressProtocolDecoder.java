@@ -138,7 +138,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Event.KEY_SATELLITES, satellitesNumber);
 
                 // Validity
-                position.setValid(satellitesNumber >= 3); // TODO: probably wrong
+                position.setValid(satellitesNumber >= 3);
 
                 // Cell signal
                 position.set(Event.KEY_GSM, buf.readUnsignedByte());

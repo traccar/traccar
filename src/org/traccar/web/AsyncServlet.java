@@ -113,8 +113,8 @@ public class AsyncServlet extends BaseServlet {
                     destroyed = true;
                 }
                 Context.getConnectionManager().removeListener(devices, dataListener);
-                synchronized (asyncSessions) {
-                    asyncSessions.remove(userId);
+                synchronized (ASYNC_SESSIONS) {
+                    ASYNC_SESSIONS.remove(userId);
                 }
             }
         };
@@ -175,17 +175,17 @@ public class AsyncServlet extends BaseServlet {
 
     }
 
-    private static final Map<Long, AsyncSession> asyncSessions = new HashMap<>();
+    private static final Map<Long, AsyncSession> ASYNC_SESSIONS = new HashMap<>();
 
     public static void sessionRefreshUser(long userId) {
-        synchronized (asyncSessions) {
-            asyncSessions.remove(userId);
+        synchronized (ASYNC_SESSIONS) {
+            ASYNC_SESSIONS.remove(userId);
         }
     }
 
     public static void sessionRefreshDevice(long deviceId) {
-        synchronized (asyncSessions) {
-            Iterator<Entry<Long, AsyncSession>> iterator = asyncSessions.entrySet().iterator();
+        synchronized (ASYNC_SESSIONS) {
+            Iterator<Entry<Long, AsyncSession>> iterator = ASYNC_SESSIONS.entrySet().iterator();
             while (iterator.hasNext()) {
                 if (iterator.next().getValue().hasDevice(deviceId)) {
                     iterator.remove();
@@ -199,14 +199,14 @@ public class AsyncServlet extends BaseServlet {
         context.setTimeout(ASYNC_TIMEOUT);
         HttpServletRequest req = (HttpServletRequest) context.getRequest();
 
-        synchronized (asyncSessions) {
+        synchronized (ASYNC_SESSIONS) {
 
-            if (Boolean.parseBoolean(req.getParameter("first")) || !asyncSessions.containsKey(userId)) {
+            if (Boolean.parseBoolean(req.getParameter("first")) || !ASYNC_SESSIONS.containsKey(userId)) {
                 Collection<Long> devices = Context.getPermissionsManager().allowedDevices(userId);
-                asyncSessions.put(userId, new AsyncSession(userId, devices));
+                ASYNC_SESSIONS.put(userId, new AsyncSession(userId, devices));
             }
 
-            asyncSessions.get(userId).request(context);
+            ASYNC_SESSIONS.get(userId).request(context);
         }
     }
 

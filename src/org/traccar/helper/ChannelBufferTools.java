@@ -19,7 +19,10 @@ import org.jboss.netty.buffer.ChannelBuffer;
 
 import java.util.Formatter;
 
-public class ChannelBufferTools {
+public final class ChannelBufferTools {
+
+    private ChannelBufferTools() {
+    }
 
     public static Integer find(ChannelBuffer buf, int start, String subString) {
         return find(buf, start, buf.readerIndex() + buf.readableBytes(), subString);

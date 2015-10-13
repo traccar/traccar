@@ -61,7 +61,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             channel.write(response, remoteAddress);
         }
     }
-    
+
     private Position decodePosition(int type, ChannelBuffer buf) {
 
         Position position = new Position();

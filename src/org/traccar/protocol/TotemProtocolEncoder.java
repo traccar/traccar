@@ -17,6 +17,7 @@
 package org.traccar.protocol;
 
 import org.traccar.StringProtocolEncoder;
+import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class TotemProtocolEncoder extends StringProtocolEncoder {
@@ -33,6 +34,9 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "*{%s},025,C,1#", Command.KEY_DEVICE_PASSWORD);
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(command, "*{%s},025,C,0#", Command.KEY_DEVICE_PASSWORD);
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                break;
         }
 
         return null;

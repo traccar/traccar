@@ -19,7 +19,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class PatternUtil {
+public final class PatternUtil {
+
+    private PatternUtil() {
+    }
 
     public static String checkPattern(String pattern, String input) {
 

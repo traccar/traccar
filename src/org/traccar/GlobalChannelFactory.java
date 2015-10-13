@@ -20,10 +20,13 @@ import org.jboss.netty.channel.socket.DatagramChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-public class GlobalChannelFactory {
+public final class GlobalChannelFactory {
 
     private static ChannelFactory channelFactory = null;
     private static DatagramChannelFactory datagramChannelFactory = null;
+
+    private GlobalChannelFactory() {
+    }
 
     public static void release() {
         if (channelFactory != null) {

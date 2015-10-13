@@ -32,7 +32,8 @@ public class BingMapsReverseGeocoder extends JsonReverseGeocoder {
     public Address parseAddress(JsonObject json) {
         JsonArray result = json.getJsonArray("resourceSets");
         if (result != null) {
-            JsonObject location = result.getJsonObject(0).getJsonArray("resources").getJsonObject(0).getJsonObject("address");
+            JsonObject location =
+                    result.getJsonObject(0).getJsonArray("resources").getJsonObject(0).getJsonObject("address");
             if (location != null) {
                 Address address = new Address();
                 if (location.containsKey("addressLine")) {

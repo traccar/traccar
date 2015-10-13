@@ -41,7 +41,7 @@ public class TramigoFrameDecoder extends LengthFieldBasedFrameDecoder {
         // Swap byte order for legacy protocol
         if (buf.getUnsignedByte(buf.readerIndex()) == 0x80) {
             int length = buf.readableBytes();
-            byte bytes[] = new byte[length];
+            byte[] bytes = new byte[length];
             buf.getBytes(buf.readerIndex(), bytes);
 
             ChannelBuffer result = (ChannelBuffer) super.decode(

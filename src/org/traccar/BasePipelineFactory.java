@@ -64,7 +64,11 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
                 msg.append("[").append(String.format("%08X", e.getChannel().getId())).append(": ");
                 msg.append(((InetSocketAddress) e.getChannel().getLocalAddress()).getPort());
-                msg.append(e instanceof DownstreamMessageEvent ? " > " : " < ");
+                if (e instanceof DownstreamMessageEvent) {
+                    msg.append(" > ");
+                } else {
+                    msg.append(" < ");
+                }
 
                 msg.append(((InetSocketAddress) event.getRemoteAddress()).getAddress().getHostAddress()).append("]");
 

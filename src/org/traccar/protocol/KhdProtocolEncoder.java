@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class KhdProtocolEncoder extends BaseProtocolEncoder {
@@ -52,6 +53,9 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
                 return encodeCommand(MSG_CUT_OIL);
             case Command.TYPE_ENGINE_RESUME:
                 return encodeCommand(MSG_RESUME_OIL);
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                break;
         }
 
         return null;

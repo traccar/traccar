@@ -67,6 +67,8 @@ public class GoogleReverseGeocoder extends JsonReverseGeocoder {
                         case "postal_code":
                             address.setPostcode(value);
                             break typesLoop;
+                        default:
+                            break;
                     }
                 }
             }
