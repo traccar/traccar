@@ -69,6 +69,11 @@ public class DateBuilder {
         return setDate(year, month, day);
     }
 
+    public DateBuilder setCurrentDate() {
+        Calendar now = Calendar.getInstance(calendar.getTimeZone());
+        return setYear(now.get(Calendar.YEAR)).setMonth(now.get(Calendar.MONTH)).setDay(now.get(Calendar.DAY_OF_MONTH));
+    }
+
     public DateBuilder setHour(int hour) {
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         return this;
