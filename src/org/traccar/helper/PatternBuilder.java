@@ -25,20 +25,24 @@ public class PatternBuilder {
         void build(PatternBuilder builder);
     }
 
+    // eXPRession
     public PatternBuilder xpr(String s) {
         pattern.append(s);
         return this;
     }
 
+    // OPtional eXpression
     public PatternBuilder opx(String s) {
         return xpr("(?:").xpr(s).xpr(")?");
     }
 
+    // TeXT
     public PatternBuilder txt(String s) {
         pattern.append(s.replaceAll("([\\\\\\.\\[\\{\\(\\*\\+\\?\\^\\$\\|])", "\\\\$1"));
         return this;
     }
 
+    // NUMber
     public PatternBuilder num(String s) {
         s = s.replace("dddd", "d{4}").replace("ddd", "d{3}").replace("dd", "d{2}");
         s = s.replace("xxxx", "x{4}").replace("xxx", "x{3}").replace("xx", "x{2}");
@@ -47,6 +51,7 @@ public class PatternBuilder {
         return this;
     }
 
+    // OPtional Number
     public PatternBuilder opn(String s) {
         return xpr("(?:").num(s).xpr(")?");
     }
@@ -60,6 +65,7 @@ public class PatternBuilder {
         return xpr("[^").txt(s).xpr("]*");
     }
 
+    // NeXT
     public PatternBuilder nxt(String s) {
         return not(s).txt(s);
     }
@@ -69,7 +75,11 @@ public class PatternBuilder {
     }
 
     public PatternBuilder groupEnd(boolean optional) {
-        return xpr(optional ? ")?" : ")");
+        if (optional) {
+            return xpr(")?");
+        } else {
+            return xpr(")");
+        }
     }
 
     public Pattern compile() {

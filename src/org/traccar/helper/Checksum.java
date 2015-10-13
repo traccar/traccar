@@ -19,7 +19,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.zip.CRC32;
 
-public class Checksum {
+public final class Checksum {
+
+    private Checksum() {
+    }
 
     private static final int[] CRC16_CCITT_TABLE_REVERSE = {
         0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF,
@@ -132,8 +135,9 @@ public class Checksum {
                 return crc16Unreflected(buf, 0xFFFF, CRC16_CCITT_TABLE) ^ 0xFFFF;
             case CRC16_MCRF4XX:
                 return crc16Reflected(buf, 0xFFFF, CRC16_CCITT_TABLE_REVERSE);
+            default:
+                throw new UnsupportedOperationException(type);
         }
-        throw new UnsupportedOperationException();
     }
 
     public static int crc32(ByteBuffer buf) {

@@ -28,8 +28,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Log;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -131,14 +131,16 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
 
                 case TAG_DIGITAL_INPUTS:
                     int input = buf.readUnsignedShort();
-                    for (int i = 0; i < 16; i++)
+                    for (int i = 0; i < 16; i++) {
                         position.set(Event.PREFIX_IO + (i + 1), BitUtil.check(input, i));
+                    }
                     break;
 
                 case TAG_DIGITAL_OUTPUTS:
                     int output = buf.readUnsignedShort();
-                    for (int i = 0; i < 16; i++)
+                    for (int i = 0; i < 16; i++) {
                         position.set(Event.PREFIX_IO + (i + 17), BitUtil.check(output, i));
+                    }
                     break;
 
                 case TAG_INPUT_VOLTAGE1:

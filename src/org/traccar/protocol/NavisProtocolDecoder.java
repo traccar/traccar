@@ -26,6 +26,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -308,6 +309,9 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                 return processArray(channel, buf);
             case "*>S":
                 return processHandshake(channel, buf);
+            default:
+                Log.warning(new UnsupportedOperationException(type));
+                break;
         }
 
         return null;

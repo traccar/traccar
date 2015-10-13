@@ -113,10 +113,18 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
 
-                    if (BitUtil.check(mask, 10)) buf.skipBytes(4);
-                    if (BitUtil.check(mask, 11)) buf.skipBytes(4);
-                    if (BitUtil.check(mask, 12)) buf.skipBytes(2);
-                    if (BitUtil.check(mask, 13)) buf.skipBytes(2);
+                    if (BitUtil.check(mask, 10)) {
+                        buf.skipBytes(4);
+                    }
+                    if (BitUtil.check(mask, 11)) {
+                        buf.skipBytes(4);
+                    }
+                    if (BitUtil.check(mask, 12)) {
+                        buf.skipBytes(2);
+                    }
+                    if (BitUtil.check(mask, 13)) {
+                        buf.skipBytes(2);
+                    }
 
                     if (BitUtil.check(mask, 14)) {
                         position.set(Event.KEY_MCC, buf.readUnsignedShort());

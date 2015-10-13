@@ -62,7 +62,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("[#")) {
 
             // TODO: EXIT Send response
-        
+
         } else if (hasDeviceId()) {
 
             Matcher parser = PATTERN.matcher(sentence);

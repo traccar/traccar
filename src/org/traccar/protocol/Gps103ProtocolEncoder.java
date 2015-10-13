@@ -60,7 +60,6 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
-
         }
 
         return null;

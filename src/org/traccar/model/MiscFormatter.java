@@ -15,9 +15,6 @@
  */
 package org.traccar.model;
 
-import org.traccar.helper.Log;
-import org.traccar.web.JsonConverter;
-
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,19 +24,21 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
+import org.traccar.helper.Log;
+import org.traccar.web.JsonConverter;
 
 /**
  * Format extended tracker status
  */
 public class MiscFormatter {
 
-    private static final String xmlRootNode = "info";
+    private static final String XML_ROOT_NODE = "info";
 
-    private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
 
     private static String format(Object value) {
         if (value instanceof Double || value instanceof Float) {
-            return decimalFormat.format(value);
+            return DECIMAL_FORMAT.format(value);
         } else {
             return value.toString();
         }
@@ -48,7 +47,7 @@ public class MiscFormatter {
     public static String toXmlString(Map<String, Object> attributes) {
         StringBuilder result = new StringBuilder();
 
-        result.append("<").append(xmlRootNode).append(">");
+        result.append("<").append(XML_ROOT_NODE).append(">");
 
         for (Map.Entry<String, Object> entry : attributes.entrySet()) {
 
@@ -57,7 +56,7 @@ public class MiscFormatter {
             result.append("</").append(entry.getKey()).append(">");
         }
 
-        result.append("</").append(xmlRootNode).append(">");
+        result.append("</").append(XML_ROOT_NODE).append(">");
 
         return result.toString();
     }

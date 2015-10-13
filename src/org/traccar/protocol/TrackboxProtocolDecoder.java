@@ -63,7 +63,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
             if (identify(id, channel)) {
                 sendResponse(channel);
             }
-        
+
         } else {
 
             Matcher parser = PATTERN.matcher(sentence);

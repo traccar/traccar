@@ -15,10 +15,10 @@
  */
 package org.traccar.helper;
 
-/**
- * Useful functions to work with bits
- */
-public class BitUtil {
+public final class BitUtil {
+
+    private BitUtil() {
+    }
 
     public static boolean check(long number, int index) {
         return (number & (1 << index)) != 0;
