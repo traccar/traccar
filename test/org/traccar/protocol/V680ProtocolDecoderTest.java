@@ -13,7 +13,10 @@ public class V680ProtocolDecoderTest extends ProtocolDecoderTest {
         
         assertNull(decoder.decode(null, null,
                 "#353588102019155"));
-        
+
+        verify(decoder.decode(null, null,
+                "#135790246811222#13486119277#1#0000#SOS#1#27bc10af#11407.4182,E,2232.7632,N,0.00,79.50#070709#134147.000##"));
+
         verify(decoder.decode(null, null,
                 "#356823031193431##0#0000#SF#1#72403#V#04702.3025,W,2252.18380,S,008.18,0#090413#134938"));
 
@@ -46,10 +49,7 @@ public class V680ProtocolDecoderTest extends ProtocolDecoderTest {
         
         verify(decoder.decode(null, null,
                 "#356823031166908#13001190527#0#0000#AUT#4#V#07136.4070,W,1040.0575,N,000.35,257#280813#142836#V#07136.4088,W,1040.0580,N,000.49,288#280813#142846#V#07136.4098,W,1040.0590,N,000.59,264#280813#142856#V#07136.4093,W,1040.0605,N,000.30,264#280813#142906##"));
-        
-        verify(decoder.decode(null, null,
-                "#135790246811222#13486119277#1#0000#SOS#1#27bc10af#11407.4182,E,2232.7632,N,0.00,79.50#070709#134147.000##"));
-        
+
         verify(decoder.decode(null, null,
                 "#355488020132015##1#0000#AUT#01#510089246a34c0#10641.338800,E,619.427100,S,0.00,0.00#011113#161942.000##"));
         

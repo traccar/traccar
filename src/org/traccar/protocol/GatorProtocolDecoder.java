@@ -63,10 +63,8 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(), buf.readUnsignedByte());
         id = id.replaceFirst("^0+(?!$)", "");
 
-        if (type == MSG_POSITION_DATA ||
-            type == MSG_ROLLCALL_RESPONSE ||
-            type == MSG_ALARM_DATA ||
-            type == MSG_BLIND_AREA) {
+        if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
+                || type == MSG_ALARM_DATA || type == MSG_BLIND_AREA) {
 
             // Create new position
             Position position = new Position();

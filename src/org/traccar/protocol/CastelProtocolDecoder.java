@@ -67,8 +67,14 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(buf.readUnsignedShort() % 360);
 
         int flags = buf.readUnsignedByte();
-        position.setLatitude((flags & 0x02) == 0 ? -lat : lat);
-        position.setLongitude((flags & 0x01) == 0 ? -lon : lon);
+        if ((flags & 0x02) == 0) {
+            lat = -lat;
+        }
+        if ((flags & 0x01) == 0) {
+            lon = -lon;
+        }
+        position.setLatitude(lat);
+        position.setLongitude(lon);
         position.setValid((flags & 0x0C) > 0);
         position.set(Event.KEY_SATELLITES, flags >> 4);
     }
@@ -95,17 +101,14 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(version);
                 response.writeBytes(id);
                 response.writeShort(ChannelBuffers.swapShort(MSG_HEARTBEAT_RESPONSE));
-                response.writeShort(Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
+                response.writeShort(
+                        Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
                 response.writeByte(0x0D); response.writeByte(0x0A);
                 channel.write(response, remoteAddress);
             }
 
-        } else if (
-                type == MSG_LOGIN ||
-                type == MSG_LOGOUT ||
-                type == MSG_GPS ||
-                type == MSG_ALARM ||
-                type == MSG_CURRENT_LOCATION) {
+        } else if (type == MSG_LOGIN || type == MSG_LOGOUT || type == MSG_GPS
+                || type == MSG_ALARM || type == MSG_CURRENT_LOCATION) {
 
             if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
 
@@ -122,7 +125,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 response.writeInt(0xFFFFFFFF);
                 response.writeShort(0);
                 response.writeInt((int) (System.currentTimeMillis() / 1000));
-                response.writeShort(Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
+                response.writeShort(
+                        Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
                 response.writeByte(0x0D); response.writeByte(0x0A);
                 channel.write(response, remoteAddress);
 

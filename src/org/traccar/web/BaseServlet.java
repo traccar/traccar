@@ -33,7 +33,9 @@ public abstract class BaseServlet extends HttpServlet {
     public static final String USER_KEY = "user";
 
     @Override
-    protected final void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected final void service(
+            HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
         String command = req.getPathInfo();
         if (command == null) {
             command = "";
@@ -52,7 +54,8 @@ public abstract class BaseServlet extends HttpServlet {
         }
     }
 
-    protected abstract boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception;
+    protected abstract boolean handle(
+            String command, HttpServletRequest req, HttpServletResponse resp) throws Exception;
 
     public long getUserId(HttpServletRequest req) {
         Long userId = (Long) req.getSession().getAttribute(USER_KEY);

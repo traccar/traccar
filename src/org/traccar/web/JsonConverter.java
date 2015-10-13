@@ -38,12 +38,15 @@ import org.traccar.helper.Log;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
-public class JsonConverter {
+public final class JsonConverter {
 
-    private static final DateTimeFormatter dateFormat = ISODateTimeFormat.dateTime();
+    private JsonConverter() {
+    }
+
+    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
 
     public static Date parseDate(String value) {
-        return dateFormat.parseDateTime(value).toDate();
+        return DATE_FORMAT.parseDateTime(value).toDate();
     }
 
     public static <T extends Factory> T objectFromJson(Reader reader, T prototype) throws ParseException {
@@ -63,26 +66,28 @@ public class JsonConverter {
                 final String name = Introspector.decapitalize(method.getName().substring(3));
                 Class<?> parameterType = method.getParameterTypes()[0];
 
-                if (json.containsKey(name)) try {
-                    if (parameterType.equals(boolean.class)) {
-                        method.invoke(object, json.getBoolean(name));
-                    } else if (parameterType.equals(int.class)) {
-                        method.invoke(object, json.getJsonNumber(name).intValue());
-                    } else if (parameterType.equals(long.class)) {
-                        if (json.get(name).getValueType() == JsonValue.ValueType.NUMBER) {
-                            method.invoke(object, json.getJsonNumber(name).longValue());
+                if (json.containsKey(name)) {
+                    try {
+                        if (parameterType.equals(boolean.class)) {
+                            method.invoke(object, json.getBoolean(name));
+                        } else if (parameterType.equals(int.class)) {
+                            method.invoke(object, json.getJsonNumber(name).intValue());
+                        } else if (parameterType.equals(long.class)) {
+                            if (json.get(name).getValueType() == JsonValue.ValueType.NUMBER) {
+                                method.invoke(object, json.getJsonNumber(name).longValue());
+                            }
+                        } else if (parameterType.equals(double.class)) {
+                            method.invoke(object, json.getJsonNumber(name).doubleValue());
+                        } else if (parameterType.equals(String.class)) {
+                            method.invoke(object, json.getString(name));
+                        } else if (parameterType.equals(Date.class)) {
+                            method.invoke(object, DATE_FORMAT.parseDateTime(json.getString(name)).toDate());
+                        } else if (parameterType.equals(Map.class)) {
+                            method.invoke(object, MiscFormatter.fromJson(json.getJsonObject(name)));
                         }
-                    } else if (parameterType.equals(double.class)) {
-                        method.invoke(object, json.getJsonNumber(name).doubleValue());
-                    } else if (parameterType.equals(String.class)) {
-                        method.invoke(object, json.getString(name));
-                    } else if (parameterType.equals(Date.class)) {
-                        method.invoke(object, dateFormat.parseDateTime(json.getString(name)).toDate());
-                    } else if (parameterType.equals(Map.class)) {
-                        method.invoke(object, MiscFormatter.fromJson(json.getJsonObject(name)));
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
                     }
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    Log.warning(error);
                 }
             }
         }
@@ -119,7 +124,7 @@ public class JsonConverter {
                     } else if (method.getReturnType().equals(Date.class)) {
                         Date value = (Date) method.invoke(object);
                         if (value != null) {
-                            json.add(name, dateFormat.print(new DateTime(value)));
+                            json.add(name, DATE_FORMAT.print(new DateTime(value)));
                         }
                     } else if (method.getReturnType().equals(Map.class)) {
                         json.add(name, MiscFormatter.toJson((Map) method.invoke(object)));

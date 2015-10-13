@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -31,24 +31,27 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(?:#(\\d+)#" +                // IMEI
-            "([^#]*)#)?" +                 // User
-            "(\\d+)#" +                    // Fix
-            "([^#]+)#" +                   // Password
-            "([^#]+)#" +                   // Event
-            "(\\d+)#" +                    // Packet number
-            "([^#]+)?#?" +                 // GSM base station
-            "(?:[^#]+#)?" +
-            "(\\d+)?(\\d{2}\\.\\d+)," +    // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+)?(\\d{2}\\.\\d+)," +    // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d+\\.\\d+)," +             // Speed
-            "(\\d+\\.?\\d*)?#" +           // Course
-            "(\\d{2})(\\d{2})(\\d{2})#" +  // Date (DDMMYY)
-            "(\\d{2})(\\d{2})(\\d{2})" +   // Time (HHMMSS)
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .groupBegin()
+            .num("#(d+)#")                       // imei
+            .xpr("([^#]*)#")                     // user
+            .groupEnd(true)
+            .num("(d+)#")                        // fix
+            .xpr("([^#]+)#")                     // password
+            .xpr("([^#]+)#")                     // event
+            .num("(d+)#")                        // packet number
+            .xpr("([^#]+)?#?")                   // gsm base station
+            .xpr("(?:[^#]+#)?")
+            .num("(d+)?(dd.d+),")                // longitude
+            .xpr("([EW]),")
+            .num("(d+)?(dd.d+),")                // latitude
+            .xpr("([NS]),")
+            .num("(d+.d+),")                     // speed
+            .num("(d+.?d*)?#")                   // course
+            .num("(dd)(dd)(dd)#")                // date
+            .num("(dd)(dd)(dd)")                 // time
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
@@ -58,89 +61,51 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
         sentence = sentence.trim();
 
-        // Detect device ID
         if (sentence.length() == 16) {
-            String imei = sentence.substring(1, sentence.length());
-            identify(imei, channel);
+
+            identify(sentence.substring(1, sentence.length()), channel);
+
         } else {
 
-            // Parse message
-            Matcher parser = PATTERN.matcher(sentence);
+            Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
                 return null;
             }
 
-            // Create new position
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            Integer index = 1;
 
-            // Get device by IMEI
-            String imei = parser.group(index++);
-            if (imei != null) {
-                identify(imei, channel);
+            if (parser.hasNext()) {
+                identify(parser.next(), channel);
             }
             if (!hasDeviceId()) {
                 return null;
             }
             position.setDeviceId(getDeviceId());
 
-            // User
-            position.set("user", parser.group(index++));
+            position.set("user", parser.next());
+            position.setValid(parser.nextInt() > 0);
+            position.set("password", parser.next());
+            position.set(Event.KEY_EVENT, parser.next());
+            position.set("packet", parser.next());
+            position.set(Event.KEY_GSM, parser.next());
 
-            // Validity
-            position.setValid(Integer.parseInt(parser.group(index++)) > 0);
+            position.setLongitude(parser.nextCoordinate());
+            position.setLatitude(parser.nextCoordinate());
+            position.setSpeed(parser.nextDouble());
+            position.setCourse(parser.nextDouble());
 
-            // Password
-            position.set("password", parser.group(index++));
-
-            // Event
-            position.set(Event.KEY_EVENT, parser.group(index++));
-
-            // Packet number
-            position.set("packet", parser.group(index++));
-
-            // GSM base station
-            position.set(Event.KEY_GSM, parser.group(index++));
-
-            // Longitude
-            String lon = parser.group(index++);
-            Double longitude = (lon != null) ? Double.parseDouble(lon) : 0.0;
-            longitude += Double.parseDouble(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-            position.setLongitude(longitude);
-
-            // Latitude
-            String lat = parser.group(index++);
-            Double latitude = (lat != null) ? Double.parseDouble(lat) : 0.0;
-            latitude += Double.parseDouble(parser.group(index++)) / 60;
-            if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-            position.setLatitude(latitude);
-
-            // Speed and Course
-            position.setSpeed(Double.parseDouble(parser.group(index++)));
-            String course = parser.group(index++);
-            if (course != null) {
-                position.setCourse(Double.parseDouble(course));
-            }
-
-            // Date
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            int day = Integer.parseInt(parser.group(index++));
-            int month = Integer.parseInt(parser.group(index++));
+            int day = parser.nextInt();
+            int month = parser.nextInt();
             if (day == 0 && month == 0) {
                 return null; // invalid date
             }
-            time.set(Calendar.DAY_OF_MONTH, day);
-            time.set(Calendar.MONTH, month - 1);
-            time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
 
-            // Time
-            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-            position.setTime(time.getTime());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), month, day)
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+
             return position;
         }
 
