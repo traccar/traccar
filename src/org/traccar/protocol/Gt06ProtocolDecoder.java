@@ -16,7 +16,10 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
