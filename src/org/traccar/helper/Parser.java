@@ -45,15 +45,23 @@ public class Parser {
     }
 
     public int nextInt() {
-        return Integer.parseInt(next());
+        return nextInt(10);
     }
 
     public int nextInt(int radix) {
-        return Integer.parseInt(next(), radix);
+        if (hasNext()) {
+            return Integer.parseInt(next(), radix);
+        } else {
+            return 0;
+        }
     }
 
     public double nextDouble() {
-        return Double.parseDouble(next());
+        if (hasNext()) {
+            return Double.parseDouble(next());
+        } else {
+            return 0.0;
+        }
     }
 
     // Format: (degrees)(minutes)(hemisphere)
