@@ -18,9 +18,6 @@ package org.traccar.protocol;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -90,12 +87,16 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
             // First digit
             int d1 = (b & 0xf0) >> 4;
-            if (d1 == 0xf) break;
+            if (d1 == 0xf) {
+                break;
+            }
             builder.append(d1);
 
             // Second digit
             int d2 = b & 0x0f;
-            if (d2 == 0xf) break;
+            if (d2 == 0xf) {
+                break;
+            }
             builder.append(d2);
         }
 
@@ -210,8 +211,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Parser parser = new Parser(command == MSG_RFID ? PATTERN_RFID : PATTERN,
-                buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset()));
+        Pattern pattern;
+        if (command == MSG_RFID) {
+            pattern = PATTERN_RFID;
+        } else {
+            pattern = PATTERN;
+        }
+
+        Parser parser = new Parser(pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset()));
         if (!parser.matches()) {
             return null;
         }
