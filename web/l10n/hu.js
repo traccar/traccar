@@ -1,7 +1,7 @@
-var Strings = {
+var strings = {
     sharedLoading: 'Betöltés...',
     sharedSave: 'Mentés',
-    sharedCancel: 'Mégsem',
+    sharedCancel: 'Mégse',
     sharedAdd: 'Hozzáadás',
     sharedEdit: 'Szerkesztés',
     sharedRemove: 'Törlés',
@@ -15,24 +15,24 @@ var Strings = {
     sharedSecond: 'Másodperc',
 
     errorTitle: 'Hiba',
-    errorUnknown: 'Ismeretlen hiba',
+    errorUnknown: 'Ismeretlen hiba.',
 
     userName: 'Név',
     userEmail: 'Email',
     userPassword: 'Jelszó',
     userAdmin: 'Adminisztrátor',
 
-    loginTitle: 'Belépés',
+    loginTitle: 'Bejelentkezés',
     loginLanguage: 'Nyelv',
     loginRegister: 'Regisztráció',
-    loginLogin: 'Belépés',
-    loginFailed: 'Hibás email cím vagy jelszó',
+    loginLogin: 'Bejelentkezés',
+    loginFailed: 'Hibás email vagy jelszó',
     loginCreated: 'Az új felhasználó sikeresen létrehozva',
     loginLogout: 'Kilépés',
 
     deviceDialog: 'Eszköz',
     deviceTitle: 'Eszközök',
-    deviceName: 'Név',
+    deviceName: 'Eszköznév',
     deviceIdentifier: 'Azonosító',
     deviceCommand: 'Parancs',
 
@@ -45,15 +45,15 @@ var Strings = {
 
     reportTitle: 'Jelentések',
     reportDevice: 'Eszköz',
-    reportFrom: 'Küldő',
-    reportTo: 'Címzett',
-    reportShow: 'Megmutat',
-    reportClear: 'Kitörlés',
+    reportFrom: 'Kezdő dátum:',
+    reportTo: 'Végső dátum:',
+    reportShow: 'Mutat',
+    reportClear: 'Töröl',
 
     positionTime: 'Idő',
-    positionValid: 'Érvényes',
-    positionLatitude: 'Szélesség',
-    positionLongitude: 'Hosszúság',
+    positionValid: 'Valós',
+    positionLatitude: 'Szélességi fok',
+    positionLongitude: 'Hosszúsági fok',
     positionAltitude: 'Magasság',
     positionSpeed: 'Sebesség',
     positionCourse: 'Irány',
@@ -66,13 +66,11 @@ var Strings = {
 
     mapTitle: 'Térkép',
     mapLayer: 'Térkép réteg',
-    mapCustom: 'Saját térkép',
     mapOsm: 'Open Street Map',
-    mapBingKey: 'Bing Maps Key',
     mapBingRoad: 'Bing Maps Road',
     mapBingAerial: 'Bing Maps Aerial',
 
-    stateTitle: 'Állapot',
+    stateTitle: 'Helyzet',
     stateName: 'Paraméter',
     stateValue: 'Érték',
 
@@ -80,10 +78,10 @@ var Strings = {
     commandSend: 'Küld',
     commandType: 'Típus',
     commandSent: 'A parancs elküldve',
-    commandPositionPeriodic: 'Pozíció küldés',
-    commandPositionStop: 'Pozíció küldés kikapcsolása',
-    commandEngineStop: 'Motor kikapcsolása',
-    commandEngineResume: 'Motor visszakapcsolása',
+    commandPositionPeriodic: 'Pozició küldés',
+    commandPositionStop: 'Pozició küldés vége',
+    commandEngineStop: 'Motor letiltás',
+    commandEngineResume: 'Motor engedélyezés',
     commandFrequency: 'Frekvencia',
     commandUnit: 'Egység'
 };
