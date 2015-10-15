@@ -45,8 +45,14 @@ public class DeviceServlet extends BaseServlet {
     }
 
     private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
+        if (Boolean.parseBoolean(req.getParameter("all"))) {
+            Context.getPermissionsManager().checkAdmin(getUserId(req));
+            sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
+                    Context.getDataManager().getAllDevices()));
+        } else {
+            sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getDevices(getUserId(req))));
+        }
     }
 
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {

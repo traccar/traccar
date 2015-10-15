@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.UserDevicesController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.userDevices',
+Ext.define('Traccar.store.AllDevices', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Device',
 
-    init: function () {
-        this.getView().getStore().load();
-    },
-
-    onSelectionChange: function (selected) {
-        console.log(selected); // TODO
+    proxy: {
+        type: 'ajax',
+        url: '/api/device/get',
+        extraParams: {
+            all: true
+        },
+        reader: {
+            type: 'json',
+            rootProperty: 'data'
+        }
     }
 });

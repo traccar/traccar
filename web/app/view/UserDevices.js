@@ -23,7 +23,7 @@ Ext.define('Traccar.view.UserDevices', {
     ],
 
     controller: 'userDevices',
-    store: 'Devices',
+    store: 'AllDevices',
 
     selModel: {
         selType: 'checkboxmodel',
@@ -43,3 +43,4 @@ Ext.define('Traccar.view.UserDevices', {
         dataIndex: 'uniqueId', flex: 1
     }]
 });
+32
