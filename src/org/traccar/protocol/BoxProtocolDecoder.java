@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -32,24 +32,24 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "L," +
-            "(\\d{2})(\\d{2})(\\d{2})" +  // Date
-            "(\\d{2})(\\d{2})(\\d{2})," + // Time
-            "G," +
-            "(-?\\d+\\.\\d+)," +          // Latitude
-            "(-?\\d+\\.\\d+)," +          // Longitude
-            "(\\d+\\.?\\d*)," +           // Speed
-            "(\\d+\\.?\\d*)," +           // Course
-            "(\\d+\\.?\\d*)," +           // Distance
-            "(\\d+)," +                   // Event
-            "(\\d+)" +                    // Status
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .txt("L,")
+            .num("(dd)(dd)(dd)")                 // date
+            .num("(dd)(dd)(dd),")                // time
+            .txt("G,")
+            .num("(-?d+.d+),")                   // latitude
+            .num("(-?d+.d+),")                   // longitude
+            .num("(d+.?d*),")                    // speed
+            .num("(d+.?d*),")                    // course
+            .num("(d+.?d*),")                    // distance
+            .num("(d+),")                        // event
+            .num("(d+)")                         // status
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
@@ -67,46 +67,32 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (sentence.startsWith("L,") && hasDeviceId()) {
 
-            // Parse message
-            Matcher parser = PATTERN.matcher(sentence);
+            Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
                 return null;
             }
 
-            // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
             position.setProtocol(getProtocolName());
 
-            Integer index = 1;
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
 
-            // Time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-            time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-            position.setTime(time.getTime());
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
 
-            // Location
-            position.setLatitude(Double.parseDouble(parser.group(index++)));
-            position.setLongitude(Double.parseDouble(parser.group(index++)));
-            position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
-            position.setCourse(Double.parseDouble(parser.group(index++)));
+            position.set(Event.KEY_ODOMETER, parser.next());
+            position.set(Event.KEY_EVENT, parser.next());
 
-            // Distance
-            position.set(Event.KEY_ODOMETER, parser.group(index++));
-
-            // Event
-            position.set(Event.KEY_EVENT, parser.group(index++));
-
-            // Status
-            int status = Integer.parseInt(parser.group(index++));
+            int status = parser.nextInt();
             position.setValid((status & 0x04) == 0);
             position.set(Event.KEY_STATUS, status);
+
             return position;
         }
 

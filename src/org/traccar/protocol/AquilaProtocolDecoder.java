@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -32,48 +32,47 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "\\$\\$" +
-            "[^,]+," +                          // Client
-            "(\\d+)," +                         // Device serial number
-            "(\\d+)," +                         // Event
-            "(-?\\d+\\.\\d+)," +                // Latitude
-            "(-?\\d+\\.\\d+)," +                // Longitude
-            "(\\d{2})(\\d{2})(\\d{2})" +        // Date (YYMMDD)
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
-            "([AV])," +                         // Validity
-            "(\\d+)," +                         // GSM
-            "(\\d+)," +                         // Speed
-            "(\\d+)," +                         // Distance
-            "\\d+," +                           // Driver code
-            "(\\d+)," +                         // Fuel
-            "([01])," +                         // IO 1
-            "[01]," +                           // Case open switch
-            "[01]," +                           // Over speed start
-            "[01]," +                           // Over speed end
-            "(?:\\d+,){3}" +                    // Reserved
-            "([01])," +                         // Power status
-            "([01])," +                         // IO 2
-            "\\d+," +                           // Reserved
-            "([01])," +                         // Ignition
-            "[01]," +                           // Ignition off event
-            "(?:\\d+,){7}" +                    // Reserved
-            "[01]," +                           // Corner packet
-            "(?:\\d+,){8}" +                    // Reserved
-            "([01])," +                         // Course bit 0
-            "([01])," +                         // Course bit 1
-            "([01])," +                         // Course bit 2
-            "([01])," +                         // Course bit 3
-            "\\*(\\p{XDigit}{2})");             // Checksum
+    private static final Pattern PATTERN = new PatternBuilder()
+            .txt("$$")
+            .nxt(",")                            // client
+            .num("(d+),")                        // device serial number
+            .num("(d+),")                        // event
+            .num("(-?d+.d+),")                   // latitude
+            .num("(-?d+.d+),")                   // longitude
+            .num("(dd)(dd)(dd)")                 // date (yymmdd)
+            .num("(dd)(dd)(dd),")                // time (hhmmss)
+            .xpr("([AV]),")                      // validity
+            .num("(d+),")                        // gsm
+            .num("(d+),")                        // speed
+            .num("(d+),")                        // distance
+            .num("d+,")                          // driver code
+            .num("(d+),")                        // fuel
+            .num("([01]),")                      // io 1
+            .num("[01],")                        // case open switch
+            .num("[01],")                        // over speed start
+            .num("[01],")                        // over speed end
+            .num("(?:d+,){3}")                   // reserved
+            .num("([01]),")                      // power status
+            .num("([01]),")                      // io 2
+            .num("d+,")                          // reserved
+            .num("([01]),")                      // ignition
+            .num("[01],")                        // ignition off event
+            .num("(?:d+,){7}")                   // reserved
+            .num("[01],")                        // corner packet
+            .num("(?:d+,){8}")                   // reserved
+            .num("([01]),")                      // course bit 0
+            .num("([01]),")                      // course bit 1
+            .num("([01]),")                      // course bit 2
+            .num("([01]),")                      // course bit 3
+            .txt("*")
+            .num("(xx)")                         // checksum
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
@@ -81,49 +80,36 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        String id = parser.group(index++);
-        if (!identify(id, channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_EVENT, Integer.parseInt(parser.group(index++)));
+        position.set(Event.KEY_EVENT, parser.nextInt());
 
-        position.setLatitude(Double.parseDouble(parser.group(index++)));
-        position.setLongitude(Double.parseDouble(parser.group(index++)));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
 
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        position.setValid(parser.group(index++).equals("A"));
+        position.setValid(parser.next().equals("A"));
 
-        position.set(Event.KEY_GSM, Integer.parseInt(parser.group(index++)));
+        position.set(Event.KEY_GSM, parser.nextInt());
 
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-        position.set(Event.KEY_ODOMETER, parser.group(index++));
-        position.set(Event.KEY_FUEL, parser.group(index++));
-        position.set(Event.PREFIX_IO + 1, parser.group(index++));
-        position.set(Event.KEY_CHARGE, parser.group(index++));
-        position.set(Event.PREFIX_IO + 2, parser.group(index++));
+        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.KEY_FUEL, parser.next());
+        position.set(Event.PREFIX_IO + 1, parser.next());
+        position.set(Event.KEY_CHARGE, parser.next());
+        position.set(Event.PREFIX_IO + 2, parser.next());
 
-        position.set(Event.KEY_IGNITION, parser.group(index++).equals("1"));
+        position.set(Event.KEY_IGNITION, parser.nextInt() == 1);
 
-        int course =
-                (Integer.parseInt(parser.group(index++)) << 3) +
-                (Integer.parseInt(parser.group(index++)) << 2) +
-                (Integer.parseInt(parser.group(index++)) << 1) +
-                (Integer.parseInt(parser.group(index++)));
-
+        int course = (parser.nextInt() << 3) + (parser.nextInt() << 2) + (parser.nextInt() << 1) + parser.nextInt();
         if (course > 0 && course <= 8) {
             position.setCourse((course - 1) * 45);
         }

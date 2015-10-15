@@ -19,12 +19,12 @@ import java.net.SocketAddress;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -96,44 +96,29 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd(true)
             .compile();
 
-    private Position decodePosition(Matcher parser, Date time) {
+    private Position decodePosition(Parser parser, Date time) {
 
         Position position = new Position();
         position.setDeviceId(getDeviceId());
         position.setTime(time);
 
-        Integer index = 1;
+        position.set(Event.KEY_EVENT, parser.next());
 
-        position.set(Event.KEY_EVENT, parser.group(index++));
+        position.setValid(parser.next().equals("A"));
+        position.set(Event.KEY_SATELLITES, parser.next());
 
-        // Validity
-        position.setValid(parser.group(index++).equals("A"));
-        position.set(Event.KEY_SATELLITES, parser.group(index++));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
 
-        // Latitude
-        String hemisphere = parser.group(index++);
-        Double latitude = Double.parseDouble(parser.group(index++));
-        if (hemisphere.equals("S")) latitude = -latitude;
-        position.setLatitude(latitude);
+        position.set(Event.KEY_HDOP, parser.next());
+        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.KEY_POWER, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
 
-        // Longitude
-        hemisphere = parser.group(index++);
-        Double longitude = Double.parseDouble(parser.group(index++));
-        if (hemisphere.equals("W")) longitude = -longitude;
-        position.setLongitude(longitude);
-
-        // Other
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-        position.setCourse(Double.parseDouble(parser.group(index++)));
-        position.setAltitude(Double.parseDouble(parser.group(index++)));
-        position.set(Event.KEY_HDOP, parser.group(index++));
-
-        position.set(Event.KEY_ODOMETER, parser.group(index++));
-
-        position.set(Event.KEY_POWER, parser.group(index++));
-        position.set(Event.KEY_BATTERY, parser.group(index++));
-
-        String status = parser.group(index++);
+        String status = parser.next();
         if (status != null) {
             position.set(Event.KEY_IGNITION, BitUtil.check(Integer.parseInt(status, 16), 13));
             position.set(Event.KEY_STATUS, status);
@@ -146,30 +131,25 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
         if (channel != null) {
             channel.write("1234");
         }
 
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        Integer index = 1;
-
-        if (!identify(parser.group(index++), channel, remoteAddress)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.group(index++), parser.group(index++), parser.group(index++))
-                .setDateReverse(parser.group(index++), parser.group(index++), parser.group(index++));
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         List<Position> positions = new LinkedList<>();
-        Matcher itemParser = PATTERN_ITEM.matcher(parser.group(index++));
-
+        Parser itemParser = new Parser(PATTERN_ITEM, parser.next());
         while (itemParser.find()) {
             positions.add(decodePosition(itemParser, dateBuilder.getDate()));
         }

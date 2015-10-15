@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 public class Parser {
 
-    private int position = 1;
+    private int position;
     private Matcher matcher;
 
     public Parser(Pattern pattern, String input) {
@@ -28,7 +28,13 @@ public class Parser {
     }
 
     public boolean matches() {
+        position = 1;
         return matcher.matches();
+    }
+
+    public boolean find() {
+        position = 1;
+        return matcher.find();
     }
 
     public boolean hasNext() {
@@ -64,15 +70,37 @@ public class Parser {
         }
     }
 
-    // Format: (degrees)(minutes)(hemisphere)
-    public double nextCoordinate() {
-        double coordinate = nextDouble();
-        coordinate += nextDouble() / 60;
-        String hemisphere = next();
-        if (hemisphere.equals("S") || hemisphere.equals("W")) {
+    public enum CoordinateFormat {
+        DEG_MIN_HEM,
+        HEM_DEG
+    }
+
+    public double nextCoordinate(CoordinateFormat format) {
+        double coordinate;
+        String hemisphere;
+
+        switch (format) {
+            case HEM_DEG:
+                hemisphere = next();
+                coordinate = nextDouble();
+                break;
+            case DEG_MIN_HEM:
+            default:
+                coordinate = nextDouble();
+                coordinate += nextDouble() / 60;
+                hemisphere = next();
+                break;
+        }
+
+        if (hemisphere != null && (hemisphere.equals("S") || hemisphere.equals("W"))) {
             coordinate = -coordinate;
         }
+
         return coordinate;
+    }
+
+    public double nextCoordinate() {
+        return  nextCoordinate(CoordinateFormat.DEG_MIN_HEM);
     }
 
 }
