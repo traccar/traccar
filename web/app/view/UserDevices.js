@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.User', {
+Ext.define('Traccar.view.UserDevices', {
     extend: 'Ext.grid.Panel',
-    xtype: 'userView',
+    xtype: 'userDevicesView',
 
     requires: [
-        'Traccar.view.UserController',
+        'Traccar.view.UsersController',
         'Traccar.view.EditToolbar'
     ],
 
-    controller: 'user',
+    controller: 'users',
     store: 'Users',
 
     selType: 'rowmodel',

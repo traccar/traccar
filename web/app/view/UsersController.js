@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.UserController', {
+Ext.define('Traccar.view.UsersController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.user',
+    alias: 'controller.users',
 
     requires: [
-        'Traccar.view.UserDialog',
-        'Traccar.view.UserDeviceDialog'
+        'Traccar.view.UserDialog'
     ],
 
     init: function () {
@@ -64,8 +63,8 @@ Ext.define('Traccar.view.UserController', {
     },
 
     onDevicesClick: function () {
-        var dialog = Ext.create('Traccar.view.UserDeviceDialog');
-        dialog.show();
+        //var dialog = Ext.create('Traccar.view.UserDeviceDialog');
+        //dialog.show();
     },
 
     onSelectionChange: function (selected) {
@@ -74,5 +73,4 @@ Ext.define('Traccar.view.UserController', {
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
         this.lookupReference('userDevicesButton').setDisabled(disabled);
     }
-
 });

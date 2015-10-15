@@ -19,7 +19,7 @@ Ext.define('Traccar.view.Main', {
     alias: 'widget.main',
 
     requires: [
-        'Traccar.view.Device',
+        'Traccar.view.Devices',
         'Traccar.view.State',
         'Traccar.view.Report',
         'Traccar.view.Map'
@@ -45,7 +45,7 @@ Ext.define('Traccar.view.Main', {
 
         items: [{
             region: 'center',
-            xtype: 'deviceView'
+            xtype: 'devicesView'
         }, {
             region: 'south',
             xtype: 'stateView'

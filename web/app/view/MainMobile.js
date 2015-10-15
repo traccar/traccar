@@ -19,7 +19,7 @@ Ext.define('Traccar.view.MainMobile', {
     alias: 'widget.mainMobile',
 
     requires: [
-        'Traccar.view.Device',
+        'Traccar.view.Devices',
         'Traccar.view.State',
         'Traccar.view.Map'
     ],
@@ -43,7 +43,7 @@ Ext.define('Traccar.view.MainMobile', {
         flex: 2
     }, {
         region: 'south',
-        xtype: 'deviceView',
+        xtype: 'devicesView',
         flex: 1
     }]
 });

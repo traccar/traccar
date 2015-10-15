@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.DeviceController', {
+Ext.define('Traccar.view.DevicesController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.device',
+    alias: 'controller.devices',
 
     requires: [
         'Traccar.view.CommandDialog',
-        'Traccar.view.DeviceDialog',
-        'Traccar.view.UserDialog',
-        'Traccar.view.User'
+        'Traccar.view.DeviceDialog'
     ],
 
     config: {

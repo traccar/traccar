@@ -19,7 +19,10 @@ Ext.define('Traccar.view.SettingsMenuController', {
     alias: 'controller.settings',
 
     requires: [
-        'Traccar.view.LoginController'
+        'Traccar.view.LoginController',
+        'Traccar.view.UserDialog',
+        'Traccar.view.ServerDialog',
+        'Traccar.view.Users'
     ],
 
     init: function () {
@@ -49,7 +52,7 @@ Ext.define('Traccar.view.SettingsMenuController', {
             layout: 'fit',
             modal: true,
             items: {
-                xtype: 'userView'
+                xtype: 'usersView'
             }
         }).show();
     },
