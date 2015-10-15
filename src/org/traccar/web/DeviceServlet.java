@@ -50,8 +50,16 @@ public class DeviceServlet extends BaseServlet {
             sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getAllDevices()));
         } else {
+            long userId;
+            String userIdParam = req.getParameter("userId");
+            if (userIdParam != null) {
+                userId = Long.parseLong(userIdParam);
+            } else {
+                userId = getUserId(req);
+            }
+            Context.getPermissionsManager().checkUser(getUserId(req), userId);
             sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
-                    Context.getDataManager().getDevices(getUserId(req))));
+                    Context.getDataManager().getDevices(userId)));
         }
     }
 

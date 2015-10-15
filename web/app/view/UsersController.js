@@ -65,10 +65,12 @@ Ext.define('Traccar.view.UsersController', {
     },
 
     onDevicesClick: function () {
+        var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
             title: Strings.deviceTitle,
             items: {
-                xtype: 'userDevicesView'
+                xtype: 'userDevicesView',
+                user: user
             }
         }).show();
     },

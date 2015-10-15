@@ -19,7 +19,29 @@ Ext.define('Traccar.view.UserDevicesController', {
     alias: 'controller.userDevices',
 
     init: function () {
-        this.getView().getStore().load();
+        console.log(this.getView().user.getData().id);
+        this.getView().getStore().load({
+            scope: this,
+            callback: function (records, operation, success) {
+                var userStore = Ext.create('Traccar.store.Devices');
+
+                userStore.load({
+                    params: {
+                        userId: this.getView().user.getData().id
+                    },
+                    scope: this,
+                    callback: function (records, operation, success) {
+                        var i, index;
+                        if (success) {
+                            for (i = 0; i < records.length; i++) {
+                                index = this.getView().getStore().find('id', records[i].getData().id);
+                                this.getView().getSelectionModel().select(index, true, true);
+                            }
+                        }
+                    }
+                });
+            }
+        });
     },
 
     onSelectionChange: function (selected) {
