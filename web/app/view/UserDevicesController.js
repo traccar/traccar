@@ -14,32 +14,18 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.UserDevices', {
-    extend: 'Ext.grid.Panel',
-    xtype: 'userDevicesView',
+Ext.define('Traccar.view.UserDevicesController', {
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.userDevices',
 
-    requires: [
-        'Traccar.view.UserDevicesController'
-    ],
-
-    controller: 'userDevices',
-    store: 'Devices',
-
-    selModel: {
-        selType: 'checkboxmodel',
-        checkOnly: true,
-        showHeaderCheckbox: false
+    init: function () {
+        //Ext.getStore('Users').load();
     },
 
-    listeners: {
-        selectionchange: 'onSelectionChange'
-    },
-
-    columns: [{
-        text: Strings.deviceName,
-        dataIndex: 'name', flex: 1
-    }, {
-        text: Strings.deviceIdentifier,
-        dataIndex: 'uniqueId', flex: 1
-    }]
+    onSelectionChange: function (selected) {
+        /*var disabled = selected.length > 0;
+        this.lookupReference('toolbarEditButton').setDisabled(disabled);
+        this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
+        this.lookupReference('userDevicesButton').setDisabled(disabled);*/
+    }
 });

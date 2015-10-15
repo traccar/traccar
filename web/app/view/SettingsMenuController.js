@@ -22,7 +22,8 @@ Ext.define('Traccar.view.SettingsMenuController', {
         'Traccar.view.LoginController',
         'Traccar.view.UserDialog',
         'Traccar.view.ServerDialog',
-        'Traccar.view.Users'
+        'Traccar.view.Users',
+        'Traccar.view.BaseWindow'
     ],
 
     init: function () {
@@ -45,12 +46,9 @@ Ext.define('Traccar.view.SettingsMenuController', {
     },
 
     onUsersClick: function () {
-        Ext.create('Ext.window.Window', {
+        Ext.create('Traccar.view.BaseWindow', {
             title: Strings.settingsUsers,
-            width: Traccar.Style.windowWidth,
-            height: Traccar.Style.windowHeight,
-            layout: 'fit',
-            modal: true,
+            modal: false,
             items: {
                 xtype: 'usersView'
             }

@@ -19,7 +19,9 @@ Ext.define('Traccar.view.UsersController', {
     alias: 'controller.users',
 
     requires: [
-        'Traccar.view.UserDialog'
+        'Traccar.view.UserDialog',
+        'Traccar.view.UserDevices',
+        'Traccar.view.BaseWindow'
     ],
 
     init: function () {
@@ -63,8 +65,12 @@ Ext.define('Traccar.view.UsersController', {
     },
 
     onDevicesClick: function () {
-        //var dialog = Ext.create('Traccar.view.UserDeviceDialog');
-        //dialog.show();
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.deviceTitle,
+            items: {
+                xtype: 'userDevicesView'
+            }
+        }).show();
     },
 
     onSelectionChange: function (selected) {

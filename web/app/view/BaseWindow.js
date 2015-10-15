@@ -14,32 +14,11 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.UserDevices', {
-    extend: 'Ext.grid.Panel',
-    xtype: 'userDevicesView',
+Ext.define('Traccar.view.BaseWindow', {
+    extend: 'Ext.window.Window',
 
-    requires: [
-        'Traccar.view.UserDevicesController'
-    ],
-
-    controller: 'userDevices',
-    store: 'Devices',
-
-    selModel: {
-        selType: 'checkboxmodel',
-        checkOnly: true,
-        showHeaderCheckbox: false
-    },
-
-    listeners: {
-        selectionchange: 'onSelectionChange'
-    },
-
-    columns: [{
-        text: Strings.deviceName,
-        dataIndex: 'name', flex: 1
-    }, {
-        text: Strings.deviceIdentifier,
-        dataIndex: 'uniqueId', flex: 1
-    }]
+    width: Traccar.Style.windowWidth,
+    height: Traccar.Style.windowHeight,
+    layout: 'fit',
+    modal: true
 });
