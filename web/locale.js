@@ -25,6 +25,7 @@ Locale.languages = {
     'cs': { name: 'Čeština', code: 'cs' },
     'de': { name: 'Deutsch', code: 'de' },
     'dk': { name: 'Dansk', code: 'dk' },
+    'el': { name: 'Ελληνικά', code: 'el' },
     'en': { name: 'English', code: 'en' },
     'es': { name: 'Español', code: 'es' },
     'fr': { name: 'Français', code: 'fr' },
