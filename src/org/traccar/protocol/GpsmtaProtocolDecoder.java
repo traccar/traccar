@@ -21,6 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -30,28 +32,27 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(\\d+) " +                         // UID
-            "(\\d+) " +                         // Time
-            "(\\d+\\.\\d+) " +                  // Latitude
-            "(\\d+\\.\\d+) " +                  // Longitude
-            "(\\d+) " +                         // Speed
-            "(\\d+) " +                         // Course
-            "(\\d+) " +                         // Accuracy
-            "(\\d+) " +                         // Altitude
-            "(\\d+) " +                         // Flags
-            "(\\d+) " +                         // Battery
-            "(\\d+) " +                         // Temperature
-            "(\\d).*");                         // Changing status
+    private static final Pattern PATTERN = new PatternBuilder()
+            .num("(d+) ")                        // uid
+            .num("(d+) ")                        // time
+            .num("(d+.d+) ")                     // latitude
+            .num("(d+.d+) ")                     // longitude
+            .num("(d+) ")                        // speed
+            .num("(d+) ")                        // course
+            .num("(d+) ")                        // accuracy
+            .num("(d+) ")                        // altitude
+            .num("(d+) ")                        // flags
+            .num("(d+) ")                        // battery
+            .num("(d+) ")                        // temperature
+            .num("(d)")                          // changing status
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
@@ -59,27 +60,25 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        if (!identify(parser.group(index++), channel, remoteAddress)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        String time = parser.group(index++);
+        String time = parser.next();
         position.setTime(new Date(Long.parseLong(time) * 1000));
 
-        position.setLatitude(Double.parseDouble(parser.group(index++)));
-        position.setLongitude(Double.parseDouble(parser.group(index++)));
-        position.setSpeed(Integer.parseInt(parser.group(index++)));
-        position.setCourse(Integer.parseInt(parser.group(index++)));
-        index++; // accuracy
-        position.setAltitude(Integer.parseInt(parser.group(index++)));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(parser.nextInt());
+        position.setCourse(parser.nextInt());
+        parser.next();
+        position.setAltitude(parser.nextInt());
 
-        position.set(Event.KEY_STATUS, Integer.parseInt(parser.group(index++)));
-        position.set(Event.KEY_BATTERY, Integer.parseInt(parser.group(index++)));
-        position.set(Event.PREFIX_TEMP + 1, Integer.parseInt(parser.group(index++)));
-        position.set(Event.KEY_CHARGE, Integer.parseInt(parser.group(index++)) == 1);
+        position.set(Event.KEY_STATUS, parser.nextInt());
+        position.set(Event.KEY_BATTERY, parser.nextInt());
+        position.set(Event.PREFIX_TEMP + 1, parser.nextInt());
+        position.set(Event.KEY_CHARGE, parser.nextInt() == 1);
 
         if (channel != null) {
             channel.write(time, remoteAddress);

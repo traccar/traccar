@@ -62,6 +62,14 @@ public class Parser {
         }
     }
 
+    public long nextLong() {
+        if (hasNext()) {
+            return Long.parseLong(next());
+        } else {
+            return 0;
+        }
+    }
+
     public double nextDouble() {
         if (hasNext()) {
             return Double.parseDouble(next());
