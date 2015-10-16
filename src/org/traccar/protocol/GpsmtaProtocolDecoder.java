@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Date;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
