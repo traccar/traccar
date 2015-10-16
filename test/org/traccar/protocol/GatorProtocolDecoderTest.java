@@ -1,11 +1,19 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffers;
-import static org.traccar.helper.DecoderVerifier.verify;
+import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
+import static org.traccar.helper.DecoderVerifier.verify;
 
 public class GatorProtocolDecoderTest extends ProtocolDecoderTest {
+    
+    @Test
+    public void testDecodeId() {
+        
+        Assert.assertEquals("3512345006", GatorProtocolDecoder.decodeId(12, 162, 50, 134));
+        
+    }
 
     @Test
     public void testDecode() throws Exception {

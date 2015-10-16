@@ -18,10 +18,8 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.UnitsConverter;
@@ -45,6 +43,17 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PICTURE_FRAME = 0x54;
     public static final int MSG_CAMERA_RESPONSE = 0x56;
     public static final int MSG_PICTURE_DATA = 0x57;
+    
+    public static String decodeId(int b1, int b2, int b3, int b4) {
+        
+        int d1 = 30 + ((b1 >> 7) << 3) + ((b2 >> 7) << 2) + ((b3 >> 7) << 1) + (b4 >> 7);
+        int d2 = b1 & 0x7f;
+        int d3 = b2 & 0x7f;
+        int d4 = b3 & 0x7f;
+        int d5 = b4 & 0x7f;
+        
+        return String.format("%02d%02d%02d%02d%02d", d1, d2, d3, d4, d5);
+    }
 
     @Override
     protected Object decode(
@@ -57,21 +66,17 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // length
 
-        // Pseudo IP address
-        String id = String.format("%02d%02d%02d%02d",
+        String id = decodeId(
                 buf.readUnsignedByte(), buf.readUnsignedByte(),
                 buf.readUnsignedByte(), buf.readUnsignedByte());
-        id = id.replaceFirst("^0+(?!$)", "");
 
         if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
                 || type == MSG_ALARM_DATA || type == MSG_BLIND_AREA) {
 
-            // Create new position
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            // Identification
-            if (!identify(id, channel)) {
+            if (!identify("1" + id, channel, null, false) && !identify(id, channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());
