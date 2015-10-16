@@ -32,7 +32,8 @@ Ext.define('Traccar.view.UserDevices', {
     },
 
     listeners: {
-        selectionchange: 'onSelectionChange'
+        beforedeselect: 'onBeforeDeselect',
+        beforeselect: 'onBeforeSelect'
     },
 
     columns: [{
@@ -43,4 +44,3 @@ Ext.define('Traccar.view.UserDevices', {
         dataIndex: 'uniqueId', flex: 1
     }]
 });
-32

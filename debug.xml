@@ -101,7 +101,7 @@
         address VARCHAR(512),
         attributes VARCHAR(4096) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
-        
+
         CREATE INDEX position_deviceId_fixTime ON position (deviceId, fixTime);
 
         CREATE TABLE server (
@@ -184,7 +184,7 @@
     <entry key='database.updateUserPassword'>
         UPDATE "user" SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
     </entry>
-    
+
     <entry key='database.deleteUser'>
         DELETE FROM "user" WHERE id = :id;
     </entry>
@@ -192,33 +192,37 @@
     <entry key='database.getPermissionsAll'>
         SELECT userId, deviceId FROM user_device;
     </entry>
-    
+
     <entry key='database.selectDevicesAll'>
         SELECT * FROM device;
     </entry>
-    
+
     <entry key='database.selectDevices'>
         SELECT * FROM device d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
     </entry>
-    
+
     <entry key='database.insertDevice'>
         INSERT INTO device (name, uniqueId) VALUES (:name, :uniqueId);
     </entry>
-    
+
     <entry key='database.updateDevice'>
         UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;
     </entry>
-    
+
     <entry key='database.deleteDevice'>
         DELETE FROM device WHERE id = :id;
     </entry>
-    
+
     <entry key='database.linkDevice'>
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry>
 
+    <entry key='database.unlinkDevice'>
+        DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId;
+    </entry>
+
     <entry key='database.selectPositions'>
-        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;    
+        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;
     </entry>
 
     <entry key='database.insertPosition'>

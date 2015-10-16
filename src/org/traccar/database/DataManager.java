@@ -321,6 +321,14 @@ public class DataManager implements IdentityManager {
         AsyncServlet.sessionRefreshUser(userId);
     }
 
+    public void unlinkDevice(long userId, long deviceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkDevice"))
+                .setLong("userId", userId)
+                .setLong("deviceId", deviceId)
+                .executeUpdate();
+        AsyncServlet.sessionRefreshUser(userId);
+    }
+
     public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
                 .setLong("deviceId", deviceId)

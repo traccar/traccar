@@ -38,6 +38,12 @@ public class DeviceServlet extends BaseServlet {
             case "/remove":
                 remove(req, resp);
                 break;
+            case "/link":
+                link(req, resp);
+                break;
+            case "/unlink":
+                unlink(req, resp);
+                break;
             default:
                 return false;
         }
@@ -83,6 +89,24 @@ public class DeviceServlet extends BaseServlet {
         Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
         Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
         Context.getDataManager().removeDevice(device);
+        Context.getPermissionsManager().refresh();
+        sendResponse(resp.getWriter(), true);
+    }
+
+    private void link(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        Context.getPermissionsManager().checkAdmin(getUserId(req));
+        Context.getDataManager().linkDevice(
+                Long.parseLong(req.getParameter("userId")),
+                Long.parseLong(req.getParameter("deviceId")));
+        Context.getPermissionsManager().refresh();
+        sendResponse(resp.getWriter(), true);
+    }
+
+    private void unlink(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        Context.getPermissionsManager().checkAdmin(getUserId(req));
+        Context.getDataManager().unlinkDevice(
+                Long.parseLong(req.getParameter("userId")),
+                Long.parseLong(req.getParameter("deviceId")));
         Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), true);
     }

@@ -19,6 +19,7 @@ Ext.define('Traccar.view.UserDevicesController', {
     alias: 'controller.userDevices',
 
     init: function () {
+        this.userId = this.getView().user.getData().id;
         this.getView().getStore().load({
             scope: this,
             callback: function (records, operation, success) {
@@ -26,7 +27,7 @@ Ext.define('Traccar.view.UserDevicesController', {
 
                 userStore.load({
                     params: {
-                        userId: this.getView().user.getData().id
+                        userId: this.userId
                     },
                     scope: this,
                     callback: function (records, operation, success) {
@@ -43,7 +44,35 @@ Ext.define('Traccar.view.UserDevicesController', {
         });
     },
 
-    onSelectionChange: function (selected) {
-        console.log(selected); // TODO
+    onBeforeSelect: function (object, record, index) {
+        Ext.Ajax.request({
+            scope: this,
+            url: '/api/device/link',
+            params: {
+                userId: this.userId,
+                deviceId: record.getData().id
+            },
+            callback: Traccar.app.getErrorHandler(this, function (options, success, response) {
+                if (!success) {
+                    // TODO deselect again
+                }
+            })
+        });
+    },
+
+    onBeforeDeselect: function (object, record, index) {
+        Ext.Ajax.request({
+            scope: this,
+            url: '/api/device/unlink',
+            params: {
+                userId: this.userId,
+                deviceId: record.getData().id
+            },
+            callback: Traccar.app.getErrorHandler(this, function (options, success, response) {
+                if (!success) {
+                    // TODO select again
+                }
+            })
+        });
     }
 });

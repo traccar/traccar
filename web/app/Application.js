@@ -76,5 +76,24 @@ Ext.define('Traccar.Application', {
 
     getPreference: function (key, defaultValue) {
         return this.getUser().get(key) || this.getServer().get(key) || defaultValue;
+    },
+
+    getErrorHandler: function (scope, handler) {
+        return function (options, success, response) {
+            var result;
+            if (success) {
+                result = Ext.decode(response.responseText);
+                if (!result.success) {
+                    Ext.Msg.alert(Strings.errorTitle, result.error);
+                }
+                handler.call(scope, options, success, response);
+            } else {
+                if (response.statusText) {
+                    Ext.Msg.alert(Strings.errorTitle, response.statusText);
+                } else {
+                    Ext.Msg.alert(Strings.errorTitle, response.status.toString()); // TODO: text message
+                }
+            }
+        }
     }
 });
