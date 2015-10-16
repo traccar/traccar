@@ -64,11 +64,14 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .xpr(",?")
             .groupEnd(false)
             .groupBegin()
+            .txt("GSM:").not(",").xpr(",?")
+            .groupEnd(true)
+            .groupBegin()
             .txt("COT:")
             .num("(d+)")                         // odometer
             .opn(";d+:d+:d+")                    // engine hours
             .xpr(",?")
-            .groupEnd(false)
+            .groupEnd(true)
             .groupBegin()
             .txt("ADC:")
             .num("(d+.d+);")                     // power
