@@ -19,7 +19,6 @@ Ext.define('Traccar.view.UserDevicesController', {
     alias: 'controller.userDevices',
 
     init: function () {
-        console.log(this.getView().user.getData().id);
         this.getView().getStore().load({
             scope: this,
             callback: function (records, operation, success) {

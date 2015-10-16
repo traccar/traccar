@@ -79,7 +79,7 @@ Ext.define('Traccar.controller.Root', {
 
     loadApp: function () {
         Ext.getStore('Devices').load();
-        Ext.getBody().empty();
+        Ext.get('attribution').remove();
         if (this.isPhone) {
             Ext.create('widget.mainMobile');
         } else {
