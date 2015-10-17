@@ -81,6 +81,7 @@ public class Parser {
     public enum CoordinateFormat {
         DEG_MIN_HEM,
         HEM_DEG,
+        HEM_DEG_MIN,
         HEM_DEG_MIN_HEM
     }
 
@@ -92,6 +93,11 @@ public class Parser {
             case HEM_DEG:
                 hemisphere = next();
                 coordinate = nextDouble();
+                break;
+            case HEM_DEG_MIN:
+                hemisphere = next();
+                coordinate = nextInt();
+                coordinate += nextDouble() / 60;
                 break;
             case HEM_DEG_MIN_HEM:
                 hemisphere = next();
