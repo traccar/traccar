@@ -69,8 +69,13 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 } else {
                     msg.append(" < ");
                 }
-                
-                msg.append(((InetSocketAddress) event.getRemoteAddress()).getHostString()).append("]");
+
+                if (event.getRemoteAddress() != null) {
+                    msg.append(((InetSocketAddress) event.getRemoteAddress()).getHostString());
+                } else {
+                    msg.append("null");
+                }
+                msg.append("]");
 
                 if (event.getMessage() instanceof ChannelBuffer) {
                     msg.append(" HEX: ");
