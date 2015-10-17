@@ -84,6 +84,11 @@ public class DateBuilder {
         return this;
     }
 
+    public DateBuilder addMinute(int minute) {
+        calendar.add(Calendar.MINUTE, minute);
+        return this;
+    }
+
     public DateBuilder setSecond(int second) {
         calendar.set(Calendar.SECOND, second);
         return this;

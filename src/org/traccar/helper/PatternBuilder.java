@@ -82,6 +82,10 @@ public class PatternBuilder {
         }
     }
 
+    public PatternBuilder or() {
+        return xpr("|");
+    }
+
     public Pattern compile() {
         return Pattern.compile(pattern.toString(), Pattern.DOTALL);
     }

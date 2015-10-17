@@ -80,7 +80,8 @@ public class Parser {
 
     public enum CoordinateFormat {
         DEG_MIN_HEM,
-        HEM_DEG
+        HEM_DEG,
+        HEM_DEG_MIN_HEM
     }
 
     public double nextCoordinate(CoordinateFormat format) {
@@ -92,9 +93,16 @@ public class Parser {
                 hemisphere = next();
                 coordinate = nextDouble();
                 break;
-            case DEG_MIN_HEM:
+            case HEM_DEG_MIN_HEM:
+                hemisphere = next();
+                coordinate = nextInt();
+                coordinate += nextDouble() / 60;
+                if (hasNext()) {
+                    hemisphere = next();
+                }
+                break;
             default:
-                coordinate = nextDouble();
+                coordinate = nextInt();
                 coordinate += nextDouble() / 60;
                 hemisphere = next();
                 break;
