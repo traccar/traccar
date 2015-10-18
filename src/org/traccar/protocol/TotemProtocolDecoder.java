@@ -114,10 +114,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .num("(ddd)")                        // speed
             .num("(dd.d)")                       // pdop
             .num("(d{7})")                       // odometer
-            .num("(dd)(dd.dddd)")                // latitude
-            .xpr("([NS])")
-            .num("(ddd)(dd.dddd)")               // longitude
-            .xpr("([EW])")
+            .num("(dd)(dd.dddd)([NS])")          // latitude
+            .num("(ddd)(dd.dddd)([EW])")         // longitude
             .num("dddd")                         // serial number
             .num("xxxx")                         // checksum
             .any()

@@ -275,7 +275,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_SATELLITES, satellites);
         }
 
-        // TODO: process other data
+        // other data
 
         return position;
     }
@@ -305,7 +305,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         short offset = buf.readUnsignedByte(); // dataOffset
         short packetCount = buf.readUnsignedByte();
         buf.readUnsignedByte(); // reserved
-        buf.readUnsignedByte(); // TODO: handle timezone
+        buf.readUnsignedByte(); // timezone
         buf.skipBytes(offset - 5);
 
         // Send response

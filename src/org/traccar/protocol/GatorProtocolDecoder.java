@@ -43,15 +43,15 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PICTURE_FRAME = 0x54;
     public static final int MSG_CAMERA_RESPONSE = 0x56;
     public static final int MSG_PICTURE_DATA = 0x57;
-    
+
     public static String decodeId(int b1, int b2, int b3, int b4) {
-        
+
         int d1 = 30 + ((b1 >> 7) << 3) + ((b2 >> 7) << 2) + ((b3 >> 7) << 1) + (b4 >> 7);
         int d2 = b1 & 0x7f;
         int d3 = b2 & 0x7f;
         int d4 = b3 & 0x7f;
         int d5 = b4 & 0x7f;
-        
+
         return String.format("%02d%02d%02d%02d%02d", d1, d2, d3, d4, d5);
     }
 

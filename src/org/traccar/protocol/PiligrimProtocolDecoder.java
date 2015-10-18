@@ -34,6 +34,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -102,24 +103,18 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     position.setProtocol(getProtocolName());
                     position.setDeviceId(getDeviceId());
 
-                    // Time
-                    Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                    time.clear();
-                    time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-                    time.set(Calendar.MONTH, (buf.getByte(buf.readerIndex()) & 0x0f) - 1);
-                    time.set(Calendar.YEAR, 2010 + (buf.readUnsignedByte() >> 4));
-                    time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-                    time.set(Calendar.MINUTE, buf.readUnsignedByte());
-                    time.set(Calendar.SECOND, buf.readUnsignedByte());
-                    position.setTime(time.getTime());
+                    DateBuilder dateBuilder = new DateBuilder()
+                            .setDay(buf.readUnsignedByte())
+                            .setMonth(buf.getByte(buf.readerIndex()) & 0x0f)
+                            .setYear(2010 + (buf.readUnsignedByte() >> 4))
+                            .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.setTime(dateBuilder.getDate());
 
-                    // Latitude
                     double latitude = buf.readUnsignedByte();
                     latitude += buf.readUnsignedByte() / 60.0;
                     latitude += buf.readUnsignedByte() / 6000.0;
                     latitude += buf.readUnsignedByte() / 600000.0;
 
-                    // Longitude
                     double longitude = buf.readUnsignedByte();
                     longitude += buf.readUnsignedByte() / 60.0;
                     longitude += buf.readUnsignedByte() / 6000.0;
@@ -127,8 +122,12 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
                     // Hemisphere
                     int flags = buf.readUnsignedByte();
-                    if ((flags & 0x01) != 0) latitude = -latitude;
-                    if ((flags & 0x02) != 0) longitude = -longitude;
+                    if ((flags & 0x01) != 0) {
+                        latitude = -latitude;
+                    }
+                    if ((flags & 0x02) != 0) {
+                        longitude = -longitude;
+                    }
                     position.setLatitude(latitude);
                     position.setLongitude(longitude);
 

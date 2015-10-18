@@ -43,7 +43,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(1);
-            response.writeByte(result ? 1 : 0);
+            if (result) {
+                response.writeByte(1);
+            } else {
+                response.writeByte(0);
+            }
             channel.write(response);
         }
     }
@@ -60,8 +64,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         int codec = buf.readUnsignedByte(); // codec
 
         if (codec == CODEC_12) {
-            // TODO: decode serial port data
-            return null;
+            return null; // decode serial port data
         }
 
         int count = buf.readUnsignedByte();

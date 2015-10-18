@@ -52,8 +52,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -68,10 +67,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Binary position report
-        if (apiNumber == 5 &&
-            commandType == 2 &&
-            messageType == 1 &&
-            BitUtil.check(mask, 0)) {
+        if (apiNumber == 5 && commandType == 2 && messageType == 1 && BitUtil.check(mask, 0)) {
 
             // Create new position
             Position position = new Position();
