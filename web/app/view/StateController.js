@@ -22,7 +22,8 @@ Ext.define('Traccar.view.StateController', {
         listen: {
             controller: {
                 '*': {
-                    selectDevice: 'selectDevice'
+                    selectDevice: 'selectDevice',
+                    selectReport: 'selectReport'
                 }
             }
         }
@@ -121,6 +122,10 @@ Ext.define('Traccar.view.StateController', {
         } else {
             Ext.getStore('Attributes').removeAll();
         }
+    },
+
+    selectReport: function (position) {
+        console.log(position);
     },
 
     add: function (store, data) {

@@ -29,28 +29,28 @@ Ext.define('Traccar.view.Map', {
 
     listeners: {
         afterrender: function () {
-            var user = Traccar.app.getUser();
-            var server = Traccar.app.getServer();
+            var user, server, layer, type, bingKey, vectorLayer, lat, lon, zoom;
 
-            var layer;
-            var mapLayer = user.get('map') || server.get('map');
+            user = Traccar.app.getUser();
+            server = Traccar.app.getServer();
 
-            var bingKey = server.get('bingKey');
+            type = user.get('map') || server.get('map');
+            bingKey = server.get('bingKey');
 
-            if (mapLayer === 'custom') {
+            if (type === 'custom') {
                 layer = new ol.layer.Tile({
                     source: new ol.source.XYZ({
                         url: server.get('mapUrl')
                     })
                 });
-            } else if (mapLayer === 'bingRoad') {
+            } else if (type === 'bingRoad') {
                 layer = new ol.layer.Tile({
                     source: new ol.source.BingMaps({
                         key: bingKey,
                         imagerySet: 'Road'
                     })
                 });
-            } else if (mapLayer === 'bingAerial') {
+            } else if (type === 'bingAerial') {
                 layer = new ol.layer.Tile({
                     source: new ol.source.BingMaps({
                         key: bingKey,
@@ -64,13 +64,13 @@ Ext.define('Traccar.view.Map', {
             }
 
             this.vectorSource = new ol.source.Vector({});
-            var vectorLayer = new ol.layer.Vector({
+            vectorLayer = new ol.layer.Vector({
                 source: this.vectorSource
             });
 
-            var lat = user.get('latitude') || server.get('latitude') || Traccar.Style.mapDefaultLat;
-            var lon = user.get('longitude') || server.get('longitude') || Traccar.Style.mapDefaultLon;
-            var zoom = user.get('zoom') || server.get('zoom') || Traccar.Style.mapDefaultZoom;
+            lat = user.get('latitude') || server.get('latitude') || Traccar.Style.mapDefaultLat;
+            lon = user.get('longitude') || server.get('longitude') || Traccar.Style.mapDefaultLon;
+            zoom = user.get('zoom') || server.get('zoom') || Traccar.Style.mapDefaultZoom;
 
             this.mapView = new ol.View({
                 center: ol.proj.fromLonLat([lon, lat]),
