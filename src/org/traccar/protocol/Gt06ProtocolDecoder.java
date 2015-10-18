@@ -78,7 +78,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_COMMAND_1 = 0x81;
     public static final int MSG_COMMAND_2 = 0x82;
 
-    private final static Set<Integer> MESSAGES_SUPPORTED = new HashSet<>(Arrays.asList(
+    private static final Set<Integer> MESSAGES_SUPPORTED = new HashSet<>(Arrays.asList(
             MSG_GPS,
             MSG_GPS_LBS_1,
             MSG_GPS_LBS_2,
@@ -88,14 +88,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             MSG_GPS_PHONE,
             MSG_GPS_LBS_EXTEND));
 
-    private final static Set<Integer> MESSAGES_LBS = new HashSet<>(Arrays.asList(
+    private static final Set<Integer> MESSAGES_LBS = new HashSet<>(Arrays.asList(
             MSG_GPS_LBS_1,
             MSG_GPS_LBS_2,
             MSG_GPS_LBS_STATUS_1,
             MSG_GPS_LBS_STATUS_2,
             MSG_GPS_LBS_STATUS_3));
 
-    private final static Set<Integer> MESSAGES_STATUS = new HashSet<>(Arrays.asList(
+    private static final Set<Integer> MESSAGES_STATUS = new HashSet<>(Arrays.asList(
             MSG_GPS_LBS_STATUS_1,
             MSG_GPS_LBS_STATUS_2,
             MSG_GPS_LBS_STATUS_3));
@@ -184,8 +184,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 int union = buf.readUnsignedShort();
                 position.setCourse(union & 0b0000_0011_1111_1111);
                 position.setValid((union & 0b0001_0000_0000_0000) != 0);
-                if ((union & 0b0000_0100_0000_0000) == 0) latitude = -latitude;
-                if ((union & 0b0000_1000_0000_0000) != 0) longitude = -longitude;
+                if ((union & 0b0000_0100_0000_0000) == 0) {
+                    latitude = -latitude;
+                }
+                if ((union & 0b0000_1000_0000_0000) != 0) {
+                    longitude = -longitude;
+                }
 
                 position.setLatitude(latitude);
                 position.setLongitude(longitude);

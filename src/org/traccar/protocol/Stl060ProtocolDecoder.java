@@ -16,12 +16,11 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -66,87 +65,53 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Device identification
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Date
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Time
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++) + parser.group(index++)) / 600000;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
-
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++) + parser.group(index++)) / 600000;
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-        position.setLongitude(longitude);
-
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-
-        // Course
-        position.setCourse(Double.parseDouble(parser.group(index++)));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
         // Old format
-        if (parser.group(index) != null) {
-            position.set(Event.KEY_ODOMETER, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_IGNITION, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_INPUT, Integer.parseInt(parser.group(index++)) + Integer.parseInt(parser.group(index++)) << 1);
-            position.set(Event.KEY_FUEL, Integer.parseInt(parser.group(index++)));
-        } else {
-            index += 5;
+        if (parser.hasNext(5)) {
+            position.set(Event.KEY_ODOMETER, parser.nextInt());
+            position.set(Event.KEY_IGNITION, parser.nextInt());
+            position.set(Event.KEY_INPUT, parser.nextInt() + parser.nextInt() << 1);
+            position.set(Event.KEY_FUEL, parser.nextInt());
         }
 
         // New format
-        if (parser.group(index) != null) {
-            position.set(Event.KEY_CHARGE, Integer.parseInt(parser.group(index++)) == 1);
-            position.set(Event.KEY_IGNITION, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_INPUT, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_RFID, parser.group(index++));
-            position.set(Event.KEY_ODOMETER, Integer.parseInt(parser.group(index++)));
-            position.set(Event.PREFIX_TEMP + 1, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_FUEL, Integer.parseInt(parser.group(index++)));
-            position.set("accel", Integer.parseInt(parser.group(index++)) == 1);
-            position.set(Event.KEY_OUTPUT, Integer.parseInt(parser.group(index++)) + Integer.parseInt(parser.group(index++)) << 1);
-        } else {
-            index += 10;
+        if (parser.hasNext(10)) {
+            position.set(Event.KEY_CHARGE, parser.nextInt() == 1);
+            position.set(Event.KEY_IGNITION, parser.nextInt());
+            position.set(Event.KEY_INPUT, parser.nextInt());
+            position.set(Event.KEY_RFID, parser.next());
+            position.set(Event.KEY_ODOMETER, parser.nextInt());
+            position.set(Event.PREFIX_TEMP + 1, parser.nextInt());
+            position.set(Event.KEY_FUEL, parser.nextInt());
+            position.set("accel", parser.nextInt() == 1);
+            position.set(Event.KEY_OUTPUT, parser.nextInt() + parser.nextInt() << 1);
         }
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        position.setValid(parser.next().equals("A"));
 
         return position;
     }

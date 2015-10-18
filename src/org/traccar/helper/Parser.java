@@ -38,10 +38,14 @@ public class Parser {
     }
 
     public boolean hasNext() {
+        return hasNext(1);
+    }
+
+    public boolean hasNext(int number) {
         if (matcher.group(position) != null) {
             return true;
         } else {
-            position++;
+            position += number;
             return false;
         }
     }
@@ -80,6 +84,7 @@ public class Parser {
 
     public enum CoordinateFormat {
         DEG_MIN_HEM,
+        DEG_MIN_MIN_HEM,
         HEM_DEG,
         HEM_DEG_MIN,
         HEM_DEG_MIN_HEM
@@ -90,6 +95,11 @@ public class Parser {
         String hemisphere;
 
         switch (format) {
+            case DEG_MIN_MIN_HEM:
+                coordinate = nextInt();
+                coordinate += (nextInt() + nextInt() / 1000.0) / 60;
+                hemisphere = next();
+                break;
             case HEM_DEG:
                 hemisphere = next();
                 coordinate = nextDouble();
