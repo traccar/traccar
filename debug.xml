@@ -333,5 +333,6 @@
     <entry key='aquila.port'>5089</entry>
     <entry key='flextrack.port'>5090</entry>
     <entry key='blackkite.port'>5091</entry>
+    <entry key='adm.port'>5092</entry>
 
 </properties>
