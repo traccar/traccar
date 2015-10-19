@@ -36,8 +36,14 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
     private String readSerialNumber(ChannelBuffer buf) {
         int b1 = buf.readUnsignedByte();
-        int b2 = buf.readUnsignedByte(); if (b2 > 0x80) b2 -= 0x80;
-        int b3 = buf.readUnsignedByte(); if (b3 > 0x80) b3 -= 0x80;
+        int b2 = buf.readUnsignedByte();
+        if (b2 > 0x80) {
+            b2 -= 0x80;
+        }
+        int b3 = buf.readUnsignedByte();
+        if (b3 > 0x80) {
+            b3 -= 0x80;
+        }
         int b4 = buf.readUnsignedByte();
         String serialNumber = String.format("%02d%02d%02d%02d", b1, b2, b3, b4);
         return String.valueOf(Long.parseLong(serialNumber));
@@ -63,12 +69,8 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         buf.readUnsignedShort(); // size
 
-        if (type == MSG_ON_DEMAND ||
-            type == MSG_POSITION_UPLOAD ||
-            type == MSG_POSITION_REUPLOAD ||
-            type == MSG_ALARM ||
-            type == MSG_REPLY ||
-            type == MSG_PERIPHERAL) {
+        if (type == MSG_ON_DEMAND || type == MSG_POSITION_UPLOAD || type == MSG_POSITION_REUPLOAD
+                || type == MSG_ALARM || type == MSG_REPLY || type == MSG_PERIPHERAL) {
 
             // Create new position
             Position position = new Position();
@@ -118,7 +120,8 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
-            // TODO: parse extra data
+            // parse extra data
+
             return position;
 
         } else if (type == MSG_LOGIN && channel != null) {

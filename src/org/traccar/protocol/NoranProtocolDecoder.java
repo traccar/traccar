@@ -47,8 +47,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -58,29 +57,28 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_SHAKE_HAND && channel != null) {
 
             ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 13);
-            response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", Charset.defaultCharset()));
+            response.writeBytes(
+                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", Charset.defaultCharset()));
             response.writeByte(0);
             response.writeShort(response.capacity());
             response.writeShort(MSG_SHAKE_HAND_RESPONSE);
             response.writeByte(1); // status
-            response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
+            response.writeBytes(
+                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
 
             channel.write(response, remoteAddress);
 
-        } else if (type == MSG_UPLOAD_POSITION ||
-                 type == MSG_UPLOAD_POSITION_NEW ||
-                 type == MSG_CONTROL_RESPONSE ||
-                 type == MSG_ALARM) {
+        } else if (type == MSG_UPLOAD_POSITION || type == MSG_UPLOAD_POSITION_NEW
+                || type == MSG_CONTROL_RESPONSE || type == MSG_ALARM) {
 
             boolean newFormat = false;
-            if (type == MSG_UPLOAD_POSITION && buf.readableBytes() == 48 ||
-                type == MSG_ALARM && buf.readableBytes() == 48 ||
-                type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57 ||
-                type == MSG_UPLOAD_POSITION_NEW) {
+            if (type == MSG_UPLOAD_POSITION && buf.readableBytes() == 48
+                    || type == MSG_ALARM && buf.readableBytes() == 48
+                    || type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57
+                    || type == MSG_UPLOAD_POSITION_NEW) {
                 newFormat = true;
             }
 
-            // Create new position
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
@@ -122,7 +120,13 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             }
 
             // Identification
-            String id = buf.readBytes(newFormat ? 12 : 11).toString(Charset.defaultCharset()).replaceAll("[^\\p{Print}]", "");
+            ChannelBuffer rawId;
+            if (newFormat) {
+                rawId = buf.readBytes(12);
+            } else {
+                rawId = buf.readBytes(11);
+            }
+            String id = rawId.toString(Charset.defaultCharset()).replaceAll("[^\\p{Print}]", "");
             if (!identify(id, channel, remoteAddress)) {
                 return null;
             }
