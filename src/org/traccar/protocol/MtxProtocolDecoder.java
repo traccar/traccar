@@ -22,6 +22,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -31,78 +34,67 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "#MTX," +
-            "(\\d+)," +                         // IMEI
-            "(\\d{4})(\\d{2})(\\d{2})," +       // Date
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Time
-            "(-?\\d+\\.\\d+)," +                // Latitude
-            "(-?\\d+\\.\\d+)," +                // Longitude
-            "(\\d+\\.?\\d*)," +                 // Speed
-            "(\\d+)," +                         // Course
-            "(\\d+\\.?\\d*)," +                 // Odometer
-            "(?:\\d+|X)," +
-            "(?:[01]|X)," +
-            "([01]+)," +                        // Input
-            "([01]+)," +                        // Output
-            "(\\d+)," +                         // ADC1
-            "(\\d+)" +                          // ADC2
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .txt("#MTX,")
+            .num("(d+),")                        // IMEI
+            .num("(dddd)(dd)(dd),")              // Date
+            .num("(dd)(dd)(dd),")                // Time
+            .num("(-?d+.d+),")                   // Latitude
+            .num("(-?d+.d+),")                   // Longitude
+            .num("(d+.?d*),")                    // Speed
+            .num("(d+),")                        // Course
+            .num("(d+.?d*),")                    // Odometer
+            .groupBegin()
+            .num("d+")
+            .or()
+            .txt("X")
+            .groupEnd(false)
+            .txt(",")
+            .xpr("(?:[01]|X),")
+            .xpr("([01]+),")                     // Input
+            .xpr("([01]+),")                     // Output
+            .num("(d+),")                        // ADC1
+            .num("(d+)")                         // ADC2
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        // Send response
         if (channel != null) {
             channel.write("#ACK");
         }
 
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Date
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Location
         position.setValid(true);
-        position.setLatitude(Double.parseDouble(parser.group(index++)));
-        position.setLongitude(Double.parseDouble(parser.group(index++)));
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-        position.setCourse(Double.parseDouble(parser.group(index++)));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Other
-        position.set(Event.KEY_ODOMETER, Double.parseDouble(parser.group(index++)));
-        position.set(Event.KEY_INPUT, parser.group(index++));
-        position.set(Event.KEY_OUTPUT, parser.group(index++));
-        position.set(Event.PREFIX_ADC + 1, parser.group(index++));
-        position.set(Event.PREFIX_ADC + 2, parser.group(index++));
+        position.set(Event.KEY_ODOMETER, parser.nextDouble());
+        position.set(Event.KEY_INPUT, parser.next());
+        position.set(Event.KEY_OUTPUT, parser.next());
+        position.set(Event.PREFIX_ADC + 1, parser.next());
+        position.set(Event.PREFIX_ADC + 2, parser.next());
 
         return position;
     }
