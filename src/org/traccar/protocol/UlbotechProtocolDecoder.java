@@ -54,10 +54,21 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
     private static final short DATA_RFID = 0x0E;
     private static final short DATA_EVENT = 0x10;
 
+    private void decodeObd(Position position, ChannelBuffer buf, short length) {
+
+        int end = buf.readerIndex() + length;
+
+        while (buf.readerIndex() < end) {
+            int parameterLength = buf.readUnsignedByte() >> 4;
+            String key = String.format("pid%02X", buf.readUnsignedByte());
+            String value = ChannelBuffers.hexDump(buf.readBytes(parameterLength - 2));
+            position.set(key, value);
+        }
+    }
+
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -133,7 +144,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_OBD2:
-                    position.set("obd", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    decodeObd(position, buf, length);
                     break;
 
                 case DATA_FUEL:
@@ -141,7 +152,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_OBD2_ALARM:
-                    position.set("obd-alarm", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    decodeObd(position, buf, length);
                     break;
 
                 case DATA_HARSH_DRIVER:
