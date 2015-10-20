@@ -69,7 +69,7 @@ Ext.define('Traccar.view.MapController', {
                     } else {
                         var name = deviceStore.query('id', data[i].deviceId).first().get('name');
 
-                        var style = this.getMarkerStyle(Traccar.Style.mapLiveRadius, Traccar.Style.mapLiveColor, name);
+                        var style = this.getMarkerStyle(Traccar.Style.mapLiveRadius, Traccar.Style.mapLiveColor, data[i].course, name);
                         var marker = new ol.Feature({
                             geometry: geometry,
                             originalStyle: style
@@ -97,9 +97,10 @@ Ext.define('Traccar.view.MapController', {
         });
     },
 
-    getMarkerStyle: function (radius, color, text) {
+    getMarkerStyle: function (radius, color, rotation, text) {
         return new ol.style.Style({
-            image: new ol.style.Circle({
+            image: new ol.style.RegularShape({
+                points: 3,
                 radius: radius,
                 fill: new ol.style.Fill({
                     color: color
@@ -107,7 +108,8 @@ Ext.define('Traccar.view.MapController', {
                 stroke: new ol.style.Stroke({
                     color: Traccar.Style.mapStrokeColor,
                     width: Traccar.Style.mapMarkerStroke
-                })
+                }),
+                rotation: rotation * Math.PI / 180
             }),
             text: new ol.style.Text({
                 textBaseline: 'bottom',
@@ -143,7 +145,7 @@ Ext.define('Traccar.view.MapController', {
             ]);
             positions.push(point);
 
-            var style = this.getMarkerStyle(Traccar.Style.mapReportRadius, Traccar.Style.mapReportColor);
+            var style = this.getMarkerStyle(Traccar.Style.mapReportRadius, Traccar.Style.mapReportColor, data.getAt(index).data.course);
             var feature = new ol.Feature({
                 geometry: new ol.geom.Point(positions[index]),
                 originalStyle: style
@@ -190,7 +192,7 @@ Ext.define('Traccar.view.MapController', {
 
         if (feature !== undefined) {
             var name = feature.getStyle().getText().getText();
-            feature.setStyle(this.getMarkerStyle(Traccar.Style.mapSelectRadius, Traccar.Style.mapSelectColor, name));
+            feature.setStyle(this.getMarkerStyle(Traccar.Style.mapSelectRadius, Traccar.Style.mapSelectColor, 0, name));
 
             var pan = ol.animation.pan({
                 duration: Traccar.Style.mapDelay,
