@@ -75,12 +75,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static boolean hasLbs(int type) {
-        return type == MSG_GPS_LBS_1 || type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_STATUS_1
-                || type ==  MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3;
+        return type == MSG_LBS || type == MSG_LBS_STATUS || type == MSG_GPS_LBS_1 || type == MSG_GPS_LBS_2
+                || type == MSG_GPS_LBS_STATUS_1 || type ==  MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3;
     }
 
     private static boolean hasStatus(int type) {
-        return type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3;
+        return type == MSG_STATUS || type == MSG_LBS_STATUS
+                || type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3;
     }
 
     private static void sendResponse(Channel channel, int type, int index) {
@@ -212,7 +213,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 if (hasGps(type)) {
                     decodeGps(position, buf);
                 } else {
-                    getLastLocation(position);
+                    getLastLocation(position, null);
                 }
 
                 if (hasLbs(type)) {

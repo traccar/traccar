@@ -74,7 +74,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         this.protocol = protocol;
     }
 
-    public void getLastLocation(Position position) {
+    public void getLastLocation(Position position, Date deviceTime) {
         Position last = Context.getConnectionManager().getLastPosition(getDeviceId());
         if (last != null) {
             position.setFixTime(last.getFixTime());
@@ -86,6 +86,12 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             position.setCourse(last.getCourse());
         } else {
             position.setFixTime(new Date(0));
+        }
+
+        if (deviceTime != null) {
+            position.setDeviceTime(deviceTime);
+        } else {
+            position.setDeviceTime(new Date());
         }
     }
 
