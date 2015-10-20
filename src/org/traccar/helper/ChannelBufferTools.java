@@ -124,21 +124,6 @@ public final class ChannelBufferTools {
         return value;
     }
 
-
-    /**
-     * Convert integer array to byte array
-     */
-    public static byte[] convertArray(int[] in) {
-        byte[] out = new byte[in.length];
-        for (int i = 0; i < in.length; i++) {
-            out[i] = (byte) in[i];
-        }
-        return out;
-    }
-
-    /**
-     * Convert hex string to byte array
-     */
     public static byte[] convertHexString(String in) {
         int count = in.length() / 2;
         byte[] out = new byte[count];
@@ -148,9 +133,6 @@ public final class ChannelBufferTools {
         return out;
     }
 
-    /**
-     * Convert byte array to hex string
-     */
     public static String convertByteArray(byte[] in) {
         StringBuilder out = new StringBuilder();
         Formatter formatter = new Formatter(out);
