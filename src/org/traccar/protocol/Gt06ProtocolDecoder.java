@@ -26,6 +26,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -155,7 +156,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (hasDeviceId()) {
 
-            if (MESSAGES_SUPPORTED.contains(type)) {
+            if (type == MSG_GPS || type == MSG_GPS_LBS_1 || type == MSG_GPS_LBS_2
+                    || type == MSG_GPS_LBS_STATUS_1 || type == MSG_GPS_LBS_STATUS_2 || type == MSG_GPS_LBS_STATUS_3
+                    || type == MSG_GPS_PHONE || type == MSG_GPS_LBS_EXTEND) {
 
                 Position position = new Position();
                 position.setDeviceId(getDeviceId());
@@ -168,7 +171,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 // GPS length and Satellites count
                 int gpsLength = buf.readUnsignedByte();
-                position.set(Event.KEY_SATELLITES, gpsLength & 0b0000_1111);
+                position.set(Event.KEY_SATELLITES, BitUtil.to(gpsLength, 4));
                 gpsLength >>= 4;
 
                 // Latitude

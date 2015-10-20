@@ -76,7 +76,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     int alarm = buf.readUnsignedByte();
                     buf.readUnsignedByte();
                     if (BitUtil.check(alarm, 5)) {
-                        position.set(Event.KEY_ALARM, BitUtil.range(alarm, 0, 4));
+                        position.set(Event.KEY_ALARM, BitUtil.to(alarm, 4));
                     }
                     break;
                 case 8:
@@ -172,8 +172,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
             int flags = buf.readUnsignedByte();
-            position.set(Event.KEY_SATELLITES, BitUtil.range(flags, 2));
-            position.setValid(BitUtil.range(flags, 0, 2) > 0);
+            position.set(Event.KEY_SATELLITES, BitUtil.from(flags, 2));
+            position.setValid(BitUtil.to(flags, 2) > 0);
 
             // Latitude
             double lat = buf.readUnsignedMedium();
@@ -188,8 +188,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             // Status
             flags = buf.readUnsignedByte();
             position.set(Event.KEY_IGNITION, BitUtil.check(flags, 0));
-            position.set(Event.KEY_GSM, BitUtil.range(flags, 2, 3));
-            position.setCourse((BitUtil.range(flags, 5) * 45 + 180) % 360);
+            position.set(Event.KEY_GSM, BitUtil.between(flags, 2, 5));
+            position.setCourse((BitUtil.from(flags, 5) * 45 + 180) % 360);
 
             // Speed
             int speed = buf.readUnsignedByte();

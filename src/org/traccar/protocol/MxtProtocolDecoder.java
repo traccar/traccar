@@ -73,10 +73,10 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
             long date = buf.readUnsignedInt();
 
-            long days = BitUtil.range(date, 6 + 6 + 5);
-            long hours = BitUtil.range(date, 6 + 6, 5);
-            long minutes = BitUtil.range(date, 6, 6);
-            long seconds = BitUtil.range(date, 0, 6);
+            long days = BitUtil.from(date, 6 + 6 + 5);
+            long hours = BitUtil.between(date, 6 + 6, 6 + 6 + 5);
+            long minutes = BitUtil.between(date, 6, 6 + 6);
+            long seconds = BitUtil.to(date, 6);
 
             long millis = time.getTimeInMillis();
             millis += (((days * 24 + hours) * 60 + minutes) * 60 + seconds) * 1000;
@@ -91,9 +91,9 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             long flags = buf.readUnsignedInt();
             position.set(Event.KEY_IGNITION, BitUtil.check(flags, 0));
             position.set(Event.KEY_ALARM, BitUtil.check(flags, 1));
-            position.set(Event.KEY_INPUT, BitUtil.range(flags, 2, 5));
-            position.set(Event.KEY_OUTPUT, BitUtil.range(flags, 7, 3));
-            position.setCourse(BitUtil.range(flags, 10, 3) * 45);
+            position.set(Event.KEY_INPUT, BitUtil.between(flags, 2, 7));
+            position.set(Event.KEY_OUTPUT, BitUtil.between(flags, 7, 10));
+            position.setCourse(BitUtil.between(flags, 10, 13) * 45);
             //position.setValid(BitUtil.check(flags, 15));
             position.set(Event.KEY_CHARGE, BitUtil.check(flags, 20));
 

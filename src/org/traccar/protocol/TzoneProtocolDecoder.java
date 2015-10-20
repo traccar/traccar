@@ -34,8 +34,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -87,7 +86,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
 
         int flags = buf.readUnsignedShort();
-        position.setCourse(BitUtil.range(flags, 0, 9));
+        position.setCourse(BitUtil.to(flags, 9));
         position.setLatitude(BitUtil.check(flags, 10) ? lat : -lat);
         position.setLongitude(BitUtil.check(flags, 9) ? -lon : lon);
         position.setValid(BitUtil.check(flags, 11));

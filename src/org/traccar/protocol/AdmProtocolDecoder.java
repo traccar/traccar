@@ -52,7 +52,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             identify(buf.toString(buf.readerIndex(), 15, Charset.defaultCharset()), channel);
         }
 
-        if (hasDeviceId() && BitUtil.range(type, 0, 2) == 0) {
+        if (hasDeviceId() && BitUtil.to(type, 2) == 0) {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());

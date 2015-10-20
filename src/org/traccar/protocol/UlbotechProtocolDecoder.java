@@ -123,7 +123,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                 case DATA_ADC:
                     for (int i = 0; i < length / 2; i++) {
                         int value = buf.readUnsignedShort();
-                        position.set(Event.PREFIX_ADC + BitUtil.range(value, 12), BitUtil.range(value, 0, 12));
+                        position.set(Event.PREFIX_ADC + BitUtil.from(value, 12), BitUtil.to(value, 12));
                     }
                     break;
 
