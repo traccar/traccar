@@ -50,6 +50,7 @@ Ext.define('Traccar.view.MapController', {
                 for (i = 0; i < data.length; i++) {
 
                     var store = Ext.getStore('LatestPositions');
+                    var deviceStore = Ext.getStore('Devices');
 
                     var found = store.query('deviceId', data[i].deviceId);
                     if (found.getCount() > 0) {
@@ -66,7 +67,9 @@ Ext.define('Traccar.view.MapController', {
                     if (data[i].deviceId in this.liveData) {
                         this.liveData[data[i].deviceId].setGeometry(geometry);
                     } else {
-                        var style = this.getMarkerStyle(Traccar.Style.mapLiveRadius, Traccar.Style.mapLiveColor);
+                        var name = deviceStore.query('id', data[i].deviceId).first().get('name');
+
+                        var style = this.getMarkerStyle(Traccar.Style.mapLiveRadius, Traccar.Style.mapLiveColor, name);
                         var marker = new ol.Feature({
                             geometry: geometry,
                             originalStyle: style
@@ -94,7 +97,7 @@ Ext.define('Traccar.view.MapController', {
         });
     },
 
-    getMarkerStyle: function (radius, color) {
+    getMarkerStyle: function (radius, color, text) {
         return new ol.style.Style({
             image: new ol.style.Circle({
                 radius: radius,
@@ -105,6 +108,19 @@ Ext.define('Traccar.view.MapController', {
                     color: Traccar.Style.mapStrokeColor,
                     width: Traccar.Style.mapMarkerStroke
                 })
+            }),
+            text: new ol.style.Text({
+                textBaseline: 'bottom',
+                text: text,
+                fill: new ol.style.Fill({
+                    color: '#000'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#FFF',
+                    width: 2
+                }),
+                offsetY: -12,
+                font : 'bold 12px sans-serif'
             })
         });
     },
@@ -173,7 +189,8 @@ Ext.define('Traccar.view.MapController', {
         }
 
         if (feature !== undefined) {
-            feature.setStyle(this.getMarkerStyle(Traccar.Style.mapSelectRadius, Traccar.Style.mapSelectColor));
+            var name = feature.getStyle().getText().getText();
+            feature.setStyle(this.getMarkerStyle(Traccar.Style.mapSelectRadius, Traccar.Style.mapSelectColor, name));
 
             var pan = ol.animation.pan({
                 duration: Traccar.Style.mapDelay,
