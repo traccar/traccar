@@ -31,6 +31,11 @@ public class PatternBuilder {
         return this;
     }
 
+    // GRouP
+    public PatternBuilder grp(String s) {
+        return xpr("(?:").xpr(s).xpr(")");
+    }
+
     // OPtional eXpression
     public PatternBuilder opx(String s) {
         return xpr("(?:").xpr(s).xpr(")?");
@@ -42,12 +47,21 @@ public class PatternBuilder {
         return this;
     }
 
+    // OPtional Text
+    public PatternBuilder opt(String s) {
+        return xpr("(?:").txt(s).xpr(")?");
+    }
+
     // NUMber
     public PatternBuilder num(String s) {
         s = s.replace("dddd", "d{4}").replace("ddd", "d{3}").replace("dd", "d{2}");
         s = s.replace("xxxx", "x{4}").replace("xxx", "x{3}").replace("xx", "x{2}");
 
-        pattern.append(s.replace("d", "\\d").replace("x", "\\p{XDigit}").replaceAll("([\\.\\|])", "\\\\$1"));
+        s = s.replace("d", "\\d").replace("x", "\\p{XDigit}").replaceAll("([\\.])", "\\\\$1");
+        s = s.replaceAll("\\|$", "\\\\|"); // special case for delimiter
+
+        pattern.append(s);
+
         return this;
     }
 
@@ -68,6 +82,12 @@ public class PatternBuilder {
     // NeXT
     public PatternBuilder nxt(String s) {
         return not(s).txt(s);
+    }
+
+    // BINary
+    public PatternBuilder bin(String s) {
+        pattern.append(s.replaceAll("(\\p{XDigit}{2})", "\\\\$1"));
+        return this;
     }
 
     public PatternBuilder groupBegin() {

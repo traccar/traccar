@@ -16,13 +16,13 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -33,158 +33,132 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_HEARTBEAT = Pattern.compile(
-            "\\+ACK:GTHBD," +
-            "([0-9A-Z]{2}\\p{XDigit}{4})," +
-            ".*," +
-            "(\\p{XDigit}{4})\\$?");
+    private static final Pattern PATTERN_HEARTBEAT = new PatternBuilder()
+            .txt("+ACK:GTHBD,")
+            .num("([0-9A-Z]{2}xxxx),")
+            .any().txt(",")
+            .num("(xxxx)")
+            .opt("$")
+            .compile();
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(?:(?:\\+(?:RESP|BUFF):)|" +
-            "(?:\\x00?\\x04,\\p{XDigit}{4},[01],))" +
-            "GT...," +
-            "(?:[0-9A-Z]{2}\\p{XDigit}{4})?," + // Protocol version
-            "([^,]+)," +                        // IMEI
+    private static final Pattern PATTERN = new PatternBuilder()
+            .groupBegin()
+            .txt("+").grp("RESP|BUFF").txt(":")
+            .or()
+            .bin("00?04,")
+            .num("xxxx,")
+            .xpr("[01],")
+            .groupEnd(false)
+            .xpr("GT...,")
+            .opn("[0-9A-Z]{2}xxxx").txt(",")     // protocol version
+            .xpr("([^,]+),")                     // imei
 
-            "(?:[0-9A-Z]{17}," +                // VIN
-            "[^,]{0,20}," +                     // Device name
-            "[01]," +                           // Report type
-            "\\p{XDigit}{1,8}," +               // Report mask
-            "[0-9A-Z]{17}," +                   // VIN
-            "[01]," +                           // ODB connect
-            "\\d{1,5}," +                       // ODB voltage
-            "\\p{XDigit}{8}," +                 // Support PIDs
-            "(\\d{1,5})," +                     // Engine RPM
-            "(\\d{1,3})," +                     // Speed
-            "(-?\\d{1,3})," +                   // Coolant temp
-            "(\\d+\\.?\\d*|Inf|NaN)?," +        // Fuel consumption
-            "(\\d{1,5})," +                     // DTCs cleared distance
-            "\\d{1,5}," +
-            "([01])," +                         // ODB connect
-            "(\\d{1,3})," +                     // Number of DTCs
-            "(\\p{XDigit}*)," +                 // DTCs
-            "(\\d{1,3})," +                     // Throttle
-            "\\d{1,3}," +                       // Engine load
-            "(\\d{1,3})?," +                    // Fuel level
-            "(\\d+)|.*)," +                     // Odometer
+            .groupBegin()
+            .xpr("[0-9A-Z]{17},")                // vin
+            .xpr("[^,]{0,20},")                  // device name
+            .xpr("[01],")                        // report type
+            .num("x{1,8},")                      // report mask
+            .xpr("[0-9A-Z]{17},")                // vin
+            .num("[01],")                        // obd connect
+            .num("d{1,5},")                      // obd voltage
+            .num("x{8},")                        // support pids
+            .num("(d{1,5}),")                    // engine rpm
+            .num("(d{1,3}),")                    // speed
+            .num("(-?d{1,3}),")                  // coolant temp
+            .num("(d+.?d*|Inf|NaN)?,")           // fuel consumption
+            .num("(d{1,5}),")                    // dtcs cleared distance
+            .num("d{1,5},")
+            .xpr("([01]),")                      // obd connect
+            .num("(d{1,3}),")                    // number of dtcs
+            .num("(x*),")                        // dtcs
+            .num("(d{1,3}),")                    // throttle
+            .num("d{1,3},")                      // engine load
+            .num("(d{1,3})?,")                   // fuel level
+            .num("(d+)")                         // odometer
+            .or().any()
+            .groupEnd(false).txt(",")
 
-            "(\\d*)," +                         // GPS accuracy
-            "(\\d+.\\d)?," +                    // Speed
-            "(\\d+)?," +                        // Course
-            "(-?\\d+\\.\\d)?," +                // Altitude
-            "(-?\\d+\\.\\d+)," +                // Longitude
-            "(-?\\d+\\.\\d+)," +                // Latitude
-            "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
-            "(\\d{4})?," +                      // MCC
-            "(\\d{4})?," +                      // MNC
-            "(\\p{XDigit}{4}|\\p{XDigit}{8})?," + // LAC
-            "(\\p{XDigit}{4})?," +              // Cell
-            "(?:(\\d+\\.\\d)?," +               // Odometer
-            "(\\d{1,3})?,)?" +                  // Battery
-            ".*," +
-            "(\\p{XDigit}{4})\\$?");
+            .num("(d*),")                        // gps accuracy
+            .num("(d+.d)?,")                     // speed
+            .num("(d+)?,")                       // course
+            .num("(-?d+.d)?,")                   // altitude
+            .num("(-?d+.d+),")                   // longitude
+            .num("(-?d+.d+),")                   // latitude
+            .num("(dddd)(dd)(dd)")               // date
+            .num("(dd)(dd)(dd),")                // time
+            .num("(dddd)?,")                     // mcc
+            .num("(dddd)?,")                     // mnc
+            .num("(xxxx|x{8})?,")                // loc
+            .num("(xxxx)?,")                     // cell
+            .groupBegin()
+            .num("(d+.d)?,")                     // odometer
+            .num("(d{1,3})?,")                   // battery
+            .groupEnd(true)
+            .any().txt(",")
+            .num("(xxxx)\\$?")
+            .opt("$")
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        // Handle heartbeat
-        Matcher parser = PATTERN_HEARTBEAT.matcher(sentence);
+        Parser parser = new Parser(PATTERN_HEARTBEAT, (String) msg);
         if (parser.matches()) {
             if (channel != null) {
-                channel.write("+SACK:GTHBD," + parser.group(1) + "," + parser.group(2) + "$", remoteAddress);
+                channel.write("+SACK:GTHBD," + parser.next() + "," + parser.next() + "$", remoteAddress);
             }
             return null;
         }
 
-        // Parse message
-        parser = PATTERN.matcher(sentence);
+        parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel, remoteAddress)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
         // OBD
-        position.set(Event.KEY_RPM, parser.group(index++));
-        position.set(Event.KEY_OBD_SPEED, parser.group(index++));
-        position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
-        position.set("fuel-consumption", parser.group(index++));
-        position.set("dtcs-cleared-distance", parser.group(index++));
-        position.set("odb-connect", parser.group(index++));
-        position.set("dtcs-number", parser.group(index++));
-        position.set("dtcs-codes", parser.group(index++));
-        position.set("throttle-position", parser.group(index++));
-        position.set(Event.KEY_FUEL, parser.group(index++));
-        position.set(Event.KEY_OBD_ODOMETER, parser.group(index++));
+        position.set(Event.KEY_RPM, parser.next());
+        position.set(Event.KEY_OBD_SPEED, parser.next());
+        position.set(Event.PREFIX_TEMP + 1, parser.next());
+        position.set("fuel-consumption", parser.next());
+        position.set("dtcs-cleared-distance", parser.next());
+        position.set("odb-connect", parser.next());
+        position.set("dtcs-number", parser.next());
+        position.set("dtcs-codes", parser.next());
+        position.set("throttle-position", parser.next());
+        position.set(Event.KEY_FUEL, parser.next());
+        position.set(Event.KEY_OBD_ODOMETER, parser.next());
 
-        // Validity
-        position.setValid(Integer.parseInt(parser.group(index++)) < 20);
+        position.setValid(parser.nextInt() < 20);
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
 
-        // Speed
-        String speed = parser.group(index++);
-        if (speed != null) {
-            position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(speed)));
-        }
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Course
-        String course = parser.group(index++);
-        if (speed != null) {
-            position.setCourse(Double.parseDouble(course));
-        }
+        position.set(Event.KEY_MCC, parser.next());
+        position.set(Event.KEY_MNC, parser.next());
+        position.set(Event.KEY_LAC, parser.next());
+        position.set(Event.KEY_CELL, parser.next());
 
-        // Altitude
-        String altitude = parser.group(index++);
-        if (altitude != null) {
-            position.setAltitude(Double.parseDouble(altitude));
-        }
-
-        // Coordinates
-        position.setLongitude(Double.parseDouble(parser.group(index++)));
-        position.setLatitude(Double.parseDouble(parser.group(index++)));
-
-        // Date
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-
-        // Time
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        // Cell information
-        position.set(Event.KEY_MCC, parser.group(index++));
-        position.set(Event.KEY_MNC, parser.group(index++));
-        position.set(Event.KEY_LAC, parser.group(index++));
-        position.set(Event.KEY_CELL, parser.group(index++));
-
-        // Other
-        String odometer = parser.group(index++);
-        if (odometer != null && Double.parseDouble(odometer) != 0) {
-            position.set(Event.KEY_ODOMETER, odometer);
-        }
-        position.set(Event.KEY_BATTERY, parser.group(index++));
+        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
-            channel.write("+SACK:" + parser.group(index++) + "$", remoteAddress);
+            channel.write("+SACK:" + parser.next() + "$", remoteAddress);
         }
 
         return position;

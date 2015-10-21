@@ -20,7 +20,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
-import org.traccar.model.Position;
 
 public abstract class BaseProtocolEncoder extends OneToOneEncoder {
 
