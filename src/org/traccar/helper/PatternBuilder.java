@@ -43,7 +43,7 @@ public class PatternBuilder {
 
     // TeXT
     public PatternBuilder txt(String s) {
-        pattern.append(s.replaceAll("([\\\\\\.\\[\\{\\(\\*\\+\\?\\^\\$\\|])", "\\\\$1"));
+        pattern.append(s.replaceAll("([\\\\\\.\\[\\{\\(\\)\\*\\+\\?\\^\\$\\|])", "\\\\$1"));
         return this;
     }
 
