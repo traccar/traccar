@@ -18,7 +18,9 @@ package org.traccar;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.traccar.helper.Log;
 import org.traccar.model.Command;
+import org.traccar.model.Position;
 
 public abstract class BaseProtocolEncoder extends OneToOneEncoder {
 
@@ -30,7 +32,22 @@ public abstract class BaseProtocolEncoder extends OneToOneEncoder {
     protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
 
         if (msg instanceof Command) {
-            return encodeCommand((Command) msg);
+            Command command = (Command) msg;
+            Object encodedCommand = encodeCommand(command);
+
+            // Log command
+            StringBuilder s = new StringBuilder();
+            s.append(String.format("[%08X] ", channel.getId()));
+            s.append("command type: ").append(command.getType()).append(", ");
+            s.append("id : ").append(command.getDeviceId()).append(" ");
+            if (encodedCommand != null) {
+                s.append("sent");
+            } else {
+                s.append("not sent");
+            }
+            Log.info(s.toString());
+
+            return encodedCommand;
         }
 
         return msg;
