@@ -1,8 +1,7 @@
 package org.traccar.protocol;
 
-import static org.traccar.helper.DecoderVerifier.verify;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
+import org.traccar.ProtocolDecoderTest;
 
 public class GpsGateProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -11,18 +10,18 @@ public class GpsGateProtocolDecoderTest extends ProtocolDecoderTest {
 
         GpsGateProtocolDecoder decoder = new GpsGateProtocolDecoder(new GpsGateProtocol());
 
-        assertNull(decoder.decode(null, null, "$FRLIN,,user1,8IVHF*7A"));
+        verifyNothing(decoder, text( "$FRLIN,,user1,8IVHF*7A"));
         
-        assertNull(decoder.decode(null, null, "$FRLIN,,354503026292842,VGZTHKT*0C"));
+        verifyNothing(decoder, text( "$FRLIN,,354503026292842,VGZTHKT*0C"));
 
-        assertNull(decoder.decode(null, null, "$FRLIN,IMEI,1234123412341234,*7B"));
+        verifyNothing(decoder, text( "$FRLIN,IMEI,1234123412341234,*7B"));
         
-        assertNull(decoder.decode(null, null, "$FRLIN,,saab93_device,KLRFBGIVDJ*28"));
+        verifyNothing(decoder, text( "$FRLIN,,saab93_device,KLRFBGIVDJ*28"));
 
-        verify(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 "$GPRMC,154403.000,A,6311.64120,N,01438.02740,E,0.000,0.0,270707,,*0A"));
         
-        verify(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 "$GPRMC,074524,A,5553.73701,N,03728.90491,E,10.39,226.5,160614,0.0,E*75"));
 
     }

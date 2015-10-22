@@ -1,8 +1,7 @@
 package org.traccar.protocol;
 
-import static org.junit.Assert.assertNotNull;
-import static org.traccar.helper.DecoderVerifier.verify;
 import org.junit.Test;
+import org.traccar.ProtocolDecoderTest;
 
 public class TaipProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -11,28 +10,28 @@ public class TaipProtocolDecoderTest extends ProtocolDecoderTest {
 
         TaipProtocolDecoder decoder = new TaipProtocolDecoder(new TaipProtocol(), false);
 
-        verify(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 ">RGP230615010248-2682523-065236820000003007F4101;ID=0005;#0002;*2A<"));
 
-        verify(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 ">RGP190805211932-3457215-058493640000000FFBF0300;ID=8251;#2122;*54<"));
 
-        assertNotNull(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 ">RPV00000+3739438-1220384601512612;ID=1234;*7F"));
 
-        verify(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 "\r\n>REV691615354941+3570173+1397742703203212;ID=Test"));
 
-        verify(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 ">REV481599462982+2578391-0802945201228512;ID=Test"));
         
-        verify(decoder.decode(null, null,
+        verifyPosition(decoder, text(
                 ">REV131756153215+3359479-0075299001031332;VO=10568798;IO=310;SV=10;BL=4190;CV09=0;AD=0;AL=+47;ID=356612021059680"));
-        
-        assertNotNull(decoder.decode(null, null,
+
+        verifyPosition(decoder, text(
                 ">RPV02138+4555512-0735478000000032;ID=1005;*76<"));
-        
-        assertNotNull(decoder.decode(null, null,
+
+        verifyPosition(decoder, text(
                 ">RPV19105+4538405-0739518900000012;ID=9999;*7A<\r\n"));
 
     }
