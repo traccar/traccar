@@ -11,22 +11,6 @@ public class Gt06ProtocolDecoderTest extends ProtocolDecoderTest {
         Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(new Gt06Protocol());
 
         verifyNothing(decoder, binary(
-                "787811010123456789012345100B3201000171930D0A"));
-
-        verifyAttributes(decoder, binary(
-                "78780a13440604000201baaf540d0a"));
-
-        verifyPosition(decoder, binary(
-                "78781f120f0a140e150bc505e51e780293a9e800540000f601006e0055da00035f240d0a")/*,
-                position("2015-10-20 14:21:11", true, 54.94535, 24.01762)*/);
-
-        verifyPosition(decoder, binary(
-                "787823120f081b121d37cb01c8e2cc08afd3c020d50201940701d600a1190041ee100576d1470d0a"));
-
-        verifyPosition(decoder, binary(
-                "78781F120B081D112E10CC027AC7EB0C46584900148F01CC00287D001FB8000380810D0A"));
-
-        verifyNothing(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
 
         verifyNothing(decoder, binary(
@@ -34,6 +18,19 @@ public class Gt06ProtocolDecoderTest extends ProtocolDecoderTest {
 
         verifyNothing(decoder, binary(
                 "78780d0103534190360660610003c3df0d0a"));
+
+        verifyAttributes(decoder, binary(
+                "78780a13440604000201baaf540d0a"));
+
+        verifyPosition(decoder, binary(
+                "78781f120f0a140e150bc505e51e780293a9e800540000f601006e0055da00035f240d0a"),
+                position("2015-10-20 14:21:11.000", true, 54.94535, 24.01762));
+
+        verifyPosition(decoder, binary(
+                "787823120f081b121d37cb01c8e2cc08afd3c020d50201940701d600a1190041ee100576d1470d0a"));
+
+        verifyPosition(decoder, binary(
+                "78781F120B081D112E10CC027AC7EB0C46584900148F01CC00287D001FB8000380810D0A"));
 
         verifyPosition(decoder, binary(
                 "787819100B031A0B1B31CC027AC7FD0C4657BF0115210001001CC6070D0A"));
@@ -43,10 +40,6 @@ public class Gt06ProtocolDecoderTest extends ProtocolDecoderTest {
 
         verifyPosition(decoder, binary(
                 "787825160B051B093523CF027AC8360C4657B30014000901CC00266A001E1740050400020008D7B10D0A"));
-        //       12345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-        verifyNothing(decoder, binary(
-                "787811010864717003664467100f190a0002c6d20d0a"));
 
         verifyPosition(decoder, binary(
                 "787819100e010903230ec803ae32a60653cded00180000020072feb70d0a"));
@@ -62,6 +55,12 @@ public class Gt06ProtocolDecoderTest extends ProtocolDecoderTest {
 
         verifyPosition(decoder, binary(
                 "787822220e0914160f07c9021a362805090a7800d8b802d402c30e00a98a0105010213f4bb0d0a"));
+
+        verifyNothing(decoder, binary(
+                "787811010864717003664467100f190a0002c6d20d0a"));
+
+        verifyNothing(decoder, binary(
+                "787811010123456789012345100B3201000171930D0A"));
 
     }
 

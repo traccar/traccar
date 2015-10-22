@@ -193,7 +193,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     offset = -offset;
                 }
                 if (!forceTimeZone) {
-                    timeZone.setRawOffset(offset);
+                    timeZone.setRawOffset(offset * 1000);
                 }
             }
 

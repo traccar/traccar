@@ -31,6 +31,7 @@ public class DateBuilder {
     public DateBuilder(TimeZone timeZone) {
         calendar = Calendar.getInstance(timeZone);
         calendar.clear();
+        calendar.setTimeInMillis(0);
     }
 
     public DateBuilder setYear(int year) {

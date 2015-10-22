@@ -79,7 +79,8 @@ public class ProtocolDecoderTest {
         Position position = new Position();
 
         if (time != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             position.setTime(dateFormat.parse(time));
         }
         position.setValid(valid);
@@ -136,10 +137,7 @@ public class ProtocolDecoderTest {
         Position position = (Position) decodedObject;
 
         if (expected.getFixTime() != null) {
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            Assert.assertEquals("time",
-                    dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()));
+            Assert.assertEquals("time", expected.getFixTime(), position.getFixTime());
         }
         Assert.assertEquals("valid", expected.getValid(), position.getValid());
         Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
