@@ -20,6 +20,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.socket.DatagramChannel;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
@@ -61,7 +62,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
-        e.getChannel().close();
+        closeChannel(e.getChannel());
 
         Context.getConnectionManager().removeActiveDevice(e.getChannel());
     }
@@ -69,13 +70,18 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
         Log.warning(formatChannel(e.getChannel()) + " error", e.getCause());
-        e.getChannel().close();
+        closeChannel(e.getChannel());
     }
 
     @Override
     public void channelIdle(ChannelHandlerContext ctx, IdleStateEvent e) {
         Log.info(formatChannel(e.getChannel()) + " timed out");
-        e.getChannel().close();
+        closeChannel(e.getChannel());
     }
 
+    private void closeChannel(Channel channel) {
+        if (!(channel instanceof DatagramChannel)) {
+            channel.close();
+        }
+    }
 }
