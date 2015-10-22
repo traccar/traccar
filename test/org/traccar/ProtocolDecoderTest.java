@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class ProtocolDecoderTest {
 
@@ -136,6 +137,7 @@ public class ProtocolDecoderTest {
 
         if (expected.getFixTime() != null) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             Assert.assertEquals("time",
                     dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()));
         }
