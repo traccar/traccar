@@ -116,7 +116,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(BitUtil.to(flags, 10));
         position.setValid(BitUtil.check(flags, 12));
 
-        if (BitUtil.check(flags, 10)) {
+        if (!BitUtil.check(flags, 10)) {
             latitude = -latitude;
         }
         if (BitUtil.check(flags, 11)) {

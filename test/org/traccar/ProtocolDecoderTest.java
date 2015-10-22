@@ -13,6 +13,9 @@ import org.traccar.model.Position;
 
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -70,21 +73,27 @@ public class ProtocolDecoderTest {
         }
     }
 
-    protected Position position(
-            Date time, boolean valid, double lat, double lon, double altitude, double speed, double course) {
+    protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
 
         Position position = new Position();
 
-        position.setDeviceTime(time);
-        position.setFixTime(time);
+        if (time != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            position.setTime(dateFormat.parse(time));
+        }
         position.setValid(valid);
         position.setLatitude(lat);
         position.setLongitude(lon);
-        position.setAltitude(altitude);
-        position.setSpeed(speed);
-        position.setCourse(course);
 
         return position;
+    }
+
+    private String concatenateStrings(String... strings) {
+        StringBuilder builder = new StringBuilder();
+        for (String s : strings) {
+            builder.append(s);
+        }
+        return builder.toString();
     }
 
     protected ChannelBuffer binary(String... data) {
@@ -93,15 +102,15 @@ public class ProtocolDecoderTest {
 
     protected ChannelBuffer binary(ByteOrder endianness, String... data) {
         return ChannelBuffers.wrappedBuffer(
-                endianness, ChannelBufferTools.convertHexString(String.join("", data)));
+                endianness, ChannelBufferTools.convertHexString(concatenateStrings(data)));
     }
 
     protected String text(String... data) {
-        return String.join("", data);
+        return concatenateStrings(data);
     }
 
     protected ChannelBuffer buffer(String... data) {
-        return ChannelBuffers.copiedBuffer(String.join("", data), Charset.defaultCharset());
+        return ChannelBuffers.copiedBuffer(concatenateStrings(data), Charset.defaultCharset());
     }
 
     protected DefaultHttpRequest request(String url) {
@@ -125,14 +134,14 @@ public class ProtocolDecoderTest {
 
         Position position = (Position) decodedObject;
 
-        Assert.assertEquals(position.getDeviceTime(), expected.getDeviceTime());
-        Assert.assertEquals(position.getFixTime(), expected.getFixTime());
-        Assert.assertEquals(position.getValid(), expected.getValid());
-        Assert.assertEquals(position.getLatitude(), expected.getLatitude(), 0.00001);
-        Assert.assertEquals(position.getLongitude(), expected.getLongitude(), 0.00001);
-        Assert.assertEquals(position.getAltitude(), expected.getAltitude(), 0.01);
-        Assert.assertEquals(position.getSpeed(), expected.getSpeed(), 0.01);
-        Assert.assertEquals(position.getCourse(), expected.getCourse(), 0.01);
+        if (expected.getFixTime() != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Assert.assertEquals("time",
+                    dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()));
+        }
+        Assert.assertEquals("valid", expected.getValid(), position.getValid());
+        Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
+        Assert.assertEquals("longitude", expected.getLongitude(), position.getLongitude(), 0.00001);
 
         verifyDecodedPosition(decodedObject);
 
@@ -146,23 +155,24 @@ public class ProtocolDecoderTest {
         Position position = (Position) decodedObject;
 
         Assert.assertNotNull(position.getFixTime());
-        Assert.assertTrue(position.getFixTime().after(new Date(946684800000L))); // 2000 year
-        Assert.assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000); // 25 hours
+        Assert.assertTrue("year > 2000", position.getFixTime().after(new Date(946684800000L)));
+        Assert.assertTrue("time < +25 hours",
+                position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000);
 
-        Assert.assertTrue(position.getLatitude() >= -90);
-        Assert.assertTrue(position.getLatitude() <= 90);
+        Assert.assertTrue("latitude >= -90", position.getLatitude() >= -90);
+        Assert.assertTrue("latitude <= 90", position.getLatitude() <= 90);
 
-        Assert.assertTrue(position.getLongitude() >= -180);
-        Assert.assertTrue(position.getLongitude() <= 180);
+        Assert.assertTrue("longitude >= -180", position.getLongitude() >= -180);
+        Assert.assertTrue("longitude <= 180", position.getLongitude() <= 180);
 
-        Assert.assertTrue(position.getAltitude() >= -12262);
-        Assert.assertTrue(position.getAltitude() <= 18000);
+        Assert.assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
+        Assert.assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
 
-        Assert.assertTrue(position.getSpeed() >= 0);
-        Assert.assertTrue(position.getSpeed() <= 869);
+        Assert.assertTrue("speed >= 0", position.getSpeed() >= 0);
+        Assert.assertTrue("speed <= 869", position.getSpeed() <= 869);
 
-        Assert.assertTrue(position.getCourse() >= 0);
-        Assert.assertTrue(position.getCourse() <= 360);
+        Assert.assertTrue("course >= 0", position.getCourse() >= 0);
+        Assert.assertTrue("course <= 360", position.getCourse() <= 360);
 
     }
 
