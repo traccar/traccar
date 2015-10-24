@@ -33,6 +33,8 @@ public class PatternBuilder {
     }
 
     public PatternBuilder expression(String s) {
+        s = s.replaceAll("\\|$", "\\\\|"); // special case for delimiter
+
         fragments.add(s);
         return this;
     }
@@ -63,6 +65,11 @@ public class PatternBuilder {
         return this;
     }
 
+    public PatternBuilder or() {
+        fragments.add("|");
+        return this;
+    }
+
     public PatternBuilder groupBegin() {
         return expression("(?:");
     }
@@ -73,10 +80,6 @@ public class PatternBuilder {
 
     public PatternBuilder groupEnd(String s) {
         return expression(")" + s);
-    }
-
-    public PatternBuilder or() {
-        return expression("|");
     }
 
     public Pattern compile() {

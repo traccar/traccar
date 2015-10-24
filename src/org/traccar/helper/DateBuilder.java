@@ -60,16 +60,6 @@ public class DateBuilder {
         return setDate(year, month, day);
     }
 
-    @Deprecated
-    public DateBuilder setDate(String year, String month, String day) {
-        return setDate(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
-    }
-
-    @Deprecated
-    public DateBuilder setDateReverse(String day, String month, String year) {
-        return setDate(year, month, day);
-    }
-
     public DateBuilder setCurrentDate() {
         Calendar now = Calendar.getInstance(calendar.getTimeZone());
         return setYear(now.get(Calendar.YEAR)).setMonth(now.get(Calendar.MONTH)).setDay(now.get(Calendar.DAY_OF_MONTH));
@@ -104,17 +94,8 @@ public class DateBuilder {
         return setHour(hour).setMinute(minute).setSecond(second);
     }
 
-    @Deprecated
-    public DateBuilder setTime(String hour, String minute, String second) {
-        return setTime(Integer.parseInt(hour), Integer.parseInt(minute), Integer.parseInt(second));
-    }
-
     public DateBuilder setTime(int hour, int minute, int second, int millis) {
         return setHour(hour).setMinute(minute).setSecond(second).setMillis(millis);
-    }
-
-    public DateBuilder setDateTime(int year, int month, int day, int hour, int minute, int second) {
-        return setDate(year, month, day).setTime(hour, minute, second);
     }
 
     public Date getDate() {
