@@ -24,8 +24,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BitUtil;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.*;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -46,7 +45,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (lon) {
             result = buf.readUnsignedByte() & 0x0f;
         }
-        result = result * 10 + ChannelBufferTools.readHexInteger(buf, lon ? 5 : 6) * 0.0001;
+
+        int length = 6;
+        if (lon) {
+            length = 5;
+        }
+
+        result = result * 10 + ChannelBufferTools.readHexInteger(buf, length) * 0.0001;
 
         result /= 60;
         result += degrees;
@@ -55,7 +60,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void processStatus(Position position, long status) {
-        if (!BitUtil.check(status, 0) || !BitUtil.check(status, 1) || !BitUtil.check(status, 3) || !BitUtil.check(status, 4)) {
+        if (!BitUtil.check(status, 0) || !BitUtil.check(status, 1)
+                || !BitUtil.check(status, 3) || !BitUtil.check(status, 4)) {
             position.set(Event.KEY_ALARM, true);
         }
         position.set(Event.KEY_IGNITION, !BitUtil.check(status, 10));
@@ -64,41 +70,41 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeBinary(ChannelBuffer buf, Channel channel) {
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
         buf.readByte(); // marker
 
-        // Identification
         if (!identify(ChannelBufferTools.readHexString(buf, 10), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
-        time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setHour(ChannelBufferTools.readHexInteger(buf, 2))
+                .setMinute(ChannelBufferTools.readHexInteger(buf, 2))
+                .setSecond(ChannelBufferTools.readHexInteger(buf, 2))
+                .setDay(ChannelBufferTools.readHexInteger(buf, 2))
+                .setMonth(ChannelBufferTools.readHexInteger(buf, 2))
+                .setYear(ChannelBufferTools.readHexInteger(buf, 2));
+        position.setTime(dateBuilder.getDate());
 
-        // Location
         double latitude = readCoordinate(buf, false);
         position.set(Event.KEY_POWER, buf.readByte());
         double longitude = readCoordinate(buf, true);
+
         int flags = buf.readUnsignedByte() & 0x0f;
         position.setValid((flags & 0x02) != 0);
-        if ((flags & 0x04) == 0) latitude = -latitude;
-        if ((flags & 0x08) == 0) longitude = -longitude;
+        if ((flags & 0x04) == 0) {
+            latitude = -latitude;
+        }
+        if ((flags & 0x08) == 0) {
+            longitude = -longitude;
+        }
+
         position.setLatitude(latitude);
         position.setLongitude(longitude);
 
-        // Speed and course
         position.setSpeed(ChannelBufferTools.readHexInteger(buf, 3));
         position.setCourse((buf.readUnsignedByte() & 0x0f) * 100.0 + ChannelBufferTools.readHexInteger(buf, 2));
 
@@ -106,84 +112,57 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "\\*..," +                          // Manufacturer
-            "(\\d+)," +                         // IMEI
-            "V\\d," +                           // Version?
-            ".*" +
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
-            "([AV])?," +                        // Validity
-            "-?(\\d+)-?(\\d{2}.\\d+)," +        // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "-?(\\d+)-?(\\d{2}.\\d+)," +        // Longitude (DDMM.MMMM)
-            "([EW])," +
-            "(\\d+.?\\d*)," +                   // Speed
-            "(\\d+.?\\d*)?," +                  // Course
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            "(\\p{XDigit}{8})" +                // Status
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("*")
+            .expression("..,")                   // manufacturer
+            .number("(d+),")                     // imei
+            .number("Vd,")                       // version?
+            .any()
+            .number("(dd)(dd)(dd),")             // time
+            .expression("([AV])?,")              // validity
+            .number("-?(d+)-?(dd.d+),")          // latitude
+            .expression("([NS]),")
+            .number("-?(d+)-?(dd.d+),")          // longitude
+            .expression("([EW]),")
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(x{8})")                    // status
+            .any()
+            .compile();
 
     private Position decodeText(String sentence, Channel channel) {
 
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        // Validity
-        String valid = parser.group(index++);
-        if (valid != null) {
-            position.setValid(valid.compareTo("A") == 0);
+        if (parser.hasNext()) {
+            position.setValid(parser.next().equals("A"));
         }
 
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-        position.setLongitude(longitude);
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
+        processStatus(position, parser.nextLong(16));
 
-        // Course
-        String course = parser.group(index++);
-        if (course != null) {
-            position.setCourse(Double.parseDouble(course));
-        }
-
-        // Date
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        processStatus(position, Long.parseLong(parser.group(index++), 16));
         return position;
     }
 
@@ -195,7 +174,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
         String marker = buf.toString(0, 1, Charset.defaultCharset());
 
-        // TODO X mode?
+        // handle X mode?
 
         if (marker.equals("*")) {
             return decodeText(buf.toString(Charset.defaultCharset()), channel);

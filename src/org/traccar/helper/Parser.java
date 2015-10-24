@@ -67,8 +67,12 @@ public class Parser {
     }
 
     public long nextLong() {
+        return nextLong(10);
+    }
+
+    public long nextLong(int radix) {
         if (hasNext()) {
-            return Long.parseLong(next());
+            return Long.parseLong(next(), radix);
         } else {
             return 0;
         }
