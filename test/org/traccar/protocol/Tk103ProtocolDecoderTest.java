@@ -11,6 +11,10 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
         verifyPosition(decoder, text(
+                "(088047365460BR00151024A2555.3531S02855.3329E004.7055148276.1701000000L00009AA3)"),
+                position("2015-10-24 05:51:48.000", true, -25.92255, 28.92222));
+
+        verifyPosition(decoder, text(
                 "(088047365460BP05354188047365460150929A3258.1754S02755.4323E009.4193927301.9000000000L00000000)"));
 
         verifyPosition(decoder, text(
@@ -59,8 +63,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
                 "(352606090042050,BP05,240414,V,0000.0000N,00000.0000E,000.0,193133,000.0"));
         
         verifyPosition(decoder, text(
-                "(352606090042050,BP05,240414,A,4527.3513N,00909.9758E,4.80,112825,155.49"));
-        
+                "(352606090042050,BP05,240414,A,4527.3513N,00909.9758E,4.80,112825,155.49"),
+                position("2014-04-24 11:28:25.000", true, 45.45586, 9.16626));
+
         verifyPosition(decoder, text(
                 "(013632782450,BP05,101201,A,2234.0297N,11405.9101E,000.0,040137,178.48,00000000,L00000000"));
         
