@@ -43,8 +43,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -58,13 +57,11 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         long id = buf.readUnsignedInt();
         buf.readUnsignedInt(); // time
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.set(Event.KEY_INDEX, index);
         position.setValid(true);
 
-        // Get device id
         if (!identify(String.valueOf(id), channel)) {
             return null;
         }
@@ -72,7 +69,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         if (protocol == 0x01 && (type == MSG_COMPACT || type == MSG_FULL)) {
 
-            // TODO: send ack
+            // need to send ack?
 
             buf.readUnsignedShort(); // report trigger
             buf.readUnsignedShort(); // state flag
@@ -96,7 +93,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
-            // TODO: parse other data
+            // parse other data
+
             return position;
 
         } else if (protocol == 0x80) {
@@ -133,6 +131,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm MMM d yyyy", Locale.ENGLISH);
             position.setTime(dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR)));
             return position;
+
         }
 
         return null;
