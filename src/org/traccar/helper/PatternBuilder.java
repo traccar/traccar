@@ -15,104 +15,81 @@
  */
 package org.traccar.helper;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class PatternBuilder {
 
-    private final StringBuilder pattern = new StringBuilder();
+    private final ArrayList<String> fragments = new ArrayList<>();
 
-    public interface Builder {
-        void build(PatternBuilder builder);
+    public PatternBuilder optional() {
+        return optional(1);
     }
 
-    // eXPRession
-    public PatternBuilder xpr(String s) {
-        pattern.append(s);
+    public PatternBuilder optional(int count) {
+        fragments.add(fragments.size() - count, "(?:");
+        fragments.add(")?");
         return this;
     }
 
-    // GRouP
-    public PatternBuilder grp(String s) {
-        return xpr("(?:").xpr(s).xpr(")");
-    }
-
-    // OPtional eXpression
-    public PatternBuilder opx(String s) {
-        return xpr("(?:").xpr(s).xpr(")?");
-    }
-
-    // TeXT
-    public PatternBuilder txt(String s) {
-        pattern.append(s.replaceAll("([\\\\\\.\\[\\{\\(\\)\\*\\+\\?\\^\\$\\|])", "\\\\$1"));
+    public PatternBuilder expression(String s) {
+        fragments.add(s);
         return this;
     }
 
-    // OPtional Text
-    public PatternBuilder opt(String s) {
-        return xpr("(?:").txt(s).xpr(")?");
+    public PatternBuilder text(String s) {
+        fragments.add(s.replaceAll("([\\\\\\.\\[\\{\\(\\)\\*\\+\\?\\^\\$\\|])", "\\\\$1"));
+        return this;
     }
 
-    // NUMber
-    public PatternBuilder num(String s) {
+    public PatternBuilder number(String s) {
         s = s.replace("dddd", "d{4}").replace("ddd", "d{3}").replace("dd", "d{2}");
         s = s.replace("xxxx", "x{4}").replace("xxx", "x{3}").replace("xx", "x{2}");
 
         s = s.replace("d", "\\d").replace("x", "\\p{XDigit}").replaceAll("([\\.])", "\\\\$1");
         s = s.replaceAll("\\|$", "\\\\|"); // special case for delimiter
 
-        pattern.append(s);
-
+        fragments.add(s);
         return this;
-    }
-
-    // OPtional Number
-    public PatternBuilder opn(String s) {
-        return xpr("(?:").num(s).xpr(")?");
     }
 
     public PatternBuilder any() {
-        pattern.append(".*");
+        fragments.add(".*");
         return this;
     }
 
-    public PatternBuilder not(String s) {
-        return xpr("[^").txt(s).xpr("]*");
-    }
-
-    // NeXT
-    public PatternBuilder nxt(String s) {
-        return not(s).txt(s);
-    }
-
-    // BINary
-    public PatternBuilder bin(String s) {
-        pattern.append(s.replaceAll("(\\p{XDigit}{2})", "\\\\$1"));
+    public PatternBuilder binary(String s) {
+        fragments.add(s.replaceAll("(\\p{XDigit}{2})", "\\\\$1"));
         return this;
     }
 
     public PatternBuilder groupBegin() {
-        return xpr("(?:");
+        return expression("(?:");
     }
 
-    public PatternBuilder groupEnd(boolean optional) {
-        if (optional) {
-            return xpr(")?");
-        } else {
-            return xpr(")");
-        }
+    public PatternBuilder groupEnd() {
+        return expression(")");
+    }
+
+    public PatternBuilder groupEnd(String s) {
+        return expression(")" + s);
     }
 
     public PatternBuilder or() {
-        return xpr("|");
+        return expression("|");
     }
 
     public Pattern compile() {
-        return Pattern.compile(pattern.toString(), Pattern.DOTALL);
+        return Pattern.compile(toString(), Pattern.DOTALL);
     }
 
     @Override
     public String toString() {
-        return pattern.toString();
+        StringBuilder builder = new StringBuilder();
+        for (String fragment : fragments) {
+            builder.append(fragment);
+        }
+        return builder.toString();
     }
 
 }

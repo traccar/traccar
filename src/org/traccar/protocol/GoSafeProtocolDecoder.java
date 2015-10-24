@@ -36,67 +36,67 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("*GS")                          // header
-            .num("d+,")                          // protocol version
-            .num("(d+),")                        // imei
-            .num("(dd)(dd)(dd)")                 // time
-            .num("(dd)(dd)(dd),")                // date
-            .xpr("(.*)#?")                       // data
+            .text("*GS")                         // header
+            .number("d+,")                       // protocol version
+            .number("(d+),")                     // imei
+            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd),")             // date
+            .expression("(.*)#?")                // data
             .compile();
 
     private static final Pattern PATTERN_ITEM = new PatternBuilder()
-            .num("(x+)?,")                       // event
+            .number("(x+)?,")                    // event
             .groupBegin()
-            .txt("SYS:")
-            .nxt(",")
-            .groupEnd(true)
+            .text("SYS:")
+            .expression("[^,]*,")
+            .groupEnd("?")
             .groupBegin()
-            .txt("GPS:")
-            .xpr("([AV]);")                      // validity
-            .num("(d+);")                        // satellites
-            .num("([NS])(d+.d+);")               // latitude
-            .num("([EW])(d+.d+);")               // longitude
-            .num("(d+);")                        // speed
-            .num("(d+);")                        // course
-            .num("(d+);")                        // altitude
-            .num("(d+.d+)")                      // hdop
-            .opn(";d+.d+")                       // vdop
-            .xpr(",?")
-            .groupEnd(false)
+            .text("GPS:")
+            .expression("([AV]);")               // validity
+            .number("(d+);")                     // satellites
+            .number("([NS])(d+.d+);")            // latitude
+            .number("([EW])(d+.d+);")            // longitude
+            .number("(d+);")                     // speed
+            .number("(d+);")                     // course
+            .number("(d+);")                     // altitude
+            .number("(d+.d+)")                   // hdop
+            .number("(?:;d+.d+)?")               // vdop
+            .expression(",?")
+            .groupEnd()
             .groupBegin()
-            .txt("GSM:").not(",").xpr(",?")
-            .groupEnd(true)
+            .text("GSM:").expression("[^,],?")
+            .groupEnd("?")
             .groupBegin()
-            .txt("COT:")
-            .num("(d+)")                         // odometer
-            .opn(";d+:d+:d+")                    // engine hours
-            .xpr(",?")
-            .groupEnd(true)
+            .text("COT:")
+            .number("(d+)")                      // odometer
+            .number("(?:;d+:d+:d+)?")            // engine hours
+            .expression(",?")
+            .groupEnd("?")
             .groupBegin()
-            .txt("ADC:")
-            .num("(d+.d+);")                     // power
-            .num("(d+.d+),?")                    // battery
-            .groupEnd(true)
+            .text("ADC:")
+            .number("(d+.d+);")                  // power
+            .number("(d+.d+),?")                 // battery
+            .groupEnd("?")
             .groupBegin()
-            .txt("DTT:")
-            .num("(x+);")                        // status
-            .nxt(";")
-            .num("x+;")                          // geo-fence 0-119
-            .num("x+;")                          // geo-fence 120-155
-            .num("x+,?")                         // event status
-            .groupEnd(true)
+            .text("DTT:")
+            .number("(x+);")                     // status
+            .expression("[^;]*;")
+            .number("x+;")                       // geo-fence 0-119
+            .number("x+;")                       // geo-fence 120-155
+            .number("x+,?")                      // event status
+            .groupEnd("?")
             .groupBegin()
-            .txt("ETD:").not(",").xpr(",?")
-            .groupEnd(true)
+            .text("ETD:").expression("[^,],?")
+            .groupEnd("?")
             .groupBegin()
-            .txt("OBD:").not(",").xpr(",?")
-            .groupEnd(true)
+            .text("OBD:").expression("[^,],?")
+            .groupEnd("?")
             .groupBegin()
-            .txt("FUL:").not(",").xpr(",?")
-            .groupEnd(true)
+            .text("FUL:").expression("[^,],?")
+            .groupEnd("?")
             .groupBegin()
-            .txt("TRU:").not(",").xpr(",?")
-            .groupEnd(true)
+            .text("TRU:").expression("[^,],?")
+            .groupEnd("?")
             .compile();
 
     private Position decodePosition(Parser parser, Date time) {

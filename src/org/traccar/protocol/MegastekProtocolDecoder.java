@@ -32,46 +32,46 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_GPRMC = new PatternBuilder()
-            .txt("$GPRMC,")
-            .num("(dd)(dd)(dd).d+,")             // time
-            .xpr("([AV]),")                      // validity
-            .num("(d+)(dd.d+),([NS]),")          // latitude
-            .num("(d+)(dd.d+),([EW]),")          // longitude
-            .num("(d+.d+)?,")                    // speed
-            .num("(d+.d+)?,")                    // course
-            .num("(dd)(dd)(dd)")                 // date (ddmmyy)
+            .text("$GPRMC,")
+            .number("(dd)(dd)(dd).d+,")          // time
+            .expression("([AV]),")               // validity
+            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .number("(d+.d+)?,")                 // speed
+            .number("(d+.d+)?,")                 // course
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .any()                               // checksum
             .compile();
 
     private static final Pattern PATTERN_SIMPLE = new PatternBuilder()
-            .xpr("[FL],")                        // flag
-            .xpr("([^,]*),")                     // alarm
-            .num("imei:(d+),")                   // imei
-            .num("(d+/?d*)?,")                   // satellites
-            .num("(d+.d+)?,")                    // altitude
-            .num("Battery=(d+)%,,")              // battery
-            .num("(d)?,")                        // charger
-            .num("(d+)?,")                       // mcc
-            .num("(d+)?,")                       // mnc
-            .num("(xxxx,xxxx);")                 // location code
+            .expression("[FL],")                 // flag
+            .expression("([^,]*),")              // alarm
+            .number("imei:(d+),")                // imei
+            .number("(d+/?d*)?,")                // satellites
+            .number("(d+.d+)?,")                 // altitude
+            .number("Battery=(d+)%,,")           // battery
+            .number("(d)?,")                     // charger
+            .number("(d+)?,")                    // mcc
+            .number("(d+)?,")                    // mnc
+            .number("(xxxx,xxxx);")              // location code
             .any()                               // checksum
             .compile();
 
     private static final Pattern PATTERN_ALTERNATIVE = new PatternBuilder()
-            .num("(d+),")                        // mcc
-            .num("(d+),")                        // mnc
-            .num("(xxxx,xxxx),")                 // location code
-            .num("(d+),")                        // gsm signal
-            .num("(d+),")                        // battery
-            .num("(d+),")                        // flags
-            .num("(d+),")                        // inputs
-            .num("(?:(d+),)?")                   // outputs
-            .num("(d.?d*),")                     // adc 1
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(xxxx,xxxx),")              // location code
+            .number("(d+),")                     // gsm signal
+            .number("(d+),")                     // battery
+            .number("(d+),")                     // flags
+            .number("(d+),")                     // inputs
+            .number("(?:(d+),)?")                // outputs
+            .number("(d.?d*),")                  // adc 1
             .groupBegin()
-            .num("(d.dd),")                      // adc 2
-            .num("(d.dd),")                      // adc 3
-            .groupEnd(true)
-            .xpr("([^;]+);")                     // alarm
+            .number("(d.dd),")                   // adc 2
+            .number("(d.dd),")                   // adc 3
+            .groupEnd("?")
+            .expression("([^;]+);")              // alarm
             .any()                               // checksum
             .compile();
 
@@ -216,44 +216,44 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_NEW = new PatternBuilder()
-            .txt("$MGV")
-            .num("ddd,")
-            .num("(d+),")                        // imei
-            .nxt(",")                            // name
-            .xpr("([RS]),")
-            .num("(dd)(dd)(dd),")                // date (ddmmyy)
-            .num("(dd)(dd)(dd),")                // time
-            .xpr("([AV]),")                      // validity
-            .num("(d+)(dd.d+),([NS]),")          // latitude
-            .num("(d+)(dd.d+),([EW]),")          // longitude
-            .num("dd,")
-            .num("(dd),")                        // satellites
-            .num("dd,")
-            .num("(d+.d+),")                     // hdop
-            .num("(d+.d+),")                     // speed
-            .num("(d+.d+),")                     // course
-            .num("(d+.d+),")                     // altitude
-            .num("(d+.d+),")                     // odometer
-            .num("(d+),")                        // mcc
-            .num("(d+),")                        // mnc
-            .num("(xxxx,xxxx),")                 // cell
-            .num("(d+)?,")                       // gsm
-            .xpr("([01]+),")                     // input
-            .xpr("([01]+),")                     // output
-            .num("(d+),")                        // adc1
-            .num("(d+),")                        // adc2
-            .num("(d+),")                        // adc3
+            .text("$MGV")
+            .number("ddd,")
+            .number("(d+),")                     // imei
+            .expression("[^,]*,")                // name
+            .expression("([RS]),")
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time
+            .expression("([AV]),")               // validity
+            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .number("dd,")
+            .number("(dd),")                     // satellites
+            .number("dd,")
+            .number("(d+.d+),")                  // hdop
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("(d+.d+),")                  // altitude
+            .number("(d+.d+),")                  // odometer
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(xxxx,xxxx),")              // cell
+            .number("(d+)?,")                    // gsm
+            .expression("([01]+),")              // input
+            .expression("([01]+),")              // output
+            .number("(d+),")                     // adc1
+            .number("(d+),")                     // adc2
+            .number("(d+),")                     // adc3
             .groupBegin()
-            .num("(-?d+.?d*)")                   // temperature 1
-            .or().txt(" ")
-            .groupEnd(false).txt(",")
+            .number("(-?d+.?d*)")                // temperature 1
+            .or().text(" ")
+            .groupEnd().text(",")
             .groupBegin()
-            .num("(-?d+.?d*)")                   // temperature 2
-            .or().txt(" ")
-            .groupEnd(false).txt(",")
-            .num("(d+)?,,")                      // rfid
-            .num("(d+)?,")                       // battery
-            .xpr("([^,]*);")                     // alert
+            .number("(-?d+.?d*)")                // temperature 2
+            .or().text(" ")
+            .groupEnd().text(",")
+            .number("(d+)?,,")                   // rfid
+            .number("(d+)?,")                    // battery
+            .expression("([^,]*);")              // alert
             .any()
             .compile();
 

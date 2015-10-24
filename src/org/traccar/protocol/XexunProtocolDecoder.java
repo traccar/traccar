@@ -36,35 +36,36 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_BASIC = new PatternBuilder()
-            .xpr("G[PN]RMC,")
-            .num("(dd)(dd)(dd).(d+),")           // time
-            .xpr("([AV]),")                      // validity
-            .num("(d+)(dd.d+),([NS]),")          // latitude
-            .num("(d+)(dd.d+),([EW])?,")         // longitude
-            .num("(d+.?d*),")                    // speed
-            .num("(d+.?d*)?,")                   // course
-            .num("(dd)(dd)(dd),")                // date
-            .nxt("*")
-            .num("xx,")                          // checksum
-            .xpr("([FL]),")                      // signal
-            .opx("([^,]*),")                     // alarm
+            .expression("G[PN]RMC,")
+            .number("(dd)(dd)(dd).(d+),")        // time
+            .expression("([AV]),")               // validity
+            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .number("(d+)(dd.d+),([EW])?,")      // longitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(dd)(dd)(dd),")             // date
+            .expression("[^*]*").text("*")
+            .number("xx,")                       // checksum
+            .expression("([FL]),")               // signal
+            .expression("([^,]*),").optional()   // alarm
             .any()
-            .num("imei:(d+),")                   // imei
+            .number("imei:(d+),")                // imei
             .compile();
 
     private static final Pattern PATTERN_FULL = new PatternBuilder()
             .any()
-            .num("(d+),")                        // serial
-            .xpr("([^,]+)?,")                    // phone number
-            .xpr(PATTERN_BASIC.pattern())
-            .num("(d+),")                        // satellites
-            .num("(-?d+.d+)?,")                  // altitude
-            .num("[FL]:(d+.d+)V")                // power
+            .number("(d+),")                     // serial
+            .expression("([^,]+)?,")             // phone number
+            .expression(PATTERN_BASIC.pattern())
+            .number("(d+),")                     // satellites
+            .number("(-?d+.d+)?,")               // altitude
+            .number("[FL]:(d+.d+)V")             // power
             .any()
             .compile();
 
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         Pattern pattern = full ? PATTERN_FULL : PATTERN_BASIC;
         Matcher parser = pattern.matcher((String) msg);

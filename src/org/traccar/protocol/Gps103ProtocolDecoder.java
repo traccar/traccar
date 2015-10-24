@@ -32,39 +32,39 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("imei:")
-            .num("(d+),")                        // imei
-            .xpr("([^,]+),")                     // alarm
-            .num("(dd)/?(dd)/?(dd) ?")           // local date
-            .num("(dd):?(dd)(?:dd)?,")           // local time
-            .nxt(",")
-            .xpr("[FL],")                        // full / low
+            .text("imei:")
+            .number("(d+),")                     // imei
+            .expression("([^,]+),")              // alarm
+            .number("(dd)/?(dd)/?(dd) ?")        // local date
+            .number("(dd):?(dd)(?:dd)?,")        // local time
+            .expression("[^,]*,")
+            .expression("[FL],")                 // full / low
             .groupBegin()
-            .num("(dd)(dd)(dd).(d+)")            // time utc (hhmmss.sss)
+            .number("(dd)(dd)(dd).(d+)")         // time utc (hhmmss.sss)
             .or()
-            .opn("d{1,5}.d+")
-            .groupEnd(false)
-            .txt(",")
-            .xpr("([AV]),")                      // validity
-            .opx("([NS]),")
-            .num("(d+)(dd.d+),")                 // latitude (ddmm.mmmm)
-            .opx("([NS]),")
-            .opx("([EW]),")
-            .num("(d+)(dd.d+),")                 // longitude (dddmm.mmmm)
-            .opx("([EW])?,")
-            .num("(d+.?d*)?,?")                  // speed
-            .num("(d+.?d*)?,?")                  // course
-            .num("(d+.?d*)?,?")                  // altitude
-            .xpr("([^,;]+)?,?")
-            .xpr("([^,;]+)?,?")
-            .xpr("([^,;]+)?,?")
-            .xpr("([^,;]+)?,?")
-            .xpr("([^,;]+)?,?")
+            .number("(?:d{1,5}.d+)?")
+            .groupEnd()
+            .text(",")
+            .expression("([AV]),")               // validity
+            .expression("([NS]),").optional()
+            .number("(d+)(dd.d+),")              // latitude (ddmm.mmmm)
+            .expression("([NS]),").optional()
+            .expression("([EW]),").optional()
+            .number("(d+)(dd.d+),")              // longitude (dddmm.mmmm)
+            .expression("([EW])?,").optional()
+            .number("(d+.?d*)?,?")               // speed
+            .number("(d+.?d*)?,?")               // course
+            .number("(d+.?d*)?,?")               // altitude
+            .expression("([^,;]+)?,?")
+            .expression("([^,;]+)?,?")
+            .expression("([^,;]+)?,?")
+            .expression("([^,;]+)?,?")
+            .expression("([^,;]+)?,?")
             .any()
             .compile();
 
     private static final Pattern PATTERN_HANDSHAKE = new PatternBuilder()
-            .num("##,imei:(d+),A")
+            .number("##,imei:(d+),A")
             .compile();
 
     @Override

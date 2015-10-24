@@ -33,16 +33,16 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("(")
-            .num("(d+)")                         // imei
+            .text("(")
+            .number("(d+)")                      // imei
             .any()
-            .num("(dd)(dd)(dd)")                 // date (yymmdd)
-            .num("(dd)(dd)(dd)")                 // time
-            .xpr("([AV])")
-            .num("(dd)(dd.dddd)([NS])")          // latitude
-            .num("(ddd)(dd.dddd)([EW])")         // longitude
-            .num("(ddd.d)")                      // speed
-            .num("(d+.d+)")                      // course
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd)")              // time
+            .expression("([AV])")
+            .number("(dd)(dd.dddd)([NS])")       // latitude
+            .number("(ddd)(dd.dddd)([EW])")      // longitude
+            .number("(ddd.d)")                   // speed
+            .number("(d+.d+)")                   // course
             .compile();
 
     @Override

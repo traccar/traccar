@@ -33,17 +33,17 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("L,")
-            .num("(dd)(dd)(dd)")                 // date
-            .num("(dd)(dd)(dd),")                // time
-            .txt("G,")
-            .num("(-?d+.d+),")                   // latitude
-            .num("(-?d+.d+),")                   // longitude
-            .num("(d+.?d*),")                    // speed
-            .num("(d+.?d*),")                    // course
-            .num("(d+.?d*),")                    // distance
-            .num("(d+),")                        // event
-            .num("(d+)")                         // status
+            .text("L,")
+            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd),")             // time
+            .text("G,")
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // course
+            .number("(d+.?d*),")                 // distance
+            .number("(d+),")                     // event
+            .number("(d+)")                      // status
             .any()
             .compile();
 

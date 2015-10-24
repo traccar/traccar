@@ -32,18 +32,18 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .num("(d+) ")                        // uid
-            .num("(d+) ")                        // time
-            .num("(d+.d+) ")                     // latitude
-            .num("(d+.d+) ")                     // longitude
-            .num("(d+) ")                        // speed
-            .num("(d+) ")                        // course
-            .num("(d+) ")                        // accuracy
-            .num("(d+) ")                        // altitude
-            .num("(d+) ")                        // flags
-            .num("(d+) ")                        // battery
-            .num("(d+) ")                        // temperature
-            .num("(d)")                          // changing status
+            .number("(d+) ")                     // uid
+            .number("(d+) ")                     // time
+            .number("(d+.d+) ")                  // latitude
+            .number("(d+.d+) ")                  // longitude
+            .number("(d+) ")                     // speed
+            .number("(d+) ")                     // course
+            .number("(d+) ")                     // accuracy
+            .number("(d+) ")                     // altitude
+            .number("(d+) ")                     // flags
+            .number("(d+) ")                     // battery
+            .number("(d+) ")                     // temperature
+            .number("(d)")                       // changing status
             .any()
             .compile();
 

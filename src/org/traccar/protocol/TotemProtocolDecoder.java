@@ -33,35 +33,35 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN1 = new PatternBuilder()
-            .txt("$$")                           // header
-            .num("xx")                           // length
-            .num("(d+)|")                        // imei
-            .xpr("(..)")                         // alarm
-            .txt("$GPRMC,")
-            .num("(dd)(dd)(dd).d+,")             // time
-            .xpr("([AV]),")                      // validity
-            .num("(d+)(dd.d+),([NS]),")          // latitude
-            .num("(d+)(dd.d+),([EW]),")          // longitude
-            .num("(d+.?d*)?,")                   // speed
-            .num("(d+.?d*)?,")                   // course
-            .num("(dd)(dd)(dd)")                 // date
-            .nxt("*")
-            .num("xx|")                          // checksum
-            .num("d+.d+|")                       // pdop
-            .num("(d+.d+)|")                     // hdop
-            .num("d+.d+|")                       // vdop
-            .num("(d+)|")                        // io status
-            .num("d+|")                          // time
-            .num("d")                            // charged
-            .num("(ddd)")                        // battery
-            .num("(dddd)|")                      // power
-            .opn("(d+)|")                        // adc
-            .num("(x+)|")                        // location code
-            .num("(d+)|")                        // temperature
-            .num("(d+.d+)|")                     // odometer
-            .num("d+|")                          // serial number
+            .text("$$")                          // header
+            .number("xx")                        // length
+            .number("(d+)|")                     // imei
+            .expression("(..)")                  // alarm
+            .text("$GPRMC,")
+            .number("(dd)(dd)(dd).d+,")          // time
+            .expression("([AV]),")               // validity
+            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(dd)(dd)(dd)")              // date
+            .expression("[^*]*").text("*")
+            .number("xx|")                       // checksum
+            .number("d+.d+|")                    // pdop
+            .number("(d+.d+)|")                  // hdop
+            .number("d+.d+|")                    // vdop
+            .number("(d+)|")                     // io status
+            .number("d+|")                       // time
+            .number("d")                         // charged
+            .number("(ddd)")                     // battery
+            .number("(dddd)|")                   // power
+            .number("(d+)|").optional()          // adc
+            .number("(x+)|")                     // location code
+            .number("(d+)|")                     // temperature
+            .number("(d+.d+)|")                  // odometer
+            .number("d+|")                       // serial number
             .any()
-            .num("xxxx")                         // checksum
+            .number("xxxx")                      // checksum
             .any()
             .compile();
 
@@ -93,38 +93,37 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             "\r?\n?");
 
     private static final Pattern PATTERN3 = new PatternBuilder()
-            .txt("$$")                           // header
-            .num("xx")                           // length
-            .num("(d+)|")                        // imei
-            .xpr("(..)")                         // alarm type
-            .num("(dd)(dd)(dd)")                 // date (yymmdd)
-            .num("(dd)(dd)(dd)")                 // time (hhmmss)
-            .num("(xxxx)")                       // io status
-            .xpr("[01]")                         // charging
-            .num("(dd)")                         // battery
-            .num("(dd)")                         // external power
-            .num("(dddd)")                       // adc 1
-            .num("(dddd)")                       // adc 2
-            .num("(ddd)")                        // temperature 1
-            .num("(ddd)")                        // temperature 2
-            .num("(x{8})")                       // location code
-            .xpr("([AV])")                       // validity
-            .num("(dd)")                         // satellites
-            .num("(ddd)")                        // course
-            .num("(ddd)")                        // speed
-            .num("(dd.d)")                       // pdop
-            .num("(d{7})")                       // odometer
-            .num("(dd)(dd.dddd)([NS])")          // latitude
-            .num("(ddd)(dd.dddd)([EW])")         // longitude
-            .num("dddd")                         // serial number
-            .num("xxxx")                         // checksum
+            .text("$$")                          // header
+            .number("xx")                        // length
+            .number("(d+)|")                     // imei
+            .expression("(..)")                  // alarm type
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd)")              // time
+            .number("(xxxx)")                    // io status
+            .expression("[01]")                  // charging
+            .number("(dd)")                      // battery
+            .number("(dd)")                      // external power
+            .number("(dddd)")                    // adc 1
+            .number("(dddd)")                    // adc 2
+            .number("(ddd)")                     // temperature 1
+            .number("(ddd)")                     // temperature 2
+            .number("(x{8})")                    // location code
+            .expression("([AV])")                // validity
+            .number("(dd)")                      // satellites
+            .number("(ddd)")                     // course
+            .number("(ddd)")                     // speed
+            .number("(dd.d)")                    // pdop
+            .number("(d{7})")                    // odometer
+            .number("(dd)(dd.dddd)([NS])")       // latitude
+            .number("(ddd)(dd.dddd)([EW])")      // longitude
+            .number("dddd")                      // serial number
+            .number("xxxx")                      // checksum
             .any()
             .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 

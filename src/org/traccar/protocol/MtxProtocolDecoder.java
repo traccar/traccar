@@ -32,26 +32,26 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("#MTX,")
-            .num("(d+),")                        // IMEI
-            .num("(dddd)(dd)(dd),")              // Date
-            .num("(dd)(dd)(dd),")                // Time
-            .num("(-?d+.d+),")                   // Latitude
-            .num("(-?d+.d+),")                   // Longitude
-            .num("(d+.?d*),")                    // Speed
-            .num("(d+),")                        // Course
-            .num("(d+.?d*),")                    // Odometer
+            .text("#MTX,")
+            .number("(d+),")                     // imei
+            .number("(dddd)(dd)(dd),")           // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+),")                     // course
+            .number("(d+.?d*),")                 // odometer
             .groupBegin()
-            .num("d+")
+            .number("d+")
             .or()
-            .txt("X")
-            .groupEnd(false)
-            .txt(",")
-            .xpr("(?:[01]|X),")
-            .xpr("([01]+),")                     // Input
-            .xpr("([01]+),")                     // Output
-            .num("(d+),")                        // ADC1
-            .num("(d+)")                         // ADC2
+            .text("X")
+            .groupEnd()
+            .text(",")
+            .expression("(?:[01]|X),")
+            .expression("([01]+),")              // input
+            .expression("([01]+),")              // output
+            .number("(d+),")                     // adc1
+            .number("(d+)")                      // adc2
             .any()
             .compile();
 

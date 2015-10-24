@@ -33,39 +33,39 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("$$")
-            .nxt(",")                            // client
-            .num("(d+),")                        // device serial number
-            .num("(d+),")                        // event
-            .num("(-?d+.d+),")                   // latitude
-            .num("(-?d+.d+),")                   // longitude
-            .num("(dd)(dd)(dd)")                 // date (yymmdd)
-            .num("(dd)(dd)(dd),")                // time (hhmmss)
-            .xpr("([AV]),")                      // validity
-            .num("(d+),")                        // gsm
-            .num("(d+),")                        // speed
-            .num("(d+),")                        // distance
-            .num("d+,")                          // driver code
-            .num("(d+),")                        // fuel
-            .num("([01]),")                      // io 1
-            .num("[01],")                        // case open switch
-            .num("[01],")                        // over speed start
-            .num("[01],")                        // over speed end
-            .num("(?:d+,){3}")                   // reserved
-            .num("([01]),")                      // power status
-            .num("([01]),")                      // io 2
-            .num("d+,")                          // reserved
-            .num("([01]),")                      // ignition
-            .num("[01],")                        // ignition off event
-            .num("(?:d+,){7}")                   // reserved
-            .num("[01],")                        // corner packet
-            .num("(?:d+,){8}")                   // reserved
-            .num("([01]),")                      // course bit 0
-            .num("([01]),")                      // course bit 1
-            .num("([01]),")                      // course bit 2
-            .num("([01]),")                      // course bit 3
-            .txt("*")
-            .num("(xx)")                         // checksum
+            .text("$$")
+            .expression("[^,]*,")                // client
+            .number("(d+),")                     // device serial number
+            .number("(d+),")                     // event
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .expression("([AV]),")               // validity
+            .number("(d+),")                     // gsm
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // distance
+            .number("d+,")                       // driver code
+            .number("(d+),")                     // fuel
+            .number("([01]),")                   // io 1
+            .number("[01],")                     // case open switch
+            .number("[01],")                     // over speed start
+            .number("[01],")                     // over speed end
+            .number("(?:d+,){3}")                // reserved
+            .number("([01]),")                   // power status
+            .number("([01]),")                   // io 2
+            .number("d+,")                       // reserved
+            .number("([01]),")                   // ignition
+            .number("[01],")                     // ignition off event
+            .number("(?:d+,){7}")                // reserved
+            .number("[01],")                     // corner packet
+            .number("(?:d+,){8}")                // reserved
+            .number("([01]),")                   // course bit 0
+            .number("([01]),")                   // course bit 1
+            .number("([01]),")                   // course bit 2
+            .number("([01]),")                   // course bit 3
+            .text("*")
+            .number("(xx)")                      // checksum
             .compile();
 
     @Override

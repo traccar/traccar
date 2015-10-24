@@ -33,30 +33,29 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .groupBegin()
-            .num("#(d+)#")                       // imei
-            .xpr("([^#]*)#")                     // user
-            .groupEnd(true)
-            .num("(d+)#")                        // fix
-            .xpr("([^#]+)#")                     // password
-            .xpr("([^#]+)#")                     // event
-            .num("(d+)#")                        // packet number
-            .xpr("([^#]+)?#?")                   // gsm base station
-            .xpr("(?:[^#]+#)?")
-            .num("(d+)?(dd.d+),")                // longitude
-            .xpr("([EW]),")
-            .num("(d+)?(dd.d+),")                // latitude
-            .xpr("([NS]),")
-            .num("(d+.d+),")                     // speed
-            .num("(d+.?d*)?#")                   // course
-            .num("(dd)(dd)(dd)#")                // date
-            .num("(dd)(dd)(dd)")                 // time
+            .number("#(d+)#")                    // imei
+            .expression("([^#]*)#")              // user
+            .groupEnd("?")
+            .number("(d+)#")                     // fix
+            .expression("([^#]+)#")              // password
+            .expression("([^#]+)#")              // event
+            .number("(d+)#")                     // packet number
+            .expression("([^#]+)?#?")            // gsm base station
+            .expression("(?:[^#]+#)?")
+            .number("(d+)?(dd.d+),")             // longitude
+            .expression("([EW]),")
+            .number("(d+)?(dd.d+),")             // latitude
+            .expression("([NS]),")
+            .number("(d+.d+),")                  // speed
+            .number("(d+.?d*)?#")                // course
+            .number("(dd)(dd)(dd)#")             // date
+            .number("(dd)(dd)(dd)")              // time
             .any()
             .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
         sentence = sentence.trim();

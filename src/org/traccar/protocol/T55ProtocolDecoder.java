@@ -33,52 +33,52 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_GPRMC = new PatternBuilder()
-            .txt("$GPRMC,")
-            .num("(dd)(dd)(dd).?d*,")            // time
-            .xpr("([AV]),")                      // validity
-            .num("(dd)(dd.d+),")                 // latitude
-            .xpr("([NS]),")
-            .num("(d{2,3})(dd.d+),")             // longitude
-            .xpr("([EW]),")
-            .num("(d+.?d*)?,")                   // speed
-            .num("(d+.?d*)?,")                   // course
-            .num("(dd)(dd)(dd)")                 // date
+            .text("$GPRMC,")
+            .number("(dd)(dd)(dd).?d*,")         // time
+            .expression("([AV]),")               // validity
+            .number("(dd)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d{2,3})(dd.d+),")          // longitude
+            .expression("([EW]),")
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(dd)(dd)(dd)")              // date
             .any()
             .compile();
 
     private static final Pattern PATTERN_GPGGA = new PatternBuilder()
-            .txt("$GPGGA,")
-            .num("(dd)(dd)(dd).?d*,")            // time
-            .num("(d+)(dd.d+),")                 // latitude
-            .xpr("([NS]),")
-            .num("(d+)(dd.d+),")                 // longitude
-            .xpr("([EW]),")
+            .text("$GPGGA,")
+            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(d+)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")              // longitude
+            .expression("([EW]),")
             .any()
             .compile();
 
     private static final Pattern PATTERN_GPRMA = new PatternBuilder()
-            .txt("$GPRMA,")
-            .xpr("([AV]),")                      // validity
-            .num("(dd)(dd.d+),")                 // latitude
-            .xpr("([NS]),")
-            .num("(ddd)(dd.d+),")                // longitude
-            .xpr("([EW]),,,")
-            .num("(d+.?d*)?,")                   // speed
-            .num("(d+.?d*)?,")                   // course
+            .text("$GPRMA,")
+            .expression("([AV]),")               // validity
+            .number("(dd)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(ddd)(dd.d+),")             // longitude
+            .expression("([EW]),,,")
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
             .any()
             .compile();
 
     private static final Pattern PATTERN_TRCCR = new PatternBuilder()
-            .txt("$TRCCR,")
-            .num("(dddd)(dd)(dd)")               // date
-            .num("(dd)(dd)(dd).?d*,")            // time
-            .xpr("([AV]),")                      // validity
-            .num("(-?d+.d+),")                   // latitude
-            .num("(-?d+.d+),")                   // longitude
-            .num("(d+.d+),")                     // speed
-            .num("(d+.d+),")                     // course
-            .num("(-?d+.d+),")                   // altitude
-            .num("(d+.?d*),")                    // battery
+            .text("$TRCCR,")
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd).?d*,")         // time
+            .expression("([AV]),")               // validity
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("(-?d+.d+),")                // altitude
+            .number("(d+.?d*),")                 // battery
             .any()
             .compile();
 

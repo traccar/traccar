@@ -34,69 +34,69 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_HEARTBEAT = new PatternBuilder()
-            .txt("+ACK:GTHBD,")
-            .num("([0-9A-Z]{2}xxxx),")
-            .any().txt(",")
-            .num("(xxxx)")
-            .opt("$")
+            .text("+ACK:GTHBD,")
+            .number("([0-9A-Z]{2}xxxx),")
+            .any().text(",")
+            .number("(xxxx)")
+            .text("$").optional()
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
             .groupBegin()
-            .txt("+").grp("RESP|BUFF").txt(":")
+            .text("+").expression("(?:RESP|BUFF)").text(":")
             .or()
-            .bin("00?04,")
-            .num("xxxx,")
-            .xpr("[01],")
-            .groupEnd(false)
-            .xpr("GT...,")
-            .opn("[0-9A-Z]{2}xxxx").txt(",")     // protocol version
-            .xpr("([^,]+),")                     // imei
+            .binary("00?04,")
+            .number("xxxx,")
+            .expression("[01],")
+            .groupEnd()
+            .expression("GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .expression("([^,]+),")              // imei
 
             .groupBegin()
-            .xpr("[0-9A-Z]{17},")                // vin
-            .xpr("[^,]{0,20},")                  // device name
-            .xpr("[01],")                        // report type
-            .num("x{1,8},")                      // report mask
-            .xpr("[0-9A-Z]{17},")                // vin
-            .num("[01],")                        // obd connect
-            .num("d{1,5},")                      // obd voltage
-            .num("x{8},")                        // support pids
-            .num("(d{1,5}),")                    // engine rpm
-            .num("(d{1,3}),")                    // speed
-            .num("(-?d{1,3}),")                  // coolant temp
-            .num("(d+.?d*|Inf|NaN)?,")           // fuel consumption
-            .num("(d{1,5}),")                    // dtcs cleared distance
-            .num("d{1,5},")
-            .xpr("([01]),")                      // obd connect
-            .num("(d{1,3}),")                    // number of dtcs
-            .num("(x*),")                        // dtcs
-            .num("(d{1,3}),")                    // throttle
-            .num("d{1,3},")                      // engine load
-            .num("(d{1,3})?,")                   // fuel level
-            .num("(d+)")                         // odometer
+            .expression("[0-9A-Z]{17},")         // vin
+            .expression("[^,]{0,20},")           // device name
+            .expression("[01],")                 // report type
+            .number("x{1,8},")                   // report mask
+            .expression("[0-9A-Z]{17},")         // vin
+            .number("[01],")                     // obd connect
+            .number("d{1,5},")                   // obd voltage
+            .number("x{8},")                     // support pids
+            .number("(d{1,5}),")                 // engine rpm
+            .number("(d{1,3}),")                 // speed
+            .number("(-?d{1,3}),")               // coolant temp
+            .number("(d+.?d*|Inf|NaN)?,")        // fuel consumption
+            .number("(d{1,5}),")                 // dtcs cleared distance
+            .number("d{1,5},")
+            .expression("([01]),")               // obd connect
+            .number("(d{1,3}),")                 // number of dtcs
+            .number("(x*),")                     // dtcs
+            .number("(d{1,3}),")                 // throttle
+            .number("d{1,3},")                   // engine load
+            .number("(d{1,3})?,")                // fuel level
+            .number("(d+)")                      // odometer
             .or().any()
-            .groupEnd(false).txt(",")
+            .groupEnd().text(",")
 
-            .num("(d*),")                        // gps accuracy
-            .num("(d+.d)?,")                     // speed
-            .num("(d+)?,")                       // course
-            .num("(-?d+.d)?,")                   // altitude
-            .num("(-?d+.d+),")                   // longitude
-            .num("(-?d+.d+),")                   // latitude
-            .num("(dddd)(dd)(dd)")               // date
-            .num("(dd)(dd)(dd),")                // time
-            .num("(dddd)?,")                     // mcc
-            .num("(dddd)?,")                     // mnc
-            .num("(xxxx|x{8})?,")                // loc
-            .num("(xxxx)?,")                     // cell
+            .number("(d*),")                     // gps accuracy
+            .number("(d+.d)?,")                  // speed
+            .number("(d+)?,")                    // course
+            .number("(-?d+.d)?,")                // altitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(-?d+.d+),")                // latitude
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(dddd)?,")                  // mcc
+            .number("(dddd)?,")                  // mnc
+            .number("(xxxx|x{8})?,")             // loc
+            .number("(xxxx)?,")                  // cell
             .groupBegin()
-            .num("(d+.d)?,")                     // odometer
-            .num("(d{1,3})?,")                   // battery
-            .groupEnd(true)
-            .any().txt(",")
-            .num("(xxxx)\\$?")
-            .opt("$")
+            .number("(d+.d)?,")                  // odometer
+            .number("(d{1,3})?,")                // battery
+            .groupEnd("?")
+            .any().text(",")
+            .number("(xxxx)\\$?")
+            .text("$").optional()
             .compile();
 
     @Override

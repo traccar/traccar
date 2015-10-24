@@ -31,22 +31,22 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("[")
-            .xpr(".")
-            .num("d{10}")
-            .xpr(".")
-            .txt("(")
-            .xpr("[A-Z]+")
-            .num("(dd)(dd)(dd)")     // Time (HHMMSS)
-            .xpr("([AV])")                     // Validity
-            .num("(dd)(dd.dddd)([NS])")  // Latitude (DDMM.MMMM)
-            .num("(ddd)(dd.dddd)([EW])")  // Longitude (DDDMM.MMMM)
-            .num("(ddd.ddd)")          // Speed
-            .num("(dd)(dd)(dd)")   // Date (DDMMYY)
-            .num("d+")
+            .text("[")
+            .expression(".")
+            .number("d{10}")
+            .expression(".")
+            .text("(")
+            .expression("[A-Z]+")
+            .number("(dd)(dd)(dd)")              // time
+            .expression("([AV])")                // validity
+            .number("(dd)(dd.dddd)([NS])")       // latitude
+            .number("(ddd)(dd.dddd)([EW])")      // longitude
+            .number("(ddd.ddd)")                 // Speed
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .number("d+")
             .any()
-            .txt(")")
-            .opt("]")
+            .text(")")
+            .text("]").optional()
             .compile();
 
     @Override

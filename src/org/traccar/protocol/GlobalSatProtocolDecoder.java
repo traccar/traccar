@@ -177,21 +177,21 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .txt("$")
-            .num("(d+),")                        // imei
-            .num("d+,")                          // mode
-            .num("(d),")                         // fix
-            .num("(dd)(dd)(dd),")                // date (ddmmyy)
-            .num("(dd)(dd)(dd),")                // time (hhmmss)
-            .xpr("([EW])")
-            .num("(ddd)(dd.d+),")                // longitude (dddmm.mmmm)
-            .xpr("([NS])")
-            .num("(dd)(dd.d+),")                 // latitude (ddmm.mmmm)
-            .num("(d+.?d*),")                    // altitude
-            .num("(d+.?d*),")                    // speed
-            .num("(d+.?d*),")                    // course
-            .num("(d+),")                        // satellites
-            .num("(d+.?d*)")                     // hdop
+            .text("$")
+            .number("(d+),")                     // imei
+            .number("d+,")                       // mode
+            .number("(d),")                      // fix
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .expression("([EW])")
+            .number("(ddd)(dd.d+),")             // longitude (dddmm.mmmm)
+            .expression("([NS])")
+            .number("(dd)(dd.d+),")              // latitude (ddmm.mmmm)
+            .number("(d+.?d*),")                 // altitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // course
+            .number("(d+),")                     // satellites
+            .number("(d+.?d*)")                  // hdop
             .compile();
 
     private Position decodeAlternative(Channel channel, String sentence) {
