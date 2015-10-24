@@ -54,21 +54,23 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
 
     private Long deviceId;
 
-    private void sendResponse(Channel channel, int type, int index, String imei) {
+    private void sendLoginResponse(Channel channel, int type, int index, String imei) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.buffer(7+imei.getBytes().length);
+            int length=7+(imei.length()/2+1);
+            ChannelBuffer response = ChannelBuffers.buffer(length);
             response.writeByte(0x23);
             response.writeByte(0x23); // header
             response.writeByte(type);
             response.writeByte(0x00);
-            response.writeByte(0x0F); // length
-            response.writeByte(0x00);
-            response.writeByte(0x01); //index
+            response.writeByte(length); // length
+            response.writeShort(0x0001);//imei
             //IMEI
             response.writeBytes(ChannelBufferTools.convertHexString("0" + imei));
             channel.write(response);
         }
     }
+
+
 
     @Override
     protected Object decode(
@@ -91,7 +93,7 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
              if (type == MSG_LOGIN) {
                  try {
                      deviceId = getDataManager().getDeviceByImei(imei).getId();
-                     sendResponse(channel, type, index, imei);  // send login response
+                     sendLoginResponse(channel, type, index, imei);  // send login response
                      return null;
                  } catch (Exception error) {
                      Log.warning("Unknown device - " + imei);
@@ -149,8 +151,8 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                  extendedInfo.set(statusType,true);
                  if(type == MSG_ALARM)
                  {
-                     Log.debug("ALARM"+statusType);
-                     sendResponse(channel,type,index,imei+alarmData);
+                     Log.debug("ALARM : "+statusType);
+                     sendLoginResponse(channel, type, index, imei + alarmData);
                  }
 
                  // Reserve
@@ -207,6 +209,7 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                          Status status = new Status();
                          status.setDate(time.getTime());
                          status.setDeviceid(deviceId);
+                         status.setVoltage(getBatteryPerc(batteryVoltage));
                          status.setStatusType(statusType);
 
                          return  status;
@@ -219,7 +222,7 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                  Status status = new Status();
                  status.setDate(dateFormatLocal.parse(dateFormatGmt.format(new Date())));
                  status.setDeviceid(deviceId);
-                 sendResponse(channel, type, index, imei);
+                 sendLoginResponse(channel, type, index, imei);
                  return status;
              }
          }
