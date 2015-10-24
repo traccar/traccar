@@ -12,7 +12,8 @@ public class XexunProtocolDecoderTest extends ProtocolDecoderTest {
         XexunProtocolDecoder decoder = new XexunProtocolDecoder(new XexunProtocol(), false);
 
         verifyPosition(decoder, text(
-                "GPRMC,150120.000,A,3346.4463,S,15057.3083,E,0.0,117.4,010911,,,A*76,F,imei:351525010943661,"));
+                "GPRMC,150120.000,A,3346.4463,S,15057.3083,E,0.0,117.4,010911,,,A*76,F,imei:351525010943661,"),
+                position("2011-09-01 15:01:20.000", true, -33.77411, 150.95514));
 
         verifyPosition(decoder, text(
                 "GPRMC,010203.000,A,0102.0003,N,00102.0003,E,1.02,1.02,010203,,,A*00,F,,imei:10000000000000,"));
@@ -47,7 +48,8 @@ public class XexunProtocolDecoderTest extends ProtocolDecoderTest {
                 ",+48606717068,,L,, imei:012207005047292,,,F:4.28V,1,52,11565,247,01,000E,1FC5"));
 
         verifyPosition(decoder, text(
-                "130302125349,+79604870506,GPRMC,085349.000,A,4503.2392,N,03858.5660,E,6.95,154.65,020313,,,A*6C,F,, imei:012207007744243,03,-1.5,F:4.15V,1,139,28048,250,01,278A,5072"));
+                "130302125349,+79604870506,GPRMC,085349.000,A,4503.2392,N,03858.5660,E,6.95,154.65,020313,,,A*6C,F,, imei:012207007744243,03,-1.5,F:4.15V,1,139,28048,250,01,278A,5072"),
+                position("2013-03-02 08:53:49.000", true, 45.05399, 38.97610));
 
         verifyPosition(decoder, text(
                 "111111120009,+436763737552,GPRMC,120009.590,A,4639.6774,N,01418.5737,E,0.00,0.00,111111,,,A*68,F,, imei:359853000144328,04,481.2,F:4.15V,0,139,2689,232,03,2725,0576"));

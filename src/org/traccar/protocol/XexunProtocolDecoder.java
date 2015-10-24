@@ -22,6 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -67,8 +69,12 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Pattern pattern = full ? PATTERN_FULL : PATTERN_BASIC;
-        Matcher parser = pattern.matcher((String) msg);
+        Pattern pattern = PATTERN_BASIC;
+        if (full) {
+            pattern = PATTERN_FULL;
+        }
+
+        Parser parser = new Parser(pattern, (String) msg);
         if (!parser.matches()) {
             return null;
         }
@@ -76,79 +82,37 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
         if (full) {
-            position.set("serial", parser.group(index++));
-            position.set("number", parser.group(index++));
+            position.set("serial", parser.next());
+            position.set("number", parser.next());
         }
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MILLISECOND, Integer.parseInt(parser.group(index++)));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        String hemisphere = parser.group(index++);
-        if (hemisphere != null && hemisphere.compareTo("W") == 0) {
-            longitude = -longitude;
-        }
-        position.setLongitude(longitude);
+        position.set("signal", parser.next());
+        position.set(Event.KEY_ALARM, parser.next());
 
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-
-        // Course
-        String course = parser.group(index++);
-        if (course != null) {
-            position.setCourse(Double.parseDouble(course));
-        }
-
-        // Date
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        // Signal
-        position.set("signal", parser.group(index++));
-
-        // Alarm
-        position.set(Event.KEY_ALARM, parser.group(index++));
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
         if (full) {
+            position.set(Event.KEY_SATELLITES, parser.next().replaceFirst("^0*(?![\\.$])", ""));
 
-            // Satellites
-            position.set(Event.KEY_SATELLITES, parser.group(index++).replaceFirst("^0*(?![\\.$])", ""));
+            position.setAltitude(parser.nextDouble());
 
-            // Altitude
-            String altitude = parser.group(index++);
-            if (altitude != null) {
-                position.setAltitude(Double.parseDouble(altitude));
-            }
-
-            // Power
-            position.set(Event.KEY_POWER, Double.parseDouble(parser.group(index++)));
+            position.set(Event.KEY_POWER, parser.nextDouble());
         }
 
         return position;
