@@ -16,13 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -71,15 +70,10 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         double lat = buf.readUnsignedInt() / 600000.0;
         double lon = buf.readUnsignedInt() / 600000.0;
 
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-        time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-        time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-        time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-        time.set(Calendar.MINUTE, buf.readUnsignedByte());
-        time.set(Calendar.SECOND, buf.readUnsignedByte());
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+        position.setTime(dateBuilder.getDate());
 
         position.setSpeed(buf.readUnsignedShort() * 0.01);
 
@@ -87,8 +81,14 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         int flags = buf.readUnsignedShort();
         position.setCourse(BitUtil.to(flags, 9));
-        position.setLatitude(BitUtil.check(flags, 10) ? lat : -lat);
-        position.setLongitude(BitUtil.check(flags, 9) ? -lon : lon);
+        if (!BitUtil.check(flags, 10)) {
+            lat = -lat;
+        }
+        position.setLatitude(lat);
+        if (BitUtil.check(flags, 9)) {
+            lon = -lon;
+        }
+        position.setLongitude(lon);
         position.setValid(BitUtil.check(flags, 11));
 
         buf.readerIndex(blockEnd);
@@ -145,29 +145,25 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                     int length = buf.readUnsignedByte();
 
                     boolean odd = length % 2 != 0;
+                    if (odd) {
+                        length += 1;
+                    }
 
-                    String num = ChannelBufferTools.readHexString(buf, odd ? length + 1 : length);
+                    String num = ChannelBufferTools.readHexString(buf, length);
 
                     if (odd) {
                         num = num.substring(1);
                     }
 
                     position.set("card" + index, num);
-
                 }
             }
 
             buf.readerIndex(blockEnd);
-
         }
 
-        // Temperature
-
-        buf.skipBytes(buf.readUnsignedShort());
-
-        // Lock
-
-        buf.skipBytes(buf.readUnsignedShort());
+        buf.skipBytes(buf.readUnsignedShort()); // temperature
+        buf.skipBytes(buf.readUnsignedShort()); // lock
 
         // Passengers
 

@@ -143,8 +143,6 @@ public class ProtocolDecoderTest {
         Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
         Assert.assertEquals("longitude", expected.getLongitude(), position.getLongitude(), 0.00001);
 
-        verifyDecodedPosition(decodedObject);
-
     }
 
     private void verifyDecodedPosition(Object decodedObject) {
