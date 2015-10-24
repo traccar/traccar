@@ -36,14 +36,24 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
         return (degrees + seconds) * ((raw & 0x0f) == 0 ? -1 : 1);
     }
 
+    private static byte checksum(byte[] bytes, int offset, int len) {
+        byte result = 0x3B;
+        for (int i = offset; i < offset + len; i++) {
+            result += 0x56 ^ bytes[i];
+            result++;
+            result ^= 0xC5 + bytes[i];
+            result--;
+        }
+        return result;
+    }
+
     public AutoFon45ProtocolDecoder(AutoFon45Protocol protocol) {
         super(protocol);
     }
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -62,7 +72,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             if (channel != null) {
                 byte[] response = "resp_crc=".getBytes("US-ASCII");
                 response = Arrays.copyOf(response, response.length + 1);
-                response[response.length - 1] = crc(bytes, 0, 18);
+                response[response.length - 1] = checksum(bytes, 0, 18);
                 channel.write(ChannelBuffers.wrappedBuffer(response));
             }
         } else if (type == MSG_LOCATION) {
@@ -119,17 +129,6 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return null;
-    }
-
-    private byte crc(byte[] bytes, int offset, int len) {
-        byte GPRS_CRC = 0x3B;
-        for (int i = offset; i < offset + len; i++) {
-            GPRS_CRC += 0x56 ^ bytes[i];
-            GPRS_CRC++;
-            GPRS_CRC ^= 0xC5 + bytes[i];
-            GPRS_CRC--;
-        }
-        return GPRS_CRC;
     }
 
 }
