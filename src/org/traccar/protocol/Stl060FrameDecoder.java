@@ -29,20 +29,17 @@ public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
         ChannelBuffer result = (ChannelBuffer) super.decode(ctx, channel, buf);
 
         if (result != null) {
 
-            Integer beginIndex = ChannelBufferTools.find(
-                    result, 0, result.readableBytes(), "$");
-            if (beginIndex == null) {
+            int index = result.indexOf(result.readerIndex(), result.writerIndex(), (byte) '$');
+            if (index == -1) {
                 return result;
             } else {
-                result.skipBytes(beginIndex);
+                result.skipBytes(index);
                 return result.readBytes(result.readableBytes());
             }
 
