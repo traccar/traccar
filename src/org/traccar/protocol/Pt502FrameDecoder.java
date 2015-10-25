@@ -27,9 +27,7 @@ public class Pt502FrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
         if (buf.readableBytes() < BINARY_HEADER) {
             return null;
@@ -47,8 +45,8 @@ public class Pt502FrameDecoder extends FrameDecoder {
 
         } else {
 
-            Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), "\n");
-            if (index != null) {
+            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '\n');
+            if (index != -1) {
                 ChannelBuffer result = buf.readBytes(index - 1);
                 buf.skipBytes(2);
                 return result;
