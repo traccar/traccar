@@ -181,7 +181,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
 
         String flag = buf.toString(2, 1, Charset.defaultCharset());
-        int index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
+        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
 
         // Identification
         String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
@@ -262,14 +262,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         // Find type
-        Integer index = ChannelBufferTools.find(buf, 0, buf.readableBytes(), ",");
-        index = ChannelBufferTools.find(buf, index + 1, buf.readableBytes(), ",");
+        Integer index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        index = buf.indexOf(index + 1, buf.writerIndex(), (byte) ',');
 
         String type = buf.toString(index + 1, 3, Charset.defaultCharset());
         if (type.equals("CCC")) {
