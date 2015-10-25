@@ -16,13 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -33,77 +32,64 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(?:HI,\\d+)?" +
-            "TK," +
-            "(\\d+)," +                         // IMEI
-            "(\\d{2})(\\d{2})(\\d{2})" +        // Date (YYMMDD)
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
-            "([+-]\\d+\\.\\d+)," +              // Latitude
-            "([+-]\\d+\\.\\d+)," +              // Longitude
-            "(\\d+)," +                         // Speed
-            "(\\d+)," +                         // Course
-            "\\d+," +
-            "(\\d+)," +                         // Altitude
-            "([FL])," +                         // GPS fix
-            "\\d+," +
-            "(\\d+)," +                         // GPS level
-            "\\p{XDigit}+," +
-            "\\p{XDigit}+," +
-            "(\\d+)," +                         // GSM level
-            "[^,]*," +
-            "(\\d+\\.\\d+)," +                  // Battery
-            "(\\d)," +                          // Charging
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .number("HI,d+").optional()
+            .text("TK,")
+            .number("(d+),")                     // imei
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time
+            .number("([+-]d+.d+),")              // latitude
+            .number("([+-]d+.d+),")              // longitude
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("d+,")
+            .number("(d+),")                     // altitude
+            .expression("([FL]),")               // gps fix
+            .number("d+,")
+            .number("(d+),")                     // gps level
+            .number("x+,")
+            .number("x+,")
+            .number("(d+),")                     // gsm level
+            .expression("[^,]*,")
+            .number("(d+.d+),")                  // battery
+            .number("(d),")                      // charging
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        // Parse message
-        String sentence = (String) msg;
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
-            throw new ParseException(null, 0);
+            return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Identify device
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Location
-        position.setLatitude(Double.parseDouble(parser.group(index++)));
-        position.setLongitude(Double.parseDouble(parser.group(index++)));
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
-        position.setCourse(Double.parseDouble(parser.group(index++)));
-        position.setAltitude(Double.parseDouble(parser.group(index++)));
-        position.setValid(parser.group(index++).equals("F"));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
+        position.setValid(parser.next().equals("F"));
 
-        // Other
-        position.set(Event.KEY_GPS, parser.group(index++));
-        position.set(Event.KEY_GSM, parser.group(index++));
-        position.set(Event.KEY_BATTERY, parser.group(index++));
-        position.set(Event.KEY_CHARGE, parser.group(index++));
+        position.set(Event.KEY_GPS, parser.next());
+        position.set(Event.KEY_GSM, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Event.KEY_CHARGE, parser.next());
+
         return position;
     }
 
