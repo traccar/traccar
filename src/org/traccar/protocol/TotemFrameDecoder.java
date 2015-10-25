@@ -21,29 +21,25 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.StringFinder;
 
 public class TotemFrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
-        // Check minimum length
         if (buf.readableBytes() < 10) {
             return null;
         }
 
-        // Find start
-        Integer beginIndex = ChannelBufferTools.find(buf, buf.readerIndex(), "$$");
-        if (beginIndex == null) {
+        int beginIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("$$"));
+        if (beginIndex == -1) {
             return null;
         } else if (beginIndex > buf.readerIndex()) {
             buf.readerIndex(beginIndex);
         }
 
-        // Read message
         int length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
         if (length <= buf.readableBytes()) {
             return buf.readBytes(length);
