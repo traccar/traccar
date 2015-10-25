@@ -9,8 +9,6 @@ import org.junit.Test;
 
 public class ChannelBufferToolsTest {
     
-    private final ChannelBufferFactory factory = new HeapChannelBufferFactory();
-
     @Test
     public void testReadHexInteger() {
         byte[] buf = {0x01, (byte) 0x90, 0x34};
