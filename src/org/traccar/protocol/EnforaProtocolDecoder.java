@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
+import org.traccar.helper.StringFinder;
 import org.traccar.model.Position;
 
 public class EnforaProtocolDecoder extends BaseProtocolDecoder {
@@ -77,8 +78,8 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Find GPSMC string
-        Integer start = ChannelBufferTools.find(buf, 0, buf.readableBytes(), "GPRMC");
-        if (start == null) {
+        int start = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("GPRMC"));
+        if (start == -1) {
             // Message does not contain GPS data
             return null;
         }
