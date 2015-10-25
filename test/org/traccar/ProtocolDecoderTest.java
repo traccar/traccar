@@ -104,7 +104,7 @@ public class ProtocolDecoderTest {
 
     protected ChannelBuffer binary(ByteOrder endianness, String... data) {
         return ChannelBuffers.wrappedBuffer(
-                endianness, ChannelBufferTools.convertHexString(concatenateStrings(data)));
+                endianness, ChannelBufferTools.hexToBytes(concatenateStrings(data)));
     }
 
     protected String text(String... data) {

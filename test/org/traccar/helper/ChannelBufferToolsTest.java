@@ -1,9 +1,7 @@
 package org.traccar.helper;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferFactory;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.buffer.HeapChannelBufferFactory;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -30,12 +28,12 @@ public class ChannelBufferToolsTest {
 
     @Test
     public void convertHexStringTest() {
-        assertArrayEquals(new byte[] {0x12, 0x34}, ChannelBufferTools.convertHexString("1234"));
+        assertArrayEquals(new byte[] {0x12, 0x34}, ChannelBufferTools.hexToBytes("1234"));
     }
 
     @Test
     public void convertHexByteArray() {
-        assertEquals("1234", ChannelBufferTools.convertByteArray(new byte[] {0x12, 0x34}));
+        assertEquals("1234", ChannelBufferTools.bytesToHex(new byte[]{0x12, 0x34}));
     }
 
 }

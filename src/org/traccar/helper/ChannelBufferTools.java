@@ -89,7 +89,7 @@ public final class ChannelBufferTools {
         return value;
     }
 
-    public static byte[] convertHexString(String in) {
+    public static byte[] hexToBytes(String in) {
         int count = in.length() / 2;
         byte[] out = new byte[count];
         for (int i = 0; i < count; i++) {
@@ -98,7 +98,7 @@ public final class ChannelBufferTools {
         return out;
     }
 
-    public static String convertByteArray(byte[] in) {
+    public static String bytesToHex(byte[] in) {
         StringBuilder out = new StringBuilder();
         Formatter formatter = new Formatter(out);
         for (byte b : in) {

@@ -65,13 +65,13 @@ public final class Hashing {
         RANDOM.nextBytes(salt);
         byte[] hash = function(password.toCharArray(), salt);
         return new HashingResult(
-                ChannelBufferTools.convertByteArray(hash),
-                ChannelBufferTools.convertByteArray(salt));
+                ChannelBufferTools.bytesToHex(hash),
+                ChannelBufferTools.bytesToHex(salt));
     }
 
     public static boolean validatePassword(String password, String hashHex, String saltHex) {
-        byte[] hash = ChannelBufferTools.convertHexString(hashHex);
-        byte[] salt = ChannelBufferTools.convertHexString(saltHex);
+        byte[] hash = ChannelBufferTools.hexToBytes(hashHex);
+        byte[] salt = ChannelBufferTools.hexToBytes(saltHex);
         return slowEquals(hash, function(password.toCharArray(), salt));
     }
 
