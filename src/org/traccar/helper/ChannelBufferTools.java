@@ -24,10 +24,6 @@ public final class ChannelBufferTools {
     private ChannelBufferTools() {
     }
 
-    public static Integer find(ChannelBuffer buf, int start, String subString) {
-        return find(buf, start, buf.readerIndex() + buf.readableBytes(), subString);
-    }
-
     /**
      * Find string in network buffer
      */
