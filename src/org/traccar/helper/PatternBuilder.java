@@ -49,7 +49,7 @@ public class PatternBuilder {
         s = s.replace("xxxx", "x{4}").replace("xxx", "x{3}").replace("xx", "x{2}");
 
         s = s.replace("d", "\\d").replace("x", "\\p{XDigit}").replaceAll("([\\.])", "\\\\$1");
-        s = s.replaceAll("\\|$", "\\\\|"); // special case for delimiter
+        s = s.replaceAll("\\|$", "\\\\|").replaceAll("^\\|", "\\\\|"); // special case for delimiter
 
         fragments.add(s);
         return this;

@@ -13,6 +13,7 @@ public class PatternBuilderTest {
         Assert.assertEquals("a|b", new PatternBuilder().expression("a|b").toString());
         Assert.assertEquals("ab\\|", new PatternBuilder().expression("ab|").toString());
         Assert.assertEquals("|", new PatternBuilder().or().toString());
+        Assert.assertEquals("\\|\\d|\\d\\|", new PatternBuilder().number("|d|d|").toString());
     }
 
 }

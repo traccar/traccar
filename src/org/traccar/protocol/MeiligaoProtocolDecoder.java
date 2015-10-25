@@ -27,6 +27,7 @@ import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -36,37 +37,51 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(\\d{2})(\\d{2})(\\d{2})\\.?(\\d+)?," + // Time (HHMMSS.SSS)
-            "([AV])," +                         // Validity
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+\\.?\\d*)?," +                // Speed
-            "(\\d+\\.?\\d*)?," +                // Course
-            "(\\d{2})(\\d{2})(\\d{2})" +        // Date (DDMMYY)
-            "[^\\|]*" +
-            "(?:\\|(\\d+\\.\\d+)?" +            // HDOP
-            "\\|(-?\\d+\\.?\\d*)?" +            // Altitude
-            "\\|(\\p{XDigit}{4})?" +            // State
-            "(?:\\|(\\p{XDigit}{4}),(\\p{XDigit}{4})" + // ADC
-            "(?:,(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}),(\\p{XDigit}{4}))?" +
-            "(?:\\|" +
-            "(?:(\\p{XDigit}{16})" +            // Cell
-            "\\|(\\p{XDigit}{2})" +             // GSM
-            "\\|(\\p{XDigit}{8})|" +            // Odometer
-            "(\\p{XDigit}{9})" +                // Odometer
-            "(?:\\|(\\p{XDigit}{5,}))?)?)?)?)?" + // RFID
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .number("(dd)(dd)(dd).?(d+)?,")      // time
+            .expression("([AV]),")               // validity
+            .number("(d+)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")              // longitude
+            .expression("([EW]),")
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .expression("[^\\|]*")
+            .groupBegin()
+            .number("|(d+.d+)?")                 // hdop
+            .number("|(-?d+.?d*)?")              // altitude
+            .number("|(xxxx)?")                  // state
+            .groupBegin()
+            .number("|(xxxx),(xxxx)")            // adc
+            .groupBegin()
+            .number(",(xxxx),(xxxx),(xxxx),(xxxx),(xxxx),(xxxx)")
+            .groupEnd("?")
+            .groupBegin()
+            .text("|")
+            .groupBegin()
+            .number("(x{16})")                   // cell
+            .number("|(xx)")                     // gsm
+            .number("|(x{8})|")                  // odometer
+            .number("(x{9})")                    // odometer
+            .groupBegin()
+            .number("|(x{5,})")                  // rfid
+            .groupEnd("?")
+            .groupEnd("?")
+            .groupEnd("?")
+            .groupEnd("?")
+            .groupEnd("?")
+            .any()
+            .compile();
 
-    private static final Pattern PATTERN_RFID = Pattern.compile(
-            "\\|(\\d{2})(\\d{2})(\\d{2})," +    // Time (HHMMSS)
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Date (DDMMYY)
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d+)(\\d{2}\\.\\d+)," +          // Longitude (DDDMM.MMMM)
-            "([EW])");
+    private static final Pattern PATTERN_RFID = new PatternBuilder()
+            .number("|(dd)(dd)(dd),")            // time
+            .number("(dd)(dd)(dd),")             // Date (ddmmyy)
+            .number("(d+)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(d+)(dd.d+),")              // longitude
+            .expression("([EW])")
+            .compile();
 
     public static final int MSG_HEARTBEAT = 0x0001;
     public static final int MSG_SERVER = 0x0002;
@@ -143,8 +158,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
         buf.skipBytes(2); // header
@@ -182,7 +196,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
@@ -193,13 +206,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(6);
         }
 
-        // Get device by id
         if (!identify(id, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // RFID
         if (command == MSG_RFID) {
             for (int i = 0; i < 15; i++) {
                 long rfid = buf.readUnsignedInt();
@@ -218,7 +229,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             pattern = PATTERN;
         }
 
-        Parser parser = new Parser(pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset()));
+        Parser parser = new Parser(
+                pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset()));
         if (!parser.matches()) {
             return null;
         }
@@ -230,6 +242,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
             position.setTime(dateBuilder.getDate());
 
+            position.setValid(true);
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
 
