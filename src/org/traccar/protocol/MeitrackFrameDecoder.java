@@ -26,16 +26,14 @@ public class MeitrackFrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
         if (buf.readableBytes() < 10) {
             return null;
         }
 
-        Integer index = ChannelBufferTools.find(buf, buf.readerIndex(), buf.writerIndex(), ",");
-        if (index != null) {
+        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        if (index != -1) {
             int length = index - buf.readerIndex() + Integer.parseInt(
                     buf.toString(buf.readerIndex() + 3, index - buf.readerIndex() - 3, Charset.defaultCharset()));
             if (buf.readableBytes() >= length) {

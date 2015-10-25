@@ -267,7 +267,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         // Find type
-        Integer index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
+        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         index = buf.indexOf(index + 1, buf.writerIndex(), (byte) ',');
 
         String type = buf.toString(index + 1, 3, Charset.defaultCharset());
