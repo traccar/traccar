@@ -25,37 +25,6 @@ public final class ChannelBufferTools {
     }
 
     /**
-     * Find string in network buffer
-     */
-    public static Integer find(
-            ChannelBuffer buf,
-            Integer start,
-            Integer finish,
-            String subString) {
-
-        int index = start;
-        boolean match;
-
-        for (; index < finish; index++) {
-            match = true;
-
-            for (int i = 0; i < subString.length(); i++) {
-                char c = (char) buf.getByte(index + i);
-                if (c != subString.charAt(i)) {
-                    match = false;
-                    break;
-                }
-            }
-
-            if (match) {
-                return index;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Convert hex to integer (length in hex digits)
      */
     public static int readHexInteger(ChannelBuffer buf, int length) {
