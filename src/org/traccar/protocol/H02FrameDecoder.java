@@ -28,28 +28,26 @@ public class H02FrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
-        String marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
+        char marker = (char) buf.getByte(buf.readerIndex());
 
-        while (!marker.equals("*") && !marker.equals("$") && buf.readableBytes() > 0) {
+        while (marker != '*' && marker != '$' && buf.readableBytes() > 0) {
             buf.skipBytes(1);
             if (buf.readableBytes() > 0) {
-                marker = buf.toString(buf.readerIndex(), 1, Charset.defaultCharset());
+                marker = (char) buf.getByte(buf.readerIndex());
             }
         }
 
-        if (marker.equals("*")) {
+        if (marker == '*') {
 
             // Return text message
-            Integer index = ChannelBufferTools.find(buf, buf.readerIndex(), buf.readableBytes(), "#");
-            if (index != null) {
+            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
+            if (index != -1) {
                 return buf.readBytes(index + 1 - buf.readerIndex());
             }
 
-        } else if (marker.equals("$") && buf.readableBytes() >= MESSAGE_LENGTH) {
+        } else if (marker == '$' && buf.readableBytes() >= MESSAGE_LENGTH) {
 
             // Return binary message
             return buf.readBytes(MESSAGE_LENGTH);
