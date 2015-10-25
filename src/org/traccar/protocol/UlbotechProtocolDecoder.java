@@ -66,6 +66,36 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeDriverBehavior(Position position, ChannelBuffer buf) {
+
+        int value = buf.readUnsignedByte();
+
+        if (BitUtil.check(value, 0)) {
+            position.set("rapid-acceleration", true);
+        }
+        if (BitUtil.check(value, 1)) {
+            position.set("rough-braking", true);
+        }
+        if (BitUtil.check(value, 2)) {
+            position.set("harsh-course", true);
+        }
+        if (BitUtil.check(value, 3)) {
+            position.set("no-warm-up", true);
+        }
+        if (BitUtil.check(value, 4)) {
+            position.set("long-idle", true);
+        }
+        if (BitUtil.check(value, 5)) {
+            position.set("fatigue-driving", true);
+        }
+        if (BitUtil.check(value, 6)) {
+            position.set("rough-terrain", true);
+        }
+        if (BitUtil.check(value, 7)) {
+            position.set("high-rpm", true);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -156,7 +186,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_HARSH_DRIVER:
-                    position.set("driver-behavior", buf.readUnsignedByte());
+                    decodeDriverBehavior(position, buf);
                     break;
 
                 case DATA_CANBUS:
