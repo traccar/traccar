@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
@@ -45,7 +46,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // model
         buf.readUnsignedInt(); // firmware
 
-        String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
+        String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
         if (!identify(imei, channel)) {
             return null;
         }

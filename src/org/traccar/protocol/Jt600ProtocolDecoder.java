@@ -22,6 +22,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
@@ -48,7 +49,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         buf.readByte(); // header
 
         // Get device by identifier
-        String id = String.valueOf(Long.parseLong(ChannelBufferTools.readHexString(buf, 10)));
+        String id = String.valueOf(Long.parseLong(ChannelBuffers.hexDump(buf.readBytes(5))));
         if (!identify(id, channel)) {
             return null;
         }

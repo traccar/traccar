@@ -138,14 +138,14 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                     position.set("supply-air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     break;
                 case 0x30D:
-                    position.set("active-alarm", ChannelBufferTools.readHexString(value, 16));
+                    position.set("active-alarm", ChannelBuffers.hexDump(value));
                     break;
                 case 0x40C:
                     position.set("air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     position.set("air-temp-dep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     break;
                 case 0x40D:
-                    position.set("cold-unit-state", ChannelBufferTools.readHexString(value, 16));
+                    position.set("cold-unit-state", ChannelBuffers.hexDump(value));
                     break;
                 case 0x50C:
                     position.set("defrost-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);

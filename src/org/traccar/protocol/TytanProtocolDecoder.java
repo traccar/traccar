@@ -83,10 +83,10 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     position.set("antihijack", buf.readUnsignedByte());
                     break;
                 case 9:
-                    position.set("authorized", ChannelBufferTools.readHexString(buf, 16));
+                    position.set("authorized", ChannelBuffers.hexDump(buf.readBytes(8)));
                     break;
                 case 10:
-                    position.set("unauthorized", ChannelBufferTools.readHexString(buf, 16));
+                    position.set("unauthorized", ChannelBuffers.hexDump(buf.readBytes(8)));
                     break;
                 case 24:
                     Set<Integer> temps = new LinkedHashSet<>();

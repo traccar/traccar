@@ -122,7 +122,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // hardware version
             buf.readUnsignedByte(); // software version
 
-            String imei = ChannelBufferTools.readHexString(buf, 16).substring(1);
+            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
             if (!identify(imei, channel)) {
                 return null;
             }

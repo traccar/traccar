@@ -19,6 +19,7 @@ import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
@@ -76,7 +77,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readByte(); // marker
 
-        if (!identify(ChannelBufferTools.readHexString(buf, 10), channel)) {
+        if (!identify(ChannelBuffers.hexDump(buf.readBytes(5)), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

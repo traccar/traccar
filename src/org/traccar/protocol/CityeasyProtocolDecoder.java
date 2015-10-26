@@ -22,6 +22,7 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
@@ -70,7 +71,7 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
         buf.readUnsignedShort(); // length
 
-        String imei = ChannelBufferTools.readHexString(buf, 14);
+        String imei = ChannelBuffers.hexDump(buf.readBytes(7));
         if (!identify(imei, channel, null, false) && !identify(imei + Checksum.luhn(Long.parseLong(imei)), channel)) {
             return null;
         }
