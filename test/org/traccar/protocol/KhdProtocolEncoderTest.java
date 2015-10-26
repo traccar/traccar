@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Command;
 
+import javax.xml.bind.DatatypeConverter;
+
 public class KhdProtocolEncoderTest {
 
     @Test
@@ -17,8 +19,8 @@ public class KhdProtocolEncoderTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        Assert.assertEquals(encoder.encodeCommand(command), ChannelBuffers.wrappedBuffer(ChannelBufferTools.hexToBytes(
-                "2929390006000000003F0D")));
+        Assert.assertEquals(encoder.encodeCommand(command), ChannelBuffers.wrappedBuffer(
+                DatatypeConverter.parseHexBinary("2929390006000000003F0D")));
 
     }
 

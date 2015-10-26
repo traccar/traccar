@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Command;
 
+import javax.xml.bind.DatatypeConverter;
+
 public class Gt06ProtocolEncoderTest {
 
     @Test
@@ -17,8 +19,8 @@ public class Gt06ProtocolEncoderTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        Assert.assertEquals(encoder.encodeCommand(command), ChannelBuffers.wrappedBuffer(ChannelBufferTools.hexToBytes(
-                "787812800c0000000052656c61792c312300009dee0d0a")));
+        Assert.assertEquals(encoder.encodeCommand(command), ChannelBuffers.wrappedBuffer(
+                DatatypeConverter.parseHexBinary("787812800c0000000052656c61792c312300009dee0d0a")));
 
     }
 

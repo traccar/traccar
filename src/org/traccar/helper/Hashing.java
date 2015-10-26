@@ -19,6 +19,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 public final class Hashing {
 
@@ -65,13 +66,13 @@ public final class Hashing {
         RANDOM.nextBytes(salt);
         byte[] hash = function(password.toCharArray(), salt);
         return new HashingResult(
-                ChannelBufferTools.bytesToHex(hash),
-                ChannelBufferTools.bytesToHex(salt));
+                DatatypeConverter.printHexBinary(hash),
+                DatatypeConverter.printHexBinary(salt));
     }
 
     public static boolean validatePassword(String password, String hashHex, String saltHex) {
-        byte[] hash = ChannelBufferTools.hexToBytes(hashHex);
-        byte[] salt = ChannelBufferTools.hexToBytes(saltHex);
+        byte[] hash = DatatypeConverter.parseHexBinary(hashHex);
+        byte[] salt = DatatypeConverter.parseHexBinary(saltHex);
         return slowEquals(hash, function(password.toCharArray(), salt));
     }
 

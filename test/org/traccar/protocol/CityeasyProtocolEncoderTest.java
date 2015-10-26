@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Command;
 
+import javax.xml.bind.DatatypeConverter;
+
 public class CityeasyProtocolEncoderTest {
 
     @Test
@@ -18,8 +20,8 @@ public class CityeasyProtocolEncoderTest {
         command.setType(Command.TYPE_SET_TIMEZONE);
         command.set(Command.KEY_TIMEZONE, 6 * 3600);
 
-        Assert.assertEquals(encoder.encodeCommand(command), ChannelBuffers.wrappedBuffer(ChannelBufferTools.hexToBytes(
-                "5353001100080001680000000B60820D0A")));
+        Assert.assertEquals(encoder.encodeCommand(command), ChannelBuffers.wrappedBuffer(
+                DatatypeConverter.parseHexBinary("5353001100080001680000000B60820D0A")));
 
     }
 

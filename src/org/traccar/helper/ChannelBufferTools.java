@@ -17,6 +17,7 @@ package org.traccar.helper;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
+import javax.xml.bind.DatatypeConverter;
 import java.util.Formatter;
 
 public final class ChannelBufferTools {
@@ -87,24 +88,6 @@ public final class ChannelBufferTools {
         }
 
         return value;
-    }
-
-    public static byte[] hexToBytes(String in) {
-        int count = in.length() / 2;
-        byte[] out = new byte[count];
-        for (int i = 0; i < count; i++) {
-            out[i] = (byte) Integer.parseInt(in.substring(i * 2, (i + 1) * 2), 16);
-        }
-        return out;
-    }
-
-    public static String bytesToHex(byte[] in) {
-        StringBuilder out = new StringBuilder();
-        Formatter formatter = new Formatter(out);
-        for (byte b : in) {
-            formatter.format("%02x", b);
-        }
-        return out.toString();
     }
 
 }

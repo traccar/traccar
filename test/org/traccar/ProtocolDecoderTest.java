@@ -11,6 +11,7 @@ import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
+import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -104,7 +105,7 @@ public class ProtocolDecoderTest {
 
     protected ChannelBuffer binary(ByteOrder endianness, String... data) {
         return ChannelBuffers.wrappedBuffer(
-                endianness, ChannelBufferTools.hexToBytes(concatenateStrings(data)));
+                endianness, DatatypeConverter.parseHexBinary(concatenateStrings(data)));
     }
 
     protected String text(String... data) {
