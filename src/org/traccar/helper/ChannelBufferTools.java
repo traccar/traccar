@@ -50,26 +50,6 @@ public final class ChannelBufferTools {
     }
 
     /**
-     * Return hex string
-     */
-    public static String readHexString(ChannelBuffer buf, int length) {
-
-        StringBuilder result = new StringBuilder();
-        Formatter formatter = new Formatter(result);
-
-        for (int i = 0; i < length / 2; i++) {
-            formatter.format("%02x", buf.readByte());
-        }
-
-        if (length % 2 != 0) {
-            int b = buf.getUnsignedByte(buf.readerIndex());
-            formatter.format("%01x", b >>> 4);
-        }
-
-        return result.toString();
-    }
-
-    /**
      * Read BCD coded coordinate (first byte has sign bit)
      */
     public static double readCoordinate(ChannelBuffer buf) {

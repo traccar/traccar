@@ -150,7 +150,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                         length += 1;
                     }
 
-                    String num = ChannelBufferTools.readHexString(buf, length);
+                    String num = ChannelBuffers.hexDump(buf.readBytes(length / 2));
 
                     if (odd) {
                         num = num.substring(1);
