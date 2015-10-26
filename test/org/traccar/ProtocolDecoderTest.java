@@ -148,8 +148,8 @@ public class ProtocolDecoderTest {
 
     private void verifyDecodedPosition(Object decodedObject) {
 
-        Assert.assertNotNull(decodedObject);
-        Assert.assertTrue(decodedObject instanceof Position);
+        Assert.assertNotNull("position is null", decodedObject);
+        Assert.assertTrue("not a position", decodedObject instanceof Position);
 
         Position position = (Position) decodedObject;
 

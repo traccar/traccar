@@ -101,7 +101,7 @@ public class Parser {
         switch (format) {
             case DEG_MIN_MIN_HEM:
                 coordinate = nextInt();
-                coordinate += (nextInt() + nextInt() / 1000.0) / 60;
+                coordinate += Double.parseDouble(next() + '.' + next()) / 60;
                 hemisphere = next();
                 break;
             case HEM_DEG:
