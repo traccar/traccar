@@ -9,6 +9,7 @@ import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.ExtendedInfoFormatter;
+import org.traccar.model.MixPacket;
 import org.traccar.model.Position;
 import org.traccar.model.Status;
 
@@ -81,6 +82,7 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         List<Position> positions=new ArrayList<Position>();
+        List<Status> statusList=new ArrayList<Status>();
         int i=0;
          while (buf.readable()){
              i++;
@@ -138,9 +140,10 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                  buf.skipBytes(2);
 
                  // Digital I/O Status
-                 String binaryDigitalIO = getBits(buf.readUnsignedShort());
+                 String binaryDigitalIO = getBits(buf.readUnsignedByte());
                  extendedInfo.set("acc", binaryDigitalIO.charAt(1));
                  extendedInfo.set("ac", binaryDigitalIO.charAt(2));
+                 buf.skipBytes(1);
 
                  // 2 Analog Input
                  buf.skipBytes(4);
@@ -211,8 +214,7 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                          status.setDeviceid(deviceId);
                          status.setVoltage(getBatteryPerc(batteryVoltage));
                          status.setStatusType(statusType);
-
-                         return  status;
+                         statusList.add(status);
                      }
                      buf.skipBytes(16);
                  }
@@ -222,12 +224,15 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                  Status status = new Status();
                  status.setDate(dateFormatLocal.parse(dateFormatGmt.format(new Date())));
                  status.setDeviceid(deviceId);
+                 statusList.add(status);
                  sendLoginResponse(channel, type, index, imei);
-                 return status;
              }
          }
 
-        return positions;
+        MixPacket mixPacket=new MixPacket();
+        mixPacket.setPositions(positions);
+        mixPacket.setStatus(statusList);
+        return mixPacket;
     }
 
 
