@@ -22,10 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.DateBuilder;
-import org.traccar.helper.Parser;
-import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.*;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -41,12 +38,16 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),").optional()          // imei
             .number("(dd),(dd),(dd),")           // date
             .number("(dd),(dd),(dd),")           // time
-            .number("(dd)(dd).?(dddd)")          // latitude
-            .expression("([NS]),")
-            .number("(ddd)(dd).?(dddd)")         // longitude
-            .expression("([EW]),")
+            .groupBegin()
+            .number("(dd)(dd).?(d+)([NS]),")     // latitude
+            .number("(ddd)(dd).?(d+)([EW]),")    // longitude
+            .or()
+            .number("(dd.d+)([NS]),")            // latitude
+            .number("(ddd.d+)([EW]),")           // longitude
+            .groupEnd()
             .number("(d+.?d+),")                 // speed
             .number("(d+),")                     // course
+            .groupBegin()
             .groupBegin()
             .number("(d+),")                     // altitude
             .number("(d+),")                     // satellites
@@ -60,8 +61,10 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d),")                      // external battery status
             .number("(d+),")                     // gsm
             .groupEnd("?")
-            .expression("([AV]),?")              // validity
-            .number("(d+)?")                     // rfid
+            .groupEnd("?")
+            .any()
+            .expression("([AV])")                // validity
+            .number(",(d{10})").optional()       // rfid
             .any()
             .compile();
 
@@ -79,7 +82,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         String id = parser.next();
         String imei = parser.next();
-        if (!identify(id, channel, null, false) && !identify(imei, channel)) {
+        if (!identify(id, channel, null, false) && (imei == null || !identify(imei, channel))) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -89,8 +92,14 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        if (parser.hasNext(8)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        }
+        if (parser.hasNext(4)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        }
 
         position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(
                 parser.next().replace(".", "")) / 10));

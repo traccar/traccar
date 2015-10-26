@@ -87,6 +87,7 @@ public class Parser {
     }
 
     public enum CoordinateFormat {
+        DEG_HEM,
         DEG_MIN_HEM,
         DEG_MIN_MIN_HEM,
         HEM_DEG,
@@ -99,6 +100,10 @@ public class Parser {
         String hemisphere;
 
         switch (format) {
+            case DEG_HEM:
+                coordinate = nextDouble();
+                hemisphere = next();
+                break;
             case DEG_MIN_MIN_HEM:
                 coordinate = nextInt();
                 coordinate += Double.parseDouble(next() + '.' + next()) / 60;
