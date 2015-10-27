@@ -17,12 +17,16 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 public class LaipacProtocolDecoder extends BaseProtocolDecoder {
@@ -31,90 +35,63 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "\\$AVRMC," +
-            "([^,]+)," +                   // Identifier
-            "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
-            "([AVRavr])," +                // Validity
-            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+\\.\\d+)," +             // Speed
-            "(\\d+\\.\\d+)," +             // Course
-            "(\\d{2})(\\d{2})(\\d{2})," +  // Date (DDMMYY)
-            "(.)," +                       // Type
-            "[^\\*]+\\*" +
-            "(\\p{XDigit}{2})");           // Checksum
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("$AVRMC,")
+            .expression("([^,]+),")              // identifier
+            .number("(dd)(dd)(dd),")             // time
+            .expression("([AVRavr]),")           // validity
+            .number("(dd)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(ddd)(dd.d+),")             // longitude
+            .number("([EW]),")
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .expression("(.),")                  // type
+            .expression("[^*]+").text("*")
+            .number("(xx)")                      // checksum
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
-        // Heartbeat
         if (sentence.startsWith("$ECHK") && channel != null) {
-            channel.write(sentence + "\r\n");
+            channel.write(sentence + "\r\n"); // heartbeat
             return null;
         }
 
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        Integer index = 1;
 
-        // Identification
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        // Validity
-        String status = parser.group(index++);
-        position.setValid(status.compareToIgnoreCase("A") == 0);
+        String status = parser.next();
+        position.setValid(status.toUpperCase().equals("A"));
 
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-        position.setLongitude(longitude);
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-
-        // Course
-        position.setCourse(Double.parseDouble(parser.group(index++)));
-
-        // Date
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        // Response
-        String type = parser.group(index++);
-        String checksum = parser.group(index++);
+        String type = parser.next();
+        String checksum = parser.next();
         String response = null;
 
         if (type.equals("0") && Character.isLowerCase(status.charAt(0))) {
@@ -131,6 +108,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         if (response != null && channel != null) {
             channel.write(response + "\r\n");
         }
+
         return position;
     }
 
