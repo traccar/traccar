@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.StringFinder;
 
 public class TotemFrameDecoder extends FrameDecoder {

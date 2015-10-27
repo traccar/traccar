@@ -19,7 +19,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.traccar.CharacterDelimiterFrameDecoder;
-import org.traccar.helper.ChannelBufferTools;
 
 public class Stl060FrameDecoder extends CharacterDelimiterFrameDecoder {
 

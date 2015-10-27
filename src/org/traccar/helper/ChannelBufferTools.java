@@ -17,9 +17,6 @@ package org.traccar.helper;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-import javax.xml.bind.DatatypeConverter;
-import java.util.Formatter;
-
 public final class ChannelBufferTools {
 
     private ChannelBufferTools() {

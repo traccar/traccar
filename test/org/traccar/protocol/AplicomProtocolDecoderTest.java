@@ -1,10 +1,7 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
-
 
 public class AplicomProtocolDecoderTest extends ProtocolDecoderTest {
 

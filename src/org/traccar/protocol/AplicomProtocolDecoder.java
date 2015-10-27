@@ -23,7 +23,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;

@@ -7,7 +7,6 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
 import org.traccar.database.IdentityManager;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 

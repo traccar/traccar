@@ -24,7 +24,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 

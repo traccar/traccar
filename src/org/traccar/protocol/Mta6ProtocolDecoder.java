@@ -33,7 +33,6 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -286,9 +285,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             throws Exception {
 
         HttpRequest request = (HttpRequest) msg;
-
         ChannelBuffer buf = request.getContent();
-        int length = buf.readableBytes();
 
         // Read identifier
         buf.skipBytes("id=".length());
