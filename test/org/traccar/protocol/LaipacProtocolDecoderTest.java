@@ -10,18 +10,24 @@ public class LaipacProtocolDecoderTest extends ProtocolDecoderTest {
 
         LaipacProtocolDecoder decoder = new LaipacProtocolDecoder(new LaipacProtocol());
 
-        verifyNothing(decoder, text( "$AVSYS,99999999,V1.50,SN0000103,32768*15"));
+        verifyNothing(decoder, text(
+                "$AVSYS,99999999,V1.50,SN0000103,32768*15"));
         
-        verifyNothing(decoder, text( "$ECHK,99999999,0*35"));
+        verifyNothing(decoder, text(
+                "$ECHK,99999999,0*35"));
         
-        verifyNothing(decoder, text( "$AVSYS,MSG00002,14406,7046811160,64*1A"));
+        verifyNothing(decoder, text(
+                "$AVSYS,MSG00002,14406,7046811160,64*1A"));
 
-        verifyNothing(decoder, text( "$EAVSYS,MSG00002,8931086013104404999,,Owner,0x52014406*76"));
+        verifyNothing(decoder, text(
+                "$EAVSYS,MSG00002,8931086013104404999,,Owner,0x52014406*76"));
 
-        verifyNothing(decoder, text( "$ECHK,MSG00002,0*5E"));
+        verifyNothing(decoder, text(
+                "$ECHK,MSG00002,0*5E"));
 
         verifyPosition(decoder, text(
-                "$AVRMC,99999999,164339,A,4351.0542,N,07923.5445,W,0.29,78.66,180703,0,3.727,17,1,0,0*37"));
+                "$AVRMC,99999999,164339,A,4351.0542,N,07923.5445,W,0.29,78.66,180703,0,3.727,17,1,0,0*37"),
+                position("2003-07-18 16:43:39.000", true, 43.85090, -79.39241));
 
         verifyPosition(decoder, text(
                 "$AVRMC,99999999,164339,a,4351.0542,N,07923.5445,W,0.29,78.66,180703,0,3.727,17,1,0,0*17"));
