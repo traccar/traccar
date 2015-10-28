@@ -2,9 +2,6 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.PatternBuilder;
-
-import java.util.regex.Pattern;
 
 public class GlobalSatProtocolDecoderTest extends ProtocolDecoderTest {
 
