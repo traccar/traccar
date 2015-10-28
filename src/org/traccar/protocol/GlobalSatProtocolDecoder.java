@@ -190,7 +190,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // altitude
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
-            .number("(d+)[,\\*]")                  // satellites
+            .number("(d+)[,*]")                  // satellites
             .number("(d+.?d*)")                  // hdop
             .compile();
 
