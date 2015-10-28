@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 public class FreedomProtocolDecoder extends BaseProtocolDecoder {
@@ -30,68 +30,47 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "IMEI," +
-            "(\\d+)," +                           // IMEI
-            "(\\d{4}).(\\d{2}).(\\d{2}), " +      // Date
-            "(\\d{2}):(\\d{2}):(\\d{2}), " +      // Time
-            "([NS]), Lat:(\\d{2})(\\d+.\\d+), " + // Latitude
-            "([EW]), Lon:(\\d{3})(\\d+.\\d+), " + // Longitude
-            "Spd:(\\d+.\\d+)" +                   // Speed
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("IMEI,")
+            .number("(d+),")                           // IMEI
+            .number("(dddd)/(dd)/(dd), ")      // Date
+            .number("(dd):(dd):(dd), ")      // Time
+            .number("([NS]), Lat:(dd)(d+.d+), ") // Latitude
+            .number("([EW]), Lon:(ddd)(d+.d+), ") // Longitude
+            .text("Spd:").number("(d+.d+)")                   // Speed
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg)
             throws Exception {
 
-        // Parse message
-        Matcher parser = PATTERN.matcher((String) msg);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        Integer index = 1;
 
-        // Identification
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Validity
         position.setValid(true);
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Latitude
-        String hemisphere = parser.group(index++);
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (hemisphere.compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
 
-        // Longitude
-        hemisphere = parser.group(index++);
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (hemisphere.compareTo("W") == 0) longitude = -longitude;
-        position.setLongitude(longitude);
+        position.setSpeed(parser.nextDouble());
 
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
         return position;
     }
 
