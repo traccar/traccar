@@ -180,7 +180,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             .text("$")
             .number("(d+),")                     // imei
             .number("d+,")                       // mode
-            .number("(d),")                      // fix
+            .number("(d+),")                     // fix
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([EW])")
@@ -189,8 +189,8 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd.d+),")              // latitude (ddmm.mmmm)
             .number("(d+.?d*),")                 // altitude
             .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
-            .number("(d+),")                     // satellites
+            .number("(d+.?d*)?,")                // course
+            .number("(d+)[,*]")                  // satellites
             .number("(d+.?d*)")                  // hdop
             .compile();
 
@@ -209,7 +209,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.setValid(parser.next().equals("1"));
+        position.setValid(!parser.next().equals("1"));
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
