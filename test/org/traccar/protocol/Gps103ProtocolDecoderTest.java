@@ -10,15 +10,26 @@ public class Gps103ProtocolDecoderTest extends ProtocolDecoderTest {
 
         Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new Gps103Protocol());
 
+        verifyPosition(decoder, text(
+                "imei:359710049092324,tracker,151027025958,,F,235957.000,A,2429.5156,N,04424.5828,E,0.01,27.91,,0,0,,,;"),
+                position("2015-10-26 23:59:57.000", true, 24.49193, 44.40971));
+
+        verifyPosition(decoder, text(
+                "imei:865328021058861,tracker,151027041419,,F,011531.000,A,6020.2979,N,02506.1940,E,0.49,113.30,,0,0,0.0%,,;"),
+                position("2015-10-27 01:15:31.000", true, 60.33830, 25.10323));
+
         // Log on request
-        verifyNothing(decoder, text( "##,imei:359586015829802,A"));
+        verifyNothing(decoder, text(
+                "##,imei:359586015829802,A"));
 
         // Heartbeat package
-        verifyNothing(decoder, text( "359586015829802"));
+        verifyNothing(decoder, text(
+                "359586015829802"));
 
         // No GPS signal
-        verifyNothing(decoder, text( "imei:359586015829802,tracker,000000000,13554900601,L,;"));
-        
+        verifyNothing(decoder, text(
+                "imei:359586015829802,tracker,000000000,13554900601,L,;"));
+
         verifyPosition(decoder, text(
                 "imei:869039001186913,tracker,1308282156,0,F,215630.000,A,5602.11015,N,9246.30767,E,1.4,,175.9,"));
 
