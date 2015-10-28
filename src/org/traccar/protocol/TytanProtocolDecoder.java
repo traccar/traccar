@@ -39,12 +39,6 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static float readSwappedFloat(ChannelBuffer buf) {
-        byte[] bytes = new byte[4];
-        buf.readBytes(bytes);
-        return ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, bytes).readFloat();
-    }
-
     private void decodeExtraData(Position position, ChannelBuffer buf, int end) {
         while (buf.readerIndex() < end) {
 
@@ -66,9 +60,9 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                 case 6:
                     n = buf.readUnsignedByte() >> 4;
                     if (n < 2) {
-                        position.set(Event.PREFIX_ADC + n, readSwappedFloat(buf));
+                        position.set(Event.PREFIX_ADC + n, buf.readFloat());
                     } else {
-                        position.set("di" + (n - 2), readSwappedFloat(buf));
+                        position.set("di" + (n - 2), buf.readFloat());
                     }
                     break;
                 case 7:
@@ -82,10 +76,10 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     position.set("antihijack", buf.readUnsignedByte());
                     break;
                 case 9:
-                    position.set("authorized", ChannelBuffers.hexDump(buf.readBytes(8)));
+                    position.set("unauthorized", ChannelBuffers.hexDump(buf.readBytes(8)));
                     break;
                 case 10:
-                    position.set("unauthorized", ChannelBuffers.hexDump(buf.readBytes(8)));
+                    position.set("authorized", ChannelBuffers.hexDump(buf.readBytes(8)));
                     break;
                 case 24:
                     Set<Integer> temps = new LinkedHashSet<>();
@@ -105,7 +99,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte();
                     break;
                 case 90:
-                    position.set(Event.KEY_POWER, readSwappedFloat(buf));
+                    position.set(Event.KEY_POWER, buf.readFloat());
                     break;
                 case 101:
                     position.set(Event.KEY_OBD_SPEED, buf.readUnsignedByte());
