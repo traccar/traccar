@@ -32,12 +32,14 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("IMEI,")
-            .number("(d+),")                           // IMEI
-            .number("(dddd)/(dd)/(dd), ")      // Date
-            .number("(dd):(dd):(dd), ")      // Time
-            .number("([NS]), Lat:(dd)(d+.d+), ") // Latitude
-            .number("([EW]), Lon:(ddd)(d+.d+), ") // Longitude
-            .text("Spd:").number("(d+.d+)")                   // Speed
+            .number("(d+),")                     // imei
+            .number("(dddd)/(dd)/(dd), ")        // date
+            .number("(dd):(dd):(dd), ")          // time
+            .expression("([NS]), ")
+            .number("Lat:(dd)(d+.d+), ")         // latitude
+            .expression("([EW]), ")
+            .number("Lon:(ddd)(d+.d+), ")        // longitude
+            .text("Spd:").number("(d+.d+)")      // speed
             .any()
             .compile();
 
