@@ -74,6 +74,15 @@ public class ProtocolDecoderTest {
         }
     }
 
+    protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
+        Object decodedObject = decoder.decode(null, null, object);
+        Assert.assertNotNull(decodedObject);
+        Assert.assertTrue(decodedObject instanceof List);
+        for (Object item : (List) decodedObject) {
+            verifyDecodedPosition(item, position);
+        }
+    }
+
     protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
 
         Position position = new Position();
