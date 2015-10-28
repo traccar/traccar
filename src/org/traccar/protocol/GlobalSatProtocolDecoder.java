@@ -180,7 +180,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             .text("$")
             .number("(d+),")                     // imei
             .number("d+,")                       // mode
-            .number("(d+),")                      // fix
+            .number("(d+),")                     // fix
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([EW])")
@@ -189,8 +189,8 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd.d+),")              // latitude (ddmm.mmmm)
             .number("(d+.?d*),")                 // altitude
             .number("(d+.?d*),")                 // speed
-            .number("(d*.?d*),")                 // course
-            .number("(d+)[,\\\\*]")              // satellites
+            .number("(d+.?d*)?,")                // course
+            .number("(d+)[,\\*]")                  // satellites
             .number("(d+.?d*)")                  // hdop
             .compile();
 
@@ -220,8 +220,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setAltitude(parser.nextDouble());
         position.setSpeed(parser.nextDouble());
-        String course = parser.next();
-        position.setCourse(course.isEmpty() ? 0d : Double.parseDouble(course));
+        position.setCourse(parser.nextDouble());
 
         position.set(Event.KEY_SATELLITES, parser.nextInt());
         position.set(Event.KEY_HDOP, parser.next());
