@@ -22,10 +22,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BitUtil;
-import org.traccar.helper.DateBuilder;
-import org.traccar.helper.Parser;
-import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.*;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -56,7 +53,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+);")                     // satellites
             .number("([NS])(d+.d+);")            // latitude
             .number("([EW])(d+.d+);")            // longitude
-            .number("(d+);")                     // speed
+            .number("(d+)?;")                    // speed
             .number("(d+);")                     // course
             .number("(d+);")                     // altitude
             .number("(d+.d+)")                   // hdop
@@ -89,7 +86,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .text("ETD:").expression("[^,],?")
             .groupEnd("?")
             .groupBegin()
-            .text("OBD:").expression("[^,],?")
+            .text("OBD:")
+            .number("(x+),?")
             .groupEnd("?")
             .groupBegin()
             .text("FUL:").expression("[^,],?")
@@ -125,6 +123,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         if (status != null) {
             position.set(Event.KEY_IGNITION, BitUtil.check(Integer.parseInt(status, 16), 13));
             position.set(Event.KEY_STATUS, status);
+        }
+
+        if (parser.hasNext()) {
+            position.set("obd", parser.next());
         }
 
         return position;

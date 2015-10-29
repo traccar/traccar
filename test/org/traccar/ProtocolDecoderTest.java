@@ -69,6 +69,7 @@ public class ProtocolDecoderTest {
         Object decodedObject = decoder.decode(null, null, object);
         Assert.assertNotNull(decodedObject);
         Assert.assertTrue(decodedObject instanceof List);
+        Assert.assertFalse("list if empty", ((List) decodedObject).isEmpty());
         for (Object item : (List) decodedObject) {
             verifyDecodedPosition(item);
         }
@@ -78,6 +79,7 @@ public class ProtocolDecoderTest {
         Object decodedObject = decoder.decode(null, null, object);
         Assert.assertNotNull(decodedObject);
         Assert.assertTrue(decodedObject instanceof List);
+        Assert.assertFalse("list if empty", ((List) decodedObject).isEmpty());
         for (Object item : (List) decodedObject) {
             verifyDecodedPosition(item, position);
         }
