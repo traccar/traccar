@@ -155,7 +155,11 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                  if(type == MSG_ALARM)
                  {
                      Log.debug("ALARM : "+statusType);
-                     sendLoginResponse(channel, type, index, imei + alarmData);
+                     if(alarmData.equals("08") || alarmData.equals("10")){
+                       sendAlarmPacketAfter16Sec(channel,type,index, imei + alarmData);
+                     }else{
+                         sendLoginResponse(channel, type, index, imei + alarmData);
+                     }
                  }
 
                  // Reserve
@@ -235,6 +239,15 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
         return mixPacket;
     }
 
+    private void sendAlarmPacketAfter16Sec(final Channel channel,final int type,final int index,final String alarmData) {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                sendLoginResponse(channel, type, index,alarmData);
+            }
+        }, 16001);
+    }
+
 
     private static String getBits(int flags) {
         int hexFlag = Integer.parseInt(Integer.toHexString(flags), 16);
@@ -281,7 +294,7 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
             alarmCodeString = "LBA";
         }else if (alarmCode.equals("03")) {
             alarmCodeString = "SOS";
-        }else if (alarmCode.equals("08")) {
+        }else if (alarmCode.equals("08") || alarmCode.equals("10") ) {
             alarmCodeString = "VIBALM";
         } else if (alarmCode.equals("16")) {
             alarmCodeString = "PWROFF";
