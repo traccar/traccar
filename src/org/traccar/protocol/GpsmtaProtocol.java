@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
@@ -35,6 +36,7 @@ public class GpsmtaProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new GpsmtaProtocolDecoder(GpsmtaProtocol.this));
             }
         });
