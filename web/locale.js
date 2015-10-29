@@ -37,6 +37,7 @@ Locale.languages = {
     'ru': { name: 'Русский', code: 'ru' },
     'si': { name: 'සිංහල', code: 'en' },
     'sk': { name: 'Slovenčina', code: 'sk' },
+    'sl': { name: 'Slovenščina', code: 'sl' },
     'sr': { name: 'Srpski', code: 'sr' },
     'th': { name: 'ไทย', code: 'th' },
     'zh': { name: '中文', code: 'zh_CN' }
