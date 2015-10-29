@@ -9,7 +9,13 @@ public class Gl200ProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new Gl200Protocol());
-        
+
+        verifyAttributes(decoder, text(
+                "+RESP:GTINF,1F0101,135790246811220,1G1JC5444R7252367,,16,898600810906F8048812,16,0,1,12000,,4.2,0,0,,,20090214013254,,,,,,+0800,0,20090214093254,11F0$"));
+
+        verifyAttributes(decoder, text(
+                "+RESP:GTFRI,120113,555564055560555,,1,1,1,,,,,,,,0282,0380,f080,cabf,6900,79,20140824165629,0001$"));
+
         verifyPosition(decoder, text(
                 "+RESP:GTFRI,0F0106,862193020451183,,,10,1,1,0.0,163,,-57.513617,-25.368191,20150918182145,,,,,,21235.0,,,,0,210100,,,,20150918182149,00B8$"));
 
@@ -123,7 +129,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolDecoderTest {
 
         verifyNothing(decoder, text(
                 "\u0000\u0004,0017,0,GTPNA,,867844000400914,,0,0,1,0,,,,0,0,,,,,,99,20150404190153,0601$"));
-        
+
         verifyPosition(decoder, text(
                 "\u0000\u0004,0017,0,GTEPN,,867844000400914,,0,0,1,0,0.0,0,1717.4,-75.598445,6.278578,20150405003116,,,,,95,20150405003358,0607$"));
 

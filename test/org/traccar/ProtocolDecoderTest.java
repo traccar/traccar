@@ -51,10 +51,10 @@ public class ProtocolDecoderTest {
 
     protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
         Object decodedObject = decoder.decode(null, null, object);
-        Assert.assertNotNull(decodedObject);
-        Assert.assertTrue(decodedObject instanceof Position);
+        Assert.assertNotNull("position is null", decodedObject);
+        Assert.assertTrue("not a position", decodedObject instanceof Position);
         Position position = (Position) decodedObject;
-        Assert.assertFalse(position.getAttributes().isEmpty());
+        Assert.assertFalse("no attributes", position.getAttributes().isEmpty());
     }
 
     protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {

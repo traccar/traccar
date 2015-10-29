@@ -41,6 +41,33 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private static final Pattern PATTERN_INF = new PatternBuilder()
+            .text("+RESP:GTINF,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("[0-9A-Z]{17},")         // vin
+            .expression("[^,]{0,20},")           // device name
+            .number("(xx),")                     // state
+            .expression("[0-9F]{20},")           // iccid
+            .number("d{1,2},")
+            .number("d{1,2},")
+            .expression("[01],")
+            .number("(d{1,5}),")                 // power
+            .text(",")
+            .number("(d+.d+),")                  // battery
+            .expression("([01]),")               // charging
+            .expression("[01],")
+            .text(",,")
+            .number("d{14},")                    // last fix time
+            .text(",,,,,")
+            .number("[-+]dddd,")                 // timezone
+            .expression("[01],")                 // daylight saving
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(xxxx)")                    // counter
+            .text("$").optional()
+            .compile();
+
     private static final Pattern PATTERN = new PatternBuilder()
             .groupBegin()
             .text("+").expression("(?:RESP|BUFF)").text(":")
@@ -78,16 +105,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .or().any()
             .groupEnd().text(",")
 
-            .number("(d*),")                     // gps accuracy
-            .number("(d+.d)?,")                  // speed
-            .number("(d+)?,")                    // course
-            .number("(-?d+.d)?,")                // altitude
-            .number("(-?d+.d+),")                // longitude
-            .number("(-?d+.d+),")                // latitude
+            .number("(d{1,2})?,")                // gps accuracy
+            .number("(d{1,3}.d)?,")              // speed
+            .number("(d{1,3})?,")                // course
+            .number("(-?d{1,5}.d)?,")            // altitude
+            .number("(-?d{1,3}.d{6})?,")         // longitude
+            .number("(-?d{1,2}.d{6})?,")         // latitude
             .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd),")             // time
-            .number("(dddd)?,")                  // mcc
-            .number("(dddd)?,")                  // mnc
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(0ddd)?,")                  // mcc
+            .number("(0ddd)?,")                  // mnc
             .number("(xxxx|x{8})?,")             // loc
             .number("(xxxx)?,")                  // cell
             .groupBegin()
@@ -95,7 +123,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // battery
             .groupEnd("?")
             .any().text(",")
-            .number("(xxxx)\\$?")
+            .number("(xxxx)")
             .text("$").optional()
             .compile();
 
@@ -109,6 +137,33 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                 channel.write("+SACK:GTHBD," + parser.next() + "," + parser.next() + "$", remoteAddress);
             }
             return null;
+        }
+
+        parser = new Parser(PATTERN_INF, (String) msg);
+        if (parser.matches()) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+
+            if (!identify(parser.next(), channel, remoteAddress)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+
+            position.set(Event.KEY_STATUS, parser.next());
+            position.set(Event.KEY_POWER, parser.next());
+            position.set(Event.KEY_BATTERY, parser.next());
+            position.set(Event.KEY_CHARGE, parser.next());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+            getLastLocation(position, dateBuilder.getDate());
+
+            position.set(Event.KEY_INDEX, parser.next());
+
+            return position;
         }
 
         parser = new Parser(PATTERN, (String) msg);
@@ -137,17 +192,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_FUEL, parser.next());
         position.set(Event.KEY_OBD_ODOMETER, parser.next());
 
-        position.setValid(parser.nextInt() < 20);
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setLatitude(parser.nextDouble());
+        if (parser.hasNext(12)) {
+            position.setValid(parser.nextInt() < 20);
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
+            position.setAltitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+            position.setLatitude(parser.nextDouble());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+        } else {
+            getLastLocation(position, null);
+        }
 
         position.set(Event.KEY_MCC, parser.next());
         position.set(Event.KEY_MNC, parser.next());
