@@ -11,7 +11,8 @@ public class SanavProtocolDecoderTest extends ProtocolDecoderTest {
         SanavProtocolDecoder decoder = new SanavProtocolDecoder(new SanavProtocol());
         
         verifyPosition(decoder, text(
-                "imei=352024028982787&rmc=$GPRMC,103048.000,A,4735.0399,N,01905.2895,E,0.00,0.00,171013,,*05,AUTO-4095mv"));
+                "imei=352024028982787&rmc=$GPRMC,103048.000,A,4735.0399,N,01905.2895,E,0.00,0.00,171013,,*05,AUTO-4095mv"),
+                position("2013-10-17 10:30:48.000", true, 47.58400, 19.08816));
 
         verifyPosition(decoder, text(
                 "imei:352024028980000rmc:$GPRMC,093604.354,A,4735.0862,N,01905.2146,E,0.00,0.00,171013,,*09,AUTO-4103mv"));

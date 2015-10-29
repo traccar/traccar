@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.LinkedHashSet;
