@@ -61,8 +61,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .expression(",?")
             .groupEnd()
             .groupBegin()
-            .text("GSM:").expression("[^,],?")
-            .groupEnd("?")
+            .text("GSM:").expression("[^,]*,?")
+            .groupEnd()
             .groupBegin()
             .text("COT:")
             .number("(d+)")                      // odometer
@@ -83,17 +83,17 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .number("x+,?")                      // event status
             .groupEnd("?")
             .groupBegin()
-            .text("ETD:").expression("[^,],?")
+            .text("ETD:").expression("[^,]*,?")
             .groupEnd("?")
             .groupBegin()
             .text("OBD:")
             .number("(x+),?")
             .groupEnd("?")
             .groupBegin()
-            .text("FUL:").expression("[^,],?")
+            .text("FUL:").expression("[^,]*,?")
             .groupEnd("?")
             .groupBegin()
-            .text("TRU:").expression("[^,],?")
+            .text("TRU:").expression("[^,]*,?")
             .groupEnd("?")
             .compile();
 
