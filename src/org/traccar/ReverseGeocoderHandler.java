@@ -33,7 +33,13 @@ public class ReverseGeocoderHandler implements ChannelUpstreamHandler {
     public ReverseGeocoderHandler(ReverseGeocoder geocoder, boolean processInvalidPositions) {
         this.geocoder = geocoder;
         this.processInvalidPositions = processInvalidPositions;
-        addressFormat = new AddressFormat();
+
+        String formatString = Context.getConfig().getString("geocoder.format");
+        if (formatString != null) {
+            addressFormat = new AddressFormat(Context.getConfig().getString("geocoder.format"));
+        } else {
+            addressFormat = new AddressFormat();
+        }
     }
 
     @Override
