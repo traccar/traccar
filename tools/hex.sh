@@ -15,7 +15,7 @@ then
 fi
 
 send_hex_udp () {
-  echo $2 | xxd -r -p | nc -u localhost $1
+  echo $2 | xxd -r -p | nc -u -w 0 localhost $1
 }
 
 send_hex_tcp () {
@@ -23,7 +23,7 @@ send_hex_tcp () {
 }
 
 send_text_udp () {
-  echo -n -e $2 | nc -u localhost $1
+  echo -n -e $2 | nc -u -w 0 localhost $1
 }
 
 send_text_tcp () {
