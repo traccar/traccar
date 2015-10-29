@@ -62,7 +62,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .groupBegin()
             .text("GSM:").expression("[^,]*,?")
-            .groupEnd()
+            .groupEnd("?")
             .groupBegin()
             .text("COT:")
             .number("(d+)")                      // odometer
