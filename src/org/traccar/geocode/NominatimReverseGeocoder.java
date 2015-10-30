@@ -40,15 +40,24 @@ public class NominatimReverseGeocoder extends JsonReverseGeocoder {
             if (result.containsKey("road")) {
                 address.setStreet(result.getString("road"));
             }
+            if (result.containsKey("suburb")) {
+                address.setSuburb(result.getString("suburb"));
+            }
+
             if (result.containsKey("village")) {
                 address.setSettlement(result.getString("village"));
-            }
-            if (result.containsKey("city")) {
+            } else if (result.containsKey("town")) {
+                address.setSettlement(result.getString("town"));
+            } else if (result.containsKey("city")) {
                 address.setSettlement(result.getString("city"));
             }
+
             if (result.containsKey("state_district")) {
                 address.setDistrict(result.getString("state_district"));
+            } else if (result.containsKey("region")) {
+                address.setDistrict(result.getString("region"));
             }
+
             if (result.containsKey("state")) {
                 address.setState(result.getString("state"));
             }

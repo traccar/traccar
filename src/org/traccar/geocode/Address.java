@@ -67,6 +67,16 @@ public class Address {
         this.settlement = settlement;
     }
 
+    private String suburb;
+
+    public String getSuburb() {
+        return suburb;
+    }
+
+    public void setSuburb(String suburb) {
+        this.suburb = suburb;
+    }
+
     private String street;
 
     public String getStreet() {
