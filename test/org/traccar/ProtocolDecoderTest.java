@@ -154,6 +154,15 @@ public class ProtocolDecoderTest {
         Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
         Assert.assertEquals("longitude", expected.getLongitude(), position.getLongitude(), 0.00001);
 
+        Assert.assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
+        Assert.assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
+
+        Assert.assertTrue("speed >= 0", position.getSpeed() >= 0);
+        Assert.assertTrue("speed <= 869", position.getSpeed() <= 869);
+
+        Assert.assertTrue("course >= 0", position.getCourse() >= 0);
+        Assert.assertTrue("course <= 360", position.getCourse() <= 360);
+
     }
 
     private void verifyDecodedPosition(Object decodedObject) {
