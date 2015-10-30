@@ -18,15 +18,14 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -37,29 +36,30 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final short MSG_LOGIN = 0x1001;
-    private static final short MSG_LOGIN_RESPONSE = (short) 0x9001;
-    private static final short MSG_LOGOUT = 0x1002;
-    private static final short MSG_HEARTBEAT = 0x1003;
-    private static final short MSG_HEARTBEAT_RESPONSE = (short) 0x9003;
-    private static final short MSG_GPS = 0x4001;
-    private static final short MSG_ALARM = 0x4007;
-    private static final short MSG_GPS_SLEEP = 0x4009;
-    private static final short MSG_AGPS_REQUEST = 0x5101;
-    private static final short MSG_CURRENT_LOCATION = (short) 0xB001;
+    private static final short MSG_SC_LOGIN = 0x1001;
+    private static final short MSG_SC_LOGIN_RESPONSE = (short) 0x9001;
+    private static final short MSG_SC_LOGOUT = 0x1002;
+    private static final short MSG_SC_HEARTBEAT = 0x1003;
+    private static final short MSG_SC_HEARTBEAT_RESPONSE = (short) 0x9003;
+    private static final short MSG_SC_GPS = 0x4001;
+    private static final short MSG_SC_ALARM = 0x4007;
+    private static final short MSG_SC_GPS_SLEEP = 0x4009;
+    private static final short MSG_SC_AGPS_REQUEST = 0x5101;
+    private static final short MSG_SC_CURRENT_LOCATION = (short) 0xB001;
 
-    private static void readPosition(ChannelBuffer buf, Position position) {
+    private static final short MSG_CC_LOGIN = 0x4001;
+    private static final short MSG_CC_LOGIN_RESPONSE = (short) 0x8001;
 
-        // Date and time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-        time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-        time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-        time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-        time.set(Calendar.MINUTE, buf.readUnsignedByte());
-        time.set(Calendar.SECOND, buf.readUnsignedByte());
-        position.setTime(time.getTime());
+    private Position readPosition(ChannelBuffer buf) {
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(getDeviceId());
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+        position.setTime(dateBuilder.getDate());
 
         double lat = buf.readUnsignedInt() / 3600000.0;
         double lon = buf.readUnsignedInt() / 3600000.0;
@@ -77,12 +77,36 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(lon);
         position.setValid((flags & 0x0C) > 0);
         position.set(Event.KEY_SATELLITES, flags >> 4);
+
+        return position;
+    }
+
+    private void sendResponse(
+            Channel channel, SocketAddress remoteAddress,
+            int version, ChannelBuffer id, short type, ChannelBuffer content) {
+
+        if (channel != null) {
+            int length = 2 + 2 + 1 + id.readableBytes() + 2 + 2 + 2;
+            if (content != null) {
+                length += content.readableBytes();
+            }
+
+            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, length);
+            response.writeByte('@'); response.writeByte('@');
+            response.writeShort(length);
+            response.writeByte(version);
+            response.writeBytes(id);
+            response.writeShort(ChannelBuffers.swapShort(type));
+            response.writeShort(
+                    Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
+            response.writeByte(0x0D); response.writeByte(0x0A);
+            channel.write(response, remoteAddress);
+        }
     }
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -92,98 +116,89 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer id = buf.readBytes(20);
         int type = ChannelBuffers.swapShort(buf.readShort());
 
-        if (type == MSG_HEARTBEAT) {
+        if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
+            return null;
+        }
 
-            if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 31);
-                response.writeByte(0x40); response.writeByte(0x40);
-                response.writeShort(response.capacity());
-                response.writeByte(version);
-                response.writeBytes(id);
-                response.writeShort(ChannelBuffers.swapShort(MSG_HEARTBEAT_RESPONSE));
-                response.writeShort(
-                        Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
-                response.writeByte(0x0D); response.writeByte(0x0A);
-                channel.write(response, remoteAddress);
+        if (version == 4) {
+
+            if (type == MSG_SC_HEARTBEAT) {
+
+                sendResponse(channel, remoteAddress, version, id, MSG_SC_HEARTBEAT_RESPONSE, null);
+
+            } else if (type == MSG_SC_LOGIN || type == MSG_SC_LOGOUT || type == MSG_SC_GPS
+                    || type == MSG_SC_ALARM || type == MSG_SC_CURRENT_LOCATION) {
+
+                if (type == MSG_SC_LOGIN) {
+                    ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 10);
+                    response.writeInt(0xFFFFFFFF);
+                    response.writeShort(0);
+                    response.writeInt((int) (System.currentTimeMillis() / 1000));
+                    sendResponse(channel, remoteAddress, version, id, MSG_SC_LOGIN_RESPONSE, response);
+                }
+
+                if (type == MSG_SC_GPS) {
+                    buf.readUnsignedByte(); // historical
+                } else if (type == MSG_SC_ALARM) {
+                    buf.readUnsignedInt(); // alarm
+                } else if (type == MSG_SC_CURRENT_LOCATION) {
+                    buf.readUnsignedShort();
+                }
+
+                buf.readUnsignedInt(); // ACC ON time
+                buf.readUnsignedInt(); // UTC time
+                long odometer = buf.readUnsignedInt();
+                buf.readUnsignedInt(); // trip odometer
+                buf.readUnsignedInt(); // total fuel consumption
+                buf.readUnsignedShort(); // current fuel consumption
+                long status = buf.readUnsignedInt();
+                buf.skipBytes(8);
+
+                int count = buf.readUnsignedByte();
+
+                List<Position> positions = new LinkedList<>();
+
+                for (int i = 0; i < count; i++) {
+                    Position position = readPosition(buf);
+                    position.set(Event.KEY_ODOMETER, odometer);
+                    position.set(Event.KEY_STATUS, status);
+                    positions.add(position);
+                }
+
+                if (!positions.isEmpty()) {
+                    return positions;
+                }
+
+            } else if (type == MSG_SC_GPS_SLEEP || type == MSG_SC_AGPS_REQUEST) {
+
+                return readPosition(buf);
+
             }
 
-        } else if (type == MSG_LOGIN || type == MSG_LOGOUT || type == MSG_GPS
-                || type == MSG_ALARM || type == MSG_CURRENT_LOCATION) {
+        } else {
 
-            if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
+            if (type == MSG_CC_LOGIN) {
 
-                return null;
+                sendResponse(channel, remoteAddress, version, id, MSG_CC_LOGIN_RESPONSE, null);
 
-            } else if (type == MSG_LOGIN && channel != null) {
+                Position position = readPosition(buf);
 
-                ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 41);
-                response.writeByte(0x40); response.writeByte(0x40);
-                response.writeShort(response.capacity());
-                response.writeByte(version);
-                response.writeBytes(id);
-                response.writeShort(ChannelBuffers.swapShort(MSG_LOGIN_RESPONSE));
-                response.writeInt(0xFFFFFFFF);
-                response.writeShort(0);
-                response.writeInt((int) (System.currentTimeMillis() / 1000));
-                response.writeShort(
-                        Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
-                response.writeByte(0x0D); response.writeByte(0x0A);
-                channel.write(response, remoteAddress);
+                position.set(Event.KEY_STATUS, buf.readUnsignedInt());
+                position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
+                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+
+                buf.readUnsignedByte(); // geo-fencing id
+                buf.readUnsignedByte(); // geo-fencing flags
+                buf.readUnsignedByte(); // additional flags
+
+                // GSM_CELL_CODE
+                // STR_Z - firmware version
+                // STR_Z - hardware version
+
+                return position;
 
             }
 
-            if (type == MSG_GPS) {
-                buf.readUnsignedByte(); // historical
-            } else if (type == MSG_ALARM) {
-                buf.readUnsignedInt(); // alarm
-            } else if (type == MSG_CURRENT_LOCATION) {
-                buf.readUnsignedShort();
-            }
-
-            buf.readUnsignedInt(); // ACC ON time
-            buf.readUnsignedInt(); // UTC time
-            long odometer = buf.readUnsignedInt();
-            buf.readUnsignedInt(); // trip odometer
-            buf.readUnsignedInt(); // total fuel consumption
-            buf.readUnsignedShort(); // current fuel consumption
-            long status = buf.readUnsignedInt();
-            buf.skipBytes(8);
-
-            int count = buf.readUnsignedByte();
-
-            List<Position> positions = new LinkedList<>();
-
-            for (int i = 0; i < count; i++) {
-
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
-                position.setDeviceId(getDeviceId());
-
-                readPosition(buf, position);
-
-                position.set(Event.KEY_ODOMETER, odometer);
-                position.set(Event.KEY_STATUS, status);
-
-                positions.add(position);
-            }
-
-            if (!positions.isEmpty()) {
-                return positions;
-            }
-
-        } else if (type == MSG_GPS_SLEEP || type == MSG_AGPS_REQUEST) {
-
-            if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
-                return null;
-            }
-
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
-
-            readPosition(buf, position);
-
-            return position;
         }
 
         return null;
