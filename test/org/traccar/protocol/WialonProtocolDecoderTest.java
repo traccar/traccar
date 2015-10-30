@@ -10,15 +10,19 @@ public class WialonProtocolDecoderTest extends ProtocolDecoderTest {
 
         WialonProtocolDecoder decoder = new WialonProtocolDecoder(new WialonProtocol());
 
-        verifyNothing(decoder, text( "#L#123456789012345;test"));
+        verifyNothing(decoder, text(
+                "#L#123456789012345;test"));
         
-        verifyNothing(decoder, text( "#L#2002;NA"));
+        verifyNothing(decoder, text(
+                "#L#2002;NA"));
         
-        verifyNothing(decoder, text( "#P#"));
+        verifyNothing(decoder, text(
+                "#P#"));
 
         verifyPosition(decoder, text(
-                "#SD#270413;205601;5544.6025;N;03739.6834;E;1;2;3;4"));
-        
+                "#SD#270413;205601;5544.6025;N;03739.6834;E;1;2;3;4"),
+                position("2013-04-27 20:56:01.000", true, 55.74338, 37.66139));
+
         verifyPosition(decoder, text(
                 "#SD#021214;065947;2237.7552;N;11404.8851;E;0.000;;170.9;5"));
 
