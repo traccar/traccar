@@ -28,7 +28,7 @@ import java.util.List;
 public class WatchProtocol extends BaseProtocol {
 
     public WatchProtocol() {
-        super("tk102");
+        super("watch");
     }
 
     @Override
