@@ -41,7 +41,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([AV])")                // validity
             .number("(dd)(dd.dddd)([NS])")       // latitude
             .number("(ddd)(dd.dddd)([EW])")      // longitude
-            .number("(ddd.ddd)")                 // Speed
+            .number("(ddd.ddd)")                 // speed
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .number("d+")
             .any()
