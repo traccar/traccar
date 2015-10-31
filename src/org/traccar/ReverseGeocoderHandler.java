@@ -62,6 +62,8 @@ public class ReverseGeocoderHandler implements ChannelUpstreamHandler {
                         Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
                     }
                 });
+            } else {
+                Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
             }
         } else {
             Channels.fireMessageReceived(ctx, message, e.getRemoteAddress());
