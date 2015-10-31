@@ -24,6 +24,7 @@ Ext.define('Traccar.view.Login', {
 
     controller: 'login',
 
+    title: Strings.loginTitle,
     closable: false,
     modal: false,
 
