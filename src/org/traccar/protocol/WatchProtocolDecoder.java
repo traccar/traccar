@@ -53,7 +53,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.d+),")                  // speed
             .number("(d+.d+),")                  // course
-            .number("(d+),")                     // altitude
+            .number("(d+.?d*),")                 // altitude
             .number("(d+),")                     // satellites
             .number("(d+),")                     // gsm
             .number("(d+),")                     // battery
