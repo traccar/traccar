@@ -13,7 +13,7 @@ public class CastelProtocolDecoderTest extends ProtocolDecoderTest {
 
         CastelProtocolDecoder decoder = new CastelProtocolDecoder(new CastelProtocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "404044000c3631313135303030303935360000000000000000420600011e0a0f0b1312864fcd08c07a13030100640acf000004000a000000000000007ba083a66ad80d0a"));
 
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,

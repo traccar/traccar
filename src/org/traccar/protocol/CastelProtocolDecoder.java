@@ -183,26 +183,26 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
                 sendResponse(channel, remoteAddress, version, id, MSG_CC_HEARTBEAT_RESPONSE, null);
 
-                if (buf.readUnsignedByte() == 0x01) {
-                    int count = buf.readUnsignedByte();
-                    List<Position> positions = new LinkedList<>();
+                buf.readUnsignedByte(); // 0x01 for history
+                int count = buf.readUnsignedByte();
 
-                    for (int i = 0; i < count; i++) {
-                        Position position = readPosition(buf);
+                List<Position> positions = new LinkedList<>();
 
-                        position.set(Event.KEY_STATUS, buf.readUnsignedInt());
-                        position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
-                        position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                for (int i = 0; i < count; i++) {
+                    Position position = readPosition(buf);
 
-                        buf.readUnsignedByte(); // geo-fencing id
-                        buf.readUnsignedByte(); // geo-fencing flags
-                        buf.readUnsignedByte(); // additional flags
+                    position.set(Event.KEY_STATUS, buf.readUnsignedInt());
+                    position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
+                    position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
 
-                        position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                        position.set(Event.KEY_CELL, buf.readUnsignedShort());
+                    buf.readUnsignedByte(); // geo-fencing id
+                    buf.readUnsignedByte(); // geo-fencing flags
+                    buf.readUnsignedByte(); // additional flags
 
-                        positions.add(position);
-                    }
+                    position.set(Event.KEY_LAC, buf.readUnsignedShort());
+                    position.set(Event.KEY_CELL, buf.readUnsignedShort());
+
+                    positions.add(position);
 
                     return positions;
                 }
