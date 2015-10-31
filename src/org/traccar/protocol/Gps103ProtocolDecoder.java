@@ -69,8 +69,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
@@ -121,15 +120,15 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         int localHours = parser.nextInt();
         int localMinutes = parser.nextInt();
 
-        int utcHours = parser.nextInt();
-        int utcMinutes = parser.nextInt();
+        String utcHours = parser.next();
+        String utcMinutes = parser.next();
 
         dateBuilder.setTime(localHours, localMinutes, parser.nextInt(), parser.nextInt());
 
         // Timezone calculation
-        if (utcHours != 0 && utcMinutes != 0) {
-            int deltaMinutes = (localHours - utcHours) * 60;
-            deltaMinutes += localMinutes - utcMinutes;
+        if (utcHours != null && utcMinutes != null) {
+            int deltaMinutes = (localHours - Integer.valueOf(utcHours)) * 60;
+            deltaMinutes += localMinutes - Integer.valueOf(utcMinutes);
             if (deltaMinutes <= -12 * 60) {
                 deltaMinutes += 24 * 60;
             } else if (deltaMinutes > 12 * 60) {
