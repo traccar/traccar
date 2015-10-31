@@ -99,8 +99,7 @@ Ext.define('Traccar.view.MapController', {
 
     getMarkerStyle: function (radius, color, rotation, text) {
         return new ol.style.Style({
-            image: new ol.style.RegularShape({
-                points: 3,
+            image: new ol.style.Arrow({
                 radius: radius,
                 fill: new ol.style.Fill({
                     color: color
