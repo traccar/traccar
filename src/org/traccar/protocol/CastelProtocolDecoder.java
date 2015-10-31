@@ -49,6 +49,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private static final short MSG_CC_LOGIN = 0x4001;
     private static final short MSG_CC_LOGIN_RESPONSE = (short) 0x8001;
+    private static final short MSG_CC_HEARTBEAT = 0x4206;
+    private static final short MSG_CC_HEARTBEAT_RESPONSE = (short) 0x8206;
 
     private Position readPosition(ChannelBuffer buf) {
 
@@ -177,7 +179,35 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            if (type == MSG_CC_LOGIN) {
+            if (type == MSG_CC_HEARTBEAT) {
+
+                sendResponse(channel, remoteAddress, version, id, MSG_CC_HEARTBEAT_RESPONSE, null);
+
+                if (buf.readUnsignedByte() == 0x01) {
+                    int count = buf.readUnsignedByte();
+                    List<Position> positions = new LinkedList<>();
+
+                    for (int i = 0; i < count; i++) {
+                        Position position = readPosition(buf);
+
+                        position.set(Event.KEY_STATUS, buf.readUnsignedInt());
+                        position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
+                        position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+
+                        buf.readUnsignedByte(); // geo-fencing id
+                        buf.readUnsignedByte(); // geo-fencing flags
+                        buf.readUnsignedByte(); // additional flags
+
+                        position.set(Event.KEY_LAC, buf.readUnsignedShort());
+                        position.set(Event.KEY_CELL, buf.readUnsignedShort());
+
+                        positions.add(position);
+                    }
+
+                    return positions;
+                }
+
+            } else if (type == MSG_CC_LOGIN) {
 
                 sendResponse(channel, remoteAddress, version, id, MSG_CC_LOGIN_RESPONSE, null);
 
