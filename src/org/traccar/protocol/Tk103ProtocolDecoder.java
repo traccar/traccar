@@ -38,7 +38,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)(,)?")                  // device id
             .expression(".{4},?")                // command
             .number("d*")                        // imei?
-            .number("(dd)(dd)(dd),?")            // date (yymmdd)
+            .number("(dd)(dd)(dd),?")            // date
             .expression("([AV]),?")              // validity
             .number("(dd)(dd.d+)")               // latitude
             .expression("([NS]),?")
@@ -51,6 +51,17 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:L(x+))?")                // odometer
             .any()
             .text(")").optional()
+            .compile();
+
+    private static final Pattern PATTERN_BATTERY = new PatternBuilder()
+            .number("(d+),")                     // device id
+            .text("ZC20,")
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time
+            .number("d+,")                       // battery level
+            .number("(d+),")                     // battery voltage
+            .number("(d+),")                     // power voltage
+            .number("d+")                        // installed
             .compile();
 
     @Override
@@ -77,7 +88,36 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Parser parser = new Parser(PATTERN, sentence);
+        Parser parser = new Parser(PATTERN_BATTERY, sentence);
+        if (parser.matches()) {
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+
+            if (!identify(parser.next(), channel)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+            getLastLocation(position, dateBuilder.getDate());
+
+            int battery = parser.nextInt();
+            if (battery != 65535) {
+                position.set(Event.KEY_BATTERY, battery);
+            }
+
+            int power = parser.nextInt();
+            if (power != 65535) {
+                position.set(Event.KEY_POWER, battery);
+            }
+
+            return position;
+        }
+
+        parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
