@@ -335,5 +335,6 @@
     <entry key='blackkite.port'>5091</entry>
     <entry key='adm.port'>5092</entry>
     <entry key='watch.port'>5093</entry>
+    <entry key='t800x.port'>5094</entry>
 
 </properties>

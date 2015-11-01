@@ -17,9 +17,6 @@ package org.traccar.protocol;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
@@ -36,7 +33,7 @@ public class T800xProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("objectDecoder", new T800XProtocolDecoder(T800xProtocol.this));
+                pipeline.addLast("objectDecoder", new T800xProtocolDecoder(T800xProtocol.this));
             }
         });
     }

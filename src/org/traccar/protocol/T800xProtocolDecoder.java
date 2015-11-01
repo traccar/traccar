@@ -15,9 +15,9 @@ import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class T800XProtocolDecoder extends BaseProtocolDecoder {
+public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
-    public T800XProtocolDecoder(T800xProtocol protocol) {
+    public T800xProtocolDecoder(T800xProtocol protocol) {
         super(protocol);
     }
 

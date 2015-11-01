@@ -5,15 +5,12 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
 
-/**
- * Created by Ankit on 21-10-2015.
- */
-public class T800XProtocolDecoderTest extends TestCase {
+public class T800xProtocolDecoderTest extends TestCase {
 
     @Test
     public void testDecode() throws Exception {
 
-        /*T800XProtocolDecoder decoder = new T800XProtocolDecoder(new TestDataManager(), null, null);
+        /*T800xProtocolDecoder decoder = new T800xProtocolDecoder(new TestDataManager(), null, null);
 
         assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
                 "232301001500020357367031063979150208625010"))));
