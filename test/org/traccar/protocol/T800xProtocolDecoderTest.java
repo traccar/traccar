@@ -1,28 +1,30 @@
 package org.traccar.protocol;
 
-import junit.framework.TestCase;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.ProtocolDecoderTest;
 
-public class T800xProtocolDecoderTest extends TestCase {
+public class T800xProtocolDecoderTest extends ProtocolDecoderTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        /*T800xProtocolDecoder decoder = new T800xProtocolDecoder(new TestDataManager(), null, null);
+        T800xProtocolDecoder decoder = new T800xProtocolDecoder(new T800xProtocol());
 
-        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-                "232301001500020357367031063979150208625010"))));
+        verifyNothing(decoder, binary(
+                "232301001500020357367031063979150208625010"));
 
-        assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-                "6767030004001A0001"))));*/
+        verifyNothing(decoder, binary(
+                "232303000f00000357367031063979"));
 
-       /* assertNull(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-                "6767070088001050E2281400FFFFFFFF02334455660333445566043344556605AA00000007334455660A334455660B334455660C4E2000000DAA0000000E334455660F3344556610AAAA000011334455661C334455661F334455662133445566423344556646334455664D334455665C334455665E33445566880000000089000000008A000000008B00000000"))));
-*/
-       /* verify(decoder.decode(null, null, ChannelBuffers.wrappedBuffer(ChannelBufferTools.convertHexString(
-                "676702001b03c5538086df0190c1790b3482df0f0157020800013beb00342401"))));
-*/
+        verifyPosition(decoder, binary(
+                "232304004200030357367031063979003c03842307d00000c80000050100008000008900890100000017b100151022121648b8ef0c4422969342cec5944100000110"));
+
+        verifyPosition(decoder, binary(
+                "232302004200150357367031063979003c03842307d000004a0000050100004001009500940000000285ab001510281350477f710d4452819342d1ba944101160038"));
+
+        verifyAttributes(decoder, binary(
+                "232302004200000357367031063979003c03842307d000008000000501000000010094009400000002a0b90015102814590694015a00620cf698620cf49e620cf498"));
+
     }
+
 }
