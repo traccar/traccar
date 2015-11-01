@@ -8,40 +8,21 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.database.DataManager;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Log;
-import org.traccar.model.ExtendedInfoFormatter;
-import org.traccar.model.MixPacket;
 import org.traccar.model.Position;
-import org.traccar.model.Status;
 
+import javax.xml.bind.DatatypeConverter;
+import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * Created by Ankit on 21-10-2015.
- */
-
-
 public class T800XProtocolDecoder extends BaseProtocolDecoder {
 
-    public T800XProtocolDecoder(DataManager dataManager, String protocol, Properties properties) {
-        super(dataManager, protocol, properties);
+    public T800XProtocolDecoder(T800xProtocol protocol) {
+        super(protocol);
     }
 
-    private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
     SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
     SimpleDateFormat dateFormatLocal = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
-
-    private String readImei(ChannelBuffer buf) {
-        int b = buf.readUnsignedByte();
-        StringBuilder imei = new StringBuilder();
-        imei.append(b & 0x0F);
-        for (int i = 0; i < 7; i++) {
-            b = buf.readUnsignedByte();
-            imei.append((b & 0xF0) >> 4);
-            imei.append(b & 0x0F);
-        }
-        return imei.toString();
-    }
 
     private static final int MSG_LOGIN = 0x01;
     private static final int MSG_GPS = 0x02;
@@ -66,23 +47,19 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(length); // length
             response.writeShort(0x0001);//imei
             //IMEI
-            response.writeBytes(ChannelBufferTools.convertHexString("0" + imei));
+            response.writeBytes(DatatypeConverter.parseHexBinary("0" + imei));
             channel.write(response);
         }
     }
 
-
-
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, Object msg)
-            throws Exception {
-
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         List<Position> positions=new ArrayList<Position>();
-        List<Status> statusList=new ArrayList<Status>();
+        //List<Status> statusList=new ArrayList<Status>();
         int i=0;
          while (buf.readable()){
              i++;
@@ -90,21 +67,18 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
              int type = buf.readUnsignedByte(); // type
              buf.readShort(); // length
              int index = buf.readUnsignedShort();   // index
-             String imei = ChannelBufferTools.readHexString(buf, 16).substring(1); // imei
+             String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1); // imei
 
              if (type == MSG_LOGIN) {
-                 try {
-                     deviceId = getDataManager().getDeviceByImei(imei).getId();
+                 if (identify(imei, channel)) {
                      sendLoginResponse(channel, type, index, imei);  // send login response
-                     return null;
-                 } catch (Exception error) {
-                     Log.warning("Unknown device - " + imei);
                  }
+                 return null;
              } else if (deviceId != null &&
                      (type == MSG_GPS || type == MSG_ALARM)) {
 
-                 ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
-                 extendedInfo.set("index", index);
+                 //ExtendedInfoFormatter extendedInfo = new ExtendedInfoFormatter(getProtocol());
+                 //extendedInfo.set("index", index);
 
                  //ACC ON Interval TODO
                  buf.skipBytes(2);
@@ -141,17 +115,17 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
 
                  // Digital I/O Status
                  String binaryDigitalIO = getBits(buf.readUnsignedByte());
-                 extendedInfo.set("acc", binaryDigitalIO.charAt(1));
-                 extendedInfo.set("ac", binaryDigitalIO.charAt(2));
+                 //extendedInfo.set("acc", binaryDigitalIO.charAt(1));
+                 //extendedInfo.set("ac", binaryDigitalIO.charAt(2));
                  buf.skipBytes(1);
 
                  // 2 Analog Input
                  buf.skipBytes(4);
 
                  // Alarm Data
-                 String alarmData = ChannelBufferTools.readHexString(buf, 2);
+                 String alarmData = ChannelBuffers.hexDump(buf.readBytes(1));
                  String statusType=getStatusType(alarmData);
-                 extendedInfo.set(statusType,true);
+                 //extendedInfo.set(statusType,true);
                  if(type == MSG_ALARM)
                  {
                      Log.debug("ALARM : "+statusType);
@@ -170,18 +144,18 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
 
 
                  // Inner Battery Voltage
-                 double batteryVoltage = Double.parseDouble(ChannelBufferTools.readHexString(buf, 2));
-                 extendedInfo.set("power", getBatteryPerc(batteryVoltage));
+                 double batteryVoltage = Double.parseDouble(ChannelBuffers.hexDump(buf.readBytes(1)));
+                 //extendedInfo.set("power", getBatteryPerc(batteryVoltage));
 
                  // Time & Date Calculation
                  Calendar time = Calendar.getInstance();
                  time.clear();
-                 time.set(Calendar.YEAR, 2000 + Integer.parseInt(ChannelBufferTools.readHexString(buf, 2)));
-                 time.set(Calendar.MONTH, (Integer.parseInt(ChannelBufferTools.readHexString(buf, 2)) - 1));
-                 time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(ChannelBufferTools.readHexString(buf, 2)));
-                 time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(ChannelBufferTools.readHexString(buf, 2)));
-                 time.set(Calendar.MINUTE, Integer.parseInt(ChannelBufferTools.readHexString(buf, 2)));
-                 time.set(Calendar.SECOND, Integer.parseInt(ChannelBufferTools.readHexString(buf, 2)));
+                 time.set(Calendar.YEAR, 2000 + Integer.parseInt(ChannelBuffers.hexDump(buf.readBytes(1))));
+                 time.set(Calendar.MONTH, (Integer.parseInt(ChannelBuffers.hexDump(buf.readBytes(1))) - 1));
+                 time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(ChannelBuffers.hexDump(buf.readBytes(1))));
+                 time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(ChannelBuffers.hexDump(buf.readBytes(1))));
+                 time.set(Calendar.MINUTE, Integer.parseInt(ChannelBuffers.hexDump(buf.readBytes(1))));
+                 time.set(Calendar.SECOND, Integer.parseInt(ChannelBuffers.hexDump(buf.readBytes(1))));
 
                  if (locationType.charAt(1) == '1') {
                      Log.debug("GPS DATA");
@@ -200,11 +174,11 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                      position.setLatitude((double) bytes2Float(latitude, 0));
 
                      // Read Speed
-                     String str_speed = ChannelBufferTools.readHexString(buf, 4);
+                     String str_speed = ChannelBuffers.hexDump(buf.readBytes(2));
                      String result = str_speed.substring(0, 3) + "." + str_speed.substring(3);
                      position.setSpeed(Double.parseDouble(result) * 0.539957);
 
-                     position.setExtendedInfo(extendedInfo.toString());
+                     //position.setExtendedInfo(extendedInfo.toString());
                      positions.add(position);
 
                      buf.skipBytes(2);
@@ -213,30 +187,30 @@ public class T800XProtocolDecoder extends BaseProtocolDecoder {
                      Log.debug("LBS DATA");
                      if(type == MSG_ALARM)
                      {
-                         Status status = new Status();
+                         /*Status status = new Status();
                          status.setDate(time.getTime());
                          status.setDeviceid(deviceId);
                          status.setVoltage(getBatteryPerc(batteryVoltage));
                          status.setStatusType(statusType);
-                         statusList.add(status);
+                         statusList.add(status);*/
                      }
                      buf.skipBytes(16);
                  }
              } else if (deviceId != null &&
                      (type == MSG_HEARTBEAT)) {
                  dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
-                 Status status = new Status();
+                 /*Status status = new Status();
                  status.setDate(dateFormatLocal.parse(dateFormatGmt.format(new Date())));
                  status.setDeviceid(deviceId);
-                 statusList.add(status);
+                 statusList.add(status);*/
                  sendLoginResponse(channel, type, index, imei);
              }
          }
 
-        MixPacket mixPacket=new MixPacket();
+        /*MixPacket mixPacket=new MixPacket();
         mixPacket.setPositions(positions);
-        mixPacket.setStatus(statusList);
-        return mixPacket;
+        mixPacket.setStatus(statusList);*/
+        return positions;
     }
 
     private void sendAlarmPacketAfter16Sec(final Channel channel,final int type,final int index,final String alarmData) {
