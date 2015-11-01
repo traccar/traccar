@@ -127,8 +127,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         // Timezone calculation
         if (utcHours != null && utcMinutes != null) {
-            int deltaMinutes = (localHours - Integer.valueOf(utcHours)) * 60;
-            deltaMinutes += localMinutes - Integer.valueOf(utcMinutes);
+            int deltaMinutes = (localHours - Integer.parseInt(utcHours)) * 60;
+            deltaMinutes += localMinutes - Integer.parseInt(utcMinutes);
             if (deltaMinutes <= -12 * 60) {
                 deltaMinutes += 24 * 60;
             } else if (deltaMinutes > 12 * 60) {

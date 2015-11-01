@@ -203,9 +203,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Event.KEY_CELL, buf.readUnsignedShort());
 
                     positions.add(position);
-
-                    return positions;
                 }
+
+                return positions;
 
             } else if (type == MSG_CC_LOGIN) {
 
