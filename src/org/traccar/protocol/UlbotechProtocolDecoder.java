@@ -197,7 +197,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_VIN:
-                    position.set("vin", buf.readBytes(length).toString(Charset.defaultCharset()));
+                    position.set(Event.KEY_VIN, buf.readBytes(length).toString(Charset.defaultCharset()));
                     break;
 
                 case DATA_RFID:

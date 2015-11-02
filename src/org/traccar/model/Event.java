@@ -50,6 +50,7 @@ public abstract class Event extends Extensible {
     public static final String KEY_DOOR = "door";
     public static final String KEY_RPM = "rpm";
     public static final String KEY_HOURS = "hours";
+    public static final String KEY_VIN = "vin";
 
     public static final String KEY_OBD_SPEED = "obd-speed";
     public static final String KEY_OBD_ODOMETER = "obd-odometer";
