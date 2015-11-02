@@ -32,17 +32,17 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(dd)(dd)(dd).(ddd),") // Time
-            .number("(dd)(dd.dddd)([NS]),") // Latitude (DDMM.MMMM)
-            .number("(ddd)(dd.dddd)([EW]),") // Longitude (DDDMM.MMMM)
-            .number("(d+.d),")                    // HDOP
-            .number("(-?d+.?d*),")                // Altitude
-            .number("(d),")                           // Fix Type
-            .number("(d+.d+),")                   // Course
-            .number("d+.d+,")                   // Speed (kph)
-            .number("(d+.d+),")                   // Speed (knots)
-            .number("(dd)(dd)(dd),")        // Date
-            .number("(d+)")                           // Satellites
+            .number("(dd)(dd)(dd).(ddd),")       // time
+            .number("(dd)(dd.dddd)([NS]),")      // latitude
+            .number("(ddd)(dd.dddd)([EW]),")     // longitude
+            .number("(d+.d),")                   // hdop
+            .number("(-?d+.?d*),")               // altitude
+            .number("(d),")                      // fix type
+            .number("(d+.d+),")                  // course
+            .number("d+.d+,")                    // speed (kph)
+            .number("(d+.d+),")                  // speed (knots)
+            .number("(dd)(dd)(dd),")             // date
+            .number("(d+)")                      // satellites
             .compile();
 
     private void sendResponse(Channel channel) {
