@@ -15,14 +15,18 @@
  */
 package org.traccar;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import org.traccar.helper.Checksum;
+import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.MiscFormatter;
 import org.traccar.model.Position;
 
 public class WebDataHandler extends BaseDataHandler {
@@ -73,14 +77,41 @@ public class WebDataHandler extends BaseDataHandler {
 
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
 
+        String attributes = MiscFormatter.toJsonString(position.getAttributes());
+
         String request = url
                 .replace("{uniqueId}", device.getUniqueId())
-                .replace("{deviceId}", String.valueOf(device.getId()))
+                .replace("{deviceId}", String.valueOf(position.getDeviceId()))
+                .replace("{protocol}", String.valueOf(position.getProtocol()))
+                .replace("{deviceTime}", String.valueOf(position.getDeviceTime().getTime()))
                 .replace("{fixTime}", String.valueOf(position.getFixTime().getTime()))
-                .replace("{latitude}", String.valueOf(position.getLatitude()))
+                .replace("{valid}", String.valueOf(position.getLatitude()))
+                .replace("{latitude}", String.valueOf(position.getValid()))
                 .replace("{longitude}", String.valueOf(position.getLongitude()))
-                .replace("{gprmc}", formatSentence(position))
+                .replace("{altitude}", String.valueOf(position.getAltitude()))
+                .replace("{speed}", String.valueOf(position.getSpeed()))
+                .replace("{course}", String.valueOf(position.getCourse()))
                 .replace("{statusCode}", calculateStatus(position));
+
+        if (position.getAddress() != null) {
+            try {
+                request = request.replace("{address}", URLEncoder.encode(position.getAddress(), "UTF-8"));
+            } catch (UnsupportedEncodingException error) {
+                Log.warning(error);
+            }
+        }
+
+        if (request.contains("{attributes}")) {
+            try {
+                request = request.replace("{attributes}", URLEncoder.encode(attributes, "UTF-8"));
+            } catch (UnsupportedEncodingException error) {
+                Log.warning(error);
+            }
+        }
+
+        if (request.contains("{gprmc}")) {
+            request = request.replace("{gprmc}", formatSentence(position));
+        }
 
         Context.getAsyncHttpClient().prepareGet(request).execute();
 
