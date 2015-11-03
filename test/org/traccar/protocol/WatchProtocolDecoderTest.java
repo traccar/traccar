@@ -16,7 +16,7 @@ public class WatchProtocolDecoderTest extends ProtocolDecoderTest {
         verifyNothing(decoder, text(
                 "[SG*8800000015*0002*LK"));
 
-        verifyNothing(decoder, text(
+        verifyAttributes(decoder, text(
                 "[3G*4700186508*000B*LK,0,10,100"));
 
         verifyPosition(decoder, text(
