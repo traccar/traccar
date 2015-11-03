@@ -1,6 +1,6 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
- *                       Luis Parada (luis.parada@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -32,120 +32,74 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            ".*" +
-            "\\$[A-Z]{3}\\d?," +                // Type
-            "(\\d+)," +                         // Id
-            "(\\d{2})(\\d{2})(\\d{2})\\.(\\d{3})," + // Time (HHMMSS.SSS)
-            "([AV])," +                         // Validity
-            "(\\d{2})(\\d{2}\\.\\d{4})," +      // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d{4})," +      // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+\\.\\d+)?," +                 // Speed
-            "(\\d+\\.\\d+)?," +                 // Course
-            "(\\d{2})(\\d{2})(\\d{2}),,," +     // Date
-            "./" +
-            "([01])+," +                        // Input
-            "([01])+/" +                        // Output
-            "([^/]+)?/" +                       // ADC
-            "(\\d+)" +                          // Odometer
-            "(?:/([^/]+)?/" +                   // RFID
-            "(\\p{XDigit}{3}))?" +              // State
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .any().text("$")
+            .expression("[A-Z]{3}")
+            .number("d?,")                       // type
+            .number("(d+),")                     // id
+            .number("(dd)(dd)(dd).(ddd),")       // time
+            .expression("([AV]),")               // validity
+            .number("(dd)(dd.dddd),")            // latitude
+            .expression("([NS]),")
+            .number("(ddd)(dd.dddd),")           // longitude
+            .expression("([EW]),")
+            .number("(d+.d+)?,")                 // speed
+            .number("(d+.d+)?,")                 // course
+            .number("(dd)(dd)(dd),,,")           // date
+            .expression("./")
+            .expression("([01])+,")              // input
+            .expression("([01])+/")              // output
+            .expression("([^/]+)?/")             // adc
+            .number("(d+)")                      // odometer
+            .expression("/([^/]+)?/")            // rfid
+            .number("(xxx)").optional(2)         // state
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MILLISECOND, Integer.parseInt(parser.group(index++)));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) {
-            latitude = -latitude;
-        }
-        position.setLatitude(latitude);
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) {
-            longitude = -longitude;
-        }
-        position.setLongitude(longitude);
+        position.set(Event.KEY_INPUT, parser.next());
+        position.set(Event.KEY_OUTPUT, parser.next());
 
-        // Speed
-        String speed = parser.group(index++);
-        if (speed != null) {
-            position.setSpeed(Double.parseDouble(speed));
-        }
-
-        // Course
-        String course = parser.group(index++);
-        if (course != null) {
-            position.setCourse(Double.parseDouble(course));
-        }
-
-        // Date
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
-
-        // IO
-        position.set(Event.KEY_INPUT, parser.group(index++));
-        position.set(Event.KEY_OUTPUT, parser.group(index++));
-
-        // ADC
-        String adc = parser.group(index++);
-        if (adc != null) {
-            String[] values = adc.split(",");
+        if (parser.hasNext()) {
+            String[] values = parser.next().split(",");
             for (int i = 0; i < values.length; i++) {
                 position.set(Event.PREFIX_ADC + (i + 1), Integer.parseInt(values[i], 16));
             }
         }
 
-        position.set(Event.KEY_ODOMETER, parser.group(index++));
+        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.KEY_RFID, parser.next());
 
-        // Driver
-        position.set(Event.KEY_RFID, parser.group(index++));
-
-        // Other
-        String status = parser.group(index++);
-        if (status != null) {
-            int value = Integer.parseInt(status, 16);
+        if (parser.hasNext()) {
+            int value = parser.nextInt(16);
             position.set(Event.KEY_BATTERY, value >> 8);
             position.set(Event.KEY_GSM, (value >> 4) & 0xf);
             position.set(Event.KEY_SATELLITES, value & 0xf);
@@ -153,4 +107,5 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
 }
