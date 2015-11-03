@@ -10,7 +10,8 @@ public class SuntechProtocolDecoderTest extends ProtocolDecoderTest {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new SuntechProtocol());
         
-        verifyNothing(decoder, text( "SA200ALV;317652"));
+        verifyNothing(decoder, text(
+                "SA200ALV;317652"));
         
         verifyPosition(decoder, text(
                 "ST910;Alert;123456;410;20141018;18:30:12;+37.478774;+126.889690;000.000;000.00;0;4.0;1;6002"));

@@ -10,7 +10,8 @@ public class MiniFinderProtocolDecoderTest extends ProtocolDecoderTest {
 
         MiniFinderProtocolDecoder decoder = new MiniFinderProtocolDecoder(new MiniFinderProtocol());
 
-        verifyNothing(decoder, text( "!1,860719020212696"));
+        verifyNothing(decoder, text(
+                "!1,860719020212696"));
 
         verifyPosition(decoder, text(
                 "!D,22/2/14,13:40:58,56.899601,14.811541,0,0,1,176.0,98,5,16,0"));

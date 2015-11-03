@@ -10,9 +10,11 @@ public class GotopProtocolDecoderTest extends ProtocolDecoderTest {
 
         GotopProtocolDecoder decoder = new GotopProtocolDecoder(new GotopProtocol());
 
-        verifyNothing(decoder, text( ""));
+        verifyNothing(decoder, text(
+                ""));
         
-        verifyNothing(decoder, text( "353327020412763,CMD-X"));
+        verifyNothing(decoder, text(
+                "353327020412763,CMD-X"));
 
         verifyPosition(decoder, text(
                 "013226009991924,CMD-T,A,DATE:130802,TIME:153721,LAT:25.9757433S,LOT:028.1087816E,Speed:000.0,X-X-X-X-81-26,000,65501-00A0-4B8E"));

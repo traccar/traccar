@@ -1,9 +1,7 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
 
 public class Gt02ProtocolDecoderTest extends ProtocolDecoderTest {
 
@@ -13,7 +11,8 @@ public class Gt02ProtocolDecoderTest extends ProtocolDecoderTest {
         Gt02ProtocolDecoder decoder = new Gt02ProtocolDecoder(new Gt02Protocol());
 
         verifyPosition(decoder, binary(
-                "68682500000123456789012345000110010101010101026B3F3E026B3F3E000000000000000000010D0A"));
+                "68682500000123456789012345000110010101010101026B3F3E026B3F3E000000000000000000010D0A"),
+                position("2001-01-01 01:01:01.000", true, -22.54610, -22.54610));
 
         verifyNothing(decoder, binary(
                 "6868110603035889905101276600001a0402292d0d0a"));

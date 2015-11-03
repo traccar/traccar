@@ -10,7 +10,8 @@ public class Tk102ProtocolDecoderTest extends ProtocolDecoderTest {
 
         Tk102ProtocolDecoder decoder = new Tk102ProtocolDecoder(new Tk102Protocol());
 
-        verifyNothing(decoder, text( ""));
+        verifyNothing(decoder, text(
+                ""));
 
         verifyNothing(decoder, text(
                 "[!0000000081r(353327023367238,TK102-W998_01_V1.1.001_130219,255,001,255,001,0,100,100,0,internet,0000,0000,0,0,255,0,4,1,11,00)"));
