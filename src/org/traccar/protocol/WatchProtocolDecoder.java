@@ -91,6 +91,18 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, manufacturer, id, "LK");
 
+            if (!content.isEmpty()) {
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(getDeviceId());
+
+                getLastLocation(position, null);
+
+                position.set(Event.KEY_BATTERY, content.split(",")[3]);
+
+                return position;
+            }
+
         } else if (type.equals("UD") || type.equals("UD2") || type.equals("AL")) {
 
             if (type.equals("AL")) {
