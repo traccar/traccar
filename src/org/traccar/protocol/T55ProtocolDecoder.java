@@ -82,6 +82,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private Position position = null;
+
     private Position decodeGprmc(String sentence, Channel channel) {
 
         if (channel != null) {
@@ -95,7 +97,10 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+
+        if (hasDeviceId()) {
+            position.setDeviceId(getDeviceId());
+        }
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -109,7 +114,12 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        return position;
+        if (hasDeviceId()) {
+            return position;
+        } else {
+            this.position = position; // save position
+            return null;
+        }
     }
 
     private Position decodeGpgga(String sentence) {
@@ -207,10 +217,15 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("IMEI")) {
             identify(sentence.substring(5, sentence.length()), channel);
         } else if (sentence.startsWith("$GPFID")) {
-            identify(sentence.substring(6, sentence.length()), channel);
+            if (identify(sentence.substring(6, sentence.length()), channel) && position != null) {
+                Position position = this.position;
+                position.setDeviceId(getDeviceId());
+                this.position = null;
+                return position;
+            }
         } else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
             identify(sentence, channel);
-        } else if (sentence.startsWith("$GPRMC") && hasDeviceId()) {
+        } else if (sentence.startsWith("$GPRMC")) {
             return decodeGprmc(sentence, channel);
         } else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
             return decodeGpgga(sentence);

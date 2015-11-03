@@ -10,13 +10,17 @@ public class T55ProtocolDecoderTest extends ProtocolDecoderTest {
 
         T55ProtocolDecoder decoder = new T55ProtocolDecoder(new T55Protocol());
 
-        verifyNothing(decoder, text( "$GPFID,ID123456ABC"));
+        verifyNothing(decoder, text(
+                "$GPFID,ID123456ABC"));
 
-        verifyNothing(decoder, text( "$PGID,359853000144328*0F"));
+        verifyNothing(decoder, text(
+                "$PGID,359853000144328*0F"));
 
-        verifyNothing(decoder, text( "$PCPTI,CradlePoint Test,184453,184453.0,6F*57"));
+        verifyNothing(decoder, text(
+                "$PCPTI,CradlePoint Test,184453,184453.0,6F*57"));
         
-        verifyNothing(decoder, text( "IMEI 351467108700000"));
+        verifyNothing(decoder, text(
+                "IMEI 351467108700000"));
         
         verifyPosition(decoder, text(
                 "$GPRMC,012006,A,4828.10,N,1353.52,E,0.00,0.00,180915,020.3,E*42"));
@@ -65,6 +69,21 @@ public class T55ProtocolDecoderTest extends ProtocolDecoderTest {
 
         verifyPosition(decoder, text(
                 "355096030432529$GPGGA,000000.00,3136.628,S,5213.990,W,1,7,2.13,250.00,M,-16.384,M,0.0,1"));
+
+    }
+
+    @Test
+    public void testMaxonDecode() throws Exception {
+
+        // Maxon devices can send NMEA before identification
+
+        T55ProtocolDecoder decoder = new T55ProtocolDecoder(new T55Protocol());
+
+        verifyNothing(decoder, text(
+                "$GPRMC,012006,A,4828.10,N,1353.52,E,0.00,0.00,180915,020.3,E*42"));
+
+        verifyPosition(decoder, text(
+                "$GPFID,ID123456ABC"));
 
     }
 
