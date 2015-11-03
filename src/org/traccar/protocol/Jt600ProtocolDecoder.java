@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,16 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -48,58 +49,49 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readByte(); // header
 
-        // Get device by identifier
         String id = String.valueOf(Long.parseLong(ChannelBuffers.hexDump(buf.readBytes(5))));
         if (!identify(id, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Protocol and type
         int version = ChannelBufferTools.readHexInteger(buf, 1);
         buf.readUnsignedByte(); // type
-
         buf.readBytes(2); // length
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
-        time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.HOUR_OF_DAY, ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
-        time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDay(ChannelBufferTools.readHexInteger(buf, 2))
+                .setMonth(ChannelBufferTools.readHexInteger(buf, 2))
+                .setYear(ChannelBufferTools.readHexInteger(buf, 2))
+                .setHour(ChannelBufferTools.readHexInteger(buf, 2))
+                .setMinute(ChannelBufferTools.readHexInteger(buf, 2))
+                .setSecond(ChannelBufferTools.readHexInteger(buf, 2));
+        position.setTime(dateBuilder.getDate());
 
-        // Coordinates
         double latitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 8));
         double longitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 9));
 
-        // Flags
         byte flags = buf.readByte();
         position.setValid((flags & 0x1) == 0x1);
-        if ((flags & 0x2) == 0) latitude = -latitude;
+        if ((flags & 0x2) == 0) {
+            latitude = -latitude;
+        }
         position.setLatitude(latitude);
-        if ((flags & 0x4) == 0) longitude = -longitude;
+        if ((flags & 0x4) == 0) {
+            longitude = -longitude;
+        }
         position.setLongitude(longitude);
 
-        // Speed
         position.setSpeed(ChannelBufferTools.readHexInteger(buf, 2));
-
-        // Course
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
         if (version == 1) {
 
             position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
-
-            // Power
             position.set(Event.KEY_POWER, buf.readUnsignedByte());
 
             buf.readByte(); // other flags and sensors
 
-            // Altitude
             position.setAltitude(buf.readUnsignedShort());
 
             position.set(Event.KEY_CELL, buf.readUnsignedShort());
@@ -117,96 +109,72 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_FUEL, fuel);
 
         }
+
         return position;
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "\\(" +
-            "([\\d]+)," +                // Id
-            "W01," +                     // Type
-            "(\\d{3})(\\d{2}.\\d{4})," + // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d{2})(\\d{2}.\\d{4})," + // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "([AV])," +                  // Validity
-            "(\\d{2})(\\d{2})(\\d{2})," + // Date (DDMMYY)
-            "(\\d{2})(\\d{2})(\\d{2})," + // Time (HHMMSS)
-            "(\\d+)," +                  // Speed (km/h)
-            "(\\d+)," +                  // Course
-            "(\\d+)," +                  // Power
-            "(\\d+)," +                  // GPS signal
-            "(\\d+)," +                  // GSM signal
-            "(\\d+)," +                  // Alert Type
-            ".*\\)");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("(")
+            .number("(d+),")                     // id
+            .text("W01,")                        // type
+            .number("(ddd)(dd.dddd),")           // longitude
+            .expression("([EW]),")
+            .number("(dd)(dd.dddd),")            // latitude
+            .expression("([NS]),")
+            .expression("([AV]),")               // validity
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("(d+),")                     // power
+            .number("(d+),")                     // gps signal
+            .number("(d+),")                     // gsm signal
+            .number("(d+),")                     // alert type
+            .any()
+            .text(")")
+            .compile();
 
     private Position decodeAlertMessage(ChannelBuffer buf, Channel channel) {
 
-        String message = buf.toString(Charset.defaultCharset());
-
-        // Parse message
-        Matcher parser = PATTERN.matcher(message);
+        Parser parser = new Parser(PATTERN, buf.toString(Charset.defaultCharset()));
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.set(Event.KEY_ALARM, true);
-        Integer index = 1;
 
-        // Get device by identifier
-        if (!identify(parser.group(index++), channel)) {
+        position.set(Event.KEY_ALARM, true);
+
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-        position.setLongitude(longitude);
+        position.setLongitude(parser.nextCoordinate());
+        position.setLatitude(parser.nextCoordinate());
+        position.setValid(parser.next().equals("A"));
 
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        position.set(Event.KEY_POWER, parser.nextDouble());
 
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-
-        // Course
-        position.setCourse(Double.parseDouble(parser.group(index++)));
-
-        // Power
-        position.set(Event.KEY_POWER, Double.parseDouble(parser.group(index++)));
         return position;
     }
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
         char first = (char) buf.getByte(0);
 
-        // Check message type
         if (first == '$') {
             return decodeNormalMessage(buf, channel);
         } else if (first == '(') {
