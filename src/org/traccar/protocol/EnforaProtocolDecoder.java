@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBufferIndexFinder;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Log;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.StringFinder;
 import org.traccar.model.Position;
 
@@ -34,18 +34,19 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2}).(\\d+)," + // Time (HHMMSS.SS)
-            "([AV])," +                  // Validity
-            "(\\d{2})(\\d{2}.\\d+)," +   // Latitude (DDMM.MMMMMM)
-            "([NS])," +
-            "(\\d{3})(\\d{2}.\\d+)," +   // Longitude (DDDMM.MMMMMM)
-            "([EW])," +
-            "(\\d+.\\d+)?," +            // Speed
-            "(\\d+.\\d+)?," +            // Course
-            "(\\d{2})(\\d{2})(\\d{2})," + // Date (DDMMYY)
-            ".*[\r\n\u0000]*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("GPRMC,")
+            .number("(dd)(dd)(dd).(d+),")        // time
+            .expression("([AV]),")               // validity
+            .number("(dd)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(ddd)(dd.d+),")             // longitude
+            .expression("([EW]),")
+            .number("(d+.d+)?,")                 // speed
+            .number("(d+.d+)?,")                 // course
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .any()
+            .compile();
 
     public static final int IMEI_LENGTH = 15;
 
@@ -56,88 +57,58 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        // Find IMEI (Modem ID)
-        String imei = null;
-        for (int first = -1, i = 0; i < buf.readableBytes(); i++) {
-            if (!Character.isDigit((char) buf.getByte(i))) {
-                first = i + 1;
+        // Find IMEI number
+        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new ChannelBufferIndexFinder() {
+            @Override
+            public boolean find(ChannelBuffer buffer, int guessedIndex) {
+                if (buffer.writerIndex() - guessedIndex >= IMEI_LENGTH) {
+                    for (int i = 0; i < IMEI_LENGTH; i++) {
+                        if (!Character.isDigit((char) buffer.getByte(guessedIndex + i))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                return false;
             }
-
-            // Found digit string
-            if (i - first == IMEI_LENGTH - 1) {
-                imei = buf.toString(first, IMEI_LENGTH, Charset.defaultCharset());
-                break;
-            }
-        }
-
-        // Write log
-        if (imei == null) {
-            Log.warning("Enfora decoder failed to find IMEI");
+        });
+        if (index == -1) {
             return null;
         }
 
-        // Find GPSMC string
+        String imei = buf.toString(index, IMEI_LENGTH, Charset.defaultCharset());
+        if (!identify(imei, channel)) {
+            return null;
+        }
+
+        // Find NMEA sentence
         int start = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("GPRMC"));
         if (start == -1) {
-            // Message does not contain GPS data
             return null;
         }
-        String sentence = buf.toString(start, buf.readableBytes() - start, Charset.defaultCharset());
 
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        String sentence = buf.toString(start, buf.readableBytes() - start, Charset.defaultCharset());
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(imei, channel)) {
-            return null;
-        }
         position.setDeviceId(getDeviceId());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MILLISECOND, Integer.parseInt(parser.group(index++)) * 10);
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Latitude
-        double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Longitude
-        double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-        position.setLongitude(longitude);
-
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-
-        // Course
-        String course = parser.group(index++);
-        if (course != null) {
-            position.setCourse(Double.parseDouble(course));
-        }
-
-        // Date
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
         return position;
     }
 
