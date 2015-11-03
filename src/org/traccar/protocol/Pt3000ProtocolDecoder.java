@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
@@ -30,84 +30,50 @@ public class Pt3000ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "%(\\d+)," +                   // IMEI
-            "\\$GPRMC," +
-            "(\\d{2})(\\d{2})(\\d{2})\\.?\\d*," + // Time (HHMMSS.SSS)
-            "([AV])," +                    // Validity
-            "(\\d{2})(\\d{2}\\.\\d+)," +   // Latitude (DDMM.MMMM)
-            "([NS])," +
-            "(\\d{3})(\\d{2}\\.\\d+)," +   // Longitude (DDDMM.MMMM)
-            "([EW])," +
-            "(\\d+\\.?\\d*)?," +           // Speed
-            "(\\d+\\.?\\d*)?," +           // Course
-            "(\\d{2})(\\d{2})(\\d{2})" +   // Date (DDMMYY)
-            ".+");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .number("%(d+),")                    // imei
+            .text("$GPRMC,")
+            .number("(dd)(dd)(dd).?d*,")         // time
+            .expression("([AV]),")               // validity
+            .number("(dd)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(ddd)(dd.d+),")             // longitude
+            .expression("([EW]),")
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Identifier
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("A") == 0);
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("S") == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60;
-        if (parser.group(index++).compareTo("W") == 0) longitude = -longitude;
-        position.setLongitude(longitude);
-
-        // Speed
-        String speed = parser.group(index++);
-        if (speed != null) {
-            position.setSpeed(Double.parseDouble(speed));
-        }
-
-        // Course
-        String course = parser.group(index++);
-        if (course != null) {
-            position.setCourse(Double.parseDouble(course));
-        }
-
-        // Date
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
         return position;
     }
 
