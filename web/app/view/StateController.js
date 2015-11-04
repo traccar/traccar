@@ -116,9 +116,9 @@ Ext.define('Traccar.view.StateController', {
     selectDevice: function (device) {
         var found;
         this.deviceId = device.get('id');
-        found = Ext.getStore('LatestPositions').query('deviceId', this.deviceId);
-        if (found.getCount() > 0) {
-            this.updatePosition(found.first());
+        found = Ext.getStore('LatestPositions').findRecord('deviceId', this.deviceId, 0, false, false, true);
+        if (found) {
+            this.updatePosition(found);
         } else {
             Ext.getStore('Attributes').removeAll();
         }

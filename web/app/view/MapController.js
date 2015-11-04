@@ -52,9 +52,9 @@ Ext.define('Traccar.view.MapController', {
                     var store = Ext.getStore('LatestPositions');
                     var deviceStore = Ext.getStore('Devices');
 
-                    var found = store.query('deviceId', data[i].deviceId);
-                    if (found.getCount() > 0) {
-                        found.first().set(data[i]);
+                    var found = store.findRecord('deviceId', data[i].deviceId, 0, false, false, true);
+                    if (found) {
+                        found.set(data[i]);
                     } else {
                         store.add(Ext.create('Traccar.model.Position', data[i]));
                     }
@@ -67,7 +67,7 @@ Ext.define('Traccar.view.MapController', {
                     if (data[i].deviceId in this.liveData) {
                         this.liveData[data[i].deviceId].setGeometry(geometry);
                     } else {
-                        var name = deviceStore.query('id', data[i].deviceId).first().get('name');
+                        var name = deviceStore.findRecord('id', data[i].deviceId, 0, false, false, true).get('name');
 
                         var style = this.getMarkerStyle(Traccar.Style.mapLiveRadius, Traccar.Style.mapLiveColor, data[i].course, name);
                         var marker = new ol.Feature({
