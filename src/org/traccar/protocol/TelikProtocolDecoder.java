@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -31,74 +31,54 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "\\d{4}" +
-            "(\\d{6})" +                  // Device ID
-            "(\\d+)," +                   // Type
-            "\\d{12}," +                  // Event Time
-            "\\d+," +
-            "(\\d{2})(\\d{2})(\\d{2})" +  // Date
-            "(\\d{2})(\\d{2})(\\d{2})," + // Time
-            "(-?\\d+)," +                 // Longitude
-            "(-?\\d+)," +                 // Latitude
-            "(\\d)," +                    // Validity
-            "(\\d+)," +                   // Speed
-            "(\\d+)," +                   // Course
-            "(\\d+)," +                   // Satellites
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .number("dddd")
+            .number("(d{6})")                    // device id
+            .number("(d+),")                     // type
+            .number("d{12},")                    // event time
+            .number("d+,")
+            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(-?d+),")                   // longitude
+            .number("(-?d+),")                   // latitude
+            .number("(d),")                      // validity
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("(d+),")                     // satellites
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        // Parse message
-        Matcher parser = PATTERN.matcher((String) msg);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Message type
-        position.set(Event.KEY_TYPE, parser.group(index++));
+        position.set(Event.KEY_TYPE, parser.next());
 
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Location
-        position.setLongitude(Double.parseDouble(parser.group(index++)) / 10000);
-        position.setLatitude(Double.parseDouble(parser.group(index++)) / 10000);
+        position.setLongitude(parser.nextDouble() / 10000);
+        position.setLatitude(parser.nextDouble() / 10000);
+        position.setValid(parser.nextInt() != 1);
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
 
-        // Validity
-        position.setValid(parser.group(index++).compareTo("1") != 0);
-
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-
-        // Course
-        position.setCourse(Double.parseDouble(parser.group(index++)));
-
-        // Satellites
-        position.set(Event.KEY_SATELLITES, parser.group(index++));
+        position.set(Event.KEY_SATELLITES, parser.next());
 
         return position;
     }
