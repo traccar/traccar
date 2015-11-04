@@ -90,6 +90,7 @@ public class Parser {
         DEG_HEM,
         DEG_MIN_HEM,
         DEG_MIN_MIN_HEM,
+        HEM_DEG_MIN_MIN,
         HEM_DEG,
         HEM_DEG_MIN,
         HEM_DEG_MIN_HEM
@@ -126,6 +127,12 @@ public class Parser {
                     hemisphere = next();
                 }
                 break;
+            case HEM_DEG_MIN_MIN:
+                hemisphere = next();
+                coordinate = nextInt();
+                coordinate += Double.parseDouble(next() + '.' + next()) / 60;
+                break;
+            case DEG_MIN_HEM:
             default:
                 coordinate = nextInt();
                 coordinate += nextDouble() / 60;
