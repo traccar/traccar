@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -31,93 +32,78 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "\\$GPRS" +
-            "(\\d+)," +                   // IMEI
-            "([^,]+)," +                  // Version
-            "(\\d{2})(\\d{2})(\\d{2})," + // Date
-            "(\\d{2})(\\d{2})(\\d{2})," + // Time
-            "(\\d)" +                     // Flags
-            "(\\d{2})(\\d{5})" +          // Latitude (DDMMMMM)
-            "(\\d{3})(\\d{5})," +         // Longitude (DDDMMMMM)
-            "(\\d+)," +                   // Speed
-            "(\\d+)," +                   // Course
-            "(\\d+)," +                   // Status
-            "(\\d+)?," +                  // GPRS counting value
-            "(\\d+)?," +                  // GPS power saving counting value
-            "(\\d+)," +                   // Switch status
-            "(\\d+)" +                    // Relay status
-            "(?:[LH]{2})?" +              // Power status
-            "#V(\\d+).*");                // Battery
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("$GPRS")
+            .number("(d+),")                   // IMEI
+            .expression("([^,]+),")                  // Version
+            .number("(dd)(dd)(dd),") // Date
+            .number("(dd)(dd)(dd),") // Time
+            .number("(d)")                     // Flags
+            .number("(dd)(d{5})")          // Latitude (DDMMMMM)
+            .number("(ddd)(d{5}),")         // Longitude (DDDMMMMM)
+            .number("(d+),")                   // Speed
+            .number("(d+),")                   // Course
+            .number("(d+),")                   // Status
+            .number("(d+)?,")                  // GPRS counting value
+            .number("(d+)?,")                  // GPS power saving counting value
+            .number("(d+),")                   // Switch status
+            .number("(d+)")                    // Relay status
+            .expression("(?:[LH]{2})?")              // Power status
+            .number("#V(d+)")                // Battery
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Firmware version
-        position.set(Event.KEY_VERSION, parser.group(index++));
+        position.set(Event.KEY_VERSION, parser.next());
 
-        // Date
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, 2000 + Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Validity
-        int flags = Integer.parseInt(parser.group(index++));
-        position.setValid((flags & 0x1) != 0);
+        int flags = parser.nextInt();
 
-        // Latitude
-        Double latitude = Double.parseDouble(parser.group(index++));
-        latitude += Double.parseDouble(parser.group(index++)) / 60000;
-        if ((flags & 0x4) == 0) latitude = -latitude;
-        position.setLatitude(latitude);
+        position.setValid(BitUtil.check(flags, 0));
 
-        // Longitude
-        Double longitude = Double.parseDouble(parser.group(index++));
-        longitude += Double.parseDouble(parser.group(index++)) / 60000;
-        if ((flags & 0x2) == 0) longitude = -longitude;
-        position.setLongitude(longitude);
+        double latitude = parser.nextDouble() + parser.nextDouble() / 60000;
+        if (BitUtil.check(flags, 2)) {
+            position.setLatitude(latitude);
+        } else {
+            position.setLatitude(-latitude);
+        }
 
-        // Speed
-        position.setSpeed(Double.parseDouble(parser.group(index++)) / 10);
+        double longitude = parser.nextDouble() + parser.nextDouble() / 60000;
+        if (BitUtil.check(flags, 1)) {
+            position.setLongitude(longitude);
+        } else {
+            position.setLongitude(-longitude);
+        }
 
-        // Course
-        position.setCourse(Double.parseDouble(parser.group(index++)) / 10);
+        position.setSpeed(parser.nextDouble() / 10);
+        position.setCourse(parser.nextDouble() / 10);
 
-        // Additional data
-        position.set(Event.KEY_STATUS, parser.group(index++));
-        position.set(Event.KEY_GSM, parser.group(index++));
-        position.set(Event.KEY_GPS, parser.group(index++));
-        position.set(Event.KEY_INPUT, parser.group(index++));
-        position.set(Event.KEY_OUTPUT, parser.group(index++));
-        position.set(Event.KEY_BATTERY, Double.parseDouble(parser.group(index++)) / 10);
+        position.set(Event.KEY_STATUS, parser.next());
+        position.set(Event.KEY_GSM, parser.next());
+        position.set(Event.KEY_GPS, parser.next());
+        position.set(Event.KEY_INPUT, parser.next());
+        position.set(Event.KEY_OUTPUT, parser.next());
+        position.set(Event.KEY_BATTERY, parser.nextDouble() / 10);
 
         return position;
     }

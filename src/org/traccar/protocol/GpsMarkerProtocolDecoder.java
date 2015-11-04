@@ -38,9 +38,9 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{15})")                   // imei
             .number("T(dd)(dd)(dd)")             // date
             .number("(dd)(dd)(dd)?")             // time
-            .number("([NS])")
+            .expression("([NS])")
             .number("(dd)(dd)(dddd)")            // latitude
-            .number("([EW])")
+            .expression("([EW])")
             .number("(ddd)(dd)(dddd)")           // longitude
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
