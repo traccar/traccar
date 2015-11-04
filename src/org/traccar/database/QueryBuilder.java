@@ -281,6 +281,92 @@ public final class QueryBuilder {
         }
     }
 
+    private <T extends Factory> void addProcessors(
+            List<ResultSetProcessor<T>> processors, Class<?> parameterType, final Method method, final String name) {
+
+        if (parameterType.equals(boolean.class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try {
+                        method.invoke(object, resultSet.getBoolean(name));
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
+                    }
+                }
+            });
+        } else if (parameterType.equals(int.class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try {
+                        method.invoke(object, resultSet.getInt(name));
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
+                    }
+                }
+            });
+        } else if (parameterType.equals(long.class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try {
+                        method.invoke(object, resultSet.getLong(name));
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
+                    }
+                }
+            });
+        } else if (parameterType.equals(double.class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try {
+                        method.invoke(object, resultSet.getDouble(name));
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
+                    }
+                }
+            });
+        } else if (parameterType.equals(String.class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try {
+                        method.invoke(object, resultSet.getString(name));
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
+                    }
+                }
+            });
+        } else if (parameterType.equals(Date.class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try {
+                        Timestamp timestamp = resultSet.getTimestamp(name);
+                        if (timestamp != null) {
+                            method.invoke(object, new Date(timestamp.getTime()));
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
+                    }
+                }
+            });
+        } else if (parameterType.equals(Map.class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try (JsonReader reader = Json.createReader(new StringReader(resultSet.getString(name)))) {
+                        method.invoke(object, MiscFormatter.fromJson(reader.readObject()));
+                    } catch (IllegalAccessException | InvocationTargetException | JsonParsingException error) {
+                        Log.warning(error);
+                    }
+                }
+            });
+        }
+    }
+
     public <T extends Factory> Collection<T> executeQuery(T prototype) throws SQLException {
         List<T> result = new LinkedList<>();
 
@@ -313,89 +399,7 @@ public final class QueryBuilder {
                                 continue;
                             }
 
-                            Class<?> parameterType = method.getParameterTypes()[0];
-
-                            if (parameterType.equals(boolean.class)) {
-                                processors.add(new ResultSetProcessor<T>() {
-                                    @Override
-                                    public void process(T object, ResultSet resultSet) throws SQLException {
-                                        try {
-                                            method.invoke(object, resultSet.getBoolean(name));
-                                        } catch (IllegalAccessException | InvocationTargetException error) {
-                                            Log.warning(error);
-                                        }
-                                    }
-                                });
-                            } else if (parameterType.equals(int.class)) {
-                                processors.add(new ResultSetProcessor<T>() {
-                                    @Override
-                                    public void process(T object, ResultSet resultSet) throws SQLException {
-                                        try {
-                                            method.invoke(object, resultSet.getInt(name));
-                                        } catch (IllegalAccessException | InvocationTargetException error) {
-                                            Log.warning(error);
-                                        }
-                                    }
-                                });
-                            } else if (parameterType.equals(long.class)) {
-                                processors.add(new ResultSetProcessor<T>() {
-                                    @Override
-                                    public void process(T object, ResultSet resultSet) throws SQLException {
-                                        try {
-                                            method.invoke(object, resultSet.getLong(name));
-                                        } catch (IllegalAccessException | InvocationTargetException error) {
-                                            Log.warning(error);
-                                        }
-                                    }
-                                });
-                            } else if (parameterType.equals(double.class)) {
-                                processors.add(new ResultSetProcessor<T>() {
-                                    @Override
-                                    public void process(T object, ResultSet resultSet) throws SQLException {
-                                        try {
-                                            method.invoke(object, resultSet.getDouble(name));
-                                        } catch (IllegalAccessException | InvocationTargetException error) {
-                                            Log.warning(error);
-                                        }
-                                    }
-                                });
-                            } else if (parameterType.equals(String.class)) {
-                                processors.add(new ResultSetProcessor<T>() {
-                                    @Override
-                                    public void process(T object, ResultSet resultSet) throws SQLException {
-                                        try {
-                                            method.invoke(object, resultSet.getString(name));
-                                        } catch (IllegalAccessException | InvocationTargetException error) {
-                                            Log.warning(error);
-                                        }
-                                    }
-                                });
-                            } else if (parameterType.equals(Date.class)) {
-                                processors.add(new ResultSetProcessor<T>() {
-                                    @Override
-                                    public void process(T object, ResultSet resultSet) throws SQLException {
-                                        try {
-                                            Timestamp timestamp = resultSet.getTimestamp(name);
-                                            if (timestamp != null) {
-                                                method.invoke(object, new Date(timestamp.getTime()));
-                                            }
-                                        } catch (IllegalAccessException | InvocationTargetException error) {
-                                            Log.warning(error);
-                                        }
-                                    }
-                                });
-                            } else if (parameterType.equals(Map.class)) {
-                                processors.add(new ResultSetProcessor<T>() {
-                                    @Override
-                                    public void process(T object, ResultSet resultSet) throws SQLException {
-                                        try (JsonReader reader = Json.createReader(new StringReader(resultSet.getString(name)))) {
-                                            method.invoke(object, MiscFormatter.fromJson(reader.readObject()));
-                                        } catch (IllegalAccessException | InvocationTargetException | JsonParsingException error) {
-                                            Log.warning(error);
-                                        }
-                                    }
-                                });
-                            }
+                            addProcessors(processors, method.getParameterTypes()[0], method, name);
                         }
                     }
 

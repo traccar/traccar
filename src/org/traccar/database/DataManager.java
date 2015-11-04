@@ -241,7 +241,11 @@ public class DataManager implements IdentityManager {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
                 .setString("email", email)
                 .executeQuerySingle(new User());
-        return user != null && user.isPasswordValid(password) ? user : null;
+        if (user != null && user.isPasswordValid(password)) {
+            return user;
+        } else {
+            return null;
+        }
     }
 
     public Collection<User> getUsers() throws SQLException {

@@ -50,8 +50,24 @@ public class WebDataHandler extends BaseDataHandler {
 
             double lat = position.getLatitude();
             double lon = position.getLongitude();
-            f.format("%02d%07.4f,%c,", (int) Math.abs(lat), Math.abs(lat) % 1 * 60, lat < 0 ? 'S' : 'N');
-            f.format("%03d%07.4f,%c,", (int) Math.abs(lon), Math.abs(lon) % 1 * 60, lon < 0 ? 'W' : 'E');
+
+            char hemisphere;
+
+            if (lat < 0) {
+                hemisphere = 'S';
+            } else {
+                hemisphere = 'N';
+            }
+
+            f.format("%02d%07.4f,%c,", (int) Math.abs(lat), Math.abs(lat) % 1 * 60, hemisphere);
+
+            if (lon < 0) {
+                hemisphere = 'W';
+            } else {
+                hemisphere = 'E';
+            }
+
+            f.format("%03d%07.4f,%c,", (int) Math.abs(lon), Math.abs(lon) % 1 * 60, hemisphere);
 
             f.format("%.2f,%.2f,", position.getSpeed(), position.getCourse());
             f.format("%1$td%1$tm%1$ty,,", calendar);
