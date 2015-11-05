@@ -52,4 +52,10 @@ public abstract class Extensible extends Message {
         }
     }
 
+    public void add(Map.Entry<String, Object> entry) {
+        if (entry.getValue() != null) {
+            attributes.put(entry.getKey(), entry.getValue());
+        }
+    }
+
 }

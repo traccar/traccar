@@ -24,6 +24,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -58,10 +59,9 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         int end = buf.readerIndex() + length;
 
         while (buf.readerIndex() < end) {
-            int parameterLength = buf.readUnsignedByte() >> 4;
-            String key = String.format("pid%02X", buf.readUnsignedByte());
-            String value = ChannelBuffers.hexDump(buf.readBytes(parameterLength - 2));
-            position.set(key, value);
+            int parameterLength = buf.getUnsignedByte(buf.readerIndex()) >> 4;
+            position.add(ObdDecoder.decode(buf.readUnsignedByte() & 0x0F, buf.readUnsignedByte(),
+                    ChannelBuffers.hexDump(buf.readBytes(parameterLength - 2))));
         }
     }
 
@@ -105,18 +105,15 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // version
         buf.readUnsignedByte(); // type
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        // Get device id
         String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
         if (!identify(imei, channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Time
         long seconds = buf.readUnsignedInt() & 0x7fffffffL;
         seconds += 946684800L; // 2000-01-01 00:00
         seconds -= timeZone;

@@ -13,6 +13,9 @@ public class UlbotechProtocolDecoderTest extends ProtocolDecoderTest {
         UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(new UlbotechProtocol());
 
         verifyPosition(decoder, binary(
+                "f8010108679650230651689dc8e45b010e01194a26fbd47fa6001f003c0054030402420000040400024d7b0506037c18692212071131057f410c0ee0310d1b312f41413112ef0804000dd59fcc32f8"));
+
+        verifyPosition(decoder, binary(
                 "f8010103596580419465449da89d16010efe5580fe0923d82100140129005903040242000004040001a7f10506037818be220e070e31057b410c1324310d144131fa3208040020b1418297f8"));
         
         verifyPosition(decoder, binary(
