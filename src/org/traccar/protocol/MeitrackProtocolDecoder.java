@@ -57,10 +57,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+),")                   // altitude
             .number("(d+),")                     // odometer
             .number("(d+),")                     // runtime
-            .number("(d+|")
-            .number("d+|")
-            .number("x+|")
-            .number("x+),")                      // cell
+            .number("(d+)|")                     // mcc
+            .number("(d+)|")                     // mnc
+            .number("(x+)|")                     // lac
+            .number("(x+),")                     // cell
             .number("(x+),")                     // state
             .number("(x+)?|")                    // adc1
             .number("(x+)?|")                    // adc2
@@ -119,6 +119,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Event.KEY_ODOMETER, parser.next());
         position.set("runtime", parser.next());
+        position.set(Event.KEY_MCC, parser.next());
+        position.set(Event.KEY_MCC, parser.next());
+        position.set(Event.KEY_LAC, parser.next());
         position.set(Event.KEY_CELL, parser.next());
         position.set(Event.KEY_STATUS, parser.next());
 
@@ -192,9 +195,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
             position.set("runtime", buf.readUnsignedInt());
-            position.set(Event.KEY_CELL,
-                    buf.readUnsignedShort() + "|" + buf.readUnsignedShort() + "|" +
-                    buf.readUnsignedShort() + "|" + buf.readUnsignedShort());
+            position.set(Event.KEY_MCC, buf.readUnsignedShort());
+            position.set(Event.KEY_MCC, buf.readUnsignedShort());
+            position.set(Event.KEY_LAC, buf.readUnsignedShort());
+            position.set(Event.KEY_CELL, buf.readUnsignedShort());
             position.set(Event.KEY_STATUS, buf.readUnsignedShort());
 
             position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
