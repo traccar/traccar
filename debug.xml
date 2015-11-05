@@ -251,6 +251,7 @@
     <entry key='totem.port'>5007</entry>
     <entry key='enfora.port'>5008</entry>
     <entry key='meiligao.port'>5009</entry>
+    <entry key='trv.port'>5010</entry>
     <entry key='suntech.port'>5011</entry>
     <entry key='progress.port'>5012</entry>
     <entry key='h02.port'>5013</entry>
