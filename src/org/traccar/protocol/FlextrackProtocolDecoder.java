@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -32,34 +32,36 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_LOGON = Pattern.compile(
-            "(-?\\d+)," +                  // Index
-            "LOGON," +
-            "(\\d+)," +                    // Node ID
-            "(\\d+)");                     // ICCID
+    private static final Pattern PATTERN_LOGON = new PatternBuilder()
+            .number("(-?d+),")                   // index
+            .text("LOGON,")
+            .number("(d+),")                     // node id
+            .number("(d+)")                      // iccid
+            .compile();
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(-?\\d+)," +                  // Index
-            "UNITSTAT," +
-            "(\\d{4})(\\d{2})(\\d{2})," +  // Date (YYYYMMDD)
-            "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
-            "\\d+," +                      // Node ID
-            "([NS])(\\d+)\\.(\\d+\\.\\d+)," + // Longitude
-            "([EW])(\\d+)\\.(\\d+\\.\\d+)," + // Latitude
-            "(\\d+)," +                    // Speed
-            "(\\d+)," +                    // Course
-            "(\\d+)," +                    // Satellites
-            "(\\d+)," +                    // Battery
-            "(-?\\d+)," +                  // GSM
-            "(\\p{XDigit}+)," +            // State
-            "(\\d{3})" +                   // MCC
-            "(\\d{2})," +                  // MNC
-            "(-?\\d+)," +                  // Altitude
-            "(\\d+)," +                    // HDOP
-            "(\\p{XDigit}+)," +            // Cell
-            "\\d+," +                      // GPS fix time
-            "(\\p{XDigit}+)," +            // LAC
-            "(\\d+)");                     // Odometer
+    private static final Pattern PATTERN = new PatternBuilder()
+            .number("(-?d+),")                   // index
+            .text("UNITSTAT,")
+            .number("(dddd)(dd)(dd),")           // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("d+,")                       // node id
+            .number("([NS])(d+).(d+.d+),")       // latitude
+            .number("([EW])(d+).(d+.d+),")       // longitude
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("(d+),")                     // satellites
+            .number("(d+),")                     // battery
+            .number("(-?d+),")                   // gsm
+            .number("(x+),")                     // state
+            .number("(ddd)")                     // mcc
+            .number("(dd),")                     // mnc
+            .number("(-?d+),")                   // altitude
+            .number("(d+),")                     // hdop
+            .number("(x+),")                     // cell
+            .number("d+,")                       // gps fix time
+            .number("(x+),")                     // lac
+            .number("(d+)")                      // odometer
+            .compile();
 
     private void sendAcknowledgement(Channel channel, String index) {
         if (channel != null) {
@@ -69,24 +71,21 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
         if (sentence.contains("LOGON")) {
 
-            Matcher parser = PATTERN_LOGON.matcher(sentence);
+            Parser parser = new Parser(PATTERN_LOGON, sentence);
             if (!parser.matches()) {
                 return null;
             }
 
-            int index = 1;
+            sendAcknowledgement(channel, parser.next());
 
-            sendAcknowledgement(channel, parser.group(index++));
-
-            String id = parser.group(index++);
-            String iccid = parser.group(index++);
+            String id = parser.next();
+            String iccid = parser.next();
 
             if (!identify(iccid, channel, null, false) && !identify(id, channel)) {
                 return null;
@@ -94,7 +93,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (sentence.contains("UNITSTAT") && hasDeviceId()) {
 
-            Matcher parser = PATTERN.matcher(sentence);
+            Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -103,56 +102,32 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
-            int index = 1;
+            sendAcknowledgement(channel, parser.next());
 
-            sendAcknowledgement(channel, parser.group(index++));
-
-            // Time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-            time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-            time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-            position.setTime(time.getTime());
-
-            // Latitude
-            String hemisphere = parser.group(index++);
-            double lat = Integer.parseInt(parser.group(index++));
-            lat += Double.parseDouble(parser.group(index++)) / 60;
-            if (hemisphere.equals("S")) {
-                lat = -lat;
-            }
-            position.setLatitude(lat);
-
-            // Longitude
-            hemisphere = parser.group(index++);
-            double lon = Integer.parseInt(parser.group(index++));
-            lon += Double.parseDouble(parser.group(index++)) / 60;
-            if (hemisphere.equals("W")) {
-                lon = -lon;
-            }
-            position.setLongitude(lon);
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
 
             position.setValid(true);
-            position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(parser.group(index++))));
-            position.setCourse(Integer.parseInt(parser.group(index++)));
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+            position.setCourse(parser.nextInt());
 
-            position.set(Event.KEY_SATELLITES, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_BATTERY, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_GSM, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_STATUS, Integer.parseInt(parser.group(index++), 16));
-            position.set(Event.KEY_MCC, Integer.parseInt(parser.group(index++)));
-            position.set(Event.KEY_MNC, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_SATELLITES, parser.nextInt());
+            position.set(Event.KEY_BATTERY, parser.nextInt());
+            position.set(Event.KEY_GSM, parser.nextInt());
+            position.set(Event.KEY_STATUS, parser.nextInt(16));
+            position.set(Event.KEY_MCC, parser.nextInt());
+            position.set(Event.KEY_MNC, parser.nextInt());
 
-            position.setAltitude(Integer.parseInt(parser.group(index++)));
+            position.setAltitude(parser.nextInt());
 
-            position.set(Event.KEY_HDOP, Integer.parseInt(parser.group(index++)) / 10.0);
-            position.set(Event.KEY_CELL, parser.group(index++));
-            position.set(Event.KEY_LAC, parser.group(index++));
-            position.set(Event.KEY_ODOMETER, Integer.parseInt(parser.group(index++)));
+            position.set(Event.KEY_HDOP, parser.nextInt() * 0.1);
+            position.set(Event.KEY_CELL, parser.next());
+            position.set(Event.KEY_LAC, parser.next());
+            position.set(Event.KEY_ODOMETER, parser.nextInt());
 
             return position;
         }
