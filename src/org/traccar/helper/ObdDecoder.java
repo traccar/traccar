@@ -20,7 +20,10 @@ import org.traccar.model.Event;
 import java.util.AbstractMap;
 import java.util.Map;
 
-public class ObdDecoder {
+public final class ObdDecoder {
+
+    private ObdDecoder() {
+    }
 
     private static final int MODE_CURRENT = 0x01;
     private static final int MODE_FREEZE_FRAME = 0x02;
