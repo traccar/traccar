@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -30,38 +31,40 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            ".*\\$1," +
-            "(\\d+)," +                         // IMEI
-            "D001," +                           // Type
-            "[^,]*," +                          // Vehicle
-            "(\\d{2})/(\\d{2})/(\\d{2})," +     // Date
-            "(\\d{2}):(\\d{2}):(\\d{2})," +     // Time
-            "(\\d{2})(\\d{2})\\.?(\\d+)([NS])," + // Latitude
-            "(\\d{3})(\\d{2})\\.?(\\d+)([EW])," + // Longitude
-            "(\\d+\\.?\\d*)," +                 // Speed
-            "(\\d+\\.?\\d*)," +                 // Course
-
-            "(?:(\\d+)," +                      // Odometer
-            "(\\d+)," +                         // Ignition
-            "(\\d+)," +                         // DI1
-            "(\\d+)," +                         // DI2
-            "(\\d+),|" +                        // Fuel
-
-            "([01])," +                         // Charging
-            "([01])," +                         // Ignition
-            "0,0," +                            // Reserved
-            "(\\d+)," +                         // DI
-            "([^,]+)," +                        // RFID
-            "(\\d+)," +                         // Odometer
-            "(\\d+)," +                         // Temperature
-            "(\\d+)," +                         // Fuel
-            "([01])," +                         // Accelerometer
-            "([01])," +                         // DO1
-            "([01]),)" +                        // DO2
-
-            "([AV])" +                          // Validity
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .any()
+            .text("$1,")
+            .number("(d+),")                     // imei
+            .text("D001,")                       // type
+            .expression("[^,]*,")                // vehicle
+            .number("(dd)/(dd)/(dd),")           // date
+            .number("(dd):(dd):(dd),")           // time
+            .number("(dd)(dd).?(d+)([NS]),")     // latitude
+            .number("(ddd)(dd).?(d+)([EW]),")    // longitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // course
+            .groupBegin()
+            .number("(d+),")                     // odometer
+            .number("(d+),")                     // Ignition
+            .number("(d+),")                     // di1
+            .number("(d+),")                     // di2
+            .number("(d+),")                     // fuel
+            .or()
+            .expression("([01]),")               // charging
+            .expression("([01]),")               // ignition
+            .expression("0,0,")                  // reserved
+            .number("(d+),")                     // di
+            .expression("([^,]+),")              // rfid
+            .number("(d+),")                     // odometer
+            .number("(d+),")                     // temperature
+            .number("(d+),")                     // fuel
+            .expression("([01]),")               // accelerometer
+            .expression("([01]),")               // do1
+            .expression("([01]),")               // do2
+            .groupEnd()
+            .expression("([AV])")                // validity
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
