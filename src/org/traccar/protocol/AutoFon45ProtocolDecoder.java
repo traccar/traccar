@@ -1,4 +1,5 @@
 /*
+ * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
  * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +18,12 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import static org.traccar.protocol.AutoFon45FrameDecoder.MSG_LOCATION;
@@ -30,9 +31,17 @@ import static org.traccar.protocol.AutoFon45FrameDecoder.MSG_LOGIN;
 
 public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
 
-    private static double convertCoordinate(short degrees, int raw) {
-        double seconds = (raw >> 4 & 0xffffff) / 600000.0;
-        return (degrees + seconds) * ((raw & 0x0f) == 0 ? -1 : 1);
+    public AutoFon45ProtocolDecoder(AutoFon45Protocol protocol) {
+        super(protocol);
+    }
+
+    private static double convertCoordinate(short degrees, int minutes) {
+        double value = degrees + BitUtil.from(minutes, 4) / 600000.0;
+        if (BitUtil.check(minutes, 0)) {
+            return value;
+        } else {
+            return -value;
+        }
     }
 
     private static byte checksum(byte[] bytes, int offset, int len) {
@@ -46,19 +55,16 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
         return result;
     }
 
-    public AutoFon45ProtocolDecoder(AutoFon45Protocol protocol) {
-        super(protocol);
-    }
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        int type = buf.getUnsignedByte(0);
+        int type = buf.getUnsignedByte(buf.readerIndex());
 
         if (type == MSG_LOGIN) {
+
             byte[] bytes = new byte[19];
             buf.readBytes(bytes);
 
@@ -67,24 +73,25 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            // Send response (CRC)
+            // Send response (checksum)
             if (channel != null) {
                 byte[] response = "resp_crc=".getBytes("US-ASCII");
                 response = Arrays.copyOf(response, response.length + 1);
                 response[response.length - 1] = checksum(bytes, 0, 18);
                 channel.write(ChannelBuffers.wrappedBuffer(response));
             }
+
         } else if (type == MSG_LOCATION) {
+
             buf.readUnsignedByte();
 
-            // Create new position
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
             short status = buf.readUnsignedByte();
-            position.set(Event.KEY_ALARM, (status & 0x80) != 0);
-            position.set(Event.KEY_BATTERY, status & 0x7F);
+            position.set(Event.KEY_ALARM, BitUtil.check(status, 7));
+            position.set(Event.KEY_BATTERY, BitUtil.to(status, 7));
 
             buf.skipBytes(2); // remaining time
 
@@ -94,37 +101,27 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             buf.readByte(); // mode
             buf.readByte(); // gprs sending interval
 
-            buf.skipBytes(6); // MCC, MNC, LAC, CID
+            buf.skipBytes(6); // mcc, mnc, lac, cid
 
-            // GPS status
             int valid = buf.readUnsignedByte();
-            position.setValid((valid & 0xc0) != 0);
-            position.set(Event.KEY_SATELLITES, valid & 0x3f);
+            position.setValid(BitUtil.from(valid, 6) != 0);
+            position.set(Event.KEY_SATELLITES, BitUtil.from(valid, 6));
 
-            // Date and time
-            int timeOfDay = buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte();
-            int date = buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte();
+            int time = buf.readUnsignedMedium();
+            int date = buf.readUnsignedMedium();
 
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.HOUR_OF_DAY, timeOfDay / 10000);
-            time.set(Calendar.MINUTE, (timeOfDay - time.get(Calendar.HOUR_OF_DAY) * 10000) / 100);
-            time.set(Calendar.SECOND, (timeOfDay - time.get(Calendar.HOUR_OF_DAY) * 10000 - time.get(Calendar.MINUTE) * 100));
-            time.set(Calendar.DAY_OF_MONTH, date / 10000);
-            time.set(Calendar.MONTH, (date - time.get(Calendar.DAY_OF_MONTH) * 10000) / 100 - 1);
-            time.set(Calendar.YEAR, 2000 + (date - time.get(Calendar.DAY_OF_MONTH) * 10000 - (time.get(Calendar.MONTH) + 1) * 100));
-            position.setTime(time.getTime());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(time / 10000, time / 100 % 100, time % 100)
+                    .setDateReverse(date / 10000, date / 100 % 100, date % 100);
+            position.setTime(dateBuilder.getDate());
 
-            // Location
-            position.setLatitude(convertCoordinate(buf.readUnsignedByte(),
-                    buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte()));
-            position.setLongitude(convertCoordinate(buf.readUnsignedByte(),
-                    buf.readUnsignedByte() << 16 | buf.readUnsignedByte() << 8 | buf.readUnsignedByte()));
+            position.setLatitude(convertCoordinate(buf.readUnsignedByte(), buf.readUnsignedMedium()));
+            position.setLongitude(convertCoordinate(buf.readUnsignedByte(), buf.readUnsignedMedium()));
             position.setSpeed(buf.readUnsignedByte());
-            position.setCourse(buf.readUnsignedByte() << 8 | buf.readUnsignedByte());
+            position.setCourse(buf.readUnsignedShort());
 
-            buf.readUnsignedByte(); // checksum
             return position;
+
         }
 
         return null;

@@ -45,7 +45,6 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePosition(ChannelBuffer buf, boolean history) {
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(getDeviceId());
@@ -61,7 +60,6 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
         buf.skipBytes(6); // time
 
-        // Timers
         if (!history) {
             for (int i = 0; i < 2; i++) {
                 buf.skipBytes(5); // time
@@ -77,12 +75,10 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // lac
         buf.readUnsignedShort(); // cid
 
-        // GPS status
         int valid = buf.readUnsignedByte();
         position.setValid((valid & 0xc0) != 0);
         position.set(Event.KEY_SATELLITES, valid & 0x3f);
 
-        // Date and time
         Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         time.clear();
         time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
@@ -93,7 +89,6 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         time.set(Calendar.SECOND, buf.readUnsignedByte());
         position.setTime(time.getTime());
 
-        // Location
         position.setLatitude(convertCoordinate(buf.readInt()));
         position.setLongitude(convertCoordinate(buf.readInt()));
         position.setAltitude(buf.readShort());
@@ -109,8 +104,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
