@@ -14,7 +14,8 @@ public class MiniFinderProtocolDecoderTest extends ProtocolDecoderTest {
                 "!1,860719020212696"));
 
         verifyPosition(decoder, text(
-                "!D,22/2/14,13:40:58,56.899601,14.811541,0,0,1,176.0,98,5,16,0"));
+                "!D,22/2/14,13:40:58,56.899601,14.811541,0,0,1,176.0,98,5,16,0"),
+                position("2014-02-22 13:40:58.000", true, 56.89960, 14.81154));
 
         verifyPosition(decoder, text(
                 "!D,22/2/14,13:47:51,56.899517,14.811665,0,0,b0001,179.3,97,5,16,0"));
