@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
@@ -30,77 +30,66 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "\\+RESP:GT...," +
-            "(\\d{15})," +                      // IMEI
-            "(?:(?:\\d+," +                     // Number
-            "\\d," +                            // Reserved / Geofence id
-            "\\d)|" +                           // Reserved / Geofence alert
-            "(?:[^,]*))," +                     // Calling number
-            "([01])," +                         // GPS fix
-            "(\\d+.\\d)," +                     // Speed
-            "(\\d+)," +                         // Course
-            "(-?\\d+.\\d)," +                   // Altitude
-            "\\d*," +                           // GPS accuracy
-            "(-?\\d+.\\d+)," +                  // Longitude
-            "(-?\\d+.\\d+)," +                  // Latitude
-            "(\\d{4})(\\d{2})(\\d{2})" +        // Date (YYYYMMDD)
-            "(\\d{2})(\\d{2})(\\d{2})," +       // Time (HHMMSS)
-            ".*");
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("+RESP:")
+            .expression("GT...,")
+            .number("(d{15}),")                  // imei
+            .groupBegin()
+            .number("d+,")                       // number
+            .number("d,")                        // reserved / geofence id
+            .number("d")                         // reserved / geofence alert
+            .or()
+            .number("[^,]*")                     // calling number
+            .groupEnd(",")
+            .expression("([01]),")               // gps fix
+            .number("(d+.d),")                   // speed
+            .number("(d+),")                     // course
+            .number("(-?d+.d),")                 // altitude
+            .number("d*,")                       // gps accuracy
+            .number("(-?d+.d+),")                // longitude
+            .number("(-?d+.d+),")                // latitude
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .any()
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
-        // Send response
         if (sentence.contains("AT+GTHBD=") && channel != null) {
             String response = "+RESP:GTHBD,GPRS ACTIVE,";
             response += sentence.substring(9, sentence.lastIndexOf(','));
             response += '\0';
-            channel.write(response);
+            channel.write(response); // heartbeat response
         }
 
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        Integer index = 1;
-
-        // Get device by IMEI
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Validity
-        position.setValid(Integer.parseInt(parser.group(index++)) == 0);
+        position.setValid(parser.nextInt() == 0);
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
 
-        // Position info
-        position.setSpeed(Double.parseDouble(parser.group(index++)));
-        position.setCourse(Double.parseDouble(parser.group(index++)));
-        position.setAltitude(Double.parseDouble(parser.group(index++)));
-        position.setLongitude(Double.parseDouble(parser.group(index++)));
-        position.setLatitude(Double.parseDouble(parser.group(index++)));
-
-        // Time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
         return position;
     }
