@@ -33,16 +33,16 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).?(d+)?,") // Time (HHMMSS.SSS)
-            .expression("([AV]),")                    // Validity
-            .number("(dd)(dd.d+),")   // Latitude (DDMM.MMMM)
+            .number("(dd)(dd)(dd).?(d+)?,")      // time
+            .expression("([AV]),")               // validity
+            .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
-            .number("(ddd)(dd.d+),")   // Longitude (DDDMM.MMMM)
+            .number("(ddd)(dd.d+),")             // longitude
             .expression("([EW]),")
-            .number("(d+.d+)?,")            // Speed
-            .number("(d+.d+)?,")            // Course
-            .number("(dd)(dd)(dd)")   // Date (DDMMYY)
-            .any()                         // Other (Checksumm)
+            .number("(d+.d+)?,")                 // speed
+            .number("(d+.d+)?,")                 // course
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .any()
             .compile();
 
     private void send(Channel channel, String message) {

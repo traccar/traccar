@@ -34,22 +34,22 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$GPRS")
-            .number("(d+),")                   // IMEI
-            .expression("([^,]+),")                  // Version
-            .number("(dd)(dd)(dd),") // Date
-            .number("(dd)(dd)(dd),") // Time
-            .number("(d)")                     // Flags
-            .number("(dd)(d{5})")          // Latitude (DDMMMMM)
-            .number("(ddd)(d{5}),")         // Longitude (DDDMMMMM)
-            .number("(d+),")                   // Speed
-            .number("(d+),")                   // Course
-            .number("(d+),")                   // Status
-            .number("(d+)?,")                  // GPRS counting value
-            .number("(d+)?,")                  // GPS power saving counting value
-            .number("(d+),")                   // Switch status
-            .number("(d+)")                    // Relay status
-            .expression("(?:[LH]{2})?")              // Power status
-            .number("#V(d+)")                // Battery
+            .number("(d+),")                     // imei
+            .expression("([^,]+),")              // version
+            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(d)")                       // flags
+            .number("(dd)(d{5})")                // latitude
+            .number("(ddd)(d{5}),")              // longitude
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("(d+),")                     // status
+            .number("(d+)?,")                    // gprs counting value
+            .number("(d+)?,")                    // gps power saving counting value
+            .number("(d+),")                     // switch status
+            .number("(d+)")                      // relay status
+            .expression("(?:[LH]{2})?")          // power status
+            .number("#V(d+)")                    // battery
             .any()
             .compile();
 
