@@ -76,7 +76,7 @@ Ext.define('Traccar.view.StateController', {
 
     formatValue: function (value) {
         if (typeof (id) === 'number') {
-            return value.toFixed(2);
+            return Number(value.toFixed(2));
         } else {
             return value;
         }
