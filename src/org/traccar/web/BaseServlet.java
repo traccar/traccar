@@ -65,7 +65,9 @@ public abstract class BaseServlet extends HttpServlet {
         String authorization = req.getHeader(Authorization.HEADER);
         if (authorization != null && !authorization.isEmpty()) {
             Map<String, String> authMap = Authorization.parse(authorization);
-            User user = Context.getDataManager().login(authMap.get(Authorization.USERNAME), authMap.get(Authorization.PASSWORD));
+            String username = authMap.get(Authorization.USERNAME);
+            String password = authMap.get(Authorization.PASSWORD);
+            User user = Context.getDataManager().login(username, password);
             if (user != null) {
                 return user.getId();
             }

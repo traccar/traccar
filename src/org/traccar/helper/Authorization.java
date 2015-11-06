@@ -24,10 +24,10 @@ import org.jboss.netty.handler.codec.base64.Base64;
 import org.jboss.netty.util.CharsetUtil;
 
 public final class Authorization {
-    
+
     private Authorization() {
     }
-    
+
     public static final String HEADER = "Authorization";
     public static final String SCHEME = "Basic";
     public static final String REGEX = SCHEME + " ";
@@ -39,7 +39,7 @@ public final class Authorization {
     public static Map<String, String> parse(String authorization) {
         Map<String, String> authMap = new HashMap<>();
         final String encodedUsernameAndPassword = authorization.replaceFirst(REGEX, REPLACEMENT);
-        ChannelBuffer buffer = ChannelBuffers.copiedBuffer(encodedUsernameAndPassword,CharsetUtil.UTF_8);
+        ChannelBuffer buffer = ChannelBuffers.copiedBuffer(encodedUsernameAndPassword, CharsetUtil.UTF_8);
         String usernameAndPassword = Base64.decode(buffer).toString(CharsetUtil.UTF_8);
         final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, TOKENIZER);
         authMap.put(USERNAME, tokenizer.nextToken());
