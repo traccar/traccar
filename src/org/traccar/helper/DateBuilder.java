@@ -25,13 +25,20 @@ public class DateBuilder {
 
     public DateBuilder() {
         this(TimeZone.getTimeZone("UTC"));
+    }
 
+    public DateBuilder(Date time) {
+        this(time, TimeZone.getTimeZone("UTC"));
     }
 
     public DateBuilder(TimeZone timeZone) {
+        this(new Date(0), timeZone);
+    }
+
+    public DateBuilder(Date time, TimeZone timeZone) {
         calendar = Calendar.getInstance(timeZone);
         calendar.clear();
-        calendar.setTimeInMillis(0);
+        calendar.setTimeInMillis(time.getTime());
     }
 
     public DateBuilder setYear(int year) {
@@ -87,6 +94,11 @@ public class DateBuilder {
 
     public DateBuilder setMillis(int millis) {
         calendar.set(Calendar.MILLISECOND, millis);
+        return this;
+    }
+
+    public DateBuilder addMillis(long millis) {
+        calendar.setTimeInMillis(calendar.getTimeInMillis() + millis);
         return this;
     }
 

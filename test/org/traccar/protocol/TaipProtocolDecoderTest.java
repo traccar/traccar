@@ -11,7 +11,8 @@ public class TaipProtocolDecoderTest extends ProtocolDecoderTest {
         TaipProtocolDecoder decoder = new TaipProtocolDecoder(new TaipProtocol(), false);
 
         verifyPosition(decoder, text(
-                ">RGP230615010248-2682523-065236820000003007F4101;ID=0005;#0002;*2A<"));
+                ">RGP230615010248-2682523-065236820000003007F4101;ID=0005;#0002;*2A<"),
+                position("2015-06-23 01:02:48.000", true, -26.82523, -65.23682));
 
         verifyPosition(decoder, text(
                 ">RGP190805211932-3457215-058493640000000FFBF0300;ID=8251;#2122;*54<"));
@@ -23,7 +24,8 @@ public class TaipProtocolDecoderTest extends ProtocolDecoderTest {
                 "\r\n>REV691615354941+3570173+1397742703203212;ID=Test"));
 
         verifyPosition(decoder, text(
-                ">REV481599462982+2578391-0802945201228512;ID=Test"));
+                ">REV481599462982+2578391-0802945201228512;ID=Test"),
+                position("2010-09-02 17:29:42.000", true, 25.78391, -80.29452));
         
         verifyPosition(decoder, text(
                 ">REV131756153215+3359479-0075299001031332;VO=10568798;IO=310;SV=10;BL=4190;CV09=0;AD=0;AL=+47;ID=356612021059680"));
