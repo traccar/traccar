@@ -33,19 +33,23 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("!D,")
+            .expression("![AD],")
             .number("(d+)/(d+)/(d+),")           // date
             .number("(d+):(d+):(d+),")           // time
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
+            .groupBegin()
             .number("(x+),")                     // flags
             .number("(-?d+.d+),")                // altitude
             .number("(d+),")                     // battery
             .number("(d+),")                     // satellites in use
             .number("(d+),")                     // satellites in view
             .text("0")
+            .or()
+            .any()
+            .groupEnd()
             .compile();
 
     @Override
@@ -58,7 +62,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             identify(sentence.substring(3, sentence.length()), channel);
 
-        } else if (sentence.startsWith("!D") && hasDeviceId()) {
+        } else if ((sentence.startsWith("!D") || sentence.startsWith("!A")) && hasDeviceId()) {
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
@@ -77,16 +81,24 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
             position.setSpeed(parser.nextDouble());
+
             position.setCourse(parser.nextDouble());
+            if (position.getCourse() > 360) {
+                position.setCourse(0);
+            }
 
-            int flags = parser.nextInt(16);
-            position.set(Event.KEY_FLAGS, flags);
-            position.setValid(BitUtil.check(flags, 0));
+            if (parser.hasNext(5)) {
 
-            position.setAltitude(parser.nextDouble());
+                int flags = parser.nextInt(16);
+                position.set(Event.KEY_FLAGS, flags);
+                position.setValid(BitUtil.check(flags, 0));
 
-            position.set(Event.KEY_BATTERY, parser.next());
-            position.set(Event.KEY_SATELLITES, parser.next());
+                position.setAltitude(parser.nextDouble());
+
+                position.set(Event.KEY_BATTERY, parser.next());
+                position.set(Event.KEY_SATELLITES, parser.next());
+
+            }
 
             return position;
 
