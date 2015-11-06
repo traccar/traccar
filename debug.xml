@@ -63,8 +63,8 @@
         language VARCHAR(128),
         distanceUnit VARCHAR(128),
         speedUnit VARCHAR(128),
-        latitude FLOAT DEFAULT 0 NOT NULL,
-        longitude FLOAT DEFAULT 0 NOT NULL,
+        latitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
+        longitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
         zoom INT DEFAULT 0 NOT NULL);
 
         CREATE TABLE device (
@@ -93,8 +93,8 @@
         deviceTime TIMESTAMP NOT NULL,
         fixTime TIMESTAMP NOT NULL,
         valid BIT NOT NULL,
-        latitude FLOAT NOT NULL,
-        longitude FLOAT NOT NULL,
+        latitude DOUBLE PRECISION NOT NULL,
+        longitude DOUBLE PRECISION NOT NULL,
         altitude FLOAT NOT NULL,
         speed FLOAT NOT NULL,
         course FLOAT NOT NULL,
@@ -113,8 +113,8 @@
         language VARCHAR(128),
         distanceUnit VARCHAR(128),
         speedUnit VARCHAR(128),
-        latitude FLOAT DEFAULT 0 NOT NULL,
-        longitude FLOAT DEFAULT 0 NOT NULL,
+        latitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
+        longitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
         zoom INT DEFAULT 0 NOT NULL);
 
         CREATE TABLE traccar (
