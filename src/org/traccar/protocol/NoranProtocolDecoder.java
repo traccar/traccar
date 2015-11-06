@@ -20,12 +20,12 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -87,14 +87,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedInt(); // GIS port
             }
 
-            // Flags
-            int flags = buf.readUnsignedByte();
-            position.setValid((flags & 0x01) != 0);
+            position.setValid(BitUtil.check(buf.readUnsignedByte(), 0));
 
-            // Alarm type
             position.set(Event.KEY_ALARM, buf.readUnsignedByte());
 
-            // Location
             if (newFormat) {
                 position.setSpeed(buf.readUnsignedInt());
                 position.setCourse(buf.readFloat());
@@ -105,21 +101,18 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(buf.readFloat());
             position.setLatitude(buf.readFloat());
 
-            // Time
             if (!newFormat) {
                 long timeValue = buf.readUnsignedInt();
-                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                time.clear();
-                time.set(Calendar.YEAR, 2000 + (int) (timeValue >> 26));
-                time.set(Calendar.MONTH, (int) (timeValue >> 22 & 0x0f) - 1);
-                time.set(Calendar.DAY_OF_MONTH, (int) (timeValue >> 17 & 0x1f));
-                time.set(Calendar.HOUR_OF_DAY, (int) (timeValue >> 12 & 0x1f));
-                time.set(Calendar.MINUTE, (int) (timeValue >> 6 & 0x3f));
-                time.set(Calendar.SECOND, (int) (timeValue & 0x3f));
-                position.setTime(time.getTime());
+                DateBuilder dateBuilder = new DateBuilder()
+                        .setYear((int) BitUtil.from(timeValue, 26))
+                        .setMonth((int) BitUtil.between(timeValue, 22, 26))
+                        .setDay((int) BitUtil.between(timeValue, 17, 22))
+                        .setHour((int) BitUtil.between(timeValue, 12, 17))
+                        .setMinute((int) BitUtil.between(timeValue, 6, 12))
+                        .setSecond((int) BitUtil.to(timeValue, 6));
+                position.setTime(dateBuilder.getDate());
             }
 
-            // Identification
             ChannelBuffer rawId;
             if (newFormat) {
                 rawId = buf.readBytes(12);
@@ -132,14 +125,12 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(getDeviceId());
 
-            // Time
             if (newFormat) {
                 DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
                 position.setTime(dateFormat.parse(buf.readBytes(17).toString(Charset.defaultCharset())));
                 buf.readByte();
             }
 
-            // Other data
             if (!newFormat) {
                 position.set(Event.PREFIX_IO + 1, buf.readUnsignedByte());
                 position.set(Event.KEY_FUEL, buf.readUnsignedByte());

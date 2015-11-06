@@ -18,14 +18,14 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -48,8 +48,6 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ALARM = 200;
     public static final int MSG_ALARM_RECIEVED = 201;
 
-    private static final String HEX_CHARS = "0123456789ABCDEF";
-
     private void requestArchive(Channel channel) {
         if (lastIndex == 0) {
             lastIndex = newIndex;
@@ -64,7 +62,8 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
     }
 
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
         int type = buf.readUnsignedShort();
@@ -95,7 +94,6 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
-                // Message index
                 if (type == MSG_LOGMSG) {
                     position.set(Event.KEY_ARCHIVE, true);
                     int subtype = buf.readUnsignedShort();
@@ -112,84 +110,47 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     newIndex = buf.readUnsignedInt();
                 }
 
-                // Time
-                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                time.clear();
-                time.setTimeInMillis(buf.readUnsignedInt() * 1000);
-                position.setTime(time.getTime());
-
-                // Latitude
+                position.setTime(new Date(buf.readUnsignedInt() * 1000));
                 position.setLatitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
-
-                // Longitude
                 position.setLongitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
+                position.setSpeed(buf.readUnsignedInt() * 0.01);
+                position.setCourse(buf.readUnsignedShort() * 0.01);
+                position.setAltitude(buf.readUnsignedShort() * 0.01);
 
-                // Speed
-                position.setSpeed(buf.readUnsignedInt() / 100.0);
+                int satellites = buf.readUnsignedByte();
+                position.setValid(satellites >= 3);
+                position.set(Event.KEY_SATELLITES, satellites);
 
-                // Course
-                position.setCourse(buf.readUnsignedShort() / 100.0);
-
-                // Altitude
-                position.setAltitude(buf.readUnsignedShort() / 100.0);
-
-                // Satellites
-                int satellitesNumber = buf.readUnsignedByte();
-                position.set(Event.KEY_SATELLITES, satellitesNumber);
-
-                // Validity
-                position.setValid(satellitesNumber >= 3);
-
-                // Cell signal
                 position.set(Event.KEY_GSM, buf.readUnsignedByte());
-
-                // Odometer
                 position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
 
                 long extraFlags = buf.readLong();
 
-                // Analog inputs
-                if ((extraFlags & 0x1) == 0x1) {
+                if (BitUtil.check(extraFlags, 0)) {
                     int count = buf.readUnsignedShort();
                     for (int i = 1; i <= count; i++) {
                         position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
                     }
                 }
 
-                // CAN adapter
-                if ((extraFlags & 0x2) == 0x2) {
+                if (BitUtil.check(extraFlags, 1)) {
                     int size = buf.readUnsignedShort();
                     position.set("can", buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
                     buf.skipBytes(size);
                 }
 
-                // Passenger sensor
-                if ((extraFlags & 0x4) == 0x4) {
-                    int size = buf.readUnsignedShort();
-
-                    // Convert binary data to hex
-                    StringBuilder hex = new StringBuilder();
-                    for (int i = buf.readerIndex(); i < buf.readerIndex() + size; i++) {
-                        byte b = buf.getByte(i);
-                        hex.append(HEX_CHARS.charAt((b & 0xf0) >> 4));
-                        hex.append(HEX_CHARS.charAt(b & 0x0F));
-                    }
-
-                    position.set("passenger", hex.toString());
-
-                    buf.skipBytes(size);
+                if (BitUtil.check(extraFlags, 2)) {
+                    position.set("passenger",
+                            ChannelBuffers.hexDump(buf.readBytes(buf.readUnsignedShort())));
                 }
 
-                // Send response for alarm message
                 if (type == MSG_ALARM) {
+                    position.set(Event.KEY_ALARM, true);
                     byte[] response = {(byte) 0xC9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
                     channel.write(ChannelBuffers.wrappedBuffer(response));
-
-                    position.set(Event.KEY_ALARM, true);
                 }
 
-                // Skip CRC
-                buf.readUnsignedInt();
+                buf.readUnsignedInt(); // crc
 
                 positions.add(position);
             }

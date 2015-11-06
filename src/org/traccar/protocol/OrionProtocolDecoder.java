@@ -16,16 +16,13 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
-
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -56,8 +53,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -80,7 +76,6 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < (header & 0x0f); i++) {
 
-                // Create new position
                 Position position = new Position();
                 position.setDeviceId(getDeviceId());
                 position.setProtocol(getProtocolName());
@@ -89,28 +84,21 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // length
                 position.set(Event.KEY_FLAGS, buf.readUnsignedShort());
 
-                // Location
                 position.setLatitude(convertCoordinate(buf.readInt()));
                 position.setLongitude(convertCoordinate(buf.readInt()));
                 position.setAltitude(buf.readShort() / 10.0);
                 position.setCourse(buf.readUnsignedShort());
                 position.setSpeed(buf.readUnsignedShort() * 0.0539957);
 
-                // Date and time
-                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                time.clear();
-                time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-                time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-                time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-                time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-                time.set(Calendar.MINUTE, buf.readUnsignedByte());
-                time.set(Calendar.SECOND, buf.readUnsignedByte());
-                position.setTime(time.getTime());
+                DateBuilder dateBuilder = new DateBuilder()
+                        .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                        .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                position.setTime(dateBuilder.getDate());
 
-                // Accuracy
                 int satellites = buf.readUnsignedByte();
-                position.set(Event.KEY_SATELLITES, satellites);
                 position.setValid(satellites >= 3);
+                position.set(Event.KEY_SATELLITES, satellites);
+
                 positions.add(position);
             }
 

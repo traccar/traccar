@@ -105,7 +105,6 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             String sentence = buf.toString(Charset.defaultCharset());
 
-            // Coordinates
             Pattern pattern = Pattern.compile("(-?\\d+\\.\\d+), (-?\\d+\\.\\d+)");
             Matcher matcher = pattern.matcher(sentence);
             if (!matcher.find()) {
@@ -114,7 +113,6 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(Double.parseDouble(matcher.group(1)));
             position.setLongitude(Double.parseDouble(matcher.group(2)));
 
-            // Speed and Course
             pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
             matcher = pattern.matcher(sentence);
             if (matcher.find()) {
@@ -122,7 +120,6 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(0); // matcher.group(1) for course
             }
 
-            // Time
             pattern = Pattern.compile("(\\d{1,2}:\\d{2} \\w{3} \\d{1,2})");
             matcher = pattern.matcher(sentence);
             if (!matcher.find()) {
@@ -130,6 +127,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             }
             DateFormat dateFormat = new SimpleDateFormat("HH:mm MMM d yyyy", Locale.ENGLISH);
             position.setTime(dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR)));
+
             return position;
 
         }

@@ -16,13 +16,11 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -64,12 +62,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Event.KEY_INDEX, buf.readUnsignedShort());
 
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000);
-            time.set(Calendar.MONTH, 0);
-            time.set(Calendar.DAY_OF_MONTH, 1);
+            DateBuilder dateBuilder = new DateBuilder().setDate(2000, 1, 1);
 
             long date = buf.readUnsignedInt();
 
@@ -78,12 +71,10 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             long minutes = BitUtil.between(date, 6, 6 + 6);
             long seconds = BitUtil.to(date, 6);
 
-            long millis = time.getTimeInMillis();
-            millis += (((days * 24 + hours) * 60 + minutes) * 60 + seconds) * 1000;
+            dateBuilder.addMillis((((days * 24 + hours) * 60 + minutes) * 60 + seconds) * 1000);
 
-            position.setTime(new Date(millis));
+            position.setTime(dateBuilder.getDate());
 
-            // Location
             position.setValid(true);
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);

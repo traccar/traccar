@@ -18,16 +18,14 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -90,8 +88,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
         int type = buf.readUnsignedShort();
@@ -104,8 +101,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_TRACKER_ID) {
-            Log.warning("Unsupported authentication type");
-            return null;
+            return null; // unsupported authentication type
         }
 
         if (type == MSG_TRACKER_ID_EXT) {
@@ -139,7 +135,6 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
-                // Message index
                 int subtype = type;
                 if (type == MSG_LOG_RECORDS) {
                     position.set(Event.KEY_ARCHIVE, true);
@@ -154,19 +149,10 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedShort(); // length
                 }
 
-                // Time
-                Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                time.clear();
-                time.setTimeInMillis(buf.readUnsignedInt() * 1000);
-                position.setTime(time.getTime());
-
-                // Latitude
+                position.setTime(new Date(buf.readUnsignedInt() * 1000));
                 position.setLatitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
-
-                // Longitude
                 position.setLongitude(buf.readInt() * 180.0 / 0x7FFFFFFF);
 
-                // Speed and Validity
                 if (subtype == MSG_STATE_FULL_INFO_T104) {
                     int speed = buf.readUnsignedByte();
                     position.setValid(speed != 255);
@@ -175,39 +161,25 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 } else {
                     int speed = buf.readShort();
                     position.setValid(speed != -1);
-                    position.setSpeed(UnitsConverter.knotsFromKph(speed / 100.0));
+                    position.setSpeed(UnitsConverter.knotsFromKph(speed * 0.01));
                 }
 
-                // Course
-                position.setCourse(buf.readShort() / 100.0);
-
-                // Altitude
+                position.setCourse(buf.readShort() * 0.01);
                 position.setAltitude(buf.readShort());
 
                 if (subtype == MSG_STATE_FULL_INFO_T104) {
 
-                    // Satellites
                     position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
-
-                    // Cell signal
                     position.set(Event.KEY_GSM, buf.readUnsignedByte());
-
-                    // Event type
                     position.set(Event.KEY_EVENT, buf.readUnsignedShort());
-
-                    // Odometer
                     position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
-
-                    // Input/Output
                     position.set(Event.KEY_INPUT, buf.readUnsignedByte());
                     position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
 
-                    // Analog sensors
                     for (int i = 1; i <= 8; i++) {
                         position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
                     }
 
-                    // Counters
                     position.set(Event.PREFIX_COUNT + 1, buf.readUnsignedInt());
                     position.set(Event.PREFIX_COUNT + 2, buf.readUnsignedInt());
                     position.set(Event.PREFIX_COUNT + 3, buf.readUnsignedInt());
@@ -216,8 +188,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 positions.add(position);
             }
 
-            // Skip CRC
-            buf.readUnsignedInt();
+            buf.readUnsignedInt(); // crc
 
             if (type == MSG_LOG_RECORDS) {
                 requestArchive(channel);
