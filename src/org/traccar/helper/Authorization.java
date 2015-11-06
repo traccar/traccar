@@ -15,10 +15,13 @@
  */
 package org.traccar.helper;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.base64.Base64;
+import org.jboss.netty.util.CharsetUtil;
 
 public final class Authorization {
     
@@ -36,7 +39,8 @@ public final class Authorization {
     public static Map<String, String> parse(String authorization) {
         Map<String, String> authMap = new HashMap<>();
         final String encodedUsernameAndPassword = authorization.replaceFirst(REGEX, REPLACEMENT);
-        String usernameAndPassword = new String(Base64.getDecoder().decode(encodedUsernameAndPassword));
+        ChannelBuffer buffer = ChannelBuffers.copiedBuffer(encodedUsernameAndPassword,CharsetUtil.UTF_8);
+        String usernameAndPassword = Base64.decode(buffer).toString(CharsetUtil.UTF_8);
         final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, TOKENIZER);
         authMap.put(USERNAME, tokenizer.nextToken());
         authMap.put(PASSWORD, tokenizer.nextToken());
