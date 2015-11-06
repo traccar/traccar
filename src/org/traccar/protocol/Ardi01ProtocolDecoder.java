@@ -16,12 +16,12 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -32,75 +32,56 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(\\d+)," +                    // IMEI
-            "(\\d{4})(\\d{2})(\\d{2})" +   // Date (YYYYMMDD)
-            "(\\d{2})(\\d{2})(\\d{2})," +  // Time (HHMMSS)
-            "(-?\\d+\\.\\d+)," +           // Longitude
-            "(-?\\d+\\.\\d+)," +           // Latitude
-            "(\\d+\\.?\\d*)," +            // Speed
-            "(\\d+\\.?\\d*)," +            // Course
-            "(-?\\d+\\.?\\d*)," +          // Altitude
-            "(\\d+)," +                    // Satellites
-            "(\\d+)," +                    // Event
-            "(\\d+)," +                    // Battery
-            "(-?\\d+)");                   // Temperature
+    private static final Pattern PATTERN = new PatternBuilder()
+            .number("(d+),")                     // imei
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(-?d+.d+),")                // longitude
+            .number("(-?d+.d+),")                // latitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // course
+            .number("(-?d+.?d*),")               // altitude
+            .number("(d+),")                     // satellites
+            .number("(d+),")                     // event
+            .number("(d+),")                     // battery
+            .number("(-?d+)")                    // temperature
+            .compile();
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        // Parse message
-        Matcher parser = PATTERN.matcher(sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        Integer index = 1;
 
-        // Detect device
-        if (!identify(parser.group(index++), channel)) {
+        if (!identify(parser.next(), channel)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
 
-        // Date and time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.YEAR, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MONTH, Integer.parseInt(parser.group(index++)) - 1);
-        time.set(Calendar.DAY_OF_MONTH, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.HOUR_OF_DAY, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.MINUTE, Integer.parseInt(parser.group(index++)));
-        time.set(Calendar.SECOND, Integer.parseInt(parser.group(index++)));
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
 
-        // Location data
-        position.setLongitude(Double.parseDouble(parser.group(index++)));
-        position.setLatitude(Double.parseDouble(parser.group(index++)));
-        position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(parser.group(index++))));
-        position.setCourse(Double.parseDouble(parser.group(index++)));
-        position.setAltitude(Double.parseDouble(parser.group(index++)));
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
 
-        // Satellites
-        int satellites = Integer.parseInt(parser.group(index++));
+        int satellites = parser.nextInt();
         position.setValid(satellites >= 3);
         position.set(Event.KEY_SATELLITES, satellites);
 
-        // Event
-        position.set(Event.KEY_EVENT, parser.group(index++));
-
-        // Input
-        position.set(Event.KEY_BATTERY, parser.group(index++));
-
-        // Output
-        position.set(Event.PREFIX_TEMP + 1, parser.group(index++));
+        position.set(Event.KEY_EVENT, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Event.PREFIX_TEMP + 1, parser.next());
 
         return position;
     }
