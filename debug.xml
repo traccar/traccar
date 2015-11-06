@@ -256,7 +256,6 @@
     <entry key='progress.port'>5012</entry>
     <entry key='h02.port'>5013</entry>
     <entry key='jt600.port'>5014</entry>
-    <entry key='ev603.port'>5015</entry>
     <entry key='v680.port'>5016</entry>
     <entry key='pt502.port'>5017</entry>
     <entry key='tr20.port'>5018</entry>
