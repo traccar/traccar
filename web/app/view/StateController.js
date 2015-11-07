@@ -25,14 +25,14 @@ Ext.define('Traccar.view.StateController', {
                     selectDevice: 'selectDevice',
                     selectReport: 'selectReport'
                 }
+            },
+            store: {
+                '#LatestPositions': {
+                    add: 'update',
+                    update: 'update'
+                }
             }
         }
-    },
-
-    init: function () {
-        var store = Ext.getStore('LatestPositions');
-        store.on('add', this.add, this);
-        store.on('update', this.update, this);
     },
 
     keys: {
@@ -128,15 +128,15 @@ Ext.define('Traccar.view.StateController', {
         console.log(position);
     },
 
-    add: function (store, data) {
-        if (this.deviceId === data[0].get('deviceId')) {
-            this.updatePosition(data[0]);
-        }
-    },
-
     update: function (store, data) {
-        if (this.deviceId === data.get('deviceId')) {
-            this.updatePosition(data);
+        var i;
+        if (!Ext.isArray(data)) {
+            data = [data];
+        }
+        for (i = 0; i < data.length; i++) {
+            if (this.deviceId === data[i].get('deviceId')) {
+                this.updatePosition(data[0]);
+            }
         }
     }
 });

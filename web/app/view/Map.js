@@ -27,6 +27,18 @@ Ext.define('Traccar.view.Map', {
     title: Strings.mapTitle,
     layout: 'fit',
 
+    getMap: function () {
+        return this.map;
+    },
+
+    getMapView: function () {
+        return this.mapView;
+    },
+
+    getVectorSource: function () {
+        return this.vectorSource;
+    },
+
     listeners: {
         afterrender: function () {
             var user, server, layer, type, bingKey, vectorLayer, lat, lon, zoom;
