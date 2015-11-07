@@ -16,12 +16,11 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -57,8 +56,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -81,42 +79,30 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(getDeviceId());
 
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
-            time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.HOUR_OF_DAY, ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
-            position.setTime(time.getTime());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setYear(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setMonth(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setDay(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setHour(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setMinute(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setSecond(ChannelBufferTools.readHexInteger(buf, 2));
+            position.setTime(dateBuilder.getDate());
 
-            // Location
             position.setLatitude(ChannelBufferTools.readCoordinate(buf));
             position.setLongitude(ChannelBufferTools.readCoordinate(buf));
             position.setSpeed(UnitsConverter.knotsFromKph(ChannelBufferTools.readHexInteger(buf, 4)));
             position.setCourse(ChannelBufferTools.readHexInteger(buf, 4));
 
-            // Flags
             int flags = buf.readUnsignedByte();
             position.setValid((flags & 0x80) != 0);
             position.set(Event.KEY_SATELLITES, flags & 0x0f);
 
-            // Status
             position.set(Event.KEY_STATUS, buf.readUnsignedByte());
-
-            // Key switch
             position.set("key", buf.readUnsignedByte());
-
-            // Oil
             position.set("oil", buf.readUnsignedShort() / 10.0);
-
-            // Power
             position.set(Event.KEY_POWER, buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
-
-            // Odometer
             position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+
             return position;
         }
 

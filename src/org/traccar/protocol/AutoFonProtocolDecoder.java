@@ -16,14 +16,13 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -79,15 +78,10 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         position.setValid((valid & 0xc0) != 0);
         position.set(Event.KEY_SATELLITES, valid & 0x3f);
 
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-        time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-        time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-        time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-        time.set(Calendar.MINUTE, buf.readUnsignedByte());
-        time.set(Calendar.SECOND, buf.readUnsignedByte());
-        position.setTime(time.getTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+        position.setTime(dateBuilder.getDate());
 
         position.setLatitude(convertCoordinate(buf.readInt()));
         position.setLongitude(convertCoordinate(buf.readInt()));
@@ -120,7 +114,6 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            // Send response
             if (channel != null) {
                 channel.write(ChannelBuffers.wrappedBuffer(new byte[] {buf.readByte()}));
             }

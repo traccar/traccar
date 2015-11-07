@@ -17,12 +17,11 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
-import java.util.Calendar;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -70,8 +69,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -84,15 +82,13 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
         byte packetNumber = buf.readByte();
 
-        // Send reply
         sendReply(channel, deviceUniqueId, packetNumber);
 
-        // Parse location
         if (type == MSG_CLIENT_STATUS) {
+
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            // Device identifier
             if (!identify(String.valueOf(deviceUniqueId), channel)) {
                 return null;
             }
@@ -102,7 +98,6 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // software version
             buf.readUnsignedByte(); // protocol version
 
-            // Status
             position.set(Event.KEY_STATUS, buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
 
             int operator = (buf.readUnsignedByte() & 0xf0) << 4;
@@ -128,23 +123,17 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(buf.readUnsignedByte() >= 3); // satellites
 
-            // Location data
             position.setLongitude(buf.readInt() / Math.PI * 180 / 100000000);
             position.setLatitude(buf.readInt() / Math.PI * 180 / 100000000.0);
             position.setAltitude(buf.readInt() * 0.01);
             position.setSpeed(UnitsConverter.knotsFromMps(buf.readInt() * 0.01));
             position.setCourse(buf.readUnsignedShort() / Math.PI * 180.0 / 1000.0);
 
-            // Time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte() - 1);
-            time.set(Calendar.YEAR, buf.readUnsignedShort());
-            position.setTime(time.getTime());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTimeReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedShort());
+            position.setTime(dateBuilder.getDate());
+
             return position;
         }
 

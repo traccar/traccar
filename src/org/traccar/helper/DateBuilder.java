@@ -106,6 +106,10 @@ public class DateBuilder {
         return setHour(hour).setMinute(minute).setSecond(second);
     }
 
+    public DateBuilder setTimeReverse(int second, int minute, int hour) {
+        return setHour(hour).setMinute(minute).setSecond(second);
+    }
+
     public DateBuilder setTime(int hour, int minute, int second, int millis) {
         return setHour(hour).setMinute(minute).setSecond(second).setMillis(millis);
     }

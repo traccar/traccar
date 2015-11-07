@@ -16,14 +16,13 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
-import java.util.Calendar;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -60,8 +59,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -72,34 +70,28 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
         if (type == MSG_ON_DEMAND || type == MSG_POSITION_UPLOAD || type == MSG_POSITION_REUPLOAD
                 || type == MSG_ALARM || type == MSG_REPLY || type == MSG_PERIPHERAL) {
 
-            // Create new position
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            // Device identification
             if (!identify(readSerialNumber(buf), channel)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());
 
-            // Date and time
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 2000 + ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.MONTH, ChannelBufferTools.readHexInteger(buf, 2) - 1);
-            time.set(Calendar.DAY_OF_MONTH, ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.HOUR_OF_DAY, ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.MINUTE, ChannelBufferTools.readHexInteger(buf, 2));
-            time.set(Calendar.SECOND, ChannelBufferTools.readHexInteger(buf, 2));
-            position.setTime(time.getTime());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setYear(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setMonth(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setDay(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setHour(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setMinute(ChannelBufferTools.readHexInteger(buf, 2))
+                    .setSecond(ChannelBufferTools.readHexInteger(buf, 2));
+            position.setTime(dateBuilder.getDate());
 
-            // Location
             position.setLatitude(ChannelBufferTools.readCoordinate(buf));
             position.setLongitude(ChannelBufferTools.readCoordinate(buf));
             position.setSpeed(UnitsConverter.knotsFromKph(ChannelBufferTools.readHexInteger(buf, 4)));
             position.setCourse(ChannelBufferTools.readHexInteger(buf, 4));
 
-            // Flags
             int flags = buf.readUnsignedByte();
             position.setValid((flags & 0x80) != 0);
 
@@ -109,14 +101,10 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             } else {
 
-                // Odometer
                 position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
 
-                // Status
-                buf.skipBytes(4);
-
-                // Other
-                buf.skipBytes(8);
+                buf.skipBytes(4); // status
+                buf.skipBytes(8); // other
 
             }
 
