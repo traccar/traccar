@@ -35,15 +35,26 @@ Ext.define('Traccar.Style', {
     mapDefaultLon: -0.1275,
     mapDefaultZoom: 6,
 
-    mapMaxZoom: 19,
-    mapSelectColor: 'rgba(0, 255, 0, 1.0)',
-    mapSelectRadius: 10,
-    mapReportColor: 'rgba(0, 0, 255, 1.0)',
-    mapReportRadius: 5,
-    mapLiveColor: 'rgba(255, 0, 0, 1.0)',
-    mapLiveRadius: 7,
-    mapStrokeColor: 'rgba(50, 50, 50, 1.0)',
+    mapRouteColor: 'rgba(21, 127, 204, 1.0)',
     mapRouteWidth: 5,
-    mapMarkerStroke: 2,
+
+    mapArrowStrokeColor: 'rgba(50, 50, 50, 1.0)',
+    mapArrowStrokeWidth: 2,
+
+    mapTextColor: 'rgba(50, 50, 50, 1.0)',
+    mapTextStrokeColor: 'rgba(255, 255, 255, 1.0)',
+    mapTextStrokeWidth: 2,
+    mapTextOffset: 10,
+    mapTextFont: 'bold 12px sans-serif',
+
+    mapColorOnline: '#4DFA90',
+    mapColorUnknown: '#FABE4D',
+    mapColorOffline: '#FF5468',
+    mapColorReport: 'rgba(21, 127, 204, 1.0)',
+
+    mapRadiusNormal: 10,
+    mapRadiusSelected: 15,
+
+    mapMaxZoom: 19,
     mapDelay: 500
 });
