@@ -16,14 +16,8 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BitUtil;
-import org.traccar.helper.DateBuilder;
-import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 
@@ -42,8 +36,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         buf.readUnsignedByte(); // start marker
-        int type = buf.readUnsignedShort();
-        int flags = buf.readUnsignedShort();
+        //int type = buf.readUnsignedShort();
+        //int flags = buf.readUnsignedShort();
         buf.skipBytes(6); // phone number
         buf.readUnsignedShort(); // index
 
