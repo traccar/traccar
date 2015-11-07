@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'Показать',
     reportClear: 'Очистить',
 
-    positionTime: 'Время',
+    positionFixTime: 'Время',
     positionValid: 'Корректность',
     positionLatitude: 'Широта',
     positionLongitude: 'Долгота',

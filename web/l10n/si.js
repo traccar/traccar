@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'පෙන්වන්න',
     reportClear: 'ඉවත් කරන්න',
 
-    positionTime: 'කාලය',
+    positionFixTime: 'කාලය',
     positionValid: 'වලංගු',
     positionLatitude: 'අක්ෂාංශ',
     positionLongitude: 'දේශාංශ',

@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'Vis',
     reportClear: 'Ryd',
 
-    positionTime: 'Tid',
+    positionFixTime: 'Tid',
     positionValid: 'Valid',
     positionLatitude: '>Breddegrad',
     positionLongitude: 'Længdegrad',

@@ -50,7 +50,7 @@ var Strings = {
     reportShow: '显示',
     reportClear: '清空',
 
-    positionTime: '时间',
+    positionFixTime: '时间',
     positionValid: '有效',
     positionLatitude: '纬度',
     positionLongitude: '经度',

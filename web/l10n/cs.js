@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'Zobrazit',
     reportClear: 'Vyčistit',
 
-    positionTime: 'Čas',
+    positionFixTime: 'Čas',
     positionValid: 'Správný',
     positionLatitude: 'Šířka',
     positionLongitude: 'Délka',

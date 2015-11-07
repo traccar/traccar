@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'Laten zien',
     reportClear: 'Leegmaken',
 
-    positionTime: 'Tijd',
+    positionFixTime: 'Tijd',
     positionValid: 'Geldig',
     positionLatitude: 'Latitude',
     positionLongitude: 'Longitude',

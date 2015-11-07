@@ -50,7 +50,7 @@
     reportShow: 'Προβολή',
     reportClear: 'Καθαρισμός',
 
-    positionTime: 'Χρόνος',
+    positionFixTime: 'Χρόνος',
     positionValid: 'Έγκυρο',
     positionLatitude: 'Γ. πλάτος',
     positionLongitude: 'Γ. μήκος',

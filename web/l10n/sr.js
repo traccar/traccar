@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'Prikaži',
     reportClear: 'Izbriši',
 
-    positionTime: 'Vreme',
+    positionFixTime: 'Vreme',
     positionValid: 'Ispravno',
     positionLatitude: 'Geografska širina',
     positionLongitude: 'Geografska dužina',

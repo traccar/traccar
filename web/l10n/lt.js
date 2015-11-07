@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'Rodyti',
     reportClear: 'Valyti',
 
-    positionTime: 'Laikas',
+    positionFixTime: 'Laikas',
     positionValid: 'Galimas',
     positionLatitude: 'Platuma',
     positionLongitude: 'Ilguma',

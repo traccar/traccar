@@ -84,7 +84,7 @@ Ext.define('Traccar.view.Report', {
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('valid')
     }, {
-        text: Strings.positionTime,
+        text: Strings.positionFixTime,
         dataIndex: 'fixTime',
         flex: 1,
         xtype: 'datecolumn',

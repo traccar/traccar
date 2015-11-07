@@ -50,7 +50,7 @@ var Strings = {
     reportShow: 'แสดง',
     reportClear: 'ขจัด',
 
-    positionTime: 'เวลา',
+    positionFixTime: 'เวลา',
     positionValid: 'ถูกต้อง',
     positionLatitude: 'ละติจูด',
     positionLongitude: 'ลองจิจูด',

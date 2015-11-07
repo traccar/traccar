@@ -35,44 +35,20 @@ Ext.define('Traccar.view.StateController', {
         }
     },
 
-    keys: {
-        fixTime: {
-            priority: 1,
-            name: Strings.positionTime
-        },
-        latitude: {
-            priority: 2,
-            name: Strings.positionLatitude
-        },
-        longitude: {
-            priority: 3,
-            name: Strings.positionLongitude
-        },
-        valid: {
-            priority: 4,
-            name: Strings.positionValid
-        },
-        altitude: {
-            priority: 5,
-            name: Strings.positionAltitude
-        },
-        speed: {
-            priority: 6,
-            name: Strings.positionSpeed
-        },
-        course: {
-            priority: 7,
-            name: Strings.positionCourse
-        },
-        address: {
-            priority: 8,
-            name: Strings.positionAddress
-        },
-        protocol: {
-            priority: 9,
-            name: Strings.positionProtocol
+    keys: (function () {
+        var i, list, result;
+        result = {};
+        list = ['fixTime', 'latitude', 'longitude', 'valid', 'altitude', 'speed', 'course', 'address', 'protocol'];
+        for (i = 0; i < list.length; i++) {
+            result[list[i]] = {
+                priority: i,
+                name: Strings['position' + list[i].replace(/^\w/g, function (s) {
+                    return s.toUpperCase();
+                })]
+            };
         }
-    },
+        return result;
+    }()),
 
     formatValue: function (value) {
         if (typeof (id) === 'number') {

@@ -50,7 +50,7 @@ var strings = {
     reportShow: 'Mutat',
     reportClear: 'Töröl',
 
-    positionTime: 'Idő',
+    positionFixTime: 'Idő',
     positionValid: 'Valós',
     positionLatitude: 'Szélességi fok',
     positionLongitude: 'Hosszúsági fok',
