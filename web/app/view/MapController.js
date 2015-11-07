@@ -188,7 +188,7 @@ Ext.define('Traccar.view.MapController', {
     selectMarker: function (marker) {
         if (this.selectedMarker) {
             this.selectedMarker.setStyle(
-                this.resizeMarker(this.selectedMarker.getStyle(), Traccar.Style.mapRadiusSelected));
+                this.resizeMarker(this.selectedMarker.getStyle(), Traccar.Style.mapRadiusNormal));
         }
 
         if (marker) {
