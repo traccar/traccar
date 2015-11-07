@@ -18,14 +18,14 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -83,7 +83,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         position.setDeviceId(getDeviceId());
 
-        // Format type
         int format;
         if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
             format = buf.readUnsignedShort();
@@ -95,49 +94,29 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         long index = buf.readUnsignedInt();
         position.set(Event.KEY_INDEX, index);
 
-        // Event type
         position.set(Event.KEY_EVENT, buf.readUnsignedShort());
 
-        // Event time
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.clear();
-        time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-        time.set(Calendar.MINUTE, buf.readUnsignedByte());
-        time.set(Calendar.SECOND, buf.readUnsignedByte());
-        time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-        time.set(Calendar.MONTH, buf.readUnsignedByte());
-        time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-        position.set("time", time.getTimeInMillis());
+        buf.skipBytes(6); // event time
 
-        // Alarm status
         position.set(Event.KEY_ALARM, buf.readUnsignedByte());
-
-        // Modules status
         position.set(Event.KEY_STATUS, buf.readUnsignedByte());
-
-        // GSM signal
         position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
-        // Output
         if (isFormat(format, F10, F20, F30)) {
             position.set(Event.KEY_OUTPUT, buf.readUnsignedShort());
         } else if (isFormat(format, F40, F50, F51, F52)) {
             position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
         }
 
-        // Input
         if (isFormat(format, F10, F20, F30, F40)) {
             position.set(Event.KEY_INPUT, buf.readUnsignedShort());
         } else if (isFormat(format, F50, F51, F52)) {
             position.set(Event.KEY_INPUT, buf.readUnsignedByte());
         }
 
-        position.set(Event.KEY_POWER, buf.readUnsignedShort() / 1000.0);
-
-        // Battery power
+        position.set(Event.KEY_POWER, buf.readUnsignedShort() * 0.001);
         position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
 
-        // Temperature
         if (isFormat(format, F10, F20, F30)) {
             position.set(Event.PREFIX_TEMP + 1, buf.readShort());
         }
@@ -147,46 +126,37 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
         }
 
+        // Impulse counters
         if (isFormat(format, F20, F50, F51, F52)) {
-            // Impulse counters
             buf.readUnsignedInt();
             buf.readUnsignedInt();
         }
 
         if (isFormat(format, F20, F50, F51, F52)) {
-            // Validity
             int locationStatus = buf.readUnsignedByte();
-            position.setValid((locationStatus & 0x02) == 0x02);
+            position.setValid(BitUtil.check(locationStatus, 1));
 
-            // Location time
-            time.clear();
-            time.set(Calendar.HOUR_OF_DAY, buf.readUnsignedByte());
-            time.set(Calendar.MINUTE, buf.readUnsignedByte());
-            time.set(Calendar.SECOND, buf.readUnsignedByte());
-            time.set(Calendar.DAY_OF_MONTH, buf.readUnsignedByte());
-            time.set(Calendar.MONTH, buf.readUnsignedByte());
-            time.set(Calendar.YEAR, 2000 + buf.readUnsignedByte());
-            position.setTime(time.getTime());
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+            position.setTime(dateBuilder.getDate());
 
-            // Location data
             position.setLatitude(buf.readFloat() / Math.PI * 180);
             position.setLongitude(buf.readFloat() / Math.PI * 180);
             position.setSpeed(buf.readFloat());
             position.setCourse(buf.readUnsignedShort());
 
-            // Odometer
             position.set(Event.KEY_ODOMETER, buf.readFloat());
 
-            // Last segment
-            position.set("segment", buf.readFloat());
+            position.set("segment", buf.readFloat()); // last segment
 
             // Segment times
             buf.readUnsignedShort();
             buf.readUnsignedShort();
         }
 
+        // Other
         if (isFormat(format, F51, F52)) {
-            // Other stuff
             buf.readUnsignedShort();
             buf.readByte();
             buf.readUnsignedShort();
@@ -198,8 +168,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort();
         }
 
+        // Four temperature sensors
         if (isFormat(format, F40, F52)) {
-            // Four temperature sensors
             buf.readByte();
             buf.readByte();
             buf.readByte();
@@ -217,7 +187,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         response.writeInt((int) result.getId());
         sendReply(channel, response);
 
-        // No location data
         if (result.getPosition().getFixTime() == null) {
             return null;
         }
@@ -241,7 +210,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         response.writeByte(count);
         sendReply(channel, response);
 
-        // No location data
         if (positions.isEmpty()) {
             return null;
         }
@@ -281,12 +249,10 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        // Read header
         prefix = buf.toString(buf.readerIndex(), 4, CHARSET);
         buf.skipBytes(prefix.length()); // prefix @NTC by default
         serverId = buf.readUnsignedInt();
@@ -298,7 +264,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             return null; // keep alive message
         }
 
-        // Read message type
         String type = buf.toString(buf.readerIndex(), 3, CHARSET);
         buf.skipBytes(type.length());
 

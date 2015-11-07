@@ -17,11 +17,9 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -33,6 +31,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -103,14 +102,10 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 weekNumber = buf.readUnsignedShort();
             }
 
-            Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-            time.clear();
-            time.set(Calendar.YEAR, 1980);
-            time.set(Calendar.MONTH, 0);
-            time.set(Calendar.DAY_OF_MONTH, 6);
-            long offset = time.getTimeInMillis();
+            DateBuilder dateBuilder = new DateBuilder().setDate(1980, 1, 6);
+            dateBuilder.addMillis(weekNumber * 7 * 24 * 60 * 60 * 1000 + weekTime);
 
-            return new Date(offset + weekNumber * 7 * 24 * 60 * 60 * 1000 + weekTime);
+            return dateBuilder.getDate();
         }
 
     }
@@ -130,7 +125,6 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
                 short flags = buf.readUnsignedByte();
 
-                // Skip events
                 short event = buf.readUnsignedByte();
                 if (BitUtil.check(event, 7)) {
                     if (BitUtil.check(event, 6)) {
@@ -287,7 +281,6 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         HttpRequest request = (HttpRequest) msg;
         ChannelBuffer buf = request.getContent();
 
-        // Read identifier
         buf.skipBytes("id=".length());
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
         String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), Charset.defaultCharset());
@@ -297,7 +290,6 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(uniqueId.length());
         buf.skipBytes("&bin=".length());
 
-        // Read header
         short packetId = buf.readUnsignedByte();
         short offset = buf.readUnsignedByte(); // dataOffset
         short packetCount = buf.readUnsignedByte();
@@ -305,13 +297,11 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // timezone
         buf.skipBytes(offset - 5);
 
-        // Send response
         if (channel != null) {
             sendContinue(channel);
             sendResponse(channel, packetId, packetCount);
         }
 
-        // Parse data
         if (packetId == 0x31 || packetId == 0x32 || packetId == 0x36) {
             if (simple) {
                 return parseFormatA1(buf);
