@@ -95,6 +95,12 @@ Ext.define('Traccar.view.Map', {
                 layers: [layer, vectorLayer],
                 view: this.mapView
             });
+
+            this.map.on("click", function(e) {
+                this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+                    this.fireEvent('selectFeature', feature);
+                }, this);
+            }, this);
         },
 
         resize: function () {

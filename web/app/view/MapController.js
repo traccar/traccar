@@ -35,6 +35,11 @@ Ext.define('Traccar.view.MapController', {
                     load: 'loadReport',
                     clear: 'clearReport'
                 }
+            },
+            component: {
+                '#': {
+                    selectFeature: 'selectFeature'
+                }
             }
         }
     },
@@ -206,5 +211,9 @@ Ext.define('Traccar.view.MapController', {
 
     selectReport: function (position) {
         this.selectMarker(this.reportMarkers[position.get('id')]);
+    },
+
+    selectFeature: function (feature) {
+        console.log(feature);
     }
 });
