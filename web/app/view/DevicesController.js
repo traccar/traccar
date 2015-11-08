@@ -27,6 +27,7 @@ Ext.define('Traccar.view.DevicesController', {
         listen: {
             controller: {
                 '*': {
+                    selectDevice: 'selectDevice',
                     selectReport: 'selectReport'
                 }
             }
@@ -87,8 +88,12 @@ Ext.define('Traccar.view.DevicesController', {
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty);
         if (!empty) {
-            this.fireEvent('selectDevice', selected.getLastSelected());
+            this.fireEvent('selectDevice', selected.getLastSelected(), true);
         }
+    },
+
+    selectDevice: function (device, center) {
+        this.getView().getSelectionModel().select([device], false, true);
     },
 
     selectReport: function (position) {

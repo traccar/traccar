@@ -50,7 +50,7 @@ Ext.define('Traccar.view.MapController', {
     },
 
     updateLatest: function (store, data) {
-        var i, position, geometry, deviceId, name, marker, style;
+        var i, position, geometry, device, deviceId, name, marker, style;
 
         if (!Ext.isArray(data)) {
             data = [data];
@@ -59,6 +59,7 @@ Ext.define('Traccar.view.MapController', {
         for (i = 0; i < data.length; i++) {
             position = data[i];
             deviceId = position.get('deviceId');
+            device = Ext.getStore('Devices').findRecord('id', deviceId, 0, false, false, true);
 
             geometry = new ol.geom.Point(ol.proj.fromLonLat([
                 position.get('longitude'),
@@ -70,13 +71,13 @@ Ext.define('Traccar.view.MapController', {
                 marker.setGeometry(geometry);
             } else {
                 marker = new ol.Feature(geometry);
+                marker.set('record', device);
                 this.latestMarkers[deviceId] = marker;
                 this.getView().getVectorSource().addFeature(marker);
 
                 style = this.getLatestMarker();
                 style.getImage().setRotation(position.get('course'));
-                style.getText().setText(
-                    Ext.getStore('Devices').findRecord('id', deviceId, 0, false, false, true).get('name'));
+                style.getText().setText(device.get('name'));
                 marker.setStyle(style);
             }
         }
@@ -103,6 +104,7 @@ Ext.define('Traccar.view.MapController', {
             geometry = new ol.geom.Point(point);
 
             marker = new ol.Feature(geometry);
+            marker.set('record', position);
             this.reportMarkers[position.get('id')] = marker;
             this.getView().getVectorSource().addFeature(marker);
 
@@ -190,7 +192,7 @@ Ext.define('Traccar.view.MapController', {
         });
     },
 
-    selectMarker: function (marker) {
+    selectMarker: function (marker, center) {
         if (this.selectedMarker) {
             this.selectedMarker.setStyle(
                 this.resizeMarker(this.selectedMarker.getStyle(), Traccar.Style.mapRadiusNormal));
@@ -199,21 +201,30 @@ Ext.define('Traccar.view.MapController', {
         if (marker) {
             marker.setStyle(
                 this.resizeMarker(marker.getStyle(), Traccar.Style.mapRadiusSelected));
-            this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+            if (center) {
+                this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+            }
         }
 
         this.selectedMarker = marker;
     },
 
-    selectDevice: function (device) {
-        this.selectMarker(this.latestMarkers[device.get('id')]);
+    selectDevice: function (device, center) {
+        this.selectMarker(this.latestMarkers[device.get('id')], center);
     },
 
-    selectReport: function (position) {
-        this.selectMarker(this.reportMarkers[position.get('id')]);
+    selectReport: function (position, center) {
+        this.selectMarker(this.reportMarkers[position.get('id')], center);
     },
 
     selectFeature: function (feature) {
-        console.log(feature);
+        var record = feature.get('record');
+        if (record) {
+            if (record instanceof Traccar.model.Device) {
+                this.fireEvent('selectDevice', record, false);
+            } else {
+                this.fireEvent('selectReport', record, false);
+            }
+        }
     }
 });
