@@ -88,7 +88,7 @@ public class AsyncServlet extends BaseServlet {
 
         private final ConnectionManager.DataCacheListener dataListener = new ConnectionManager.DataCacheListener() {
             @Override
-            public void onUpdate(Position position) {
+            public void onUpdatePosition(Position position) {
                 synchronized (AsyncSession.this) {
                     logEvent("onUpdate deviceId: " + position.getDeviceId());
                     if (!destroyed) {

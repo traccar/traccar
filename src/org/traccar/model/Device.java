@@ -54,6 +54,10 @@ public class Device implements Factory {
         this.uniqueId = uniqueId;
     }
 
+    public static final String STATUS_UNKNOWN = "unknown";
+    public static final String STATUS_ONLINE = "online";
+    public static final String STATUS_OFFLINE = "offline";
+
     private String status;
 
     public String getStatus() {

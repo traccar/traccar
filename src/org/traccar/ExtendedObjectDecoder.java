@@ -37,6 +37,7 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
         MessageEvent e = (MessageEvent) evt;
         Object originalMessage = e.getMessage();
         Object decodedMessage = decode(e.getChannel(), e.getRemoteAddress(), originalMessage);
+        onMessageEvent(e.getChannel(), e.getRemoteAddress(), originalMessage); // call after decode
         if (originalMessage == decodedMessage) {
             ctx.sendUpstream(evt);
         } else if (decodedMessage != null) {
@@ -48,6 +49,9 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
                 Channels.fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
             }
         }
+    }
+
+    protected void onMessageEvent(Channel channel, SocketAddress remoteAddress, Object msg) {
     }
 
     protected abstract Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception;

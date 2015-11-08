@@ -18,6 +18,7 @@ package org.traccar.database;
 import java.net.SocketAddress;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ import java.util.Set;
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 public class ConnectionManager {
@@ -47,13 +49,14 @@ public class ConnectionManager {
         }
     }
 
-    public void setActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+    public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
     }
 
     public void removeActiveDevice(Channel channel) {
         for (ActiveDevice activeDevice : activeDevices.values()) {
             if (activeDevice.getChannel() == channel) {
+                updateDevice(activeDevice.getDeviceId(), Device.STATUS_OFFLINE, new Date());
                 activeDevices.remove(activeDevice.getDeviceId());
                 break;
             }
@@ -64,12 +67,17 @@ public class ConnectionManager {
         return activeDevices.get(deviceId);
     }
 
-    public synchronized void update(Position position) {
+    public synchronized void updateDevice(long deviceId, String status, Date time) {
+        // TODO update cache and call listener
+        Log.debug(deviceId + " " + status + " " + time);
+    }
+
+    public synchronized void updatePosition(Position position) {
         long deviceId = position.getDeviceId();
         positions.put(deviceId, position);
         if (listeners.containsKey(deviceId)) {
             for (DataCacheListener listener : listeners.get(deviceId)) {
-                listener.onUpdate(position);
+                listener.onUpdatePosition(position);
             }
         }
     }
@@ -92,7 +100,7 @@ public class ConnectionManager {
     }
 
     public interface DataCacheListener {
-        void onUpdate(Position position);
+        void onUpdatePosition(Position position);
     }
 
     public void addListener(Collection<Long> devices, DataCacheListener listener) {
