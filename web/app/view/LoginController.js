@@ -65,12 +65,13 @@ Ext.define('Traccar.view.LoginController', {
     },
 
     onSelectLanguage: function (selected) {
-        var paramName = 'locale';
-        var paramValue = selected.getValue();
-        var url = window.location.href;
+        var paramName, paramValue, url, prefix, suffix;
+        paramName = 'locale';
+        paramValue = selected.getValue();
+        url = window.location.href;
         if (url.indexOf(paramName + '=') >= 0) {
-            var prefix = url.substring(0, url.indexOf(paramName));
-            var suffix = url.substring(url.indexOf(paramName));
+            prefix = url.substring(0, url.indexOf(paramName));
+            suffix = url.substring(url.indexOf(paramName));
             suffix = suffix.substring(suffix.indexOf('=') + 1);
             suffix = (suffix.indexOf('&') >= 0) ? suffix.substring(suffix.indexOf('&')) : '';
             url = prefix + paramName + '=' + paramValue + suffix;

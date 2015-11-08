@@ -1,4 +1,5 @@
 {
     "preset": "crockford",
-    "maxErrors": 100
+    "maxErrors": 100,
+    "excludeFiles": ["arrowstyle.js"]
 }

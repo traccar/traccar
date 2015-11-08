@@ -118,7 +118,8 @@ Ext.define('Traccar.view.MapController', {
     },
 
     clearReport: function (store) {
-        var vectorSource = this.getView().getVectorSource();
+        var vectorSource, key;
+        vectorSource = this.getView().getVectorSource();
 
         if (this.reportRoute) {
             vectorSource.removeFeature(this.reportRoute);
@@ -126,7 +127,7 @@ Ext.define('Traccar.view.MapController', {
         }
 
         if (this.reportMarkers) {
-            for (var key in this.reportMarkers) {
+            for (key in this.reportMarkers) {
                 if (this.reportMarkers.hasOwnProperty(key)) {
                     vectorSource.removeFeature(this.reportMarkers[key]);
                 }

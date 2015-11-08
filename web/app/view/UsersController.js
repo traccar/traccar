@@ -55,8 +55,8 @@ Ext.define('Traccar.view.UsersController', {
                 no: Strings.sharedCancel
             },
             fn: function (btn) {
+                var store = Ext.getStore('Users');
                 if (btn === 'yes') {
-                    var store = Ext.getStore('Users');
                     store.remove(user);
                     store.sync();
                 }
