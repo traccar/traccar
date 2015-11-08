@@ -163,6 +163,8 @@ public class ProtocolDecoderTest {
         Assert.assertTrue("course >= 0", position.getCourse() >= 0);
         Assert.assertTrue("course <= 360", position.getCourse() <= 360);
 
+        Assert.assertNotNull("protocol is null", position.getProtocol());
+
     }
 
     private void verifyDecodedPosition(Object decodedObject) {
@@ -191,6 +193,8 @@ public class ProtocolDecoderTest {
 
         Assert.assertTrue("course >= 0", position.getCourse() >= 0);
         Assert.assertTrue("course <= 360", position.getCourse() <= 360);
+
+        Assert.assertNotNull("protocol is null", position.getProtocol());
 
     }
 

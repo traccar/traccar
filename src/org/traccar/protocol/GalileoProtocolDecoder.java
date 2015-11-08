@@ -122,8 +122,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         List<Position> positions = new LinkedList<>();
         Set<Integer> tags = new HashSet<>();
         boolean hasLocation = false;
+
         Position position = new Position();
-        position.setProtocol(getProtocolName());
 
         while (buf.readerIndex() < length) {
 
@@ -201,6 +201,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         sendReply(channel, buf.readUnsignedShort());
 
         for (Position p : positions) {
+            p.setProtocol(getProtocolName());
             p.setDeviceId(getDeviceId());
         }
 
