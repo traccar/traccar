@@ -40,6 +40,8 @@ public final class Log {
     private Log() {
     }
 
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
     private static final String LOGGER_NAME = "traccar";
 
     private static final String STACK_PACKAGE = "org.traccar";
@@ -49,7 +51,7 @@ public final class Log {
 
     public static void setupLogger(Config config) throws IOException {
 
-        Layout layout = new PatternLayout("%d{yyyy-MM-dd HH:mm:ss} %5p: %m%n");
+        Layout layout = new PatternLayout("%d{" + DATE_FORMAT + "} %5p: %m%n");
 
         Appender appender = new DailyRollingFileAppender(
                 layout, config.getString("logger.file"), "'.'yyyyMMdd");

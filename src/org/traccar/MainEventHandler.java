@@ -26,6 +26,10 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class MainEventHandler extends IdleStateAwareChannelHandler {
 
     @Override
@@ -39,11 +43,12 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(e.getChannel())).append(" ");
             s.append("id: ").append(position.getDeviceId()).append(", ");
-            s.append("time: ").append(position.getFixTime()).append(", ");
-            s.append("lat: ").append(position.getLatitude()).append(", ");
-            s.append("lon: ").append(position.getLongitude()).append(", ");
-            s.append("speed: ").append(position.getSpeed()).append(", ");
-            s.append("course: ").append(position.getCourse());
+            s.append("time: ").append(
+                    new SimpleDateFormat(Log.DATE_FORMAT).format(position.getFixTime())).append(", ");
+            s.append("lat: ").append(String.format("%.5f", position.getLatitude())).append(", ");
+            s.append("lon: ").append(String.format("%.5f", position.getLongitude())).append(", ");
+            s.append("speed: ").append(String.format("%.1f", position.getSpeed())).append(", ");
+            s.append("course: ").append(String.format("%.1f", position.getCourse()));
             Log.info(s.toString());
 
             Context.getConnectionManager().updatePosition(position);

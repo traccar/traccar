@@ -17,6 +17,7 @@ package org.traccar.database;
 
 import java.net.SocketAddress;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,7 +70,8 @@ public class ConnectionManager {
 
     public synchronized void updateDevice(long deviceId, String status, Date time) {
         // TODO update cache and call listener
-        Log.debug(deviceId + " " + status + " " + time);
+        Log.debug(deviceId + " " + status + " "
+                + new SimpleDateFormat(Log.DATE_FORMAT).format(time));
     }
 
     public synchronized void updatePosition(Position position) {
