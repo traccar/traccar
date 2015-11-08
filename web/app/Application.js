@@ -86,7 +86,9 @@ Ext.define('Traccar.Application', {
                 if (!result.success) {
                     Ext.Msg.alert(Strings.errorTitle, result.error);
                 }
-                handler.call(scope, options, success, response);
+                if (handler) {
+                    handler.call(scope, options, success, response);
+                }
             } else {
                 if (response.statusText) {
                     Ext.Msg.alert(Strings.errorTitle, response.statusText);
@@ -94,6 +96,6 @@ Ext.define('Traccar.Application', {
                     Ext.Msg.alert(Strings.errorTitle, response.status.toString()); // TODO: text message
                 }
             }
-        }
+        };
     }
 });

@@ -50,7 +50,7 @@ Ext.define('Traccar.view.MapController', {
     },
 
     updateLatest: function (store, data) {
-        var i, position, geometry, device, deviceId, name, marker, style;
+        var i, position, geometry, device, deviceId, marker, style;
 
         if (!Ext.isArray(data)) {
             data = [data];
@@ -84,7 +84,7 @@ Ext.define('Traccar.view.MapController', {
     },
 
     loadReport: function (store, data) {
-        var i, position, point, points, geometry, deviceId, name, marker, style;
+        var i, position, point, geometry, marker, style;
 
         this.clearReport(store);
 

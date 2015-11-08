@@ -52,11 +52,7 @@ Ext.define('Traccar.view.UserDevicesController', {
                 userId: this.userId,
                 deviceId: record.getData().id
             },
-            callback: Traccar.app.getErrorHandler(this, function (options, success, response) {
-                if (!success) {
-                    // TODO deselect again
-                }
-            })
+            callback: Traccar.app.getErrorHandler()
         });
     },
 
@@ -68,11 +64,7 @@ Ext.define('Traccar.view.UserDevicesController', {
                 userId: this.userId,
                 deviceId: record.getData().id
             },
-            callback: Traccar.app.getErrorHandler(this, function (options, success, response) {
-                if (!success) {
-                    // TODO select again
-                }
-            })
+            callback: Traccar.app.getErrorHandler()
         });
     }
 });

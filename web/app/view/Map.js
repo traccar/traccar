@@ -96,7 +96,7 @@ Ext.define('Traccar.view.Map', {
                 view: this.mapView
             });
 
-            this.map.on("click", function(e) {
+            this.map.on('click', function(e) {
                 this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
                     this.fireEvent('selectFeature', feature);
                 }, this);
