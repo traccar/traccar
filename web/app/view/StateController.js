@@ -28,8 +28,11 @@ Ext.define('Traccar.view.StateController', {
             },
             store: {
                 '#LatestPositions': {
-                    add: 'update',
-                    update: 'update'
+                    add: 'updateLatest',
+                    update: 'updateLatest'
+                },
+                '#Positions': {
+                    clear: 'clearReport'
                 }
             }
         }
@@ -49,6 +52,18 @@ Ext.define('Traccar.view.StateController', {
         }
         return result;
     }()),
+
+    updateLatest: function (store, data) {
+        var i;
+        if (!Ext.isArray(data)) {
+            data = [data];
+        }
+        for (i = 0; i < data.length; i++) {
+            if (this.deviceId === data[i].get('deviceId')) {
+                this.updatePosition(data[i]);
+            }
+        }
+    },
 
     formatValue: function (value) {
         if (typeof (id) === 'number') {
@@ -90,29 +105,22 @@ Ext.define('Traccar.view.StateController', {
     },
 
     selectDevice: function (device) {
-        var found;
+        var position;
         this.deviceId = device.get('id');
-        found = Ext.getStore('LatestPositions').findRecord('deviceId', this.deviceId, 0, false, false, true);
-        if (found) {
-            this.updatePosition(found);
+        position = Ext.getStore('LatestPositions').findRecord('deviceId', this.deviceId, 0, false, false, true);
+        if (position) {
+            this.updatePosition(position);
         } else {
             Ext.getStore('Attributes').removeAll();
         }
     },
 
     selectReport: function (position) {
-        console.log(position);
+        this.deviceId = null;
+        this.updatePosition(position);
     },
 
-    update: function (store, data) {
-        var i;
-        if (!Ext.isArray(data)) {
-            data = [data];
-        }
-        for (i = 0; i < data.length; i++) {
-            if (this.deviceId === data[i].get('deviceId')) {
-                this.updatePosition(data[0]);
-            }
-        }
+    clearReport: function (store) {
+        Ext.getStore('Attributes').removeAll();
     }
 });
