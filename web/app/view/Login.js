@@ -34,8 +34,8 @@ Ext.define('Traccar.view.Login', {
 
         autoEl: {
             tag: 'form',
-            method: 'POST',
-            action: 'blank',
+            method: 'GET',
+            action: 'favicon.ico',
             target: 'submitTarget'
         },
 
