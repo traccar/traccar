@@ -103,6 +103,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
     private Position decodePosition(Parser parser, Date time) {
 
         Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(getDeviceId());
         position.setTime(time);
 
