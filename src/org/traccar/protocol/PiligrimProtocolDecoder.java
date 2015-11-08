@@ -32,6 +32,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -58,8 +59,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         HttpRequest request = (HttpRequest) msg;
         String uri = request.getUri();
@@ -80,7 +80,6 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
             sendResponse(channel, "BINGPS: OK");
 
-            // Identification
             QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
             if (!identify(decoder.getParameters().get("imei").get(0), channel)) {
                 return null;
@@ -118,47 +117,39 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
                     longitude += buf.readUnsignedByte() / 6000.0;
                     longitude += buf.readUnsignedByte() / 600000.0;
 
-                    // Hemisphere
                     int flags = buf.readUnsignedByte();
-                    if ((flags & 0x01) != 0) {
+                    if (BitUtil.check(flags, 0)) {
                         latitude = -latitude;
                     }
-                    if ((flags & 0x02) != 0) {
+                    if (BitUtil.check(flags, 1)) {
                         longitude = -longitude;
                     }
                     position.setLatitude(latitude);
                     position.setLongitude(longitude);
 
-                    // Satellites
                     int satellites = buf.readUnsignedByte();
                     position.set(Event.KEY_SATELLITES, satellites);
                     position.setValid(satellites >= 3);
 
-                    // Speed
                     position.setSpeed(buf.readUnsignedByte());
 
-                    // Course
                     double course = buf.readUnsignedByte() << 1;
                     course += (flags >> 2) & 1;
                     course += buf.readUnsignedByte() / 100.0;
                     position.setCourse(course);
 
-                    // Sensors
                     if (type == MSG_GPS_SENSORS) {
-
-                        // External power
                         double power = buf.readUnsignedByte();
                         power += buf.readUnsignedByte() << 8;
-                        position.set(Event.KEY_POWER, power / 100);
+                        position.set(Event.KEY_POWER, power * 0.01);
 
-                        // Battery
                         double battery = buf.readUnsignedByte();
                         battery += buf.readUnsignedByte() << 8;
-                        position.set(Event.KEY_BATTERY, battery / 100);
+                        position.set(Event.KEY_BATTERY, battery * 0.01);
 
                         buf.skipBytes(6);
-
                     }
+
                     positions.add(position);
 
                 } else if (type == MSG_EVENTS) {

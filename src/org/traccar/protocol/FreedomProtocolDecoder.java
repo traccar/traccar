@@ -45,8 +45,7 @@ public class FreedomProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {

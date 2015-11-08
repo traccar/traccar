@@ -21,6 +21,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -68,7 +69,6 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
         position.setProtocol(getProtocolName());
 
-        // Location data
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         if (type != MSG_MINI_EVENT_REPORT) {
             buf.readUnsignedInt(); // fix time
@@ -84,7 +84,6 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
         }
 
-        // Fix status
         if (type == MSG_MINI_EVENT_REPORT) {
             position.set(Event.KEY_SATELLITES, buf.getUnsignedByte(buf.readerIndex()) & 0xf);
             position.setValid((buf.readUnsignedByte() & 0x20) == 0);
@@ -94,32 +93,22 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type != MSG_MINI_EVENT_REPORT) {
-
-            // Carrier
             position.set("carrier", buf.readUnsignedShort());
-
-            // Cell signal
             position.set(Event.KEY_GSM, buf.readShort());
-
         }
 
-        // Modem state
         position.set("modem", buf.readUnsignedByte());
 
-        // HDOP
         if (type != MSG_MINI_EVENT_REPORT) {
             position.set(Event.KEY_HDOP, buf.readUnsignedByte());
         }
 
-        // Inputs
         position.set(Event.KEY_INPUT, buf.readUnsignedByte());
 
-        // Unit status
         if (type != MSG_MINI_EVENT_REPORT) {
             position.set(Event.KEY_STATUS, buf.readUnsignedByte());
         }
 
-        // Event code
         if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
             if (type != MSG_MINI_EVENT_REPORT) {
                 buf.readUnsignedByte(); // event index
@@ -127,10 +116,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_EVENT, buf.readUnsignedByte());
         }
 
-        // Accumulators
-        int accCount = buf.readUnsignedByte();
-        int accType = accCount >> 6;
-        accCount &= 0x3f;
+        int accType = BitUtil.from(buf.getUnsignedByte(buf.readerIndex()), 6);
+        int accCount = BitUtil.to(buf.readUnsignedByte(), 6);
 
         if (type != MSG_MINI_EVENT_REPORT) {
             buf.readUnsignedByte(); // reserved
@@ -150,20 +137,16 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        // Check options header
-        if ((buf.getByte(buf.readerIndex()) & 0x80) != 0) {
+        if (BitUtil.check(buf.getByte(buf.readerIndex()), 7)) {
 
             int content = buf.readUnsignedByte();
 
-            // Identifier
-            if ((content & 0x01) != 0) {
+            if (BitUtil.check(content, 0)) {
 
-                // Read identifier
                 int length = buf.readUnsignedByte();
                 long id = 0;
                 for (int i = 0; i < length; i++) {
@@ -177,34 +160,28 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                 identify(String.valueOf(id), channel, remoteAddress);
             }
 
-            // Identifier type
-            if ((content & 0x02) != 0) {
-                buf.skipBytes(buf.readUnsignedByte());
+            if (BitUtil.check(content, 1)) {
+                buf.skipBytes(buf.readUnsignedByte()); // identifier type
             }
 
-            // Authentication
-            if ((content & 0x04) != 0) {
-                buf.skipBytes(buf.readUnsignedByte());
+            if (BitUtil.check(content, 2)) {
+                buf.skipBytes(buf.readUnsignedByte()); // authentication
             }
 
-            // Routing
-            if ((content & 0x08) != 0) {
-                buf.skipBytes(buf.readUnsignedByte());
+            if (BitUtil.check(content, 3)) {
+                buf.skipBytes(buf.readUnsignedByte()); // routing
             }
 
-            // Forwarding
-            if ((content & 0x10) != 0) {
-                buf.skipBytes(buf.readUnsignedByte());
+            if (BitUtil.check(content, 4)) {
+                buf.skipBytes(buf.readUnsignedByte()); // forwarding
             }
 
-            // Responce redirection
-            if ((content & 0x20) != 0) {
-                buf.skipBytes(buf.readUnsignedByte());
+            if (BitUtil.check(content, 5)) {
+                buf.skipBytes(buf.readUnsignedByte()); // response redirection
             }
 
         }
 
-        // Unidentified device
         if (!hasDeviceId()) {
             return null;
         }
@@ -213,7 +190,6 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         int index = buf.readUnsignedShort();
 
-        // Send acknowledgement
         if (service == SERVICE_ACKNOWLEDGED) {
             sendResponse(channel, remoteAddress, type, index, 0);
         }

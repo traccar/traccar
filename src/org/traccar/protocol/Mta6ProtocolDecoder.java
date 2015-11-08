@@ -275,8 +275,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         HttpRequest request = (HttpRequest) msg;
         ChannelBuffer buf = request.getContent();

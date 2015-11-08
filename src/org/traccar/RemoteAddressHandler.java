@@ -25,8 +25,7 @@ public class RemoteAddressHandler extends ExtendedObjectDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String hostAddress = ((InetSocketAddress) remoteAddress).getAddress().getHostAddress();
 

@@ -54,8 +54,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
@@ -75,24 +74,20 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         } else if (hasDeviceId()
                 && (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS)) {
 
-            // Create new position
             Position position = new Position();
             position.setDeviceId(getDeviceId());
 
             position.setProtocol(getProtocolName());
             position.set(Event.KEY_INDEX, index);
 
-            // Location
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1800000.0);
             position.setLongitude(buf.readInt() / 1800000.0);
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             position.setCourse(buf.readUnsignedShort());
 
-            // Cell
             position.set(Event.KEY_CELL, ChannelBuffers.hexDump(buf.readBytes(9)));
 
-            // Validity
             position.setValid((buf.readUnsignedByte() & 0x01) != 0);
 
             if (type == MSG_ALARM) {
@@ -102,7 +97,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_STATE) {
                 position.set(Event.KEY_STATUS, buf.readUnsignedByte());
             }
+
             return position;
+
         }
 
         return null;

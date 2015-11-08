@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         HttpRequest request = (HttpRequest) msg;
         QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
@@ -54,11 +53,9 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             params = decoder.getParameters();
         }
 
-        // Create new position
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        // Identification
         String id;
         if (params.containsKey("id")) {
             id = params.get("id").get(0);
@@ -70,7 +67,6 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        // Decode position
         position.setValid(true);
         if (params.containsKey("timestamp")) {
             try {
@@ -89,7 +85,6 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(Double.parseDouble(params.get("lat").get(0)));
         position.setLongitude(Double.parseDouble(params.get("lon").get(0)));
 
-        // Optional parameters
         if (params.containsKey("speed")) {
             position.setSpeed(Double.parseDouble(params.get("speed").get(0)));
         }
@@ -124,7 +119,6 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             position.set("description", params.get("desc").get(0));
         }
 
-        // Send response
         if (channel != null) {
             HttpResponse response = new DefaultHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.OK);

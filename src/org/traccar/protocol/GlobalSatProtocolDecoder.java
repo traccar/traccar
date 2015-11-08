@@ -53,7 +53,6 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             channel.write("ACK\r");
         }
 
-        // Message type
         String format;
         if (sentence.startsWith("GSr")) {
             format = format0;
@@ -230,8 +229,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg)
-            throws Exception {
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
