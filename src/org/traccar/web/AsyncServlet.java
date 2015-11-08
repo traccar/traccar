@@ -50,7 +50,7 @@ public class AsyncServlet extends BaseServlet {
 
     public static class AsyncSession {
 
-        private static final boolean DEBUG_ASYNC = false;
+        private static final boolean DEBUG_ASYNC = true;
 
         private static final long SESSION_TIMEOUT = 30;
         private static final long REQUEST_TIMEOUT = 20;
@@ -114,7 +114,9 @@ public class AsyncServlet extends BaseServlet {
                 }
                 Context.getConnectionManager().removeListener(devices, dataListener);
                 synchronized (ASYNC_SESSIONS) {
-                    ASYNC_SESSIONS.remove(userId);
+                    if (ASYNC_SESSIONS.get(userId) == AsyncSession.this) {
+                        ASYNC_SESSIONS.remove(userId);
+                    }
                 }
             }
         };
