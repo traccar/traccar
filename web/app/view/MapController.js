@@ -76,7 +76,7 @@ Ext.define('Traccar.view.MapController', {
                 this.getView().getVectorSource().addFeature(marker);
 
                 style = this.getLatestMarker();
-                style.getImage().setRotation(position.get('course'));
+                style.getImage().setRotation(position.get('course') * 180 / Math.PI);
                 style.getText().setText(device.get('name'));
                 marker.setStyle(style);
             }
@@ -109,7 +109,7 @@ Ext.define('Traccar.view.MapController', {
             this.getView().getVectorSource().addFeature(marker);
 
             style = this.getReportMarker();
-            style.getImage().setRotation(position.get('course'));
+            style.getImage().setRotation(position.get('course') * 180 / Math.PI);
             // style.getText().setText('2000-01-01 00:00:00'); // TODO show time
             marker.setStyle(style);
 
@@ -187,7 +187,8 @@ Ext.define('Traccar.view.MapController', {
             image: new ol.style.Arrow({
                 radius: radius,
                 fill: style.getImage().getFill(),
-                stroke: style.getImage().getStroke()
+                stroke: style.getImage().getStroke(),
+                rotation: style.getImage().getRotation()
             }),
             text: style.getText()
         });
