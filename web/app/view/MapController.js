@@ -110,7 +110,9 @@ Ext.define('Traccar.view.MapController', {
 
             style = this.getReportMarker();
             style.getImage().setRotation(position.get('course') * 180 / Math.PI);
-            // style.getText().setText('2000-01-01 00:00:00'); // TODO show time
+            style.getText().setText(
+                Ext.Date.format(position.get('fixTime'), Traccar.Style.dateTimeFormat));
+
             marker.setStyle(style);
 
             this.reportRoute.getGeometry().appendCoordinate(point);
