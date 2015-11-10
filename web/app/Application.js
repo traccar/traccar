@@ -93,7 +93,7 @@ Ext.define('Traccar.Application', {
                 if (response.statusText) {
                     Ext.Msg.alert(Strings.errorTitle, response.statusText);
                 } else {
-                    Ext.Msg.alert(Strings.errorTitle, response.status.toString()); // TODO: text message
+                    Ext.Msg.alert(Strings.errorTitle, Strings.errorConnection);
                 }
             }
         };

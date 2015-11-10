@@ -16,6 +16,7 @@ var Strings = {
 
     errorTitle: 'Error',
     errorUnknown: 'Unknown error',
+    errorConnection: 'Connection error',
 
     userName: 'Name',
     userEmail: 'Email',
