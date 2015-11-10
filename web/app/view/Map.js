@@ -93,7 +93,8 @@ Ext.define('Traccar.view.Map', {
             this.map = new ol.Map({
                 target: this.body.dom.id,
                 layers: [layer, vectorLayer],
-                view: this.mapView
+                view: this.mapView,
+                controls: ol.control.defaults({ attribution: false })
             });
 
             this.map.on('click', function (e) {
