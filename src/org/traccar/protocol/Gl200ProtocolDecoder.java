@@ -131,7 +131,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN_HEARTBEAT, (String) msg);
+        String sentence = (String) msg;
+
+        Parser parser = new Parser(PATTERN_HEARTBEAT, sentence);
         if (parser.matches()) {
             if (channel != null) {
                 channel.write("+SACK:GTHBD," + parser.next() + "," + parser.next() + "$", remoteAddress);
@@ -139,7 +141,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        parser = new Parser(PATTERN_INF, (String) msg);
+        parser = new Parser(PATTERN_INF, sentence);
         if (parser.matches()) {
 
             Position position = new Position();
@@ -166,7 +168,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return position;
         }
 
-        parser = new Parser(PATTERN, (String) msg);
+        parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -178,6 +180,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
+
+        // RFID
+        if (sentence.startsWith("+RESP:GTIDA")) {
+            position.set(Event.KEY_RFID, sentence.split(",")[5]);
+        }
 
         // OBD
         position.set(Event.KEY_RPM, parser.next());
