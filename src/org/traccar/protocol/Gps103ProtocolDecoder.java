@@ -101,7 +101,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        // Get device by IMEI
         String imei = parser.next();
         if (!identify(imei, channel, remoteAddress)) {
             return null;
