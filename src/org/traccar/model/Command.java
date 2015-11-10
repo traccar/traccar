@@ -25,6 +25,7 @@ public class Command extends Extensible implements Factory {
     public static final String TYPE_ALARM_ARM = "alarmArm";
     public static final String TYPE_ALARM_DISARM = "alarmDisarm";
     public static final String TYPE_SET_TIMEZONE = "setTimezone";
+    public static final String TYPE_REQUEST_PHOTO = "requestPhoto";
 
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";

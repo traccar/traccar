@@ -35,7 +35,8 @@ public class Gps103Protocol extends BaseProtocol {
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
                 Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_RESUME);
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_REQUEST_PHOTO);
     }
 
     @Override

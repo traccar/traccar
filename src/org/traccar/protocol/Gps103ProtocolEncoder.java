@@ -57,6 +57,8 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
                 return formatCommand(command, "**,imei:{%s},L", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ALARM_DISARM:
                 return formatCommand(command, "**,imei:{%s},M", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_REQUEST_PHOTO:
+                return formatCommand(command, "**,imei:{%s},160", Command.KEY_UNIQUE_ID);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
