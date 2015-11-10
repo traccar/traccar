@@ -52,7 +52,10 @@ Ext.define('Traccar.view.Map', {
             if (type === 'custom') {
                 layer = new ol.layer.Tile({
                     source: new ol.source.XYZ({
-                        url: server.get('mapUrl')
+                        url: server.get('mapUrl'),
+                        attributions: [new ol.Attribution({
+                            html: ''
+                        })]
                     })
                 });
             } else if (type === 'bingRoad') {
@@ -93,8 +96,7 @@ Ext.define('Traccar.view.Map', {
             this.map = new ol.Map({
                 target: this.body.dom.id,
                 layers: [layer, vectorLayer],
-                view: this.mapView,
-                controls: ol.control.defaults({ attribution: false })
+                view: this.mapView
             });
 
             this.map.on('click', function (e) {
