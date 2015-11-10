@@ -70,8 +70,8 @@ public class ConnectionManager {
 
     public synchronized void updateDevice(long deviceId, String status, Date time) {
         // TODO update cache and call listener
-        Log.debug(deviceId + " " + status + " "
-                + new SimpleDateFormat(Log.DATE_FORMAT).format(time));
+        /*Log.debug(deviceId + " " + status + " "
+                + new SimpleDateFormat(Log.DATE_FORMAT).format(time));*/
     }
 
     public synchronized void updatePosition(Position position) {
