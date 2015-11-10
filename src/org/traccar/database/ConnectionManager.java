@@ -17,7 +17,6 @@ package org.traccar.database;
 
 import java.net.SocketAddress;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
