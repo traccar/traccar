@@ -53,5 +53,11 @@ if (!(Locale.language in Locale.languages)) {
     Locale.language = 'en'; // default
 }
 
-Ext.Loader.loadScript('/l10n/' + Locale.language + '.js');
+Ext.Ajax.request({
+    url: '/l10n/' + Locale.language + '.json',
+    callback: function (options, success, response) {
+        Strings = Ext.decode(response.responseText);
+    }
+});
+
 Ext.Loader.loadScript('//cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/locale/locale-' + Locale.languages[Locale.language].code + '.js');

@@ -48,7 +48,6 @@ Ext.define('Traccar.view.LoginController', {
                             Traccar.ErrorManager.error(Strings.loginFailed);
                         }
                     }
-
                 }
             });
         }
