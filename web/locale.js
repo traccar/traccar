@@ -24,7 +24,7 @@ Locale.languages = {
     'bg': { name: 'Български', code: 'bg' },
     'cs': { name: 'Čeština', code: 'cs' },
     'de': { name: 'Deutsch', code: 'de' },
-    'dk': { name: 'Dansk', code: 'dk' },
+    'da': { name: 'Dansk', code: 'da' },
     'el': { name: 'Ελληνικά', code: 'el' },
     'en': { name: 'English', code: 'en' },
     'es': { name: 'Español', code: 'es' },
