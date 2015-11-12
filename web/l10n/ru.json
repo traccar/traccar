@@ -13,15 +13,13 @@
     "sharedHour": "Часы",
     "sharedMinute": "Минуты",
     "sharedSecond": "Секунды",
-
     "errorTitle": "Ошибка",
     "errorUnknown": "Неизвестная ошибка",
-
+    "errorConnection": "Ошибка соединения",
     "userName": "Имя",
     "userEmail": "Email",
     "userPassword": "Пароль",
     "userAdmin": "Администратор",
-
     "loginTitle": "Вход",
     "loginLanguage": "Язык",
     "loginRegister": "Регистрация",
@@ -29,27 +27,23 @@
     "loginFailed": "Неправильный email адрес или пароль",
     "loginCreated": "Новый пользователь зарегистрирован",
     "loginLogout": "Выход",
-
     "deviceDialog": "Устройство",
     "deviceTitle": "Устройства",
     "deviceName": "Название",
     "deviceIdentifier": "Идентификатор",
     "deviceCommand": "Команда",
-
     "settingsTitle": "Настройки",
     "settingsUser": "Аккаунт",
     "settingsServer": "Сервер",
     "settingsUsers": "Пользователи",
     "settingsDistanceUnit": "Расстояние",
     "settingsSpeedUnit": "Скорость",
-
     "reportTitle": "Отчеты",
     "reportDevice": "Устройство",
     "reportFrom": "С",
     "reportTo": "По",
     "reportShow": "Показать",
     "reportClear": "Очистить",
-
     "positionFixTime": "Время",
     "positionValid": "Корректность",
     "positionLatitude": "Широта",
@@ -59,24 +53,23 @@
     "positionCourse": "Курс",
     "positionAddress": "Адрес",
     "positionProtocol": "Протокол",
-
     "serverTitle": "Настройки Сервера",
     "serverZoom": "Приближение",
     "serverRegistration": "Регистрация",
-
     "mapTitle": "Карта",
     "mapLayer": "Слой Карты",
+    "mapCustom": "Пользовательская карта",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Ключ Bing Maps",
     "mapBingRoad": "Bing Maps Дороги",
     "mapBingAerial": "Bing Maps Спутник",
-
     "stateTitle": "Состояние",
     "stateName": "Параметр",
     "stateValue": "Значение",
-
     "commandTitle": "Команда",
     "commandSend": "Отправить",
     "commandType": "Тип",
+    "commandSent": "Команда отправлена",
     "commandPositionPeriodic": "Начать Отслеживание",
     "commandPositionStop": "Отменить Отслеживание",
     "commandEngineStop": "Заблокировать Двигатель",

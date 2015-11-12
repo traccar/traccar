@@ -13,15 +13,13 @@
     "sharedHour": "Time",
     "sharedMinute": "Minut",
     "sharedSecond": "Sekund",
-
     "errorTitle": "Fejl",
     "errorUnknown": "Ukendt Fejl",
-
+    "errorConnection": "Connection error",
     "userName": "Navn",
     "userEmail": "Email",
     "userPassword": "Kodeord",
     "userAdmin": "Admin",
-
     "loginTitle": "Log på",
     "loginLanguage": "Sprog",
     "loginRegister": "Registrer",
@@ -29,27 +27,23 @@
     "loginFailed": "Fejl i email adresse eller kodeord",
     "loginCreated": "Ny bruger er registreret",
     "loginLogout": "Log af",
-
     "deviceDialog": "Enhed",
     "deviceTitle": "Enheder",
     "deviceName": "Navn",
     "deviceIdentifier": "Imei nr",
     "deviceCommand": "Kommando",
-
     "settingsTitle": "Indstillinger",
     "settingsUser": "Konto",
     "settingsServer": "Server",
     "settingsUsers": "Brugere",
     "settingsDistanceUnit": "Distance",
     "settingsSpeedUnit": "Hastighed",
-
     "reportTitle": "Rapporter",
     "reportDevice": "Enhed",
     "reportFrom": "Fra",
     "reportTo": "Til",
     "reportShow": "Vis",
     "reportClear": "Ryd",
-
     "positionFixTime": "Tid",
     "positionValid": "Valid",
     "positionLatitude": ">Breddegrad",
@@ -59,24 +53,23 @@
     "positionCourse": "Kurs",
     "positionAddress": "Addresse",
     "positionProtocol": "Protocol",
-
     "serverTitle": "Server indstillinger",
     "serverZoom": "Zoom",
     "serverRegistration": "Registrering",
-
     "mapTitle": "Kort",
     "mapLayer": "Kort opsætning",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "Status",
     "stateName": "Parameter",
     "stateValue": "Værdi",
-
     "commandTitle": "Kommando",
     "commandSend": "Send",
     "commandType": "Type",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Periodisk Rapportering",
     "commandPositionStop": "Stop Rapportering",
     "commandEngineStop": "Stop motor",

@@ -13,15 +13,13 @@
     "sharedHour": "ชั่วโมง",
     "sharedMinute": "นาที",
     "sharedSecond": "วินาที",
-
     "errorTitle": "ผิดพลาด",
     "errorUnknown": "ข้อผิดพลาดที่ไม่รู้จัก",
-
+    "errorConnection": "Connection error",
     "userName": "ชื่อ",
     "userEmail": "อีเมล",
     "userPassword": "รหัสผ่าน",
     "userAdmin": "ผู้ดูแลระบบ",
-
     "loginTitle": "เข้าสู่ระบบ",
     "loginLanguage": "ภาษา",
     "loginRegister": "ลงทะเบียน",
@@ -29,27 +27,23 @@
     "loginFailed": "ที่อยู่อีเมลหรือรหัสผ่านไม่ถูกต้อง",
     "loginCreated": "ผู้ใช้ใหม่ ได้รับการจดทะเบียน",
     "loginLogout": "ออกจากระบบ",
-
     "deviceDialog": "เครื่อง/อุปกรณ์",
     "deviceTitle": "เครื่อง/อุปกรณ์",
     "deviceName": "ชื่อ",
     "deviceIdentifier": "ระบุ",
     "deviceCommand": "คำสั่ง",
-
     "settingsTitle": "การตั้งค่า",
     "settingsUser": "บัญชี",
     "settingsServer": "ผู้ให้บริการ",
     "settingsUsers": "ผู้ใช้งาน",
     "settingsDistanceUnit": "ระยะทาง",
     "settingsSpeedUnit": "ความเร็ว",
-
     "reportTitle": "รายงาน",
     "reportDevice": "เครื่อง/อุปกรณ์",
     "reportFrom": "จาก",
     "reportTo": "ไปถึง",
     "reportShow": "แสดง",
     "reportClear": "ขจัด",
-
     "positionFixTime": "เวลา",
     "positionValid": "ถูกต้อง",
     "positionLatitude": "ละติจูด",
@@ -59,24 +53,23 @@
     "positionCourse": "แนวทางเดิน",
     "positionAddress": "ที่อยู่",
     "positionProtocol": "โปรโตคอล",
-
     "serverTitle": "การตั้งค่าเซิร์ฟเวอ",
     "serverZoom": "เลื่อนใกล้/ไกล",
     "serverRegistration": "ลงทะเบียน",
-
     "mapTitle": "แผนที่",
     "mapLayer": "ชั้น แผนที่",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps ถนน",
     "mapBingAerial": "Bing Maps อากาศ",
-
     "stateTitle": "สถานะ",
     "stateName": "พารามิเตอร์",
     "stateValue": "มูลค่า",
-
     "commandTitle": "คำสั่ง",
     "commandSend": "ส่ง",
     "commandType": "ชนิด",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "แก้ไขตำแหน่ง",
     "commandPositionStop": "ตำแหน่ง หยุด",
     "commandEngineStop": "หยุดเครื่องยนต์",

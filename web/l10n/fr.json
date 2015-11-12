@@ -13,15 +13,13 @@
     "sharedHour": "Heure",
     "sharedMinute": "Minute",
     "sharedSecond": "Seconde",
-
     "errorTitle": "Erreur",
     "errorUnknown": "Erreur inconnue",
-
+    "errorConnection": "Connection error",
     "userName": "Nom",
     "userEmail": "Email",
     "userPassword": "Mot de Passe",
     "userAdmin": "Admin",
-
     "loginTitle": "Identification",
     "loginLanguage": "Langue",
     "loginRegister": "Inscription",
@@ -29,27 +27,23 @@
     "loginFailed": "Adresse email ou mot de passe incorrect",
     "loginCreated": "New user has been registered",
     "loginLogout": "Déconnection",
-
     "deviceDialog": "Dispositif",
     "deviceTitle": "Dispositifs",
     "deviceName": "Nom",
     "deviceIdentifier": "Identifiant",
     "deviceCommand": "Commande",
-
     "settingsTitle": "Configurations",
     "settingsUser": "Compte",
     "settingsServer": "Serveur",
     "settingsUsers": "Utilisateurs",
     "settingsDistanceUnit": "Distance",
     "settingsSpeedUnit": "Vitesse",
-
     "reportTitle": "Rapports",
     "reportDevice": "Dispositif",
     "reportFrom": "De",
     "reportTo": "A",
     "reportShow": "Afficher",
     "reportClear": "Effacer",
-
     "positionFixTime": "Heure",
     "positionValid": "Valide",
     "positionLatitude": "Latitude",
@@ -59,24 +53,23 @@
     "positionCourse": "Sense",
     "positionAddress": "Adresse",
     "positionProtocol": "Protocole",
-
     "serverTitle": "Configurations du Serveur Settings",
     "serverZoom": "Zoom",
     "serverRegistration": "Inscription",
-
     "mapTitle": "Carte",
     "mapLayer": "Cartes",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "Etat",
     "stateName": "Paramètre",
     "stateValue": "Valeur",
-
     "commandTitle": "Commande",
     "commandSend": "Envoyer",
     "commandType": "Type",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Périodicité du rapport de position",
     "commandPositionStop": "Arrêt du rapport de position",
     "commandEngineStop": "Moteur arrêter",

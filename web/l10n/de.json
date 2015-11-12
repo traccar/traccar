@@ -13,15 +13,13 @@
     "sharedHour": "Stunde",
     "sharedMinute": "Minute",
     "sharedSecond": "Sekunde",
-
     "errorTitle": "Fehler",
     "errorUnknown": "Unbekannter Fehler",
-
+    "errorConnection": "Connection error",
     "userName": "Name",
     "userEmail": "Email",
     "userPassword": "Passwort",
     "userAdmin": "Admin",
-
     "loginTitle": "Anmeldung",
     "loginLanguage": "Sprache",
     "loginRegister": "Registrieren",
@@ -29,27 +27,23 @@
     "loginFailed": "Falsche Emailadresse oder Passwort",
     "loginCreated": "Neuer Benutzer wurde registriert",
     "loginLogout": "Abmelden",
-
     "deviceDialog": "Gerät",
     "deviceTitle": "Geräte",
     "deviceName": "Name",
     "deviceIdentifier": "Kennung",
     "deviceCommand": "Befehl",
-
     "settingsTitle": "Einstellungen",
     "settingsUser": "Benutzerkonto",
     "settingsServer": "Server",
     "settingsUsers": "Benutzer",
     "settingsDistanceUnit": "Entfernung",
     "settingsSpeedUnit": "Geschwindigkeit",
-
     "reportTitle": "Berichte",
     "reportDevice": "Gerät",
     "reportFrom": "Von",
     "reportTo": "Bis",
     "reportShow": "Anzeigen",
     "reportClear": "Leeren",
-
     "positionFixTime": "Zeit",
     "positionValid": "Gültig",
     "positionLatitude": "Latitude",
@@ -59,24 +53,23 @@
     "positionCourse": "Richtung",
     "positionAddress": "Adresse",
     "positionProtocol": "Protokoll",
-
     "serverTitle": "Server Einstellungen",
     "serverZoom": "Zoomen",
     "serverRegistration": "Registrierung zulassen",
-
     "mapTitle": "Karte",
     "mapLayer": "Karten Layer",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Strassenkarte",
     "mapBingAerial": "Bing Luftbilder",
-
     "stateTitle": "Status",
     "stateName": "Parameter",
     "stateValue": "Wert",
-
     "commandTitle": "Befehl",
     "commandSend": "Senden",
     "commandType": "Typ",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Position Fix",
     "commandPositionStop": "Position Stop",
     "commandEngineStop": "Motor Stop",

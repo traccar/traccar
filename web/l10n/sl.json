@@ -13,15 +13,13 @@
     "sharedHour": "Ura",
     "sharedMinute": "Minuta",
     "sharedSecond": "Sekunda",
-
     "errorTitle": "Napaka",
     "errorUnknown": "Neznana napaka",
-
+    "errorConnection": "Connection error",
     "userName": "Ime",
     "userEmail": "E-Pošta",
     "userPassword": "Geslo",
     "userAdmin": "Admin",
-
     "loginTitle": "Prijava",
     "loginLanguage": "Jezik",
     "loginRegister": "Registracija",
@@ -29,27 +27,23 @@
     "loginFailed": "Nepravilna e-pošta ali geslo",
     "loginCreated": "Nov uporabnik je registriran",
     "loginLogout": "Odjava",
-
     "deviceDialog": "Naprave",
     "deviceTitle": "Naprave",
     "deviceName": "Naziv",
     "deviceIdentifier": "Identifikacija",
     "deviceCommand": "Ukaz",
-
     "settingsTitle": "Nastavitve",
     "settingsUser": "Račun",
     "settingsServer": "Strežnik",
     "settingsUsers": "Uporabniki",
     "settingsDistanceUnit": "Razdalja",
     "settingsSpeedUnit": "Hitrost",
-
     "reportTitle": "Poročila",
     "reportDevice": "Naprava",
     "reportFrom": "Od",
     "reportTo": "Do",
     "reportShow": "Prikaži",
     "reportClear": "Očisti",
-
     "positionFixTime": "Čas",
     "positionValid": "Veljavnost",
     "positionLatitude": "Širina",
@@ -59,24 +53,23 @@
     "positionCourse": "Smer",
     "positionAddress": "Naslov",
     "positionProtocol": "Protokol",
-
     "serverTitle": "Nastavitve strežnika",
     "serverZoom": "Povečava",
     "serverRegistration": "Registracija",
-
     "mapTitle": "Karta",
     "mapLayer": "Zemljevidi",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Karta",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Ceste",
     "mapBingAerial": "Bing Maps Satelit",
-
     "stateTitle": "Stanje",
     "stateName": "Parameter",
     "stateValue": "Vrednost",
-
     "commandTitle": "Ukaz",
     "commandSend": "Pošlji",
     "commandType": "Tip",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Periodično poročanje",
     "commandPositionStop": "Ustavi poročanje",
     "commandEngineStop": "Ugasni motor",

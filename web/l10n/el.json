@@ -1,4 +1,4 @@
-﻿{
+{
     "sharedLoading": "Φόρτωση...",
     "sharedSave": "Αποθήκευση",
     "sharedCancel": "Άκυρον",
@@ -13,15 +13,13 @@
     "sharedHour": "Ώρα",
     "sharedMinute": "Λεπτά",
     "sharedSecond": "Δευτερόλεπτα",
-
     "errorTitle": "Σφάλμα",
     "errorUnknown": "Άνωστο σφάλμα",
-
+    "errorConnection": "Connection error",
     "userName": "Όνομα",
     "userEmail": "Email",
     "userPassword": "Συνθηματικό",
     "userAdmin": "Admin",
-
     "loginTitle": "Σύνδεση",
     "loginLanguage": "Γλώσσα",
     "loginRegister": "Εγγραφή",
@@ -29,27 +27,23 @@
     "loginFailed": "Εσφαλμένη διεύθυνση ή εσφαλμένο συνθηματικό",
     "loginCreated": "Ο νέος χρήστης καταχωρήθηκε.",
     "loginLogout": "Αποσύνδεση",
-
     "deviceDialog": "Συσκευή",
     "deviceTitle": "Συσκευές",
     "deviceName": "Όνομα",
     "deviceIdentifier": "Αναγνωριστικό",
     "deviceCommand": "Εντολή",
-
     "settingsTitle": "Ρυθμίσεις",
     "settingsUser": "Λογαριασμός",
     "settingsServer": "Εξυπηρετητής",
     "settingsUsers": "Χρήστες",
     "settingsDistanceUnit": "Απόσταση",
     "settingsSpeedUnit": "Ταχύτητα",
-
     "reportTitle": "Αναφορές",
     "reportDevice": "Συσκευή",
     "reportFrom": "Από",
     "reportTo": "Έως",
     "reportShow": "Προβολή",
     "reportClear": "Καθαρισμός",
-
     "positionFixTime": "Χρόνος",
     "positionValid": "Έγκυρο",
     "positionLatitude": "Γ. πλάτος",
@@ -59,24 +53,23 @@
     "positionCourse": "Πορεία",
     "positionAddress": "Διεύθυνση",
     "positionProtocol": "Πρωτόκολλο",
-
     "serverTitle": "Ρυθμίσεις εξυπηρετητή",
     "serverZoom": "Εστίαση",
     "serverRegistration": "Εγγραφή",
-
     "mapTitle": "Χάρτης",
     "mapLayer": "Επιλογή χάρτη",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "Κατάσταση",
     "stateName": "Παράμετρος",
     "stateValue": "Τιμή",
-
     "commandTitle": "Εντολή",
     "commandSend": "Αποστολή",
     "commandType": "Τύπος",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Περιοδικές αναφορές",
     "commandPositionStop": "Λήξη αναφορών",
     "commandEngineStop": "Κλείσιμο",

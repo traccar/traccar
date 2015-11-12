@@ -13,15 +13,13 @@
     "sharedHour": "Hora",
     "sharedMinute": "Minuto",
     "sharedSecond": "Segundo",
-
     "errorTitle": "Erro",
     "errorUnknown": "Erro desconhecido",
-
+    "errorConnection": "Connection error",
     "userName": "Nome",
     "userEmail": "E-mail",
     "userPassword": "Senha",
     "userAdmin": "Admin",
-
     "loginTitle": "Entrar",
     "loginLanguage": "Idioma",
     "loginRegister": "Registrar",
@@ -29,27 +27,23 @@
     "loginFailed": "Endereço de e-mail ou senha incorreta",
     "loginCreated": "Novo usuário foi registrado",
     "loginLogout": "Sair",
-
     "deviceDialog": "Dispositivo",
     "deviceTitle": "Devices",
     "deviceName": "Nome",
     "deviceIdentifier": "Identificador",
     "deviceCommand": "Comando",
-
     "settingsTitle": "Configurações",
     "settingsUser": "Conta",
     "settingsServer": "Servidor",
     "settingsUsers": "Usuário",
     "settingsDistanceUnit": "Distância",
     "settingsSpeedUnit": "Velocidade",
-
     "reportTitle": "Relatórios",
     "reportDevice": "Dispositivo",
     "reportFrom": "De",
     "reportTo": "Para",
     "reportShow": "Mostrar",
     "reportClear": "Limpar",
-
     "positionFixTime": "Tempo",
     "positionValid": "Válido",
     "positionLatitude": "Latitude",
@@ -59,24 +53,23 @@
     "positionCourse": "Course",
     "positionAddress": "Endereço",
     "positionProtocol": "protocolo",
-
     "serverTitle": "Configurações do Servidor",
     "serverZoom": "Zoom",
     "serverRegistration": "Registro",
-
     "mapTitle": "Mapa",
     "mapLayer": "Camada Mapa",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Mapa",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Mapas Estrada",
     "mapBingAerial": "Bing Mapas Aérea",
-
     "stateTitle": "Estado",
     "stateName": "Parâmetro",
     "stateValue": "Valor",
-
     "commandTitle": "Comando",
     "commandSend": "Enviar",
     "commandType": "Tipo",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Posição Tempo",
     "commandPositionStop": "Parar Posição",
     "commandEngineStop": "Bloqueio Veículo",

@@ -13,15 +13,13 @@
     "sharedHour": "Hodina",
     "sharedMinute": "Minuta",
     "sharedSecond": "Sekunda",
-
     "errorTitle": "Chyba",
     "errorUnknown": "Neznámá chyba",
-
+    "errorConnection": "Connection error",
     "userName": "Jméno",
     "userEmail": "Email",
     "userPassword": "Heslo",
     "userAdmin": "Admin",
-
     "loginTitle": "Přihlášení",
     "loginLanguage": "Jazyk",
     "loginRegister": "Registrace",
@@ -29,27 +27,23 @@
     "loginFailed": "Nesprávný email nebo heslo",
     "loginCreated": "Nový uživatel byl zaregistrován",
     "loginLogout": "Odhlášení",
-
     "deviceDialog": "Zařízení",
     "deviceTitle": "Zařízení",
     "deviceName": "Název",
     "deviceIdentifier": "Identifikace",
     "deviceCommand": "Příkaz",
-
     "settingsTitle": "Nastavení",
     "settingsUser": "Účet",
     "settingsServer": "Server",
     "settingsUsers": "Uživatelé",
     "settingsDistanceUnit": "Vzdálenost",
     "settingsSpeedUnit": "Rychlost",
-
     "reportTitle": "Zpráva",
     "reportDevice": "Zařízení",
     "reportFrom": "Od",
     "reportTo": "Komu",
     "reportShow": "Zobrazit",
     "reportClear": "Vyčistit",
-
     "positionFixTime": "Čas",
     "positionValid": "Správný",
     "positionLatitude": "Šířka",
@@ -59,11 +53,9 @@
     "positionCourse": "Směr",
     "positionAddress": "Adresa",
     "positionProtocol": "Protokol",
-
     "serverTitle": "Nastavení serveru",
     "serverZoom": "Přiblížení",
     "serverRegistration": "Registrace",
-
     "mapTitle": "Mapa",
     "mapLayer": "Vrstva mapy",
     "mapCustom": "Upravená mapa",
@@ -71,11 +63,9 @@
     "mapBingKey": "Bing Maps klíč",
     "mapBingRoad": "Bing Maps cesta",
     "mapBingAerial": "Bing Maps anténa",
-
     "stateTitle": "Stav",
     "stateName": "Atribut",
     "stateValue": "Hodnota",
-
     "commandTitle": "Příkaz",
     "commandSend": "Odeslat",
     "commandType": "Napsat",

@@ -13,15 +13,13 @@
     "sharedHour": "Час",
     "sharedMinute": "Минута",
     "sharedSecond": "Секунда",
-
     "errorTitle": "Грешка",
     "errorUnknown": "Непозната Грешка",
-
+    "errorConnection": "Connection error",
     "userName": "Име",
     "userEmail": "Пощенска кутия",
     "userPassword": "Парола",
     "userAdmin": "Admin",
-
     "loginTitle": "Идентификация",
     "loginLanguage": "Език",
     "loginRegister": "Регистрация",
@@ -29,27 +27,23 @@
     "loginFailed": "Грешен потребител или парола",
     "loginCreated": "Регистриран Нов Потребител",
     "loginLogout": "Изход",
-
     "deviceDialog": "Обекти",
     "deviceTitle": "Устройства",
     "deviceName": "Име",
     "deviceIdentifier": "Идентификатор",
     "deviceCommand": "Команда",
-
     "settingsTitle": "Настройки",
     "settingsUser": "Профил",
     "settingsServer": "Сървър",
     "settingsUsers": "Потребител",
     "settingsDistanceUnit": "Разстояние",
     "settingsSpeedUnit": "Скорост",
-
     "reportTitle": "Доклад",
     "reportDevice": "Устройство",
     "reportFrom": "От",
     "reportTo": "До",
     "reportShow": "Покажи",
     "reportClear": "Изчисти",
-
     "positionFixTime": "Време",
     "positionValid": "Валидност",
     "positionLatitude": "Географска Ширина",
@@ -59,11 +53,9 @@
     "positionCourse": "Посока",
     "positionAddress": "Адрес",
     "positionProtocol": "Протокол",
-
     "serverTitle": "Настройки на Сървъра",
     "serverZoom": "Приближение",
     "serverRegistration": "Регистрация",
-
     "mapTitle": "Карта",
     "mapLayer": "Слой",
     "mapCustom": "Потребителска Карта",
@@ -71,14 +63,13 @@
     "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "Състояние",
     "stateName": "Параметър",
     "stateValue": "Стойност",
-
     "commandTitle": "Команда",
     "commandSend": "Изпрати",
     "commandType": "Тип",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Периодичен Доклад",
     "commandPositionStop": "Спри Доклада",
     "commandEngineStop": "Спри Двигател",

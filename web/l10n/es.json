@@ -13,15 +13,13 @@
     "sharedHour": "Hora",
     "sharedMinute": "Minuto",
     "sharedSecond": "Segundos",
-
     "errorTitle": "Error",
     "errorUnknown": "Error Desconocido",
-
+    "errorConnection": "Connection error",
     "userName": "Nombre",
     "userEmail": "Email",
     "userPassword": "Contraseña",
     "userAdmin": "Admin",
-
     "loginTitle": "Ingresar",
     "loginLanguage": "Lenguaje",
     "loginRegister": "Registrar",
@@ -29,27 +27,23 @@
     "loginFailed": "Direccion de correo o Contraseña Incorrecta",
     "loginCreated": "Nuevo usuario ha sido registrado",
     "loginLogout": "Salir",
-
     "deviceDialog": "Dispositivo",
     "deviceTitle": "Dispositivos",
     "deviceName": "Nombre",
     "deviceIdentifier": "Identificador",
     "deviceCommand": "Comando",
-
     "settingsTitle": "Preferencias",
     "settingsUser": "Cuenta",
     "settingsServer": "Servidor",
     "settingsUsers": "Usuarios",
     "settingsDistanceUnit": "Distancia",
     "settingsSpeedUnit": "Velocidad",
-
     "reportTitle": "Reportes",
     "reportDevice": "Dispositivos",
     "reportFrom": "Desde",
     "reportTo": "Hasta",
     "reportShow": "Mostrar",
     "reportClear": "Limpiar",
-
     "positionFixTime": "Hora",
     "positionValid": "Valida",
     "positionLatitude": "Latitud",
@@ -59,24 +53,23 @@
     "positionCourse": "Curso",
     "positionAddress": "Direccion",
     "positionProtocol": "Protocolo",
-
     "serverTitle": "Preferencias Servidor",
     "serverZoom": "Zoom",
     "serverRegistration": "Registrar",
-
     "mapTitle": "Mapa",
     "mapLayer": "Capa de Mapa",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps - Carretera",
     "mapBingAerial": "Bing Maps - Aereo",
-
     "stateTitle": "Estado",
     "stateName": "Parametro",
     "stateValue": "Valor",
-
     "commandTitle": "Comando",
     "commandSend": "Enviar",
     "commandType": "Tipo",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Frecuencia de posiciones",
     "commandPositionStop": "Detener reporte de posiciones",
     "commandEngineStop": "Apagar motor",

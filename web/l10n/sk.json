@@ -13,15 +13,13 @@
     "sharedHour": "Hodina",
     "sharedMinute": "Minúta",
     "sharedSecond": "Druhý",
-
     "errorTitle": "Chyba",
     "errorUnknown": "Neznáma chyba",
-
+    "errorConnection": "Connection error",
     "userName": "Meno",
     "userEmail": "E-mail",
     "userPassword": "Heslo",
     "userAdmin": "Admin",
-
     "loginTitle": "Prihlásenie",
     "loginLanguage": "Jazyk",
     "loginRegister": "Registrovať",
@@ -29,27 +27,23 @@
     "loginFailed": "Nesprávna e-mailová adresa alebo heslo",
     "loginCreated": "Nový užívateľ sa zaregistroval",
     "loginLogout": "Odhlásiť",
-
     "deviceDialog": "Zariadenie",
     "deviceTitle": "Zariadena",
     "deviceName": "Meno",
     "deviceIdentifier": "Identifikátor",
     "deviceCommand": "Príkaz",
-
     "settingsTitle": "Nastavenia",
     "settingsUser": "Účet",
     "settingsServer": "Server",
     "settingsUsers": "Užívatelia",
     "settingsDistanceUnit": "Vzdialenosť",
     "settingsSpeedUnit": "Rýchlosť jazdy",
-
     "reportTitle": "Správy",
     "reportDevice": "Zariadenie",
     "reportFrom": "Z",
     "reportTo": "do",
     "reportShow": "Zobraziť",
     "reportClear": "Vyčistiť",
-
     "positionFixTime": "Čas",
     "positionValid": "Platný",
     "positionLatitude": "Šírka",
@@ -59,24 +53,23 @@
     "positionCourse": "Kurz",
     "positionAddress": "Adresa",
     "positionProtocol": "Protokol",
-
     "serverTitle": "Nastavenie servera",
     "serverZoom": "Zoom",
     "serverRegistration": "Registrácia",
-
     "mapTitle": "Mapa",
     "mapLayer": "Mapové vrstvy",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Arial",
-
     "stateTitle": "Štát",
     "stateName": "Parameter",
     "stateValue": "Hodnota",
-
     "commandTitle": "Príkaz",
     "commandSend": "Odoslať",
     "commandType": "Typ",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Pravidelné podávanie správ",
     "commandPositionStop": "Zastavte podávanie správ",
     "commandEngineStop": "Zastavenie motora",

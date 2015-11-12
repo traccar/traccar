@@ -13,43 +13,37 @@
     "sharedHour": "පැය",
     "sharedMinute": "මිනිත්තු",
     "sharedSecond": "තත්පර",
-
     "errorTitle": "දෝෂයක්",
     "errorUnknown": "නොදන්නා දෝෂයක්",
-
+    "errorConnection": "Connection error",
     "userName": "නම",
     "userEmail": "විද්යුත් තැපෑල",
     "userPassword": "මුරපදය",
     "userAdmin": "පරිපාලක",
-
     "loginTitle": "පිවිසුම",
     "loginLanguage": "භාෂාව",
     "loginRegister": "ලියාපදිංචි කරන්න",
     "loginLogin": "පිවිසුම",
     "loginFailed": "ඊ-මේල් ලිපිනය හෝ මුරපදය වැරදිය",
-    "loginCreated": "නව පරිශීලක ලියාපදිංචි කරන ලදි ",
+    "loginCreated": "නව පරිශීලක ලියාපදිංචි කරන ලදි",
     "loginLogout": "ඉවත්වන්න",
-
     "deviceDialog": "උපාංගය",
     "deviceTitle": "උපාංග",
     "deviceName": "නම",
     "deviceIdentifier": "හඳුනාගැනීමේ කේතය",
     "deviceCommand": "විධානය",
-
     "settingsTitle": "සැකසුම්",
     "settingsUser": "ගිණුම",
     "settingsServer": "සේවාදායකය",
     "settingsUsers": "පරිශීලකයන්",
     "settingsDistanceUnit": "දුර",
     "settingsSpeedUnit": "වේගය",
-
     "reportTitle": "වාර්තා",
     "reportDevice": "උපාංගය",
     "reportFrom": "සිට",
     "reportTo": "දක්වා",
     "reportShow": "පෙන්වන්න",
     "reportClear": "ඉවත් කරන්න",
-
     "positionFixTime": "කාලය",
     "positionValid": "වලංගු",
     "positionLatitude": "අක්ෂාංශ",
@@ -59,11 +53,9 @@
     "positionCourse": "දිගංශය",
     "positionAddress": "ලිපිනය",
     "positionProtocol": "ප්රොටොකෝලය",
-
     "serverTitle": "සේවාදායකයේ සැකසුම්",
     "serverZoom": "විශාලනය",
     "serverRegistration": "ලියාපදිංචි කිරීම",
-
     "mapTitle": "සිතියම",
     "mapLayer": "සිතියම් ස්තරය",
     "mapCustom": "අභිරුචි සිතියම",
@@ -71,14 +63,13 @@
     "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "තත්වය",
     "stateName": "පරාමිතිය",
     "stateValue": "අගය",
-
     "commandTitle": "විධානය",
     "commandSend": "යවන්න",
     "commandType": "වර්ගය",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "ආවර්තිතව වාර්තා කරන්න",
     "commandPositionStop": "වාර්තා කිරීම නවත්වන්න",
     "commandEngineStop": "එන්ජිම නවත්වන්න",

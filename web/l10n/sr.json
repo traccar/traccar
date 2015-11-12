@@ -13,15 +13,13 @@
     "sharedHour": "Čas",
     "sharedMinute": "Minut",
     "sharedSecond": "Sekunda",
-
     "errorTitle": "Greška",
     "errorUnknown": "Nepoznata greška",
-
+    "errorConnection": "Connection error",
     "userName": "Ime",
     "userEmail": "Email",
     "userPassword": "Lozinka",
     "userAdmin": "Admin",
-
     "loginTitle": "Prijava",
     "loginLanguage": "Jezik",
     "loginRegister": "Registruj se",
@@ -29,27 +27,23 @@
     "loginFailed": "Neispravna email adresa ili lozinka",
     "loginCreated": "Novi korisnik je registrovan",
     "loginLogout": "Odjava",
-
     "deviceDialog": "Uređaj",
     "deviceTitle": "Uređaji",
     "deviceName": "Ime",
     "deviceIdentifier": "Identifikator",
     "deviceCommand": "Komanda",
-
     "settingsTitle": "Podešavanja",
     "settingsUser": "Nalog",
     "settingsServer": "Server",
     "settingsUsers": "Korisnici",
     "settingsDistanceUnit": "Udaljenost",
     "settingsSpeedUnit": "Brzina",
-
     "reportTitle": "Izveštaji",
     "reportDevice": "Uređaj",
     "reportFrom": "Od",
     "reportTo": "Do",
     "reportShow": "Prikaži",
     "reportClear": "Izbriši",
-
     "positionFixTime": "Vreme",
     "positionValid": "Ispravno",
     "positionLatitude": "Geografska širina",
@@ -59,24 +53,23 @@
     "positionCourse": "Pravac",
     "positionAddress": "Adresa",
     "positionProtocol": "Protokol",
-
     "serverTitle": "Podešavanja Servera",
     "serverZoom": "Zumiranje",
     "serverRegistration": "Registracija",
-
     "mapTitle": "Mapa",
     "mapLayer": "Vrsta Mape",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "Stanje",
     "stateName": "Parametar",
     "stateValue": "Vrednost",
-
     "commandTitle": "Komanda",
     "commandSend": "Pošalji",
     "commandType": "Tip",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Periodično izveštavanje",
     "commandPositionStop": "Prekini izveštavanja",
     "commandEngineStop": "Zaustavi motor",

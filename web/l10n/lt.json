@@ -13,15 +13,13 @@
     "sharedHour": "Valanda(-os)",
     "sharedMinute": "Minutė(-es)",
     "sharedSecond": "Sekundė(-es)",
-
     "errorTitle": "Klaida",
     "errorUnknown": "Nenumatyta klaida",
-
+    "errorConnection": "Connection error",
     "userName": "Prisijungimo vardas",
     "userEmail": "Vartotojo vardas",
     "userPassword": "Slaptažodis",
     "userAdmin": "Administratorius",
-
     "loginTitle": "Prisijungimas",
     "loginLanguage": "Kalba",
     "loginRegister": "Registruotis",
@@ -29,27 +27,23 @@
     "loginFailed": "Neteisingas el.paštas ir/ar slaptažodis",
     "loginCreated": "Registracija sėmkinga",
     "loginLogout": "Atsijungti",
-
     "deviceDialog": "Prietaisas",
     "deviceTitle": "Prietaisai",
     "deviceName": "Pavadinimas",
     "deviceIdentifier": "Identifikacinis kodas",
     "deviceCommand": "Komanda",
-
     "settingsTitle": "Nustatymai",
     "settingsUser": "Paskyra",
     "settingsServer": "Serveris",
     "settingsUsers": "Vartotojai",
     "settingsDistanceUnit": "Atstumas",
     "settingsSpeedUnit": "Greitis",
-
     "reportTitle": "Ataskaita",
     "reportDevice": "Prietaisas",
     "reportFrom": "Nuo",
     "reportTo": "Iki",
     "reportShow": "Rodyti",
     "reportClear": "Valyti",
-
     "positionFixTime": "Laikas",
     "positionValid": "Galimas",
     "positionLatitude": "Platuma",
@@ -59,24 +53,23 @@
     "positionCourse": "Eiga",
     "positionAddress": "Adresas",
     "positionProtocol": "Protokolas",
-
     "serverTitle": "Serverio nustatymai",
     "serverZoom": "Priartinimas",
     "serverRegistration": "Registracija",
-
     "mapTitle": "Žemėlapis",
     "mapLayer": "Žemėlapio sluoksnis",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "Statusas",
     "stateName": "Parametras",
     "stateValue": "Reikšmė",
-
     "commandTitle": "Komanda",
     "commandSend": "Siūsti",
     "commandType": "Tipas",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Periodinis reportavimas",
     "commandPositionStop": "Stabdyti reportavimą",
     "commandEngineStop": "Stabdyti variklį",

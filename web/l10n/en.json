@@ -13,16 +13,13 @@
     "sharedHour": "Hour",
     "sharedMinute": "Minute",
     "sharedSecond": "Second",
-
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",
-
     "userName": "Name",
     "userEmail": "Email",
     "userPassword": "Password",
     "userAdmin": "Admin",
-
     "loginTitle": "Login",
     "loginLanguage": "Language",
     "loginRegister": "Register",
@@ -30,27 +27,23 @@
     "loginFailed": "Incorrect email address or password",
     "loginCreated": "New user has been registered",
     "loginLogout": "Logout",
-
     "deviceDialog": "Device",
     "deviceTitle": "Devices",
     "deviceName": "Name",
     "deviceIdentifier": "Identifier",
     "deviceCommand": "Command",
-
     "settingsTitle": "Settings",
     "settingsUser": "Account",
     "settingsServer": "Server",
     "settingsUsers": "Users",
     "settingsDistanceUnit": "Distance",
     "settingsSpeedUnit": "Speed",
-
     "reportTitle": "Reports",
     "reportDevice": "Device",
     "reportFrom": "From",
     "reportTo": "To",
     "reportShow": "Show",
     "reportClear": "Clear",
-
     "positionFixTime": "Time",
     "positionValid": "Valid",
     "positionLatitude": "Latitude",
@@ -60,11 +53,9 @@
     "positionCourse": "Course",
     "positionAddress": "Address",
     "positionProtocol": "Protocol",
-
     "serverTitle": "Server Settings",
     "serverZoom": "Zoom",
     "serverRegistration": "Registration",
-
     "mapTitle": "Map",
     "mapLayer": "Map Layer",
     "mapCustom": "Custom Map",
@@ -72,11 +63,9 @@
     "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "State",
     "stateName": "Attribute",
     "stateValue": "Value",
-
     "commandTitle": "Command",
     "commandSend": "Send",
     "commandType": "Type",

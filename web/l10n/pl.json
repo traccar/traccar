@@ -13,15 +13,13 @@
     "sharedHour": "Godzina",
     "sharedMinute": "Minuta",
     "sharedSecond": "Sekunda",
-
     "errorTitle": "Bląd",
     "errorUnknown": "Nieznany błąd",
-
+    "errorConnection": "Connection error",
     "userName": "Nazwa",
     "userEmail": "Email",
     "userPassword": "Hasło",
     "userAdmin": "Administrator",
-
     "loginTitle": "Logowanie",
     "loginLanguage": "Język",
     "loginRegister": "Rejestracja",
@@ -29,27 +27,23 @@
     "loginFailed": "Nieprawidłowy adres e-mail lub hasło",
     "loginCreated": "Nowy użytkownik został zarejestrowany",
     "loginLogout": "Wyloguj",
-
     "deviceDialog": "Urządzenie",
     "deviceTitle": "Urządzenia",
     "deviceName": "Nazwa",
     "deviceIdentifier": "Identyfikator",
     "deviceCommand": "Zdarzenie",
-
     "settingsTitle": "Ustawienia",
     "settingsUser": "Konto",
     "settingsServer": "Serwer",
     "settingsUsers": "Użytkownicy",
     "settingsDistanceUnit": "Dystans",
     "settingsSpeedUnit": "Prędkość",
-
     "reportTitle": "Raporty",
     "reportDevice": "Urządzenie",
     "reportFrom": "Z",
     "reportTo": "Do",
     "reportShow": "Wczytaj",
     "reportClear": "Wyczyść",
-
     "positionFixTime": "Czas",
     "positionValid": "Aktywny",
     "positionLatitude": "Szerokość",
@@ -59,24 +53,23 @@
     "positionCourse": "Kurs",
     "positionAddress": "Adres",
     "positionProtocol": "Protokół",
-
     "serverTitle": "Ustawienia serwera",
     "serverZoom": "Powiększenie",
     "serverRegistration": "Rejestracja",
-
     "mapTitle": "Mapa",
     "mapLayer": "Mapa",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
-
     "stateTitle": "Lokalizacja",
     "stateName": "Właściwości",
     "stateValue": "Wartość",
-
     "commandTitle": "Zdarzenie",
     "commandSend": "Wyślij",
     "commandType": "Typ",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Pozycja - Fix",
     "commandPositionStop": "Pozycja - Stop",
     "commandEngineStop": "Silnik - Stop",

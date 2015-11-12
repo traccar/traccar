@@ -13,15 +13,13 @@
     "sharedHour": "Uur",
     "sharedMinute": "Minuut",
     "sharedSecond": "Seconde",
-
     "errorTitle": "Fout",
     "errorUnknown": "Onbekende fout",
-
+    "errorConnection": "Connection error",
     "userName": "Gebruikersnaam",
     "userEmail": "Email",
     "userPassword": "WachtwoordPassword",
     "userAdmin": "Admin",
-
     "loginTitle": "Inloggen",
     "loginLanguage": "Taal",
     "loginRegister": "Registeren",
@@ -29,27 +27,23 @@
     "loginFailed": "Onjuiste emailadres of wachtwoord",
     "loginCreated": "Nieuwe gebruiker is geregistreerd",
     "loginLogout": "Uitloggen",
-
     "deviceDialog": "Apparaat",
     "deviceTitle": "Apparaten",
     "deviceName": "Naam",
     "deviceIdentifier": "Identifier",
     "deviceCommand": "Commando",
-
     "settingsTitle": "Instellingen",
     "settingsUser": "Account",
     "settingsServer": "Server",
     "settingsUsers": "Gebruikers",
     "settingsDistanceUnit": "Afstand",
     "settingsSpeedUnit": "Snelheid",
-
     "reportTitle": "Reports",
     "reportDevice": "Apparaat",
     "reportFrom": "Van",
     "reportTo": "Naar",
     "reportShow": "Laten zien",
     "reportClear": "Leegmaken",
-
     "positionFixTime": "Tijd",
     "positionValid": "Geldig",
     "positionLatitude": "Latitude",
@@ -59,24 +53,23 @@
     "positionCourse": "Koers",
     "positionAddress": "Adres",
     "positionProtocol": "Protocol",
-
     "serverTitle": "Server Instellingen",
     "serverZoom": "Zoom",
     "serverRegistration": "Registratie",
-
     "mapTitle": "Kaart",
     "mapLayer": "Kaart laag",
+    "mapCustom": "Custom Map",
     "mapOsm": "Open Street Map",
+    "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Wegen",
     "mapBingAerial": "Bing Maps Luchtfoto",
-
     "stateTitle": "Status",
     "stateName": "Parameter",
     "stateValue": "Waarde",
-
     "commandTitle": "Commando",
     "commandSend": "Verstuur",
     "commandType": "Type",
+    "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Periodic Reporting",
     "commandPositionStop": "Stop Reporting",
     "commandEngineStop": "Engine Stop",
