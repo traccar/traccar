@@ -21,6 +21,7 @@ Ext.Loader.setConfig({
 });
 
 Locale.languages = {
+    'ar': { name: 'العربية', code: 'en' }
     'bg': { name: 'Български', code: 'bg' },
     'cs': { name: 'Čeština', code: 'cs' },
     'de': { name: 'Deutsch', code: 'de' },
@@ -34,6 +35,7 @@ Locale.languages = {
     'nl': { name: 'Nederlands', code: 'nl' },
     'pl': { name: 'Polski', code: 'pl' },
     'pt': { name: 'Português', code: 'pt' },
+    'pt_BR': { name: 'Português (Brasil)', code: 'pt_BR' },
     'ru': { name: 'Русский', code: 'ru' },
     'si': { name: 'සිංහල', code: 'en' },
     'sk': { name: 'Slovenčina', code: 'sk' },
