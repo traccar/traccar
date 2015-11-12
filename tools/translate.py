@@ -1,41 +1,35 @@
 #!/usr/bin/python
 
-import re
 import os
+import optparse
+import urllib2
+import json
+import base64
 
-abspath = os.path.abspath(__file__)
-dname = os.path.dirname(abspath)
-os.chdir(dname)
+parser = optparse.OptionParser()
+parser.add_option("-u", "--user", dest="username", help="transifex user login")
+parser.add_option("-p", "--password", dest="password", help="transifex user password")
 
-path = '../web/l10n/'
+(options, args) = parser.parse_args()
 
-files = [f for f in os.listdir(path) if os.path.isfile(path + f) and f.endswith('.js') and not f.endswith('en.js')]
-for f in files:
-    f = path + f
+if not options.username or not options.password:
+    parser.error('User name and password are required')
 
-    print 'en -> ' + f[-5:-3]
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    dict = {}
+path = "../web/l10n/"
 
-    for line in open(f).read().splitlines():
-        match = re.search("    (\\w+): '(.+)'(,)?", line)
-        if match:
-            dict[match.group(1)] = match.group(2)
+def request(url):
+    req = urllib2.Request(url)
+    auth = base64.encodestring("%s:%s" % (options.username, options.password)).replace("\n", "")
+    req.add_header("Authorization", "Basic %s" % auth)
+    return urllib2.urlopen(req)
 
-    out = open(f, 'w')
+resource = json.load(request("https://www.transifex.com/api/2/project/traccar/resource/web/?details"))
 
-    for line in open(path + 'en.js').read().splitlines():
-        match = re.search("    (\\w+): '(.+)'(,)?", line)
-        if match:
-            if dict.has_key(match.group(1)):
-                value = dict[match.group(1)]
-            else:
-                print '"' + match.group(2) + '"'
-                value = match.group(2) + ' (*)'
-
-            out.write('    ' + match.group(1) + ": '" + value + "'")
-            if match.group(3) is not None:
-                out.write(',')
-            out.write('\n')
-        else:
-            out.write(line + '\n')
+for language in resource["available_languages"]:
+    code = language["code"]
+    data = request("https://www.transifex.com/api/2/project/traccar/resource/web/translation/" + code + "?file")
+    file = open(path + code + ".json", "wb")
+    file.write(data.read())
+    file.close()
