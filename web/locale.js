@@ -21,7 +21,7 @@ Ext.Loader.setConfig({
 });
 
 Locale.languages = {
-    'ar': { name: 'العربية', code: 'en' }
+    'ar': { name: 'العربية', code: 'en' },
     'bg': { name: 'Български', code: 'bg' },
     'cs': { name: 'Čeština', code: 'cs' },
     'de': { name: 'Deutsch', code: 'de' },
