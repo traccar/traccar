@@ -76,10 +76,11 @@ Ext.define('Traccar.view.MapController', {
                 this.getView().getVectorSource().addFeature(marker);
 
                 style = this.getLatestMarker();
-                style.getImage().setRotation(position.get('course') * 180 / Math.PI);
                 style.getText().setText(device.get('name'));
                 marker.setStyle(style);
             }
+
+            marker.getStyle().getImage().setRotation(position.get('course') * Math.PI / 180);
         }
     },
 
@@ -109,7 +110,7 @@ Ext.define('Traccar.view.MapController', {
             this.getView().getVectorSource().addFeature(marker);
 
             style = this.getReportMarker();
-            style.getImage().setRotation(position.get('course') * 180 / Math.PI);
+            style.getImage().setRotation(position.get('course') * Math.PI / 180 );
             style.getText().setText(
                 Ext.Date.format(position.get('fixTime'), Traccar.Style.dateTimeFormat));
 
