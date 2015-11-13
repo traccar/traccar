@@ -20,6 +20,7 @@ import org.traccar.helper.Log;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.AccessControlException;
+import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonStructure;
@@ -27,6 +28,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.traccar.Context;
+import org.traccar.helper.Authorization;
+import org.traccar.model.User;
 
 public abstract class BaseServlet extends HttpServlet {
 
@@ -57,7 +61,17 @@ public abstract class BaseServlet extends HttpServlet {
     protected abstract boolean handle(
             String command, HttpServletRequest req, HttpServletResponse resp) throws Exception;
 
-    public long getUserId(HttpServletRequest req) {
+    public long getUserId(HttpServletRequest req) throws Exception  {
+        String authorization = req.getHeader(Authorization.HEADER);
+        if (authorization != null && !authorization.isEmpty()) {
+            Map<String, String> authMap = Authorization.parse(authorization);
+            String username = authMap.get(Authorization.USERNAME);
+            String password = authMap.get(Authorization.PASSWORD);
+            User user = Context.getDataManager().login(username, password);
+            if (user != null) {
+                return user.getId();
+            }
+        }
         Long userId = (Long) req.getSession().getAttribute(USER_KEY);
         if (userId == null) {
             throw new AccessControlException("User not logged in");
