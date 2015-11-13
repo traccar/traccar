@@ -59,11 +59,11 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return false;
     }
 
-    private static class ParseResult {
+    private static final class ParseResult {
         private final long id;
         private final Position position;
 
-        public ParseResult(long id, Position position) {
+        private ParseResult(long id, Position position) {
             this.id = id;
             this.position = position;
         }

@@ -40,11 +40,11 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
 
-    private static class OpenChannelHandler extends SimpleChannelHandler {
+    private static final class OpenChannelHandler extends SimpleChannelHandler {
 
         private final TrackerServer server;
 
-        public OpenChannelHandler(TrackerServer server) {
+        private OpenChannelHandler(TrackerServer server) {
             this.server = server;
         }
 
