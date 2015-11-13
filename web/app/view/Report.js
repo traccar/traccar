@@ -45,6 +45,7 @@ Ext.define('Traccar.view.Report', {
         xtype: 'datefield',
         reference: 'fromDateField',
         startDay: Traccar.Style.weekStartDay,
+        format: Traccar.Style.dateFormat,
         value: new Date(new Date().getTime() - 30 * 60 * 1000)
     }, {
         xtype: 'timefield',
@@ -59,6 +60,7 @@ Ext.define('Traccar.view.Report', {
         xtype: 'datefield',
         reference: 'toDateField',
         startDay: Traccar.Style.weekStartDay,
+        format: Traccar.Style.dateFormat,
         value: new Date()
     }, {
         xtype: 'timefield',
