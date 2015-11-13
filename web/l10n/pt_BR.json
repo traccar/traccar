@@ -72,7 +72,7 @@
     "commandSent": "Comando foi enviado",
     "commandPositionPeriodic": "Atualização Periódica",
     "commandPositionStop": "Parar Atualizaçao",
-    "commandEngineStop": "Parar Motor",
+    "commandEngineStop": "Desligar Motor",
     "commandEngineResume": "Religar Motor",
     "commandFrequency": "Frequencia",
     "commandUnit": "Unidade"
