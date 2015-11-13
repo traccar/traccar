@@ -41,7 +41,7 @@ Ext.define('Traccar.view.Map', {
 
     listeners: {
         afterrender: function () {
-            var user, server, layer, type, bingKey, vectorLayer, lat, lon, zoom;
+            var user, server, layer, type, bingKey, vectorLayer, lat, lon, zoom, target;
 
             user = Traccar.app.getUser();
             server = Traccar.app.getServer();
@@ -97,6 +97,22 @@ Ext.define('Traccar.view.Map', {
                 target: this.body.dom.id,
                 layers: [layer, vectorLayer],
                 view: this.mapView
+            });
+
+            target = this.map.getTarget();
+            if (typeof target === 'string') {
+                target = Ext.get(target).dom;
+            }
+
+            this.map.on('pointermove', function (e) {
+                var hit = this.forEachFeatureAtPixel(e.pixel, function(feature, layer) {
+                    return true;
+                });
+                if (hit) {
+                    target.style.cursor = 'pointer';
+                } else {
+                    target.style.cursor = '';
+                }
             });
 
             this.map.on('click', function (e) {
