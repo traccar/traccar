@@ -120,7 +120,7 @@
         CREATE TABLE traccar (
         version INT DEFAULT 0 NOT NULL);
 
-        INSERT INTO traccar (version) VALUES (301);
+        INSERT INTO traccar (version) VALUES (302);
     </entry>
 
     <entry key='database.selectServers'>

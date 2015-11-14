@@ -43,8 +43,8 @@
         language VARCHAR(128),
         distanceUnit VARCHAR(128),
         speedUnit VARCHAR(128),
-        latitude FLOAT DEFAULT 0 NOT NULL,
-        longitude FLOAT DEFAULT 0 NOT NULL,
+        latitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
+        longitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
         zoom INT DEFAULT 0 NOT NULL);
 
         CREATE TABLE device (
@@ -53,8 +53,7 @@
         uniqueId VARCHAR(128) NOT NULL UNIQUE,
         status VARCHAR(128),
         lastUpdate TIMESTAMP,
-        positionId INT,
-        dataId INT);
+        positionId INT);
 
         CREATE TABLE user_device (
         userId INT NOT NULL,
@@ -74,47 +73,34 @@
         deviceTime TIMESTAMP NOT NULL,
         fixTime TIMESTAMP NOT NULL,
         valid BIT NOT NULL,
-        latitude FLOAT NOT NULL,
-        longitude FLOAT NOT NULL,
+        latitude DOUBLE PRECISION NOT NULL,
+        longitude DOUBLE PRECISION NOT NULL,
         altitude FLOAT NOT NULL,
         speed FLOAT NOT NULL,
         course FLOAT NOT NULL,
         address VARCHAR(512),
-        other VARCHAR(4096) NOT NULL,
+        attributes VARCHAR(4096) NOT NULL,
         FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
-        
+
         CREATE INDEX position_deviceId_fixTime ON position (deviceId, fixTime);
-
-        CREATE TABLE data (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        protocol VARCHAR(128),
-        deviceId INT NOT NULL,
-        serverTime TIMESTAMP NOT NULL,
-        deviceTime TIMESTAMP NOT NULL,
-        other VARCHAR(4096) NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
-
-        ALTER TABLE device ADD
-        FOREIGN KEY (positionId) REFERENCES position (id) ON DELETE CASCADE;
-
-        ALTER TABLE device ADD
-        FOREIGN KEY (dataId) REFERENCES data (id) ON DELETE CASCADE;
 
         CREATE TABLE server (
         id INT PRIMARY KEY AUTO_INCREMENT,
         registration BIT NOT NULL,
         map VARCHAR(128),
+        bingKey VARCHAR(128),
+        mapUrl VARCHAR(128),
         language VARCHAR(128),
         distanceUnit VARCHAR(128),
         speedUnit VARCHAR(128),
-        latitude FLOAT DEFAULT 0 NOT NULL,
-        longitude FLOAT DEFAULT 0 NOT NULL,
+        latitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
+        longitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
         zoom INT DEFAULT 0 NOT NULL);
 
         CREATE TABLE traccar (
         version INT DEFAULT 0 NOT NULL);
 
-        INSERT INTO traccar (version) VALUES (301);
+        INSERT INTO traccar (version) VALUES (302);
     </entry>
 
     <entry key='database.selectServers'>
@@ -130,6 +116,8 @@
         UPDATE server SET
         registration = :registration,
         map = :map,
+        bingKey = :bingKey,
+        mapUrl = :mapUrl,
         language = :language,
         distanceUnit = :distanceUnit,
         speedUnit = :speedUnit,
@@ -176,7 +164,7 @@
     <entry key='database.updateUserPassword'>
         UPDATE "user" SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
     </entry>
-    
+
     <entry key='database.deleteUser'>
         DELETE FROM "user" WHERE id = :id;
     </entry>
@@ -184,38 +172,42 @@
     <entry key='database.getPermissionsAll'>
         SELECT userId, deviceId FROM user_device;
     </entry>
-    
+
     <entry key='database.selectDevicesAll'>
         SELECT * FROM device;
     </entry>
-    
+
     <entry key='database.selectDevices'>
         SELECT * FROM device d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
     </entry>
-    
+
     <entry key='database.insertDevice'>
         INSERT INTO device (name, uniqueId) VALUES (:name, :uniqueId);
     </entry>
-    
+
     <entry key='database.updateDevice'>
         UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;
     </entry>
-    
+
     <entry key='database.deleteDevice'>
         DELETE FROM device WHERE id = :id;
     </entry>
-    
+
     <entry key='database.linkDevice'>
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry>
 
+    <entry key='database.unlinkDevice'>
+        DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId;
+    </entry>
+
     <entry key='database.selectPositions'>
-        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to;    
+        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;
     </entry>
 
     <entry key='database.insertPosition'>
-        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
-        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
 
     <entry key='database.selectLatestPositions'>

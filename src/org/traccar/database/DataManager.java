@@ -172,7 +172,7 @@ public class DataManager implements IdentityManager {
                         version = schema.getVersion();
                     }
 
-                    if (version != 301) {
+                    if (version != 302) {
                         Log.error("Wrong database schema version (" + version + ")");
                         throw new RuntimeException();
                     }
