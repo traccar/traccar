@@ -14,8 +14,6 @@ goog.require('ol.style.ImageState');
 goog.require('ol.style.Stroke');
 
 
-ol.nullFunction = ol.nullFunction || function() {}; // TODO: remove in 3.11
-
 
 /**
  * @classdesc
