@@ -238,12 +238,12 @@
     <entry key='totem.port'>5007</entry>
     <entry key='enfora.port'>5008</entry>
     <entry key='meiligao.port'>5009</entry>
-    <entry key='maxon.port'>5010</entry>
+    <entry key='trv.port'>5010</entry>
     <entry key='suntech.port'>5011</entry>
     <entry key='progress.port'>5012</entry>
     <entry key='h02.port'>5013</entry>
     <entry key='jt600.port'>5014</entry>
-    <entry key='ev603.port'>5015</entry>
+    <entry key='huabao.port'>5015</entry>
     <entry key='v680.port'>5016</entry>
     <entry key='pt502.port'>5017</entry>
     <entry key='tr20.port'>5018</entry>
@@ -266,7 +266,7 @@
     <entry key='ywt.port'>5035</entry>
     <entry key='tk102.port'>5036</entry>
     <entry key='intellitrac.port'>5037</entry>
-    <entry key='xt7.port'>5038</entry>
+    <entry key='gpsmta.port'>5038</entry>
     <entry key='wialon.port'>5039</entry>
     <entry key='carscop.port'>5040</entry>
     <entry key='apel.port'>5041</entry>
@@ -317,5 +317,11 @@
     <entry key='castel.port'>5086</entry>
     <entry key='mxt.port'>5087</entry>
     <entry key='cityeasy.port'>5088</entry>
+    <entry key='aquila.port'>5089</entry>
+    <entry key='flextrack.port'>5090</entry>
+    <entry key='blackkite.port'>5091</entry>
+    <entry key='adm.port'>5092</entry>
+    <entry key='watch.port'>5093</entry>
+    <entry key='t800x.port'>5094</entry>
 
 </properties>
