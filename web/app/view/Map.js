@@ -105,7 +105,7 @@ Ext.define('Traccar.view.Map', {
             }
 
             this.map.on('pointermove', function (e) {
-                var hit = this.forEachFeatureAtPixel(e.pixel, function(feature, layer) {
+                var hit = this.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
                     return true;
                 });
                 if (hit) {
