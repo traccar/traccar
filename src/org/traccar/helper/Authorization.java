@@ -28,13 +28,13 @@ public final class Authorization {
     private Authorization() {
     }
 
-    public static final String HEADER = "Authorization";
-    public static final String SCHEME = "Basic";
-    public static final String REGEX = SCHEME + " ";
+    public static final String AUTHORIAZTION_SCHEME_VALUE = "Basic";
+    public static final String REGEX = AUTHORIAZTION_SCHEME_VALUE + " ";
     public static final String REPLACEMENT = "";
     public static final String TOKENIZER = ":";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
+    public static final String WWW_AUTHENTICATE_VALUE = "Basic realm=\"api\"";
 
     public static Map<String, String> parse(String authorization) {
         Map<String, String> authMap = new HashMap<>();
