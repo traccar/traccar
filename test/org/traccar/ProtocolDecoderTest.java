@@ -38,7 +38,7 @@ public class ProtocolDecoderTest {
             }
 
             @Override
-            public Device getDeviceByUniqueId(String imei) {
+            public Device getDeviceByUniqueId(String uniqueId) {
                 return createDevice();
             }
 

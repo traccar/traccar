@@ -12,6 +12,9 @@ public class AutoFon45ProtocolDecoderTest extends ProtocolDecoderTest {
         AutoFon45ProtocolDecoder decoder = new AutoFon45ProtocolDecoder(new AutoFon45Protocol());
 
         verifyNothing(decoder, binary(
+                "41035151305289931441139602662095148807"));
+
+        verifyNothing(decoder, binary(
                 "41032125656985547543619173484002123481"));
 
         verifyPosition(decoder, binary(
