@@ -53,10 +53,17 @@ public abstract class BaseServlet extends HttpServlet {
         try {
             resp.setContentType(APPLICATION_JSON);
             resp.setCharacterEncoding(CharsetUtil.UTF_8.name());
-            resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN,
-                    Context.getConfig().getString("web.origin", ALLOW_ORIGIN_VALUE));
             resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, ALLOW_HEADERS_VALUE);
             resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, ALLOW_METHODS_VALUE);
+
+            String origin = req.getHeader(HttpHeaders.Names.ORIGIN);
+            String allowed = Context.getConfig().getString("web.origin");
+            if (allowed == null) {
+                resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOW_ORIGIN_VALUE);
+            } else if (allowed.contains(origin)) {
+                resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+            }
+
             if (!handle(getCommand(req), req, resp)) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
