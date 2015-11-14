@@ -23,6 +23,8 @@ Ext.define('Traccar.view.Register', {
 
     controller: 'register',
 
+    title: Strings.loginRegister,
+
     items: {
         xtype: 'form',
         reference: 'form',
