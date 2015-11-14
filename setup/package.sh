@@ -54,10 +54,10 @@ cleanup () {
 
 prepare_windows_64 () {
   unzip wrapper-windows-x86-64-*.zip
-  cp wrapper_*_src/bin/wrapper.exe wrapper/bin/wrapper-windows-x86-32.exe
-  cp wrapper_*_src/lib/wrapper.dll wrapper/lib/wrapper-windows-x86-32.dll
-  cp wrapper_*_src/lib/wrapper.jar wrapper/lib/wrapper.jar
-  rm -rf wrapper_*_src
+  cp wrapper-windows-*/bin/wrapper.exe wrapper/bin/wrapper-windows-x86-32.exe
+  cp wrapper-windows-*/lib/wrapper.dll wrapper/lib/wrapper-windows-x86-32.dll
+  cp wrapper-windows-*/lib/wrapper.jar wrapper/lib/wrapper.jar
+  rm -rf wrapper-windows-*/
 }
 
 prepare_linux_32 () {
