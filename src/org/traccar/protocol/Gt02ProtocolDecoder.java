@@ -32,18 +32,6 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private String readImei(ChannelBuffer buf) {
-        int b = buf.readUnsignedByte();
-        StringBuilder imei = new StringBuilder();
-        imei.append(b & 0x0F);
-        for (int i = 0; i < 7; i++) {
-            b = buf.readUnsignedByte();
-            imei.append((b & 0xF0) >> 4);
-            imei.append(b & 0x0F);
-        }
-        return imei.toString();
-    }
-
     public static final int MSG_HEARTBEAT = 0x1A;
     public static final int MSG_DATA = 0x10;
 
@@ -56,15 +44,29 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
         buf.readByte(); // size
 
-        // Zero for location messages
-        buf.readByte(); // voltage
-        buf.readByte(); // gsm signal
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
 
-        String imei = readImei(buf);
-        long index = buf.readUnsignedShort();
+        // Zero for location messages
+        int power = buf.readUnsignedByte();
+        int gsm = buf.readUnsignedByte();
+
+        String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+        if (!identify(imei, channel)) {
+            return null;
+        }
+        position.setDeviceId(getDeviceId());
+
+        position.set(Event.KEY_INDEX, buf.readUnsignedShort());
+
         int type = buf.readUnsignedByte();
 
         if (type == MSG_HEARTBEAT) {
+
+            getLastLocation(position, null);
+
+            position.set(Event.KEY_POWER, power);
+            position.set(Event.KEY_GSM, gsm);
 
             if (channel != null) {
                 byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
@@ -72,15 +74,6 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             }
 
         } else if (type == MSG_DATA) {
-
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.set(Event.KEY_INDEX, index);
-
-            if (!identify(imei, channel)) {
-                return null;
-            }
-            position.setDeviceId(getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -107,10 +100,9 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(latitude);
             position.setLongitude(longitude);
 
-            return position;
         }
 
-        return null;
+        return position;
     }
 
 }
