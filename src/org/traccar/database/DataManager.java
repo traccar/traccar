@@ -310,6 +310,12 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
+    public void updateDeviceStatus(Device device) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateDeviceStatus"))
+                .setObject(device)
+                .executeUpdate();
+    }
+
     public void removeDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)

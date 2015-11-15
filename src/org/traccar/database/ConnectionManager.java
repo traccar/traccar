@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.jboss.netty.channel.Channel;
+import org.traccar.Context;
 import org.traccar.Protocol;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -68,9 +69,17 @@ public class ConnectionManager {
     }
 
     public synchronized void updateDevice(long deviceId, String status, Date time) {
-        // TODO update cache and call listener
-        /*Log.debug(deviceId + " " + status + " "
-                + new SimpleDateFormat(Log.DATE_FORMAT).format(time));*/
+        Device device = Context.getIdentityManager().getDeviceById(deviceId);
+        device.setStatus(status);
+        device.setLastUpdate(time);
+
+        try {
+            Context.getDataManager().updateDeviceStatus(device);
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
+
+        // TODO call listener
     }
 
     public synchronized void updatePosition(Position position) {

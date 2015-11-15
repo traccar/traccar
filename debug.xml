@@ -209,6 +209,10 @@
         UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;
     </entry>
 
+    <entry key='database.updateDeviceStatus'>
+        UPDATE device SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
+    </entry>
+
     <entry key='database.deleteDevice'>
         DELETE FROM device WHERE id = :id;
     </entry>
