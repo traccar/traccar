@@ -187,11 +187,16 @@ public class ProtocolDecoderTest {
             Assert.assertFalse("no attributes", attributes.isEmpty());
         }
 
+        if (attributes.containsKey(Event.KEY_LAC) || attributes.containsKey(Event.KEY_CID)) {
+            checkInteger(attributes.get(Event.KEY_LAC), 1, 65535);
+            checkInteger(attributes.get(Event.KEY_CID), 1, 268435455);
+        }
+
         if (attributes.containsKey(Event.KEY_MCC) || attributes.containsKey(Event.KEY_MNC)) {
             checkInteger(attributes.get(Event.KEY_MCC), 100, 999);
             checkInteger(attributes.get(Event.KEY_MNC), 0, 999);
-            checkInteger(attributes.get(Event.KEY_LAC), 1, 65535);
-            checkInteger(attributes.get(Event.KEY_CID), 1, 268435455);
+            Assert.assertTrue("value missing", attributes.containsKey(Event.KEY_LAC));
+            Assert.assertTrue("value missing", attributes.containsKey(Event.KEY_CID));
         }
 
     }
