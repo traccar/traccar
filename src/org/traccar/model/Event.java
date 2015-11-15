@@ -36,7 +36,7 @@ public abstract class Event extends Extensible {
     public static final String KEY_MCC = "mcc";
     public static final String KEY_MNC = "mnc";
     public static final String KEY_LAC = "lac";
-    public static final String KEY_CELL = "cell";
+    public static final String KEY_CID = "cid";
     public static final String KEY_FUEL = "fuel";
     public static final String KEY_RFID = "rfid";
     public static final String KEY_VERSION = "version";

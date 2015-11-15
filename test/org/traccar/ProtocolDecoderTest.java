@@ -8,6 +8,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import javax.xml.bind.DatatypeConverter;
@@ -18,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class ProtocolDecoderTest {
@@ -179,12 +181,27 @@ public class ProtocolDecoderTest {
 
         }
 
+        Map<String, Object> attributes = position.getAttributes();
+
         if (checkAttributes) {
-
-            Assert.assertFalse("no attributes", position.getAttributes().isEmpty());
-
+            Assert.assertFalse("no attributes", attributes.isEmpty());
         }
 
+        /*if (attributes.containsKey(Event.KEY_LAC) || attributes.containsKey(Event.KEY_CID)) {
+            checkInteger(attributes.get(Event.KEY_MCC), 100, 999);
+            checkInteger(attributes.get(Event.KEY_MNC), 0, 999);
+            checkInteger(attributes.get(Event.KEY_LAC), 1, 65535);
+            checkInteger(attributes.get(Event.KEY_CID), 1, 65535);
+        }*/
+
+    }
+
+    private void checkInteger(Object value, int min, int max) {
+        Assert.assertNotNull("value is null", value);
+        Assert.assertTrue("not int or long", value instanceof Integer || value instanceof Long);
+        long number = ((Number) value).longValue();
+        Assert.assertTrue("value too low", number >= min);
+        Assert.assertTrue("value too high", number <= max);
     }
 
 }

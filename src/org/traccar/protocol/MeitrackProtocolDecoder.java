@@ -122,7 +122,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_MCC, parser.next());
         position.set(Event.KEY_MCC, parser.next());
         position.set(Event.KEY_LAC, parser.next());
-        position.set(Event.KEY_CELL, parser.next());
+        position.set(Event.KEY_CID, parser.next());
         position.set(Event.KEY_STATUS, parser.next());
 
         for (int i = 1; i <= 3; i++) {
@@ -198,7 +198,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_MCC, buf.readUnsignedShort());
             position.set(Event.KEY_MCC, buf.readUnsignedShort());
             position.set(Event.KEY_LAC, buf.readUnsignedShort());
-            position.set(Event.KEY_CELL, buf.readUnsignedShort());
+            position.set(Event.KEY_CID, buf.readUnsignedShort());
             position.set(Event.KEY_STATUS, buf.readUnsignedShort());
 
             position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());

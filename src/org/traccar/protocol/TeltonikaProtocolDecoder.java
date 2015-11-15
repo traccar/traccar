@@ -115,7 +115,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
                 if (BitUtil.check(locationMask, 5)) {
                     position.set("area", buf.readUnsignedShort());
-                    position.set(Event.KEY_CELL, buf.readUnsignedShort());
+                    position.set(Event.KEY_CID, buf.readUnsignedShort());
                 }
 
                 if (BitUtil.check(locationMask, 6)) {

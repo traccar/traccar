@@ -83,7 +83,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Event.KEY_CELL, parser.next());
+        position.set(Event.KEY_CID, parser.next());
 
         position.setValid(true);
         position.setLatitude(parser.nextDouble());

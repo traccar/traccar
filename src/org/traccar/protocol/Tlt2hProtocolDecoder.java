@@ -86,7 +86,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 position.setProtocol(getProtocolName());
                 position.setDeviceId(getDeviceId());
 
-                position.set(Event.KEY_CELL, parser.next());
+                position.set(Event.KEY_CID, parser.next());
 
                 DateBuilder dateBuilder = new DateBuilder()
                         .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());

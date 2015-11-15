@@ -114,7 +114,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_MCC, parser.nextInt());
             position.set(Event.KEY_MNC, parser.nextInt());
             position.set(Event.KEY_LAC, parser.nextInt());
-            position.set(Event.KEY_CELL, parser.nextInt());
+            position.set(Event.KEY_CID, parser.nextInt());
 
             return position;
         }

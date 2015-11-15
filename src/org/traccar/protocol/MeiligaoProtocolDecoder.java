@@ -283,7 +283,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            position.set(Event.KEY_CELL, parser.next());
+            position.set(Event.KEY_CID, parser.next());
 
             if (parser.hasNext()) {
                 position.set(Event.KEY_GSM, parser.nextInt(16));

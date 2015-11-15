@@ -295,7 +295,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_ODOMETER, parser.nextDouble());
         position.set(Event.KEY_MCC, parser.nextInt());
         position.set(Event.KEY_MNC, parser.nextInt());
-        position.set(Event.KEY_CELL, parser.next());
+        position.set(Event.KEY_CID, parser.next());
 
         String gsm = parser.next();
         if (gsm != null) {

@@ -101,7 +101,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         if (blockLength > 0) {
 
             position.set(Event.KEY_LAC, buf.readUnsignedShort());
-            position.set(Event.KEY_CELL, buf.readUnsignedShort());
+            position.set(Event.KEY_CID, buf.readUnsignedShort());
 
         }
 

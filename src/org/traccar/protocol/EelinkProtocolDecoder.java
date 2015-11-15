@@ -86,7 +86,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Event.KEY_CELL, ChannelBuffers.hexDump(buf.readBytes(9)));
+            position.set(Event.KEY_CID, ChannelBuffers.hexDump(buf.readBytes(9)));
 
             position.setValid((buf.readUnsignedByte() & 0x01) != 0);
 

@@ -218,7 +218,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_MCC, parser.next());
         position.set(Event.KEY_MNC, parser.next());
         position.set(Event.KEY_LAC, parser.next());
-        position.set(Event.KEY_CELL, parser.next());
+        position.set(Event.KEY_CID, parser.next());
 
         position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());

@@ -200,7 +200,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // additional flags
 
                     position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                    position.set(Event.KEY_CELL, buf.readUnsignedShort());
+                    position.set(Event.KEY_CID, buf.readUnsignedShort());
 
                     positions.add(position);
                 }

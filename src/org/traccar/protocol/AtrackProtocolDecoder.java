@@ -95,7 +95,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Event.KEY_GSM, buf.readUnsignedByte());
                     break;
                 case "CE":
-                    position.set(Event.KEY_CELL, buf.readUnsignedInt());
+                    position.set(Event.KEY_CID, buf.readUnsignedInt());
                     break;
                 case "LC":
                     position.set(Event.KEY_LAC, buf.readUnsignedShort());
