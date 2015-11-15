@@ -116,7 +116,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text(",")
             .number("(0ddd)?,")                  // mcc
             .number("(0ddd)?,")                  // mnc
-            .number("(xxxx|x{8})?,")             // lac
+            .number("(?:xxxx)?")
+            .number("(xxxx)").optional(2)        // lac
+            .text(",")
             .number("(xxxx)?,")                  // cell
             .groupBegin()
             .number("(d+.d)?,")                  // odometer

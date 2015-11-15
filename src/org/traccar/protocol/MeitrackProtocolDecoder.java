@@ -121,8 +121,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set("runtime", parser.next());
         position.set(Event.KEY_MCC, parser.nextInt());
         position.set(Event.KEY_MNC, parser.nextInt());
-        position.set(Event.KEY_LAC, parser.next());
-        position.set(Event.KEY_CID, parser.next());
+        position.set(Event.KEY_LAC, parser.nextInt(16));
+        position.set(Event.KEY_CID, parser.nextInt(16));
         position.set(Event.KEY_STATUS, parser.next());
 
         for (int i = 1; i <= 3; i++) {

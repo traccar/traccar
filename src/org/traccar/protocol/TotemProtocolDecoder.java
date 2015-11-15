@@ -55,7 +55,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)")                     // battery
             .number("(dddd)|")                   // power
             .number("(d+)|").optional()          // adc
-            .number("(x+)|")                     // location code
+            .number("x*(xxxx)")                  // lac
+            .number("(xxxx)|")                   // cid
             .number("(d+)|")                     // temperature
             .number("(d+.d+)|")                  // odometer
             .number("d+|")                       // serial number
@@ -84,7 +85,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)")                      // battery
             .number("(dd)|")                     // external power
             .number("(d+)|")                     // adc
-            .number("(x{8})|")                   // location code
+            .number("(xxxx)")                    // lac
+            .number("(xxxx)|")                   // cid
             .number("(d+)|")                     // temperature
             .number("(d+.d+)|")                  // odometer
             .number("d+|")                       // serial number
@@ -107,7 +109,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)")                    // adc 2
             .number("(ddd)")                     // temperature 1
             .number("(ddd)")                     // temperature 2
-            .number("(x{8})")                    // location code
+            .number("(xxxx)")                    // lac
+            .number("(xxxx)")                    // cid
             .expression("([AV])")                // validity
             .number("(dd)")                      // satellites
             .number("(ddd)")                     // course
@@ -185,7 +188,14 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_BATTERY, parser.next());
             position.set(Event.KEY_POWER, parser.nextDouble());
             position.set(Event.PREFIX_ADC + 1, parser.next());
-            position.set(Event.KEY_LAC, parser.next());
+
+            int lac = parser.nextInt(16);
+            int cid = parser.nextInt(16);
+            if (lac != 0 && cid != 0) {
+                position.set(Event.KEY_LAC, lac);
+                position.set(Event.KEY_CID, cid);
+            }
+
             position.set(Event.PREFIX_TEMP + 1, parser.next());
             position.set(Event.KEY_ODOMETER, parser.next());
 
@@ -203,7 +213,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.PREFIX_ADC + 2, parser.next());
             position.set(Event.PREFIX_TEMP + 1, parser.next());
             position.set(Event.PREFIX_TEMP + 2, parser.next());
-            position.set(Event.KEY_LAC, parser.next());
+            position.set(Event.KEY_LAC, parser.nextInt(16));
+            position.set(Event.KEY_CID, parser.nextInt(16));
 
             position.setValid(parser.next().equals("A"));
             position.set(Event.KEY_SATELLITES, parser.next());

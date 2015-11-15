@@ -53,14 +53,16 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d)?,")                     // charger
             .number("(d+)?,")                    // mcc
             .number("(d+)?,")                    // mnc
-            .number("(xxxx,xxxx);")              // location code
+            .number("(xxxx),")                   // lac
+            .number("(xxxx);")                   // cid
             .any()                               // checksum
             .compile();
 
     private static final Pattern PATTERN_ALTERNATIVE = new PatternBuilder()
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
-            .number("(xxxx,xxxx),")              // location code
+            .number("(xxxx),")                   // lac
+            .number("(xxxx),")                   // cid
             .number("(d+),")                     // gsm signal
             .number("(d+),")                     // battery
             .number("(d+),")                     // flags
@@ -174,7 +176,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 if (parser.hasNext(3)) {
                     position.set(Event.KEY_MCC, parser.nextInt());
                     position.set(Event.KEY_MNC, parser.nextInt());
-                    position.set(Event.KEY_LAC, parser.next());
+                    position.set(Event.KEY_LAC, parser.nextInt(16));
+                    position.set(Event.KEY_CID, parser.nextInt(16));
                 }
 
             } else {
@@ -198,7 +201,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
                 position.set(Event.KEY_MCC, parser.nextInt());
                 position.set(Event.KEY_MNC, parser.nextInt());
-                position.set(Event.KEY_LAC, parser.next());
+                position.set(Event.KEY_LAC, parser.nextInt(16));
+                position.set(Event.KEY_CID, parser.nextInt(16));
                 position.set(Event.KEY_GSM, parser.next());
 
                 position.set(Event.KEY_BATTERY, Double.parseDouble(parser.next()));
@@ -238,7 +242,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // odometer
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
-            .number("(xxxx,xxxx),")              // cell
+            .number("(xxxx),")                   // lac
+            .number("(xxxx),")                   // cid
             .number("(d+)?,")                    // gsm
             .expression("([01]+),")              // input
             .expression("([01]+),")              // output
@@ -297,7 +302,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_ODOMETER, parser.nextDouble());
         position.set(Event.KEY_MCC, parser.nextInt());
         position.set(Event.KEY_MNC, parser.nextInt());
-        position.set(Event.KEY_CID, parser.next());
+        position.set(Event.KEY_LAC, parser.nextInt(16));
+        position.set(Event.KEY_CID, parser.nextInt(16));
 
         String gsm = parser.next();
         if (gsm != null) {
