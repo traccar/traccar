@@ -116,7 +116,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text(",")
             .number("(0ddd)?,")                  // mcc
             .number("(0ddd)?,")                  // mnc
-            .number("(xxxx|x{8})?,")             // loc
+            .number("(xxxx|x{8})?,")             // lac
             .number("(xxxx)?,")                  // cell
             .groupBegin()
             .number("(d+.d)?,")                  // odometer
@@ -215,10 +215,12 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
         }
 
-        position.set(Event.KEY_MCC, parser.next());
-        position.set(Event.KEY_MNC, parser.next());
-        position.set(Event.KEY_LAC, parser.next());
-        position.set(Event.KEY_CID, parser.next());
+        if (parser.hasNext(4)) {
+            position.set(Event.KEY_MCC, parser.nextInt());
+            position.set(Event.KEY_MNC, parser.nextInt());
+            position.set(Event.KEY_LAC, parser.nextInt(16));
+            position.set(Event.KEY_CID, parser.nextInt(16));
+        }
 
         position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());

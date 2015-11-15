@@ -125,8 +125,8 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(parser.nextInt());
 
             position.set(Event.KEY_HDOP, parser.nextInt() * 0.1);
-            position.set(Event.KEY_CID, parser.next());
-            position.set(Event.KEY_LAC, parser.next());
+            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Event.KEY_LAC, parser.nextInt(16));
             position.set(Event.KEY_ODOMETER, parser.nextInt());
 
             return position;
