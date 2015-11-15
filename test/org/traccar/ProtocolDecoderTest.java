@@ -45,46 +45,6 @@ public class ProtocolDecoderTest {
         });
     }
 
-    protected void verifyNothing(BaseProtocolDecoder decoder, Object object) throws Exception {
-        Assert.assertNull(decoder.decode(null, null, object));
-    }
-
-    protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
-        Object decodedObject = decoder.decode(null, null, object);
-        Assert.assertNotNull("position is null", decodedObject);
-        Assert.assertTrue("not a position", decodedObject instanceof Position);
-        Position position = (Position) decodedObject;
-        Assert.assertFalse("no attributes", position.getAttributes().isEmpty());
-    }
-
-    protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object));
-    }
-
-    protected void verifyPosition(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), position);
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
-        Object decodedObject = decoder.decode(null, null, object);
-        Assert.assertNotNull("list is null", decodedObject);
-        Assert.assertTrue("not a list", decodedObject instanceof List);
-        Assert.assertFalse("list if empty", ((List) decodedObject).isEmpty());
-        for (Object item : (List) decodedObject) {
-            verifyDecodedPosition(item);
-        }
-    }
-
-    protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        Object decodedObject = decoder.decode(null, null, object);
-        Assert.assertNotNull("list is null", decodedObject);
-        Assert.assertTrue("not a list", decodedObject instanceof List);
-        Assert.assertFalse("list if empty", ((List) decodedObject).isEmpty());
-        for (Object item : (List) decodedObject) {
-            verifyDecodedPosition(item, position);
-        }
-    }
-
     protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
 
         Position position = new Position();
@@ -140,61 +100,90 @@ public class ProtocolDecoderTest {
         return request;
     }
 
-    private void verifyDecodedPosition(Object decodedObject, Position expected) {
+    protected void verifyNothing(BaseProtocolDecoder decoder, Object object) throws Exception {
+        Assert.assertNull(decoder.decode(null, null, object));
+    }
 
-        Assert.assertNotNull("position is null", decodedObject);
-        Assert.assertTrue("not a position", decodedObject instanceof Position);
+    protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
+        verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
+    }
 
-        Position position = (Position) decodedObject;
+    protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {
+        verifyDecodedPosition(decoder.decode(null, null, object), true, false, null);
+    }
 
-        if (expected.getFixTime() != null) {
-            Assert.assertEquals("time", expected.getFixTime(), position.getFixTime());
+    protected void verifyPosition(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
+        verifyDecodedPosition(decoder.decode(null, null, object), true, false, position);
+    }
+
+    protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
+        verifyDecodedList(decoder.decode(null, null, object), null);
+    }
+
+    protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
+        verifyDecodedList(decoder.decode(null, null, object), position);
+    }
+
+    private void verifyDecodedList(Object decodedObject, Position expected) {
+
+        Assert.assertNotNull("list is null", decodedObject);
+        Assert.assertTrue("not a list", decodedObject instanceof List);
+        Assert.assertFalse("list if empty", ((List) decodedObject).isEmpty());
+
+        for (Object item : (List) decodedObject) {
+            verifyDecodedPosition(item, true, false, expected);
         }
-        Assert.assertEquals("valid", expected.getValid(), position.getValid());
-        Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
-        Assert.assertEquals("longitude", expected.getLongitude(), position.getLongitude(), 0.00001);
-
-        Assert.assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
-        Assert.assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
-
-        Assert.assertTrue("speed >= 0", position.getSpeed() >= 0);
-        Assert.assertTrue("speed <= 869", position.getSpeed() <= 869);
-
-        Assert.assertTrue("course >= 0", position.getCourse() >= 0);
-        Assert.assertTrue("course <= 360", position.getCourse() <= 360);
-
-        Assert.assertNotNull("protocol is null", position.getProtocol());
 
     }
 
-    private void verifyDecodedPosition(Object decodedObject) {
+    private void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
 
         Assert.assertNotNull("position is null", decodedObject);
         Assert.assertTrue("not a position", decodedObject instanceof Position);
 
         Position position = (Position) decodedObject;
 
-        Assert.assertNotNull(position.getFixTime());
-        Assert.assertTrue("year > 2000", position.getFixTime().after(new Date(946684800000L)));
-        Assert.assertTrue("time < +25 hours",
-                position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000);
+        if (checkLocation) {
 
-        Assert.assertTrue("latitude >= -90", position.getLatitude() >= -90);
-        Assert.assertTrue("latitude <= 90", position.getLatitude() <= 90);
+            if (expected != null) {
 
-        Assert.assertTrue("longitude >= -180", position.getLongitude() >= -180);
-        Assert.assertTrue("longitude <= 180", position.getLongitude() <= 180);
+                if (expected.getFixTime() != null) {
+                    Assert.assertEquals("time", expected.getFixTime(), position.getFixTime());
+                }
+                Assert.assertEquals("valid", expected.getValid(), position.getValid());
+                Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
+                Assert.assertEquals("longitude", expected.getLongitude(), position.getLongitude(), 0.00001);
 
-        Assert.assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
-        Assert.assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
+            } else {
 
-        Assert.assertTrue("speed >= 0", position.getSpeed() >= 0);
-        Assert.assertTrue("speed <= 869", position.getSpeed() <= 869);
+                Assert.assertNotNull(position.getFixTime());
+                Assert.assertTrue("year > 2000", position.getFixTime().after(new Date(946684800000L)));
+                Assert.assertTrue("time < +25 hours",
+                        position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000);
 
-        Assert.assertTrue("course >= 0", position.getCourse() >= 0);
-        Assert.assertTrue("course <= 360", position.getCourse() <= 360);
+                Assert.assertTrue("latitude >= -90", position.getLatitude() >= -90);
+                Assert.assertTrue("latitude <= 90", position.getLatitude() <= 90);
 
-        Assert.assertNotNull("protocol is null", position.getProtocol());
+            }
+
+            Assert.assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
+            Assert.assertTrue("altitude <= 18000", position.getAltitude() <= 18000);
+
+            Assert.assertTrue("speed >= 0", position.getSpeed() >= 0);
+            Assert.assertTrue("speed <= 869", position.getSpeed() <= 869);
+
+            Assert.assertTrue("course >= 0", position.getCourse() >= 0);
+            Assert.assertTrue("course <= 360", position.getCourse() <= 360);
+
+            Assert.assertNotNull("protocol is null", position.getProtocol());
+
+        }
+
+        if (checkAttributes) {
+
+            Assert.assertFalse("no attributes", position.getAttributes().isEmpty());
+
+        }
 
     }
 
