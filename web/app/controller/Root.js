@@ -96,19 +96,22 @@ Ext.define('Traccar.controller.Root', {
                 first: first
             },
             callback: Traccar.app.getErrorHandler(this, function (options, success, response) {
-                var i, store, data, position;
+                var i, store, data, devices, positions, position;
                 if (success) {
                     store = Ext.getStore('LatestPositions');
                     data = Ext.decode(response.responseText).data;
+                    devices = data.devices;
+                    positions = data.positions;
 
-                    for (i = 0; i < data.length; i++) {
-                        position = store.findRecord('deviceId', data[i].deviceId, 0, false, false, true);
+                    for (i = 0; i < positions.length; i++) {
+                        position = store.findRecord('deviceId', positions[i].deviceId, 0, false, false, true);
                         if (position) {
-                            position.set(data[i]);
+                            position.set(positions[i]);
                         } else {
-                            store.add(Ext.create('Traccar.model.Position', data[i]));
+                            store.add(Ext.create('Traccar.model.Position', positions[i]));
                         }
                     }
+
                     this.asyncUpdate(false);
                 }
             })
