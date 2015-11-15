@@ -21,6 +21,7 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.socket.DatagramChannel;
+import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
@@ -66,7 +67,9 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
         closeChannel(e.getChannel());
 
-        Context.getConnectionManager().removeActiveDevice(e.getChannel());
+        if (ctx.getPipeline().get("httpDecoder") == null) {
+            Context.getConnectionManager().removeActiveDevice(e.getChannel());
+        }
     }
 
     @Override
