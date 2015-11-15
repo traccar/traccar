@@ -171,9 +171,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Event.KEY_CHARGE, Integer.parseInt(charger) == 1);
                 }
 
-                position.set(Event.KEY_MCC, parser.next());
-                position.set(Event.KEY_MNC, parser.next());
-                position.set(Event.KEY_LAC, parser.next());
+                if (parser.hasNext(3)) {
+                    position.set(Event.KEY_MCC, parser.nextInt());
+                    position.set(Event.KEY_MNC, parser.nextInt());
+                    position.set(Event.KEY_LAC, parser.next());
+                }
 
             } else {
 
@@ -194,8 +196,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 }
                 position.setDeviceId(getDeviceId());
 
-                position.set(Event.KEY_MCC, parser.next());
-                position.set(Event.KEY_MNC, parser.next());
+                position.set(Event.KEY_MCC, parser.nextInt());
+                position.set(Event.KEY_MNC, parser.nextInt());
                 position.set(Event.KEY_LAC, parser.next());
                 position.set(Event.KEY_GSM, parser.next());
 
