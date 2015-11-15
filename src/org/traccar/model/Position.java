@@ -47,6 +47,16 @@ public class Position extends Event implements Factory {
         setFixTime(time);
     }
 
+    private boolean outdated;
+
+    public boolean getOutdated() {
+        return outdated;
+    }
+
+    public void setOutdated(boolean outdated) {
+        this.outdated = outdated;
+    }
+
     private boolean valid;
 
     public boolean getValid() {
