@@ -40,6 +40,7 @@ Ext.define('Traccar.controller.Root', {
 
     onServerReturn: function (options, success, response) {
         var result;
+        Ext.get('spinner').remove();
         if (Traccar.ErrorManager.check(success, response)) {
             result = Ext.decode(response.responseText);
             if (result.success) {
