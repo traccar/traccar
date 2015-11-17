@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -130,6 +131,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
         }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
+
+        addDynamicHandlers(pipeline, "extraHandler", "extra.handlers");
+
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
         }
@@ -140,4 +144,19 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         return pipeline;
     }
 
+    private void addDynamicHandlers(ChannelPipeline pipeline, String id, String key) {
+        final String[] extraHandlers = Context.getConfig().getString(key,"").split(",");
+        int i = 0;
+        for (String extraHandler : extraHandlers) {
+            try {
+                Class c = Class.forName(extraHandler);
+                i++;
+                pipeline.addLast(id + "."+i, (ChannelHandler)c.newInstance());
+            } catch (Throwable e) {
+                Log.error("Error loading handler : " + extraHandler + " " + e);
+            }
+        }
+
+    }
+    
 }
