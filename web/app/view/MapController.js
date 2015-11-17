@@ -54,7 +54,6 @@ Ext.define('Traccar.view.MapController', {
     },
 
     getDeviceColor: function (device) {
-        console.log(device.get('status'));
         switch (device.get('status')) {
             case 'online':
                 return Traccar.Style.mapColorOnline;
