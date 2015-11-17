@@ -36,13 +36,13 @@ public class ConnectionManager {
 
     private final Map<Long, ActiveDevice> activeDevices = new HashMap<>();
     private final Map<Long, Position> positions = new HashMap<>();
-    private final Map<Long, Set<DataCacheListener>> listeners = new HashMap<>();
+    private final Map<Long, Set<UpdateListener>> listeners = new HashMap<>();
 
     public ConnectionManager(DataManager dataManager) {
         if (dataManager != null) {
             try {
                 for (Position position : dataManager.getLatestPositions()) {
-                    this.positions.put(position.getDeviceId(), position);
+                    positions.put(position.getDeviceId(), position);
                 }
             } catch (SQLException error) {
                 Log.warning(error);
@@ -79,14 +79,19 @@ public class ConnectionManager {
             Log.warning(error);
         }
 
-        // TODO call listener
+        if (listeners.containsKey(deviceId)) {
+            for (UpdateListener listener : listeners.get(deviceId)) {
+                listener.onUpdateDevice(device);
+            }
+        }
     }
 
     public synchronized void updatePosition(Position position) {
         long deviceId = position.getDeviceId();
         positions.put(deviceId, position);
+
         if (listeners.containsKey(deviceId)) {
-            for (DataCacheListener listener : listeners.get(deviceId)) {
+            for (UpdateListener listener : listeners.get(deviceId)) {
                 listener.onUpdatePosition(position);
             }
         }
@@ -109,32 +114,33 @@ public class ConnectionManager {
         return result;
     }
 
-    public interface DataCacheListener {
+    public interface UpdateListener {
+        void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
     }
 
-    public void addListener(Collection<Long> devices, DataCacheListener listener) {
+    public void addListener(Collection<Long> devices, UpdateListener listener) {
         for (long deviceId : devices) {
             addListener(deviceId, listener);
         }
     }
 
-    public synchronized void addListener(long deviceId, DataCacheListener listener) {
+    public synchronized void addListener(long deviceId, UpdateListener listener) {
         if (!listeners.containsKey(deviceId)) {
-            listeners.put(deviceId, new HashSet<DataCacheListener>());
+            listeners.put(deviceId, new HashSet<UpdateListener>());
         }
         listeners.get(deviceId).add(listener);
     }
 
-    public void removeListener(Collection<Long> devices, DataCacheListener listener) {
+    public void removeListener(Collection<Long> devices, UpdateListener listener) {
         for (long deviceId : devices) {
             removeListener(deviceId, listener);
         }
     }
 
-    public synchronized void removeListener(long deviceId, DataCacheListener listener) {
+    public synchronized void removeListener(long deviceId, UpdateListener listener) {
         if (!listeners.containsKey(deviceId)) {
-            listeners.put(deviceId, new HashSet<DataCacheListener>());
+            listeners.put(deviceId, new HashSet<UpdateListener>());
         }
         listeners.get(deviceId).remove(listener);
     }

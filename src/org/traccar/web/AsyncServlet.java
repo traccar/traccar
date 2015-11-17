@@ -36,6 +36,7 @@ import org.traccar.Context;
 import org.traccar.GlobalTimer;
 import org.traccar.database.ConnectionManager;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 public class AsyncServlet extends BaseServlet {
@@ -60,7 +61,8 @@ public class AsyncServlet extends BaseServlet {
         private final Set<Long> devices = new HashSet<>();
         private Timeout sessionTimeout;
         private Timeout requestTimeout;
-        private final Map<Long, Position> positions = new HashMap<>();
+        private final Set<Device> deviceUpdates = new HashSet<>();
+        private final Set<Position> positionUpdates = new HashSet<>();
         private AsyncContext activeContext;
 
         private void logEvent(String message) {
@@ -76,7 +78,7 @@ public class AsyncServlet extends BaseServlet {
 
             Collection<Position> initialPositions = Context.getConnectionManager().getInitialState(devices);
             for (Position position : initialPositions) {
-                positions.put(position.getDeviceId(), position);
+                positionUpdates.add(position);
             }
 
             Context.getConnectionManager().addListener(devices, dataListener);
@@ -86,17 +88,34 @@ public class AsyncServlet extends BaseServlet {
             return devices.contains(deviceId);
         }
 
-        private final ConnectionManager.DataCacheListener dataListener = new ConnectionManager.DataCacheListener() {
+        private final ConnectionManager.UpdateListener dataListener = new ConnectionManager.UpdateListener() {
             @Override
-            public void onUpdatePosition(Position position) {
+            public void onUpdateDevice(Device device) {
                 synchronized (AsyncSession.this) {
-                    logEvent("onUpdate deviceId: " + position.getDeviceId());
+                    logEvent("onUpdateDevice deviceId: " + device.getId());
                     if (!destroyed) {
                         if (requestTimeout != null) {
                             requestTimeout.cancel();
                             requestTimeout = null;
                         }
-                        positions.put(position.getDeviceId(), position);
+                        deviceUpdates.add(device);
+                        if (activeContext != null) {
+                            response();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onUpdatePosition(Position position) {
+                synchronized (AsyncSession.this) {
+                    logEvent("onUpdatePosition deviceId: " + position.getDeviceId());
+                    if (!destroyed) {
+                        if (requestTimeout != null) {
+                            requestTimeout.cancel();
+                            requestTimeout = null;
+                        }
+                        positionUpdates.add(position);
                         if (activeContext != null) {
                             response();
                         }
@@ -142,7 +161,7 @@ public class AsyncServlet extends BaseServlet {
                     sessionTimeout = null;
                 }
 
-                if (!positions.isEmpty()) {
+                if (!deviceUpdates.isEmpty() || !positionUpdates.isEmpty()) {
                     response();
                 } else {
                     requestTimeout = GlobalTimer.getTimer().newTimeout(
@@ -160,15 +179,16 @@ public class AsyncServlet extends BaseServlet {
                 result.add("success", true);
 
                 if (Context.getConfig().getBoolean("web.oldAsyncFormat")) {
-                    result.add("data", JsonConverter.arrayToJson(positions.values()));
+                    result.add("data", JsonConverter.arrayToJson(positionUpdates));
                 } else {
                     JsonObjectBuilder data = Json.createObjectBuilder();
-                    data.add("devices", Json.createArrayBuilder().build()); // TODO: send device status
-                    data.add("positions", JsonConverter.arrayToJson(positions.values()));
+                    data.add("devices", JsonConverter.arrayToJson(deviceUpdates));
+                    data.add("positions", JsonConverter.arrayToJson(positionUpdates));
                     result.add("data", data.build());
                 }
 
-                positions.clear();
+                deviceUpdates.clear();
+                positionUpdates.clear();
 
                 try {
                     response.getWriter().println(result.build().toString());
