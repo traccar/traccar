@@ -120,7 +120,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (Context.isLoggerEnabled()) {
             pipeline.addLast("logger", new StandardLoggingHandler());
         }
+
         addSpecificHandlers(pipeline);
+
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
         }
@@ -132,7 +134,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
 
-        addDynamicHandlers(pipeline, "extraHandler", "extra.handlers");
+        addDynamicHandlers(pipeline);
 
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
@@ -144,19 +146,17 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         return pipeline;
     }
 
-    private void addDynamicHandlers(ChannelPipeline pipeline, String id, String key) {
-        final String[] extraHandlers = Context.getConfig().getString(key,"").split(",");
-        int i = 0;
-        for (String extraHandler : extraHandlers) {
-            try {
-                Class c = Class.forName(extraHandler);
-                i++;
-                pipeline.addLast(id + "."+i, (ChannelHandler)c.newInstance());
-            } catch (Throwable e) {
-                Log.error("Error loading handler : " + extraHandler + " " + e);
+    private void addDynamicHandlers(ChannelPipeline pipeline) {
+        if (Context.getConfig().hasKey("extra.handlers")) {
+            String[] handlers = Context.getConfig().getString("extra.handlers").split(",");
+            for (int i = 0; i < handlers.length; i++) {
+                try {
+                    pipeline.addLast("extraHandler." + i, (ChannelHandler) Class.forName(handlers[i]).newInstance());
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException error) {
+                    Log.warning(error);
+                }
             }
         }
-
     }
-    
+
 }
