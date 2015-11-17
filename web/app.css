@@ -1,3 +1,13 @@
+.status-color-online {
+    background-color: rgba(77, 250, 144, 0.3);
+}
+.status-color-unknown {
+    background-color: rgba(250, 190, 77, 0.3);
+}
+.status-color-offline {
+    background-color: rgba(255, 84, 104, 0.3);
+}
+
 .state-indicator {
     position: absolute;
     top: -999em;
