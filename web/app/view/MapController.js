@@ -27,6 +27,10 @@ Ext.define('Traccar.view.MapController', {
                 }
             },
             store: {
+                '#Devices': {
+                    add: 'updateDevice',
+                    update: 'updateDevice'
+                },
                 '#LatestPositions': {
                     add: 'updateLatest',
                     update: 'updateLatest'
@@ -47,6 +51,51 @@ Ext.define('Traccar.view.MapController', {
     init: function () {
         this.latestMarkers = {};
         this.reportMarkers = {};
+    },
+
+    getDeviceColor: function (device) {
+        console.log(device.get('status'));
+        switch (device.get('status')) {
+            case 'online':
+                return Traccar.Style.mapColorOnline;
+            case 'offline':
+                return Traccar.Style.mapColorOffline;
+            default:
+                return Traccar.Style.mapColorUnknown;
+        }
+    },
+
+    changeMarkerColor: function (style, color) {
+        return new ol.style.Style({
+            image: new ol.style.Arrow({
+                radius: style.getImage().getRadius(),
+                fill: new ol.style.Fill({
+                    color: color
+                }),
+                stroke: style.getImage().getStroke(),
+                rotation: style.getImage().getRotation()
+            }),
+            text: style.getText()
+        });
+    },
+
+    updateDevice: function (store, data) {
+        var i, device, deviceId;
+
+        if (!Ext.isArray(data)) {
+            data = [data];
+        }
+
+        for (i = 0; i < data.length; i++) {
+            device = data[i];
+            deviceId = device.get('id');
+
+            if (deviceId in this.latestMarkers) {
+                marker = this.latestMarkers[deviceId];
+                marker.setStyle(
+                    this.changeMarkerColor(marker.getStyle(), this.getDeviceColor(device)));
+            }
+        }
     },
 
     updateLatest: function (store, data) {
@@ -75,7 +124,7 @@ Ext.define('Traccar.view.MapController', {
                 this.latestMarkers[deviceId] = marker;
                 this.getView().getVectorSource().addFeature(marker);
 
-                style = this.getLatestMarker();
+                style = this.getLatestMarker(this.getDeviceColor(device));
                 style.getText().setText(device.get('name'));
                 marker.setStyle(style);
             }
@@ -175,9 +224,9 @@ Ext.define('Traccar.view.MapController', {
         });
     },
 
-    getLatestMarker: function () {
+    getLatestMarker: function (color) {
         return this.getMarkerStyle(
-            Traccar.Style.mapRadiusNormal, Traccar.Style.mapColorUnknown);
+            Traccar.Style.mapRadiusNormal, color);
     },
 
     getReportMarker: function () {
