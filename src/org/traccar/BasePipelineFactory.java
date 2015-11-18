@@ -31,7 +31,6 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.helper.Log;
-import org.traccar.location.LocationProvider;
 
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 

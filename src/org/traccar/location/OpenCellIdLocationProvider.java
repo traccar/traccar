@@ -36,7 +36,6 @@ public class OpenCellIdLocationProvider extends BaseLocationProvider {
     }
 
     protected void getLocation(int mcc, int mnc, long lac, long cid, final LocationProviderCallback callback) {
-        String x = String.format(url, mcc, mnc, lac, cid);
         Context.getAsyncHttpClient().prepareGet(String.format(url, mcc, mnc, lac, cid))
                 .execute(new AsyncCompletionHandler() {
                     @Override
