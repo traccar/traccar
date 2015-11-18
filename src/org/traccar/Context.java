@@ -29,6 +29,8 @@ import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.OpenCageReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
+import org.traccar.location.LocationProvider;
+import org.traccar.location.OpenCellIdLocationProvider;
 import org.traccar.web.WebServer;
 
 public final class Context {
@@ -76,6 +78,12 @@ public final class Context {
 
     public static ReverseGeocoder getReverseGeocoder() {
         return reverseGeocoder;
+    }
+
+    private static LocationProvider locationProvider;
+
+    public static LocationProvider getLocationProvider() {
+        return locationProvider;
     }
 
     private static WebServer webServer;
@@ -142,6 +150,11 @@ public final class Context {
                     reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
                     break;
             }
+        }
+
+        if (config.getBoolean("location.enable")) {
+            String key = config.getString("location.key");
+            locationProvider = new OpenCellIdLocationProvider(key);
         }
 
         if (config.getBoolean("web.enable")) {

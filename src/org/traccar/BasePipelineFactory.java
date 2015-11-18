@@ -31,6 +31,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.helper.Log;
+import org.traccar.location.LocationProvider;
 
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
@@ -40,6 +41,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
+    private LocationProviderHandler locationProviderHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -103,6 +105,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                     Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocode.processInvalidPositions"));
         }
 
+        if (Context.getLocationProvider() != null) {
+            locationProviderHandler = new LocationProviderHandler(Context.getLocationProvider());
+        }
+
         if (Context.getConfig().getBoolean("distance.enable")) {
             distanceHandler = new DistanceHandler();
         }
@@ -131,6 +137,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
+        }
+        if (locationProviderHandler != null) {
+            pipeline.addLast("location", locationProviderHandler);
         }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
 

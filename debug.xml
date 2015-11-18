@@ -18,6 +18,9 @@
     <entry key='geocoder.type'>nominatim</entry>
     <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
 
+    <entry key='location.enable'>false</entry>
+    <entry key='location.key'>fake</entry>
+
     <entry key='distance.enable'>true</entry>
 
     <!--<entry key='filter.enable'>true</entry>
