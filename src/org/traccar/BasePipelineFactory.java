@@ -128,9 +128,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         addSpecificHandlers(pipeline);
 
-        if (filterHandler != null) {
-            pipeline.addLast("filter", filterHandler);
-        }
         if (distanceHandler != null) {
             pipeline.addLast("distance", distanceHandler);
         }
@@ -143,6 +140,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
 
         addDynamicHandlers(pipeline);
+
+        if (filterHandler != null) {
+            pipeline.addLast("filter", filterHandler);
+        }
 
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());

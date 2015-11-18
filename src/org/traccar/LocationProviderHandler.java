@@ -48,6 +48,7 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
                     @Override
                     public void onSuccess(double latitude, double longitude) {
                         position.set(Event.KEY_APPROXIMATE, true);
+                        position.setValid(true);
                         position.setFixTime(position.getDeviceTime());
                         position.setLatitude(latitude);
                         position.setLongitude(longitude);

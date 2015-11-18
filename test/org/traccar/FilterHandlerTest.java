@@ -15,8 +15,8 @@ public class FilterHandlerTest {
 
     @Before
     public void setUp() {
-        filtingHandler = new FilterHandler(true, true, true, true, 10, 10);
-        passingHandler = new FilterHandler(false, false, false, false, 0, 0);
+        filtingHandler = new FilterHandler(true, true, true, true, true, 10, 10);
+        passingHandler = new FilterHandler(false, false, false, false, false, 0, 0);
     }
 
     @After
