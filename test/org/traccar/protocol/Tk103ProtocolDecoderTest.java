@@ -11,6 +11,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolDecoderTest {
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
         verifyAttributes(decoder, text(
+                "(088047194605BZ00,510,010,36e6,932c,43,36e6,766b,36,36e6,7668,32"));
+
+        verifyAttributes(decoder, text(
                 "(013632651491,ZC20,040613,040137,6,42,112,0"));
 
         verifyAttributes(decoder, text(
