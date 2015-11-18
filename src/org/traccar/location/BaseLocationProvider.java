@@ -15,6 +15,7 @@
  */
 package org.traccar.location;
 
+import org.traccar.Context;
 import org.traccar.model.Event;
 
 import java.util.Map;
@@ -23,13 +24,22 @@ public abstract class BaseLocationProvider implements LocationProvider {
 
     @Override
     public void getLocation(Map<String, Object> attributes, LocationProviderCallback callback) {
-        if (attributes.containsKey(Event.KEY_MCC) || attributes.containsKey(Event.KEY_MNC)) {
-            Number mcc = (Number) attributes.get(Event.KEY_MCC);
-            Number mnc = (Number) attributes.get(Event.KEY_MNC);
-            Number lac = (Number) attributes.get(Event.KEY_LAC);
-            Number cid = (Number) attributes.get(Event.KEY_CID);
-            getLocation(mcc.intValue(), mnc.intValue(), lac.longValue(), cid.longValue(), callback);
+
+        Number mcc = (Number) attributes.get(Event.KEY_MCC);
+        if (mcc == null) {
+            mcc = Context.getConfig().getInteger("location.mcc");
         }
+
+        Number mnc = (Number) attributes.get(Event.KEY_MNC);
+        if (mnc == null) {
+            mnc = Context.getConfig().getInteger("location.mnc");
+        }
+
+        Number lac = (Number) attributes.get(Event.KEY_LAC);
+        Number cid = (Number) attributes.get(Event.KEY_CID);
+
+        getLocation(mcc.intValue(), mnc.intValue(), lac.longValue(), cid.longValue(), callback);
+
     }
 
     protected abstract void getLocation(int mcc, int mnc, long lac, long cid, LocationProviderCallback callback);
