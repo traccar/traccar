@@ -21,7 +21,9 @@ public interface LocationProvider {
 
     interface LocationProviderCallback {
 
-        void onResult(double latitude, double longitude);
+        void onSuccess(double latitude, double longitude);
+
+        void onFailure();
 
     }
 
