@@ -14,11 +14,9 @@ public class ReverseGeocoderTest {
             testNominatim();
             testGisgraphy();
         }
-
     }
 
     public void testGoogle() {
-
         ReverseGeocoder reverseGeocoder = new GoogleReverseGeocoder();
 
         reverseGeocoder.getAddress(new AddressFormat(), 37.4217550, -122.0846330, new ReverseGeocoder.ReverseGeocoderCallback() {
@@ -30,7 +28,6 @@ public class ReverseGeocoderTest {
     }
 
     public void testNominatim() {
-
         ReverseGeocoder reverseGeocoder = new NominatimReverseGeocoder();
 
         reverseGeocoder.getAddress(new AddressFormat(), 40.7337807, -73.9974401, new ReverseGeocoder.ReverseGeocoderCallback() {
@@ -42,7 +39,6 @@ public class ReverseGeocoderTest {
     }
 
     public void testGisgraphy() {
-
         ReverseGeocoder reverseGeocoder = new GisgraphyReverseGeocoder();
 
         reverseGeocoder.getAddress(new AddressFormat(), 48.8530000, 2.3400000, new ReverseGeocoder.ReverseGeocoderCallback() {
