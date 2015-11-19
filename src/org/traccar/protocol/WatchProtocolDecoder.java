@@ -64,8 +64,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, String manufacturer, String id, String content) {
         if (channel != null) {
-            channel.write(
-                    String.format("[%s*%s*%04x*%s]", manufacturer, id, content.length(), content));
+            channel.write(String.format(
+                    "[%s*%s*%04x*%s]", manufacturer, id, content.length(), content));
         }
     }
 
@@ -137,6 +137,10 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             position.set("steps", parser.nextInt());
 
             return position;
+
+        } else if (type.equals("TKQ")) {
+
+            sendResponse(channel, manufacturer, id, "TKQ");
 
         }
 
