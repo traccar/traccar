@@ -81,6 +81,10 @@ public class ConnectionManager {
 
     public synchronized void updateDevice(final long deviceId, String status, Date time) {
         Device device = Context.getIdentityManager().getDeviceById(deviceId);
+        if (device == null) {
+            return;
+        }
+
         device.setStatus(status);
         if (time != null) {
             device.setLastUpdate(time);
