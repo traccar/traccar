@@ -26,9 +26,7 @@ public class MeiligaoFrameDecoder extends FrameDecoder {
 
     @Override
     protected Object decode(
-            ChannelHandlerContext ctx,
-            Channel channel,
-            ChannelBuffer buf) throws Exception {
+            ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
         // Strip not '$' (0x24) bytes from the beginning
         while (buf.readable() && buf.getUnsignedByte(buf.readerIndex()) != 0x24) {
