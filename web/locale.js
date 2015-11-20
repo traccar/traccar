@@ -37,6 +37,7 @@ Locale.languages = {
     'pl': { name: 'Polski', code: 'pl' },
     'pt': { name: 'Português', code: 'pt' },
     'pt_BR': { name: 'Português (Brasil)', code: 'pt_BR' },
+    'ro': { name: 'Română', code: 'ro' },
     'ru': { name: 'Русский', code: 'ru' },
     'si': { name: 'සිංහල', code: 'en' },
     'sk': { name: 'Slovenčina', code: 'sk' },
