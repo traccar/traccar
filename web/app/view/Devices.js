@@ -42,6 +42,12 @@ Ext.define('Traccar.view.Devices', {
         }, {
             xtype: 'tbfill'
         }, {
+            id:'deviceFollowButton',
+            glyph: 'xf05b@FontAwesome',
+            tooltip: Strings.deviceFollow,
+            tooltipType: 'title',
+            enableToggle: true
+        }, {
             xtype: 'settingsMenu'
         }]
     },

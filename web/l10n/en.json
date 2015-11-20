@@ -33,6 +33,7 @@
     "deviceIdentifier": "Identifier",
     "deviceLastUpdate": "Last Update",
     "deviceCommand": "Command",
+    "deviceFollow": "Follow",
     "settingsTitle": "Settings",
     "settingsUser": "Account",
     "settingsServer": "Server",

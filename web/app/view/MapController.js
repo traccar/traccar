@@ -97,6 +97,10 @@ Ext.define('Traccar.view.MapController', {
         }
     },
 
+    followSelected: function () {
+        return Ext.getCmp('deviceFollowButton') && Ext.getCmp('deviceFollowButton').pressed;
+    },
+
     updateLatest: function (store, data) {
         var i, position, geometry, device, deviceId, marker, style;
 
@@ -129,6 +133,10 @@ Ext.define('Traccar.view.MapController', {
             }
 
             marker.getStyle().getImage().setRotation(position.get('course') * Math.PI / 180);
+
+            if (marker === this.selectedMarker && this.followSelected()) {
+                this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+            }
         }
     },
 
