@@ -141,7 +141,7 @@ Ext.define('Traccar.view.MapController', {
             geometry: new ol.geom.LineString([])
         });
         this.reportRoute.setStyle(this.getRouteStyle());
-        this.getView().getReportSource().addFeature(this.reportRoute);
+        this.getView().getRouteSource().addFeature(this.reportRoute);
 
         for (i = 0; i < data.length; i++) {
             position = data[i];
@@ -169,18 +169,17 @@ Ext.define('Traccar.view.MapController', {
     },
 
     clearReport: function (store) {
-        var reportSource, key;
-        reportSource = this.getView().getReportSource();
+        var key;
 
         if (this.reportRoute) {
-            reportSource.removeFeature(this.reportRoute);
+            this.getView().getRouteSource().removeFeature(this.reportRoute);
             this.reportRoute = null;
         }
 
         if (this.reportMarkers) {
             for (key in this.reportMarkers) {
                 if (this.reportMarkers.hasOwnProperty(key)) {
-                    reportSource.removeFeature(this.reportMarkers[key]);
+                    this.getView().getReportSource().removeFeature(this.reportMarkers[key]);
                 }
             }
             this.reportMarkers = {};

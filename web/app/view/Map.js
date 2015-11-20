@@ -39,13 +39,17 @@ Ext.define('Traccar.view.Map', {
         return this.latestSource;
     },
 
+    getRouteSource: function () {
+        return this.routeSource;
+    },
+
     getReportSource: function () {
         return this.reportSource;
     },
 
     listeners: {
         afterrender: function () {
-            var user, server, layer, type, bingKey, latestLayer, reportLayer, lat, lon, zoom, target;
+            var user, server, layer, type, bingKey, latestLayer, routeLayer, reportLayer, lat, lon, zoom, target;
 
             user = Traccar.app.getUser();
             server = Traccar.app.getServer();
@@ -87,9 +91,30 @@ Ext.define('Traccar.view.Map', {
                 source: this.latestSource
             });
 
+            this.routeSource = new ol.source.Vector({});
+            routeLayer = new ol.layer.Vector({
+                source: this.routeSource
+            });
+
             this.reportSource = new ol.source.Vector({});
             reportLayer = new ol.layer.Vector({
-                source: this.reportSource
+                source: new ol.source.Cluster({
+                    distance: 40,
+                    source: this.reportSource
+                }),
+                style: function (feature, resolution) {
+                    style = [new ol.style.Style({
+                        image: new ol.style.Circle({
+                            radius: feature.get('radius'),
+                            fill: new ol.style.Fill({
+                                color: [255, 153, 0, Math.min(0.8, 0.4 + (feature.get('features').length / 100))]
+                            })
+                        }),
+                        text: new ol.style.Text({
+                            text: feature.get('features').length.toString()
+                        })
+                    })];
+                }
             });
 
             lat = user.get('latitude') || server.get('latitude') || Traccar.Style.mapDefaultLat;
@@ -104,7 +129,7 @@ Ext.define('Traccar.view.Map', {
 
             this.map = new ol.Map({
                 target: this.body.dom.id,
-                layers: [layer, latestLayer, reportLayer],
+                layers: [layer, routeLayer, reportLayer, latestLayer],
                 view: this.mapView
             });
 
