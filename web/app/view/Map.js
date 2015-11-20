@@ -98,15 +98,7 @@ Ext.define('Traccar.view.Map', {
 
             this.reportSource = new ol.source.Vector({});
             reportLayer = new ol.layer.Vector({
-                source: new ol.source.Cluster({
-                    distance: Traccar.Style.mapClusterDistance,
-                    source: this.reportSource
-                }),
-                style: function (feature, resolution) {
-                    if (feature.get('features').length == 1) {
-                        return [feature.get('features')[0].getStyle()];
-                    }
-                }
+                source: this.reportSource
             });
 
             lat = user.get('latitude') || server.get('latitude') || Traccar.Style.mapDefaultLat;

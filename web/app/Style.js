@@ -32,8 +32,6 @@ Ext.define('Traccar.Style', {
     reportHeight: 250,
     reportTime: 100,
 
-    mapClusterDistance: 30,
-
     mapDefaultLat: 51.507222,
     mapDefaultLon: -0.1275,
     mapDefaultZoom: 6,
@@ -55,8 +53,8 @@ Ext.define('Traccar.Style', {
     mapColorOffline: 'rgba(255, 84, 104, 1.0)',
     mapColorReport: 'rgba(21, 127, 204, 1.0)',
 
-    mapRadiusNormal: 10,
-    mapRadiusSelected: 15,
+    mapRadiusNormal: 9,
+    mapRadiusSelected: 14,
 
     mapMaxZoom: 19,
     mapDelay: 500

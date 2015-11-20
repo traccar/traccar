@@ -159,8 +159,8 @@ Ext.define('Traccar.view.MapController', {
 
             style = this.getReportMarker();
             style.getImage().setRotation(position.get('course') * Math.PI / 180);
-            style.getText().setText(
-                Ext.Date.format(position.get('fixTime'), Traccar.Style.dateTimeFormat));
+            /*style.getText().setText(
+                Ext.Date.format(position.get('fixTime'), Traccar.Style.dateTimeFormat));*/
 
             marker.setStyle(style);
 
