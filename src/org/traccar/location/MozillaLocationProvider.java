@@ -47,7 +47,7 @@ public class MozillaLocationProvider extends BaseLocationProvider {
     }
 
     protected void getLocation(int mcc, int mnc, long lac, long cid, final LocationProviderCallback callback) {
-        String body = String.format(template,mcc, mnc, lac, cid);
+        String body = String.format(template, mcc, mnc, lac, cid);
         Context.getAsyncHttpClient().preparePost(url).setBody(body).execute(new AsyncCompletionHandler() {
             @Override
             public Object onCompleted(Response response) throws Exception {
