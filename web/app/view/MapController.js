@@ -121,7 +121,7 @@ Ext.define('Traccar.view.MapController', {
                 marker = new ol.Feature(geometry);
                 marker.set('record', device);
                 this.latestMarkers[deviceId] = marker;
-                this.getView().getVectorSource().addFeature(marker);
+                this.getView().getLatestSource().addFeature(marker);
 
                 style = this.getLatestMarker(this.getDeviceColor(device));
                 style.getText().setText(device.get('name'));
@@ -141,7 +141,7 @@ Ext.define('Traccar.view.MapController', {
             geometry: new ol.geom.LineString([])
         });
         this.reportRoute.setStyle(this.getRouteStyle());
-        this.getView().getVectorSource().addFeature(this.reportRoute);
+        this.getView().getReportSource().addFeature(this.reportRoute);
 
         for (i = 0; i < data.length; i++) {
             position = data[i];
@@ -155,7 +155,7 @@ Ext.define('Traccar.view.MapController', {
             marker = new ol.Feature(geometry);
             marker.set('record', position);
             this.reportMarkers[position.get('id')] = marker;
-            this.getView().getVectorSource().addFeature(marker);
+            this.getView().getReportSource().addFeature(marker);
 
             style = this.getReportMarker();
             style.getImage().setRotation(position.get('course') * Math.PI / 180);
@@ -169,18 +169,18 @@ Ext.define('Traccar.view.MapController', {
     },
 
     clearReport: function (store) {
-        var vectorSource, key;
-        vectorSource = this.getView().getVectorSource();
+        var reportSource, key;
+        reportSource = this.getView().getReportSource();
 
         if (this.reportRoute) {
-            vectorSource.removeFeature(this.reportRoute);
+            reportSource.removeFeature(this.reportRoute);
             this.reportRoute = null;
         }
 
         if (this.reportMarkers) {
             for (key in this.reportMarkers) {
                 if (this.reportMarkers.hasOwnProperty(key)) {
-                    vectorSource.removeFeature(this.reportMarkers[key]);
+                    reportSource.removeFeature(this.reportMarkers[key]);
                 }
             }
             this.reportMarkers = {};
