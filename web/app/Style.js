@@ -32,6 +32,8 @@ Ext.define('Traccar.Style', {
     reportHeight: 250,
     reportTime: 100,
 
+    mapClusterDistance: 30,
+
     mapDefaultLat: 51.507222,
     mapDefaultLon: -0.1275,
     mapDefaultZoom: 6,

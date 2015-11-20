@@ -99,21 +99,13 @@ Ext.define('Traccar.view.Map', {
             this.reportSource = new ol.source.Vector({});
             reportLayer = new ol.layer.Vector({
                 source: new ol.source.Cluster({
-                    distance: 40,
+                    distance: Traccar.Style.mapClusterDistance,
                     source: this.reportSource
                 }),
                 style: function (feature, resolution) {
-                    style = [new ol.style.Style({
-                        image: new ol.style.Circle({
-                            radius: feature.get('radius'),
-                            fill: new ol.style.Fill({
-                                color: [255, 153, 0, Math.min(0.8, 0.4 + (feature.get('features').length / 100))]
-                            })
-                        }),
-                        text: new ol.style.Text({
-                            text: feature.get('features').length.toString()
-                        })
-                    })];
+                    if (feature.get('features').length == 1) {
+                        return [feature.get('features')[0].getStyle()];
+                    }
                 }
             });
 
