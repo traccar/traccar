@@ -23,25 +23,36 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-public class OpenCellIdLocationProvider extends BaseLocationProvider {
+public class MozillaLocationProvider extends BaseLocationProvider {
 
     private String url;
+    private String template;
 
-    public OpenCellIdLocationProvider(String key) {
-        this("http://opencellid.org/cell/get", key);
+    public MozillaLocationProvider() {
+        this("https://location.services.mozilla.com/v1/geolocate", "test");
     }
 
-    public OpenCellIdLocationProvider(String url, String key) {
-        this.url = url + "?format=json&mcc=%d&mnc=%d&lac=%d&cellid=%d&key=" + key;
+    public MozillaLocationProvider(String url, String key) {
+        this.url = url + "?key=" + key;
+
+        template = new StringBuilder()
+                .append("{\"cellTowers\":[{")
+                .append("\"radioType\":\"gsm\",")
+                .append("\"mobileCountryCode\":%d,")
+                .append("\"mobileNetworkCode\":%d,")
+                .append("\"locationAreaCode\":%d,")
+                .append("\"cellId\":%d")
+                .append("}]}")
+                .toString();
     }
 
     protected void getLocation(int mcc, int mnc, long lac, long cid, final LocationProviderCallback callback) {
-        Context.getAsyncHttpClient().prepareGet(String.format(url, mcc, mnc, lac, cid))
-                .execute(new AsyncCompletionHandler() {
+        String body = String.format(template,mcc, mnc, lac, cid);
+        Context.getAsyncHttpClient().preparePost(url).setBody(body).execute(new AsyncCompletionHandler() {
             @Override
             public Object onCompleted(Response response) throws Exception {
                 try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
-                    JsonObject json = reader.readObject();
+                    JsonObject json = reader.readObject().getJsonObject("location");
                     if (json.containsKey("lat") && json.containsKey("lon")) {
                         callback.onSuccess(
                                 json.getJsonNumber("lat").doubleValue(),
@@ -58,6 +69,7 @@ public class OpenCellIdLocationProvider extends BaseLocationProvider {
                 callback.onFailure();
             }
         });
+
     }
 
 }

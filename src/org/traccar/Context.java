@@ -30,6 +30,7 @@ import org.traccar.geocode.OpenCageReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.location.LocationProvider;
+import org.traccar.location.MozillaLocationProvider;
 import org.traccar.location.OpenCellIdLocationProvider;
 import org.traccar.web.WebServer;
 
@@ -153,8 +154,17 @@ public final class Context {
         }
 
         if (config.getBoolean("location.enable")) {
+            String type = config.getString("location.type", "opencellid");
             String key = config.getString("location.key");
-            locationProvider = new OpenCellIdLocationProvider(key);
+
+            switch (type) {
+                case "mozilla":
+                    locationProvider = new MozillaLocationProvider();
+                    break;
+                default:
+                    locationProvider = new OpenCellIdLocationProvider(key);
+                    break;
+            }
         }
 
         if (config.getBoolean("web.enable")) {
