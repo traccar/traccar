@@ -17,6 +17,7 @@ package org.traccar;
 
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.helper.Log;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class FilterHandler extends BaseDataHandler {
@@ -27,18 +28,20 @@ public class FilterHandler extends BaseDataHandler {
     private final boolean filterZero;
     private final boolean filterDuplicate;
     private final boolean filterFuture;
+    private final boolean filterApproximate;
     private final int filterDistance;
     private final long filterLimit;
 
     public FilterHandler(
-            boolean filterInvalid, boolean filterZero, boolean filterDuplicate,
-            boolean filterFuture, int filterDistance, long filterLimit) {
+            boolean filterInvalid, boolean filterZero, boolean filterDuplicate, boolean filterFuture,
+            boolean filterApproximate, int filterDistance, long filterLimit) {
 
         this.filterInvalid = filterInvalid;
         this.filterZero = filterZero;
         this.filterDuplicate = filterDuplicate;
         this.filterDistance = filterDistance;
         this.filterFuture = filterFuture;
+        this.filterApproximate = filterApproximate;
         this.filterLimit = filterLimit;
     }
 
@@ -49,6 +52,7 @@ public class FilterHandler extends BaseDataHandler {
         filterZero = config.getBoolean("filter.zero");
         filterDuplicate = config.getBoolean("filter.duplicate");
         filterFuture = config.getBoolean("filter.future");
+        filterApproximate = config.getBoolean("filter.approximate");
         filterDistance = config.getInteger("filter.distance");
         filterLimit = config.getLong("filter.limit") * 1000;
     }
@@ -85,6 +89,11 @@ public class FilterHandler extends BaseDataHandler {
         return filterFuture && position.getFixTime().getTime() > System.currentTimeMillis() + FILTER_FUTURE_LIMIT;
     }
 
+    private boolean filterApproximate(Position position) {
+        Boolean approximate = (Boolean) position.getAttributes().get(Event.KEY_APPROXIMATE);
+        return filterApproximate && approximate != null && approximate;
+    }
+
     private boolean filterDistance(Position position) {
         if (filterDistance != 0) {
             Position last = getLastPosition(position.getDeviceId());
@@ -116,8 +125,8 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filter(Position p) {
 
-        boolean result = filterInvalid(p) || filterZero(p)
-                || filterDuplicate(p) || filterFuture(p) || filterDistance(p);
+        boolean result = filterInvalid(p) || filterZero(p) || filterDuplicate(p)
+                || filterFuture(p) || filterApproximate(p) || filterDistance(p);
 
         if (filterLimit(p)) {
             result = false;

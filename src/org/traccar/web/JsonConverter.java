@@ -64,7 +64,7 @@ public final class JsonConverter {
                 final String name = Introspector.decapitalize(method.getName().substring(3));
                 Class<?> parameterType = method.getParameterTypes()[0];
 
-                if (json.containsKey(name)) {
+                if (json.containsKey(name) && !json.isNull(name)) {
                     try {
                         if (parameterType.equals(boolean.class)) {
                             method.invoke(object, json.getBoolean(name));

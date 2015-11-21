@@ -8,7 +8,7 @@ StartTest(function (t) {
     t.ok(Traccar.Application, 'Traccar.Application is defined');
 
     t.ok(Strings, 'Strings are defined');
-    t.ok(Traccar.Styles, 'Traccar.Styles are defined');
+    t.ok(Traccar.Style, 'Traccar.Style are defined');
 
     t.done();
 });

@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -39,6 +40,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
+    private LocationProviderHandler locationProviderHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -102,6 +104,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                     Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocode.processInvalidPositions"));
         }
 
+        if (Context.getLocationProvider() != null) {
+            locationProviderHandler = new LocationProviderHandler(Context.getLocationProvider());
+        }
+
         if (Context.getConfig().getBoolean("distance.enable")) {
             distanceHandler = new DistanceHandler();
         }
@@ -119,17 +125,26 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (Context.isLoggerEnabled()) {
             pipeline.addLast("logger", new StandardLoggingHandler());
         }
+
         addSpecificHandlers(pipeline);
-        if (filterHandler != null) {
-            pipeline.addLast("filter", filterHandler);
-        }
+
         if (distanceHandler != null) {
             pipeline.addLast("distance", distanceHandler);
         }
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
         }
+        if (locationProviderHandler != null) {
+            pipeline.addLast("location", locationProviderHandler);
+        }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
+
+        addDynamicHandlers(pipeline);
+
+        if (filterHandler != null) {
+            pipeline.addLast("filter", filterHandler);
+        }
+
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
         }
@@ -138,6 +153,19 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
         pipeline.addLast("mainHandler", new MainEventHandler());
         return pipeline;
+    }
+
+    private void addDynamicHandlers(ChannelPipeline pipeline) {
+        if (Context.getConfig().hasKey("extra.handlers")) {
+            String[] handlers = Context.getConfig().getString("extra.handlers").split(",");
+            for (int i = 0; i < handlers.length; i++) {
+                try {
+                    pipeline.addLast("extraHandler." + i, (ChannelHandler) Class.forName(handlers[i]).newInstance());
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException error) {
+                    Log.warning(error);
+                }
+            }
+        }
     }
 
 }

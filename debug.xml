@@ -18,6 +18,11 @@
     <entry key='geocoder.type'>nominatim</entry>
     <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
 
+    <entry key='location.enable'>false</entry>
+    <entry key='location.key'>fake</entry>
+    <entry key='location.mcc'>260</entry>
+    <entry key='location.mnc'>2</entry>
+
     <entry key='distance.enable'>true</entry>
 
     <!--<entry key='filter.enable'>true</entry>
@@ -207,6 +212,10 @@
 
     <entry key='database.updateDevice'>
         UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;
+    </entry>
+
+    <entry key='database.updateDeviceStatus'>
+        UPDATE device SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
     </entry>
 
     <entry key='database.deleteDevice'>

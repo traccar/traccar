@@ -94,8 +94,13 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setAltitude(buf.readUnsignedShort());
 
-            position.set(Event.KEY_CID, buf.readUnsignedShort());
-            position.set(Event.KEY_LAC, buf.readUnsignedShort());
+            int cid = buf.readUnsignedShort();
+            int lac = buf.readUnsignedShort();
+            if (cid != 0 && lac != 0) {
+                position.set(Event.KEY_CID, cid);
+                position.set(Event.KEY_LAC, lac);
+            }
+
             position.set(Event.KEY_GSM, buf.readUnsignedByte());
 
         } else if (version == 2) {

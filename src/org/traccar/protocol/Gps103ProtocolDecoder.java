@@ -63,6 +63,17 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_NETWORK = new PatternBuilder()
+            .text("imei:")
+            .number("(d+),")                     // imei
+            .expression("[^,]+,")                // alarm
+            .number("d+,,")
+            .text("L,,,")
+            .number("(x+),,")                    // lac
+            .number("(x+),,,")                   // cid
+            .any()
+            .compile();
+
     private static final Pattern PATTERN_HANDSHAKE = new PatternBuilder()
             .number("##,imei:(d+),A")
             .compile();
@@ -93,13 +104,30 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Parser parser = new Parser(PATTERN, sentence);
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        Parser parser = new Parser(PATTERN_NETWORK, sentence);
+        if (parser.matches()) {
+
+            if (!identify(parser.next(), channel, remoteAddress)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Event.KEY_LAC, parser.nextInt(16));
+            position.set(Event.KEY_CID, parser.nextInt(16));
+
+            return position;
+
+        }
+
+        parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
 
         String imei = parser.next();
         if (!identify(imei, channel, remoteAddress)) {

@@ -42,6 +42,12 @@ Ext.define('Traccar.view.Devices', {
         }, {
             xtype: 'tbfill'
         }, {
+            id:'deviceFollowButton',
+            glyph: 'xf05b@FontAwesome',
+            tooltip: Strings.deviceFollow,
+            tooltipType: 'title',
+            enableToggle: true
+        }, {
             xtype: 'settingsMenu'
         }]
     },
@@ -52,10 +58,27 @@ Ext.define('Traccar.view.Devices', {
 
     columns: [{
         text: Strings.deviceName,
-        dataIndex: 'name', flex: 1
+        dataIndex: 'name',
+        flex: 1
     }, {
-        text: Strings.deviceIdentifier,
-        dataIndex: 'uniqueId', flex: 1
+        text: Strings.deviceLastUpdate,
+        dataIndex: 'lastUpdate',
+        flex: 1,
+        renderer: function (value, metaData, record) {
+            var status = record.get('status');
+            switch (status) {
+                case 'online':
+                    metaData.tdCls = 'status-color-online';
+                    break;
+                case 'offline':
+                    metaData.tdCls = 'status-color-offline';
+                    break;
+                default:
+                    metaData.tdCls = 'status-color-unknown';
+                    break;
+            }
+            return Ext.Date.format(value, Traccar.Style.dateTimeFormat);
+        }
     }]
 
 });

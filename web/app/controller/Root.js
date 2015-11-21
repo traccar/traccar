@@ -40,6 +40,7 @@ Ext.define('Traccar.controller.Root', {
 
     onServerReturn: function (options, success, response) {
         var result;
+        Ext.get('spinner').remove();
         if (Traccar.ErrorManager.check(success, response)) {
             result = Ext.decode(response.responseText);
             if (result.success) {
@@ -96,19 +97,35 @@ Ext.define('Traccar.controller.Root', {
                 first: first
             },
             callback: Traccar.app.getErrorHandler(this, function (options, success, response) {
-                var i, store, data, position;
+                var i, deviceStore, positionStore, data, devices, positions, device, position;
                 if (success) {
-                    store = Ext.getStore('LatestPositions');
+                    deviceStore = Ext.getStore('Devices');
+                    positionStore = Ext.getStore('LatestPositions');
                     data = Ext.decode(response.responseText).data;
+                    devices = data.devices;
+                    positions = data.positions;
 
-                    for (i = 0; i < data.length; i++) {
-                        position = store.findRecord('deviceId', data[i].deviceId, 0, false, false, true);
-                        if (position) {
-                            position.set(data[i]);
-                        } else {
-                            store.add(Ext.create('Traccar.model.Position', data[i]));
+                    for (i = 0; i < devices.length; i++) {
+                        device = deviceStore.findRecord('id', devices[i].id, 0, false, false, true);
+                        if (device) {
+                            device.set({
+                                status: devices[i].status,
+                                lastUpdate: devices[i].lastUpdate
+                            }, {
+                                dirty: false
+                            });
                         }
                     }
+
+                    for (i = 0; i < positions.length; i++) {
+                        position = positionStore.findRecord('deviceId', positions[i].deviceId, 0, false, false, true);
+                        if (position) {
+                            position.set(positions[i]);
+                        } else {
+                            positionStore.add(Ext.create('Traccar.model.Position', positions[i]));
+                        }
+                    }
+
                     this.asyncUpdate(false);
                 }
             })

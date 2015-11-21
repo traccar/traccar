@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.traccar.location;
 
-Ext.define('Traccar.model.Device', {
-    extend: 'Ext.data.Model',
-    identifier: 'negative',
+import java.util.Map;
 
-    fields: [{
-        name: 'id',
-        type: 'int'
-    }, {
-        name: 'name',
-        type: 'string'
-    }, {
-        name: 'uniqueId',
-        type: 'string'
-    }, {
-        name: 'status',
-        type: 'string'
-    }, {
-        name: 'lastUpdate',
-        type: 'date'
-    }]
-});
+public interface LocationProvider {
+
+    interface LocationProviderCallback {
+
+        void onSuccess(double latitude, double longitude);
+
+        void onFailure();
+
+    }
+
+    void getLocation(Map<String, Object> attributes, LocationProviderCallback callback);
+
+}

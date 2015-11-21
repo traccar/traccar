@@ -143,10 +143,14 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
                 getLastLocation(position, dateBuilder.getDate());
 
-                position.set(Event.KEY_MCC, buf.readUnsignedShort());
-                position.set(Event.KEY_MNC, buf.readUnsignedShort());
-                position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                position.set(Event.KEY_CID, buf.readUnsignedShort());
+                byte[] array = new byte[16];
+                buf.readBytes(array);
+                ChannelBuffer swapped = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, array);
+
+                position.set(Event.KEY_MCC, swapped.readUnsignedShort());
+                position.set(Event.KEY_MNC, swapped.readUnsignedShort());
+                position.set(Event.KEY_LAC, swapped.readUnsignedShort());
+                position.set(Event.KEY_CID, swapped.readUnsignedShort());
 
                 // two more cell towers
 

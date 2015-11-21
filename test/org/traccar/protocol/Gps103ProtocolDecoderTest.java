@@ -10,6 +10,12 @@ public class Gps103ProtocolDecoderTest extends ProtocolDecoderTest {
 
         Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new Gps103Protocol());
 
+        verifyAttributes(decoder, text(
+                "imei:359710041100000,tracker,000000000,,L,,,fa8,,c9af,,,,,0,0,0.00%,,"));
+
+        verifyAttributes(decoder, text(
+                "imei:863070016871385,tracker,0000000119,,L,,,0FB6,,CB5D,,,"));
+
         verifyPosition(decoder, text(
                 "imei:359710045559474,tracker,151030080103,,F,000101.000,A,5443.3834,N,02512.9071,E,0.00,0;"),
                 position("2015-10-30 00:01:01.000", true, 54.72306, 25.21512));

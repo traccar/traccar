@@ -64,6 +64,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("d+")                        // installed
             .compile();
 
+    private static final Pattern PATTERN_NETWORK = new PatternBuilder()
+            .number("(d{12})")                   // device id
+            .text("BZ00,")
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(x+),")                     // lac
+            .number("(x+),")                     // cid
+            .any()
+            .compile();
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -88,11 +98,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
         Parser parser = new Parser(PATTERN_BATTERY, sentence);
         if (parser.matches()) {
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-
             if (!identify(parser.next(), channel)) {
                 return null;
             }
@@ -117,13 +127,27 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return position;
         }
 
+        parser = new Parser(PATTERN_NETWORK, sentence);
+        if (parser.matches()) {
+            if (!identify(parser.next(), channel)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Event.KEY_MCC, parser.nextInt());
+            position.set(Event.KEY_MNC, parser.nextInt());
+            position.set(Event.KEY_LAC, parser.nextInt(16));
+            position.set(Event.KEY_CID, parser.nextInt(16));
+
+            return position;
+        }
+
         parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
 
         if (!identify(parser.next(), channel)) {
             return null;

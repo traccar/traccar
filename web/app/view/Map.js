@@ -35,13 +35,21 @@ Ext.define('Traccar.view.Map', {
         return this.mapView;
     },
 
-    getVectorSource: function () {
-        return this.vectorSource;
+    getLatestSource: function () {
+        return this.latestSource;
+    },
+
+    getRouteSource: function () {
+        return this.routeSource;
+    },
+
+    getReportSource: function () {
+        return this.reportSource;
     },
 
     listeners: {
         afterrender: function () {
-            var user, server, layer, type, bingKey, vectorLayer, lat, lon, zoom, target;
+            var user, server, layer, type, bingKey, latestLayer, routeLayer, reportLayer, lat, lon, zoom, target;
 
             user = Traccar.app.getUser();
             server = Traccar.app.getServer();
@@ -78,9 +86,19 @@ Ext.define('Traccar.view.Map', {
                 });
             }
 
-            this.vectorSource = new ol.source.Vector({});
-            vectorLayer = new ol.layer.Vector({
-                source: this.vectorSource
+            this.latestSource = new ol.source.Vector({});
+            latestLayer = new ol.layer.Vector({
+                source: this.latestSource
+            });
+
+            this.routeSource = new ol.source.Vector({});
+            routeLayer = new ol.layer.Vector({
+                source: this.routeSource
+            });
+
+            this.reportSource = new ol.source.Vector({});
+            reportLayer = new ol.layer.Vector({
+                source: this.reportSource
             });
 
             lat = user.get('latitude') || server.get('latitude') || Traccar.Style.mapDefaultLat;
@@ -95,7 +113,7 @@ Ext.define('Traccar.view.Map', {
 
             this.map = new ol.Map({
                 target: this.body.dom.id,
-                layers: [layer, vectorLayer],
+                layers: [layer, routeLayer, reportLayer, latestLayer],
                 view: this.mapView
             });
 

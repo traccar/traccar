@@ -27,6 +27,10 @@ Ext.define('Traccar.view.MapController', {
                 }
             },
             store: {
+                '#Devices': {
+                    add: 'updateDevice',
+                    update: 'updateDevice'
+                },
                 '#LatestPositions': {
                     add: 'updateLatest',
                     update: 'updateLatest'
@@ -47,6 +51,54 @@ Ext.define('Traccar.view.MapController', {
     init: function () {
         this.latestMarkers = {};
         this.reportMarkers = {};
+    },
+
+    getDeviceColor: function (device) {
+        switch (device.get('status')) {
+            case 'online':
+                return Traccar.Style.mapColorOnline;
+            case 'offline':
+                return Traccar.Style.mapColorOffline;
+            default:
+                return Traccar.Style.mapColorUnknown;
+        }
+    },
+
+    changeMarkerColor: function (style, color) {
+        return new ol.style.Style({
+            image: new ol.style.Arrow({
+                radius: style.getImage().getRadius(),
+                fill: new ol.style.Fill({
+                    color: color
+                }),
+                stroke: style.getImage().getStroke(),
+                rotation: style.getImage().getRotation()
+            }),
+            text: style.getText()
+        });
+    },
+
+    updateDevice: function (store, data) {
+        var i, device, deviceId;
+
+        if (!Ext.isArray(data)) {
+            data = [data];
+        }
+
+        for (i = 0; i < data.length; i++) {
+            device = data[i];
+            deviceId = device.get('id');
+
+            if (deviceId in this.latestMarkers) {
+                marker = this.latestMarkers[deviceId];
+                marker.setStyle(
+                    this.changeMarkerColor(marker.getStyle(), this.getDeviceColor(device)));
+            }
+        }
+    },
+
+    followSelected: function () {
+        return Ext.getCmp('deviceFollowButton') && Ext.getCmp('deviceFollowButton').pressed;
     },
 
     updateLatest: function (store, data) {
@@ -73,14 +125,18 @@ Ext.define('Traccar.view.MapController', {
                 marker = new ol.Feature(geometry);
                 marker.set('record', device);
                 this.latestMarkers[deviceId] = marker;
-                this.getView().getVectorSource().addFeature(marker);
+                this.getView().getLatestSource().addFeature(marker);
 
-                style = this.getLatestMarker();
+                style = this.getLatestMarker(this.getDeviceColor(device));
                 style.getText().setText(device.get('name'));
                 marker.setStyle(style);
             }
 
             marker.getStyle().getImage().setRotation(position.get('course') * Math.PI / 180);
+
+            if (marker === this.selectedMarker && this.followSelected()) {
+                this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+            }
         }
     },
 
@@ -93,7 +149,7 @@ Ext.define('Traccar.view.MapController', {
             geometry: new ol.geom.LineString([])
         });
         this.reportRoute.setStyle(this.getRouteStyle());
-        this.getView().getVectorSource().addFeature(this.reportRoute);
+        this.getView().getRouteSource().addFeature(this.reportRoute);
 
         for (i = 0; i < data.length; i++) {
             position = data[i];
@@ -107,12 +163,12 @@ Ext.define('Traccar.view.MapController', {
             marker = new ol.Feature(geometry);
             marker.set('record', position);
             this.reportMarkers[position.get('id')] = marker;
-            this.getView().getVectorSource().addFeature(marker);
+            this.getView().getReportSource().addFeature(marker);
 
             style = this.getReportMarker();
             style.getImage().setRotation(position.get('course') * Math.PI / 180);
-            style.getText().setText(
-                Ext.Date.format(position.get('fixTime'), Traccar.Style.dateTimeFormat));
+            /*style.getText().setText(
+                Ext.Date.format(position.get('fixTime'), Traccar.Style.dateTimeFormat));*/
 
             marker.setStyle(style);
 
@@ -121,18 +177,17 @@ Ext.define('Traccar.view.MapController', {
     },
 
     clearReport: function (store) {
-        var vectorSource, key;
-        vectorSource = this.getView().getVectorSource();
+        var key;
 
         if (this.reportRoute) {
-            vectorSource.removeFeature(this.reportRoute);
+            this.getView().getRouteSource().removeFeature(this.reportRoute);
             this.reportRoute = null;
         }
 
         if (this.reportMarkers) {
             for (key in this.reportMarkers) {
                 if (this.reportMarkers.hasOwnProperty(key)) {
-                    vectorSource.removeFeature(this.reportMarkers[key]);
+                    this.getView().getReportSource().removeFeature(this.reportMarkers[key]);
                 }
             }
             this.reportMarkers = {};
@@ -175,9 +230,9 @@ Ext.define('Traccar.view.MapController', {
         });
     },
 
-    getLatestMarker: function () {
+    getLatestMarker: function (color) {
         return this.getMarkerStyle(
-            Traccar.Style.mapRadiusNormal, Traccar.Style.mapColorUnknown);
+            Traccar.Style.mapRadiusNormal, color);
     },
 
     getReportMarker: function () {

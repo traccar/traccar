@@ -31,6 +31,7 @@
     "deviceTitle": "Eszközök",
     "deviceName": "Eszköznév",
     "deviceIdentifier": "Azonosító",
+    "deviceLastUpdate": "Utolsó frissítés",
     "deviceCommand": "Parancs",
     "settingsTitle": "Beállítások",
     "settingsUser": "Fiók",

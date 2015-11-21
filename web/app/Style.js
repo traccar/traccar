@@ -48,13 +48,13 @@ Ext.define('Traccar.Style', {
     mapTextOffset: 10,
     mapTextFont: 'bold 12px sans-serif',
 
-    mapColorOnline: '#4DFA90',
-    mapColorUnknown: '#FABE4D',
-    mapColorOffline: '#FF5468',
+    mapColorOnline: 'rgba(77, 250, 144, 1.0)',
+    mapColorUnknown: 'rgba(250, 190, 77, 1.0)',
+    mapColorOffline: 'rgba(255, 84, 104, 1.0)',
     mapColorReport: 'rgba(21, 127, 204, 1.0)',
 
-    mapRadiusNormal: 10,
-    mapRadiusSelected: 15,
+    mapRadiusNormal: 9,
+    mapRadiusSelected: 14,
 
     mapMaxZoom: 19,
     mapDelay: 500

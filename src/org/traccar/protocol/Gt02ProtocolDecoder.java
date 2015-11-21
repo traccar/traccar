@@ -100,6 +100,10 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(latitude);
             position.setLongitude(longitude);
 
+        } else {
+
+            return null;
+
         }
 
         return position;

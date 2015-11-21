@@ -66,7 +66,9 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
         closeChannel(e.getChannel());
 
-        Context.getConnectionManager().removeActiveDevice(e.getChannel());
+        if (ctx.getPipeline().get("httpDecoder") == null) {
+            Context.getConnectionManager().removeActiveDevice(e.getChannel());
+        }
     }
 
     @Override
