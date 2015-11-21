@@ -18,16 +18,17 @@ package org.traccar.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
+import org.traccar.helper.CommandCall;
 import org.traccar.model.Server;
 
-public class ServerServlet extends BaseServlet {
+public class ServerServlet extends BaseServletResource<Server> {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
 
         switch (command) {
             case "/get":
-                get(resp);
+                get(req, resp);
                 break;
             case "/update":
                 update(req, resp);
@@ -38,16 +39,22 @@ public class ServerServlet extends BaseServlet {
         return true;
     }
 
-    private void get(HttpServletResponse resp) throws Exception {
-        sendResponse(resp.getWriter(), JsonConverter.objectToJson(
-                    Context.getDataManager().getServer()));
+    @Override
+    protected void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        super.update(req, resp, new CommandCall() {
+
+            @Override
+            public void check() {
+                Context.getPermissionsManager().checkAdmin(getUserId());
+            }
+
+        });
     }
 
-    private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Server server = JsonConverter.objectFromJson(req.getReader(), new Server());
-        Context.getPermissionsManager().checkAdmin(getUserId(req));
-        Context.getDataManager().updateServer(server);
-        sendResponse(resp.getWriter(), true);
+    @Override
+    protected void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        sendResponse(resp.getWriter(), JsonConverter.objectToJson(
+                    Context.getDataManager().getServer()));
     }
 
 }

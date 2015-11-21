@@ -379,4 +379,43 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
+    public void add(Object entity) throws SQLException {
+        if (entity instanceof User) {
+            addUser((User) entity);
+        } else if (entity instanceof Device) {
+            addDevice((Device) entity);
+        } else if (entity instanceof Position) {
+            addPosition((Position) entity);
+        }
+    }
+
+    public void update(Object entity) throws SQLException {
+        if (entity instanceof User) {
+            updateUser((User) entity);
+        } else if (entity instanceof Device) {
+            updateDevice((Device) entity);
+        } else if (entity instanceof Server) {
+            updateServer((Server) entity);
+        }
+    }
+
+    public void remove(Object entity) throws SQLException {
+        if (entity instanceof User) {
+            removeUser((User) entity);
+        } else if (entity instanceof Device) {
+            removeDevice((Device) entity);
+        }
+    }
+
+    public void link(Class clazz, long userId, long entityId) throws SQLException {
+        if (clazz.equals(Device.class)) {
+            linkDevice(userId, entityId);
+        }
+    }
+
+    public void unlink(Class clazz, long userId, long entityId) throws SQLException {
+        if (clazz.equals(Device.class)) {
+            unlinkDevice(userId, entityId);
+        }
+    }
 }

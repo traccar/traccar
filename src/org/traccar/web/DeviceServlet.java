@@ -18,9 +18,11 @@ package org.traccar.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
+import org.traccar.helper.CommandCall;
 import org.traccar.model.Device;
+import org.traccar.model.User;
 
-public class DeviceServlet extends BaseServlet {
+public class DeviceServlet extends BaseServletResource<Device> {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -50,7 +52,8 @@ public class DeviceServlet extends BaseServlet {
         return true;
     }
 
-    private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    @Override
+    protected void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         if (Boolean.parseBoolean(req.getParameter("all"))) {
             Context.getPermissionsManager().checkAdmin(getUserId(req));
             sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
@@ -63,39 +66,57 @@ public class DeviceServlet extends BaseServlet {
             } else {
                 userId = getUserId(req);
             }
-            Context.getPermissionsManager().checkUser(getUserId(req), userId);
+            Context.getPermissionsManager().check(User.class, getUserId(req), userId);
             sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getDevices(userId)));
         }
     }
 
-    private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
-        long userId = getUserId(req);
-        Context.getDataManager().addDevice(device);
-        Context.getDataManager().linkDevice(userId, device.getId());
-        Context.getPermissionsManager().refresh();
-        sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
+    @Override
+    protected void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        super.add(req, resp, new CommandCall<Device>() {
+
+            @Override
+            public void after() throws Exception {
+                Context.getDataManager().link(Device.class, getUserId(), getEntity().getId());
+                Context.getPermissionsManager().refresh();
+            }
+
+        });
     }
 
-    private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
-        Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
-        Context.getDataManager().updateDevice(device);
-        sendResponse(resp.getWriter(), true);
+    @Override
+    protected void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        super.update(req, resp, new CommandCall<Device>() {
+
+            @Override
+            public void check() throws Exception {
+                Context.getPermissionsManager().check(Device.class, getUserId(), getEntity().getId());
+            }
+
+        });
     }
 
-    private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
-        Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
-        Context.getDataManager().removeDevice(device);
-        Context.getPermissionsManager().refresh();
-        sendResponse(resp.getWriter(), true);
+    @Override
+    protected void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        super.remove(req, resp, new CommandCall<Device>() {
+
+            @Override
+            public void check() throws Exception {
+                Context.getPermissionsManager().check(Device.class, getUserId(), getEntity().getId());
+            }
+
+            @Override
+            public void after() throws Exception {
+                Context.getPermissionsManager().refresh();
+            }
+
+        });
     }
 
     private void link(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Context.getPermissionsManager().checkAdmin(getUserId(req));
-        Context.getDataManager().linkDevice(
+        Context.getDataManager().link(Device.class,
                 Long.parseLong(req.getParameter("userId")),
                 Long.parseLong(req.getParameter("deviceId")));
         Context.getPermissionsManager().refresh();
@@ -104,7 +125,7 @@ public class DeviceServlet extends BaseServlet {
 
     private void unlink(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Context.getPermissionsManager().checkAdmin(getUserId(req));
-        Context.getDataManager().unlinkDevice(
+        Context.getDataManager().unlink(Device.class,
                 Long.parseLong(req.getParameter("userId")),
                 Long.parseLong(req.getParameter("deviceId")));
         Context.getPermissionsManager().refresh();

@@ -23,8 +23,9 @@ import org.traccar.model.Position;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.traccar.model.Device;
 
-public class PositionServlet extends BaseServlet {
+public class PositionServlet extends BaseServletResource<Position> {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -42,9 +43,10 @@ public class PositionServlet extends BaseServlet {
         return true;
     }
 
-    private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    @Override
+    protected void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         long deviceId = Long.parseLong(req.getParameter("deviceId"));
-        Context.getPermissionsManager().checkDevice(getUserId(req), deviceId);
+        Context.getPermissionsManager().check(Device.class, getUserId(req), deviceId);
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getPositions(
                             getUserId(req), deviceId,
@@ -59,7 +61,7 @@ public class PositionServlet extends BaseServlet {
         for (String deviceIdString : req.getParameterValues("devicesId")) {
             Long deviceId = Long.parseLong(deviceIdString);
 
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
+            Context.getPermissionsManager().check(Device.class, userId, deviceId);
 
             Position position = Context.getConnectionManager().getLastPosition(deviceId);
             positions.put(deviceId.toString(), position);

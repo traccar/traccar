@@ -45,7 +45,7 @@ public class MainServlet extends BaseServlet {
     }
 
     private void session(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Long userId = (Long) req.getSession().getAttribute(USER_KEY);
+        Long userId = (Long) req.getSession().getAttribute(USER_ID_KEY);
         if (userId != null) {
             sendResponse(resp.getWriter(), JsonConverter.objectToJson(
                     Context.getDataManager().getUser(userId)));
@@ -58,7 +58,7 @@ public class MainServlet extends BaseServlet {
         User user = Context.getDataManager().login(
                 req.getParameter("email"), req.getParameter("password"));
         if (user != null) {
-            req.getSession().setAttribute(USER_KEY, user.getId());
+            req.getSession().setAttribute(USER_ID_KEY, user.getId());
             sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
         } else {
             sendResponse(resp.getWriter(), false);
@@ -66,12 +66,12 @@ public class MainServlet extends BaseServlet {
     }
 
     private void logout(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        req.getSession().removeAttribute(USER_KEY);
+        req.getSession().removeAttribute(USER_ID_KEY);
         sendResponse(resp.getWriter(), true);
     }
 
     private void register(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        User user = JsonConverter.objectFromJson(req.getReader(), User.class);
         Context.getDataManager().addUser(user);
         sendResponse(resp.getWriter(), true);
     }

@@ -37,15 +37,11 @@ import org.traccar.model.User;
 
 public abstract class BaseServlet extends HttpServlet {
 
-    public static final String USER_KEY = "user";
+    public static final String USER_ID_KEY = "user";
     public static final String ALLOW_ORIGIN_VALUE = "*";
     public static final String ALLOW_HEADERS_VALUE = "Origin, X-Requested-With, Content-Type, Accept";
     public static final String ALLOW_METHODS_VALUE = "GET, POST, PUT, DELETE";
     public static final String APPLICATION_JSON = "application/json";
-    public static final String GET = "GET";
-    public static final String POST = "POST";
-    public static final String PUT = "PUT";
-    public static final String DELETE = "DELETE";
 
     @Override
     protected final void service(
@@ -82,6 +78,10 @@ public abstract class BaseServlet extends HttpServlet {
             String command, HttpServletRequest req, HttpServletResponse resp) throws Exception;
 
     public long getUserId(HttpServletRequest req) throws Exception  {
+        Object userId = req.getSession().getAttribute(USER_ID_KEY);
+        if (userId != null) {
+            return (Long) userId;
+        }
         String authorization = req.getHeader(HttpHeaders.Names.AUTHORIZATION);
         if (authorization != null && !authorization.isEmpty()) {
             Map<String, String> authMap = Authorization.parse(authorization);
@@ -92,11 +92,7 @@ public abstract class BaseServlet extends HttpServlet {
                 return user.getId();
             }
         }
-        Long userId = (Long) req.getSession().getAttribute(USER_KEY);
-        if (userId == null) {
-            throw new AccessControlException("User not logged in");
-        }
-        return userId;
+        throw new AccessControlException("User not logged in");
     }
 
     public void sendResponse(Writer writer, boolean success) throws IOException {
@@ -129,26 +125,12 @@ public abstract class BaseServlet extends HttpServlet {
         writer.write(result.build().toString());
     }
 
-    private String getCommand(HttpServletRequest req) {
+    protected String getCommand(HttpServletRequest req) {
         String command = req.getPathInfo();
         if (command == null) {
-            switch (req.getMethod()) {
-                case GET:
-                    command = "/get";
-                    break;
-                case POST:
-                    command = "/add";
-                    break;
-                case PUT:
-                    command = "/update";
-                    break;
-                case DELETE:
-                    command = "/remove";
-                    break;
-                default:
-                    command = "";
-            }
+            command = "";
         }
         return command;
     }
+
 }
