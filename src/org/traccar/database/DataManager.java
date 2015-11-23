@@ -102,6 +102,7 @@ public class DataManager implements IdentityManager {
             ds.setPassword(config.getString("database.password"));
             ds.setIdleConnectionTestPeriod(600);
             ds.setTestConnectionOnCheckin(true);
+            ds.setMaxStatementsPerConnection(config.getInteger("database.maxStatements"));
             int maxPoolSize = config.getInteger("database.maxPoolSize");
             if (maxPoolSize != 0) {
                 ds.setMaxPoolSize(maxPoolSize);
