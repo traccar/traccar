@@ -204,7 +204,9 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
                 case DATA_EVENT:
                     position.set(Event.KEY_EVENT, buf.readUnsignedByte());
-                    position.set("event-mask", buf.readUnsignedInt());
+                    if (length > 1) {
+                        position.set("event-mask", buf.readUnsignedInt());
+                    }
                     break;
 
                 default:
