@@ -10,6 +10,12 @@ public class H02ProtocolDecoderTest extends ProtocolDecoderTest {
     public void testDecode() throws Exception {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
+
+        verifyPosition(decoder, buffer(
+                "*HQ,1451316485,V1,121557,A,-23-3.3408,S,-48-2.8926,W,0.1,158,241115,FFFFFFFF#"));
+
+        verifyPosition(decoder, buffer(
+                "*HQ,1451316485,V1,121557,A,-23-35.3408,S,-48-2.8926,W,0.1,158,241115,FFFFFFFF#"));
         
         verifyPosition(decoder, buffer(
                 "*HQ,355488020119695,V1,050418,,2827.61232,N,07703.84822,E,0.00,0,031015,FFFEFBFF#"),

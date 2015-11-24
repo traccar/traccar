@@ -27,6 +27,7 @@ import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.PatternUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -122,9 +123,17 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .number("(dd)(dd)(dd),")             // time
             .expression("([AV])?,")              // validity
-            .number("-?(d+)-?(dd.d+),")          // latitude
+            .groupBegin()
+            .number("(d+)(dd.d+),")              // latitude
+            .or()
+            .number("-(d+)-(d+.d+),")            // latitude
+            .groupEnd()
             .expression("([NS]),")
-            .number("-?(d+)-?(dd.d+),")          // longitude
+            .groupBegin()
+            .number("(d+)(dd.d+),")              // longitude
+            .or()
+            .number("-(d+)-(d+.d+),")            // longitude
+            .groupEnd()
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
@@ -134,6 +143,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private Position decodeText(String sentence, Channel channel) {
+
+        String x = PatternUtil.checkPattern(PATTERN.pattern(), sentence);
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
@@ -155,8 +166,20 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(parser.next().equals("A"));
         }
 
-        position.setLatitude(parser.nextCoordinate());
-        position.setLongitude(parser.nextCoordinate());
+        if (parser.hasNext(2)) {
+            position.setLatitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(2)) {
+            position.setLatitude(parser.nextCoordinate());
+        }
+
+        if (parser.hasNext(2)) {
+            position.setLongitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(2)) {
+            position.setLongitude(parser.nextCoordinate());
+        }
+
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
 
