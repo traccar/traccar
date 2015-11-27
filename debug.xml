@@ -9,6 +9,7 @@
     <entry key='web.enable'>true</entry>
     <!--<entry key='web.address'></entry>-->
     <entry key='web.port'>8082</entry>
+    <!--<entry key='api.provider'>rest</entry>-->
     <!--<entry key='web.application'>../traccar-web/traccar-web.war</entry>
     <entry key='web.old'>true</entry>-->
     <entry key='web.path'>web</entry>

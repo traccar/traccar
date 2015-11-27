@@ -1,0 +1,41 @@
+package org.traccar.jaxrs;
+
+import org.traccar.Context;
+import org.traccar.web.JsonConverter;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonStructure;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+
+import static org.traccar.web.BaseServlet.USER_KEY;
+
+/**
+ * Created by niko on 11/26/15.
+ */
+@Path("/")
+@Produces("application/json;charset=utf-8")
+public class SecurityResource extends BaseResource{
+
+    @javax.ws.rs.core.Context
+    HttpServletRequest req;
+
+
+    @Path("login")
+    @POST
+    public Response logOn() throws Exception{
+        org.traccar.model.User user = Context.getDataManager().login(
+                req.getParameter("email"), req.getParameter("password"));
+        if (user != null) {
+            req.getSession().setAttribute(USER_KEY, user.getId());
+            return sendResponse(JsonConverter.objectToJson(user));
+        } else {
+            return sendResponse(false);
+        }
+    }
+}

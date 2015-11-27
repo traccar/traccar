@@ -91,6 +91,11 @@
             <artifactId>jetty-jndi</artifactId>
             <version>${jetty.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>2.17</version>
+        </dependency>
     </dependencies>
 
     <build>

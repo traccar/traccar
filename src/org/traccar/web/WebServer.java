@@ -24,6 +24,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
 import org.traccar.helper.Log;
 
@@ -101,6 +102,20 @@ public class WebServer {
     }
 
     private void initApi() {
+        switch (config.getString("api.provider", "old")) {
+            case "old":
+                initOldApi();
+                break;
+            case "rest":
+                initRestApi();
+                break;
+            default:
+                Log.error("Unsupported api provider: " + config.getString("api.provider"));
+                break;
+        }
+
+    }
+    private void initOldApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
@@ -110,6 +125,15 @@ public class WebServer {
         servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
         servletHandler.addServlet(new ServletHolder(new CommandServlet()), "/command/*");
         servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
+        handlers.addHandler(servletHandler);
+    }
+
+    private void initRestApi() {
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        ServletHolder servletHolder = new ServletHolder(new ServletContainer());
+        servletHolder.getInitParameters().put("jersey.config.server.provider.packages", "org.traccar.rest");
+
+        servletHandler.addServlet(servletHolder, "/api/*");
         handlers.addHandler(servletHandler);
     }
 
