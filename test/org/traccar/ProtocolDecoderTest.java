@@ -119,21 +119,25 @@ public class ProtocolDecoderTest {
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), null);
+        verifyDecodedList(decoder.decode(null, null, object), true, null);
+    }
+
+    protected void verifyPositions(BaseProtocolDecoder decoder, boolean checkLocation, Object object) throws Exception {
+        verifyDecodedList(decoder.decode(null, null, object), checkLocation, null);
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedList(decoder.decode(null, null, object), position);
+        verifyDecodedList(decoder.decode(null, null, object), true, position);
     }
 
-    private void verifyDecodedList(Object decodedObject, Position expected) {
+    private void verifyDecodedList(Object decodedObject, boolean checkLocation, Position expected) {
 
         Assert.assertNotNull("list is null", decodedObject);
         Assert.assertTrue("not a list", decodedObject instanceof List);
         Assert.assertFalse("list if empty", ((List) decodedObject).isEmpty());
 
         for (Object item : (List) decodedObject) {
-            verifyDecodedPosition(item, true, false, expected);
+            verifyDecodedPosition(item, checkLocation, false, expected);
         }
 
     }

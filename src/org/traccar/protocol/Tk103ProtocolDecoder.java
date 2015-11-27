@@ -154,6 +154,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
+        int alarm = sentence.indexOf("BO01");
+        if (alarm != -1) {
+            position.set(Event.KEY_ALARM, Integer.parseInt(sentence.substring(alarm + 4, alarm + 5)));
+        }
+
         DateBuilder dateBuilder = new DateBuilder();
         if (parser.next() == null) {
             dateBuilder.setDate(parser.nextInt(), parser.nextInt(), parser.nextInt());

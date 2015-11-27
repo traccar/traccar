@@ -61,6 +61,9 @@ public class WebServer {
                 break;
             case "new":
                 initApi();
+                if (config.getBoolean("web.console")) {
+                    initConsole();
+                }
                 initWebApp();
                 break;
             case "old":
@@ -118,12 +121,10 @@ public class WebServer {
         handlers.addHandler(servletHandler);
     }
 
-    private void initRestApi() {
-        ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.packages("org.traccar.api");
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-        ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
-        servletHandler.addServlet(servletHolder, "/rest/*");
+    private void initConsole() {
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletHandler.setContextPath("/console");
+        servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/*");
         handlers.addHandler(servletHandler);
     }
 

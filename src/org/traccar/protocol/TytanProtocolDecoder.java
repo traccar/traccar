@@ -18,10 +18,8 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -81,16 +79,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     position.set("authorized", ChannelBuffers.hexDump(buf.readBytes(8)));
                     break;
                 case 24:
-                    Set<Integer> temps = new LinkedHashSet<>();
-                    int temp = buf.readUnsignedByte();
-                    for (int i = 3; i >= 0; i--) {
-                        n = (temp >> (2 * i)) & 0x03;
-                        if (!temps.contains(n)) {
-                            temps.add(n);
-                        }
-                    }
-                    for (int i : temps) {
-                        position.set(Event.PREFIX_TEMP + i, buf.readUnsignedByte());
+                    for (int i = 0; i < length / 2; i++) {
+                        position.set(Event.PREFIX_TEMP + buf.readUnsignedByte(), buf.readByte());
                     }
                     break;
                 case 28:

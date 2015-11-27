@@ -81,49 +81,54 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
                 long time = buf.readUnsignedInt() & 0x3fffffff;
                 time += 1167609600; // 2007-01-01 00:00:00
-                position.setTime(new Date(time * 1000));
 
                 globalMask = buf.readUnsignedByte();
-                if (!BitUtil.check(globalMask, 0)) {
-                    return null;
-                }
+                if (BitUtil.check(globalMask, 0)) {
 
-                int locationMask = buf.readUnsignedByte();
+                    position.setTime(new Date(time * 1000));
 
-                if (BitUtil.check(locationMask, 0)) {
-                    position.setLatitude(buf.readFloat());
-                    position.setLongitude(buf.readFloat());
-                }
+                    int locationMask = buf.readUnsignedByte();
 
-                if (BitUtil.check(locationMask, 1)) {
-                    position.setAltitude(buf.readUnsignedShort());
-                }
+                    if (BitUtil.check(locationMask, 0)) {
+                        position.setLatitude(buf.readFloat());
+                        position.setLongitude(buf.readFloat());
+                    }
 
-                if (BitUtil.check(locationMask, 2)) {
-                    position.setCourse(buf.readUnsignedByte() * 360.0 / 256);
-                }
+                    if (BitUtil.check(locationMask, 1)) {
+                        position.setAltitude(buf.readUnsignedShort());
+                    }
 
-                if (BitUtil.check(locationMask, 3)) {
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                }
+                    if (BitUtil.check(locationMask, 2)) {
+                        position.setCourse(buf.readUnsignedByte() * 360.0 / 256);
+                    }
 
-                if (BitUtil.check(locationMask, 4)) {
-                    int satellites = buf.readUnsignedByte();
-                    position.set(Event.KEY_SATELLITES, satellites);
-                    position.setValid(satellites >= 3);
-                }
+                    if (BitUtil.check(locationMask, 3)) {
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                    }
 
-                if (BitUtil.check(locationMask, 5)) {
-                    position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                    position.set(Event.KEY_CID, buf.readUnsignedShort());
-                }
+                    if (BitUtil.check(locationMask, 4)) {
+                        int satellites = buf.readUnsignedByte();
+                        position.set(Event.KEY_SATELLITES, satellites);
+                        position.setValid(satellites >= 3);
+                    }
 
-                if (BitUtil.check(locationMask, 6)) {
-                    position.set(Event.KEY_GSM, buf.readUnsignedByte());
-                }
+                    if (BitUtil.check(locationMask, 5)) {
+                        position.set(Event.KEY_LAC, buf.readUnsignedShort());
+                        position.set(Event.KEY_CID, buf.readUnsignedShort());
+                    }
 
-                if (BitUtil.check(locationMask, 7)) {
-                    position.set("operator", buf.readUnsignedInt());
+                    if (BitUtil.check(locationMask, 6)) {
+                        position.set(Event.KEY_GSM, buf.readUnsignedByte());
+                    }
+
+                    if (BitUtil.check(locationMask, 7)) {
+                        position.set("operator", buf.readUnsignedInt());
+                    }
+
+                } else {
+
+                    getLastLocation(position, new Date(time * 1000));
+
                 }
 
             } else {
