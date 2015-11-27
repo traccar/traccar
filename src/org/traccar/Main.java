@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,18 @@ public final class Main {
         if (Context.getWebServer() != null) {
             Context.getWebServer().start();
         }
+        if (Context.getDatabaseConsole() != null) {
+            Context.getDatabaseConsole().start();
+        }
 
-        // Shutdown server properly
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 Log.info("Shutting down server...");
+
+                if (Context.getDatabaseConsole() != null) {
+                    Context.getDatabaseConsole().stop();
+                }
                 if (Context.getWebServer() != null) {
                     Context.getWebServer().stop();
                 }

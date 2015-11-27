@@ -25,6 +25,9 @@
 
     <entry key='distance.enable'>true</entry>
 
+    <entry key='console.enable'>true</entry>
+    <entry key='console.port'>8083</entry>
+
     <!--<entry key='filter.enable'>true</entry>
     <entry key='filter.limit'>3600</entry>
     <entry key='filter.invalid'>true</entry>
