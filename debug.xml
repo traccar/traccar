@@ -13,6 +13,7 @@
     <entry key='web.old'>true</entry>-->
     <entry key='web.path'>web</entry>
     <entry key='web.debug'>true</entry>
+    <entry key='web.console'>true</entry>
 
     <entry key='geocoder.enable'>true</entry>
     <entry key='geocoder.type'>nominatim</entry>
@@ -24,9 +25,6 @@
     <entry key='location.mnc'>2</entry>
 
     <entry key='distance.enable'>true</entry>
-
-    <entry key='console.enable'>true</entry>
-    <entry key='console.port'>8083</entry>
 
     <!--<entry key='filter.enable'>true</entry>
     <entry key='filter.limit'>3600</entry>

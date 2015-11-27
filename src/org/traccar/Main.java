@@ -33,18 +33,12 @@ public final class Main {
         if (Context.getWebServer() != null) {
             Context.getWebServer().start();
         }
-        if (Context.getDatabaseConsole() != null) {
-            Context.getDatabaseConsole().start();
-        }
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 Log.info("Shutting down server...");
 
-                if (Context.getDatabaseConsole() != null) {
-                    Context.getDatabaseConsole().stop();
-                }
                 if (Context.getWebServer() != null) {
                     Context.getWebServer().stop();
                 }

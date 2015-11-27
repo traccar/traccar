@@ -16,8 +16,6 @@
 package org.traccar;
 
 import com.ning.http.client.AsyncHttpClient;
-import org.h2.server.web.ConnectionInfo;
-import org.h2.tools.Server;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
@@ -35,8 +33,6 @@ import org.traccar.location.LocationProvider;
 import org.traccar.location.MozillaLocationProvider;
 import org.traccar.location.OpenCellIdLocationProvider;
 import org.traccar.web.WebServer;
-
-import java.lang.reflect.Method;
 
 public final class Context {
 
@@ -95,12 +91,6 @@ public final class Context {
 
     public static WebServer getWebServer() {
         return webServer;
-    }
-
-    private static Server databaseConsole;
-
-    public static Server getDatabaseConsole() {
-        return databaseConsole;
     }
 
     private static ServerManager serverManager;
@@ -183,20 +173,6 @@ public final class Context {
                 permissionsManager = new PermissionsManager(dataManager);
             }
             webServer = new WebServer(config, dataManager.getDataSource());
-        }
-
-        if (config.getBoolean("console.enable")) {
-            databaseConsole = Server.createWebServer("-webPort", config.getString("console.port"));
-            org.h2.server.web.WebServer databaseService = (org.h2.server.web.WebServer) databaseConsole.getService();
-
-            ConnectionInfo connectionInfo = new ConnectionInfo("Traccar|"
-                    + config.getString("database.driver") + "|"
-                    + config.getString("database.url") + "|"
-                    + config.getString("database.user"));
-
-            Method method = databaseService.getClass().getDeclaredMethod("updateSetting", ConnectionInfo.class);
-            method.setAccessible(true);
-            method.invoke(databaseService, connectionInfo);
         }
 
         connectionManager = new ConnectionManager(dataManager);

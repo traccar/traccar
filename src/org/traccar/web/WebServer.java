@@ -59,6 +59,9 @@ public class WebServer {
                 break;
             case "new":
                 initApi();
+                if (config.getBoolean("web.console")) {
+                    initConsole();
+                }
                 initWebApp();
                 break;
             case "old":
@@ -107,6 +110,13 @@ public class WebServer {
         servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
         servletHandler.addServlet(new ServletHolder(new CommandServlet()), "/command/*");
         servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
+        handlers.addHandler(servletHandler);
+    }
+
+    private void initConsole() {
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletHandler.setContextPath("/console");
+        servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/*");
         handlers.addHandler(servletHandler);
     }
 
