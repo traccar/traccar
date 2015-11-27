@@ -67,7 +67,7 @@ public class PermissionsManager {
         }
     }
 
-    private void checkUser(long userId, long otherUserId) throws SecurityException {
+    public void checkUser(long userId, long otherUserId) throws SecurityException {
         if (userId != otherUserId) {
             checkAdmin(userId);
         }
@@ -77,7 +77,7 @@ public class PermissionsManager {
         return getNotNull(userId);
     }
 
-    private void checkDevice(long userId, long deviceId) throws SecurityException {
+    public void checkDevice(long userId, long deviceId) throws SecurityException {
         if (!getNotNull(userId).contains(deviceId)) {
             throw new SecurityException("Device access denied");
         }

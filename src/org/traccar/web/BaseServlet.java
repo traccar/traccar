@@ -19,9 +19,10 @@ import org.traccar.helper.Log;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessControlException;
 import java.util.Collection;
-import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonStructure;
@@ -32,8 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.util.CharsetUtil;
 import org.traccar.Context;
-import org.traccar.helper.Authorization;
-import org.traccar.model.User;
 
 public abstract class BaseServlet extends HttpServlet {
 
@@ -57,7 +56,8 @@ public abstract class BaseServlet extends HttpServlet {
             if (allowed == null) {
                 resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOW_ORIGIN_VALUE);
             } else if (allowed.contains(origin)) {
-                resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+                String originSafe = URLEncoder.encode(origin, StandardCharsets.UTF_8.displayName());
+                resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, originSafe);
             }
 
             if (!handle(getCommand(req), req, resp)) {
@@ -66,7 +66,6 @@ public abstract class BaseServlet extends HttpServlet {
         } catch (Exception error) {
             if (error instanceof AccessControlException) {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                resp.addHeader(HttpHeaders.Names.WWW_AUTHENTICATE, Authorization.WWW_AUTHENTICATE_VALUE);
             } else if (error instanceof SecurityException) {
                 resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
             }
@@ -81,16 +80,6 @@ public abstract class BaseServlet extends HttpServlet {
         Object userId = req.getSession().getAttribute(USER_ID_KEY);
         if (userId != null) {
             return (Long) userId;
-        }
-        String authorization = req.getHeader(HttpHeaders.Names.AUTHORIZATION);
-        if (authorization != null && !authorization.isEmpty()) {
-            Map<String, String> authMap = Authorization.parse(authorization);
-            String username = authMap.get(Authorization.USERNAME);
-            String password = authMap.get(Authorization.PASSWORD);
-            User user = Context.getDataManager().login(username, password);
-            if (user != null) {
-                return user.getId();
-            }
         }
         throw new AccessControlException("User not logged in");
     }

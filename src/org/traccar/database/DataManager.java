@@ -31,6 +31,7 @@ import java.util.Map;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import org.traccar.Config;
+import org.traccar.helper.Clazz;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
@@ -383,6 +384,24 @@ public class DataManager implements IdentityManager {
         QueryBuilder.create(dataSource, getQuery("database.updateServer"))
                 .setObject(server)
                 .executeUpdate();
+    }
+
+    public <T> Collection<T> get(Class<T> clazz) throws SQLException {
+        if (clazz.equals(User.class)) {
+            return (Collection<T>) getUsers();
+        } else if (clazz.equals(Device.class)) {
+            return (Collection<T>) getAllDevices();
+        }
+        return null;
+    }
+
+    public <T> T get(T entity) throws Exception {
+        if (entity instanceof User) {
+            return (T) getUser(Clazz.getId(entity));
+        } else if (entity instanceof Device) {
+            return (T) getDeviceById(Clazz.getId(entity));
+        }
+        return null;
     }
 
     public void add(Object entity) throws SQLException {

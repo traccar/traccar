@@ -18,10 +18,9 @@ package org.traccar.web;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
-import org.traccar.helper.CommandCall;
 import org.traccar.model.User;
 
-public class UserServlet extends BaseServletResource<User> {
+public class UserServlet extends BaseServlet {
 
     @Override
     protected boolean handle(String command, HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -45,64 +44,38 @@ public class UserServlet extends BaseServletResource<User> {
         return true;
     }
 
-    @Override
-    protected void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    private void get(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Context.getPermissionsManager().checkAdmin(getUserId(req));
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
                     Context.getDataManager().getUsers()));
     }
 
-    @Override
-    protected void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        super.add(req, resp, new CommandCall<User>() {
-
-            @Override
-            public void check() throws Exception {
-                Context.getPermissionsManager().check(User.class, getUserId(), getEntity().getId());
-            }
-
-            @Override
-            public void after() throws Exception {
-                Context.getPermissionsManager().refresh();
-            }
-        });
+    private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        Context.getDataManager().addUser(user);
+        Context.getPermissionsManager().refresh();
+        sendResponse(resp.getWriter(), JsonConverter.objectToJson(user));
     }
 
-    @Override
-    protected void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        super.update(req, resp, new CommandCall<User>() {
-
-            @Override
-            public void check() {
-                if (getEntity().getAdmin()) {
-                    Context.getPermissionsManager().checkAdmin(getUserId());
-                } else {
-                    Context.getPermissionsManager().check(User.class, getUserId(), getEntity().getId());
-                }
-            }
-
-            @Override
-            public void after() {
-                Context.getPermissionsManager().refresh();
-            }
-
-        });
+    private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        if (user.getAdmin()) {
+            Context.getPermissionsManager().checkAdmin(getUserId(req));
+        } else {
+            Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        }
+        Context.getDataManager().updateUser(user);
+        Context.getPermissionsManager().refresh();
+        sendResponse(resp.getWriter(), true);
     }
 
-    @Override
-    protected void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        super.remove(req, resp, new CommandCall<User>() {
-
-            @Override
-            public void check() throws Exception {
-                Context.getPermissionsManager().check(User.class, getUserId(), getEntity().getId());
-            }
-
-            @Override
-            public void after() throws Exception {
-                Context.getPermissionsManager().refresh();
-            }
-
-        });
+    private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
+        Context.getDataManager().removeUser(user);
+        Context.getPermissionsManager().refresh();
+        sendResponse(resp.getWriter(), true);
     }
+
 }

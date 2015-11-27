@@ -16,11 +16,14 @@
 package org.traccar.helper;
 
 import java.beans.Introspector;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-public final class Clazz {
+public final class Clazz implements Serializable {
+
+    private static final long serialVersionUID = 4983299355055144885L;
 
     private Clazz() {
     }
@@ -77,7 +80,7 @@ public final class Clazz {
         }
     }
 
-    public static long getId(Object entity) throws Exception {
+    public static <T> long getId(T entity) throws Exception {
         Method[] methods = entity.getClass().getMethods();
         for (final Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
@@ -90,7 +93,7 @@ public final class Clazz {
         throw new IllegalArgumentException();
     }
 
-    public static void setId(Object entity, long id) throws Exception {
+    public static <T, I> void setId(T entity, I id) throws Exception {
         Method[] methods = entity.getClass().getMethods();
         for (final Method method : methods) {
             if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
