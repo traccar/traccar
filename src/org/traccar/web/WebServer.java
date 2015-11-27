@@ -128,6 +128,15 @@ public class WebServer {
         handlers.addHandler(servletHandler);
     }
 
+    private void initRestApi() {
+        ResourceConfig resourceConfig = new ResourceConfig();
+        resourceConfig.packages("org.traccar.api");
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
+        servletHandler.addServlet(servletHolder, "/rest/*");
+        handlers.addHandler(servletHandler);
+    }
+
     public void start() {
         try {
             server.start();
