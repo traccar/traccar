@@ -67,7 +67,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .text("imei:")
             .number("(d+),")                     // imei
             .expression("[^,]+,")                // alarm
-            .number("d+,,")
+            .number("d*,,")
             .text("L,,,")
             .number("(x+),,")                    // lac
             .number("(x+),,,")                   // cid
