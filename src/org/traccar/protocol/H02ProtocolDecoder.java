@@ -144,8 +144,6 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeText(String sentence, Channel channel) {
 
-        String x = PatternUtil.checkPattern(PATTERN.pattern(), sentence);
-
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;

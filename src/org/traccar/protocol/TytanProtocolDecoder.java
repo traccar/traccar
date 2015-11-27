@@ -18,10 +18,8 @@ package org.traccar.protocol;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
