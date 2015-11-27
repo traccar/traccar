@@ -25,14 +25,14 @@ Ext.define('Traccar.store.DistanceUnits', {
     }, {
         key: 'mi',
         name: Strings.sharedMi,
-        factor: 0.00621371
+        factor: 0.000621371
     }],
 
     formatValue: function (value, unit) {
         var model;
         if (unit) {
             model = this.findRecord('key', unit);
-            return (value * Number(model.get('factor')).toFixed(2)) + ' ' + model.get('name');
+            return (value * model.get('factor')).toFixed(2) + ' ' + model.get('name');
         } else {
             return value;
         }
