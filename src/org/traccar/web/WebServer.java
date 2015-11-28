@@ -130,10 +130,11 @@ public class WebServer {
 
     private void initRestApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletHandler.setContextPath("/api");
         ServletHolder servletHolder = new ServletHolder(new ServletContainer());
         servletHolder.getInitParameters().put("jersey.config.server.provider.packages", "org.traccar.rest");
 
-        servletHandler.addServlet(servletHolder, "/api/*");
+        servletHandler.addServlet(servletHolder, "/*");
         handlers.addHandler(servletHandler);
     }
 

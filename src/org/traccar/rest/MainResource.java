@@ -5,13 +5,13 @@ import org.traccar.model.User;
 import org.traccar.web.JsonConverter;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import java.security.AccessControlException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.sql.SQLException;
+import java.text.ParseException;
 
 import static org.traccar.web.BaseServlet.USER_KEY;
 
@@ -25,16 +25,43 @@ public class MainResource {
     @javax.ws.rs.core.Context
     HttpServletRequest req;
 
+    @Path("session")
+    @GET
+    public Response session() throws SQLException, IOException {
+        Long userId = (Long) req.getSession().getAttribute(USER_KEY);
+        if (userId != null) {
+            return ResponseBuilder.getResponse(JsonConverter.objectToJson(
+                    Context.getDataManager().getUser(userId)));
+        }
+        return ResponseBuilder.getResponse(false);
+    }
+
     @Path("login")
     @POST
-    public Response logOn() throws Exception{
+    public Response logOn(@FormParam("email") String email,
+                          @FormParam("password") String password) throws Exception{
         User user = Context.getDataManager().login(
-                req.getParameter("email"), req.getParameter("password"));
+                email, password);
         if (user != null) {
             req.getSession().setAttribute(USER_KEY, user.getId());
             return ResponseBuilder.getResponse(JsonConverter.objectToJson(user));
-        } else {
-            return ResponseBuilder.getResponse(false);
         }
+        return ResponseBuilder.getResponse(false);
+    }
+
+    @Path("logout")
+    @GET
+    public Response logout() throws IOException {
+        req.getSession().removeAttribute(USER_KEY);
+        return ResponseBuilder.getResponse(true);
+    }
+
+    @Path("register")
+    @POST
+    public Response register(String u) throws IOException, ParseException, SQLException {
+
+        User user = JsonConverter.objectFromJson(new StringReader(u), new User());
+        Context.getDataManager().addUser(user);
+        return ResponseBuilder.getResponse(true);
     }
 }
