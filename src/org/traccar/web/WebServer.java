@@ -134,6 +134,8 @@ public class WebServer {
         ServletHolder servletHolder = new ServletHolder(new ServletContainer());
         servletHolder.getInitParameters().put("jersey.config.server.provider.packages", "org.traccar.rest");
 
+        //add servlets
+        servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
         servletHandler.addServlet(servletHolder, "/*");
         handlers.addHandler(servletHandler);
     }

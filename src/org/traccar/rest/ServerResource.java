@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.StringReader;
 import java.sql.SQLException;
 
 /**
@@ -34,8 +35,8 @@ public class ServerResource {
 
     @Path("update")
     @POST
-    public Response update() throws Exception {
-        Server server = JsonConverter.objectFromJson(req.getReader(), new Server());
+    public Response update(String serverJson) throws Exception {
+        Server server = JsonConverter.objectFromJson(new StringReader(serverJson), new Server());
         Context.getPermissionsManager().checkAdmin(new ServerServlet().getUserId(req));
         Context.getDataManager().updateServer(server);
         return ResponseBuilder.getResponse(true);
