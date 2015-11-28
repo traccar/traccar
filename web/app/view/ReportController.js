@@ -32,7 +32,7 @@ Ext.define('Traccar.view.ReportController', {
     onShowClick: function () {
         var deviceId, fromDate, fromTime, from, toDate, toTime, to, store, params;
 
-        var serialize =function(obj) {
+        var serialize = function (obj) {
             var str = [];
             for(var p in obj)
               if (obj.hasOwnProperty(p)) {
@@ -40,7 +40,7 @@ Ext.define('Traccar.view.ReportController', {
               }
             return str.join("&");
         }
-        
+
         deviceId = this.lookupReference('deviceField').getValue();
 
         fromDate = this.lookupReference('fromDateField').getValue();
@@ -67,7 +67,7 @@ Ext.define('Traccar.view.ReportController', {
         store.load({
             params: params
         });
-        
+
         exportButton = this.lookupReference('exportButton');
         exportButton.setHref('api/report/csv?' + serialize(params));
         exportButton.setDisabled(false);
