@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Path("position")
 @Produces(MediaType.APPLICATION_JSON)
-public class PossitionResource {
+public class PositionResource {
 
     @javax.ws.rs.core.Context
     HttpServletRequest req;
