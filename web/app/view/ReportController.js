@@ -30,15 +30,23 @@ Ext.define('Traccar.view.ReportController', {
     },
 
     onShowClick: function () {
+        
         var deviceId, fromDate, fromTime, from, toDate, toTime, to, store, params;
 
         var serialize = function (obj) {
             var str = [];
             for(var p in obj)
-              if (obj.hasOwnProperty(p)) {
-                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-              }
+                if (obj.hasOwnProperty(p)) {
+                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                }
             return str.join("&");
+        }
+
+        exportButton = this.lookupReference('exportButton');
+        exportButton.setDisabled(true);
+        if (! this.lookupReference('deviceField').isValid()) {
+            Ext.toast('Fill required fields');
+            return;
         }
 
         deviceId = this.lookupReference('deviceField').getValue();
@@ -65,12 +73,15 @@ Ext.define('Traccar.view.ReportController', {
 
         store = Ext.getStore('Positions');
         store.load({
-            params: params
+            params: params,
+            callback: function(records, operation, success) {
+                if (success && records.length > 0) {
+                    exportButton.setHref('api/report/csv?' + serialize(params));
+                    exportButton.setDisabled(false);
+                } 
+            }
         });
 
-        exportButton = this.lookupReference('exportButton');
-        exportButton.setHref('api/report/csv?' + serialize(params));
-        exportButton.setDisabled(false);
     },
 
     onClearClick: function () {
