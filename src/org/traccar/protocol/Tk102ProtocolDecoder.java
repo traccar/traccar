@@ -57,7 +57,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("[!")) {
 
-            if (!identify(sentence.substring(14, 14 + 15), channel)) {
+            if (!identify(sentence.substring(14, 14 + 15), channel, remoteAddress)) {
                 return null;
             }
             if (channel != null) {

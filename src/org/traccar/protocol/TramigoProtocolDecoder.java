@@ -62,7 +62,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.KEY_INDEX, index);
         position.setValid(true);
 
-        if (!identify(String.valueOf(id), channel)) {
+        if (!identify(String.valueOf(id), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

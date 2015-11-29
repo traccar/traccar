@@ -80,7 +80,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         String manufacturer = parser.next();
         String id = parser.next();
-        if (!identify(id, channel)) {
+        if (!identify(id, channel, remoteAddress)) {
             return null;
         }
 

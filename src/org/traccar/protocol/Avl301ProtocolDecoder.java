@@ -69,7 +69,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOGIN) {
 
-            if (identify(readImei(buf), channel)) {
+            if (identify(readImei(buf), channel, remoteAddress)) {
                 sendResponse(channel, type);
             }
 

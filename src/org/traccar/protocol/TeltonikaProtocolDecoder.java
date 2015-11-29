@@ -35,11 +35,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private void parseIdentification(Channel channel, ChannelBuffer buf) {
+    private void parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, Charset.defaultCharset());
-        boolean result =  identify(imei, channel);
+        boolean result =  identify(imei, channel, remoteAddress);
 
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(1);
@@ -210,7 +210,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         if (buf.getUnsignedShort(0) > 0) {
-            parseIdentification(channel, buf);
+            parseIdentification(channel, remoteAddress, buf);
         } else {
             return parseLocation(channel, buf);
         }

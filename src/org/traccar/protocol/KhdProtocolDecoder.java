@@ -73,7 +73,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            if (!identify(readSerialNumber(buf), channel)) {
+            if (!identify(readSerialNumber(buf), channel, remoteAddress)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

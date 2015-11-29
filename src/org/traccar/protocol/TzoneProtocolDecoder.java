@@ -46,7 +46,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedInt(); // firmware
 
         String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-        if (!identify(imei, channel)) {
+        if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
 

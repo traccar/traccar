@@ -206,25 +206,25 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             if (id.endsWith(",")) {
                 id = id.substring(0, id.length() - 1);
             }
-            identify(id, channel);
+            identify(id, channel, remoteAddress);
             sentence = sentence.substring(index);
         }
 
         if (sentence.startsWith("$PGID")) {
-            identify(sentence.substring(6, sentence.length() - 3), channel);
+            identify(sentence.substring(6, sentence.length() - 3), channel, remoteAddress);
         } else if (sentence.startsWith("$PCPTI")) {
-            identify(sentence.substring(7, sentence.indexOf(",", 7)), channel);
+            identify(sentence.substring(7, sentence.indexOf(",", 7)), channel, remoteAddress);
         } else if (sentence.startsWith("IMEI")) {
-            identify(sentence.substring(5, sentence.length()), channel);
+            identify(sentence.substring(5, sentence.length()), channel, remoteAddress);
         } else if (sentence.startsWith("$GPFID")) {
-            if (identify(sentence.substring(6, sentence.length()), channel) && position != null) {
+            if (identify(sentence.substring(6, sentence.length()), channel, remoteAddress) && position != null) {
                 Position position = this.position;
                 position.setDeviceId(getDeviceId());
                 this.position = null;
                 return position;
             }
         } else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
-            identify(sentence, channel);
+            identify(sentence, channel, remoteAddress);
         } else if (sentence.startsWith("$GPRMC")) {
             return decodeGprmc(sentence, channel);
         } else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {

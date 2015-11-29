@@ -103,7 +103,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN_BATTERY, sentence);
         if (parser.matches()) {
-            if (!identify(parser.next(), channel)) {
+            if (!identify(parser.next(), channel, remoteAddress)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());
@@ -129,7 +129,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         parser = new Parser(PATTERN_NETWORK, sentence);
         if (parser.matches()) {
-            if (!identify(parser.next(), channel)) {
+            if (!identify(parser.next(), channel, remoteAddress)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());
@@ -149,7 +149,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (!identify(parser.next(), channel)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

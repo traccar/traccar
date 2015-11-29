@@ -90,7 +90,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                 channel.write("LOAD", remoteAddress);
                 Parser handshakeParser = new Parser(PATTERN_HANDSHAKE, sentence);
                 if (handshakeParser.matches()) {
-                    identify(handshakeParser.next(), channel);
+                    identify(handshakeParser.next(), channel, remoteAddress);
                 }
             }
             return null;

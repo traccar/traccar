@@ -109,7 +109,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
 
         String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-        if (!identify(imei, channel)) {
+        if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

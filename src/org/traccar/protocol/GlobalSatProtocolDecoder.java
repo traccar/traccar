@@ -47,7 +47,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         format1 = format;
     }
 
-    private Position decodeOriginal(Channel channel, String sentence) {
+    private Position decodeOriginal(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         if (channel != null) {
             channel.write("ACK\r");
@@ -84,7 +84,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
             switch (format.charAt(formatIndex)) {
                 case 'S':
-                    if (!identify(value, channel)) {
+                    if (!identify(value, channel, remoteAddress)) {
                         return null;
                     }
                     position.setDeviceId(getDeviceId());
@@ -193,7 +193,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*)")                  // hdop
             .compile();
 
-    private Position decodeAlternative(Channel channel, String sentence) {
+    private Position decodeAlternative(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
@@ -203,7 +203,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        if (!identify(parser.next(), channel)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -234,9 +234,9 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("GS")) {
-            return decodeOriginal(channel, sentence);
+            return decodeOriginal(channel, remoteAddress, sentence);
         } else if (sentence.startsWith("$")) {
-            return decodeAlternative(channel, sentence);
+            return decodeAlternative(channel, remoteAddress, sentence);
         }
 
         return null;

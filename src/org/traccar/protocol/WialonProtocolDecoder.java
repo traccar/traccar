@@ -129,7 +129,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.startsWith("#L#")) {
 
             String imei = sentence.substring(3, sentence.indexOf(';'));
-            if (identify(imei, channel)) {
+            if (identify(imei, channel, remoteAddress)) {
                 sendResponse(channel, "#AL#", 1);
             }
 
