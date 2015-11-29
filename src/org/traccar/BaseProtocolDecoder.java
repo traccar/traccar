@@ -52,7 +52,11 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } else {
                 deviceId = 0;
                 if (logWarning) {
-                    Log.warning("Unknown device - " + uniqueId);
+                    String message = "Unknown device - " + uniqueId;
+                    if (remoteAddress != null) {
+                        message += " (" + ((InetSocketAddress) remoteAddress).getHostString() + ")";
+                    }
+                    Log.warning(message);
                 }
                 return false;
             }
