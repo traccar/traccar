@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Date;
 
@@ -64,10 +65,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public boolean identify(String uniqueId, Channel channel, SocketAddress remoteAddress) {
         return identify(uniqueId, channel, remoteAddress, true);
-    }
-
-    public boolean identify(String uniqueId, Channel channel) {
-        return identify(uniqueId, channel, null, true);
     }
 
     public BaseProtocolDecoder(Protocol protocol) {

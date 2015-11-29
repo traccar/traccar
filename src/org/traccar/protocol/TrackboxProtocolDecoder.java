@@ -59,7 +59,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("a=connect")) {
             String id = sentence.substring(sentence.indexOf("i=") + 2);
-            if (identify(id, channel)) {
+            if (identify(id, channel, remoteAddress)) {
                 sendResponse(channel);
             }
             return null;

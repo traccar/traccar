@@ -144,7 +144,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                 case TAG_IMEI:
                     String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
                     buf.skipBytes(imei.length());
-                    identify(imei, channel);
+                    identify(imei, channel, remoteAddress);
                     break;
 
                 case TAG_DATE:

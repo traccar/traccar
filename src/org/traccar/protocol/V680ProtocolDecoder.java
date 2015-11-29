@@ -62,7 +62,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.length() == 16) {
 
-            identify(sentence.substring(1, sentence.length()), channel);
+            identify(sentence.substring(1, sentence.length()), channel, remoteAddress);
 
         } else {
 
@@ -75,7 +75,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
 
             if (parser.hasNext()) {
-                identify(parser.next(), channel);
+                identify(parser.next(), channel, remoteAddress);
             }
             if (!hasDeviceId()) {
                 return null;

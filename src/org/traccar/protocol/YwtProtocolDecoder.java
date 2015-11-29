@@ -81,7 +81,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
 
-        if (!identify(parser.next(), channel)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

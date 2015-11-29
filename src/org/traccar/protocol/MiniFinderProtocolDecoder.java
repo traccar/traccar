@@ -60,7 +60,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("!1")) {
 
-            identify(sentence.substring(3, sentence.length()), channel);
+            identify(sentence.substring(3, sentence.length()), channel, remoteAddress);
 
         } else if ((sentence.startsWith("!D") || sentence.startsWith("!A")) && hasDeviceId()) {
 

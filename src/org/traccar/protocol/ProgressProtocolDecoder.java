@@ -78,7 +78,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(Charset.defaultCharset());
-            identify(imei, channel);
+            identify(imei, channel, remoteAddress);
 
         } else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
 

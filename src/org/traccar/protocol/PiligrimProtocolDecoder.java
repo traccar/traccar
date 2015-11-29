@@ -81,7 +81,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, "BINGPS: OK");
 
             QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-            if (!identify(decoder.getParameters().get("imei").get(0), channel)) {
+            if (!identify(decoder.getParameters().get("imei").get(0), channel, remoteAddress)) {
                 return null;
             }
 

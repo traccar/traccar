@@ -84,7 +84,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning("No device id field");
                 return null;
             }
-            if (!identify(id, channel)) {
+            if (!identify(id, channel, remoteAddress)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

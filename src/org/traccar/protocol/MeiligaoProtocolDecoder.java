@@ -94,7 +94,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_RFID = 0x9966;
 
-    private boolean identify(ChannelBuffer buf, Channel channel) {
+    private boolean identify(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < 7; i++) {
@@ -119,11 +119,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Try to recreate full IMEI number
         // Sometimes first digit is cut, so this won't work
-        if (id.length() == 14 && identify(id + Checksum.luhn(Long.parseLong(id)), channel, null, false)) {
+        if (id.length() == 14 && identify(id + Checksum.luhn(Long.parseLong(id)), channel, remoteAddress, false)) {
             return true;
         }
 
-        return identify(id, channel);
+        return identify(id, channel, remoteAddress);
     }
 
     private static void sendResponse(
@@ -206,7 +206,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(6);
         }
 
-        if (!identify(id, channel)) {
+        if (!identify(id, channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

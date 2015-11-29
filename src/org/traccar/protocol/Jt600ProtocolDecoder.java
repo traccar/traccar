@@ -42,7 +42,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return degrees + minutes / 60;
     }
 
-    private Position decodeNormalMessage(ChannelBuffer buf, Channel channel) {
+    private Position decodeNormalMessage(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -50,7 +50,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         buf.readByte(); // header
 
         String id = String.valueOf(Long.parseLong(ChannelBuffers.hexDump(buf.readBytes(5))));
-        if (!identify(id, channel)) {
+        if (!identify(id, channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -139,7 +139,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .text(")")
             .compile();
 
-    private Position decodeAlertMessage(ChannelBuffer buf, Channel channel) {
+    private Position decodeAlertMessage(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN, buf.toString(Charset.defaultCharset()));
         if (!parser.matches()) {
@@ -151,7 +151,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Event.KEY_ALARM, true);
 
-        if (!identify(parser.next(), channel)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -181,9 +181,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         char first = (char) buf.getByte(0);
 
         if (first == '$') {
-            return decodeNormalMessage(buf, channel);
+            return decodeNormalMessage(buf, channel, remoteAddress);
         } else if (first == '(') {
-            return decodeAlertMessage(buf, channel);
+            return decodeAlertMessage(buf, channel, remoteAddress);
         }
 
         return null;

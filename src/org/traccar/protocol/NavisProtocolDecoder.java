@@ -217,9 +217,9 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private Object processHandshake(Channel channel, ChannelBuffer buf) {
+    private Object processHandshake(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
-        if (identify(buf.toString(Charset.defaultCharset()), channel)) {
+        if (identify(buf.toString(Charset.defaultCharset()), channel, remoteAddress)) {
             sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", CHARSET));
         }
         return null;
@@ -273,7 +273,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             case "*>A":
                 return processArray(channel, buf);
             case "*>S":
-                return processHandshake(channel, buf);
+                return processHandshake(channel, remoteAddress, buf);
             default:
                 Log.warning(new UnsupportedOperationException(type));
                 break;

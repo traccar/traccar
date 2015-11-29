@@ -46,7 +46,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         String id = String.valueOf(buf.readUnsignedInt());
-        if (!identify(id, channel)) {
+        if (!identify(id, channel, remoteAddress)) {
             return null;
         }
 

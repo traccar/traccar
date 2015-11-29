@@ -76,7 +76,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String imei = buf.toString(index, IMEI_LENGTH, Charset.defaultCharset());
-        if (!identify(imei, channel)) {
+        if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
 

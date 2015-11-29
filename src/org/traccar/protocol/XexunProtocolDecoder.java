@@ -99,7 +99,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.set("signal", parser.next());
         position.set(Event.KEY_ALARM, parser.next());
 
-        if (!identify(parser.next(), channel)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());

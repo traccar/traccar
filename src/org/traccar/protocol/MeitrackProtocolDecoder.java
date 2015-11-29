@@ -79,7 +79,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .text("\r\n").optional()
             .compile();
 
-    private Position decodeRegularMessage(Channel channel, ChannelBuffer buf) {
+    private Position decodeRegularMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         Parser parser = new Parser(PATTERN, buf.toString(Charset.defaultCharset()));
         if (!parser.matches()) {
@@ -89,7 +89,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        if (!identify(parser.next(), channel)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
         position.setDeviceId(getDeviceId());
@@ -155,14 +155,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private List<Position> decodeBinaryMessage(Channel channel, ChannelBuffer buf) {
+    private List<Position> decodeBinaryMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<>();
 
         String flag = buf.toString(2, 1, Charset.defaultCharset());
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
 
         String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
-        if (!identify(imei, channel)) {
+        if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
 
@@ -238,9 +238,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         String type = buf.toString(index + 1, 3, Charset.defaultCharset());
         if (type.equals("CCC")) {
-            return decodeBinaryMessage(channel, buf);
+            return decodeBinaryMessage(channel, remoteAddress, buf);
         } else {
-            return decodeRegularMessage(channel, buf);
+            return decodeRegularMessage(channel, remoteAddress, buf);
         }
     }
 

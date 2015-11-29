@@ -56,7 +56,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         int index = sentence.indexOf("UB05");
         if (index != -1) {
             String imei = sentence.substring(index + 4, index + 4 + 15);
-            identify(imei, channel);
+            identify(imei, channel, remoteAddress);
         }
         if (!hasDeviceId()) {
             return null;

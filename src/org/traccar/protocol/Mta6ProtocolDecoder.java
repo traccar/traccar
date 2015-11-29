@@ -283,7 +283,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes("id=".length());
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
         String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), Charset.defaultCharset());
-        if (!identify(uniqueId, channel)) {
+        if (!identify(uniqueId, channel, remoteAddress)) {
             return null;
         }
         buf.skipBytes(uniqueId.length());
