@@ -48,6 +48,7 @@ public class PositionReportResource {
 
         long deviceId = Long.parseLong(req.getParameter("deviceId"));
 
+        org.traccar.Context.getPermissionsManager().checkDevice(SessionUtil.getUserId(req), deviceId);
         Collection<Position> positions = org.traccar.Context.getDataManager().getPositions(
                 SessionUtil.getUserId(req), deviceId,
                 JsonConverter.parseDate(req.getParameter("from")),
