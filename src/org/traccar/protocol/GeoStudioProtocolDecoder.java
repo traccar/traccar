@@ -87,7 +87,7 @@ public class GeoStudioProtocolDecoder extends BaseProtocolDecoder {
                         Integer id = content.readInt();
 
                         // Identification
-                        if (!identify(id.toString(), channel)) {
+                        if (!identify(id.toString(), channel, remoteAddress)) {
                             return null;
                         }
                         sendResponse(channel, remoteAddress);
