@@ -33,7 +33,7 @@ import org.traccar.model.User;
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class UserResource extends BaseResource<User, Long> {
+public class UserResource extends BaseResource<User> {
 
     @GET
     @RolesAllowed(User.ROLE_ADMIN)
@@ -46,7 +46,7 @@ public class UserResource extends BaseResource<User, Long> {
     @Path("{id}")
     @RolesAllowed(User.ROLE_USER)
     @Override
-    public User getEntity(@PathParam("id") Long id) {
+    public User getEntity(@PathParam("id") long id) {
         return super.getEntity(id);
     }
 
@@ -61,7 +61,7 @@ public class UserResource extends BaseResource<User, Long> {
     @Path("{id}")
     @RolesAllowed(User.ROLE_USER)
     @Override
-    public Response putEntity(@PathParam("id") Long id, User entity) {
+    public Response putEntity(@PathParam("id") long id, User entity) {
         return super.putEntity(id, entity);
     }
 
@@ -69,7 +69,7 @@ public class UserResource extends BaseResource<User, Long> {
     @Path("{id}")
     @RolesAllowed(User.ROLE_USER)
     @Override
-    public Response deleteEntity(@PathParam("id") Long id) {
+    public Response deleteEntity(@PathParam("id") long id) {
         return super.deleteEntity(id);
     }
 

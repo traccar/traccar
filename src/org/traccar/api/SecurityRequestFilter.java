@@ -25,8 +25,12 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Response;
 
 public class SecurityRequestFilter implements ContainerRequestFilter {
+
+    private static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+    private static final String BASIC_REALM = "Basic realm=\"api\"";
 
     @javax.ws.rs.core.Context
     private ResourceInfo resourceInfo;
@@ -40,7 +44,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         }
 
         if (method.isAnnotationPresent(DenyAll.class)) {
-            requestContext.abortWith(ResponseBuilder.forbidden());
+            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
             return;
         }
 
@@ -49,7 +53,8 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             || userPrincipal.getName() == null
             || userPrincipal.getPassword() == null
             || !isAuthenticatedUser(userPrincipal)) {
-            requestContext.abortWith(ResponseBuilder.unauthorized());
+            requestContext.abortWith(
+                    Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
             return;
         }
 
@@ -57,7 +62,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
             Set<String> roles = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
             if (!isAuthorizedUser(userPrincipal, roles)) {
-                requestContext.abortWith(ResponseBuilder.forbidden());
+                requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
                 return;
             }
         }
