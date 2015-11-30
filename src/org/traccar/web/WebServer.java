@@ -24,6 +24,8 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
 import org.traccar.helper.Log;
 
@@ -101,6 +103,12 @@ public class WebServer {
     }
 
     private void initApi() {
+        initOldApi();
+        initRestApi();
+    }
+
+    @Deprecated
+    private void initOldApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
@@ -117,6 +125,15 @@ public class WebServer {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/console");
         servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/*");
+        handlers.addHandler(servletHandler);
+    }
+
+    private void initRestApi() {
+        ResourceConfig resourceConfig = new ResourceConfig();
+        resourceConfig.packages("org.traccar.api");
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
+        servletHandler.addServlet(servletHolder, "/rest/*");
         handlers.addHandler(servletHandler);
     }
 

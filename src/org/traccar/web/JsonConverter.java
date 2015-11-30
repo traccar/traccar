@@ -34,6 +34,7 @@ import javax.json.JsonValue;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.traccar.helper.Clazz;
 import org.traccar.helper.Log;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
@@ -57,9 +58,23 @@ public final class JsonConverter {
 
     public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) {
         T object = (T) prototype.create();
-
         Method[] methods = object.getClass().getMethods();
+        return objectFromJson(json, object, methods);
+    }
 
+    public static <T> T objectFromJson(Reader reader, Class<T> clazz) throws ParseException {
+        try (JsonReader jsonReader = Json.createReader(reader)) {
+            return objectFromJson(jsonReader.readObject(), clazz);
+        }
+    }
+
+    public static <T> T objectFromJson(JsonObject json, Class<T> clazz) {
+        T object = Clazz.newInstance(clazz);
+        Method[] methods = object.getClass().getMethods();
+        return objectFromJson(json, object, methods);
+    }
+
+    private static <T> T objectFromJson(JsonObject json, T object, Method[] methods) {
         for (final Method method : methods) {
             if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 
@@ -91,7 +106,6 @@ public final class JsonConverter {
                 }
             }
         }
-
         return object;
     }
 
