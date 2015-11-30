@@ -20,6 +20,9 @@ import org.traccar.web.JsonIgnore;
 
 public class User implements Factory {
 
+    public static final String ROLE_USER = "user";
+    public static final String ROLE_ADMIN = "admin";
+
     @Override
     public User create() {
         return new User();

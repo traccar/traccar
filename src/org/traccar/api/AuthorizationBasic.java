@@ -77,9 +77,9 @@ public final class AuthorizationBasic {
                 */
 
                 //Temporary solution
-                userPrincipal.getRoles().add(ApplicationRole.USER);
+                userPrincipal.getRoles().add(User.ROLE_USER);
                 if (user.getAdmin()) {
-                    userPrincipal.getRoles().add(ApplicationRole.ADMIN);
+                    userPrincipal.getRoles().add(User.ROLE_ADMIN);
                 }
                 return true;
             }

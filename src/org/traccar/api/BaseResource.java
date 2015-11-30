@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import org.traccar.Context;
 import org.traccar.helper.Clazz;
+import org.traccar.model.User;
 
 public class BaseResource<T, I> {
 
@@ -45,7 +46,7 @@ public class BaseResource<T, I> {
     }
 
     public T getEntity(I id) {
-        validateSecurityContext(ApplicationRole.USER, id);
+        validateSecurityContext(User.ROLE_USER, id);
         T entity = Clazz.newInstance(clazz);
         try {
             Clazz.setId(entity, id);

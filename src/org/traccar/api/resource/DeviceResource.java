@@ -28,8 +28,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.traccar.api.ApplicationRole;
 import org.traccar.model.Device;
+import org.traccar.model.User;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -37,7 +37,7 @@ import org.traccar.model.Device;
 public class DeviceResource extends BaseResource<Device, Long> {
 
     @GET
-    @RolesAllowed(ApplicationRole.ADMIN)
+    @RolesAllowed(User.ROLE_ADMIN)
     @Override
     public Collection<Device> getEntities() {
         return super.getEntities();
@@ -45,14 +45,14 @@ public class DeviceResource extends BaseResource<Device, Long> {
 
     @GET
     @Path("{id}")
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public Device getEntity(@PathParam("id") Long id) {
         return super.getEntity(id);
     }
 
     @POST
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public Response postEntity(Device entity) {
         return super.postEntity(entity);
@@ -60,7 +60,7 @@ public class DeviceResource extends BaseResource<Device, Long> {
 
     @PUT
     @Path("{id}")
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public Response putEntity(@PathParam("id") Long id, Device entity) {
         return super.putEntity(id, entity);
@@ -68,7 +68,7 @@ public class DeviceResource extends BaseResource<Device, Long> {
 
     @DELETE
     @Path("{id}")
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public Response deleteEntity(@PathParam("id") Long id) {
         return super.deleteEntity(id);

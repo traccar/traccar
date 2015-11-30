@@ -27,7 +27,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.traccar.api.ApplicationRole;
 import org.traccar.api.BaseResource;
 import org.traccar.model.User;
 
@@ -37,7 +36,7 @@ import org.traccar.model.User;
 public class UserResource extends BaseResource<User, Long> {
 
     @GET
-    @RolesAllowed(ApplicationRole.ADMIN)
+    @RolesAllowed(User.ROLE_ADMIN)
     @Override
     public Collection<User> getEntities() {
         return super.getEntities();
@@ -45,14 +44,14 @@ public class UserResource extends BaseResource<User, Long> {
 
     @GET
     @Path("{id}")
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public User getEntity(@PathParam("id") Long id) {
         return super.getEntity(id);
     }
 
     @POST
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public Response postEntity(User entity) {
         return super.postEntity(entity);
@@ -60,7 +59,7 @@ public class UserResource extends BaseResource<User, Long> {
 
     @PUT
     @Path("{id}")
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public Response putEntity(@PathParam("id") Long id, User entity) {
         return super.putEntity(id, entity);
@@ -68,7 +67,7 @@ public class UserResource extends BaseResource<User, Long> {
 
     @DELETE
     @Path("{id}")
-    @RolesAllowed({ApplicationRole.ADMIN, ApplicationRole.USER})
+    @RolesAllowed(User.ROLE_USER)
     @Override
     public Response deleteEntity(@PathParam("id") Long id) {
         return super.deleteEntity(id);
