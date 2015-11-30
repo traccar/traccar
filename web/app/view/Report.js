@@ -37,7 +37,8 @@ Ext.define('Traccar.view.Report', {
         valueField: 'id',
         displayField: 'name',
         typeAhead: true,
-        queryMode: 'local'
+        queryMode: 'local',
+        allowBlank: false 
     }, '-', {
         xtype: 'tbtext',
         html: Strings.reportFrom
@@ -71,6 +72,12 @@ Ext.define('Traccar.view.Report', {
     }, '-', {
         text: Strings.reportShow,
         handler: 'onShowClick'
+    }, {
+        href : '#',
+        text: 'Export',
+        hrefTarget: '_blank',
+        reference: 'exportButton',
+        disabled: true
     }, {
         text: Strings.reportClear,
         handler: 'onClearClick'

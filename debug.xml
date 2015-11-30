@@ -9,6 +9,7 @@
     <entry key='web.enable'>true</entry>
     <!--<entry key='web.address'></entry>-->
     <entry key='web.port'>8082</entry>
+    <entry key='api.provider'>rest</entry>
     <!--<entry key='web.application'>../traccar-web/traccar-web.war</entry>
     <entry key='web.old'>true</entry>-->
     <entry key='web.path'>web</entry>
@@ -44,7 +45,7 @@
 
     <!--<entry key='database.driverFile'>hsqldb.jar</entry>-->
     <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./target/database</entry>
+    <entry key='database.url'>jdbc:h2:~/h2db/db</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
     <entry key='database.mock'>true</entry>
