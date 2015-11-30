@@ -20,7 +20,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 
-public class CORSResponseFilter implements ContainerResponseFilter {
+public class CorsResponseFilter implements ContainerResponseFilter {
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN_KEY = "Access-Control-Allow-Origin";
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN_VALUE = "*";
@@ -49,4 +49,5 @@ public class CORSResponseFilter implements ContainerResponseFilter {
             response.getHeaders().add(ACCESS_CONTROL_ALLOW_METHODS_KEY, ACCESS_CONTROL_ALLOW_METHODS_VALUE);
         }
     }
+
 }

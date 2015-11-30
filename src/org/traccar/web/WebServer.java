@@ -27,7 +27,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
-import org.traccar.api.CORSResponseFilter;
+import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.helper.Log;
 
@@ -134,7 +134,7 @@ public class WebServer {
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.packages("org.traccar.api");
         resourceConfig.register(SecurityRequestFilter.class);
-        resourceConfig.register(CORSResponseFilter.class);
+        resourceConfig.register(CorsResponseFilter.class);
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
         ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
         servletHandler.addServlet(servletHolder, "/rest/*");

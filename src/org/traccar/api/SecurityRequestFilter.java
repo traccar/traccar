@@ -35,18 +35,15 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) {
         Method method = resourceInfo.getResourceMethod();
 
-        //@PermitAll
         if (method.isAnnotationPresent(PermitAll.class)) {
             return;
         }
 
-        //@DenyAll
         if (method.isAnnotationPresent(DenyAll.class)) {
             requestContext.abortWith(ResponseBuilder.forbidden());
             return;
         }
 
-        //AuthorizationBasic
         UserPrincipal userPrincipal = AuthorizationBasic.getUserPrincipal(requestContext);
         if (userPrincipal == null
             || userPrincipal.getName() == null
@@ -56,7 +53,6 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             return;
         }
 
-        //@RolesAllowed
         if (method.isAnnotationPresent(RolesAllowed.class)) {
             RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
             Set<String> roles = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
@@ -66,7 +62,6 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             }
         }
 
-        //SecurityContext
         requestContext.setSecurityContext(new SecurityContextApi(userPrincipal));
     }
 
@@ -77,4 +72,5 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     private boolean isAuthorizedUser(UserPrincipal userPrincipal, Set<String> roles) {
         return AuthorizationBasic.isAuthorizedUser(userPrincipal, roles);
     }
+
 }
