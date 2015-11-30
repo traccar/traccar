@@ -73,7 +73,8 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
 
         String imei = ChannelBuffers.hexDump(buf.readBytes(7));
-        if (!identify(imei, channel, null, false) && !identify(imei + Checksum.luhn(Long.parseLong(imei)), channel)) {
+        if (!identify(imei, channel, remoteAddress, false)
+                && !identify(imei + Checksum.luhn(Long.parseLong(imei)), channel, remoteAddress)) {
             return null;
         }
 

@@ -74,7 +74,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            if (!identify("1" + id, channel, null, false) && !identify(id, channel)) {
+            if (!identify("1" + id, channel, remoteAddress, false) && !identify(id, channel, remoteAddress)) {
                 return null;
             }
             position.setDeviceId(getDeviceId());

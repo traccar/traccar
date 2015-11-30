@@ -66,7 +66,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
                 int endIndex = sentence.indexOf(',', beginIndex);
                 if (endIndex != -1) {
                     String imei = sentence.substring(beginIndex, endIndex);
-                    if (identify(imei, channel)) {
+                    if (identify(imei, channel, remoteAddress)) {
                         if (channel != null) {
                             send(channel, "$FRSES," + channel.getId());
                         }

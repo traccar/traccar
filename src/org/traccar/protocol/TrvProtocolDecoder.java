@@ -70,7 +70,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type.equals("AP00")) {
-            identify(sentence.substring(7), channel);
+            identify(sentence.substring(7), channel, remoteAddress);
             return null;
         }
 

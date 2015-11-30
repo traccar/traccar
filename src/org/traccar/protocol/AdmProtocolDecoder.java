@@ -49,7 +49,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         if (type == MSG_IMEI) {
-            identify(buf.toString(buf.readerIndex(), 15, Charset.defaultCharset()), channel);
+            identify(buf.toString(buf.readerIndex(), 15, Charset.defaultCharset()), channel, remoteAddress);
         }
 
         if (hasDeviceId() && BitUtil.to(type, 2) == 0) {

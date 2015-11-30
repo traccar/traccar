@@ -57,7 +57,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
             int index = sentence.indexOf(',', 2) + 1;
             String id = sentence.substring(index, sentence.indexOf(',', index));
-            identify(id, channel);
+            identify(id, channel, remoteAddress);
 
         } else if (sentence.startsWith("E,")) {
 

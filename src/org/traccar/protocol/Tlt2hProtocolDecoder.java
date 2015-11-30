@@ -69,7 +69,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (!identify(parser.next(), channel)) {
+        if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
 

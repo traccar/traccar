@@ -103,7 +103,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             }
 
             String id = sentence.substring(beginIndex, endIndex);
-            if (!identify(id, channel)) {
+            if (!identify(id, channel, remoteAddress)) {
                 return null;
             }
 

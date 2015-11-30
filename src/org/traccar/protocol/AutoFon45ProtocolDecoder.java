@@ -69,7 +69,7 @@ public class AutoFon45ProtocolDecoder extends BaseProtocolDecoder {
             buf.readBytes(bytes);
 
             String imei = ChannelBuffers.hexDump(ChannelBuffers.wrappedBuffer(bytes, 1, 8)).substring(1);
-            if (!identify(imei, channel)) {
+            if (!identify(imei, channel, remoteAddress)) {
                 return null;
             }
 

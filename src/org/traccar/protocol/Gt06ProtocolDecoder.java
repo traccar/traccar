@@ -197,7 +197,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (identify(imei, channel)) {
+            if (identify(imei, channel, remoteAddress)) {
                 buf.skipBytes(buf.readableBytes() - 6);
                 sendResponse(channel, type, buf.readUnsignedShort());
             }
