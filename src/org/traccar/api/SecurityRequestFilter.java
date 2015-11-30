@@ -25,9 +25,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.ext.Provider;
 
-@Provider
 public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @javax.ws.rs.core.Context
