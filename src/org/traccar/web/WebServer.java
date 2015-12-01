@@ -60,15 +60,14 @@ public class WebServer {
         initServer();
         switch (config.getString("web.type", "new")) {
             case "api":
-                initOldApi();
+                initOldApi(false);
                 break;
             case "old":
-                initOldApi();
+                initOldApi(false);
                 initOldWebApp();
                 break;
             default:
-                initOldApi();
-                initRestApi();
+                initOldApi(true);
                 if (config.getBoolean("web.console")) {
                     initConsole();
                 }
@@ -103,10 +102,17 @@ public class WebServer {
         handlers.addHandler(app);
     }
 
-    @Deprecated
-    private void initOldApi() {
+    private void initOldApi(boolean initRest) {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
+        if (initRest) {
+            ResourceConfig resourceConfig = new ResourceConfig();
+            resourceConfig.register(SecurityRequestFilter.class);
+            resourceConfig.register(CorsResponseFilter.class);
+            resourceConfig.registerClasses(
+                    ServerResource.class, SessionResource.class, DeviceResource.class, UserResource.class);
+            servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/rest/*");
+        }
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
         servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
         servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
@@ -121,19 +127,6 @@ public class WebServer {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/console");
         servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/*");
-        handlers.addHandler(servletHandler);
-    }
-
-    private void initRestApi() {
-        ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.register(SecurityRequestFilter.class);
-        resourceConfig.register(CorsResponseFilter.class);
-        resourceConfig.registerClasses(
-                ServerResource.class, SessionResource.class, DeviceResource.class, UserResource.class);
-
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletHandler.setContextPath("/rest");
-        servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
         handlers.addHandler(servletHandler);
     }
 

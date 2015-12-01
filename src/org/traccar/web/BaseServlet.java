@@ -36,7 +36,7 @@ import org.traccar.Context;
 
 public abstract class BaseServlet extends HttpServlet {
 
-    public static final String USER_ID_KEY = "user";
+    public static final String USER_ID_KEY = "userId";
     public static final String ALLOW_ORIGIN_VALUE = "*";
     public static final String ALLOW_HEADERS_VALUE = "Origin, X-Requested-With, Content-Type, Accept";
     public static final String ALLOW_METHODS_VALUE = "GET, POST, PUT, DELETE";

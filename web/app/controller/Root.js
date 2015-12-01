@@ -33,7 +33,7 @@ Ext.define('Traccar.controller.Root', {
     onLaunch: function () {
         Ext.Ajax.request({
             scope: this,
-            url: '/rest/server',
+            url: '/api/rest/server',
             callback: this.onServerReturn
         });
     },
@@ -44,7 +44,7 @@ Ext.define('Traccar.controller.Root', {
             Traccar.app.setServer(Ext.decode(response.responseText));
             Ext.Ajax.request({
                 scope: this,
-                url: '/rest/session',
+                url: '/api/rest/session',
                 callback: this.onSessionReturn
             });
         } else {
