@@ -277,9 +277,16 @@ public class DataManager implements IdentityManager {
         }
     }
 
+    @Deprecated
     public void removeUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
                 .setObject(user)
+                .executeUpdate();
+    }
+
+    public void removeUser(long userId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
+                .setLong("id", userId)
                 .executeUpdate();
     }
 
@@ -317,11 +324,19 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
+    @Deprecated
     public void removeDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
         AsyncServlet.sessionRefreshDevice(device.getId());
+    }
+
+    public void removeDevice(long deviceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
+                .setLong("id", deviceId)
+                .executeUpdate();
+        AsyncServlet.sessionRefreshDevice(deviceId);
     }
 
     public void linkDevice(long userId, long deviceId) throws SQLException {

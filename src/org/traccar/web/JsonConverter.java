@@ -43,6 +43,14 @@ public final class JsonConverter {
     private JsonConverter() {
     }
 
+    private static <T> T newClassInstance(Class<T> clazz) {
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException();
+        }
+    }
+
     private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
 
     public static Date parseDate(String value) {
@@ -57,9 +65,23 @@ public final class JsonConverter {
 
     public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) {
         T object = (T) prototype.create();
-
         Method[] methods = object.getClass().getMethods();
+        return objectFromJson(json, object, methods);
+    }
 
+    public static <T> T objectFromJson(Reader reader, Class<T> clazz) throws ParseException {
+        try (JsonReader jsonReader = Json.createReader(reader)) {
+            return objectFromJson(jsonReader.readObject(), clazz);
+        }
+    }
+
+    public static <T> T objectFromJson(JsonObject json, Class<T> clazz) {
+        T object = newClassInstance(clazz);
+        Method[] methods = object.getClass().getMethods();
+        return objectFromJson(json, object, methods);
+    }
+
+    private static <T> T objectFromJson(JsonObject json, T object, Method[] methods) {
         for (final Method method : methods) {
             if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 
@@ -91,7 +113,6 @@ public final class JsonConverter {
                 }
             }
         }
-
         return object;
     }
 

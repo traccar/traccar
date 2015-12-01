@@ -20,7 +20,7 @@ public class JsonConverterTest {
                 "\"string\": \"discworld\", " +
                 "\"date\":\"2015-07-09T19:02:17.000Z\"" +
                 "}"),
-                new Primitives());
+                Primitives.class);
 
         assertEquals(true, o.getBoolean());
         assertEquals(42, o.getInt());
