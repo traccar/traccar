@@ -19,12 +19,10 @@ import java.security.Principal;
 
 public class UserPrincipal implements Principal {
 
-    private String name;
     private long userId;
 
-    public UserPrincipal(long userId, String name) {
+    public UserPrincipal(long userId) {
         this.userId = userId;
-        this.name = name;
     }
 
     public Long getUserId() {
@@ -33,7 +31,7 @@ public class UserPrincipal implements Principal {
 
     @Override
     public String getName() {
-        return name;
+        return null;
     }
 
 }

@@ -20,12 +20,15 @@ import org.traccar.api.resource.SessionResource;
 import org.traccar.model.User;
 
 import java.nio.charset.Charset;
+import java.security.Security;
 import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.DatatypeConverter;
 
 public class SecurityRequestFilter implements ContainerRequestFilter {
@@ -48,25 +51,40 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        if (requestContext.getUriInfo().getPath().equals("session")) {
+        String sessionPath = SessionResource.class.getAnnotation(Path.class).value();
+        if (sessionPath.equals(requestContext.getUriInfo().getPath())) {
             return;
         }
 
-        long userId = (Long) req.getSession().getAttribute(SessionResource.USER_ID_KEY);
-        // TODO use session
+        SecurityContext securityContext = null;
 
-        try {
-            String[] auth = decodeBasicAuth(requestContext.getHeaderString(AUTHORIZATION_HEADER));
-            User user = Context.getDataManager().login(auth[0], auth[1]);
-            if (user != null) {
-                requestContext.setSecurityContext(
-                        new UserSecurityContext(new UserPrincipal(user.getId(), user.getName())));
-            } else {
-                throw new WebApplicationException(
-                        Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
+        String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
+        if (authHeader != null) {
+
+            try {
+                String[] auth = decodeBasicAuth(authHeader);
+                User user = Context.getDataManager().login(auth[0], auth[1]);
+                if (user != null) {
+                    securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
+                }
+            } catch (SQLException e) {
+                throw new WebApplicationException(e);
             }
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
+
+        } else if (req.getSession() != null) {
+
+            Long userId = (Long) req.getSession().getAttribute(SessionResource.USER_ID_KEY);
+            if (userId != null) {
+                securityContext = new UserSecurityContext(new UserPrincipal(userId));
+            }
+
+        }
+
+        if (securityContext != null) {
+            requestContext.setSecurityContext(securityContext);
+        } else {
+            throw new WebApplicationException(
+                    Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
         }
     }
 
