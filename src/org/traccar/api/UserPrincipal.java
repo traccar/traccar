@@ -31,18 +31,6 @@ public class UserPrincipal implements Principal {
         this.roles = roles;
     }
 
-    public UserPrincipal(String username, Set<String> roles) {
-        this.username = username;
-        this.roles = roles;
-    }
-
-    public UserPrincipal(String username) {
-        this.username = username;
-    }
-
-    public UserPrincipal() {
-    }
-
     public Long getId() {
         return id;
     }
@@ -68,7 +56,4 @@ public class UserPrincipal implements Principal {
         return roles;
     }
 
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
 }

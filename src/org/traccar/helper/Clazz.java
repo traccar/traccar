@@ -23,19 +23,6 @@ import java.lang.reflect.Type;
 
 public final class Clazz implements Serializable {
 
-    private static final long serialVersionUID = 4983299355055144885L;
-
-    private Clazz() {
-    }
-
-    public static Class getGenericArgumentType(Class currentClass, Class genericSuperClass) {
-        return getGenericArgumentType(currentClass, genericSuperClass, 0);
-    }
-
-    public static Class getGenericArgumentType(Class currentClass, int argumentIndex) {
-        return getGenericArgumentType(currentClass, null, argumentIndex);
-    }
-
     public static Class getGenericArgumentType(Class currentClass) {
         return getGenericArgumentType(currentClass, null, 0);
     }
@@ -70,14 +57,6 @@ public final class Clazz implements Serializable {
             return classe.cast(objeto);
         }
         throw new ClassCastException();
-    }
-
-    public static Class forName(String className) {
-        try {
-            return Class.forName(className, false, Thread.currentThread().getContextClassLoader());
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 
     public static <T> long getId(T entity) throws Exception {
