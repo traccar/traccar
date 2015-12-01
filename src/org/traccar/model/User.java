@@ -162,6 +162,7 @@ public class User implements Factory {
 
     private String hashedPassword;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @JsonIgnore
     public String getHashedPassword() {
         return hashedPassword;
@@ -173,6 +174,7 @@ public class User implements Factory {
 
     private String salt;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @JsonIgnore
     public String getSalt() {
         return salt;

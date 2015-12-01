@@ -16,10 +16,12 @@
 package org.traccar.api;
 
 import org.traccar.Context;
+import org.traccar.api.resource.SessionResource;
 import org.traccar.model.User;
 
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -41,8 +43,18 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         return null;
     }
 
+    @javax.ws.rs.core.Context
+    private HttpServletRequest req;
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
+        if (requestContext.getUriInfo().getPath().equals("session")) {
+            return;
+        }
+
+        long userId = (Long) req.getSession().getAttribute(SessionResource.USER_ID_KEY);
+        // TODO use session
+
         try {
             String[] auth = decodeBasicAuth(requestContext.getHeaderString(AUTHORIZATION_HEADER));
             User user = Context.getDataManager().login(auth[0], auth[1]);
