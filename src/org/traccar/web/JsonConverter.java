@@ -34,7 +34,6 @@ import javax.json.JsonValue;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.traccar.helper.Clazz;
 import org.traccar.helper.Log;
 import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
@@ -42,6 +41,14 @@ import org.traccar.model.MiscFormatter;
 public final class JsonConverter {
 
     private JsonConverter() {
+    }
+
+    private static <T> T newClassInstance(Class<T> clazz) {
+        try {
+            return clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
@@ -69,7 +76,7 @@ public final class JsonConverter {
     }
 
     public static <T> T objectFromJson(JsonObject json, Class<T> clazz) {
-        T object = Clazz.newInstance(clazz);
+        T object = newClassInstance(clazz);
         Method[] methods = object.getClass().getMethods();
         return objectFromJson(json, object, methods);
     }

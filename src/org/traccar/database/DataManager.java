@@ -31,7 +31,6 @@ import java.util.Map;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import org.traccar.Config;
-import org.traccar.helper.Clazz;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
