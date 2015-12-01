@@ -48,7 +48,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     }
 
     @javax.ws.rs.core.Context
-    private HttpServletRequest req;
+    private HttpServletRequest request;
 
     @javax.ws.rs.core.Context
     private ResourceInfo resourceInfo;
@@ -75,9 +75,9 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                 throw new WebApplicationException(e);
             }
 
-        } else if (req.getSession() != null) {
+        } else if (request.getSession() != null) {
 
-            Long userId = (Long) req.getSession().getAttribute(SessionResource.USER_ID_KEY);
+            Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
             if (userId != null) {
                 securityContext = new UserSecurityContext(new UserPrincipal(userId));
             }

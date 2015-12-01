@@ -27,7 +27,6 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -42,13 +41,13 @@ public class SessionResource extends BaseResource {
     public static final String USER_ID_KEY = "userId";
 
     @javax.ws.rs.core.Context
-    private HttpServletRequest req;
+    private HttpServletRequest request;
 
     @PermitAll
     @GET
     public User get() {
         try {
-            Long userId = (Long) req.getSession().getAttribute(USER_ID_KEY);
+            Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
             if (userId != null) {
                 return Context.getDataManager().getUser(userId);
             } else {
@@ -65,7 +64,7 @@ public class SessionResource extends BaseResource {
         try {
             User user = Context.getDataManager().login(email, password);
             if (user != null) {
-                req.getSession().setAttribute(USER_ID_KEY, user.getId());
+                request.getSession().setAttribute(USER_ID_KEY, user.getId());
                 return user;
             } else {
                 throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
@@ -77,7 +76,7 @@ public class SessionResource extends BaseResource {
 
     @DELETE
     public Response remove() {
-        req.getSession().removeAttribute(USER_ID_KEY);
+        request.getSession().removeAttribute(USER_ID_KEY);
         return Response.noContent().build();
     }
 
