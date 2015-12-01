@@ -278,9 +278,16 @@ public class DataManager implements IdentityManager {
         }
     }
 
+    @Deprecated
     public void removeUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
                 .setObject(user)
+                .executeUpdate();
+    }
+
+    public void removeUser(long userId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
+                .setLong("id", userId)
                 .executeUpdate();
     }
 
@@ -318,11 +325,19 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
+    @Deprecated
     public void removeDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
         AsyncServlet.sessionRefreshDevice(device.getId());
+    }
+
+    public void removeDevice(long deviceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
+                .setLong("id", deviceId)
+                .executeUpdate();
+        AsyncServlet.sessionRefreshDevice(deviceId);
     }
 
     public void linkDevice(long userId, long deviceId) throws SQLException {
@@ -387,61 +402,4 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
-    public <T> Collection<T> get(Class<T> clazz) throws SQLException {
-        if (clazz.equals(User.class)) {
-            return (Collection<T>) getUsers();
-        } else if (clazz.equals(Device.class)) {
-            return (Collection<T>) getAllDevices();
-        }
-        return null;
-    }
-
-    public <T> T get(T entity) throws Exception {
-        if (entity instanceof User) {
-            return (T) getUser(Clazz.getId(entity));
-        } else if (entity instanceof Device) {
-            return (T) getDeviceById(Clazz.getId(entity));
-        }
-        return null;
-    }
-
-    public void add(Object entity) throws SQLException {
-        if (entity instanceof User) {
-            addUser((User) entity);
-        } else if (entity instanceof Device) {
-            addDevice((Device) entity);
-        } else if (entity instanceof Position) {
-            addPosition((Position) entity);
-        }
-    }
-
-    public void update(Object entity) throws SQLException {
-        if (entity instanceof User) {
-            updateUser((User) entity);
-        } else if (entity instanceof Device) {
-            updateDevice((Device) entity);
-        } else if (entity instanceof Server) {
-            updateServer((Server) entity);
-        }
-    }
-
-    public void remove(Object entity) throws SQLException {
-        if (entity instanceof User) {
-            removeUser((User) entity);
-        } else if (entity instanceof Device) {
-            removeDevice((Device) entity);
-        }
-    }
-
-    public void link(Class clazz, long userId, long entityId) throws SQLException {
-        if (clazz.equals(Device.class)) {
-            linkDevice(userId, entityId);
-        }
-    }
-
-    public void unlink(Class clazz, long userId, long entityId) throws SQLException {
-        if (clazz.equals(Device.class)) {
-            unlinkDevice(userId, entityId);
-        }
-    }
 }
