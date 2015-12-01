@@ -33,43 +33,37 @@ Ext.define('Traccar.controller.Root', {
     onLaunch: function () {
         Ext.Ajax.request({
             scope: this,
-            url: '/api/server/get',
+            url: '/rest/server',
             callback: this.onServerReturn
         });
     },
 
     onServerReturn: function (options, success, response) {
-        var result;
         Ext.get('spinner').remove();
-        if (Traccar.ErrorManager.check(success, response)) {
-            result = Ext.decode(response.responseText);
-            if (result.success) {
-                Traccar.app.setServer(result.data);
-                Ext.Ajax.request({
-                    scope: this,
-                    url: '/api/session',
-                    callback: this.onSessionReturn
-                });
-            }
+        if (success) {
+            Traccar.app.setServer(Ext.decode(response.responseText));
+            Ext.Ajax.request({
+                scope: this,
+                url: '/rest/session',
+                callback: this.onSessionReturn
+            });
+        } else {
+            Traccar.app.showError(response);
         }
     },
 
     onSessionReturn: function (options, success, response) {
-        var result;
-        if (Traccar.ErrorManager.check(success, response)) {
-            result = Ext.decode(response.responseText);
-            if (result.success) {
-                Traccar.app.setUser(result.data);
-                this.loadApp();
-            } else {
-                this.login = Ext.create('widget.login', {
-                    listeners: {
-                        scope: this,
-                        login: this.onLogin
-                    }
-                });
-                this.login.show();
-            }
+        if (success) {
+            Traccar.app.setUser(Ext.decode(response.responseText));
+            this.loadApp();
+        } else {
+            this.login = Ext.create('widget.login', {
+                listeners: {
+                    scope: this,
+                    login: this.onLogin
+                }
+            });
+            this.login.show();
         }
     },
 

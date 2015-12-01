@@ -16,6 +16,7 @@
 package org.traccar.api;
 
 import org.traccar.Context;
+import org.traccar.api.resource.ServerResource;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.model.User;
 
@@ -50,8 +51,10 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+        String path = requestContext.getUriInfo().getPath();
+        String serverPath = ServerResource.class.getAnnotation(Path.class).value();
         String sessionPath = SessionResource.class.getAnnotation(Path.class).value();
-        if (sessionPath.equals(requestContext.getUriInfo().getPath())) {
+        if (serverPath.equals(path) || sessionPath.equals(path)) {
             return;
         }
 

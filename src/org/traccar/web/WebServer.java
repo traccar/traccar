@@ -64,10 +64,10 @@ public class WebServer {
                 break;
             case "old":
                 initOldApi();
-                initRestApi();
                 initOldWebApp();
                 break;
             default:
+                initOldApi();
                 initRestApi();
                 if (config.getBoolean("web.console")) {
                     initConsole();
@@ -130,9 +130,10 @@ public class WebServer {
         resourceConfig.register(CorsResponseFilter.class);
         resourceConfig.registerClasses(
                 ServerResource.class, SessionResource.class, DeviceResource.class, UserResource.class);
+
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        ServletHolder servletHolder = new ServletHolder(new ServletContainer(resourceConfig));
-        servletHandler.addServlet(servletHolder, "/rest/*");
+        servletHandler.setContextPath("/rest");
+        servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
         handlers.addHandler(servletHandler);
     }
 

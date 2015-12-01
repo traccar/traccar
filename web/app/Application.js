@@ -78,6 +78,14 @@ Ext.define('Traccar.Application', {
         return this.getUser().get(key) || this.getServer().get(key) || defaultValue;
     },
 
+    showError: function (response) {
+        if (response.statusText) {
+            Ext.Msg.alert(Strings.errorTitle, response.statusText);
+        } else {
+            Ext.Msg.alert(Strings.errorTitle, Strings.errorConnection);
+        }
+    },
+
     getErrorHandler: function (scope, handler) {
         return function (options, success, response) {
             var result;
