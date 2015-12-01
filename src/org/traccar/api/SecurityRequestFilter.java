@@ -16,17 +16,18 @@
 package org.traccar.api;
 
 import org.traccar.Context;
-import org.traccar.api.resource.ServerResource;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.model.User;
 
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.DatatypeConverter;
@@ -49,12 +50,13 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     @javax.ws.rs.core.Context
     private HttpServletRequest req;
 
+    @javax.ws.rs.core.Context
+    private ResourceInfo resourceInfo;
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        String path = requestContext.getUriInfo().getPath();
-        String serverPath = ServerResource.class.getAnnotation(Path.class).value();
-        String sessionPath = SessionResource.class.getAnnotation(Path.class).value();
-        if (serverPath.equals(path) || sessionPath.equals(path)) {
+        Method method = resourceInfo.getResourceMethod();
+        if (method.isAnnotationPresent(PermitAll.class)) {
             return;
         }
 

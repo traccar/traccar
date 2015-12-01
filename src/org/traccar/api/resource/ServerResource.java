@@ -20,6 +20,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 
+import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -37,6 +38,7 @@ import java.sql.SQLException;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ServerResource extends BaseResource {
 
+    @PermitAll
     @GET
     public Server get() {
         try {

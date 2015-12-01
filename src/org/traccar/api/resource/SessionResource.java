@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.User;
 
+import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -43,6 +44,7 @@ public class SessionResource extends BaseResource {
     @javax.ws.rs.core.Context
     private HttpServletRequest req;
 
+    @PermitAll
     @GET
     public User get() {
         try {
@@ -57,6 +59,7 @@ public class SessionResource extends BaseResource {
         }
     }
 
+    @PermitAll
     @POST
     public User add(@FormParam("email") String email, @FormParam("password") String password) {
         try {
