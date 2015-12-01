@@ -18,6 +18,7 @@ package org.traccar.api;
 import org.traccar.Context;
 import org.traccar.model.User;
 
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -35,7 +36,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         auth = auth.replaceFirst("[B|b]asic ", "");
         byte[] decodedBytes = DatatypeConverter.parseBase64Binary(auth);
         if (decodedBytes != null && decodedBytes.length > 0) {
-            return new String(decodedBytes).split(":", 2);
+            return new String(decodedBytes, Charset.defaultCharset()).split(":", 2);
         }
         return null;
     }
