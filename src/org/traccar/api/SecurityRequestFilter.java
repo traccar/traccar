@@ -15,67 +15,46 @@
  */
 package org.traccar.api;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
+import org.traccar.Context;
+import org.traccar.model.User;
+
+import java.sql.SQLException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.DatatypeConverter;
 
 public class SecurityRequestFilter implements ContainerRequestFilter {
 
-    private static final String WWW_AUTHENTICATE = "WWW-Authenticate";
-    private static final String BASIC_REALM = "Basic realm=\"api\"";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+    public static final String BASIC_REALM = "Basic realm=\"api\"";
 
-    @javax.ws.rs.core.Context
-    private ResourceInfo resourceInfo;
+    public static String[] decodeBasicAuth(String auth) {
+        auth = auth.replaceFirst("[B|b]asic ", "");
+        byte[] decodedBytes = DatatypeConverter.parseBase64Binary(auth);
+        if (decodedBytes != null && decodedBytes.length > 0) {
+            return new String(decodedBytes).split(":", 2);
+        }
+        return null;
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        Method method = resourceInfo.getResourceMethod();
-
-        if (method.isAnnotationPresent(PermitAll.class)) {
-            return;
-        }
-
-        if (method.isAnnotationPresent(DenyAll.class)) {
-            requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-            return;
-        }
-
-        UserPrincipal userPrincipal = AuthorizationBasic.getUserPrincipal(requestContext);
-        if (userPrincipal == null
-            || userPrincipal.getName() == null
-            || userPrincipal.getPassword() == null
-            || !isAuthenticatedUser(userPrincipal)) {
-            requestContext.abortWith(
-                    Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
-            return;
-        }
-
-        if (method.isAnnotationPresent(RolesAllowed.class)) {
-            RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
-            Set<String> roles = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
-            if (!isAuthorizedUser(userPrincipal, roles)) {
-                requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
-                return;
+        try {
+            String[] auth = decodeBasicAuth(requestContext.getHeaderString(AUTHORIZATION_HEADER));
+            User user = Context.getDataManager().login(auth[0], auth[1]);
+            if (user != null) {
+                requestContext.setSecurityContext(
+                        new UserSecurityContext(new UserPrincipal(user.getId(), user.getName())));
+            } else {
+                throw new WebApplicationException(
+                        Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
             }
+        } catch (SQLException e) {
+            throw new WebApplicationException(e);
         }
-
-        requestContext.setSecurityContext(new SecurityContextApi(userPrincipal));
-    }
-
-    private boolean isAuthenticatedUser(UserPrincipal principal) {
-        return AuthorizationBasic.isAuthenticatedUser(principal);
-    }
-
-    private boolean isAuthorizedUser(UserPrincipal userPrincipal, Set<String> roles) {
-        return AuthorizationBasic.isAuthorizedUser(userPrincipal, roles);
     }
 
 }

@@ -18,23 +18,22 @@ package org.traccar.api;
 import java.security.Principal;
 import javax.ws.rs.core.SecurityContext;
 
-public class SecurityContextApi implements SecurityContext {
+public class UserSecurityContext implements SecurityContext {
 
-    private Principal userPrincipal;
+    private UserPrincipal principal;
 
-    public SecurityContextApi(Principal userPrincipal) {
-        this.userPrincipal = userPrincipal;
+    public UserSecurityContext(UserPrincipal principal) {
+        this.principal = principal;
     }
 
     @Override
     public Principal getUserPrincipal() {
-        return userPrincipal;
+        return principal;
     }
 
     @Override
     public boolean isUserInRole(String role) {
-        UserPrincipal user = (UserPrincipal) userPrincipal;
-        return user.getRoles().contains(role);
+        return true;
     }
 
     @Override

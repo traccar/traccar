@@ -16,44 +16,24 @@
 package org.traccar.api;
 
 import java.security.Principal;
-import java.util.Set;
 
 public class UserPrincipal implements Principal {
 
-    private Long id;
-    private String username;
-    private String password;
-    private Set<String> roles;
+    private String name;
+    private long userId;
 
-    public UserPrincipal(String username, String password, Set<String> roles) {
-        this.username = username;
-        this.password = password;
-        this.roles = roles;
+    public UserPrincipal(long userId, String name) {
+        this.userId = userId;
+        this.name = name;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public Long getUserId() {
+        return userId;
     }
 
     @Override
     public String getName() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Set<String> getRoles() {
-        return roles;
+        return name;
     }
 
 }
