@@ -20,16 +20,10 @@ import javax.ws.rs.core.SecurityContext;
 
 public class SecurityContextApi implements SecurityContext {
 
-    private static final String AUTHENTICATION_SCHEME = "BASIC";
-    private static final boolean IS_SECURE = true;
-
     private Principal userPrincipal;
 
     public SecurityContextApi(Principal userPrincipal) {
         this.userPrincipal = userPrincipal;
-    }
-
-    public SecurityContextApi() {
     }
 
     @Override
@@ -45,11 +39,12 @@ public class SecurityContextApi implements SecurityContext {
 
     @Override
     public boolean isSecure() {
-        return IS_SECURE;
+        return false;
     }
 
     @Override
     public String getAuthenticationScheme() {
-        return AUTHENTICATION_SCHEME;
+        return BASIC_AUTH;
     }
+
 }
