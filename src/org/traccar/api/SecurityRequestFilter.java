@@ -20,7 +20,6 @@ import org.traccar.api.resource.SessionResource;
 import org.traccar.model.User;
 
 import java.nio.charset.Charset;
-import java.security.Security;
 import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;

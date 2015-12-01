@@ -35,9 +35,6 @@ import org.traccar.api.resource.SessionResource;
 import org.traccar.api.resource.UserResource;
 import org.traccar.helper.Log;
 
-/**
- * Integrated HTTP server
- */
 public class WebServer {
 
     private Server server;
@@ -63,21 +60,19 @@ public class WebServer {
         initServer();
         switch (config.getString("web.type", "new")) {
             case "api":
-                initApi();
+                initOldApi();
                 break;
-            case "new":
-                initApi();
+            case "old":
+                initOldApi();
+                initRestApi();
+                initOldWebApp();
+                break;
+            default:
+                initRestApi();
                 if (config.getBoolean("web.console")) {
                     initConsole();
                 }
                 initWebApp();
-                break;
-            case "old":
-                initApi();
-                initOldWebApp();
-                break;
-            default:
-                Log.error("Unsupported web application type: " + config.getString("web.type"));
                 break;
         }
         server.setHandler(handlers);
@@ -102,15 +97,10 @@ public class WebServer {
             Log.warning(error);
         }
 
-        WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/");
-        webapp.setWar(config.getString("web.application"));
-        handlers.addHandler(webapp);
-    }
-
-    private void initApi() {
-        initOldApi();
-        initRestApi();
+        WebAppContext app = new WebAppContext();
+        app.setContextPath("/");
+        app.setWar(config.getString("web.application"));
+        handlers.addHandler(app);
     }
 
     @Deprecated
