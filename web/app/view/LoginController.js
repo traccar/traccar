@@ -34,19 +34,16 @@ Ext.define('Traccar.view.LoginController', {
             Ext.getBody().mask(Strings.sharedLoading);
             Ext.Ajax.request({
                 scope: this,
-                url: '/api/login',
+                method: 'POST',
+                url: '/api/rest/session',
                 params: form.getValues(),
                 callback: function (options, success, response) {
-                    var result;
                     Ext.getBody().unmask();
-                    if (Traccar.ErrorManager.check(success, response)) {
-                        result = Ext.decode(response.responseText);
-                        if (result.success) {
-                            Traccar.app.setUser(result.data);
-                            this.fireViewEvent('login');
-                        } else {
-                            Traccar.ErrorManager.error(Strings.loginFailed);
-                        }
+                    if (success) {
+                        Traccar.app.setUser(Ext.decode(response.responseText));
+                        this.fireViewEvent('login');
+                    } else {
+                        Traccar.app.showError(Strings.loginFailed);
                     }
                 }
             });
@@ -56,7 +53,8 @@ Ext.define('Traccar.view.LoginController', {
     logout: function () {
         Ext.Ajax.request({
             scope: this,
-            url: '/api/logout',
+            method: 'DELETE',
+            url: '/api/rest/session',
             callback: function () {
                 window.location.reload();
             }

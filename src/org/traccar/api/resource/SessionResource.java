@@ -21,10 +21,12 @@ import org.traccar.model.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -68,6 +70,12 @@ public class SessionResource extends BaseResource {
         } catch (SQLException e) {
             throw new WebApplicationException(e);
         }
+    }
+
+    @DELETE
+    public Response remove() {
+        req.getSession().removeAttribute(USER_ID_KEY);
+        return Response.noContent().build();
     }
 
 }
