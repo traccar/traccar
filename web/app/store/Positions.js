@@ -19,11 +19,7 @@ Ext.define('Traccar.store.Positions', {
     model: 'Traccar.model.Position',
 
     proxy: {
-        type: 'ajax',
-        url: '/api/position/get',
-        reader: {
-            type: 'json',
-            rootProperty: 'data'
-        }
+        type: 'rest',
+        url: '/api/rest/positions'
     }
 });

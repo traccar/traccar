@@ -355,7 +355,7 @@ public class DataManager implements IdentityManager {
         AsyncServlet.sessionRefreshUser(userId);
     }
 
-    public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {
+    public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
                 .setLong("deviceId", deviceId)
                 .setDate("from", from)
