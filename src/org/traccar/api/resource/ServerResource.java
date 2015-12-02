@@ -22,10 +22,12 @@ import org.traccar.model.Server;
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 
 @Path("server")
@@ -38,6 +40,16 @@ public class ServerResource extends BaseResource {
     public Server get() {
         try {
             return Context.getDataManager().getServer();
+        } catch (SQLException e) {
+            throw new WebApplicationException(e);
+        }
+    }
+
+    @PUT
+    public Response update(Server entity) {
+        try {
+            Context.getDataManager().updateServer(entity);
+            return Response.ok(entity).build();
         } catch (SQLException e) {
             throw new WebApplicationException(e);
         }

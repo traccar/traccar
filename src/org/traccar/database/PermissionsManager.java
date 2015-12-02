@@ -90,4 +90,5 @@ public class PermissionsManager {
             checkDevice(userId, entityId);
         }
     }
+
 }

@@ -23,7 +23,8 @@ Ext.define('Traccar.view.RegisterController', {
         if (form.isValid()) {
             Ext.Ajax.request({
                 scope: this,
-                url: '/api/register',
+                method: 'POST',
+                url: '/api/rest/users',
                 jsonData: form.getValues(),
                 callback: this.onCreateReturn
             });
@@ -31,9 +32,11 @@ Ext.define('Traccar.view.RegisterController', {
     },
 
     onCreateReturn: function (options, success, response) {
-        if (Traccar.ErrorManager.check(success, response)) {
+        if (success) {
             this.closeView();
             Ext.toast(Strings.loginCreated);
+        } else {
+            Traccar.app.showError(response);
         }
     }
 

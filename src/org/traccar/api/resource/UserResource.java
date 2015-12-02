@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -47,6 +48,7 @@ public class UserResource extends BaseResource {
         }
     }
 
+    @PermitAll
     @POST
     public Response add(User entity) {
         try {
