@@ -19,19 +19,9 @@ Ext.define('Traccar.store.Users', {
     model: 'Traccar.model.User',
 
     proxy: {
-        type: 'ajax',
-        api: {
-            create: '/api/user/add',
-            read: '/api/user/get',
-            update: '/api/user/update',
-            destroy: '/api/user/remove'
-        },
-        reader: {
-            type: 'json',
-            rootProperty: 'data'
-        },
+        type: 'rest',
+        url: '/api/rest/users',
         writer: {
-            type: 'json',
             writeAllFields: true
         }
     }

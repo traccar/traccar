@@ -19,14 +19,10 @@ Ext.define('Traccar.store.AllDevices', {
     model: 'Traccar.model.Device',
 
     proxy: {
-        type: 'ajax',
-        url: '/api/device/get',
+        type: 'rest',
+        url: '/api/rest/devices',
         extraParams: {
             all: true
-        },
-        reader: {
-            type: 'json',
-            rootProperty: 'data'
         }
     }
 });

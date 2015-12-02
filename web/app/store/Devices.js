@@ -19,19 +19,9 @@ Ext.define('Traccar.store.Devices', {
     model: 'Traccar.model.Device',
 
     proxy: {
-        type: 'ajax',
-        api: {
-            create: '/api/device/add',
-            read: '/api/device/get',
-            update: '/api/device/update',
-            destroy: '/api/device/remove'
-        },
-        reader: {
-            type: 'json',
-            rootProperty: 'data'
-        },
+        type: 'rest',
+        url: '/api/rest/devices',
         writer: {
-            type: 'json',
             writeAllFields: true
         }
     }
