@@ -20,11 +20,9 @@ import java.io.Writer;
 import java.net.InetSocketAddress;
 import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
