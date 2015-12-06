@@ -111,17 +111,8 @@ public class DataManager implements IdentityManager {
         }
     }
 
-    @Override
-    public Device getDeviceById(long id) {
-        return devicesById.get(id);
-    }
-
-    @Override
-    public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
-
-        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay
-                || !devicesByUniqueId.containsKey(uniqueId)) {
-
+    private void updateDeviceCache(boolean force) throws SQLException {
+        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay || force) {
             devicesById.clear();
             devicesByUniqueId.clear();
             for (Device device : getAllDevices()) {
@@ -130,7 +121,17 @@ public class DataManager implements IdentityManager {
             }
             devicesLastUpdate = System.currentTimeMillis();
         }
+    }
 
+    @Override
+    public Device getDeviceById(long id) throws SQLException {
+        updateDeviceCache(!devicesById.containsKey(id));
+        return devicesById.get(id);
+    }
+
+    @Override
+    public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
+        updateDeviceCache(!devicesByUniqueId.containsKey(uniqueId));
         return devicesByUniqueId.get(uniqueId);
     }
 
