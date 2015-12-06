@@ -124,8 +124,12 @@ public class DataManager implements IdentityManager {
     }
 
     @Override
-    public Device getDeviceById(long id) throws SQLException {
-        updateDeviceCache(!devicesById.containsKey(id));
+    public Device getDeviceById(long id) {
+        try {
+            updateDeviceCache(!devicesById.containsKey(id));
+        } catch (SQLException e) {
+            Log.warning(e);
+        }
         return devicesById.get(id);
     }
 

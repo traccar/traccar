@@ -19,7 +19,7 @@ import org.traccar.model.Device;
 
 public interface IdentityManager {
 
-    Device getDeviceById(long id) throws Exception;
+    Device getDeviceById(long id);
 
     Device getDeviceByUniqueId(String uniqueId) throws Exception;
 
