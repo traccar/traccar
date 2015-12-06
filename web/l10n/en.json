@@ -27,6 +27,7 @@
     "loginFailed": "Incorrect email address or password",
     "loginCreated": "New user has been registered",
     "loginLogout": "Logout",
+    "devicesAndState": "Devices and State",
     "deviceDialog": "Device",
     "deviceTitle": "Devices",
     "deviceName": "Name",

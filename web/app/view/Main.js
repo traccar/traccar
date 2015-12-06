@@ -37,7 +37,7 @@ Ext.define('Traccar.view.Main', {
         region: 'west',
         layout: 'border',
         width: Traccar.Style.deviceWidth,
-        title: 'devicesAndState',
+        title: Strings.devicesAndState,
 
         defaults: {
             split: true,
