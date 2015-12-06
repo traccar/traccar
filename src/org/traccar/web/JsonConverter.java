@@ -35,7 +35,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.helper.Log;
-import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
 public final class JsonConverter {
@@ -43,30 +42,10 @@ public final class JsonConverter {
     private JsonConverter() {
     }
 
-    private static <T> T newClassInstance(Class<T> clazz) {
-        try {
-            return clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new IllegalArgumentException();
-        }
-    }
-
     private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
 
     public static Date parseDate(String value) {
         return DATE_FORMAT.parseDateTime(value).toDate();
-    }
-
-    public static <T extends Factory> T objectFromJson(Reader reader, T prototype) throws ParseException {
-        try (JsonReader jsonReader = Json.createReader(reader)) {
-            return objectFromJson(jsonReader.readObject(), prototype);
-        }
-    }
-
-    public static <T extends Factory> T objectFromJson(JsonObject json, T prototype) {
-        T object = (T) prototype.create();
-        Method[] methods = object.getClass().getMethods();
-        return objectFromJson(json, object, methods);
     }
 
     public static <T> T objectFromJson(Reader reader, Class<T> clazz) throws ParseException {
@@ -76,9 +55,13 @@ public final class JsonConverter {
     }
 
     public static <T> T objectFromJson(JsonObject json, Class<T> clazz) {
-        T object = newClassInstance(clazz);
-        Method[] methods = object.getClass().getMethods();
-        return objectFromJson(json, object, methods);
+        try {
+            T object = clazz.newInstance();
+            Method[] methods = object.getClass().getMethods();
+            return objectFromJson(json, object, methods);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     private static <T> T objectFromJson(JsonObject json, T object, Method[] methods) {

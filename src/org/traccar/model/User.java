@@ -18,12 +18,7 @@ package org.traccar.model;
 import org.traccar.helper.Hashing;
 import org.traccar.web.JsonIgnore;
 
-public class User implements Factory {
-
-    @Override
-    public User create() {
-        return new User();
-    }
+public class User {
 
     private long id;
 

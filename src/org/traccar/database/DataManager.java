@@ -171,7 +171,7 @@ public class DataManager implements IdentityManager {
                 if (schemaVersionQuery != null) {
 
                     Schema schema = QueryBuilder.create(dataSource, schemaVersionQuery)
-                            .executeQuerySingle(new Schema());
+                            .executeQuerySingle(Schema.class);
 
                     int version = 0;
                     if (schema != null) {
@@ -246,7 +246,7 @@ public class DataManager implements IdentityManager {
     public User login(String email, String password) throws SQLException {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
                 .setString("email", email)
-                .executeQuerySingle(new User());
+                .executeQuerySingle(User.class);
         if (user != null && user.isPasswordValid(password)) {
             return user;
         } else {
@@ -256,13 +256,13 @@ public class DataManager implements IdentityManager {
 
     public Collection<User> getUsers() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectUsersAll"))
-                .executeQuery(new User());
+                .executeQuery(User.class);
     }
 
     public User getUser(long userId) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectUser"))
                 .setLong("id", userId)
-                .executeQuerySingle(new User());
+                .executeQuerySingle(User.class);
     }
 
     public void addUser(User user) throws SQLException {
@@ -297,18 +297,18 @@ public class DataManager implements IdentityManager {
 
     public Collection<Permission> getPermissions() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.getPermissionsAll"))
-                .executeQuery(new Permission());
+                .executeQuery(Permission.class);
     }
 
     public Collection<Device> getAllDevices() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectDevicesAll"))
-                .executeQuery(new Device());
+                .executeQuery(Device.class);
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectDevices"))
                 .setLong("userId", userId)
-                .executeQuery(new Device());
+                .executeQuery(Device.class);
     }
 
     public void addDevice(Device device) throws SQLException {
@@ -365,7 +365,7 @@ public class DataManager implements IdentityManager {
                 .setLong("deviceId", deviceId)
                 .setDate("from", from)
                 .setDate("to", to)
-                .executeQuery(new Position());
+                .executeQuery(Position.class);
     }
 
     public void addPosition(Position position) throws SQLException {
@@ -392,12 +392,12 @@ public class DataManager implements IdentityManager {
 
     public Collection<Position> getLatestPositions() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectLatestPositions"))
-                .executeQuery(new Position());
+                .executeQuery(Position.class);
     }
 
     public Server getServer() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
-                .executeQuerySingle(new Server());
+                .executeQuerySingle(Server.class);
     }
 
     public void updateServer(Server server) throws SQLException {

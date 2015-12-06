@@ -15,12 +15,7 @@
  */
 package org.traccar.model;
 
-public class Server implements Factory {
-
-    @Override
-    public Server create() {
-        return new Server();
-    }
+public class Server {
 
     private long id;
 

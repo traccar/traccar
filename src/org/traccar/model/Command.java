@@ -15,7 +15,7 @@
  */
 package org.traccar.model;
 
-public class Command extends Extensible implements Factory {
+public class Command extends Extensible {
 
     public static final String TYPE_POSITION_SINGLE = "positionSingle";
     public static final String TYPE_POSITION_PERIODIC = "positionPeriodic";
@@ -34,10 +34,5 @@ public class Command extends Extensible implements Factory {
     public static final String KEY_TIMEZONE = "timezone";
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";
     public static final String KEY_RADIUS = "radius";
-
-    @Override
-    public Command create() {
-        return new Command();
-    }
 
 }
