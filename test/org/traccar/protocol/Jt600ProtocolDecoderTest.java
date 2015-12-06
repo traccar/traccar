@@ -1,13 +1,10 @@
 package org.traccar.protocol;
 
-import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.ProtocolTest;
 
-import java.nio.charset.Charset;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
-public class Jt600ProtocolDecoderTest extends ProtocolDecoderTest {
+public class Jt600ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

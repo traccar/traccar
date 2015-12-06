@@ -2,9 +2,9 @@ package org.traccar.protocol;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
-public class XexunFrameDecoderTest extends ProtocolDecoderTest {
+public class XexunFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

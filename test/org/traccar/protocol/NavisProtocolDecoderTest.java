@@ -1,14 +1,12 @@
 package org.traccar.protocol;
 
-import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.ProtocolTest;
 
 import java.nio.ByteOrder;
-import org.jboss.netty.buffer.ChannelBuffers;
 
 import org.junit.Test;
 
-public class NavisProtocolDecoderTest extends ProtocolDecoderTest {
+public class NavisProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

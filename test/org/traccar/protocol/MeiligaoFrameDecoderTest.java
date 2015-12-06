@@ -1,12 +1,10 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Assert;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
-public class MeiligaoFrameDecoderTest extends ProtocolDecoderTest {
+public class MeiligaoFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

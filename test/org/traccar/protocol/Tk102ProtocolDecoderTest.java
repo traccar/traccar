@@ -1,9 +1,9 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
-public class Tk102ProtocolDecoderTest extends ProtocolDecoderTest {
+public class Tk102ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

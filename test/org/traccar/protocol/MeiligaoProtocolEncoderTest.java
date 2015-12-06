@@ -1,10 +1,10 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-import org.traccar.ProtocolEncoderTest;
+import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-public class MeiligaoProtocolEncoderTest extends ProtocolEncoderTest {
+public class MeiligaoProtocolEncoderTest extends ProtocolTest {
 
     @Test
     public void testEncode() throws Exception {

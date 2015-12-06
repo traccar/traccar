@@ -2,9 +2,9 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
-public class MeitrackProtocolDecoderTest extends ProtocolDecoderTest {
+public class MeitrackProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

@@ -1,11 +1,9 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.ProtocolTest;
 
-public class EelinkProtocolDecoderTest extends ProtocolDecoderTest {
+public class EelinkProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

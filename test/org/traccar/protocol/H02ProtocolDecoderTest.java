@@ -1,10 +1,9 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
-public class H02ProtocolDecoderTest extends ProtocolDecoderTest {
+public class H02ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

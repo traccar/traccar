@@ -3,9 +3,9 @@ package org.traccar.protocol;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
-public class PiligrimProtocolDecoderTest extends ProtocolDecoderTest {
+public class PiligrimProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
