@@ -19,6 +19,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class ServerManager {
         URL packageUrl = Thread.currentThread().getContextClassLoader().getResource(packagePath);
 
         if (packageUrl.getProtocol().equals("jar")) {
-            String jarFileName = URLDecoder.decode(packageUrl.getFile(), "UTF-8");
+            String jarFileName = URLDecoder.decode(packageUrl.getFile(), StandardCharsets.UTF_8.name());
             try (JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")))) {
                 Enumeration<JarEntry> jarEntries = jf.entries();
                 while (jarEntries.hasMoreElements()) {
