@@ -42,16 +42,18 @@ Ext.define('Traccar.view.CommandDialogController', {
 
         Ext.Ajax.request({
             scope: this,
-            url: '/api/command/send',
+            url: '/api/rest/commands',
             jsonData: record.getData(),
             callback: this.onSendResult
         });
     },
 
     onSendResult: function (options, success, response) {
-        if (Traccar.ErrorManager.check(success, response)) {
+        if (success) {
             Ext.toast(Strings.commandSent);
             this.closeView();
+        } else {
+            Traccar.app.showError(response);
         }
     }
 });
