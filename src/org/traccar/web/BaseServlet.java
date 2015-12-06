@@ -56,7 +56,7 @@ public abstract class BaseServlet extends HttpServlet {
             if (allowed == null) {
                 resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOW_ORIGIN_VALUE);
             } else if (allowed.contains(origin)) {
-                String originSafe = URLEncoder.encode(origin, StandardCharsets.UTF_8.displayName());
+                String originSafe = URLEncoder.encode(origin, StandardCharsets.UTF_8.name());
                 resp.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, originSafe);
             }
 

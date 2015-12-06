@@ -15,7 +15,12 @@
  */
 package org.traccar.api;
 
+import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.traccar.Context;
+
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -36,9 +41,6 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN_KEY)) {
-            response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, ACCESS_CONTROL_ALLOW_ORIGIN_VALUE);
-        }
         if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_HEADERS_KEY)) {
             response.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS_KEY, ACCESS_CONTROL_ALLOW_HEADERS_VALUE);
         }
@@ -47,6 +49,17 @@ public class CorsResponseFilter implements ContainerResponseFilter {
         }
         if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_METHODS_KEY)) {
             response.getHeaders().add(ACCESS_CONTROL_ALLOW_METHODS_KEY, ACCESS_CONTROL_ALLOW_METHODS_VALUE);
+        }
+
+        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN_KEY)) {
+            String origin = request.getHeaderString(HttpHeaders.Names.ORIGIN);
+            String allowed = Context.getConfig().getString("web.origin");
+            if (allowed == null) {
+                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, ACCESS_CONTROL_ALLOW_ORIGIN_VALUE);
+            } else if (allowed.contains(origin)) {
+                String originSafe = URLEncoder.encode(origin, StandardCharsets.UTF_8.name());
+                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, originSafe);
+            }
         }
     }
 
