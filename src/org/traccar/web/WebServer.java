@@ -33,6 +33,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
+import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
@@ -133,6 +134,7 @@ public class WebServer {
                     PermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class);
             servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/rest/*");
         }
+        servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
         servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
         servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
