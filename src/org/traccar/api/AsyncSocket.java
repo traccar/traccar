@@ -24,7 +24,7 @@ public class AsyncSocket {
 
     @OnWebSocketMessage
     public void onWebSocketText(Session session, String message) {
-        session.getRemote().sendString(message, null); // TODO: actual implementation
+        session.getRemote().sendString(message, null);
     }
 
 }

@@ -57,31 +57,6 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
         return buf;
     }
 
-    // TODO: remove if not needed
-    private static int radiusToArea(int radius) {
-        if (radius == 0) {
-            return 0x00;
-        } else if (radius <= 30) {
-            return 0x01;
-        } else if (radius <= 50) {
-            return 0x02;
-        } else if (radius <= 100) {
-            return 0x03;
-        } else if (radius <= 200) {
-            return 0x04;
-        } else if (radius <= 300) {
-            return 0x05;
-        } else if (radius <= 500) {
-            return 0x06;
-        } else if (radius <= 1000) {
-            return 0x07;
-        } else if (radius <= 2000) {
-            return 0x08;
-        } else {
-            return 0xff;
-        }
-    }
-
     @Override
     protected Object encodeCommand(Command command) {
 
