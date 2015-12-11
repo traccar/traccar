@@ -56,67 +56,58 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        String id;
-        if (params.containsKey("id")) {
-            id = params.get("id").get(0);
-        } else {
-            id = params.get("deviceid").get(0);
-        }
-        if (!identify(id, channel, remoteAddress)) {
-            return null;
-        }
-        position.setDeviceId(getDeviceId());
-
-        position.setValid(true);
-        if (params.containsKey("timestamp")) {
-            try {
-                long timestamp = Long.parseLong(params.get("timestamp").get(0));
-                if (timestamp < Integer.MAX_VALUE) {
-                    timestamp *= 1000;
-                }
-                position.setTime(new Date(timestamp));
-            } catch (NumberFormatException error) {
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                position.setTime(dateFormat.parse(params.get("timestamp").get(0)));
+        for (String key : params.keySet()) {
+            String value = params.get(key).get(0);
+            switch (key) {
+                case "id":
+                case "deviceid":
+                    if (!identify(value, channel, remoteAddress)) {
+                        return null;
+                    }
+                    position.setDeviceId(getDeviceId());
+                    break;
+                case "timestamp":
+                    try {
+                        long timestamp = Long.parseLong(value);
+                        if (timestamp < Integer.MAX_VALUE) {
+                            timestamp *= 1000;
+                        }
+                        position.setTime(new Date(timestamp));
+                    } catch (NumberFormatException error) {
+                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        position.setTime(dateFormat.parse(value));
+                    }
+                    break;
+                case "lat":
+                    position.setLatitude(Double.parseDouble(value));
+                    break;
+                case "lon":
+                    position.setLongitude(Double.parseDouble(value));
+                    break;
+                case "speed":
+                    position.setSpeed(Double.parseDouble(value));
+                    break;
+                case "bearing":
+                case "heading":
+                    position.setCourse(Double.parseDouble(value));
+                    break;
+                case "altitude":
+                    position.setAltitude(Double.parseDouble(value));
+                    break;
+                case "hdop":
+                    position.set(Event.KEY_HDOP, Double.parseDouble(value));
+                    break;
+                case "batt":
+                    position.set(Event.KEY_BATTERY, value);
+                    break;
+                default:
+                    position.set(key, value);
+                    break;
             }
-        } else {
+        }
+
+        if (position.getFixTime() == null) {
             position.setTime(new Date());
-        }
-        position.setLatitude(Double.parseDouble(params.get("lat").get(0)));
-        position.setLongitude(Double.parseDouble(params.get("lon").get(0)));
-
-        if (params.containsKey("speed")) {
-            position.setSpeed(Double.parseDouble(params.get("speed").get(0)));
-        }
-
-        if (params.containsKey("bearing")) {
-            position.setCourse(Double.parseDouble(params.get("bearing").get(0)));
-        } else if (params.containsKey("heading")) {
-            position.setCourse(Double.parseDouble(params.get("heading").get(0)));
-        }
-
-        if (params.containsKey("altitude")) {
-            position.setAltitude(Double.parseDouble(params.get("altitude").get(0)));
-        }
-
-        if (params.containsKey("hdop")) {
-            position.set(Event.KEY_HDOP, params.get("hdop").get(0));
-        }
-
-        if (params.containsKey("vacc")) {
-            position.set("vacc", params.get("vacc").get(0));
-        }
-
-        if (params.containsKey("hacc")) {
-            position.set("hacc", params.get("hacc").get(0));
-        }
-
-        if (params.containsKey("batt")) {
-            position.set(Event.KEY_BATTERY, params.get("batt").get(0));
-        }
-
-        if (params.containsKey("desc")) {
-            position.set("description", params.get("desc").get(0));
         }
 
         if (channel != null) {
