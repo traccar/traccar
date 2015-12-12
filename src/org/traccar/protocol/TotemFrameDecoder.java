@@ -39,7 +39,15 @@ public class TotemFrameDecoder extends FrameDecoder {
             buf.readerIndex(beginIndex);
         }
 
-        int length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
+        int length;
+
+        int flagIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("AA"));
+        if (flagIndex != -1 && flagIndex - beginIndex == 6) {
+            length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 4, Charset.defaultCharset()));
+        } else {
+            length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
+        }
+
         if (length <= buf.readableBytes()) {
             return buf.readBytes(length);
         }
