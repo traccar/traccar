@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -124,6 +125,32 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN4 = new PatternBuilder()
+            .text("$$")                          // header
+            .number("dddd")                      // length
+            .text("AA")                          // type
+            .number("(d+)|")                     // imei
+            .number("(x{8})")                    // status
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)")                      // battery
+            .number("(dd)")                      // external power
+            .number("(dddd)")                    // adc 1
+            .number("(xxxx)")                    // lac
+            .number("(xxxx)")                    // cid
+            .number("(dd)")                      // satellites
+            .number("(dd)")                      // gsm
+            .number("(ddd)")                     // course
+            .number("(ddd)")                     // speed
+            .number("(dd.d)")                    // hdop
+            .number("(d{7})")                    // odometer
+            .number("(dd)(dd.dddd)([NS])")       // latitude
+            .number("(ddd)(dd.dddd)([EW])")      // longitude
+            .number("dddd")                      // serial number
+            .number("xx")                        // checksum
+            .any()
+            .compile();
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -132,7 +159,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         // Determine format
         Pattern pattern = PATTERN3;
-        if (sentence.contains("$GPRMC")) {
+        if (sentence.indexOf("AA") == 6) {
+            pattern = PATTERN4;
+        } else if (sentence.contains("$GPRMC")) {
             pattern = PATTERN1;
         } else {
             int index = sentence.indexOf('|');
@@ -154,9 +183,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_ALARM, parser.next());
-
         if (pattern == PATTERN1 || pattern == PATTERN2) {
+
+            position.set(Event.KEY_ALARM, parser.next());
 
             DateBuilder dateBuilder = new DateBuilder();
             int year = 0;
@@ -201,6 +230,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (pattern == PATTERN3) {
 
+            position.set(Event.KEY_ALARM, parser.next());
+
             DateBuilder dateBuilder = new DateBuilder()
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -226,6 +257,33 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Event.KEY_ODOMETER, parser.next());
 
+            position.setLatitude(parser.nextCoordinate());
+            position.setLongitude(parser.nextCoordinate());
+
+        } else if (pattern == PATTERN4) {
+
+            position.set(Event.KEY_STATUS, parser.next());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+
+            position.set(Event.KEY_BATTERY, parser.nextDouble() / 10);
+            position.set(Event.KEY_POWER, parser.nextDouble());
+            position.set(Event.PREFIX_ADC + 1, parser.next());
+            position.set(Event.KEY_LAC, parser.nextInt(16));
+            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Event.KEY_SATELLITES, parser.nextInt());
+            position.set(Event.KEY_GSM, parser.nextInt());
+
+            position.setCourse(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+
+            position.set(Event.KEY_HDOP, parser.nextDouble());
+            position.set(Event.KEY_ODOMETER, parser.nextInt());
+
+            position.setValid(true);
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
 
