@@ -149,7 +149,7 @@ public class Parser {
                 break;
         }
 
-        if (hemisphere != null && (hemisphere.equals("S") || hemisphere.equals("W"))) {
+        if (hemisphere != null && (hemisphere.equals("S") || hemisphere.equals("W") || hemisphere.equals("-"))) {
             coordinate = -coordinate;
         }
 
