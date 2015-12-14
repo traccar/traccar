@@ -64,7 +64,7 @@ Ext.define('Traccar.view.UserDevicesController', {
         Ext.Ajax.request({
             scope: this,
             method: 'DELETE',
-            url: '/api/device/unlink',
+            url: '/api/rest/permissions',
             jsonData: {
                 userId: this.userId,
                 deviceId: record.getData().id
