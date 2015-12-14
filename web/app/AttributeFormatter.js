@@ -18,7 +18,7 @@ Ext.define('Traccar.AttributeFormatter', {
     singleton: true,
 
     coordinateFormatter: function (value) {
-        return value.toFixed(6);
+        return value.toFixed(Traccar.Style.coordinatePrecision);
     },
 
     speedFormatter: function (value) {
@@ -36,7 +36,7 @@ Ext.define('Traccar.AttributeFormatter', {
 
     defaultFormatter: function (value) {
         if (typeof value === 'number') {
-            return Number(value.toFixed(2));
+            return Number(value.toFixed(Traccar.Style.numberPrecision));
         } else if (typeof value === 'boolean') {
             return value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no;
         } else if (value instanceof Date) {
