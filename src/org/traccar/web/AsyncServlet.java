@@ -178,14 +178,7 @@ public class AsyncServlet extends BaseServlet {
                 JsonObjectBuilder result = Json.createObjectBuilder();
                 result.add("success", true);
 
-                if (Context.getConfig().getBoolean("web.oldAsyncFormat")) {
-                    result.add("data", JsonConverter.arrayToJson(positionUpdates));
-                } else {
-                    JsonObjectBuilder data = Json.createObjectBuilder();
-                    data.add("devices", JsonConverter.arrayToJson(deviceUpdates));
-                    data.add("positions", JsonConverter.arrayToJson(positionUpdates));
-                    result.add("data", data.build());
-                }
+                result.add("data", JsonConverter.arrayToJson(positionUpdates));
 
                 deviceUpdates.clear();
                 positionUpdates.clear();
