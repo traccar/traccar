@@ -25,6 +25,9 @@ Ext.define('Traccar.model.Server', {
         name: 'registration',
         type: 'boolean'
     }, {
+        name: 'readonly',
+        type: 'boolean'
+    }, {
         name: 'map',
         type: 'string'
     }, {

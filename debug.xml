@@ -113,6 +113,7 @@
         CREATE TABLE server (
         id INT PRIMARY KEY AUTO_INCREMENT,
         registration BIT NOT NULL,
+        readonly BIT NOT NULL,
         map VARCHAR(128),
         bingKey VARCHAR(128),
         mapUrl VARCHAR(128),
@@ -134,13 +135,14 @@
     </entry>
 
     <entry key='database.insertServer'>
-        INSERT INTO server (registration, latitude, longitude, zoom)
-        VALUES (:registration, :latitude, :longitude, :zoom);
+        INSERT INTO server (registration, readonly, latitude, longitude, zoom)
+        VALUES (:registration, :readonly, :latitude, :longitude, :zoom);
     </entry>
 
     <entry key='database.updateServer'>
         UPDATE server SET
         registration = :registration,
+        readonly = :readonly,
         map = :map,
         bingKey = :bingKey,
         mapUrl = :mapUrl,

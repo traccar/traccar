@@ -59,6 +59,7 @@
     "serverTitle": "Server Settings",
     "serverZoom": "Zoom",
     "serverRegistration": "Registration",
+    "serverReadonly": "Readonly",
     "mapTitle": "Map",
     "mapLayer": "Map Layer",
     "mapCustom": "Custom Map",

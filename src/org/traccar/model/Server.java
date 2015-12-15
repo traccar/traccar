@@ -37,6 +37,16 @@ public class Server {
         this.registration = registration;
     }
 
+    private boolean readonly;
+
+    public boolean getReadonly() {
+        return readonly;
+    }
+
+    public void setReadonly(boolean readonly) {
+        this.readonly = readonly;
+    }
+
     private String map;
 
     public String getMap() {
