@@ -349,5 +349,6 @@
     <entry key='upro.port'>5095</entry>
     <entry key='auru.port'>5096</entry>
     <entry key='disha.port'>5097</entry>
+    <entry key='thinkrace.port'>5098</entry>
 
 </properties>
