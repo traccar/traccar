@@ -15,8 +15,12 @@
  */
 package org.traccar.api;
 
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.traccar.api.resource.SessionResource;
 
 public class AsyncSocketServlet extends WebSocketServlet {
 
@@ -25,7 +29,13 @@ public class AsyncSocketServlet extends WebSocketServlet {
     @Override
     public void configure(WebSocketServletFactory factory) {
         factory.getPolicy().setIdleTimeout(ASYNC_TIMEOUT);
-        factory.register(AsyncSocket.class);
+        factory.setCreator(new WebSocketCreator() {
+            @Override
+            public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
+                long userId = (Long) req.getSession().getAttribute(SessionResource.USER_ID_KEY);
+                return new AsyncSocket(userId);
+            }
+        });
     }
 
 }
