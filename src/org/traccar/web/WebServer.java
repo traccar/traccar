@@ -71,14 +71,14 @@ public class WebServer {
         initServer();
         switch (config.getString("web.type", "new")) {
             case "api":
-                initOldApi(false);
+                initApi();
                 break;
             case "old":
-                initOldApi(false);
+                initOldApi();
                 initOldWebApp();
                 break;
             default:
-                initOldApi(true);
+                initApi();
                 if (config.getBoolean("web.console")) {
                     initConsole();
                 }
@@ -122,19 +122,26 @@ public class WebServer {
         handlers.addHandler(app);
     }
 
-    private void initOldApi(boolean initRest) {
+    private void initApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
-        if (initRest) {
-            ResourceConfig resourceConfig = new ResourceConfig();
-            resourceConfig.register(ResourceErrorHandler.class);
-            resourceConfig.register(SecurityRequestFilter.class);
-            resourceConfig.register(CorsResponseFilter.class);
-            resourceConfig.registerClasses(ServerResource.class, SessionResource.class, CommandResource.class,
-                    PermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class);
-            servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/rest/*");
-        }
+
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
+
+        ResourceConfig resourceConfig = new ResourceConfig();
+        resourceConfig.register(ResourceErrorHandler.class);
+        resourceConfig.register(SecurityRequestFilter.class);
+        resourceConfig.register(CorsResponseFilter.class);
+        resourceConfig.registerClasses(ServerResource.class, SessionResource.class, CommandResource.class,
+                PermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class);
+        servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
+
+        handlers.addHandler(servletHandler);
+    }
+
+    private void initOldApi() {
+        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletHandler.setContextPath("/api");
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
         servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
         servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");

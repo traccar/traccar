@@ -47,7 +47,7 @@ Ext.define('Traccar.view.UserDevicesController', {
     onBeforeSelect: function (object, record, index) {
         Ext.Ajax.request({
             scope: this,
-            url: '/api/rest/permissions',
+            url: '/api/permissions',
             jsonData: {
                 userId: this.userId,
                 deviceId: record.getData().id
@@ -64,7 +64,7 @@ Ext.define('Traccar.view.UserDevicesController', {
         Ext.Ajax.request({
             scope: this,
             method: 'DELETE',
-            url: '/api/rest/permissions',
+            url: '/api/permissions',
             jsonData: {
                 userId: this.userId,
                 deviceId: record.getData().id

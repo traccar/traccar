@@ -42,7 +42,7 @@ Ext.define('Traccar.view.CommandDialogController', {
 
         Ext.Ajax.request({
             scope: this,
-            url: '/api/rest/commands',
+            url: '/api/commands',
             jsonData: record.getData(),
             callback: this.onSendResult
         });

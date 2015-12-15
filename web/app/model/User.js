@@ -58,7 +58,7 @@ Ext.define('Traccar.model.User', {
 
     proxy: {
         type: 'rest',
-        url: '/api/rest/users',
+        url: '/api/users',
         writer: {
             type: 'json',
             writeAllFields: true

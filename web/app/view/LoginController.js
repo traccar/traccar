@@ -35,7 +35,7 @@ Ext.define('Traccar.view.LoginController', {
             Ext.Ajax.request({
                 scope: this,
                 method: 'POST',
-                url: '/api/rest/session',
+                url: '/api/session',
                 params: form.getValues(),
                 callback: function (options, success, response) {
                     Ext.getBody().unmask();
@@ -54,7 +54,7 @@ Ext.define('Traccar.view.LoginController', {
         Ext.Ajax.request({
             scope: this,
             method: 'DELETE',
-            url: '/api/rest/session',
+            url: '/api/session',
             callback: function () {
                 window.location.reload();
             }

@@ -20,6 +20,6 @@ Ext.define('Traccar.store.Positions', {
 
     proxy: {
         type: 'rest',
-        url: '/api/rest/positions'
+        url: '/api/positions'
     }
 });
