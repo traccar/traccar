@@ -66,9 +66,11 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     private void sendData(String key, Collection<?> data) {
-        JsonObjectBuilder json = Json.createObjectBuilder();
-        json.add(key, JsonConverter.arrayToJson(data));
-        getRemote().sendString(json.build().toString(), null);
+        if (!data.isEmpty()) {
+            JsonObjectBuilder json = Json.createObjectBuilder();
+            json.add(key, JsonConverter.arrayToJson(data));
+            getRemote().sendString(json.build().toString(), null);
+        }
     }
 
 }
