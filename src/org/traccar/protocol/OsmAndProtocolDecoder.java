@@ -56,9 +56,9 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        for (String key : params.keySet()) {
-            String value = params.get(key).get(0);
-            switch (key) {
+        for (Map.Entry<String, List<String>> entry : params.entrySet()) {
+            String value = entry.getValue().get(0);
+            switch (entry.getKey()) {
                 case "id":
                 case "deviceid":
                     if (!identify(value, channel, remoteAddress)) {
@@ -101,7 +101,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Event.KEY_BATTERY, value);
                     break;
                 default:
-                    position.set(key, value);
+                    position.set(entry.getKey(), value);
                     break;
             }
         }

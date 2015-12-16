@@ -20,7 +20,6 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
-import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
 
 import java.util.List;

@@ -37,8 +37,9 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS = 0x90;
 
     private static double convertCoordinate(long raw, boolean negative) {
-        double result = raw / 1000000;
-        result += (raw % 1000000) * 0.0001 / 60;
+        long degrees = raw / 1000000;
+        double minutes = (raw % 1000000) * 0.0001;
+        double result = degrees + minutes / 60;
         if (negative) {
             result = -result;
         }
