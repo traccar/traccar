@@ -11,10 +11,13 @@ public class NoranProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         NoranProtocolDecoder decoder = new NoranProtocolDecoder(new NoranProtocol());
-        
-        //verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
-        //        "28003200c38000d900fcc97a416b1a7a42b43eef3d4e523039473034383737000000000092fcda4a"));
-        
+
+        verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "28003200c380000000469458408c4ad340ad381e3f4e52303947313336303900000001ff00002041"));
+
+        verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "28003200c38000d900fcc97a416b1a7a42b43eef3d4e523039473034383737000000000092fcda4a"));
+
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "3400080001090000000000001D43A29BE842E62520424E523039423036363932000031322D30332D30352031313A34373A343300"));
         

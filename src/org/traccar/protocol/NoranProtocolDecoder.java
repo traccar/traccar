@@ -74,8 +74,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             boolean newFormat = false;
             if (type == MSG_UPLOAD_POSITION && buf.readableBytes() == 48
                     || type == MSG_ALARM && buf.readableBytes() == 48
-                    || type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57
-                    || type == MSG_UPLOAD_POSITION_NEW) {
+                    || type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57) {
                 newFormat = true;
             }
 
