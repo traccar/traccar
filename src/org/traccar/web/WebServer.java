@@ -35,6 +35,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
+import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.CommandResource;
@@ -129,6 +130,7 @@ public class WebServer {
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
 
         ResourceConfig resourceConfig = new ResourceConfig();
+        resourceConfig.register(ObjectMapperProvider.class);
         resourceConfig.register(ResourceErrorHandler.class);
         resourceConfig.register(SecurityRequestFilter.class);
         resourceConfig.register(CorsResponseFilter.class);
