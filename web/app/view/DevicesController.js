@@ -33,6 +33,12 @@ Ext.define('Traccar.view.DevicesController', {
             }
         }
     },
+    init: function () {
+        var readonly = Traccar.app.getServer().get('readonly') && !Traccar.app.getUser().get('admin');
+        this.lookupReference('toolbarAddButton').setVisible(!readonly);
+        this.lookupReference('toolbarEditButton').setVisible(!readonly);
+        this.lookupReference('toolbarRemoveButton').setVisible(!readonly);
+    },
 
     onAddClick: function () {
         var device, dialog;
