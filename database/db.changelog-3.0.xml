@@ -5,11 +5,183 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd"> 
 
-  <changeSet author="authorName" id="changelog-1.0">
-    <createTable tableName="TablesAndTables">
-      <column name="COLUMN1" type="TEXT">
-        <constraints nullable="true" primaryKey="false" unique="false"/>
+  <changeSet author="author" id="changelog-3.0">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="traccar" />
+      </not>
+    </preConditions>
+
+    <createTable tableName="user">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(1024)">
+        <constraints nullable="false" />
+      </column>
+      <column name="email" type="VARCHAR(256)">
+        <constraints nullable="false" unique="true" />
+      </column>
+      <column name="hashedPassword" type="VARCHAR(1024)">
+        <constraints nullable="false" />
+      </column>
+      <column name="salt" type="VARCHAR(1024)" defaultValue="">
+        <constraints nullable="false" />
+      </column>
+      <column name="readonly" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="admin" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="map" type="VARCHAR(1024)" defaultValue="osm">
+        <constraints nullable="false" />
+      </column>
+      <column name="language" type="VARCHAR(1024)" defaultValue="en">
+        <constraints nullable="false" />
+      </column>
+      <column name="distanceUnit" type="VARCHAR(1024)" defaultValue="km">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="zoom" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
       </column>
     </createTable>
+
+    <createTable tableName="device">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(1024)">
+        <constraints nullable="false" />
+      </column>
+      <column name="uniqueId" type="VARCHAR(256)">
+        <constraints nullable="false" unique="true" />
+      </column>
+      <column name="status" type="VARCHAR(1024)" />
+      <column name="positionId" type="INT" />
+      <column name="dataId" type="INT" />
+    </createTable>
+
+    <createTable tableName="user_device">
+      <column name="userId" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceId" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="read" type="BOOLEAN" defaultValueBoolean="true">
+        <constraints nullable="false" />
+      </column>
+      <column name="write" type="BOOLEAN" defaultValueBoolean="true">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_device" baseColumnNames="userId" constraintName="fk_user_device_userId" referencedTableName="user" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_device" baseColumnNames="deviceId" constraintName="fk_user_device_deviceId" referencedTableName="device" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createIndex tableName="user_device" indexName="user_device_user_id">
+      <column name="userId" />
+    </createIndex>
+
+    <createTable tableName="position">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="protocol" type="VARCHAR(1024)" />
+      <column name="deviceId" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="serverTime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceTime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="fixTime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="valid" type="BOOLEAN">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="altitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="speed" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="course" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="address" type="VARCHAR(1024)" />
+      <column name="other" type="VARCHAR(8192)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="position" baseColumnNames="deviceId" constraintName="fk_position_deviceId" referencedTableName="device" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="data">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="protocol" type="VARCHAR(1024)" />
+      <column name="deviceId" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="serverTime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceTime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="other" type="VARCHAR(8192)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="data" baseColumnNames="deviceId" constraintName="fk_data_deviceId" referencedTableName="device" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <addForeignKeyConstraint baseTableName="device" baseColumnNames="positionId" constraintName="fk_device_positionId" referencedTableName="position" referencedColumnNames="id" />
+    <addForeignKeyConstraint baseTableName="device" baseColumnNames="dataId" constraintName="fk_device_dataId" referencedTableName="data" referencedColumnNames="id" />
+
+    <createTable tableName="server">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="registration" type="BOOLEAN">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="zoom" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="traccar">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+    </createTable>
+
   </changeSet>
 </databaseChangeLog>

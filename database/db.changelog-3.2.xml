@@ -3,13 +3,15 @@
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd"> 
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
-  <changeSet author="authorName" id="changelog-1.0">
+  <changeSet author="author" id="changelog-3.2">
+
     <createTable tableName="TablesAndTables">
       <column name="COLUMN1" type="TEXT">
         <constraints nullable="true" primaryKey="false" unique="false"/>
       </column>
     </createTable>
+
   </changeSet>
 </databaseChangeLog>

@@ -19,6 +19,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -160,22 +162,19 @@ public class DataManager implements IdentityManager {
 
         if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
 
-            /*try {
-                ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
+            /*ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
 
-                Database database = DatabaseFactory.getInstance().openDatabase(
-                        config.getString("database.url"),
-                        config.getString("database.user"),
-                        config.getString("database.password"),
-                        null, resourceAccessor);
+            Database database = DatabaseFactory.getInstance().openDatabase(
+                    config.getString("database.url"),
+                    config.getString("database.user"),
+                    config.getString("database.password"),
+                    null, resourceAccessor);
 
-                Liquibase liquibase = new Liquibase(
-                        config.getString("database.changelog"), new FileSystemResourceAccessor(), database);
+            Liquibase liquibase = new Liquibase(
+                    config.getString("database.changelog"), resourceAccessor, database);
 
-                liquibase.update(new Contexts());
-            } catch (Exception e) {
-                Log.warning(e);
-            }*/
+            liquibase.update(new Contexts());*/
+
 
             boolean exist = false;
 
