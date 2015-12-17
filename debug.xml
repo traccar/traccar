@@ -50,6 +50,8 @@
     <entry key='database.mock'>true</entry>
     <entry key='database.xml'>false</entry>
 
+    <entry key='database.changelog'>./database/db.changelog-master.xml</entry>
+
     <entry key='database.checkTable'>traccar</entry>
 
     <entry key='database.selectSchemaVersion'>

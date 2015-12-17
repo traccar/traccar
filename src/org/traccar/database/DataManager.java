@@ -30,6 +30,15 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import org.traccar.Config;
 import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
@@ -147,9 +156,26 @@ public class DataManager implements IdentityManager {
         return query;
     }
 
-    private void initDatabaseSchema() throws SQLException {
+    private void initDatabaseSchema() throws SQLException, LiquibaseException {
 
         if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
+
+            /*try {
+                ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
+
+                Database database = DatabaseFactory.getInstance().openDatabase(
+                        config.getString("database.url"),
+                        config.getString("database.user"),
+                        config.getString("database.password"),
+                        null, resourceAccessor);
+
+                Liquibase liquibase = new Liquibase(
+                        config.getString("database.changelog"), new FileSystemResourceAccessor(), database);
+
+                liquibase.update(new Contexts());
+            } catch (Exception e) {
+                Log.warning(e);
+            }*/
 
             boolean exist = false;
 
