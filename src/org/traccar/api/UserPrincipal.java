@@ -13,10 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.model;
+package org.traccar.api;
 
-public interface Factory {
+import java.security.Principal;
 
-    Object create();
+public class UserPrincipal implements Principal {
+
+    private long userId;
+
+    public UserPrincipal(long userId) {
+        this.userId = userId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
 
 }

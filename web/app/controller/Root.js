@@ -33,43 +33,37 @@ Ext.define('Traccar.controller.Root', {
     onLaunch: function () {
         Ext.Ajax.request({
             scope: this,
-            url: '/api/server/get',
+            url: '/api/server',
             callback: this.onServerReturn
         });
     },
 
     onServerReturn: function (options, success, response) {
-        var result;
         Ext.get('spinner').remove();
-        if (Traccar.ErrorManager.check(success, response)) {
-            result = Ext.decode(response.responseText);
-            if (result.success) {
-                Traccar.app.setServer(result.data);
-                Ext.Ajax.request({
-                    scope: this,
-                    url: '/api/session',
-                    callback: this.onSessionReturn
-                });
-            }
+        if (success) {
+            Traccar.app.setServer(Ext.decode(response.responseText));
+            Ext.Ajax.request({
+                scope: this,
+                url: '/api/session',
+                callback: this.onSessionReturn
+            });
+        } else {
+            Traccar.app.showError(response);
         }
     },
 
     onSessionReturn: function (options, success, response) {
-        var result;
-        if (Traccar.ErrorManager.check(success, response)) {
-            result = Ext.decode(response.responseText);
-            if (result.success) {
-                Traccar.app.setUser(result.data);
-                this.loadApp();
-            } else {
-                this.login = Ext.create('widget.login', {
-                    listeners: {
-                        scope: this,
-                        login: this.onLogin
-                    }
-                });
-                this.login.show();
-            }
+        if (success) {
+            Traccar.app.setUser(Ext.decode(response.responseText));
+            this.loadApp();
+        } else {
+            this.login = Ext.create('widget.login', {
+                listeners: {
+                    scope: this,
+                    login: this.onLogin
+                }
+            });
+            this.login.show();
         }
     },
 
@@ -90,45 +84,41 @@ Ext.define('Traccar.controller.Root', {
     },
 
     asyncUpdate: function (first) {
-        Ext.Ajax.request({
-            scope: this,
-            url: '/api/async',
-            params: {
-                first: first
-            },
-            callback: Traccar.app.getErrorHandler(this, function (options, success, response) {
-                var i, deviceStore, positionStore, data, devices, positions, device, position;
-                if (success) {
-                    deviceStore = Ext.getStore('Devices');
-                    positionStore = Ext.getStore('LatestPositions');
-                    data = Ext.decode(response.responseText).data;
-                    devices = data.devices;
-                    positions = data.positions;
+        var socket = new WebSocket("ws://" + window.location.host + "/api/socket");
 
-                    for (i = 0; i < devices.length; i++) {
-                        device = deviceStore.findRecord('id', devices[i].id, 0, false, false, true);
-                        if (device) {
-                            device.set({
-                                status: devices[i].status,
-                                lastUpdate: devices[i].lastUpdate
-                            }, {
-                                dirty: false
-                            });
-                        }
+        socket.onmessage = function (event) {
+            var i, store, data, array, entity;
+
+            data = Ext.decode(event.data);
+
+            if (data.devices) {
+                array = data.devices;
+                store = Ext.getStore('Devices');
+                for (i = 0; i < array.length; i++) {
+                    entity = store.findRecord('id', array[i].id, 0, false, false, true);
+                    if (entity) {
+                        entity.set({
+                            status: array[i].status,
+                            lastUpdate: array[i].lastUpdate
+                        }, {
+                            dirty: false
+                        });
                     }
-
-                    for (i = 0; i < positions.length; i++) {
-                        position = positionStore.findRecord('deviceId', positions[i].deviceId, 0, false, false, true);
-                        if (position) {
-                            position.set(positions[i]);
-                        } else {
-                            positionStore.add(Ext.create('Traccar.model.Position', positions[i]));
-                        }
-                    }
-
-                    this.asyncUpdate(false);
                 }
-            })
-        });
+            }
+
+            if (data.positions) {
+                array = data.positions;
+                store = Ext.getStore('LatestPositions');
+                for (i = 0; i < array.length; i++) {
+                    entity = store.findRecord('deviceId', array[i].deviceId, 0, false, false, true);
+                    if (entity) {
+                        entity.set(array[i]);
+                    } else {
+                        store.add(Ext.create('Traccar.model.Position', array[i]));
+                    }
+                }
+            }
+        };
     }
 });

@@ -2,11 +2,11 @@ package org.traccar.protocol;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
 import java.nio.ByteOrder;
 
-public class Pt502FrameDecoderTest extends ProtocolDecoderTest {
+public class Pt502FrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

@@ -1,12 +1,10 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.ProtocolTest;
 
 
-public class AutoFon45ProtocolDecoderTest extends ProtocolDecoderTest {
+public class AutoFon45ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
         AutoFon45ProtocolDecoder decoder = new AutoFon45ProtocolDecoder(new AutoFon45Protocol());

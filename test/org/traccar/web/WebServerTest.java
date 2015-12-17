@@ -10,11 +10,12 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-public class WebServerInitialContextTest {
+public class WebServerTest {
+
     @Test
-    public void smokeTest() throws NamingException {
+    public void contextTest() throws NamingException {
         DataSource mockDataSource = (DataSource) Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class[]{DataSource.class}, new InvocationHandler() {
+                new Class[] { DataSource.class }, new InvocationHandler() {
                     @Override
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                         return null;
@@ -24,4 +25,5 @@ public class WebServerInitialContextTest {
         Context context = new InitialContext();
         context.bind("java:/DefaultDS", mockDataSource);
     }
+
 }

@@ -15,12 +15,7 @@
  */
 package org.traccar.model;
 
-public class Schema implements Factory {
-
-    @Override
-    public Schema create() {
-        return new Schema();
-    }
+public class Schema {
 
     private int version;
 

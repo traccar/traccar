@@ -113,6 +113,7 @@
         CREATE TABLE server (
         id INT PRIMARY KEY AUTO_INCREMENT,
         registration BIT NOT NULL,
+        readonly BIT NOT NULL,
         map VARCHAR(128),
         bingKey VARCHAR(128),
         mapUrl VARCHAR(128),
@@ -134,13 +135,14 @@
     </entry>
 
     <entry key='database.insertServer'>
-        INSERT INTO server (registration, latitude, longitude, zoom)
-        VALUES (:registration, :latitude, :longitude, :zoom);
+        INSERT INTO server (registration, readonly, latitude, longitude, zoom)
+        VALUES (:registration, :readonly, :latitude, :longitude, :zoom);
     </entry>
 
     <entry key='database.updateServer'>
         UPDATE server SET
         registration = :registration,
+        readonly = :readonly,
         map = :map,
         bingKey = :bingKey,
         mapUrl = :mapUrl,
@@ -346,5 +348,10 @@
     <entry key='adm.port'>5092</entry>
     <entry key='watch.port'>5093</entry>
     <entry key='t800x.port'>5094</entry>
+    <entry key='upro.port'>5095</entry>
+    <entry key='auru.port'>5096</entry>
+    <entry key='disha.port'>5097</entry>
+    <entry key='thinkrace.port'>5098</entry>
+    <entry key='pathaway.port'>5099</entry>
 
 </properties>

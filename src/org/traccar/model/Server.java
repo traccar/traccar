@@ -15,12 +15,7 @@
  */
 package org.traccar.model;
 
-public class Server implements Factory {
-
-    @Override
-    public Server create() {
-        return new Server();
-    }
+public class Server {
 
     private long id;
 
@@ -40,6 +35,16 @@ public class Server implements Factory {
 
     public void setRegistration(boolean registration) {
         this.registration = registration;
+    }
+
+    private boolean readonly;
+
+    public boolean getReadonly() {
+        return readonly;
+    }
+
+    public void setReadonly(boolean readonly) {
+        this.readonly = readonly;
     }
 
     private String map;

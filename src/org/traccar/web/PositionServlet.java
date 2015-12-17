@@ -46,8 +46,7 @@ public class PositionServlet extends BaseServlet {
         long deviceId = Long.parseLong(req.getParameter("deviceId"));
         Context.getPermissionsManager().checkDevice(getUserId(req), deviceId);
         sendResponse(resp.getWriter(), JsonConverter.arrayToJson(
-                    Context.getDataManager().getPositions(
-                            getUserId(req), deviceId,
+                    Context.getDataManager().getPositions(deviceId,
                             JsonConverter.parseDate(req.getParameter("from")),
                             JsonConverter.parseDate(req.getParameter("to")))));
     }

@@ -51,7 +51,7 @@ public class UserServlet extends BaseServlet {
     }
 
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        User user = JsonConverter.objectFromJson(req.getReader(), User.class);
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
         Context.getDataManager().addUser(user);
         Context.getPermissionsManager().refresh();
@@ -59,7 +59,7 @@ public class UserServlet extends BaseServlet {
     }
 
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        User user = JsonConverter.objectFromJson(req.getReader(), User.class);
         if (user.getAdmin()) {
             Context.getPermissionsManager().checkAdmin(getUserId(req));
         } else {
@@ -71,7 +71,7 @@ public class UserServlet extends BaseServlet {
     }
 
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        User user = JsonConverter.objectFromJson(req.getReader(), new User());
+        User user = JsonConverter.objectFromJson(req.getReader(), User.class);
         Context.getPermissionsManager().checkUser(getUserId(req), user.getId());
         Context.getDataManager().removeUser(user);
         Context.getPermissionsManager().refresh();

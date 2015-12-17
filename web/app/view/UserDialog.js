@@ -73,11 +73,13 @@ Ext.define('Traccar.view.UserDialog', {
         }, {
             xtype: 'numberfield',
             name: 'latitude',
-            fieldLabel: Strings.positionLatitude
+            fieldLabel: Strings.positionLatitude,
+            decimalPrecision: Traccar.Style.coordinatePrecision
         }, {
             xtype: 'numberfield',
             name: 'longitude',
-            fieldLabel: Strings.positionLongitude
+            fieldLabel: Strings.positionLongitude,
+            decimalPrecision: Traccar.Style.coordinatePrecision
         }, {
             xtype: 'numberfield',
             name: 'zoom',

@@ -1,13 +1,10 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.ProtocolTest;
 
-public class TzoneProtocolDecoderTest extends ProtocolDecoderTest {
+public class TzoneProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

@@ -89,6 +89,7 @@ public class Parser {
     public enum CoordinateFormat {
         DEG_DEG,
         DEG_HEM,
+        DEG_MIN_MIN,
         DEG_MIN_HEM,
         DEG_MIN_MIN_HEM,
         HEM_DEG_MIN_MIN,
@@ -108,6 +109,10 @@ public class Parser {
             case DEG_HEM:
                 coordinate = nextDouble();
                 hemisphere = next();
+                break;
+            case DEG_MIN_MIN:
+                coordinate = nextInt();
+                coordinate += Double.parseDouble(next() + '.' + next()) / 60;
                 break;
             case DEG_MIN_MIN_HEM:
                 coordinate = nextInt();
@@ -144,7 +149,7 @@ public class Parser {
                 break;
         }
 
-        if (hemisphere != null && (hemisphere.equals("S") || hemisphere.equals("W"))) {
+        if (hemisphere != null && (hemisphere.equals("S") || hemisphere.equals("W") || hemisphere.equals("-"))) {
             coordinate = -coordinate;
         }
 

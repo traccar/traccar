@@ -62,7 +62,6 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
-
         }
 
         return null;

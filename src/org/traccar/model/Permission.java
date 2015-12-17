@@ -15,12 +15,7 @@
  */
 package org.traccar.model;
 
-public class Permission implements Factory {
-
-    @Override
-    public Permission create() {
-        return new Permission();
-    }
+public class Permission {
 
     private long userId;
 

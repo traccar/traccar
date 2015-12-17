@@ -70,7 +70,7 @@ public class DeviceServlet extends BaseServlet {
     }
 
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
+        Device device = JsonConverter.objectFromJson(req.getReader(), Device.class);
         long userId = getUserId(req);
         Context.getDataManager().addDevice(device);
         Context.getDataManager().linkDevice(userId, device.getId());
@@ -79,14 +79,14 @@ public class DeviceServlet extends BaseServlet {
     }
 
     private void update(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
+        Device device = JsonConverter.objectFromJson(req.getReader(), Device.class);
         Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
         Context.getDataManager().updateDevice(device);
         sendResponse(resp.getWriter(), true);
     }
 
     private void remove(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        Device device = JsonConverter.objectFromJson(req.getReader(), new Device());
+        Device device = JsonConverter.objectFromJson(req.getReader(), Device.class);
         Context.getPermissionsManager().checkDevice(getUserId(req), device.getId());
         Context.getDataManager().removeDevice(device);
         Context.getPermissionsManager().refresh();

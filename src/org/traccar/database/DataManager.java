@@ -111,17 +111,8 @@ public class DataManager implements IdentityManager {
         }
     }
 
-    @Override
-    public Device getDeviceById(long id) {
-        return devicesById.get(id);
-    }
-
-    @Override
-    public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
-
-        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay
-                || !devicesByUniqueId.containsKey(uniqueId)) {
-
+    private void updateDeviceCache(boolean force) throws SQLException {
+        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay || force) {
             devicesById.clear();
             devicesByUniqueId.clear();
             for (Device device : getAllDevices()) {
@@ -130,7 +121,21 @@ public class DataManager implements IdentityManager {
             }
             devicesLastUpdate = System.currentTimeMillis();
         }
+    }
 
+    @Override
+    public Device getDeviceById(long id) {
+        try {
+            updateDeviceCache(!devicesById.containsKey(id));
+        } catch (SQLException e) {
+            Log.warning(e);
+        }
+        return devicesById.get(id);
+    }
+
+    @Override
+    public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
+        updateDeviceCache(!devicesByUniqueId.containsKey(uniqueId));
         return devicesByUniqueId.get(uniqueId);
     }
 
@@ -166,7 +171,7 @@ public class DataManager implements IdentityManager {
                 if (schemaVersionQuery != null) {
 
                     Schema schema = QueryBuilder.create(dataSource, schemaVersionQuery)
-                            .executeQuerySingle(new Schema());
+                            .executeQuerySingle(Schema.class);
 
                     int version = 0;
                     if (schema != null) {
@@ -241,7 +246,7 @@ public class DataManager implements IdentityManager {
     public User login(String email, String password) throws SQLException {
         User user = QueryBuilder.create(dataSource, getQuery("database.loginUser"))
                 .setString("email", email)
-                .executeQuerySingle(new User());
+                .executeQuerySingle(User.class);
         if (user != null && user.isPasswordValid(password)) {
             return user;
         } else {
@@ -251,13 +256,13 @@ public class DataManager implements IdentityManager {
 
     public Collection<User> getUsers() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectUsersAll"))
-                .executeQuery(new User());
+                .executeQuery(User.class);
     }
 
     public User getUser(long userId) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectUser"))
                 .setLong("id", userId)
-                .executeQuerySingle(new User());
+                .executeQuerySingle(User.class);
     }
 
     public void addUser(User user) throws SQLException {
@@ -277,26 +282,33 @@ public class DataManager implements IdentityManager {
         }
     }
 
+    @Deprecated
     public void removeUser(User user) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
                 .setObject(user)
                 .executeUpdate();
     }
 
+    public void removeUser(long userId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteUser"))
+                .setLong("id", userId)
+                .executeUpdate();
+    }
+
     public Collection<Permission> getPermissions() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.getPermissionsAll"))
-                .executeQuery(new Permission());
+                .executeQuery(Permission.class);
     }
 
     public Collection<Device> getAllDevices() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectDevicesAll"))
-                .executeQuery(new Device());
+                .executeQuery(Device.class);
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectDevices"))
                 .setLong("userId", userId)
-                .executeQuery(new Device());
+                .executeQuery(Device.class);
     }
 
     public void addDevice(Device device) throws SQLException {
@@ -317,11 +329,19 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
+    @Deprecated
     public void removeDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setObject(device)
                 .executeUpdate();
         AsyncServlet.sessionRefreshDevice(device.getId());
+    }
+
+    public void removeDevice(long deviceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
+                .setLong("id", deviceId)
+                .executeUpdate();
+        AsyncServlet.sessionRefreshDevice(deviceId);
     }
 
     public void linkDevice(long userId, long deviceId) throws SQLException {
@@ -340,12 +360,12 @@ public class DataManager implements IdentityManager {
         AsyncServlet.sessionRefreshUser(userId);
     }
 
-    public Collection<Position> getPositions(long userId, long deviceId, Date from, Date to) throws SQLException {
+    public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
                 .setLong("deviceId", deviceId)
                 .setDate("from", from)
                 .setDate("to", to)
-                .executeQuery(new Position());
+                .executeQuery(Position.class);
     }
 
     public void addPosition(Position position) throws SQLException {
@@ -372,12 +392,12 @@ public class DataManager implements IdentityManager {
 
     public Collection<Position> getLatestPositions() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectLatestPositions"))
-                .executeQuery(new Position());
+                .executeQuery(Position.class);
     }
 
     public Server getServer() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
-                .executeQuerySingle(new Server());
+                .executeQuerySingle(Server.class);
     }
 
     public void updateServer(Server server) throws SQLException {

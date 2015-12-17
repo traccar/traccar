@@ -7,6 +7,7 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
 import org.traccar.database.IdentityManager;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class ProtocolDecoderTest {
+public class ProtocolTest {
 
     static {
         Context.init(new IdentityManager() {
@@ -211,6 +212,19 @@ public class ProtocolDecoderTest {
         long number = ((Number) value).longValue();
         Assert.assertTrue("value too low", number >= min);
         Assert.assertTrue("value too high", number <= max);
+    }
+
+    protected void verifyCommand(
+            BaseProtocolEncoder encoder, Command command, ChannelBuffer expected) throws Exception {
+        verifyDecodedCommand(encoder.encodeCommand(command), expected);
+    }
+
+    private void verifyDecodedCommand(Object decodedObject, ChannelBuffer expected) {
+
+        Assert.assertNotNull("command is null", decodedObject);
+        Assert.assertTrue("not a buffer", decodedObject instanceof ChannelBuffer);
+        Assert.assertEquals(ChannelBuffers.hexDump(expected), ChannelBuffers.hexDump((ChannelBuffer) decodedObject));
+
     }
 
 }

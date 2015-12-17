@@ -1,15 +1,17 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
-public class H02ProtocolDecoderTest extends ProtocolDecoderTest {
+public class H02ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
+
+        verifyNothing(decoder, buffer(
+                "*HQ,1451316451,NBR,112315,724,10,2,2,215,2135,123,215,2131,121,011215,FFFFFFFF#"));
 
         verifyPosition(decoder, buffer(
                 "*HQ,1451316485,V1,121557,A,-23-3.3408,S,-48-2.8926,W,0.1,158,241115,FFFFFFFF#"));

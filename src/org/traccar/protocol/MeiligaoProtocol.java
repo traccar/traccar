@@ -21,11 +21,14 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 public class MeiligaoProtocol extends BaseProtocol {
 
     public MeiligaoProtocol() {
         super("meiligao");
+        setSupportedCommands(
+                Command.TYPE_POSITION_SINGLE);
     }
 
     @Override
@@ -35,12 +38,14 @@ public class MeiligaoProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
                 pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
+                pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
+                pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
             }
         });
     }

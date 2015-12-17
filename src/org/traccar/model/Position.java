@@ -17,12 +17,7 @@ package org.traccar.model;
 
 import java.util.Date;
 
-public class Position extends Event implements Factory {
-
-    @Override
-    public Position create() {
-        return new Position();
-    }
+public class Position extends Event {
 
     private Date fixTime;
 

@@ -17,6 +17,7 @@ package org.traccar;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
@@ -111,7 +112,8 @@ public class WebDataHandler extends BaseDataHandler {
 
         if (position.getAddress() != null) {
             try {
-                request = request.replace("{address}", URLEncoder.encode(position.getAddress(), "UTF-8"));
+                request = request.replace(
+                        "{address}", URLEncoder.encode(position.getAddress(), StandardCharsets.UTF_8.name()));
             } catch (UnsupportedEncodingException error) {
                 Log.warning(error);
             }
@@ -119,7 +121,8 @@ public class WebDataHandler extends BaseDataHandler {
 
         if (request.contains("{attributes}")) {
             try {
-                request = request.replace("{attributes}", URLEncoder.encode(attributes, "UTF-8"));
+                request = request.replace(
+                        "{attributes}", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
             } catch (UnsupportedEncodingException error) {
                 Log.warning(error);
             }

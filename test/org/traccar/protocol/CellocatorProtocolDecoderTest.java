@@ -1,12 +1,11 @@
 package org.traccar.protocol;
 
 import java.nio.ByteOrder;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
 
-public class CellocatorProtocolDecoderTest extends ProtocolDecoderTest {
+import org.junit.Test;
+import org.traccar.ProtocolTest;
+
+public class CellocatorProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

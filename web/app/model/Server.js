@@ -25,6 +25,9 @@ Ext.define('Traccar.model.Server', {
         name: 'registration',
         type: 'boolean'
     }, {
+        name: 'readonly',
+        type: 'boolean'
+    }, {
         name: 'map',
         type: 'string'
     }, {
@@ -55,7 +58,10 @@ Ext.define('Traccar.model.Server', {
 
     proxy: {
         type: 'ajax',
-        url: '/api/server/update',
+        url: '/api/server',
+        actionMethods: {
+            update: 'PUT'
+        },
         writer: {
             type: 'json',
             writeAllFields: true

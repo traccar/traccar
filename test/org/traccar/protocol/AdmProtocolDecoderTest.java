@@ -1,11 +1,11 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
 import java.nio.ByteOrder;
 
-public class AdmProtocolDecoderTest extends ProtocolDecoderTest {
+public class AdmProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {

@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.util.Date;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.traccar.model.Factory;
 
 public class JsonConverterTest {
 
@@ -20,7 +19,7 @@ public class JsonConverterTest {
                 "\"string\": \"discworld\", " +
                 "\"date\":\"2015-07-09T19:02:17.000Z\"" +
                 "}"),
-                new Primitives());
+                Primitives.class);
 
         assertEquals(true, o.getBoolean());
         assertEquals(42, o.getInt());
@@ -30,12 +29,7 @@ public class JsonConverterTest {
 
     }
 
-    public static class Primitives implements Factory {
-        
-        @Override
-        public Primitives create() {
-            return new Primitives();
-        }
+    public static class Primitives {
 
         private boolean b;
         public boolean getBoolean() { return b; }

@@ -82,33 +82,33 @@ def load_ports():
     return ports
 
 def login():
-    request = urllib2.Request(baseUrl + '/api/login')
+    request = urllib2.Request(baseUrl + '/api/session')
     response = urllib2.urlopen(request, urllib.urlencode(user))
     if debug:
         print '\nlogin: %s\n' % repr(json.load(response))
     return response.headers.get('Set-Cookie')
 
 def remove_devices(cookie):
-    request = urllib2.Request(baseUrl + '/api/device/get')
+    request = urllib2.Request(baseUrl + '/api/devices')
     request.add_header('cookie', cookie)
     response = urllib2.urlopen(request)
     data = json.load(response)
     if debug:
-        print '\ndevices: %s\n' % repr(ports)
-    for device in data['data']:
-        request = urllib2.Request(baseUrl + '/api/device/remove')
+        print '\ndevices: %s\n' % repr(data)
+    for device in data:
+        request = urllib2.Request(baseUrl + '/api/devices/' + str(device['id']))
         request.add_header('cookie', cookie)
-        response = urllib2.urlopen(request, json.dumps(device))
-        if debug:
-            print '\nremove: %s\n' % repr(json.load(response))
+        request.get_method = lambda: 'DELETE'
+        response = urllib2.urlopen(request)
 
 def add_device(cookie, unique_id):
-    request = urllib2.Request(baseUrl + '/api/device/add')
+    request = urllib2.Request(baseUrl + '/api/devices')
     request.add_header('cookie', cookie)
-    user = { 'name' : unique_id, 'uniqueId' : unique_id }
-    response = urllib2.urlopen(request, json.dumps(user))
+    request.add_header('Content-Type', 'application/json')
+    device = { 'name' : unique_id, 'uniqueId' : unique_id }
+    response = urllib2.urlopen(request, json.dumps(device))
     data = json.load(response)
-    return data['data']['id']
+    return data['id']
 
 def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -117,13 +117,13 @@ def send_message(port, message):
     s.close()
 
 def get_protocols(cookie, device_id):
-    request = urllib2.Request(baseUrl + '/api/position/get')
-    request.add_header('cookie', cookie)
     params = { 'deviceId' : device_id, 'from' : '2000-01-01T00:00:00.000Z', 'to' : '2050-01-01T00:00:00.000Z' }
-    response = urllib2.urlopen(request, urllib.urlencode(params))
+    request = urllib2.Request(baseUrl + '/api/positions?' + urllib.urlencode(params))
+    request.add_header('cookie', cookie)
+    request.add_header('Content-Type', 'application/json')
+    response = urllib2.urlopen(request)
     protocols = []
-    data = json.load(response)
-    for position in data['data']:
+    for position in json.load(response):
         protocols.append(position['protocol'])
     return protocols
 

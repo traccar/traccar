@@ -38,7 +38,6 @@ import javax.json.stream.JsonParsingException;
 import javax.sql.DataSource;
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.Factory;
 import org.traccar.model.MiscFormatter;
 
 public final class QueryBuilder {
@@ -272,8 +271,8 @@ public final class QueryBuilder {
         void process(T object, ResultSet resultSet) throws SQLException;
     }
 
-    public <T extends Factory> T executeQuerySingle(T prototype) throws SQLException {
-        Collection<T> result = executeQuery(prototype);
+    public <T> T executeQuerySingle(Class<T> clazz) throws SQLException {
+        Collection<T> result = executeQuery(clazz);
         if (!result.isEmpty()) {
             return result.iterator().next();
         } else {
@@ -281,7 +280,7 @@ public final class QueryBuilder {
         }
     }
 
-    private <T extends Factory> void addProcessors(
+    private <T> void addProcessors(
             List<ResultSetProcessor<T>> processors, Class<?> parameterType, final Method method, final String name) {
 
         if (parameterType.equals(boolean.class)) {
@@ -367,7 +366,7 @@ public final class QueryBuilder {
         }
     }
 
-    public <T extends Factory> Collection<T> executeQuery(T prototype) throws SQLException {
+    public <T> Collection<T> executeQuery(Class<T> clazz) throws SQLException {
         List<T> result = new LinkedList<>();
 
         if (query != null) {
@@ -380,7 +379,7 @@ public final class QueryBuilder {
 
                     List<ResultSetProcessor<T>> processors = new LinkedList<>();
 
-                    Method[] methods = prototype.getClass().getMethods();
+                    Method[] methods = clazz.getMethods();
 
                     for (final Method method : methods) {
                         if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
@@ -404,11 +403,15 @@ public final class QueryBuilder {
                     }
 
                     while (resultSet.next()) {
-                        T object = (T) prototype.create();
-                        for (ResultSetProcessor<T> processor : processors) {
-                            processor.process(object, resultSet);
+                        try {
+                            T object = clazz.newInstance();
+                            for (ResultSetProcessor<T> processor : processors) {
+                                processor.process(object, resultSet);
+                            }
+                            result.add(object);
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            throw new IllegalArgumentException();
                         }
-                        result.add(object);
                     }
                 }
 

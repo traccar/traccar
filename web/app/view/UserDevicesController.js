@@ -47,24 +47,33 @@ Ext.define('Traccar.view.UserDevicesController', {
     onBeforeSelect: function (object, record, index) {
         Ext.Ajax.request({
             scope: this,
-            url: '/api/device/link',
-            params: {
+            url: '/api/permissions',
+            jsonData: {
                 userId: this.userId,
                 deviceId: record.getData().id
             },
-            callback: Traccar.app.getErrorHandler()
+            callback: function (options, success, response) {
+                if (!success) {
+                    Traccar.app.showError(response);
+                }
+            }
         });
     },
 
     onBeforeDeselect: function (object, record, index) {
         Ext.Ajax.request({
             scope: this,
-            url: '/api/device/unlink',
-            params: {
+            method: 'DELETE',
+            url: '/api/permissions',
+            jsonData: {
                 userId: this.userId,
                 deviceId: record.getData().id
             },
-            callback: Traccar.app.getErrorHandler()
+            callback: function (options, success, response) {
+                if (!success) {
+                    Traccar.app.showError(response);
+                }
+            }
         });
     }
 });

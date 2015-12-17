@@ -17,12 +17,7 @@ package org.traccar.model;
 
 import java.util.Date;
 
-public class Device implements Factory {
-
-    @Override
-    public Device create() {
-        return new Device();
-    }
+public class Device {
 
     private long id;
 

@@ -1,11 +1,9 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
-import org.traccar.ProtocolDecoderTest;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.ProtocolTest;
 
-public class RuptelaProtocolDecoderTest extends ProtocolDecoderTest {
+public class RuptelaProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
