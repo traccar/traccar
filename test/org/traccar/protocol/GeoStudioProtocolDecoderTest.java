@@ -21,12 +21,12 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Test;
 import org.traccar.helper.ChannelBufferTools;
-import org.traccar.ProtocolDecoderTest;
+import org.traccar.ProtocolTest;
 
 import java.nio.ByteOrder;
 import javax.xml.bind.DatatypeConverter;
 
-public class GeoStudioProtocolDecoderTest extends ProtocolDecoderTest {
+public class GeoStudioProtocolDecoderTest extends ProtocolTest {
     
     @Test
     public void testDecode() throws Exception {
