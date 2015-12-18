@@ -40,7 +40,7 @@
 
     <modifyDataType tableName="position" columnName="latitude" newDataType="DOUBLE" />
     <modifyDataType tableName="position" columnName="longitude" newDataType="DOUBLE" />
-    <renameColumn tableName="position" oldColumnName="other" newColumnName="attributes" />
+    <renameColumn tableName="position" oldColumnName="other" newColumnName="attributes" columnDataType="VARCHAR(4096)" />
 
     <dropTable tableName="data" />
 

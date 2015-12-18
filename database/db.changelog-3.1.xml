@@ -41,11 +41,6 @@
     <modifyDataType tableName="device" columnName="name" newDataType="VARCHAR(128)" />
     <modifyDataType tableName="device" columnName="uniqueId" newDataType="VARCHAR(128)" />
     <modifyDataType tableName="device" columnName="status" newDataType="VARCHAR(128)" />
-      
-    <dropIndex tableName="user_device" indexName="user_device_user_id" />
-    <createIndex tableName="user_device" indexName="user_device_userId">
-      <column name="userId" />
-    </createIndex>
 
     <modifyDataType tableName="position" columnName="protocol" newDataType="VARCHAR(128)" />
     <modifyDataType tableName="position" columnName="latitude" newDataType="FLOAT" />
@@ -81,13 +76,13 @@
     <modifyDataType tableName="server" columnName="longitude" newDataType="FLOAT" />
     <addDefaultValue tableName="server" columnName="longitude" defaultValueNumeric="0" />
 
-    <dropPrimaryKey tableName="traccar" />
-    <addColumn tableName="traccar">
-        <column name="version" type="INT" defaultValueNumeric="0">
-          <constraints nullable="false" />
-        </column>
-    </addColumn>
-    <dropColumn tableName="traccar" columnName="id" />
+    <dropTable tableName="traccar" />
+
+    <createTable tableName="traccar">
+      <column name="version" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
 
     <insert tableName="traccar">
       <column name="version" valueNumeric="301" />

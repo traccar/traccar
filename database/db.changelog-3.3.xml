@@ -13,8 +13,8 @@
       </not>
     </preConditions>
 
-    <renameColumn tableName="user_device" oldColumnName="quotedRead" newColumnName="read" />
-    <renameColumn tableName="user_device" oldColumnName="quotedWrite" newColumnName="write" />
+    <renameColumn tableName="user_device" oldColumnName="quotedRead" newColumnName="read" columnDataType="BOOLEAN" />
+    <renameColumn tableName="user_device" oldColumnName="quotedWrite" newColumnName="write" columnDataType="BOOLEAN" />
 
     <modifySql>
       <replace replace="quotedRead" with="&quot;read&quot;" />
