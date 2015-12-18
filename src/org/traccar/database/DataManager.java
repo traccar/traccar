@@ -30,9 +30,7 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
-import liquibase.changelog.ChangeSetStatus;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseException;
@@ -48,7 +46,6 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.web.AsyncServlet;
-import org.traccar.web.JsonConverter;
 
 public class DataManager implements IdentityManager {
 
@@ -169,62 +166,7 @@ public class DataManager implements IdentityManager {
             Liquibase liquibase = new Liquibase(
                     config.getString("database.changelog"), resourceAccessor, database);
 
-            boolean first = true;
-            for (ChangeSetStatus status : liquibase.getChangeSetStatuses(null, new LabelExpression())) {
-                if (!status.getWillRun()) {
-                    first = false;
-                    break;
-                }
-            }
-
             liquibase.update(new Contexts());
-
-            if (first) {
-                User admin = new User();
-                admin.setName("admin");
-                admin.setEmail("admin");
-                admin.setAdmin(true);
-                admin.setPassword("admin");
-                addUser(admin);
-
-                mockData(admin.getId());
-            }
-        }
-    }
-
-    private void mockData(long userId) {
-        if (config.getBoolean("database.mock")) {
-            try {
-
-                Device device = new Device();
-                device.setName("test1");
-                device.setUniqueId("123456789012345");
-                addDevice(device);
-                linkDevice(userId, device.getId());
-
-                Position position = new Position();
-                position.setDeviceId(device.getId());
-
-                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:01.000Z"));
-                position.setLatitude(-36.8785803);
-                position.setLongitude(174.7281713);
-                addPosition(position);
-
-                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:02.000Z"));
-                position.setLatitude(-36.8870932);
-                position.setLongitude(174.7473116);
-                addPosition(position);
-
-                position.setTime(JsonConverter.parseDate("2015-05-22T12:00:03.000Z"));
-                position.setLatitude(-36.8932371);
-                position.setLongitude(174.7743053);
-                addPosition(position);
-
-                updateLatestPosition(position);
-
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
         }
     }
 
