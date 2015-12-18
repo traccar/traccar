@@ -5,22 +5,6 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-  <changeSet author="author" id="changelog-3.2-normalize">
-
-    <preConditions onFail="MARK_RAN">
-      <not>
-        <columnExists tableName="user" columnName="id"/>
-      </not>
-    </preConditions>
-
-    <renameTable oldTableName="quotedUser" newTableName="user" />
-
-    <modifySql>
-      <replace replace="quotedUser" with="&quot;user&quot;" />
-    </modifySql>
-
-  </changeSet>
-
   <changeSet author="author" id="changelog-3.2">
 
     <preConditions onFail="MARK_RAN">

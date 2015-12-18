@@ -5,24 +5,6 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-  <changeSet author="author" id="changelog-3.3-normalize">
-
-    <preConditions onFail="MARK_RAN">
-      <not>
-        <columnExists tableName="user_device" columnName="read"/>
-      </not>
-    </preConditions>
-
-    <renameColumn tableName="user_device" oldColumnName="quotedRead" newColumnName="read" columnDataType="BOOLEAN" />
-    <renameColumn tableName="user_device" oldColumnName="quotedWrite" newColumnName="write" columnDataType="BOOLEAN" />
-
-    <modifySql>
-      <replace replace="quotedRead" with="&quot;read&quot;" />
-      <replace replace="quotedWrite" with="&quot;write&quot;" />
-    </modifySql>
-
-  </changeSet>
-
   <changeSet author="author" id="changelog-3.3">
 
     <dropDefaultValue tableName="user" columnName="salt" />
