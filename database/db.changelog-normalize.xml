@@ -8,6 +8,7 @@
   <changeSet author="author" id="changelog-normalize-user">
 
     <preConditions onFail="MARK_RAN">
+      <tableExists tableName="traccar" />
       <not>
         <columnExists tableName="user" columnName="id"/>
       </not>
@@ -24,6 +25,7 @@
   <changeSet author="author" id="changelog-normalize-user-device">
 
     <preConditions onFail="MARK_RAN">
+      <tableExists tableName="traccar" />
       <not>
         <columnExists tableName="user_device" columnName="read"/>
       </not>
