@@ -44,7 +44,6 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_IMAGE_SIZE = 0x0200;
     public static final int MSG_IMAGE_PACKET = 0x0201;
 
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
