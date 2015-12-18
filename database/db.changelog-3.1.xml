@@ -109,6 +109,7 @@
     <modifyDataType tableName="server" columnName="longitude" newDataType="FLOAT" />
     <addNotNullConstraint tableName="server" columnName="longitude" columnDataType="FLOAT" />
     <addDefaultValue tableName="server" columnName="longitude" defaultValueNumeric="0" />
+    <addDefaultValue tableName="server" columnName="zoom" defaultValueNumeric="0" />
 
     <dropTable tableName="traccar" />
 
