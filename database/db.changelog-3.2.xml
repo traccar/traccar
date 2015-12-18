@@ -32,7 +32,9 @@
     <dropNotNullConstraint tableName="position" columnName="longitude" columnDataType="FLOAT" />
     <modifyDataType tableName="position" columnName="longitude" newDataType="DOUBLE" />
     <addNotNullConstraint tableName="position" columnName="longitude" columnDataType="DOUBLE" />
+    <dropNotNullConstraint tableName="position" columnName="other" columnDataType="VARCHAR(4096)" />
     <renameColumn tableName="position" oldColumnName="other" newColumnName="attributes" columnDataType="VARCHAR(4096)" />
+    <addNotNullConstraint tableName="position" columnName="attributes" columnDataType="VARCHAR(4096)" />
 
     <dropTable tableName="data" />
 
@@ -45,9 +47,11 @@
     <dropNotNullConstraint tableName="server" columnName="latitude" columnDataType="FLOAT" />
     <modifyDataType tableName="server" columnName="latitude" newDataType="DOUBLE" />
     <addNotNullConstraint tableName="server" columnName="latitude" columnDataType="DOUBLE" />
+    <addDefaultValue tableName="server" columnName="latitude" defaultValueNumeric="0" />
     <dropNotNullConstraint tableName="server" columnName="longitude" columnDataType="FLOAT" />
     <modifyDataType tableName="server" columnName="longitude" newDataType="DOUBLE" />
     <addNotNullConstraint tableName="server" columnName="longitude" columnDataType="DOUBLE" />
+    <addDefaultValue tableName="server" columnName="longitude" defaultValueNumeric="0" />
 
     <update tableName="traccar">
       <column name="version" valueNumeric="302" />
