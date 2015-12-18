@@ -69,6 +69,7 @@
         <constraints nullable="false" unique="true" />
       </column>
       <column name="status" type="VARCHAR(1024)" />
+      <column name="lastUpdate" type="TIMESTAMP" />
       <column name="positionId" type="INT" />
       <column name="dataId" type="INT" />
     </createTable>
