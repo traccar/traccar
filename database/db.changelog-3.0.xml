@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?> 
-<databaseChangeLog 
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd"> 
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <changeSet author="author" id="changelog-3.0">
 
@@ -42,6 +42,9 @@
         <constraints nullable="false" />
       </column>
       <column name="distanceUnit" type="VARCHAR(1024)" defaultValue="km">
+        <constraints nullable="false" />
+      </column>
+      <column name="speedUnit" type="VARCHAR(1024)" defaultValue="kmh">
         <constraints nullable="false" />
       </column>
       <column name="latitude" type="DOUBLE" defaultValueNumeric="0">
@@ -156,9 +159,6 @@
 
     <addForeignKeyConstraint baseTableName="data" baseColumnNames="deviceId" constraintName="fk_data_deviceId" referencedTableName="device" referencedColumnNames="id" onDelete="CASCADE" />
 
-    <addForeignKeyConstraint baseTableName="device" baseColumnNames="positionId" constraintName="fk_device_positionId" referencedTableName="position" referencedColumnNames="id" />
-    <addForeignKeyConstraint baseTableName="device" baseColumnNames="dataId" constraintName="fk_device_dataId" referencedTableName="data" referencedColumnNames="id" />
-
     <createTable tableName="server">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
@@ -182,6 +182,13 @@
         <constraints primaryKey="true" />
       </column>
     </createTable>
+
+    <insert tableName="server">
+      <column name="registration" valueBoolean="true" />
+      <column name="latitude" valueNumeric="0" />
+      <column name="longitude" valueNumeric="0" />
+      <column name="zoom" valueNumeric="0" />
+    </insert>
 
   </changeSet>
 </databaseChangeLog>

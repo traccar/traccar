@@ -19,12 +19,8 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -34,10 +30,11 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSetStatus;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -48,7 +45,6 @@ import org.traccar.model.Device;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
-import org.traccar.model.Schema;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.web.AsyncServlet;
@@ -160,9 +156,9 @@ public class DataManager implements IdentityManager {
 
     private void initDatabaseSchema() throws SQLException, LiquibaseException {
 
-        if (config.getString("web.type", "new").equals("new") || config.getString("web.type", "new").equals("api")) {
+        if (config.hasKey("database.changelog")) {
 
-            /*ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
+            ResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
 
             Database database = DatabaseFactory.getInstance().openDatabase(
                     config.getString("database.url"),
@@ -173,46 +169,17 @@ public class DataManager implements IdentityManager {
             Liquibase liquibase = new Liquibase(
                     config.getString("database.changelog"), resourceAccessor, database);
 
-            liquibase.update(new Contexts());*/
-
-
-            boolean exist = false;
-
-            try (Connection connection = dataSource.getConnection();
-                 ResultSet result = connection.getMetaData().getTables(connection.getCatalog(), null, null, null)) {
-
-                String checkTable = config.getString("database.checkTable");
-                while (result.next()) {
-                    if (result.getString("TABLE_NAME").equalsIgnoreCase(checkTable)) {
-                        exist = true;
-                        break;
-                    }
+            boolean first = true;
+            for (ChangeSetStatus status : liquibase.getChangeSetStatuses(null, new LabelExpression())) {
+                if (!status.getWillRun()) {
+                    first = false;
+                    break;
                 }
             }
 
-            if (exist) {
+            liquibase.update(new Contexts());
 
-                String schemaVersionQuery = getQuery("database.selectSchemaVersion");
-                if (schemaVersionQuery != null) {
-
-                    Schema schema = QueryBuilder.create(dataSource, schemaVersionQuery)
-                            .executeQuerySingle(Schema.class);
-
-                    int version = 0;
-                    if (schema != null) {
-                        version = schema.getVersion();
-                    }
-
-                    if (version != 302) {
-                        Log.error("Wrong database schema version (" + version + ")");
-                        throw new RuntimeException();
-                    }
-                }
-
-            } else {
-
-                QueryBuilder.create(dataSource, getQuery("database.createSchema")).executeUpdate();
-
+            if (first) {
                 User admin = new User();
                 admin.setName("admin");
                 admin.setEmail("admin");
@@ -220,14 +187,7 @@ public class DataManager implements IdentityManager {
                 admin.setPassword("admin");
                 addUser(admin);
 
-                Server server = new Server();
-                server.setRegistration(true);
-                QueryBuilder.create(dataSource, getQuery("database.insertServer"))
-                        .setObject(server)
-                        .executeUpdate();
-
                 mockData(admin.getId());
-
             }
         }
     }
@@ -395,6 +355,7 @@ public class DataManager implements IdentityManager {
 
     public void addPosition(Position position) throws SQLException {
         position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"), true)
+                .setDate("now", new Date())
                 .setObject(position)
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
@@ -406,6 +367,7 @@ public class DataManager implements IdentityManager {
 
     public void updateLatestPosition(Position position) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
+                .setDate("now", new Date())
                 .setObject(position)
                 .setDate("time", position.getFixTime()) // tmp
                 .setLong("device_id", position.getDeviceId()) // tmp
