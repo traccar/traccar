@@ -72,7 +72,7 @@ public class WebServer {
         initServer();
         switch (config.getString("web.type", "new")) {
             case "api":
-                initApi();
+                initOldApi();
                 break;
             case "old":
                 initOldApi();
