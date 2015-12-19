@@ -37,7 +37,7 @@ public class Gl100ProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .number("d+,")                       // number
             .number("d,")                        // reserved / geofence id
-            .number("d")                         // reserved / geofence alert
+            .number("d+")                        // reserved / geofence alert // battery
             .or()
             .number("[^,]*")                     // calling number
             .groupEnd(",")
