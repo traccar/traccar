@@ -38,8 +38,8 @@ Ext.define('Traccar.view.UserDialogController', {
             }
             store.sync({
                 failure: function (batch) {
-                    store.rejectChanges(); // TODO
-                    Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+                    store.rejectChanges();
+                    Traccar.app.showError(batch.exceptions[0].getError().response);
                 }
             });
         }

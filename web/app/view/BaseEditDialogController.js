@@ -29,12 +29,9 @@ Ext.define('Traccar.view.BaseEditDialogController', {
                 store.add(record);
             }
             store.sync({
-                success: function () {
-                    store.reload(); // workaround for selection problem
-                },
                 failure: function (batch) {
                     store.rejectChanges();
-                    Traccar.ErrorManager.check(true, batch.exceptions[0].getResponse());
+                    Traccar.app.showError(batch.exceptions[0].getError().response);
                 }
             });
         } else {
