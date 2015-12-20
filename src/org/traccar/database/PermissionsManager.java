@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.traccar.helper.Log;
-import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
 
@@ -80,14 +79,6 @@ public class PermissionsManager {
     public void checkDevice(long userId, long deviceId) throws SecurityException {
         if (!getNotNull(userId).contains(deviceId)) {
             throw new SecurityException("Device access denied");
-        }
-    }
-
-    public <T> void check(Class<T> clazz, long userId, long entityId) throws SecurityException {
-        if (clazz.equals(User.class)) {
-            checkUser(userId, entityId);
-        } else if (clazz.equals(Device.class)) {
-            checkDevice(userId, entityId);
         }
     }
 
