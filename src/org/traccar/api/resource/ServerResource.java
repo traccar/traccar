@@ -44,6 +44,7 @@ public class ServerResource extends BaseResource {
     public Response update(Server entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getDataManager().updateServer(entity);
+        Context.getPermissionsManager().refresh();
         return Response.ok(entity).build();
     }
 

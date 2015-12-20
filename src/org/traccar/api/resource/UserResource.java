@@ -47,7 +47,7 @@ public class UserResource extends BaseResource {
     @PermitAll
     @POST
     public Response add(User entity) throws SQLException {
-        Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
+        Context.getPermissionsManager().checkRegistration(getUserId());
         Context.getDataManager().addUser(entity);
         Context.getPermissionsManager().refresh();
         return Response.ok(entity).build();

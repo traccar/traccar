@@ -55,6 +55,7 @@ public class DeviceResource extends BaseResource {
 
     @POST
     public Response add(Device entity) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDataManager().addDevice(entity);
         Context.getDataManager().linkDevice(getUserId(), entity.getId());
         Context.getPermissionsManager().refresh();
@@ -64,6 +65,7 @@ public class DeviceResource extends BaseResource {
     @Path("{id}")
     @PUT
     public Response update(@PathParam("id") long id, Device entity) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), id);
         Context.getDataManager().updateDevice(entity);
         return Response.ok(entity).build();
@@ -72,6 +74,7 @@ public class DeviceResource extends BaseResource {
     @Path("{id}")
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), id);
         Context.getDataManager().removeDevice(id);
         Context.getPermissionsManager().refresh();
