@@ -22,12 +22,12 @@ public class BaseResource {
     @javax.ws.rs.core.Context
     private SecurityContext securityContext;
 
-    protected SecurityContext getSecurityContext() {
-        return securityContext;
-    }
-
     protected long getUserId() {
-        return ((UserPrincipal) securityContext.getUserPrincipal()).getUserId();
+        UserPrincipal principal = (UserPrincipal) securityContext.getUserPrincipal();
+        if (principal != null) {
+            return principal.getUserId();
+        }
+        return 0;
     }
 
 }

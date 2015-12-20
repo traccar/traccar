@@ -16,9 +16,8 @@
 
 var Locale = {};
 
-Ext.Loader.setConfig({
-    disableCaching: false
-});
+Ext.Ajax.disableCaching = false;
+Ext.Loader.disableCaching = false;
 
 Locale.languages = {
     'ar': { name: 'العربية', code: 'en' },
