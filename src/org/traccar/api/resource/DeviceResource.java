@@ -28,7 +28,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.traccar.model.Device;
@@ -39,45 +39,43 @@ import org.traccar.model.Device;
 public class DeviceResource extends BaseResource {
 
     @GET
-    public Collection<Device> get() {
-        try {
+    public Collection<Device> get(
+            @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
+        if (all) {
+            Context.getPermissionsManager().checkAdmin(getUserId());
             return Context.getDataManager().getAllDevices();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
+        } else {
+            if (userId == 0) {
+                userId = getUserId();
+            }
+            Context.getPermissionsManager().checkUser(getUserId(), userId);
+            return Context.getDataManager().getDevices(userId);
         }
     }
 
     @POST
-    public Response add(Device entity) {
-        try {
-            Context.getDataManager().addDevice(entity);
-            return Response.ok(entity).build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Response add(Device entity) throws SQLException {
+        Context.getDataManager().addDevice(entity);
+        Context.getDataManager().linkDevice(getUserId(), entity.getId());
+        Context.getPermissionsManager().refresh();
+        return Response.ok(entity).build();
     }
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, Device entity) {
-        try {
-            entity.setId(id);
-            Context.getDataManager().updateDevice(entity);
-            return Response.ok(entity).build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Response update(@PathParam("id") long id, Device entity) throws SQLException {
+        Context.getPermissionsManager().checkDevice(getUserId(), id);
+        Context.getDataManager().updateDevice(entity);
+        return Response.ok(entity).build();
     }
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) {
-        try {
-            Context.getDataManager().removeDevice(id);
-            return Response.noContent().build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Response remove(@PathParam("id") long id) throws SQLException {
+        Context.getPermissionsManager().checkDevice(getUserId(), id);
+        Context.getDataManager().removeDevice(id);
+        Context.getPermissionsManager().refresh();
+        return Response.noContent().build();
     }
 
 }

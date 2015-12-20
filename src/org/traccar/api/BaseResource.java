@@ -15,5 +15,19 @@
  */
 package org.traccar.api;
 
+import javax.ws.rs.core.SecurityContext;
+
 public class BaseResource {
+
+    @javax.ws.rs.core.Context
+    private SecurityContext securityContext;
+
+    protected SecurityContext getSecurityContext() {
+        return securityContext;
+    }
+
+    protected long getUserId() {
+        return ((UserPrincipal) securityContext.getUserPrincipal()).getUserId();
+    }
+
 }

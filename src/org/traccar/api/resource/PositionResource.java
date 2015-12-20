@@ -25,7 +25,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -37,13 +36,11 @@ public class PositionResource extends BaseResource {
 
     @GET
     public Collection<Position> get(
-            @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to) {
-        try {
-            return Context.getDataManager().getPositions(
-                    deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to));
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+            @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
+            throws SQLException {
+        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+        return Context.getDataManager().getPositions(
+                deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to));
     }
 
 }

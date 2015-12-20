@@ -26,7 +26,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -40,46 +39,40 @@ import org.traccar.model.User;
 public class UserResource extends BaseResource {
 
     @GET
-    public Collection<User> get() {
-        try {
-            return Context.getDataManager().getUsers();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Collection<User> get() throws SQLException {
+        Context.getPermissionsManager().checkAdmin(getUserId());
+        return Context.getDataManager().getUsers();
     }
 
     @PermitAll
     @POST
-    public Response add(User entity) {
-        try {
-            Context.getDataManager().addUser(entity);
-            return Response.ok(entity).build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Response add(User entity) throws SQLException {
+        Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
+        Context.getDataManager().addUser(entity);
+        Context.getPermissionsManager().refresh();
+        return Response.ok(entity).build();
     }
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, User entity) {
-        try {
-            entity.setId(id);
-            Context.getDataManager().updateUser(entity);
-            return Response.ok(entity).build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
+    public Response update(@PathParam("id") long id, User entity) throws SQLException {
+        if (entity.getAdmin()) {
+            Context.getPermissionsManager().checkAdmin(getUserId());
+        } else {
+            Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
         }
+        Context.getDataManager().updateUser(entity);
+        Context.getPermissionsManager().refresh();
+        return Response.ok(entity).build();
     }
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) {
-        try {
-            Context.getDataManager().removeUser(id);
-            return Response.noContent().build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Response remove(@PathParam("id") long id) throws SQLException {
+        Context.getPermissionsManager().checkUser(getUserId(), id);
+        Context.getDataManager().removeUser(id);
+        Context.getPermissionsManager().refresh();
+        return Response.noContent().build();
     }
 
 }

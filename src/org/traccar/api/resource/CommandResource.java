@@ -25,6 +25,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
 @Path("commands")
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,6 +34,7 @@ public class CommandResource extends BaseResource {
 
     @POST
     public Response add(Command entity) {
+        Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         Context.getConnectionManager().getActiveDevice(entity.getDeviceId()).sendCommand(entity);
         return Response.ok(entity).build();
     }

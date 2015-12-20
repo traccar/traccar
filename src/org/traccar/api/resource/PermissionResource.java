@@ -24,7 +24,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
@@ -35,23 +34,19 @@ import java.sql.SQLException;
 public class PermissionResource extends BaseResource {
 
     @POST
-    public Response add(Permission entity) {
-        try {
-            Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
-            return Response.ok(entity).build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Response add(Permission entity) throws SQLException {
+        Context.getPermissionsManager().checkAdmin(getUserId());
+        Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
+        Context.getPermissionsManager().refresh();
+        return Response.ok(entity).build();
     }
 
     @DELETE
-    public Response remove(Permission entity) {
-        try {
-            Context.getDataManager().unlinkDevice(entity.getUserId(), entity.getDeviceId());
-            return Response.noContent().build();
-        } catch (SQLException e) {
-            throw new WebApplicationException(e);
-        }
+    public Response remove(Permission entity) throws SQLException {
+        Context.getPermissionsManager().checkAdmin(getUserId());
+        Context.getDataManager().unlinkDevice(entity.getUserId(), entity.getDeviceId());
+        Context.getPermissionsManager().refresh();
+        return Response.noContent().build();
     }
 
 }

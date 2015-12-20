@@ -23,21 +23,21 @@ import javax.ws.rs.ext.ExceptionMapper;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResourceErrorHandler implements ExceptionMapper<WebApplicationException> {
+public class ResourceErrorHandler implements ExceptionMapper<Exception> {
 
     private static final String KEY_MESSAGE = "message";
     private static final String KEY_DETAILS = "details";
 
     @Override
-    public Response toResponse(WebApplicationException e) {
+    public Response toResponse(Exception e) {
         Map<String, String> error = new HashMap<>();
-        Throwable cause = e.getCause();
-        if (cause != null) {
-            error.put(KEY_MESSAGE, cause.getMessage());
-            error.put(KEY_DETAILS, Log.exceptionStack(cause));
-            return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+        if (e instanceof WebApplicationException) {
+            WebApplicationException webApplicationException = (WebApplicationException) e;
+            return Response.status(webApplicationException.getResponse().getStatus()).entity(error).build();
         } else {
-            return Response.status(e.getResponse().getStatus()).entity(error).build();
+            error.put(KEY_MESSAGE, e.getMessage());
+            error.put(KEY_DETAILS, Log.exceptionStack(e));
+            return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
     }
 
