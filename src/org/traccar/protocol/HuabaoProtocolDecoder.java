@@ -82,7 +82,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer id = buf.readBytes(6); // phone number
         int index = buf.readUnsignedShort();
 
-        if (!identify(id.toString(Charset.defaultCharset()), channel, remoteAddress)) {
+        if (!identify(ChannelBuffers.hexDump(id), channel, remoteAddress)) {
             return null;
         }
 
