@@ -222,6 +222,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_NEW = new PatternBuilder()
+            .number("dddd").optional()
             .text("$MGV")
             .number("ddd,")
             .number("(d+),")                     // imei
@@ -342,7 +343,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        if (sentence.startsWith("$MG")) {
+        if (sentence.contains("$MG")) {
             return decodeNew(channel, remoteAddress, sentence);
         } else {
             return decodeOld(channel, remoteAddress, sentence);
