@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.traccar.Context;
 import org.traccar.database.ActiveDevice;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 public class CommandServlet extends BaseServlet {
 

@@ -17,7 +17,7 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Command extends Extensible {
 
     public static final String TYPE_POSITION_SINGLE = "positionSingle";
