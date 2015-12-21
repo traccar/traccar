@@ -24,97 +24,16 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
-    <entry key='database.checkTable'>traccar</entry>
-
-    <entry key='database.selectSchemaVersion'>
-        SELECT * FROM traccar;
-    </entry>
-
-    <entry key='database.createSchema'>
-        CREATE TABLE "user" (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(128) NOT NULL,
-        email VARCHAR(128) NOT NULL UNIQUE,
-        hashedPassword VARCHAR(128) NOT NULL,
-        salt VARCHAR(128) DEFAULT '' NOT NULL,
-        readonly BIT DEFAULT 0 NOT NULL,
-        admin BIT DEFAULT 0 NOT NULL,
-        map VARCHAR(128),
-        language VARCHAR(128),
-        distanceUnit VARCHAR(128),
-        speedUnit VARCHAR(128),
-        latitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
-        longitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
-        zoom INT DEFAULT 0 NOT NULL);
-
-        CREATE TABLE device (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(128) NOT NULL,
-        uniqueId VARCHAR(128) NOT NULL UNIQUE,
-        status VARCHAR(128),
-        lastUpdate TIMESTAMP,
-        positionId INT);
-
-        CREATE TABLE user_device (
-        userId INT NOT NULL,
-        deviceId INT NOT NULL,
-        "read" BIT DEFAULT 1 NOT NULL,
-        "write" BIT DEFAULT 1 NOT NULL,
-        FOREIGN KEY (userId) REFERENCES "user" (id) ON DELETE CASCADE,
-        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
-
-        CREATE INDEX user_device_userId ON user_device(userId);
-
-        CREATE TABLE position (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        protocol VARCHAR(128),
-        deviceId INT NOT NULL,
-        serverTime TIMESTAMP NOT NULL,
-        deviceTime TIMESTAMP NOT NULL,
-        fixTime TIMESTAMP NOT NULL,
-        valid BIT NOT NULL,
-        latitude DOUBLE PRECISION NOT NULL,
-        longitude DOUBLE PRECISION NOT NULL,
-        altitude FLOAT NOT NULL,
-        speed FLOAT NOT NULL,
-        course FLOAT NOT NULL,
-        address VARCHAR(512),
-        attributes VARCHAR(4096) NOT NULL,
-        FOREIGN KEY (deviceId) REFERENCES device (id) ON DELETE CASCADE);
-
-        CREATE INDEX position_deviceId_fixTime ON position (deviceId, fixTime);
-
-        CREATE TABLE server (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        registration BIT NOT NULL,
-        map VARCHAR(128),
-        bingKey VARCHAR(128),
-        mapUrl VARCHAR(128),
-        language VARCHAR(128),
-        distanceUnit VARCHAR(128),
-        speedUnit VARCHAR(128),
-        latitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
-        longitude DOUBLE PRECISION DEFAULT 0 NOT NULL,
-        zoom INT DEFAULT 0 NOT NULL);
-
-        CREATE TABLE traccar (
-        version INT DEFAULT 0 NOT NULL);
-
-        INSERT INTO traccar (version) VALUES (302);
-    </entry>
+    <entry key='database.changelog'>[CHANGELOG]</entry>
 
     <entry key='database.selectServers'>
         SELECT * FROM server;
     </entry>
 
-    <entry key='database.insertServer'>
-        INSERT INTO server (registration, latitude, longitude, zoom)
-        VALUES (:registration, :latitude, :longitude, :zoom);
-    </entry>
-
     <entry key='database.updateServer'>
         UPDATE server SET
         registration = :registration,
+        readonly = :readonly,
         map = :map,
         bingKey = :bingKey,
         mapUrl = :mapUrl,
@@ -128,26 +47,26 @@
     </entry>
 
     <entry key='database.loginUser'>
-        SELECT * FROM "user"
+        SELECT * FROM users
         WHERE email = :email;
     </entry>
 
     <entry key='database.selectUser'>
-        SELECT * FROM "user"
+        SELECT * FROM users
         WHERE id = :id;
     </entry>
 
     <entry key='database.selectUsersAll'>
-        SELECT * FROM "user";
+        SELECT * FROM users;
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO "user" (name, email, hashedPassword, salt, admin)
+        INSERT INTO users (name, email, hashedPassword, salt, admin)
         VALUES (:name, :email, :hashedPassword, :salt, :admin);
     </entry>
 
     <entry key='database.updateUser'>
-        UPDATE "user" SET
+        UPDATE users SET
         name = :name,
         email = :email,
         admin = :admin,
@@ -162,11 +81,11 @@
     </entry>
 
     <entry key='database.updateUserPassword'>
-        UPDATE "user" SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
+        UPDATE users SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
     </entry>
 
     <entry key='database.deleteUser'>
-        DELETE FROM "user" WHERE id = :id;
+        DELETE FROM users WHERE id = :id;
     </entry>
 
     <entry key='database.getPermissionsAll'>
@@ -174,23 +93,27 @@
     </entry>
 
     <entry key='database.selectDevicesAll'>
-        SELECT * FROM device;
+        SELECT * FROM devices;
     </entry>
 
     <entry key='database.selectDevices'>
-        SELECT * FROM device d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
+        SELECT * FROM devices d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
     </entry>
 
     <entry key='database.insertDevice'>
-        INSERT INTO device (name, uniqueId) VALUES (:name, :uniqueId);
+        INSERT INTO devices (name, uniqueId) VALUES (:name, :uniqueId);
     </entry>
 
     <entry key='database.updateDevice'>
-        UPDATE device SET name = :name, uniqueId = :uniqueId WHERE id = :id;
+        UPDATE devices SET name = :name, uniqueId = :uniqueId WHERE id = :id;
+    </entry>
+
+    <entry key='database.updateDeviceStatus'>
+        UPDATE devices SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
     </entry>
 
     <entry key='database.deleteDevice'>
-        DELETE FROM device WHERE id = :id;
+        DELETE FROM devices WHERE id = :id;
     </entry>
 
     <entry key='database.linkDevice'>
@@ -202,20 +125,20 @@
     </entry>
 
     <entry key='database.selectPositions'>
-        SELECT * FROM position WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;
+        SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;
     </entry>
 
     <entry key='database.insertPosition'>
-        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
-        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
+        INSERT INTO positions (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
+        VALUES (:deviceId, :protocol, :now, :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
 
     <entry key='database.selectLatestPositions'>
-        SELECT * FROM position WHERE id IN (SELECT positionId FROM device);
+        SELECT * FROM positions WHERE id IN (SELECT positionId FROM devices);
     </entry>
 
     <entry key='database.updateLatestPosition'>
-        UPDATE device SET positionId = :id WHERE id = :deviceId;
+        UPDATE devices SET positionId = :id WHERE id = :deviceId;
     </entry>
 
     <!-- PROTOCOL CONFIG -->
@@ -315,5 +238,11 @@
     <entry key='adm.port'>5092</entry>
     <entry key='watch.port'>5093</entry>
     <entry key='t800x.port'>5094</entry>
+    <entry key='upro.port'>5095</entry>
+    <entry key='auru.port'>5096</entry>
+    <entry key='disha.port'>5097</entry>
+    <entry key='thinkrace.port'>5098</entry>
+    <entry key='pathaway.port'>5099</entry>
+    <entry key='arnavi.port'>5100</entry>
 
 </properties>
