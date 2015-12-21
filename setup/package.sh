@@ -114,6 +114,7 @@ package_unix () {
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
+  cp ../database/* out/data
   cp -r ../web/* out/web
   cp unix/traccar.xml out/conf
 
@@ -144,6 +145,7 @@ package_universal () {
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
+  cp ../database/* out/data
   cp -r ../web/* out/web
   cp windows/traccar.xml out/conf
   cp README.txt out

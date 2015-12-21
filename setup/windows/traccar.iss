@@ -23,6 +23,7 @@ Source: "..\wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: 
 
 Source: "..\..\target\tracker-server.jar"; DestDir: "{app}"
 Source: "..\..\target\lib\*"; DestDir: "{app}\lib"
+Source: "..\..\database\*"; DestDir: "{app}\data"
 Source: "..\..\web\*"; DestDir: "{app}\web"; Flags: recursesubdirs
 Source: "traccar.xml"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
 
@@ -82,5 +83,6 @@ begin
   StringChangeEx(S, '[WEB]', ExpandConstant('{app}\web'), true);
   StringChangeEx(S, '[LOG]', ExpandConstant('{app}\logs\tracker-server.log'), true);
   StringChangeEx(S, '[DATABASE]', ExpandConstant('{app}\data\database'), true);
+  StringChangeEx(S, '[CHANGELOG]', ExpandConstant('{app}\data\db.changelog-master.xml'), true);
   SaveStringToFile(ExpandConstant(CurrentFileName), S, false);
 end;
