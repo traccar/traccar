@@ -45,6 +45,7 @@ Locale.languages = {
     'sk': { name: 'Slovenčina', code: 'sk' },
     'sl': { name: 'Slovenščina', code: 'sl' },
     'sr': { name: 'Srpski', code: 'sr' },
+    'ta': { name: 'தமிழ்', code: 'en' },
     'th': { name: 'ไทย', code: 'th' },
     'uk': { name: 'Українська', code: 'ukr' },
     'zh': { name: '中文', code: 'zh_CN' }
