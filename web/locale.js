@@ -31,6 +31,7 @@ Locale.languages = {
     'fr': { name: 'Français', code: 'fr' },
     'hu': { name: 'Magyar', code: 'hu' },
     'id': { name: 'Bahasa Indonesia', code: 'id' },
+    'it': { name: 'Italiano', code: 'it' },
     'lt': { name: 'Lietuvių', code: 'lt' },
     'nl': { name: 'Nederlands', code: 'nl' },
     'no': { name: 'Norsk', code: 'no_NB' },
