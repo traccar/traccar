@@ -48,6 +48,7 @@ Locale.languages = {
     'ta': { name: 'தமிழ்', code: 'en' },
     'th': { name: 'ไทย', code: 'th' },
     'uk': { name: 'Українська', code: 'ukr' },
+    'vi': { name: 'Tiếng Việt', code: 'en' },
     'zh': { name: '中文', code: 'zh_CN' }
 };
 
