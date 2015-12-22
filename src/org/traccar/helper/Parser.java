@@ -157,7 +157,7 @@ public class Parser {
     }
 
     public double nextCoordinate() {
-        return  nextCoordinate(CoordinateFormat.DEG_MIN_HEM);
+        return nextCoordinate(CoordinateFormat.DEG_MIN_HEM);
     }
 
 }

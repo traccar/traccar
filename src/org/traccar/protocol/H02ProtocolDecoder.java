@@ -123,15 +123,15 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time
             .expression("([AV])?,")              // validity
             .groupBegin()
-            .number("(d+)(dd.d+),")              // latitude
-            .or()
             .number("-(d+)-(d+.d+),")            // latitude
+            .or()
+            .number("(d+)(dd.d+),")              // latitude
             .groupEnd()
             .expression("([NS]),")
             .groupBegin()
-            .number("(d+)(dd.d+),")              // longitude
-            .or()
             .number("-(d+)-(d+.d+),")            // longitude
+            .or()
+            .number("(d+)(dd.d+),")              // longitude
             .groupEnd()
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
@@ -164,14 +164,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(2)) {
-            position.setLatitude(parser.nextCoordinate());
+            position.setLatitude(-parser.nextCoordinate());
         }
         if (parser.hasNext(2)) {
             position.setLatitude(parser.nextCoordinate());
         }
 
         if (parser.hasNext(2)) {
-            position.setLongitude(parser.nextCoordinate());
+            position.setLongitude(-parser.nextCoordinate());
         }
         if (parser.hasNext(2)) {
             position.setLongitude(parser.nextCoordinate());

@@ -10,6 +10,10 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
 
+        verifyPosition(decoder, buffer(
+                "*HQ,4210051415,V1,164549,A,0956.3869,N,08406.7068,W,000.00,000,221215,FFFFFBFF,712,01,0,0,6#"),
+                position("2015-12-22 16:45:49.000", true, 9.93978, -84.11178));
+
         verifyNothing(decoder, buffer(
                 "*HQ,1451316451,NBR,112315,724,10,2,2,215,2135,123,215,2131,121,011215,FFFFFFFF#"));
 
