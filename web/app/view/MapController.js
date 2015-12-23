@@ -79,7 +79,7 @@ Ext.define('Traccar.view.MapController', {
     },
 
     updateDevice: function (store, data) {
-        var i, device, deviceId;
+        var i, device, deviceId, marker;
 
         if (!Ext.isArray(data)) {
             data = [data];
