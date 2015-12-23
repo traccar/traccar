@@ -28,7 +28,11 @@ public class MeiligaoProtocol extends BaseProtocol {
     public MeiligaoProtocol() {
         super("meiligao");
         setSupportedCommands(
-                Command.TYPE_POSITION_SINGLE);
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_MOVEMENT_ALARM,
+                Command.TYPE_SET_TIMEZONE,
+                Command.TYPE_REBOOT_DEVICE);
     }
 
     @Override
