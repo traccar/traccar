@@ -17,10 +17,9 @@ package org.traccar.database;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -37,7 +36,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.traccar.Config;
-import org.traccar.helper.DriverDelegate;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.MiscFormatter;
@@ -83,22 +81,19 @@ public class DataManager implements IdentityManager {
 
         } else {
 
-            // Load driver
-            String driver = config.getString("database.driver");
-            if (driver != null) {
-                String driverFile = config.getString("database.driverFile");
-
-                if (driverFile != null) {
-                    URL url = new URL("jar:file:" + new File(driverFile).getAbsolutePath() + "!/");
-                    URLClassLoader cl = new URLClassLoader(new URL[]{url});
-                    Driver d = (Driver) Class.forName(driver, true, cl).newInstance();
-                    DriverManager.registerDriver(new DriverDelegate(d));
-                } else {
-                    Class.forName(driver);
-                }
+            String driverFile = config.getString("database.driverFile");
+            if (driverFile != null) {
+                URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+                Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                method.setAccessible(true);
+                method.invoke(classLoader, new File(driverFile).toURI().toURL());
             }
 
-            // Initialize data source
+            String driver = config.getString("database.driver");
+            if (driver != null) {
+                Class.forName(driver);
+            }
+
             ComboPooledDataSource ds = new ComboPooledDataSource();
             ds.setDriverClass(config.getString("database.driver"));
             ds.setJdbcUrl(config.getString("database.url"));
@@ -112,6 +107,7 @@ public class DataManager implements IdentityManager {
                 ds.setMaxPoolSize(maxPoolSize);
             }
             dataSource = ds;
+
         }
     }
 
