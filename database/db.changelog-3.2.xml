@@ -13,13 +13,13 @@
       </not>
     </preConditions>
 
-    <dropNotNullConstraint tableName="user" columnName="latitude" columnDataType="FLOAT" />
     <dropDefaultValue tableName="user" columnName="latitude" />
+    <dropNotNullConstraint tableName="user" columnName="latitude" columnDataType="FLOAT" />
     <modifyDataType tableName="user" columnName="latitude" newDataType="DOUBLE" />
     <addNotNullConstraint tableName="user" columnName="latitude" columnDataType="DOUBLE" />
     <addDefaultValue tableName="user" columnName="latitude" defaultValueNumeric="0" />
-    <dropNotNullConstraint tableName="user" columnName="longitude" columnDataType="FLOAT" />
     <dropDefaultValue tableName="user" columnName="longitude" />
+    <dropNotNullConstraint tableName="user" columnName="longitude" columnDataType="FLOAT" />
     <modifyDataType tableName="user" columnName="longitude" newDataType="DOUBLE" />
     <addNotNullConstraint tableName="user" columnName="longitude" columnDataType="DOUBLE" />
     <addDefaultValue tableName="user" columnName="longitude" defaultValueNumeric="0" />
@@ -44,10 +44,12 @@
     <addColumn tableName="server">
       <column name="mapUrl" type="VARCHAR(128)" />
     </addColumn>
+    <dropDefaultValue tableName="server" columnName="latitude" />
     <dropNotNullConstraint tableName="server" columnName="latitude" columnDataType="FLOAT" />
     <modifyDataType tableName="server" columnName="latitude" newDataType="DOUBLE" />
     <addNotNullConstraint tableName="server" columnName="latitude" columnDataType="DOUBLE" />
     <addDefaultValue tableName="server" columnName="latitude" defaultValueNumeric="0" />
+    <dropDefaultValue tableName="server" columnName="longitude" />
     <dropNotNullConstraint tableName="server" columnName="longitude" columnDataType="FLOAT" />
     <modifyDataType tableName="server" columnName="longitude" newDataType="DOUBLE" />
     <addNotNullConstraint tableName="server" columnName="longitude" columnDataType="DOUBLE" />

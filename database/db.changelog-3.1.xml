@@ -16,14 +16,16 @@
     <dropNotNullConstraint tableName="user" columnName="name" columnDataType="VARCHAR(1024)" />
     <modifyDataType tableName="user" columnName="name" newDataType="VARCHAR(128)" />
     <addNotNullConstraint tableName="user" columnName="name" columnDataType="VARCHAR(128)" />
+    <dropUniqueConstraint tableName="user" uniqueColumns="email" constraintName="uk_user_email" />
     <dropNotNullConstraint tableName="user" columnName="email" columnDataType="VARCHAR(256)" />
     <modifyDataType tableName="user" columnName="email" newDataType="VARCHAR(128)" />
     <addNotNullConstraint tableName="user" columnName="email" columnDataType="VARCHAR(128)" />
+    <addUniqueConstraint tableName="user" columnNames="email" constraintName="uk_user_email" />
     <dropNotNullConstraint tableName="user" columnName="hashedPassword" columnDataType="VARCHAR(1024)" />
     <modifyDataType tableName="user" columnName="hashedPassword" newDataType="VARCHAR(128)" />
     <addNotNullConstraint tableName="user" columnName="hashedPassword" columnDataType="VARCHAR(128)" />
-    <dropNotNullConstraint tableName="user" columnName="salt" columnDataType="VARCHAR(1024)" />
     <dropDefaultValue tableName="user" columnName="salt" />
+    <dropNotNullConstraint tableName="user" columnName="salt" columnDataType="VARCHAR(1024)" />
     <modifyDataType tableName="user" columnName="salt" newDataType="VARCHAR(128)" />
     <addNotNullConstraint tableName="user" columnName="salt" columnDataType="VARCHAR(128)" />
     <addDefaultValue tableName="user" columnName="salt" defaultValue="" />
@@ -39,13 +41,13 @@
     <dropDefaultValue tableName="user" columnName="speedUnit" />
     <dropNotNullConstraint tableName="user" columnName="speedUnit" columnDataType="VARCHAR(128)" />
     <modifyDataType tableName="user" columnName="speedUnit" newDataType="VARCHAR(128)" />
-    <dropNotNullConstraint tableName="user" columnName="latitude" columnDataType="DOUBLE" />
     <dropDefaultValue tableName="user" columnName="latitude" />
+    <dropNotNullConstraint tableName="user" columnName="latitude" columnDataType="DOUBLE" />
     <modifyDataType tableName="user" columnName="latitude" newDataType="FLOAT" />
     <addNotNullConstraint tableName="user" columnName="latitude" columnDataType="FLOAT" />
     <addDefaultValue tableName="user" columnName="latitude" defaultValueNumeric="0" />
-    <dropNotNullConstraint tableName="user" columnName="longitude" columnDataType="DOUBLE" />
     <dropDefaultValue tableName="user" columnName="longitude" />
+    <dropNotNullConstraint tableName="user" columnName="longitude" columnDataType="DOUBLE" />
     <modifyDataType tableName="user" columnName="longitude" newDataType="FLOAT" />
     <addNotNullConstraint tableName="user" columnName="longitude" columnDataType="FLOAT" />
     <addDefaultValue tableName="user" columnName="longitude" defaultValueNumeric="0" />
@@ -53,9 +55,11 @@
     <dropNotNullConstraint tableName="device" columnName="name" columnDataType="VARCHAR(1024)" />
     <modifyDataType tableName="device" columnName="name" newDataType="VARCHAR(128)" />
     <addNotNullConstraint tableName="device" columnName="name" columnDataType="VARCHAR(128)" />
+    <dropUniqueConstraint tableName="device" uniqueColumns="uniqueId" constraintName="uk_device_uniqueId" />
     <dropNotNullConstraint tableName="device" columnName="uniqueId" columnDataType="VARCHAR(256)" />
     <modifyDataType tableName="device" columnName="uniqueId" newDataType="VARCHAR(128)" />
     <addNotNullConstraint tableName="device" columnName="uniqueId" columnDataType="VARCHAR(128)" />
+    <addUniqueConstraint tableName="device" columnNames="uniqueId" constraintName="uk_device_uniqueId" />
     <modifyDataType tableName="device" columnName="status" newDataType="VARCHAR(128)" />
 
     <modifyDataType tableName="position" columnName="protocol" newDataType="VARCHAR(128)" />

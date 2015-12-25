@@ -23,7 +23,9 @@
     <renameTable oldTableName="device" newTableName="devices" />
     <renameTable oldTableName="position" newTableName="positions" />
 
+    <dropDefaultValue tableName="user_device" columnName="read" />
     <dropColumn tableName="user_device" columnName="read" />
+    <dropDefaultValue tableName="user_device" columnName="write" />
     <dropColumn tableName="user_device" columnName="write" />
 
   </changeSet>

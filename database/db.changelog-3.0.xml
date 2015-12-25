@@ -21,7 +21,7 @@
         <constraints nullable="false" />
       </column>
       <column name="email" type="VARCHAR(256)">
-        <constraints nullable="false" unique="true" />
+        <constraints nullable="false" />
       </column>
       <column name="hashedPassword" type="VARCHAR(1024)">
         <constraints nullable="false" />
@@ -58,6 +58,8 @@
       </column>
     </createTable>
 
+    <addUniqueConstraint tableName="user" columnNames="email" constraintName="uk_user_email" />
+
     <createTable tableName="device">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
@@ -66,13 +68,15 @@
         <constraints nullable="false" />
       </column>
       <column name="uniqueId" type="VARCHAR(256)">
-        <constraints nullable="false" unique="true" />
+        <constraints nullable="false" />
       </column>
       <column name="status" type="VARCHAR(1024)" />
       <column name="lastUpdate" type="TIMESTAMP" />
       <column name="positionId" type="INT" />
       <column name="dataId" type="INT" />
     </createTable>
+
+    <addUniqueConstraint tableName="device" columnNames="uniqueId" constraintName="uk_device_uniqueId" />
 
     <createTable tableName="user_device">
       <column name="userId" type="INT">
