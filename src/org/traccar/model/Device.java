@@ -91,14 +91,4 @@ public class Device {
         this.positionId = positionId;
     }
 
-    private long dataId;
-
-    public long getDataId() {
-        return dataId;
-    }
-
-    public void setDataId(long dataId) {
-        this.dataId = dataId;
-    }
-
 }
