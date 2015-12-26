@@ -55,6 +55,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
+        position.setValid(true);
 
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             String value = entry.getValue().get(0);
