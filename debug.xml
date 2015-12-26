@@ -205,7 +205,7 @@
     <entry key='galileo.port'>5034</entry>
     <entry key='ywt.port'>5035</entry>
     <entry key='tk102.port'>5036</entry>
-    <entry key='intellitrac.port'>5037</entry>
+    <!--<entry key='intellitrac.port'>5037</entry>-->
     <entry key='gpsmta.port'>5038</entry>
     <entry key='wialon.port'>5039</entry>
     <entry key='carscop.port'>5040</entry>
