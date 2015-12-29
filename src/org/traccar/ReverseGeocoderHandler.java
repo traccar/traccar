@@ -36,7 +36,7 @@ public class ReverseGeocoderHandler implements ChannelUpstreamHandler {
 
         String formatString = Context.getConfig().getString("geocoder.format");
         if (formatString != null) {
-            addressFormat = new AddressFormat(Context.getConfig().getString("geocoder.format"));
+            addressFormat = new AddressFormat(formatString);
         } else {
             addressFormat = new AddressFormat();
         }
