@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -68,17 +69,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         DateBuilder dateBuilder = new DateBuilder(new Date())
                 .setTime(0, 0, 0, 0)
                 .addMillis(seconds * 1000);
-
-        long millis = dateBuilder.getDate().getTime();
-        long diff = System.currentTimeMillis() - millis;
-
-        if (diff > 12 * 60 * 60 * 1000) {
-            millis += 24 * 60 * 60 * 1000;
-        } else if (diff < -12 * 60 * 60 * 1000) {
-            millis -= 24 * 60 * 60 * 1000;
-        }
-
-        return new Date(millis);
+        return DateUtil.correctDay(dateBuilder.getDate());
     }
 
     @Override
