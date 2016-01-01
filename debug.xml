@@ -269,5 +269,6 @@
     <entry key='thinkrace.port'>5098</entry>
     <entry key='pathaway.port'>5099</entry>
     <entry key='arnavi.port'>5100</entry>
+    <entry key='nvs.port'>5101</entry>
 
 </properties>
