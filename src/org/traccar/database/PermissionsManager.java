@@ -64,7 +64,7 @@ public class PermissionsManager {
         }
     }
 
-    private boolean isAdmin(long userId) {
+    public boolean isAdmin(long userId) {
         return users.containsKey(userId) && users.get(userId).getAdmin();
     }
 
