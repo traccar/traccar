@@ -29,7 +29,7 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
     private ObjectMapper mapper = new ObjectMapper();
 
     public ObjectMapperProvider() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         mapper.setConfig(mapper.getSerializationConfig().with(dateFormat));

@@ -32,6 +32,7 @@ Ext.define('Traccar.model.Device', {
         type: 'string'
     }, {
         name: 'lastUpdate',
-        type: 'date'
+        type: 'date',
+        dateWriteFormat: 'C'
     }]
 });
