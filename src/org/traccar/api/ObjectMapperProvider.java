@@ -16,13 +16,10 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 
 @Provider
 public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
@@ -30,7 +27,8 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
     private ObjectMapper mapper = new ObjectMapper();
 
     public ObjectMapperProvider() {
-        mapper.setConfig(mapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
+        mapper.setConfig(mapper.getSerializationConfig().with(
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")));
     }
 
     @Override
