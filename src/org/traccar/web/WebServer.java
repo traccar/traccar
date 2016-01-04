@@ -24,9 +24,11 @@ import javax.sql.DataSource;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -53,6 +55,7 @@ public class WebServer {
     private final Config config;
     private final DataSource dataSource;
     private final HandlerList handlers = new HandlerList();
+    private final SessionManager sessionManager = new HashSessionManager();
 
     private void initServer() {
 
@@ -119,6 +122,7 @@ public class WebServer {
 
         WebAppContext app = new WebAppContext();
         app.setContextPath("/");
+        app.getSessionHandler().setSessionManager(sessionManager);
         app.setWar(config.getString("web.application"));
         handlers.addHandler(app);
     }
@@ -126,6 +130,7 @@ public class WebServer {
     private void initApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
+        servletHandler.getSessionHandler().setSessionManager(sessionManager);
 
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/socket");
 
@@ -144,6 +149,8 @@ public class WebServer {
     private void initOldApi() {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
+        servletHandler.getSessionHandler().setSessionManager(sessionManager);
+        
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
         servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
         servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
