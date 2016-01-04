@@ -18,7 +18,10 @@ package org.traccar.helper;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DateUtil {
+public final class DateUtil {
+
+    private DateUtil() {
+    }
 
     public static Date correctDay(Date guess) {
         return correctDate(new Date(), guess, Calendar.DAY_OF_MONTH);

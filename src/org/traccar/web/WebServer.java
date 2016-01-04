@@ -150,7 +150,7 @@ public class WebServer {
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletHandler.setContextPath("/api");
         servletHandler.getSessionHandler().setSessionManager(sessionManager);
-        
+
         servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
         servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
         servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
