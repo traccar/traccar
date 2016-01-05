@@ -162,6 +162,8 @@ public class DataManager implements IdentityManager {
             Liquibase liquibase = new Liquibase(
                     config.getString("database.changelog"), resourceAccessor, database);
 
+            liquibase.clearCheckSums();
+
             liquibase.update(new Contexts());
         }
     }
