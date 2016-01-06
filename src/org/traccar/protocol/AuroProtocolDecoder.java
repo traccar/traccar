@@ -27,9 +27,9 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
-public class AuruProtocolDecoder extends BaseProtocolDecoder {
+public class AuroProtocolDecoder extends BaseProtocolDecoder {
 
-    public AuruProtocolDecoder(AuruProtocol protocol) {
+    public AuroProtocolDecoder(AuroProtocol protocol) {
         super(protocol);
     }
 

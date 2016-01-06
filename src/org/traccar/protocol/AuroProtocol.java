@@ -24,10 +24,10 @@ import org.traccar.TrackerServer;
 
 import java.util.List;
 
-public class AuruProtocol extends BaseProtocol {
+public class AuroProtocol extends BaseProtocol {
 
-    public AuruProtocol() {
-        super("auru");
+    public AuroProtocol() {
+        super("auro");
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AuruProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new AuruProtocolDecoder(AuruProtocol.this));
+                pipeline.addLast("objectDecoder", new AuroProtocolDecoder(AuroProtocol.this));
             }
         });
     }

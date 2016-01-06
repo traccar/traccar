@@ -3,12 +3,12 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-public class AuruProtocolDecoderTest extends ProtocolTest {
+public class AuroProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        AuruProtocolDecoder decoder = new AuruProtocolDecoder(new AuruProtocol());
+        AuroProtocolDecoder decoder = new AuroProtocolDecoder(new AuroProtocol());
 
         verifyPosition(decoder, text(
                 "M0028T0000816398975I357325031465123E00001W*****110620150437000068DA#RD01DA240000000001+100408425+013756121100620152137231112240330004400"));
