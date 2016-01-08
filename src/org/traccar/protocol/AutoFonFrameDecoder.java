@@ -1,5 +1,6 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +23,6 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class AutoFonFrameDecoder extends FrameDecoder {
 
-    public static final int MSG_LOGIN = 0x10;
-    public static final int MSG_LOCATION = 0x11;
-    public static final int MSG_HISTORY = 0x12;
-
     @Override
     protected Object decode(
             ChannelHandlerContext ctx,
@@ -39,14 +36,20 @@ public class AutoFonFrameDecoder extends FrameDecoder {
 
         int length;
         switch (buf.getUnsignedByte(buf.readerIndex())) {
-            case MSG_LOGIN:
+            case AutoFonProtocolDecoder.MSG_LOGIN:
                 length = 12;
                 break;
-            case MSG_LOCATION:
+            case AutoFonProtocolDecoder.MSG_LOCATION:
                 length = 78;
                 break;
-            case MSG_HISTORY:
+            case AutoFonProtocolDecoder.MSG_HISTORY:
                 length = 257;
+                break;
+            case AutoFonProtocolDecoder.MSG_45_LOGIN:
+                length = 19;
+                break;
+            case AutoFonProtocolDecoder.MSG_45_LOCATION:
+                length = 34;
                 break;
             default:
                 length = 0;

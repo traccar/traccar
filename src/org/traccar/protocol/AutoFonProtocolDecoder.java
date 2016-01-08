@@ -1,5 +1,6 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +17,15 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -36,10 +40,22 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LOCATION = 0x11;
     public static final int MSG_HISTORY = 0x12;
 
+    public static final int MSG_45_LOGIN = 0x41;
+    public static final int MSG_45_LOCATION = 0x02;
+
     private static double convertCoordinate(int raw) {
         int degrees = raw / 1000000;
         double minutes = (raw % 1000000) / 10000.0;
         return degrees + minutes / 60;
+    }
+
+    private static double convertCoordinate(short degrees, int minutes) {
+        double value = degrees + BitUtil.from(minutes, 4) / 600000.0;
+        if (BitUtil.check(minutes, 0)) {
+            return value;
+        } else {
+            return -value;
+        }
     }
 
     private Position decodePosition(ChannelBuffer buf, boolean history) {
@@ -133,6 +149,59 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return positions;
+
+        } else if (type == MSG_45_LOGIN) {
+
+            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            if (!identify(imei, channel, remoteAddress)) {
+                return null;
+            }
+
+            if (channel != null) {
+                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                response.writeBytes("resp_crc=".getBytes(Charset.defaultCharset()));
+                response.writeByte(buf.getByte(buf.writerIndex() - 1));
+                channel.write(response);
+            }
+
+        } else if (type == MSG_45_LOCATION) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+
+            short status = buf.readUnsignedByte();
+            position.set(Event.KEY_ALARM, BitUtil.check(status, 7));
+            position.set(Event.KEY_BATTERY, BitUtil.to(status, 7));
+
+            buf.skipBytes(2); // remaining time
+
+            position.set(Event.PREFIX_TEMP + 1, buf.readByte());
+
+            buf.skipBytes(2); // timer (interval and units)
+            buf.readByte(); // mode
+            buf.readByte(); // gprs sending interval
+
+            buf.skipBytes(6); // mcc, mnc, lac, cid
+
+            int valid = buf.readUnsignedByte();
+            position.setValid(BitUtil.from(valid, 6) != 0);
+            position.set(Event.KEY_SATELLITES, BitUtil.from(valid, 6));
+
+            int time = buf.readUnsignedMedium();
+            int date = buf.readUnsignedMedium();
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(time / 10000, time / 100 % 100, time % 100)
+                    .setDateReverse(date / 10000, date / 100 % 100, date % 100);
+            position.setTime(dateBuilder.getDate());
+
+            position.setLatitude(convertCoordinate(buf.readUnsignedByte(), buf.readUnsignedMedium()));
+            position.setLongitude(convertCoordinate(buf.readUnsignedByte(), buf.readUnsignedMedium()));
+            position.setSpeed(buf.readUnsignedByte());
+            position.setCourse(buf.readUnsignedShort());
+
+            return position;
 
         }
 
