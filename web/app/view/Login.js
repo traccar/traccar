@@ -34,8 +34,8 @@ Ext.define('Traccar.view.Login', {
 
         autoEl: {
             tag: 'form',
-            method: 'GET',
-            action: 'blank.html',
+            method: 'POST',
+            action: 'fake-login.html',
             target: 'submitTarget'
         },
 
