@@ -84,9 +84,13 @@ Ext.define('Traccar.controller.Root', {
     },
 
     asyncUpdate: function (first) {
-        var protocol, socket;
+        var protocol, socket, self = this;
         protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
         socket = new WebSocket(protocol + window.location.host + '/api/socket');
+
+        socket.onclose = function (event) {
+            self.asyncUpdate(false);
+        };
 
         socket.onmessage = function (event) {
             var i, store, data, array, entity;

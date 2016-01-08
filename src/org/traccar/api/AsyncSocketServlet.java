@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.traccar.api.resource.SessionResource;
 
 public class AsyncSocketServlet extends WebSocketServlet {
 
-    private static final long ASYNC_TIMEOUT = 60000;
+    private static final long ASYNC_TIMEOUT = 10 * 60 * 1000;
 
     @Override
     public void configure(WebSocketServletFactory factory) {
