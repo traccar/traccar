@@ -1,1 +1,646 @@
-{"swagger":"2.0","info":{"version":"3.3-SNAPSHOT","title":"traccar"},"host":"traccar.org","basePath":"/","schemes":["http"],"paths":{"/commands":{"post":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/Command"}}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/Command"}}}}},"/devices":{"get":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"all","in":"query","required":true,"type":"boolean"},{"name":"userId","in":"query","required":true,"type":"integer"}],"responses":{"200":{"description":"OK","headers":{},"schema":{"type":"array","items":{"$ref":"#/definitions/NestedType"}}}}},"post":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/Device"}}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/Device"}}}}},"/devices/{id}":{"put":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer"},{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/Device"}}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/Device"}}}},"delete":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer"}],"responses":{"204":{"description":"No Content","headers":{}}}}},"/permissions":{"post":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/Permission"}}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/Permission"}}}},"delete":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/Permission"}}],"responses":{"204":{"description":"No Content","headers":{}}}}},"/positions":{"get":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"deviceId","in":"query","required":true,"type":"integer"},{"name":"from","in":"query","required":true,"type":"string"},{"name":"to","in":"query","required":true,"type":"string"}],"responses":{"200":{"description":"OK","headers":{},"schema":{"type":"array","items":{"$ref":"#/definitions/NestedType_2"}}}}}},"/server":{"get":{"consumes":["application/json"],"produces":["application/json"],"parameters":[],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/Server"}}}},"put":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/Server"}}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/Server"}}}}},"/session":{"get":{"consumes":["application/x-www-form-urlencoded"],"produces":["application/json"],"parameters":[],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/User"}},"404":{"description":"Not Found","headers":{}}}},"post":{"consumes":["application/x-www-form-urlencoded"],"produces":["application/json"],"parameters":[{"name":"email","in":"formData","required":true,"type":"string"},{"name":"password","in":"formData","required":true,"type":"string"}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/User"}},"401":{"description":"Unauthorized","headers":{}}}},"delete":{"consumes":["application/x-www-form-urlencoded"],"produces":["application/json"],"parameters":[],"responses":{"204":{"description":"No Content","headers":{}}}}},"/users":{"get":{"consumes":["application/json"],"produces":["application/json"],"parameters":[],"responses":{"200":{"description":"OK","headers":{},"schema":{"type":"array","items":{"$ref":"#/definitions/NestedType_2"}}}}},"post":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/User"}}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/User"}}}}},"/users/{id}":{"put":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer"},{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/User"}}],"responses":{"200":{"description":"OK","headers":{},"schema":{"$ref":"#/definitions/User"}}}},"delete":{"consumes":["application/json"],"produces":["application/json"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer"}],"responses":{"204":{"description":"No Content","headers":{}}}}}},"definitions":{"NestedType_2":{"properties":{"fixTime":{"type":"string"},"outdated":{"type":"boolean"},"valid":{"type":"boolean"},"latitude":{"type":"number"},"longitude":{"type":"number"},"altitude":{"type":"number"},"speed":{"type":"number"},"course":{"type":"number"},"address":{"type":"string"}}},"User":{"properties":{"id":{"type":"number"},"name":{"type":"string"},"email":{"type":"string"},"readonly":{"type":"boolean"},"admin":{"type":"boolean"},"map":{"type":"string"},"language":{"type":"string"},"distanceUnit":{"type":"string"},"speedUnit":{"type":"string"},"latitude":{"type":"number"},"longitude":{"type":"number"},"zoom":{"type":"number"},"password":{"type":"string"},"hashedPassword":{"type":"string"},"salt":{"type":"string"},"passwordValid":{"type":"boolean"}}},"Server":{"properties":{"id":{"type":"number"},"registration":{"type":"boolean"},"readonly":{"type":"boolean"},"map":{"type":"string"},"bingKey":{"type":"string"},"mapUrl":{"type":"string"},"language":{"type":"string"},"distanceUnit":{"type":"string"},"speedUnit":{"type":"string"},"latitude":{"type":"number"},"longitude":{"type":"number"},"zoom":{"type":"number"}}},"Command":{"properties":{}},"Device":{"properties":{"id":{"type":"number"},"name":{"type":"string"},"uniqueId":{"type":"string"},"status":{"type":"string"},"lastUpdate":{"type":"string"},"positionId":{"type":"number"}}},"Permission":{"properties":{"userId":{"type":"number"},"deviceId":{"type":"number"}}},"NestedType":{"properties":{"id":{"type":"number"},"name":{"type":"string"},"uniqueId":{"type":"string"},"status":{"type":"string"},"lastUpdate":{"type":"string"},"positionId":{"type":"number"}}}}}
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "3.3",
+        "title": "traccar"
+    },
+    "host": "traccar.org",
+    "basePath": "/api",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/commands": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Command"
+                        }
+                    }
+                }
+            }
+        },
+        "/devices": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "userId",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Device"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Device"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Device"
+                        }
+                    }
+                }
+            }
+        },
+        "/devices/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Device"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Device"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        },
+        "/permissions": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Permission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        },
+        "/positions": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Position"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/server": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Server"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Server"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Server"
+                        }
+                    }
+                }
+            }
+        },
+        "/session": {
+            "get": {
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "headers": {}
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "headers": {}
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Position"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Position": {
+            "properties": {
+                "fixTime": {
+                    "type": "string"
+                },
+                "outdated": {
+                    "type": "boolean"
+                },
+                "valid": {
+                    "type": "boolean"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "altitude": {
+                    "type": "number"
+                },
+                "speed": {
+                    "type": "number"
+                },
+                "course": {
+                    "type": "number"
+                },
+                "address": {
+                    "type": "string"
+                }
+            }
+        },
+        "User": {
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "readonly": {
+                    "type": "boolean"
+                },
+                "admin": {
+                    "type": "boolean"
+                },
+                "map": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "distanceUnit": {
+                    "type": "string"
+                },
+                "speedUnit": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "zoom": {
+                    "type": "number"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "hashedPassword": {
+                    "type": "string"
+                },
+                "salt": {
+                    "type": "string"
+                },
+                "passwordValid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "Server": {
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "registration": {
+                    "type": "boolean"
+                },
+                "readonly": {
+                    "type": "boolean"
+                },
+                "map": {
+                    "type": "string"
+                },
+                "bingKey": {
+                    "type": "string"
+                },
+                "mapUrl": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "distanceUnit": {
+                    "type": "string"
+                },
+                "speedUnit": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "zoom": {
+                    "type": "number"
+                }
+            }
+        },
+        "Command": {
+            "properties": {}
+        },
+        "Device": {
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uniqueId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "lastUpdate": {
+                    "type": "string"
+                },
+                "positionId": {
+                    "type": "number"
+                }
+            }
+        },
+        "Permission": {
+            "properties": {
+                "userId": {
+                    "type": "number"
+                },
+                "deviceId": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}
