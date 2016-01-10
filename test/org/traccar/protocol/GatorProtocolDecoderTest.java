@@ -19,6 +19,12 @@ public class GatorProtocolDecoderTest extends ProtocolTest {
         GatorProtocolDecoder decoder = new GatorProtocolDecoder(new GatorProtocol());
 
         verifyNothing(decoder, binary(
+                "242421000658e3d851150d"));
+
+        verifyAttributes(decoder, binary(
+                "242480002658e3d851a60101c662bc00000000000000000000000000470007a30b0c00b10fc900ff00460d"));
+
+        verifyNothing(decoder, binary(
                 "242421000643e30282070d"));
 
         verifyPosition(decoder, binary(
