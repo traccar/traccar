@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import java.nio.ByteOrder;
 import java.util.List;
+
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringEncoder;
@@ -41,6 +43,15 @@ public class MeitrackProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
+                pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
+            }
+        };
+        server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+        serverList.add(server);
+        server = new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
