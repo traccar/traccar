@@ -36,7 +36,7 @@ public class PermissionsManager {
 
     private final Map<Long, Set<Long>> permissions = new HashMap<>();
 
-    private Set<Long> getNotNull(long userId) {
+    private Set<Long> getPermissions(long userId) {
         if (!permissions.containsKey(userId)) {
             permissions.put(userId, new HashSet<Long>());
         }
@@ -57,7 +57,7 @@ public class PermissionsManager {
                 users.put(user.getId(), user);
             }
             for (Permission permission : dataManager.getPermissions()) {
-                getNotNull(permission.getUserId()).add(permission.getDeviceId());
+                getPermissions(permission.getUserId()).add(permission.getDeviceId());
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -81,11 +81,11 @@ public class PermissionsManager {
     }
 
     public Collection<Long> allowedDevices(long userId) {
-        return getNotNull(userId);
+        return getPermissions(userId);
     }
 
     public void checkDevice(long userId, long deviceId) throws SecurityException {
-        if (!getNotNull(userId).contains(deviceId)) {
+        if (!getPermissions(userId).contains(deviceId)) {
             throw new SecurityException("Device access denied");
         }
     }
