@@ -50,6 +50,8 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
 
+            buf.readUnsignedShort(); // length
+
             String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
 
             if (!identify(imei, channel, remoteAddress)) {
