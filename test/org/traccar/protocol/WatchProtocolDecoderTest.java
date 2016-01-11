@@ -10,6 +10,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         WatchProtocolDecoder decoder = new WatchProtocolDecoder(new WatchProtocol());
 
+        verifyPosition(decoder, text(
+                "[3G*2256002206*0079*UD2,100116,153723,A,38.000000,N,-9.000000,W,0.44,299.3,0.0,7,100,86,0,0,00000008,2,0,268,3,3010,51042,146,3010,51043,132]"));
+
         verifyNothing(decoder, text(
                 "[3G*8800000015*0003*TKQ"));
 
