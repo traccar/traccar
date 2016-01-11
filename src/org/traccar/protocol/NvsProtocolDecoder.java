@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
@@ -36,7 +37,7 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, String response) {
         if (channel != null) {
-            channel.write(response);
+            channel.write(ChannelBuffers.copiedBuffer(response, Charset.defaultCharset()));
         }
     }
 
