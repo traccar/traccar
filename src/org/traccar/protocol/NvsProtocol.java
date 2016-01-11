@@ -34,7 +34,7 @@ public class NvsProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 4, 2, 2, 0));
+                pipeline.addLast("frameDecoder", new NvsFrameDecoder());
                 pipeline.addLast("objectDecoder", new NvsProtocolDecoder(NvsProtocol.this));
             }
         });

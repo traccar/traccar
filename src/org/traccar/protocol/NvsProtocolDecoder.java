@@ -46,10 +46,8 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        buf.skipBytes(4); // marker
-        int length = buf.readUnsignedShort();
 
-        if (length == 15 + 3) {
+        if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
 
             String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
 
@@ -63,6 +61,8 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
             List<Position> positions = new LinkedList<>();
 
+            buf.skipBytes(4); // marker
+            buf.readUnsignedShort(); // length
             buf.readLong(); // imei
             buf.readUnsignedByte(); // codec
             int count = buf.readUnsignedByte();
