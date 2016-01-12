@@ -50,9 +50,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .number("-?(d+.d+),")                // latitude
             .expression("([NS]),")
             .number("-?(d+.d+),")                // longitude
-            .expression("([EW]),")
+            .expression("([EW])?,")
             .number("(d+.d+),")                  // speed
-            .number("(d+.d+),")                  // course
+            .number("(d+.?d*),")                 // course
             .number("(d+.?d*),")                 // altitude
             .number("(d+),")                     // satellites
             .number("(d+),")                     // gsm
@@ -92,15 +92,18 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, manufacturer, id, "LK");
 
             if (!content.isEmpty()) {
-                Position position = new Position();
-                position.setProtocol(getProtocolName());
-                position.setDeviceId(getDeviceId());
+                String[] values = content.split(",");
+                if (values.length >= 4) {
+                    Position position = new Position();
+                    position.setProtocol(getProtocolName());
+                    position.setDeviceId(getDeviceId());
 
-                getLastLocation(position, null);
+                    getLastLocation(position, null);
 
-                position.set(Event.KEY_BATTERY, content.split(",")[3]);
+                    position.set(Event.KEY_BATTERY, values[3]);
 
-                return position;
+                    return position;
+                }
             }
 
         } else if (type.equals("UD") || type.equals("UD2") || type.equals("AL")) {
