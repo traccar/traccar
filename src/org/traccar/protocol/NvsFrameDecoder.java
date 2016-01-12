@@ -34,9 +34,9 @@ public class NvsFrameDecoder extends FrameDecoder {
 
         int length;
         if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
-            length = buf.getUnsignedShort(buf.readerIndex());
+            length = 2 + buf.getUnsignedShort(buf.readerIndex());
         } else {
-            length = 4 + buf.getUnsignedShort(buf.readerIndex() + 4) + 2;
+            length = 4 + 2 + buf.getUnsignedShort(buf.readerIndex() + 4) + 2;
         }
 
         if (buf.readableBytes() >= length) {
