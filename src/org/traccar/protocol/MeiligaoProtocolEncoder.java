@@ -71,10 +71,10 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
                 content.writeShort(((Number) attributes.get(Command.KEY_FREQUENCY)).intValue() / 10);
                 return encodeContent(command.getDeviceId(), MSG_TRACK_BY_INTERVAL, content);
             case Command.TYPE_ENGINE_STOP:
-                content.writeByte(0x00);
+                content.writeByte(0x01);
                 return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
             case Command.TYPE_ENGINE_RESUME:
-                content.writeByte(0x01);
+                content.writeByte(0x00);
                 return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
             case Command.TYPE_MOVEMENT_ALARM:
                 content.writeShort(((Number) attributes.get(Command.KEY_RADIUS)).intValue());
