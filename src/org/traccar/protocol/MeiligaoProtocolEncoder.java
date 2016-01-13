@@ -31,6 +31,7 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
     public static final int MSG_TRACK_ON_DEMAND = 0x4101;
     public static final int MSG_TRACK_BY_INTERVAL = 0x4102;
     public static final int MSG_MOVEMENT_ALARM = 0x4106;
+    public static final int MSG_OUTPUT_CONTROL = 0x4115;
     public static final int MSG_TIME_ZONE = 0x4132;
     public static final int MSG_REBOOT_GPS = 0x4902;
 
@@ -69,6 +70,12 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_POSITION_PERIODIC:
                 content.writeShort(((Number) attributes.get(Command.KEY_FREQUENCY)).intValue() / 10);
                 return encodeContent(command.getDeviceId(), MSG_TRACK_BY_INTERVAL, content);
+            case Command.TYPE_ENGINE_STOP:
+                content.writeByte(0x00);
+                return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
+            case Command.TYPE_ENGINE_RESUME:
+                content.writeByte(0x01);
+                return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
             case Command.TYPE_MOVEMENT_ALARM:
                 content.writeShort(((Number) attributes.get(Command.KEY_RADIUS)).intValue());
                 return encodeContent(command.getDeviceId(), MSG_MOVEMENT_ALARM, content);
