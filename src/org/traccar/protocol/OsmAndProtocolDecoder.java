@@ -33,6 +33,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import sun.net.www.content.audio.basic;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
@@ -66,6 +67,9 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                         return null;
                     }
                     position.setDeviceId(getDeviceId());
+                    break;
+                case "valid":
+                    position.setValid(Boolean.parseBoolean(value));
                     break;
                 case "timestamp":
                     try {
