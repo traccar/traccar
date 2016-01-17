@@ -135,7 +135,8 @@ public class DataManager implements IdentityManager {
 
     @Override
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
-        updateDeviceCache(!devicesByUniqueId.containsKey(uniqueId));
+        updateDeviceCache(
+                !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown"));
         return devicesByUniqueId.get(uniqueId);
     }
 
