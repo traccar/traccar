@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,12 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .number("(dd)(dd)(dd)")              // time
             .number("(dd)(dd)(dd),")             // date
+            .optional(2)
             .expression("(.*)#?")                // data
             .compile();
 
     private static final Pattern PATTERN_ITEM = new PatternBuilder()
-            .number("(x+)?,")                    // event
+            .number("(x+)?,").optional()         // event
             .groupBegin()
             .text("SYS:")
             .expression("[^,]*,")
@@ -105,7 +106,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(getDeviceId());
-        position.setTime(time);
+
+        if (time != null) {
+            position.setTime(time);
+        }
 
         position.set(Event.KEY_EVENT, parser.next());
 
@@ -153,14 +157,18 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        Date time = null;
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            time = dateBuilder.getDate();
+        }
 
         List<Position> positions = new LinkedList<>();
         Parser itemParser = new Parser(PATTERN_ITEM, parser.next());
         while (itemParser.find()) {
-            positions.add(decodePosition(itemParser, dateBuilder.getDate()));
+            positions.add(decodePosition(itemParser, time));
         }
 
         return positions;
