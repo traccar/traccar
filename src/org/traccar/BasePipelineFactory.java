@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
     private LocationProviderHandler locationProviderHandler;
+    private HemisphereHandler hemisphereHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -111,6 +112,11 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (Context.getConfig().getBoolean("distance.enable")) {
             distanceHandler = new DistanceHandler();
         }
+
+        if (Context.getConfig().hasKey("location.latitudeHemisphere")
+                || Context.getConfig().hasKey("location.longitudeHemisphere")) {
+            hemisphereHandler = new HemisphereHandler();
+        }
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -128,6 +134,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         addSpecificHandlers(pipeline);
 
+        if (hemisphereHandler != null) {
+            pipeline.addLast("hemisphere", hemisphereHandler);
+        }
         if (distanceHandler != null) {
             pipeline.addLast("distance", distanceHandler);
         }
