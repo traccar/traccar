@@ -55,11 +55,6 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        Method method = resourceInfo.getResourceMethod();
-        if (method.isAnnotationPresent(PermitAll.class)) {
-            return;
-        }
-
         SecurityContext securityContext = null;
 
         String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
@@ -87,8 +82,11 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         if (securityContext != null) {
             requestContext.setSecurityContext(securityContext);
         } else {
-            throw new WebApplicationException(
-                    Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
+            Method method = resourceInfo.getResourceMethod();
+            if (!method.isAnnotationPresent(PermitAll.class)) {
+                throw new WebApplicationException(
+                        Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
+            }
         }
     }
 
