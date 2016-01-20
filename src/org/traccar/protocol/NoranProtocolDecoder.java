@@ -26,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -90,10 +91,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_ALARM, buf.readUnsignedByte());
 
             if (newFormat) {
-                position.setSpeed(buf.readUnsignedInt());
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedInt()));
                 position.setCourse(buf.readFloat());
             } else {
-                position.setSpeed(buf.readUnsignedByte());
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
                 position.setCourse(buf.readUnsignedShort());
             }
             position.setLongitude(buf.readFloat());
