@@ -10,8 +10,8 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
 
         GoSafeProtocolDecoder decoder = new GoSafeProtocolDecoder(new GoSafeProtocol());
 
-        /*verifyPositions(decoder, text(
-                "*GS02,358696043774648,GPS:230040;A;S1.166829;E36.934287;0;0;170116,STT:20;0,MGR:32755204,ADC:0;11.2;1;28.3;2;4.1,GFS:0;0"));*/
+        verifyPosition(decoder, text(
+                "*GS02,358696043774648,GPS:230040;A;S1.166829;E36.934287;0;0;170116,STT:20;0,MGR:32755204,ADC:0;11.2;1;28.3;2;4.1,GFS:0;0"));
 
         verifyNothing(decoder, text(
                 "*GS02,358696043774648"));
