@@ -101,7 +101,10 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        buf.readByte(); // header
+        if (buf.readUnsignedByte() != 0xF8) {
+            return null;
+        }
+
         buf.readUnsignedByte(); // version
         buf.readUnsignedByte(); // type
 
@@ -218,6 +221,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         if (hasLocation) {
             return position;
         }
+
         return null;
     }
 
