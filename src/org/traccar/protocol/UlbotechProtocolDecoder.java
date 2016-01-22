@@ -151,7 +151,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
                 case DATA_STATUS:
                     int status = buf.readUnsignedShort();
-                    position.set(Event.KEY_IGNITION, BitUtil.check(status, 6));
+                    position.set(Event.KEY_IGNITION, BitUtil.check(status, 9));
                     position.set(Event.KEY_STATUS, status);
                     position.set(Event.KEY_ALARM, buf.readUnsignedShort());
                     break;
