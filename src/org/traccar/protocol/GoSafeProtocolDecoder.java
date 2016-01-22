@@ -165,7 +165,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String sentence = (String) msg;
-        Pattern pattern = sentence.startsWith("*GS02") ? PATTERN_OLD : PATTERN;
+        Pattern pattern = PATTERN;
+        if (sentence.startsWith("*GS02")) {
+            pattern = PATTERN_OLD;
+        }
 
         Parser parser = new Parser(pattern, (String) msg);
         if (!parser.matches()) {

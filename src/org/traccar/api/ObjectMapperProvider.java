@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import java.text.SimpleDateFormat;
 
 @Provider
 public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
