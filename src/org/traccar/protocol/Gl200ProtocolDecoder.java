@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,8 +124,14 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d)?,")                  // odometer
             .number("(d{1,3})?,")                // battery
             .groupEnd("?")
-            .any().text(",")
-            .number("(xxxx)")
+            .groupBegin()
+            .any()
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)")              // time
+            .or()
+            .any()
+            .groupEnd()
+            .number(",(xxxx)")
             .text("$").optional()
             .compile();
 
@@ -226,6 +232,15 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
+
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                position.setTime(dateBuilder.getDate());
+            }
+        }
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
             channel.write("+SACK:" + parser.next() + "$", remoteAddress);
