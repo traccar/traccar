@@ -269,5 +269,6 @@
     <entry key='pathaway.port'>5099</entry>
     <entry key='arnavi.port'>5100</entry>
     <entry key='nvs.port'>5101</entry>
+    <entry key='kenji.port'>5102</entry>
 
 </properties>
