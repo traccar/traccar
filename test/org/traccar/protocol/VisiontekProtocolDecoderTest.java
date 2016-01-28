@@ -11,6 +11,9 @@ public class VisiontekProtocolDecoderTest extends ProtocolTest {
         VisiontekProtocolDecoder decoder = new VisiontekProtocolDecoder(new VisiontekProtocol());
 
         verifyPosition(decoder, text(
+                "$1,117,28,01,16,15,05,48,1725.0518N,07824.5298E,0620,11,0,185,2062,0,0,0,1,1,1,1,24,00.0000,00.3740,00.0000,VAJRA V1.00,A"));
+
+        verifyPosition(decoder, text(
                 "$1,VMC,358072044271838,26,10,15,10,43,20,17.066418N,080.395667E,000.0,285,00.8,0074,6390,0,0,0,0,0,0,0,0,00.00,00.00,00,00,0000,12.7,4.0,24,10,0000000000000,A,0"));
 
         verifyNothing(decoder, text(
