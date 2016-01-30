@@ -33,7 +33,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .expression("![AD],")
+            .expression("![A-D],")
             .number("(d+)/(d+)/(d+),")           // date
             .number("(d+):(d+):(d+),")           // time
             .number("(-?d+.d+),")                // latitude
@@ -62,7 +62,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             identify(sentence.substring(3, sentence.length()), channel, remoteAddress);
 
-        } else if ((sentence.startsWith("!D") || sentence.startsWith("!A")) && hasDeviceId()) {
+        } else if (sentence.matches("![A-D].*") && hasDeviceId()) {
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
