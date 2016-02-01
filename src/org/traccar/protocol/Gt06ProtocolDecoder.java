@@ -157,8 +157,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         int flags = buf.readUnsignedByte();
 
         position.set(Event.KEY_IGNITION, BitUtil.check(flags, 1));
-        // decode other flags
-
+        position.set(Event.KEY_STATUS, flags);
         position.set(Event.KEY_POWER, buf.readUnsignedByte());
         position.set(Event.KEY_GSM, buf.readUnsignedByte());
     }
