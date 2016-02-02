@@ -37,7 +37,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+),")              // alarm
             .number("(dd)/?(dd)/?(dd) ?")        // local date
             .number("(dd):?(dd)(?:dd)?,")        // local time
-            .expression("[^,]*,")
+            .expression("([^,]+)?,")             // rfid
             .expression("[FL],")                 // full / low
             .groupBegin()
             .number("(dd)(dd)(dd).(d+)")         // time utc (hhmmss.sss)
@@ -146,6 +146,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         int localHours = parser.nextInt();
         int localMinutes = parser.nextInt();
+
+        String rfid = parser.next();
+        if (alarm.equals("rfid")) {
+            position.set(Event.KEY_RFID, rfid);
+        }
 
         String utcHours = parser.next();
         String utcMinutes = parser.next();

@@ -10,6 +10,9 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
 
         Gps103ProtocolDecoder decoder = new Gps103ProtocolDecoder(new Gps103Protocol());
 
+        verifyPosition(decoder, text(
+                "imei:868683020235846,rfid,160202091347,49121185,F,011344.000,A,0447.7273,N,07538.9934,W,0.00,0,,0,0,0.00%,,"));
+
         verifyAttributes(decoder, text(
                 "imei:359710049075097,help me,,,L,,,113b,,558f,,,,,0,0,,,"));
 
