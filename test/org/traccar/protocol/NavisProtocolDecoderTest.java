@@ -13,6 +13,9 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
 
         NavisProtocolDecoder decoder = new NavisProtocolDecoder(new NavisProtocol());
 
+        verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "404e544300000000040000005a00c6812a3e410125e3a60700011705071503011030210c0000fa200910e6000000000000000000000001082106150010ae97643f88a39f3f0000000090001fcc6c450000000000000000000000000000000000000000000000f6808080"));
+
         verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "404E5443010000007B000000130044342A3E533A383631373835303035323035303739"));
 
