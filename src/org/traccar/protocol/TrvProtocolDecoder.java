@@ -58,6 +58,18 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_HEATRBEAT = new PatternBuilder()
+            .text("TRV")
+            .text("CP01,")
+            .number("(ddd)")                     // gsm
+            .number("(ddd)")                     // gps
+            .number("(ddd)")                     // battery
+            .number("(d)")                       // acc
+            .number("(dd)")                      // arm status
+            .number("(dd)")                      // working mode
+            .any()
+            .compile();
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -66,7 +78,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
         String type = sentence.substring(3, 7);
         if (channel != null) {
-            channel.write("B" + type.substring(1)); // response
+            channel.write((char) (type.charAt(0) + 1) + type.substring(1)); // response
         }
 
         if (type.equals("AP00")) {
@@ -78,7 +90,30 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type.equals("AP01") || type.equals("AP10")) {
+        if (type.equals("CP01")) {
+
+            Parser parser = new Parser(PATTERN_HEATRBEAT, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Event.KEY_GSM, parser.nextInt());
+            position.set(Event.KEY_SATELLITES, parser.nextInt());
+            position.set(Event.KEY_BATTERY  , parser.nextInt());
+            position.set(Event.KEY_IGNITION, parser.nextInt() != 0);
+
+            position.set("arm", parser.nextInt());
+            position.set("mode", parser.nextInt());
+
+            return position;
+
+        } else if (type.equals("AP01") || type.equals("AP10")) {
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
