@@ -30,6 +30,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -78,8 +79,13 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                         }
                         position.setTime(new Date(timestamp));
                     } catch (NumberFormatException error) {
-                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        position.setTime(dateFormat.parse(value));
+                        if (value.contains("T")) {
+                            position.setTime(new Date(
+                                    ISODateTimeFormat.dateTimeParser().parseMillis(value)));
+                        } else {
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            position.setTime(dateFormat.parse(value));
+                        }
                     }
                     break;
                 case "lat":
