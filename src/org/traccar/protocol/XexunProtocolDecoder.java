@@ -44,8 +44,9 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd),")             // date
             .expression("[^*]*").text("*")
-            .number("xx,")                       // checksum
-            .expression("([FL]),")               // signal
+            .number("xx")                        // checksum
+            .expression("\\r\\n").optional()
+            .expression(",([FL]),")              // signal
             .expression("([^,]*),").optional()   // alarm
             .any()
             .number("imei:(d+),")                // imei
