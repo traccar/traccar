@@ -36,7 +36,7 @@ public class Tlt2hProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(32 * 1024, "##"));
+                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(32 * 1024, "##\r\n"));
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(Tlt2hProtocol.this));
