@@ -78,7 +78,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
         String type = sentence.substring(3, 7);
         if (channel != null) {
-            channel.write((char) (type.charAt(0) + 1) + type.substring(1)); // response
+            channel.write("TRV" + (char) (type.charAt(0) + 1) + type.substring(1) + "#"); // response
         }
 
         if (type.equals("AP00")) {
