@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.PatternUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -78,6 +79,27 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number("##,imei:(d+),A")
             .compile();
 
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .text("imei:")
+            .number("(d+),")                     // imei
+            .expression("OBD,")                  // type
+            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(d+),")                     // odometer
+            .number("(d+.d+)?,")                 // fuel instant
+            .number("(?:d+.d+)?,")               // fuel average
+            .number("(d+),")                     // speed
+            .number("d+,")                       // power load
+            .number("(d+.d+%),")                 // throttle
+            .number("(d+),")                     // rpm
+            .number("(d+.d+%),")                 // battery
+            .number("[^,]*,")                    // dtc 1
+            .number("[^,]*,")                    // dtc 2
+            .number("[^,]*,")                    // dtc 3
+            .number("[^,]*")                     // dtc 4
+            .any()
+            .compile();
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -119,6 +141,33 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Event.KEY_LAC, parser.nextInt(16));
             position.set(Event.KEY_CID, parser.nextInt(16));
+
+            return position;
+
+        }
+
+        String x = PatternUtil.checkPattern(PATTERN_OBD.pattern(), sentence);
+
+        parser = new Parser(PATTERN_OBD, sentence);
+        if (parser.matches()) {
+
+            if (!identify(parser.next(), channel, remoteAddress)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+            getLastLocation(position, dateBuilder.getDate());
+
+            position.set(Event.KEY_ODOMETER, parser.nextInt());
+            position.set(Event.KEY_FUEL, parser.next());
+            position.set(Event.KEY_OBD_SPEED, parser.next());
+            position.set(Event.KEY_THROTTLE, parser.next());
+            position.set(Event.KEY_RPM, parser.next());
+            position.set(Event.KEY_BATTERY, parser.next());
 
             return position;
 

@@ -131,7 +131,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // engine load
                     break;
                 case "TR":
-                    buf.readUnsignedByte(); // throttle position
+                    position.set(Event.KEY_THROTTLE, buf.readUnsignedByte());
                     break;
                 case "ET":
                     buf.readUnsignedShort(); // engine coolant temp
