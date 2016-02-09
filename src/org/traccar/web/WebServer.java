@@ -15,23 +15,35 @@
  */
 package org.traccar.web;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.InitialContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.traccar.Config;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
@@ -54,14 +66,66 @@ public class WebServer {
     private final DataSource dataSource;
     private final HandlerList handlers = new HandlerList();
 
-    private void initServer() {
+    private void initServer() throws FileNotFoundException {
 
         String address = config.getString("web.address");
         int port = config.getInteger("web.port", 8082);
-        if (address == null) {
-            server = new Server(port);
-        } else {
-            server = new Server(new InetSocketAddress(address, port));
+        
+        String jettyDistKeystore = config.getString("web.keystorePath")+"/"+config.getString("web.keystoreFile");
+        String keystorePath = System.getProperty(
+        "traccar.keystore" , jettyDistKeystore);
+        File keystoreFile = new File(keystorePath);
+        if (!keystoreFile.exists()){
+            if (address == null) {
+                server = new Server(port);
+            } else {
+                server = new Server(new InetSocketAddress(address, port));
+            }        
+        }
+        else{        
+            server = new Server();
+            
+            HttpConfiguration http_config = new HttpConfiguration();
+            http_config.setSecureScheme("https");
+            http_config.setSecurePort(8083);
+            http_config.setOutputBufferSize(32768); 
+            
+            ServerConnector http = new ServerConnector(server,
+                    new HttpConnectionFactory(http_config));
+            http.setPort(port);
+            http.setIdleTimeout(30000);
+            
+            
+            SslContextFactory sslContextFactory = new SslContextFactory();
+            sslContextFactory.setKeyStorePath(keystoreFile.getAbsolutePath());
+            sslContextFactory.setKeyStorePassword(config.getString("web.keystorePassword"));
+            sslContextFactory.setKeyManagerPassword(config.getString("web.aliasPassword"));
+            
+            
+            HttpConfiguration https_config = new HttpConfiguration(http_config);
+            SecureRequestCustomizer src = new SecureRequestCustomizer();
+            https_config.addCustomizer(src);     
+            
+            // HTTPS connector
+            // We create a second ServerConnector, passing in the http configuration
+            // we just made along with the previously created ssl context factory.
+            // Next we set the port and a longer idle timeout.
+            ServerConnector https;
+            https = new ServerConnector(server,
+                    new SslConnectionFactory(sslContextFactory,HttpVersion.HTTP_1_1.toString()),
+                    new HttpConnectionFactory(https_config));
+            https.setPort(8443);
+            https.setIdleTimeout(500000);
+
+            // Here you see the server having multiple connectors registered with
+            // it, now requests can flow into the server from both http and https
+            // urls to their respective ports and be processed accordingly by jetty.
+            // A simple handler is also registered with the server so the example
+            // has something to pass requests off to.
+
+            // Set the connectors
+            server.setConnectors(new Connector[] { http, https });
+            
         }
     }
 
@@ -69,7 +133,11 @@ public class WebServer {
         this.config = config;
         this.dataSource = dataSource;
 
-        initServer();
+        try {
+            initServer();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         switch (config.getString("web.type", "new")) {
             case "api":
                 initOldApi();

@@ -36,6 +36,22 @@ Ext.define('Traccar.view.DeviceDialog', {
             name: 'uniqueId',
             fieldLabel: Strings.deviceIdentifier,
             allowBlank: false
+        }, {
+            xtype: 'textfield',
+            name: 'phone',
+            fieldLabel: Strings.devicePhone,
+            allowBlank: true
+        }, {
+            xtype: 'textfield',
+            name: 'apn',
+            fieldLabel: Strings.deviceApn,
+            allowBlank: true
+        }, {
+            xtype: 'textfield',
+            name: 'password',
+            fieldLabel: Strings.devicePassword,
+            inputType: 'password',
+            allowBlank: true
         }]
     }
 });

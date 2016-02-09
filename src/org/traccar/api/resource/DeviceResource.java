@@ -57,7 +57,8 @@ public class DeviceResource extends BaseResource {
     public Response add(Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDataManager().addDevice(entity);
-        Context.getDataManager().linkDevice(getUserId(), entity.getId());
+        int rights = 0xFFFFFFFF;
+        Context.getDataManager().linkDevice(getUserId(), entity.getId(), rights);
         Context.getPermissionsManager().refresh();
         return Response.ok(entity).build();
     }

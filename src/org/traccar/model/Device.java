@@ -90,5 +90,37 @@ public class Device {
     public void setPositionId(long positionId) {
         this.positionId = positionId;
     }
+    
+    private String Phone;
+
+    public String getPhone() {
+        return Phone;
+    }
+
+    public void setPhone(String Phone) {
+        this.Phone = Phone;
+    }
+   
+    private String apn;
+
+    public String getApn() {
+        return apn;
+    }
+
+    public void setApn(String apn) {
+        this.apn = apn;
+    }
+    
+    
+    private String password;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
 
 }

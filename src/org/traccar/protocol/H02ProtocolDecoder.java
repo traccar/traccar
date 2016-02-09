@@ -66,7 +66,29 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                 || !BitUtil.check(status, 3) || !BitUtil.check(status, 4)) {
             position.set(Event.KEY_ALARM, true);
         }
-        position.set(Event.KEY_IGNITION, !BitUtil.check(status, 10));
+        if (!BitUtil.check(status, 3))
+            position.set(Event.KEY_ALARM_IGNITION, true);
+        if (!BitUtil.check(status, 0) || !BitUtil.check(status, 3))
+            position.set(Event.KEY_ALARM_DOOR, true);
+        if (!BitUtil.check(status, 1))
+            position.set(Event.KEY_ALARM_SOS, true);
+        
+        if (BitUtil.check(status, 27))
+            position.set(Event.KEY_OIL_OFF, false);
+        else
+            position.set(Event.KEY_OIL_OFF, true);
+            
+        
+        
+        
+        if (BitUtil.check(status, 10))        
+            position.set(Event.KEY_IGNITION, true);
+        else
+            position.set(Event.KEY_IGNITION, false);
+        if (BitUtil.check(status, 8))
+            position.set(Event.KEY_DOOR_OPENED, false);
+        else
+            position.set(Event.KEY_DOOR_OPENED, true);
         position.set(Event.KEY_STATUS, status);
     }
 
@@ -140,8 +162,24 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8})")                    // status
             .any()
             .compile();
+    
+    private static final Pattern PATTERN_PING = new PatternBuilder()
+            .text("*")
+            .expression("..,")                   // manufacturer
+            .number("(d+),")                     // imei
+            .text("XT,V,")
+            .any()// Ping Protocol
+            .compile();
 
     private Position decodeText(String sentence, Channel channel, SocketAddress remoteAddress) {
+        
+        
+        Parser pingParser = new Parser(PATTERN_PING, sentence);
+        
+        if (pingParser.matches()){
+            identify(pingParser.next(), channel, remoteAddress);
+            return null;
+        }
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
@@ -150,6 +188,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
+        
+        
 
         if (!identify(parser.next(), channel, remoteAddress)) {
             return null;

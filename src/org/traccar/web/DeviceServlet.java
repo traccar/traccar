@@ -38,6 +38,8 @@ public class DeviceServlet extends BaseServlet {
             case "/remove":
                 remove(req, resp);
                 break;
+            case "/shares":
+                shares(req, resp);
             case "/link":
                 link(req, resp);
                 break;
@@ -71,9 +73,10 @@ public class DeviceServlet extends BaseServlet {
 
     private void add(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Device device = JsonConverter.objectFromJson(req.getReader(), Device.class);
+        int rights=0xFFFFFFFF;
         long userId = getUserId(req);
         Context.getDataManager().addDevice(device);
-        Context.getDataManager().linkDevice(userId, device.getId());
+        Context.getDataManager().linkDevice(userId, device.getId(), rights);
         Context.getPermissionsManager().refresh();
         sendResponse(resp.getWriter(), JsonConverter.objectToJson(device));
     }
@@ -95,7 +98,17 @@ public class DeviceServlet extends BaseServlet {
 
     private void link(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Context.getPermissionsManager().checkAdmin(getUserId(req));
+        int rights=0xFFFFFFFF;
         Context.getDataManager().linkDevice(
+                Long.parseLong(req.getParameter("userId")),
+                Long.parseLong(req.getParameter("deviceId")),
+                rights);
+        Context.getPermissionsManager().refresh();
+        sendResponse(resp.getWriter(), true);
+    }
+    
+    private void shares(HttpServletRequest req, HttpServletResponse resp) throws Exception {        
+        Context.getDataManager().getDeviceLinks(
                 Long.parseLong(req.getParameter("userId")),
                 Long.parseLong(req.getParameter("deviceId")));
         Context.getPermissionsManager().refresh();

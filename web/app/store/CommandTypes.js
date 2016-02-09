@@ -30,5 +30,32 @@ Ext.define('Traccar.store.CommandTypes', {
     }, {
         key: 'engineResume',
         name: Strings.commandEngineResume
+    }, {
+        key: 'doorArm',
+        name: Strings.commandDoorArm
+    }, {
+        key: 'doorDisarm',
+        name: Strings.commandDoorDisarm
+    }, {
+        key: 'ignitionArm',
+        name: Strings.commandIgnitionArm
+    }, {
+        key: 'ignitionDisarm',
+        name: Strings.commandIgnitionDisarm
+    }, {
+        key: 'positionArm',
+        name: Strings.commandPositionArm
+    }, {
+        key: 'positionDisarm',
+        name: Strings.commandPositionDisarm
+    }, {
+        key: "dropAlarms",
+        name: Strings.commandDropAlarms
+    }, {
+        key: "alarmArm",
+        name: Strings.commandAlarmArm
+    }, {
+        key: "alarmDisarm",
+        name: Strings.commandAlarmDisarm
     }]
 });

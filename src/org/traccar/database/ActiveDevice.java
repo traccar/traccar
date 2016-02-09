@@ -16,6 +16,7 @@
 package org.traccar.database;
 
 import java.net.SocketAddress;
+import java.util.Set;
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
 import org.traccar.model.Command;
@@ -36,6 +37,10 @@ public class ActiveDevice {
 
     public Channel getChannel() {
         return channel;
+    }
+    
+    public Set<String> getCommandList(){
+        return protocol.getSupportedCommands();
     }
 
     public long getDeviceId() {

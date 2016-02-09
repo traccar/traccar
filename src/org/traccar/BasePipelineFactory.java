@@ -15,7 +15,23 @@
  */
 package org.traccar;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
@@ -29,6 +45,7 @@ import org.jboss.netty.channel.DownstreamMessageEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
+import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.helper.Log;
 
@@ -36,6 +53,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
     private final int resetDelay;
+    private final String keystore_path;
+    
 
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
@@ -94,6 +113,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         this.server = server;
 
         resetDelay = Context.getConfig().getInteger(protocol + ".resetDelay", 0);
+        
+        keystore_path = Context.getConfig().getString("web.keystorePath");
 
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
@@ -116,7 +137,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
 
     @Override
-    public ChannelPipeline getPipeline() {
+    public ChannelPipeline getPipeline() throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         ChannelPipeline pipeline = Channels.pipeline();
         if (resetDelay != 0) {
             pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), resetDelay, 0, 0));
@@ -149,6 +170,33 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
         }
         if (Context.getConfig().getBoolean("forward.enable")) {
+//      Adding ssl support to web application
+        
+//            if (keystore_path!=null && !keystore_path.isEmpty()){
+//                    TrustManagerFactory tmFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+//                    KeyStore tmpKS = null;
+//                    tmFactory.init(tmpKS);
+//                    KeyStore ks = KeyStore.getInstance("JKS");
+//
+//                    String keystore_pass = Context.getConfig().getString("web.keystorePassword");
+//                    ks.load(new FileInputStream(keystore_path), keystore_pass.toCharArray());
+//
+//                    // Set up key manager factory to use our key store
+//                    KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+//                    kmf.init(ks, keystore_pass.toCharArray());
+//
+//                    KeyManager[] km = kmf.getKeyManagers();
+//                    TrustManager[] tm = tmFactory.getTrustManagers();
+//
+//                    SSLContext sslContext = SSLContext.getInstance("TLS");
+//                    sslContext.init(km, tm, null);
+//                    SSLEngine sslEngine = sslContext.createSSLEngine();
+//                    sslEngine.setUseClientMode(false);
+//                    sslEngine.setEnabledProtocols(sslEngine.getSupportedProtocols());
+//                    sslEngine.setEnabledCipherSuites(sslEngine.getSupportedCipherSuites());
+//                    sslEngine.setEnableSessionCreation(true);
+//                    pipeline.addLast("ssl", new SslHandler(sslEngine));
+//            }            
             pipeline.addLast("webHandler", new WebDataHandler(Context.getConfig().getString("forward.url")));
         }
         pipeline.addLast("mainHandler", new MainEventHandler());

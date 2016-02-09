@@ -27,6 +27,11 @@ public abstract class Event extends Extensible {
     public static final String KEY_GPS = "gps";
     public static final String KEY_EVENT = "event";
     public static final String KEY_ALARM = "alarm";
+    public static final String KEY_ALARM_DOOR = "alarm-door";
+    public static final String KEY_ALARM_IGNITION = "alarm-ignition";
+    public static final String KEY_ALARM_MOVE = "alarm-move";
+    public static final String KEY_ALARM_SOS = "alarm-sos";
+    public static final String KEY_OIL_OFF = "oil-off";
     public static final String KEY_STATUS = "status";
     public static final String KEY_ODOMETER = "odometer";
     public static final String KEY_INPUT = "input";
@@ -42,6 +47,7 @@ public abstract class Event extends Extensible {
     public static final String KEY_VERSION = "version";
     public static final String KEY_TYPE = "type";
     public static final String KEY_IGNITION = "ignition";
+    public static final String KEY_DOOR_OPENED = "door-opened";
     public static final String KEY_FLAGS = "flags";
     public static final String KEY_CHARGE = "charge";
     public static final String KEY_IP = "ip";

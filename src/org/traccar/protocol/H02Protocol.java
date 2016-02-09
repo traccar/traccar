@@ -21,11 +21,29 @@ import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
 import java.util.List;
+import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
+import org.traccar.model.Command;
 
 public class H02Protocol extends BaseProtocol {
 
     public H02Protocol() {
         super("h02");
+        setSupportedCommands(
+                Command.TYPE_POSITION_STOP,
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_ALARM_ARM,
+                Command.TYPE_ALARM_DISARM,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ALARM_DOOR_ARM,
+                Command.TYPE_ALARM_DOOR_DISARM,
+                Command.TYPE_ALARM_IGNITION_ARM,
+                Command.TYPE_ALARM_IGNITION_DISARM,
+                Command.TYPE_MOVEMENT_ALARM,
+                Command.TYPE_ALARM_POSITION_DISARM
+                );
     }
 
     @Override
@@ -35,6 +53,8 @@ public class H02Protocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new H02FrameDecoder());
                 pipeline.addLast("objectDecoder", new H02ProtocolDecoder(H02Protocol.this));
+                pipeline.addLast("stringEncoder", new StringEncoder());         
+                pipeline.addLast("objectEncoder", new H02ProtocolEncoder());
             }
         });
     }

@@ -38,6 +38,11 @@ public abstract class BaseProtocol implements Protocol {
     public void setSupportedCommands(String... commands) {
         supportedCommands.addAll(Arrays.asList(commands));
     }
+    
+    @Override
+    public Set<String> getSupportedCommands(){
+        return supportedCommands;        
+    }
 
     @Override
     public void sendCommand(ActiveDevice activeDevice, Command command) {
@@ -46,5 +51,4 @@ public abstract class BaseProtocol implements Protocol {
         }
         activeDevice.write(command);
     }
-
 }

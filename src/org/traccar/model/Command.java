@@ -27,10 +27,18 @@ public class Command extends Extensible {
     public static final String TYPE_ENGINE_RESUME = "engineResume";
     public static final String TYPE_ALARM_ARM = "alarmArm";
     public static final String TYPE_ALARM_DISARM = "alarmDisarm";
+    public static final String TYPE_ALARM_DOOR_ARM = "doorArm";
+    public static final String TYPE_ALARM_DOOR_DISARM = "doorDisarm";
+    public static final String TYPE_ALARM_IGNITION_ARM = "ignitionArm";
+    public static final String TYPE_ALARM_IGNITION_DISARM = "ignitionDisarm";
+    public static final String TYPE_MOVEMENT_ALARM = "movementAlarm";
+    public static final String TYPE_ALARM_POSITION_DISARM = "positionDisarm";
+    public static final String TYPE_ALARM_DROP = "dropAlarms";
+    
+
     public static final String TYPE_SET_TIMEZONE = "setTimezone";
     public static final String TYPE_REQUEST_PHOTO = "requestPhoto";
     public static final String TYPE_REBOOT_DEVICE = "rebootDevice";
-    public static final String TYPE_MOVEMENT_ALARM = "movementAlarm";
 
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";

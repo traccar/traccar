@@ -20,7 +20,10 @@ Ext.define('Traccar.view.CommandDialogController', {
 
     onSelect: function (selected) {
         this.lookupReference('paramPositionPeriodic').setHidden(
-            selected.getValue() !== 'positionPeriodic');
+            selected.getValue() !== 'positionPeriodic' && selected.getValue() !== 'positionArm' );
+    },
+    
+    initComponent(){
     },
 
     onSendClick: function (button) {
@@ -35,6 +38,14 @@ Ext.define('Traccar.view.CommandDialogController', {
             value = attributes.down('numberfield[name="frequency"]').getValue();
             value *= attributes.down('combobox[name="unit"]').getValue();
 
+            record.set('attributes', {
+                frequency: value
+            });
+        }
+
+        if (record.get('type') === 'positionArm') {
+            attributes = this.lookupReference('paramPositionPeriodic');
+            value = attributes.down('numberfield[name="frequency"]').getValue();
             record.set('attributes', {
                 frequency: value
             });

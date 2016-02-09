@@ -36,7 +36,8 @@ public class PermissionResource extends BaseResource {
     @POST
     public Response add(Permission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
+        int rights=0xFFFFFFFF;
+        Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId(), rights);
         Context.getPermissionsManager().refresh();
         return Response.ok(entity).build();
     }
