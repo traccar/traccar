@@ -8,7 +8,7 @@
 
     <entry key='web.keystorePath'>/home/andrey/projects/NetBeansProjects/ssl/tc</entry>
     <entry key='web.keystoreFile'>keystore.jks</entry>
-    <entry key='web.keystorePassword'>password</entry>
+    <entry key='web.keystorePassword'>passwor</entry>
     <entry key='web.aliasPassword'>ajhtdf!</entry>
     
     <entry key='web.enable'>true</entry>
