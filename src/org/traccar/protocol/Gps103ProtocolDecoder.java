@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -145,8 +144,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         }
-
-        String x = PatternUtil.checkPattern(PATTERN_OBD.pattern(), sentence);
 
         parser = new Parser(PATTERN_OBD, sentence);
         if (parser.matches()) {
