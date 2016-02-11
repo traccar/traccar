@@ -142,7 +142,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     response.writeShort(length);
                     response.writeBytes(id);
                     response.writeShort(ChannelBuffers.swapShort((short) 0x1001));
-                    response.writeInt((int) (System.currentTimeMillis() / 1000));
+                    response.writeInt(0);
                     for (int i = 0; i < 8; i++) {
                         response.writeByte(0xff);
                     }
