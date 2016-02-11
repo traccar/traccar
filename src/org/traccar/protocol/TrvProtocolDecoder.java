@@ -44,7 +44,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW])")
             .number("(ddd.d)")                   // speed
             .number("(dd)(dd)(dd)")              // time
-            .number("(ddd.dd)")                  // course
+            .number("([d.]{6})")                 // course
             .number("(ddd)")                     // gsm
             .number("(ddd)")                     // satellites
             .number("(ddd)")                     // battery
