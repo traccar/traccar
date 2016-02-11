@@ -115,9 +115,14 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        buf.skipBytes(2); // header
+        int header = buf.readUnsignedShort();
         buf.readUnsignedShort(); // length
-        int version = buf.readUnsignedByte();
+
+        int version = -1;
+        if (header == 0x4040) {
+            version = buf.readUnsignedByte();
+        }
+
         ChannelBuffer id = buf.readBytes(20);
         int type = ChannelBuffers.swapShort(buf.readShort());
 
@@ -125,7 +130,19 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (version == 4) {
+        if (version == -1) {
+
+            if (type == 0x2001) {
+
+                buf.readUnsignedInt(); // index
+                buf.readUnsignedInt(); // unix time
+                buf.readUnsignedByte();
+
+                return readPosition(buf);
+
+            }
+
+        } else if (version == 4) {
 
             if (type == MSG_SC_HEARTBEAT) {
 
