@@ -29,6 +29,7 @@ public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
         super("minifinder");
+        setSupportedCommands("CUSTOM");
     }
 
     @Override
