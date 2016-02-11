@@ -134,6 +134,24 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             if (type == 0x2001) {
 
+                if (channel != null) {
+                    int length = 2 + 2 + id.readableBytes() + 2 + 4 + 8 + 2 + 2;
+
+                    ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, length);
+                    response.writeByte('@'); response.writeByte('@');
+                    response.writeShort(length);
+                    response.writeBytes(id);
+                    response.writeShort(ChannelBuffers.swapShort((short) 0x1001));
+                    response.writeInt((int) (System.currentTimeMillis() / 1000));
+                    for (int i = 0; i < 8; i++) {
+                        response.writeByte(0xff);
+                    }
+                    response.writeShort(
+                            Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
+                    response.writeByte(0x0D); response.writeByte(0x0A);
+                    channel.write(response, remoteAddress);
+                }
+
                 buf.readUnsignedInt(); // index
                 buf.readUnsignedInt(); // unix time
                 buf.readUnsignedByte();
