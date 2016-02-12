@@ -134,8 +134,7 @@ public class WebServer {
         resourceConfig.register(SecurityRequestFilter.class);
         resourceConfig.register(CorsResponseFilter.class);
         resourceConfig.registerClasses(ServerResource.class, SessionResource.class, CommandResource.class,
-                PermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class,
-                /*sos*/SOSResource.class);
+                PermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class);
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
         handlers.addHandler(servletHandler);
