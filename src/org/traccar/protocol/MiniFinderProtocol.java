@@ -30,7 +30,7 @@ public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
         super("minifinder");
-        setSupportedCommands(Command.TYPE_POSITION_PERIODIC);
+        setSupportedCommands(Command.CUSTOM);
     }
 
     @Override
