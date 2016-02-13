@@ -203,7 +203,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set("odb-connect", parser.next());
         position.set("dtcs-number", parser.next());
         position.set("dtcs-codes", parser.next());
-        position.set("throttle-position", parser.next());
+        position.set(Event.KEY_THROTTLE, parser.next());
         position.set(Event.KEY_FUEL, parser.next());
         position.set(Event.KEY_OBD_ODOMETER, parser.next());
 

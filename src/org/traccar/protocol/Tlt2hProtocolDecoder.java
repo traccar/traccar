@@ -35,7 +35,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_HEADER = new PatternBuilder()
             .number("#(d+)#")                    // imei
-            .expression("[^#]+#")
+            .expression("[^#]*#")
             .number("d+#")
             .expression("([^#]+)#")              // status
             .number("d+")                        // number of records
@@ -50,8 +50,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude
             .number("([EW]),")
-            .number("(d+.d+)?,")                 // speed
-            .number("(d+.d+)?,")                 // course
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .any()
             .compile();

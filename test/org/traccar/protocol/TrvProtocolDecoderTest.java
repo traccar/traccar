@@ -16,6 +16,15 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "TRVCP01,06000908000102"));
 
+        verifyAttributes(decoder, text(
+                "TRVCP01,100007100000001020151060011"));
+
+        verifyPosition(decoder, text(
+                "TRVAP01160211A2544.5118N05553.7586E105.711185941.52010001010010000,424,030,3011,27003"));
+
+        verifyPosition(decoder, text(
+                "TRVAP01160209A2540.8863N05546.6125E005.6075734123.7910000810010000,424,030,3012,27323"));
+
         verifyPosition(decoder, text(
                 "TRVAP01080524A2232.9806N11404.9355E000.1061830323.8706000908000102,460,0,9520,3671"));
 
