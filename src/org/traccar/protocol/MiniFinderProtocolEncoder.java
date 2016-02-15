@@ -27,8 +27,8 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
-            case Command.CUSTOM:
-                return command.getAttributes().keySet().iterator().next().toString();
+            case Command.TYPE_CUSTOM:
+                return command.getAttributes().get("raw");
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
