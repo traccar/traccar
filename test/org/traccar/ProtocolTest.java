@@ -194,7 +194,7 @@ public class ProtocolTest {
 
         if (attributes.containsKey(Event.KEY_LAC) || attributes.containsKey(Event.KEY_CID)) {
             checkInteger(attributes.get(Event.KEY_LAC), 1, 65535);
-            checkInteger(attributes.get(Event.KEY_CID), 1, 268435455);
+            checkInteger(attributes.get(Event.KEY_CID), 0, 268435455);
         }
 
         if (attributes.containsKey(Event.KEY_MCC) || attributes.containsKey(Event.KEY_MNC)) {
