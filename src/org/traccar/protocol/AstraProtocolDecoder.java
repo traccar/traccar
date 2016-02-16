@@ -45,6 +45,10 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
+        if (channel != null) {
+            channel.write(ChannelBuffers.wrappedBuffer(new byte[] {0x06}), remoteAddress);
+        }
+
         buf.readUnsignedByte(); // protocol
         buf.readUnsignedShort(); // length
 
