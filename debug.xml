@@ -271,5 +271,6 @@
     <entry key='nvs.port'>5101</entry>
     <entry key='kenji.port'>5102</entry>
     <entry key='astra.port'>5103</entry>
+    <entry key='homtecs.port'>5104</entry>
 
 </properties>
