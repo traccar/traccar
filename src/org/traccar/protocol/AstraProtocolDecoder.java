@@ -78,7 +78,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedByte() * 2);
 
             int reason = buf.readUnsignedMedium();
-            int status = buf.readUnsignedShort();
+            buf.readUnsignedShort(); // status
 
             position.set(Event.PREFIX_IO + 1, buf.readUnsignedByte());
             position.set(Event.PREFIX_ADC + 1, buf.readUnsignedByte());
@@ -107,11 +107,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
-            if (BitUtil.check(status, 6)) {
-
-                // extra data
-
-            }
+            // extra data
 
             positions.add(position);
 

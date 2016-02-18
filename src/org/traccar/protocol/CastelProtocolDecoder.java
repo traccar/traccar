@@ -109,6 +109,28 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void sendResponse(
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer id, short type) {
+
+        if (channel != null) {
+            int length = 2 + 2 + id.readableBytes() + 2 + 4 + 8 + 2 + 2;
+
+            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, length);
+            response.writeByte('@'); response.writeByte('@');
+            response.writeShort(length);
+            response.writeBytes(id);
+            response.writeShort(ChannelBuffers.swapShort(type));
+            response.writeInt(0);
+            for (int i = 0; i < 8; i++) {
+                response.writeByte(0xff);
+            }
+            response.writeShort(
+                    Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
+            response.writeByte(0x0D); response.writeByte(0x0A);
+            channel.write(response, remoteAddress);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -134,23 +156,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             if (type == 0x2001) {
 
-                if (channel != null) {
-                    int length = 2 + 2 + id.readableBytes() + 2 + 4 + 8 + 2 + 2;
-
-                    ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, length);
-                    response.writeByte('@'); response.writeByte('@');
-                    response.writeShort(length);
-                    response.writeBytes(id);
-                    response.writeShort(ChannelBuffers.swapShort((short) 0x1001));
-                    response.writeInt(0);
-                    for (int i = 0; i < 8; i++) {
-                        response.writeByte(0xff);
-                    }
-                    response.writeShort(
-                            Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(0, response.writerIndex())));
-                    response.writeByte(0x0D); response.writeByte(0x0A);
-                    channel.write(response, remoteAddress);
-                }
+                sendResponse(channel, remoteAddress, id, (short) 0x1001);
 
                 buf.readUnsignedInt(); // index
                 buf.readUnsignedInt(); // unix time
