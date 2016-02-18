@@ -37,6 +37,12 @@ public class Gt06FrameDecoder extends FrameDecoder {
 
         if (buf.getByte(buf.readerIndex()) == 0x78) {
             length += 1 + buf.getUnsignedByte(buf.readerIndex() + 2);
+
+            int type = buf.getUnsignedByte(buf.readerIndex() + 3);
+            if (type == Gt06ProtocolDecoder.MSG_STATUS && length == 13) {
+                length += 2; // workaround for #1727
+            }
+
         } else {
             length += 2 + buf.getUnsignedShort(buf.readerIndex() + 2);
         }
