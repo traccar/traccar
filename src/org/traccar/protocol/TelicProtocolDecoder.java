@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,13 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")
             .number("(dd)(dd)(dd)")              // date
             .number("(dd)(dd)(dd),")             // time
+            .groupBegin()
+            .number("(ddd)(dd)(dddd),")          // longitude
+            .number("(dd)(dd)(dddd),")           // latitude
+            .or()
             .number("(-?d+),")                   // longitude
             .number("(-?d+),")                   // latitude
+            .groupEnd()
             .number("(d),")                      // validity
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
@@ -72,8 +77,16 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.setLongitude(parser.nextDouble() / 10000);
-        position.setLatitude(parser.nextDouble() / 10000);
+        if (parser.hasNext(6)) {
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
+        }
+
+        if (parser.hasNext(2)) {
+            position.setLongitude(parser.nextDouble() / 10000);
+            position.setLatitude(parser.nextDouble() / 10000);
+        }
+
         position.setValid(parser.nextInt() != 1);
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
