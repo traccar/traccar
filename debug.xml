@@ -247,6 +247,7 @@
     <entry key='xt013.port'>5076</entry>
     <entry key='autofon.port'>5077</entry>
     <entry key='gosafe.port'>5078</entry>
+    <entry key='tt8850.port'>5079</entry>
     <entry key='bce.port'>5080</entry>
     <entry key='xirgo.port'>5081</entry>
     <entry key='calamp.port'>5082</entry>

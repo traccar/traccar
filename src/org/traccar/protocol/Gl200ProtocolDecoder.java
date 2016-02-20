@@ -69,13 +69,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .groupBegin()
             .text("+").expression("(?:RESP|BUFF)").text(":")
-            .or()
-            .binary("00?04,")
-            .number("xxxx,")
-            .expression("[01],")
-            .groupEnd()
             .expression("GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .expression("([^,]+),")              // imei
