@@ -25,9 +25,9 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-public class TelikProtocolDecoder extends BaseProtocolDecoder {
+public class TelicProtocolDecoder extends BaseProtocolDecoder {
 
-    public TelikProtocolDecoder(TelikProtocol protocol) {
+    public TelicProtocolDecoder(TelicProtocol protocol) {
         super(protocol);
     }
 

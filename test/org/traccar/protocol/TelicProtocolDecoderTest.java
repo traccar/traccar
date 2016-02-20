@@ -3,12 +3,12 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
-public class TelikProtocolDecoderTest extends ProtocolTest {
+public class TelicProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        TelikProtocolDecoder decoder = new TelikProtocolDecoder(new TelikProtocol());
+        TelicProtocolDecoder decoder = new TelicProtocolDecoder(new TelicProtocol());
 
         verifyNothing(decoder, text(
                 "0026436729|232|01|003002030"));

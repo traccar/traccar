@@ -235,7 +235,7 @@
     <entry key='eelink.port'>5064</entry>
     <entry key='box.port'>5065</entry>
     <entry key='freedom.port'>5066</entry>
-    <entry key='telik.port'>5067</entry>
+    <entry key='telic.port'>5067</entry>
     <entry key='trackbox.port'>5068</entry>
     <entry key='visiontek.port'>5069</entry>
     <entry key='orion.port'>5070</entry>

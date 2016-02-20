@@ -24,10 +24,10 @@ import org.traccar.TrackerServer;
 
 import java.util.List;
 
-public class TelikProtocol extends BaseProtocol {
+public class TelicProtocol extends BaseProtocol {
 
-    public TelikProtocol() {
-        super("telik");
+    public TelicProtocol() {
+        super("telic");
     }
 
     @Override
@@ -37,7 +37,7 @@ public class TelikProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\0'));
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new TelikProtocolDecoder(TelikProtocol.this));
+                pipeline.addLast("objectDecoder", new TelicProtocolDecoder(TelicProtocol.this));
             }
         });
     }
