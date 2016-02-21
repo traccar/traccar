@@ -36,7 +36,7 @@ public class TelicProtocol extends BaseProtocol {
         TrackerServer server = new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 4, 1, 4));
+                pipeline.addLast("frameDecoder", new TelicFrameDecoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new TelicProtocolDecoder(TelicProtocol.this));
             }
