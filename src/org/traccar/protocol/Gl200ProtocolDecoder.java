@@ -69,38 +69,32 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    /*private static final Pattern PATTERN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .expression("GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .expression("([^,]+),")              // imei
-
-            .groupBegin()
-            .expression("[0-9A-Z]{17},")         // vin
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .text("+RESP:GTOBD,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("(?:[0-9A-Z]{17})?,")    // vin
             .expression("[^,]{0,20},")           // device name
             .expression("[01],")                 // report type
             .number("x{1,8},")                   // report mask
-            .expression("[0-9A-Z]{17},")         // vin
+            .expression("(?:[0-9A-Z]{17})?,")    // vin
             .number("[01],")                     // obd connect
-            .number("d{1,5},")                   // obd voltage
-            .number("x{8},")                     // support pids
-            .number("(d{1,5}),")                 // engine rpm
-            .number("(d{1,3}),")                 // speed
-            .number("(-?d{1,3}),")               // coolant temp
+            .number("(?:d{1,5})?,")              // obd voltage
+            .number("(?:x{8})?,")                // support pids
+            .number("(d{1,5})?,")                // engine rpm
+            .number("(d{1,3})?,")                // speed
+            .number("(-?d{1,3})?,")              // coolant temp
             .number("(d+.?d*|Inf|NaN)?,")        // fuel consumption
-            .number("(d{1,5}),")                 // dtcs cleared distance
-            .number("d{1,5},")
-            .expression("([01]),")               // obd connect
-            .number("(d{1,3}),")                 // number of dtcs
+            .number("(d{1,5})?,")                // dtcs cleared distance
+            .number("(?:d{1,5})?,")
+            .expression("([01])?,")              // obd connect
+            .number("(d{1,3})?,")                // number of dtcs
             .number("(x*),")                     // dtcs
-            .number("(d{1,3}),")                 // throttle
-            .number("d{1,3},")                   // engine load
+            .number("(d{1,3})?,")                // throttle
+            .number("(?:d{1,3})?,")              // engine load
             .number("(d{1,3})?,")                // fuel level
-            .number("(d+)")                      // odometer
-            .or().any()
-            .groupEnd().text(",")
-
-            .number("(d{1,2})?,")                // gps accuracy
+            .number("(d+),")                     // odometer
+            .number("(?:d{1,2})?,")              // gps accuracy
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
             .number("(-?d{1,5}.d)?,")            // altitude
@@ -111,24 +105,47 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text(",")
             .number("(0ddd)?,")                  // mcc
             .number("(0ddd)?,")                  // mnc
-            .number("(?:xxxx)?")
-            .number("(xxxx)").optional(2)        // lac
-            .text(",")
+            .number("(xxxx)?,")                  // lac
             .number("(xxxx)?,")                  // cell
-            .groupBegin()
-            .number("(d+.d)?,")                  // odometer
-            .number("(d{1,3})?,")                // battery
-            .groupEnd("?")
-            .groupBegin()
-            .any()
+            .number("d*,")                       // reserved
+            .number("(d{1,7}.d)?,")              // odometer
             .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd)")              // time
-            .or()
-            .any()
-            .groupEnd()
-            .number(",(xxxx)")
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
             .text("$").optional()
-            .compile();*/
+            .compile();
+
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF)").text(":")
+            .expression("GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("[^,]*,")                // device name
+            .number("d,")                        // report id
+            .number("d,")                        // report type
+            .number("d{1,2},")                   // report number
+            .number("(?:d{1,2})?,")              // gps accuracy
+            .number("(d{1,3}.d)?,")              // speed
+            .number("(d{1,3})?,")                // course
+            .number("(-?d{1,5}.d)?,")            // altitude
+            .number("(-?d{1,3}.d{6})?,")         // longitude
+            .number("(-?d{1,2}.d{6})?,")         // latitude
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(0ddd)?,")                  // mcc
+            .number("(0ddd)?,")                  // mnc
+            .number("(xxxx)?,")                  // lac
+            .number("(xxxx)?,")                  // cell
+            .number("d*,")                       // reserved
+            .number("(d{1,3})?,")                // battery
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
     private static final Pattern PATTERN_BACKUP = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF)").text(":")
@@ -142,47 +159,12 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d{1,3}.d{6}),")          // longitude
             .number("(-?d{1,2}.d{6}),")          // latitude
             .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd)").optional(2)  // time
+            .number("(dd)(dd)(dd)")              // time
             .text(",")
             .any()
             .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
-
-    /*private static final Pattern PATTERN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .expression("GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}),")                  // imei
-            .expression("[^,]*,")                // device name
-            .number("d,")                        // report id
-            .number("d,")                        // report type
-            .number("d{1,2},")                   // report number
-
-            .number("(d{1,2})?,")                // gps accuracy
-            .number("(d{1,3}.d)?,")              // speed
-            .number("(d{1,3})?,")                // course
-            .number("(-?d{1,5}.d)?,")            // altitude
-            .number("(-?d{1,3}.d{6})?,")         // longitude
-            .number("(-?d{1,2}.d{6})?,")         // latitude
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd)").optional(2)  // time
-            .text(",")
-
-            .number("(0ddd)?,")                  // mcc
-            .number("(0ddd)?,")                  // mnc
-            .number("(xxxx)?,")                  // lac
-            .number("(xxxx)?,")                  // cell
-            .number("d*,")                       // reserved
-
-            .number("(d{1,3})?,")                // battery
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd)").optional(2)  // time
-            .text(",")
-            .number("(xxxx)")                    // count number
-
-            .text("$").optional()
-            .compile();*/
 
     private Position decodeHbd(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_HBD, sentence);
@@ -222,8 +204,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeOther(Channel channel, SocketAddress remoteAddress, String sentence) {
-        Parser parser = new Parser(PATTERN_BACKUP, sentence);
+    private Position decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        String x = PatternUtil.checkPattern(PATTERN_OBD.pattern(), sentence);
+
+        Parser parser = new Parser(PATTERN_OBD, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -236,17 +221,111 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.setValid(true);
+        position.set(Event.KEY_RPM, parser.next());
+        position.set(Event.KEY_OBD_SPEED, parser.next());
+        position.set(Event.PREFIX_TEMP + 1, parser.next());
+        position.set("fuel-consumption", parser.next());
+        position.set("dtcs-cleared-distance", parser.next());
+        position.set("odb-connect", parser.next());
+        position.set("dtcs-number", parser.next());
+        position.set("dtcs-codes", parser.next());
+        position.set(Event.KEY_THROTTLE, parser.next());
+        position.set(Event.KEY_FUEL, parser.next());
+        position.set(Event.KEY_OBD_ODOMETER, parser.next());
+
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
-        position.setLongitude(parser.nextDouble());
-        position.setLatitude(parser.nextDouble());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        if (parser.hasNext(8)) {
+            position.setValid(true);
+            position.setLongitude(parser.nextDouble());
+            position.setLatitude(parser.nextDouble());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+        } else {
+            getLastLocation(position, null);
+        }
+
+        if (parser.hasNext(4)) {
+            position.set(Event.KEY_MCC, parser.nextInt());
+            position.set(Event.KEY_MNC, parser.nextInt());
+            position.set(Event.KEY_LAC, parser.nextInt(16));
+            position.set(Event.KEY_CID, parser.nextInt(16));
+        }
+
+        position.set(Event.KEY_ODOMETER, parser.next());
+
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                position.setTime(dateBuilder.getDate());
+            }
+        }
+
+        return position;
+    }
+
+    private Position decodeOther(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Pattern pattern = PATTERN;
+        Parser parser = new Parser(pattern, sentence);
+        if (!parser.matches()) {
+            pattern = PATTERN_BACKUP;
+            parser = new Parser(pattern, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        if (!identify(parser.next(), channel, remoteAddress)) {
+            return null;
+        }
+        position.setDeviceId(getDeviceId());
+
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
+
+        if (parser.hasNext(8)) {
+            position.setValid(true);
+            position.setLongitude(parser.nextDouble());
+            position.setLatitude(parser.nextDouble());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+        } else {
+            getLastLocation(position, null);
+        }
+
+        if (pattern == PATTERN) {
+            if (parser.hasNext(4)) {
+                position.set(Event.KEY_MCC, parser.nextInt());
+                position.set(Event.KEY_MNC, parser.nextInt());
+                position.set(Event.KEY_LAC, parser.nextInt(16));
+                position.set(Event.KEY_CID, parser.nextInt(16));
+            }
+
+            position.set(Event.KEY_BATTERY, parser.next());
+
+            if (parser.hasNext(6)) {
+                DateBuilder dateBuilder = new DateBuilder()
+                        .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                    position.setTime(dateBuilder.getDate());
+                }
+            }
+        }
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
             channel.write("+SACK:" + parser.next() + "$", remoteAddress);
@@ -271,79 +350,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                 return decodeHbd(channel, remoteAddress, sentence);
             case "INF":
                 return decodeInf(channel, remoteAddress, sentence);
+            case "OBD":
+                return decodeObd(channel, remoteAddress, sentence);
             default:
                 return decodeOther(channel, remoteAddress, sentence);
         }
-
-        /*parser = new Parser(PATTERN, sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
-        if (!identify(parser.next(), channel, remoteAddress)) {
-            return null;
-        }
-        position.setDeviceId(getDeviceId());
-
-        // RFID
-        if (sentence.startsWith("+RESP:GTIDA")) {
-            position.set(Event.KEY_RFID, sentence.split(",")[5]);
-        }
-
-        // OBD
-        position.set(Event.KEY_RPM, parser.next());
-        position.set(Event.KEY_OBD_SPEED, parser.next());
-        position.set(Event.PREFIX_TEMP + 1, parser.next());
-        position.set("fuel-consumption", parser.next());
-        position.set("dtcs-cleared-distance", parser.next());
-        position.set("odb-connect", parser.next());
-        position.set("dtcs-number", parser.next());
-        position.set("dtcs-codes", parser.next());
-        position.set(Event.KEY_THROTTLE, parser.next());
-        position.set(Event.KEY_FUEL, parser.next());
-        position.set(Event.KEY_OBD_ODOMETER, parser.next());
-
-        if (parser.hasNext(12)) {
-            position.setValid(parser.nextInt() < 20);
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-            position.setCourse(parser.nextDouble());
-            position.setAltitude(parser.nextDouble());
-            position.setLongitude(parser.nextDouble());
-            position.setLatitude(parser.nextDouble());
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
-        } else {
-            getLastLocation(position, null);
-        }
-
-        if (parser.hasNext(4)) {
-            position.set(Event.KEY_MCC, parser.nextInt());
-            position.set(Event.KEY_MNC, parser.nextInt());
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
-        }
-
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
-
-        if (parser.hasNext(6)) {
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
-                position.setTime(dateBuilder.getDate());
-            }
-        }
-
-        if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
-            channel.write("+SACK:" + parser.next() + "$", remoteAddress);
-        }*/
     }
 
 }
