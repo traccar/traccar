@@ -23,7 +23,6 @@ import org.traccar.Context;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -205,8 +204,6 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
-
-        String x = PatternUtil.checkPattern(PATTERN_OBD.pattern(), sentence);
 
         Parser parser = new Parser(PATTERN_OBD, sentence);
         if (!parser.matches()) {
