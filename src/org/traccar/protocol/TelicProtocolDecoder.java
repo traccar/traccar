@@ -81,7 +81,7 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(6)) {
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
-            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
         }
 
         if (parser.hasNext(2)) {
