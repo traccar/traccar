@@ -50,6 +50,8 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("(d+),")                     // satellites
+            .expression("(?:[^,]*,){7}")
+            .number("(d+),")
             .any()
             .compile();
 
@@ -92,6 +94,7 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
 
         position.set(Event.KEY_SATELLITES, parser.next());
+        position.set(Event.KEY_BATTERY, parser.nextInt());
 
         return position;
     }
