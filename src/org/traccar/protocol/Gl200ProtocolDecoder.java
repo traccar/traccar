@@ -82,10 +82,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd)").optional(2)  // time
             .text(",")
+            .groupBegin()
             .number("(0ddd)?,")                  // mcc
             .number("(0ddd)?,")                  // mnc
             .number("(xxxx)?,")                  // lac
             .number("(xxxx)?,")                  // cell
+            .or()
+            .number("(d+)?,")                    // mcc
+            .number("(d+)?,")                    // mnc
+            .number("(d+)?,")                    // lac
+            .number("(d+)?,")                    // cell
+            .groupEnd()
             .number("d*,")                       // reserved
             .compile();
 
@@ -126,14 +133,14 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_FRI = new PatternBuilder()
             .text("+RESP:GTFRI,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
-            .number("d?,")
+            .number("d*,")
             .number("d{1,2},")                   // report type
             .number("d{1,2},")                   // count
-            .expression("(")
+            .expression("((?:")
             .expression(PATTERN_LOCATION.pattern())
-            .expression(")+")
+            .expression(")+)")
             .groupBegin()
             .number("(d{1,3})?,")                // battery
             .or()
@@ -157,7 +164,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}),")                  // imei
             .expression("[^,]*,")                // device name
-            .number("d?,")
+            .number("d*,")
             .number("d{1,2},")                   // report type
             .number("d{1,2},")                   // count
             .expression(PATTERN_LOCATION.pattern())
@@ -254,6 +261,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_LAC, parser.nextInt(16));
             position.set(Event.KEY_CID, parser.nextInt(16));
         }
+
+        parser.skip(4); // alternative networks
     }
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -304,7 +313,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        List<Position> positions = new LinkedList<>();
+        LinkedList<Position> positions = new LinkedList<>();
 
         if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
@@ -321,7 +330,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        parser.skip(15);
+        Position position = positions.getLast();
+
+        decodeLocation(position, parser);
+
+        position.set(Event.KEY_BATTERY, parser.next());
+
+        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.PREFIX_ADC + 1, parser.next());
+        position.set(Event.PREFIX_ADC + 2, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Event.KEY_STATUS, parser.next());
 
         return positions;
     }
