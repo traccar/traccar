@@ -142,6 +142,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
+            .number("(d{1,7}.d)?,").optional()   // odometer
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
@@ -169,6 +170,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("d{1,2},")                   // count
             .expression(PATTERN_LOCATION.pattern())
             .groupBegin()
+            .number("(d{1,7}.d)?,").optional()   // odometer
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
@@ -334,6 +336,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
+        position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
 
         position.set(Event.KEY_ODOMETER, parser.next());
@@ -361,7 +364,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
+        position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
+
         position.set(Event.KEY_ODOMETER, parser.next());
 
         if (parser.hasNext(6)) {
