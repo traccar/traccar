@@ -37,6 +37,10 @@ public class Parser {
         return matcher.find();
     }
 
+    public void skip(int number) {
+        position += number;
+    }
+
     public boolean hasNext() {
         return hasNext(1);
     }

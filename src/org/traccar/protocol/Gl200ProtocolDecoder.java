@@ -16,6 +16,8 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
@@ -24,6 +26,7 @@ import org.traccar.Context;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -120,17 +123,27 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    private static final Pattern PATTERN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .expression("GT...,")
+    private static final Pattern PATTERN_FRI = new PatternBuilder()
+            .text("+RESP:GTFRI,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}),")                  // imei
             .expression("[^,]*,")                // device name
-            .number("d,")                        // report id
-            .number("d,")                        // report type
+            .number("d?,")
+            .number("d{1,2},")                   // report type
             .number("d{1,2},")                   // count
+            .expression("(")
             .expression(PATTERN_LOCATION.pattern())
+            .expression(")+")
+            .groupBegin()
             .number("(d{1,3})?,")                // battery
+            .or()
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("d{5}:dd:dd,")               // hour meter
+            .number("(x+)?,")                    // adc 1
+            .number("(x+)?,")                    // adc 2
+            .number("(d{1,3})?,")                // battery
+            .number("(d{6})?,,,,")               // device status
+            .groupEnd()
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd)").optional(2)  // time
             .text(",")
@@ -138,7 +151,29 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    private static final Pattern PATTERN_BACKUP = new PatternBuilder()
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF)").text(":")
+            .expression("GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("[^,]*,")                // device name
+            .number("d?,")
+            .number("d{1,2},")                   // report type
+            .number("d{1,2},")                   // count
+            .expression(PATTERN_LOCATION.pattern())
+            .groupBegin()
+            .number("(d{1,3})?,")                // battery
+            .or()
+            .number("(d{1,7}.d)?,")              // odometer
+            .groupEnd()
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF)").text(":")
             .expression("GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
@@ -263,6 +298,34 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_FRI, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        List<Position> positions = new LinkedList<>();
+
+        if (!identify(parser.next(), channel, remoteAddress)) {
+            return null;
+        }
+
+        Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
+        while (itemParser.find()) {
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+
+            decodeLocation(position, itemParser);
+
+            positions.add(position);
+        }
+
+        parser.skip(15);
+
+        return positions;
+    }
+
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
@@ -280,6 +343,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         decodeLocation(position, parser);
 
         position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Event.KEY_ODOMETER, parser.next());
 
         if (parser.hasNext(6)) {
             DateBuilder dateBuilder = new DateBuilder()
@@ -297,8 +361,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeBackup(Channel channel, SocketAddress remoteAddress, String sentence) {
-        Parser parser = new Parser(PATTERN_BACKUP, sentence);
+    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_BASIC, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -349,13 +413,16 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             case "OBD":
                 result = decodeObd(channel, remoteAddress, sentence);
                 break;
+            case "FRI":
+                result = decodeFri(channel, remoteAddress, sentence);
+                break;
             default:
                 result = decodeOther(channel, remoteAddress, sentence);
                 break;
         }
 
         if (result == null) {
-            result = decodeBackup(channel, remoteAddress, sentence);
+            result = decodeBasic(channel, remoteAddress, sentence);
         }
 
         return result;
