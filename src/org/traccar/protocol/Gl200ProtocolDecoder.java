@@ -338,6 +338,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
+        // power value only on some devices
         if (power > 10) {
             position.set(Event.KEY_POWER, power);
         }
@@ -351,6 +352,16 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.PREFIX_ADC + 2, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
         position.set(Event.KEY_STATUS, parser.next());
+
+        // workaround for wrong location time
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                position.setTime(dateBuilder.getDate());
+            }
+        }
 
         return positions;
     }
@@ -376,6 +387,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Event.KEY_ODOMETER, parser.next());
 
+        // workaround for wrong location time
         if (parser.hasNext(6)) {
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
