@@ -69,7 +69,7 @@ public final class ObdDecoder {
             case PID_FUEL_LEVEL:
                 return createEntry(Event.KEY_FUEL, intValue * 100 / 255);
             case PID_DISTANCE_CLEARED:
-                return createEntry(Event.KEY_FUEL, intValue);
+                return createEntry("cleared-distance", intValue);
             default:
                 return null;
         }
