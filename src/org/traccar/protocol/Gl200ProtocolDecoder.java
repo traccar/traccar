@@ -135,7 +135,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
-            .number("d*,")
+            .number("(d+)?,")                    // power
             .number("d{1,2},")                   // report type
             .number("d{1,2},")                   // count
             .expression("((?:")
@@ -146,7 +146,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
-            .number("d{5}:dd:dd,")               // hour meter
+            .number("(d{5}:dd:dd),")             // hour meter
             .number("(x+)?,")                    // adc 1
             .number("(x+)?,")                    // adc 2
             .number("(d{1,3})?,")                // battery
@@ -321,6 +321,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        int power = parser.nextInt();
+
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
         while (itemParser.find()) {
             Position position = new Position();
@@ -336,10 +338,15 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
+        if (power > 10) {
+            position.set(Event.KEY_POWER, power);
+        }
+
         position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
 
         position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.KEY_HOURS, parser.next());
         position.set(Event.PREFIX_ADC + 1, parser.next());
         position.set(Event.PREFIX_ADC + 2, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
