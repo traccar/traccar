@@ -54,19 +54,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("|(xxxx)?")                  // state
             .groupBegin()
             .number("|(xxxx),(xxxx)")            // adc
+            .number("(?:,(xxxx),(xxxx),(xxxx),(xxxx),(xxxx),(xxxx))?")
             .groupBegin()
-            .number(",(xxxx),(xxxx),(xxxx),(xxxx),(xxxx),(xxxx)")
-            .groupEnd("?")
-            .groupBegin()
-            .text("|")
-            .groupBegin()
-            .number("(x{16})")                   // cell
+            .number("|x{16}")                    // cell
             .number("|(xx)")                     // gsm
-            .number("|(x{8})|")                  // odometer
-            .number("(x{9})")                    // odometer
+            .number("|(x{8})")                   // odometer
+            .or()
+            .number("|(x{9})")                   // odometer
             .groupBegin()
             .number("|(x{5,})")                  // rfid
-            .groupEnd("?")
             .groupEnd("?")
             .groupEnd("?")
             .groupEnd("?")
@@ -283,15 +279,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            position.set(Event.KEY_CID, parser.next());
-
             if (parser.hasNext()) {
                 position.set(Event.KEY_GSM, parser.nextInt(16));
             }
 
             if (parser.hasNext()) {
                 position.set(Event.KEY_ODOMETER, parser.nextInt(16));
-            } else if (parser.hasNext()) {
+            }
+            if (parser.hasNext()) {
                 position.set(Event.KEY_ODOMETER, parser.nextInt(16));
             }
 
