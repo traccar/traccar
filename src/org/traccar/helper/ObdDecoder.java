@@ -18,6 +18,8 @@ package org.traccar.helper;
 import org.traccar.model.Event;
 
 import java.util.AbstractMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public final class ObdDecoder {
@@ -25,8 +27,9 @@ public final class ObdDecoder {
     private ObdDecoder() {
     }
 
-    private static final int MODE_CURRENT = 0x01;
-    private static final int MODE_FREEZE_FRAME = 0x02;
+    public static final int MODE_CURRENT = 0x01;
+    public static final int MODE_FREEZE_FRAME = 0x02;
+    public static final int MODE_CODES = 0x03;
 
     private static final int PID_ENGINE_LOAD = 0x04;
     private static final int PID_COOLANT_TEMPERATURE = 0x05;
@@ -37,11 +40,13 @@ public final class ObdDecoder {
     private static final int PID_FUEL_LEVEL = 0x2F;
     private static final int PID_DISTANCE_CLEARED = 0x31;
 
-    public static Map.Entry<String, Object> decode(int mode, int pid, String value) {
+    public static Map.Entry<String, Object> decode(int mode, String value) {
         switch (mode) {
             case MODE_CURRENT:
             case MODE_FREEZE_FRAME:
-                return decodeData(pid, value);
+                return decodeData(Integer.parseInt(value.substring(0, 2), 16), value.substring(2));
+            case MODE_CODES:
+                return decodeCodes(value);
             default:
                 return null;
         }
@@ -49,6 +54,30 @@ public final class ObdDecoder {
 
     private static Map.Entry<String, Object> createEntry(String key, Object value) {
         return new AbstractMap.SimpleEntry<>(key, value);
+    }
+
+    private static Map.Entry<String, Object> decodeCodes(String value) {
+        StringBuilder codes = new StringBuilder();
+        for (int i = 0; i < value.length() / 4; i++) {
+            int numValue = Integer.parseInt(value.substring(i * 4, (i + 1) * 4), 16);
+            codes.append(',');
+            switch (numValue >> 14) {
+                case 0:
+                    codes.append('P');
+                    break;
+                case 1:
+                    codes.append('C');
+                    break;
+                case 2:
+                    codes.append('B');
+                    break;
+                case 3:
+                    codes.append('U');
+                    break;
+            }
+            codes.append(String.format("%04X", numValue & 0x3FFF));
+        }
+        return createEntry("dtcs", codes.toString().replaceFirst(",", ""));
     }
 
     private static Map.Entry<String, Object> decodeData(int pid, String value) {

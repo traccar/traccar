@@ -60,8 +60,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readerIndex() < end) {
             int parameterLength = buf.getUnsignedByte(buf.readerIndex()) >> 4;
-            position.add(ObdDecoder.decode(buf.readUnsignedByte() & 0x0F, buf.readUnsignedByte(),
-                    ChannelBuffers.hexDump(buf.readBytes(parameterLength - 2))));
+            int mode = buf.readUnsignedByte() & 0x0F;
+            position.add(ObdDecoder.decode(mode, ChannelBuffers.hexDump(buf.readBytes(parameterLength - 1))));
         }
     }
 
