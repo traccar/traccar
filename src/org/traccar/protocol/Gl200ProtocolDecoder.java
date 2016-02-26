@@ -93,7 +93,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // lac
             .number("(d+)?,")                    // cell
             .groupEnd()
-            .number("d*,")                       // reserved
+            .number("(?:d+|(d+.d))?,")           // odometer
             .compile();
 
     private static final Pattern PATTERN_OBD = new PatternBuilder()
@@ -265,6 +265,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         parser.skip(4); // alternative networks
+
+        position.set(Event.KEY_ODOMETER, parser.next());
     }
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
