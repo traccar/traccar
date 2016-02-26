@@ -46,7 +46,8 @@ public class Parser {
     }
 
     public boolean hasNext(int number) {
-        if (matcher.group(position) != null) {
+        String value = matcher.group(position);
+        if (value != null && !value.isEmpty()) {
             return true;
         } else {
             position += number;
