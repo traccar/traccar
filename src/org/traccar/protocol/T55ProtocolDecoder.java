@@ -217,7 +217,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("IMEI")) {
             identify(sentence.substring(5, sentence.length()), channel, remoteAddress);
         } else if (sentence.startsWith("$GPFID")) {
-            if (identify(sentence.substring(6, sentence.length()), channel, remoteAddress) && position != null) {
+            if (identify(sentence.substring(7, sentence.length()), channel, remoteAddress) && position != null) {
                 Position position = this.position;
                 position.setDeviceId(getDeviceId());
                 this.position = null;
