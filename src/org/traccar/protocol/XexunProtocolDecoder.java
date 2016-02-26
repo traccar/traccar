@@ -38,8 +38,8 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             .expression("G[PN]RMC,")
             .number("(dd)(dd)(dd).(d+),")        // time
             .expression("([AV]),")               // validity
-            .number("(d+)(dd.d+),([NS]),")       // latitude
-            .number("(d+)(dd.d+),([EW])?,")      // longitude
+            .number("(d+?)?(d?d.d+),([NS]),")    // latitude
+            .number("(d+?)?(d?d.d+),([EW])?,")   // longitude
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd),")             // date
