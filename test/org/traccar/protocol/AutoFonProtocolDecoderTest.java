@@ -11,7 +11,7 @@ public class AutoFonProtocolDecoderTest extends ProtocolTest {
 
         AutoFonProtocolDecoder decoder = new AutoFonProtocolDecoder(new AutoFonProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyPosition(decoder, binary(
                 "02080000251848470afa010262daa690013aa4046da83745f8812560df010001126a"));
 
         verifyNothing(decoder, binary(
