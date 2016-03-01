@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.traccar.helper;
 import org.traccar.model.Event;
 
 import java.util.AbstractMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public final class ObdDecoder {
@@ -62,9 +60,6 @@ public final class ObdDecoder {
             int numValue = Integer.parseInt(value.substring(i * 4, (i + 1) * 4), 16);
             codes.append(',');
             switch (numValue >> 14) {
-                case 0:
-                    codes.append('P');
-                    break;
                 case 1:
                     codes.append('C');
                     break;
@@ -73,6 +68,9 @@ public final class ObdDecoder {
                     break;
                 case 3:
                     codes.append('U');
+                    break;
+                default:
+                    codes.append('P');
                     break;
             }
             codes.append(String.format("%04X", numValue & 0x3FFF));

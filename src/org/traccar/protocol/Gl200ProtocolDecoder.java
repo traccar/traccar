@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
@@ -26,7 +25,6 @@ import org.traccar.Context;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
