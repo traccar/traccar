@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ public class MeitrackProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ALARM_ARM,
-                Command.TYPE_ALARM_DISARM);
+                Command.TYPE_ALARM_DISARM,
+                Command.TYPE_REQUEST_PHOTO);
     }
 
     @Override
@@ -45,6 +46,7 @@ public class MeitrackProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
+                pipeline.addLast("objectEncoder", new MeitrackProtocolEncoder());
             }
         };
         server.setEndianness(ByteOrder.LITTLE_ENDIAN);
@@ -54,6 +56,7 @@ public class MeitrackProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new MeitrackProtocolDecoder(MeitrackProtocol.this));
+                pipeline.addLast("objectEncoder", new MeitrackProtocolEncoder());
             }
         };
         server.setEndianness(ByteOrder.LITTLE_ENDIAN);
