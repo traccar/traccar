@@ -1,12 +1,10 @@
 goog.provide('ol.style.Arrow');
 
 goog.require('goog.asserts');
-goog.require('goog.dom');
 goog.require('ol');
 goog.require('ol.color');
 goog.require('ol.has');
 goog.require('ol.render.canvas');
-goog.require('ol.structs.IHasChecksum');
 goog.require('ol.style.AtlasManager');
 goog.require('ol.style.Fill');
 goog.require('ol.style.Image');
@@ -22,7 +20,6 @@ goog.require('ol.style.Stroke');
  * @constructor
  * @param {olx.style.ArrowOptions} options Options.
  * @extends {ol.style.Image}
- * @implements {ol.structs.IHasChecksum}
  * @api
  */
 ol.style.Arrow = function(options) {
@@ -119,9 +116,15 @@ ol.style.Arrow = function(options) {
   var snapToPixel = options.snapToPixel !== undefined ?
       options.snapToPixel : true;
 
+  /**
+   * @type {boolean}
+   */
+  var rotateWithView = options.rotateWithView !== undefined ?
+      options.rotateWithView : false;
+
   goog.base(this, {
     opacity: 1,
-    rotateWithView: false,
+    rotateWithView: rotateWithView,
     rotation: options.rotation !== undefined ? options.rotation : 0,
     scale: 1,
     snapToPixel: snapToPixel
@@ -283,7 +286,7 @@ ol.style.Arrow.RenderOptions;
 
 /**
  * @private
- * @param {ol.style.AtlasManager|undefined} atlasManager
+ * @param {ol.style.AtlasManager|undefined} atlasManager An atlas manager.
  */
 ol.style.Arrow.prototype.render_ = function(atlasManager) {
   var imageSize;
@@ -334,7 +337,7 @@ ol.style.Arrow.prototype.render_ = function(atlasManager) {
   if (atlasManager === undefined) {
     // no atlas manager is used, create a new canvas
     this.canvas_ = /** @type {HTMLCanvasElement} */
-        (goog.dom.createElement('CANVAS'));
+        (document.createElement('CANVAS'));
 
     this.canvas_.height = size;
     this.canvas_.width = size;
@@ -357,12 +360,12 @@ ol.style.Arrow.prototype.render_ = function(atlasManager) {
     if (hasCustomHitDetectionImage) {
       // render the hit-detection image into a separate atlas image
       renderHitDetectionCallback =
-          goog.bind(this.drawHitDetectionCanvas_, this, renderOptions);
+          this.drawHitDetectionCanvas_.bind(this, renderOptions);
     }
 
     var id = this.getChecksum();
     var info = atlasManager.add(
-        id, size, size, goog.bind(this.draw_, this, renderOptions),
+        id, size, size, this.draw_.bind(this, renderOptions),
         renderHitDetectionCallback);
     goog.asserts.assert(info, 'arrow size is too large');
 
@@ -388,8 +391,8 @@ ol.style.Arrow.prototype.render_ = function(atlasManager) {
 
 /**
  * @private
- * @param {ol.style.Arrow.RenderOptions} renderOptions
- * @param {CanvasRenderingContext2D} context
+ * @param {ol.style.RegularShape.RenderOptions} renderOptions Render options.
+ * @param {CanvasRenderingContext2D} context The rendering context.
  * @param {number} x The origin for the symbol (x).
  * @param {number} y The origin for the symbol (y).
  */
@@ -419,7 +422,7 @@ ol.style.Arrow.prototype.draw_ = function(renderOptions, context, x, y) {
   lineTo(this.radius_, 0);
 
   if (this.fill_) {
-    context.fillStyle = ol.color.asString(this.fill_.getColor());
+    context.fillStyle = ol.colorlike.asColorLike(this.fill_.getColor());
     context.fill();
   }
   if (this.stroke_) {
@@ -439,10 +442,9 @@ ol.style.Arrow.prototype.draw_ = function(renderOptions, context, x, y) {
 
 /**
  * @private
- * @param {ol.style.Arrow.RenderOptions} renderOptions
+ * @param {ol.style.Arrow.RenderOptions} renderOptions Render options.
  */
-ol.style.Arrow.prototype.createHitDetectionCanvas_ =
-    function(renderOptions) {
+ol.style.Arrow.prototype.createHitDetectionCanvas_ = function(renderOptions) {
   this.hitDetectionImageSize_ = [renderOptions.size, renderOptions.size];
   if (this.fill_) {
     this.hitDetectionCanvas_ = this.canvas_;
@@ -452,7 +454,7 @@ ol.style.Arrow.prototype.createHitDetectionCanvas_ =
   // if no fill style is set, create an extra hit-detection image with a
   // default fill style
   this.hitDetectionCanvas_ = /** @type {HTMLCanvasElement} */
-      (goog.dom.createElement('CANVAS'));
+      (document.createElement('CANVAS'));
   var canvas = this.hitDetectionCanvas_;
 
   canvas.height = renderOptions.size;
@@ -466,13 +468,12 @@ ol.style.Arrow.prototype.createHitDetectionCanvas_ =
 
 /**
  * @private
- * @param {ol.style.Arrow.RenderOptions} renderOptions
- * @param {CanvasRenderingContext2D} context
+ * @param {ol.style.RegularShape.RenderOptions} renderOptions Render options.
+ * @param {CanvasRenderingContext2D} context The context.
  * @param {number} x The origin for the symbol (x).
  * @param {number} y The origin for the symbol (y).
  */
-ol.style.Arrow.prototype.drawHitDetectionCanvas_ =
-    function(renderOptions, context, x, y) {
+ol.style.Arrow.prototype.drawHitDetectionCanvas_ = function(renderOptions, context, x, y) {
   var innerRadius = this.radius_ / Math.sin(Math.PI - this.backAngle_ / 2) *
       Math.sin(this.backAngle_ / 2 - this.frontAngle_);
 
@@ -511,7 +512,7 @@ ol.style.Arrow.prototype.drawHitDetectionCanvas_ =
 
 
 /**
- * @inheritDoc
+ * @return {string} The checksum.
  */
 ol.style.Arrow.prototype.getChecksum = function() {
   var strokeChecksum = this.stroke_ ?
