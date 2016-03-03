@@ -391,7 +391,7 @@ ol.style.Arrow.prototype.render_ = function(atlasManager) {
 
 /**
  * @private
- * @param {ol.style.RegularShape.RenderOptions} renderOptions Render options.
+ * @param {ol.style.Arrow.RenderOptions} renderOptions Render options.
  * @param {CanvasRenderingContext2D} context The rendering context.
  * @param {number} x The origin for the symbol (x).
  * @param {number} y The origin for the symbol (y).
@@ -468,7 +468,7 @@ ol.style.Arrow.prototype.createHitDetectionCanvas_ = function(renderOptions) {
 
 /**
  * @private
- * @param {ol.style.RegularShape.RenderOptions} renderOptions Render options.
+ * @param {ol.style.Arrow.RenderOptions} renderOptions Render options.
  * @param {CanvasRenderingContext2D} context The context.
  * @param {number} x The origin for the symbol (x).
  * @param {number} y The origin for the symbol (y).
