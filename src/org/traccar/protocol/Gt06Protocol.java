@@ -37,8 +37,8 @@ public class Gt06Protocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new Gt06FrameDecoder());
-                pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(Gt06Protocol.this));
                 pipeline.addLast("objectEncoder", new Gt06ProtocolEncoder());
+                pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(Gt06Protocol.this));
             }
         });
     }

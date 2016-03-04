@@ -38,9 +38,14 @@ public class PositionResource extends BaseResource {
     public Collection<Position> get(
             @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
-        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        return Context.getDataManager().getPositions(
-                deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to));
+        if (deviceId == 0) {
+            return Context.getConnectionManager().getInitialState(
+                    Context.getPermissionsManager().allowedDevices(getUserId()));
+        } else {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            return Context.getDataManager().getPositions(
+                    deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to));
+        }
     }
 
 }

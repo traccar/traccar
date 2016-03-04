@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -237,10 +238,17 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         index = buf.indexOf(index + 1, buf.writerIndex(), (byte) ',');
 
         String type = buf.toString(index + 1, 3, Charset.defaultCharset());
-        if (type.equals("CCC")) {
-            return decodeBinaryMessage(channel, remoteAddress, buf);
-        } else {
-            return decodeRegularMessage(channel, remoteAddress, buf);
+        switch (type) {
+            case "D03":
+                if (channel != null) {
+                    String imei = Context.getIdentityManager().getDeviceById(getDeviceId()).getUniqueId();
+                    channel.write("@@O46," + imei + ",D00,camera_picture.jpg,0*00\r\n");
+                }
+                return null;
+            case "CCC":
+                return decodeBinaryMessage(channel, remoteAddress, buf);
+            default:
+                return decodeRegularMessage(channel, remoteAddress, buf);
         }
     }
 

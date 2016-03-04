@@ -44,19 +44,19 @@ public class Gl200Protocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "$", "\0"));
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(Gl200Protocol.this));
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new Gl200ProtocolEncoder());
+                pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(Gl200Protocol.this));
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new Gl200ProtocolEncoder());
+                pipeline.addLast("objectDecoder", new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });
     }

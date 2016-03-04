@@ -37,8 +37,8 @@ public class Tlt2hProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(32 * 1024, "##\r\n"));
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new Tlt2hProtocolDecoder(Tlt2hProtocol.this));
             }
         });

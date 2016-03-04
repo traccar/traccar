@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,15 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "@@M33,{%s},C01,0,12222*18\r\n", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "@@M33,{%s},C01,0,12222*00\r\n", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "@@M33,{%s},C01,0,02222*18\r\n", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "@@M33,{%s},C01,0,02222*00\r\n", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, "@@M33,{%s},C01,0,22122*18\r\n", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "@@M33,{%s},C01,0,22122*00\r\n", Command.KEY_UNIQUE_ID);
             case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, "@@M33,{%s},C01,0,22022*18\r\n", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, "@@M33,{%s},C01,0,22022*00\r\n", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_REQUEST_PHOTO:
+                return formatCommand(command, "@@D46,{%s},D03,1,camera_picture.jpg*00\r\n", Command.KEY_UNIQUE_ID);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

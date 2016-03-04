@@ -129,7 +129,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
-            .text("+RESP:GTFRI,")
+            .text("+").expression("(?:RESP|BUFF):GTFRI,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
@@ -158,8 +158,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .expression("GT...,")
+            .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}),")                  // imei
             .expression("[^,]*,")                // device name
