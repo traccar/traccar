@@ -37,8 +37,8 @@ public class Tk102Protocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ']'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new Tk102ProtocolDecoder(Tk102Protocol.this));
             }
         });

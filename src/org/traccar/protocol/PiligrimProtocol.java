@@ -36,9 +36,9 @@ public class PiligrimProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                pipeline.addLast("httpEncoder", new HttpResponseEncoder());
                 pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                 pipeline.addLast("httpAggregator", new HttpChunkAggregator(16384));
-                pipeline.addLast("httpEncoder", new HttpResponseEncoder());
                 pipeline.addLast("objectDecoder", new PiligrimProtocolDecoder(PiligrimProtocol.this));
             }
         });
