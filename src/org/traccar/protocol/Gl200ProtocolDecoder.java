@@ -144,11 +144,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
-            .number("(d{5}:dd:dd),")             // hour meter
+            .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
             .number("(x+)?,")                    // adc 2
             .number("(d{1,3})?,")                // battery
-            .number("(d{6})?,,,,")               // device status
+            .number("(x{6})?,,,,")               // device status
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd)").optional(2)  // time

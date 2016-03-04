@@ -10,6 +10,9 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
 
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new Gl200Protocol());
 
+        verifyPositions(decoder, text(
+                "+BUFF:GTFRI,060402,862894021808798,,,10,1,1,0.0,349,394.3,-63.287717,-17.662410,20160116234031,0736,0003,6ABA,8305,00,3326.8,,,,94,220100,,,,20160116194035,4D83"));
+
         verifyPosition(decoder, text(
                 "+RESP:GTFRI,2C0204,867162020003125,GL300W,0,0,2,1,1.7,205,2867.0,-78.481127,-0.206828,20160215210433,0740,0000,7596,5891C,0.0,1,1.7,205,2867.0,-78.481127,-0.206828,20160215210503,0740,0000,7596,5891C,0.0,88,20160215210506,1E78$"));
 
@@ -22,7 +25,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "+RESP:GTFRI,210102,A10000458356CE,,0,1,1,15,1.4,0,190.6,-85.765763,42.894896,20160208164505,4126,210,0,18673,00,92,20160208164507,00A6"));
 
-        verifyPosition(decoder, text(
+        verifyPositions(decoder, text(
                 "+BUFF:GTFRI,060402,862894021808798,,,10,1,1,0.0,349,394.3,-63.287717,-17.662410,20160116234031,0736,0003,6ABA,8305,00,3326.8,,,,94,220100,,,,20160116194035,4D83"));
 
         verifyPosition(decoder, text(
@@ -34,7 +37,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, false, text(
                 "+RESP:GTFRI,120113,555564055560555,,1,1,1,,,,,,,,0282,0380,f080,cabf,6900,79,20140824165629,0001$"));
 
-        verifyPosition(decoder, text(
+        verifyPositions(decoder, text(
                 "+RESP:GTFRI,0F0106,862193020451183,,,10,1,1,0.0,163,,-57.513617,-25.368191,20150918182145,,,,,,21235.0,,,,0,210100,,,,20150918182149,00B8$"));
 
         verifyPosition(decoder, text(
@@ -58,7 +61,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyNothing(decoder, text(
                 "+RESP:GTINF,359464030073766,8938003990320469804f,18,99,100,1,0,+2.00,0,20131018084015,00EE,0103090402"));
 
-        verifyPosition(decoder, text(
+        verifyPositions(decoder, text(
                 "+RESP:GTFRI,04040C,359231038939904,,,10,1,2,0.0,117,346.0,8.924243,50.798077,20130618122040,0262,0002,0299,109C,00,0.0,,,,,,,,,20130618122045,00F6"));
         
         verifyPosition(decoder, text(
@@ -97,7 +100,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "+RESP:GTFRI,02010C,867844001274649,,0,0,1,1,0.0,0,122.5,7.684216,51.524512,20140106233722,0262,0007,79EE,1D22,,93,20140107003805,03C4$"));
 
-        verifyPosition(decoder, text(
+        verifyPositions(decoder, text(
                 "+BUFF:GTFRI,210101,863286020016706,,,10,1,1,,,,49.903915,40.391669,20140818105815,,,,,,,,,,,210100,,,,,000C$"));
 
         verifyPositions(decoder, text(
