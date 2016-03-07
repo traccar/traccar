@@ -158,11 +158,18 @@ public final class Checksum {
 
     public static String nmea(String msg) {
         int checksum = 0;
-        byte[] bytes = msg.getBytes(Charset.defaultCharset());
-        for (int i = 1; i < msg.length(); i++) {
-            checksum ^= bytes[i];
+        for (byte b : msg.getBytes(Charset.defaultCharset())) {
+            checksum ^= b;
         }
         return String.format("*%02x", checksum).toUpperCase();
+    }
+
+    public static String sum(String msg) {
+        byte checksum = 0;
+        for (byte b : msg.getBytes(Charset.defaultCharset())) {
+            checksum += b;
+        }
+        return String.format("%02X", checksum).toUpperCase();
     }
 
     public static long luhn(long imei) {
