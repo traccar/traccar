@@ -29,13 +29,16 @@ Ext.define('Traccar.model.Position', {
         type: 'int'
     }, {
         name: 'serverTime',
-        type: 'date'
+        type: 'date',
+        dateFormat: 'c'
     }, {
         name: 'deviceTime',
-        type: 'date'
+        type: 'date',
+        dateFormat: 'c'
     }, {
         name: 'fixTime',
-        type: 'date'
+        type: 'date',
+        dateFormat: 'c'
     }, {
         name: 'valid',
         type: 'boolean'
