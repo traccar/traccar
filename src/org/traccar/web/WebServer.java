@@ -42,7 +42,7 @@ import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.CommandResource;
 import org.traccar.api.resource.DeviceResource;
-import org.traccar.api.resource.PermissionResource;
+import org.traccar.api.resource.DevicePermissionResource;
 import org.traccar.api.resource.PositionResource;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.api.resource.SessionResource;
@@ -140,7 +140,7 @@ public class WebServer {
         resourceConfig.register(SecurityRequestFilter.class);
         resourceConfig.register(CorsResponseFilter.class);
         resourceConfig.registerClasses(ServerResource.class, SessionResource.class, CommandResource.class,
-                PermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class);
+                DevicePermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class);
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
         handlers.addHandler(servletHandler);
