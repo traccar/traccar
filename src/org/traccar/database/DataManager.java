@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import liquibase.resource.ResourceAccessor;
 import org.traccar.Config;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Position;
@@ -284,6 +285,38 @@ public class DataManager implements IdentityManager {
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
         AsyncServlet.sessionRefreshUser(userId);
+    }
+
+    public void addGroup(Group group) throws SQLException {
+        group.setId(QueryBuilder.create(dataSource, getQuery("database.insertGroup"), true)
+                .setObject(group)
+                .executeUpdate());
+    }
+
+    public void updateGroup(Group group) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateGroup"))
+                .setObject(group)
+                .executeUpdate();
+    }
+
+    public void removeGroup(long groupId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteGroup"))
+                .setLong("id", groupId)
+                .executeUpdate();
+    }
+
+    public void linkGroup(long userId, long groupId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkGroup"))
+                .setLong("userId", userId)
+                .setLong("groupId", groupId)
+                .executeUpdate();
+    }
+
+    public void unlinkGroup(long userId, long groupId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkGroup"))
+                .setLong("userId", userId)
+                .setLong("groupId", groupId)
+                .executeUpdate();
     }
 
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {

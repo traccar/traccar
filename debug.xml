@@ -149,6 +149,26 @@
         DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId;
     </entry>
 
+    <entry key='database.insertGroup'>
+        INSERT INTO groups (name) VALUES (:name);
+    </entry>
+
+    <entry key='database.updateGroup'>
+        UPDATE groups SET name = :name WHERE id = :id;
+    </entry>
+
+    <entry key='database.deleteGroup'>
+        DELETE FROM groups WHERE id = :id;
+    </entry>
+
+    <entry key='database.linkGroup'>
+        INSERT INTO user_group (userId, groupId) VALUES (:userId, :groupId);
+    </entry>
+
+    <entry key='database.unlinkGroup'>
+        DELETE FROM user_group WHERE userId = :userId AND groupId = :groupId;
+    </entry>
+
     <entry key='database.selectPositions'>
         SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;
     </entry>
