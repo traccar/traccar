@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.traccar.helper.Log;
-import org.traccar.model.Permission;
+import org.traccar.model.DevicePermission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 
@@ -56,7 +56,7 @@ public class PermissionsManager {
             for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
             }
-            for (Permission permission : dataManager.getPermissions()) {
+            for (DevicePermission permission : dataManager.getPermissions()) {
                 getPermissions(permission.getUserId()).add(permission.getDeviceId());
             }
         } catch (SQLException error) {

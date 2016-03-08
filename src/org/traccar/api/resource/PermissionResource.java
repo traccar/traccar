@@ -17,7 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.Permission;
+import org.traccar.model.DevicePermission;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -34,7 +34,7 @@ import java.sql.SQLException;
 public class PermissionResource extends BaseResource {
 
     @POST
-    public Response add(Permission entity) throws SQLException {
+    public Response add(DevicePermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().refresh();
@@ -42,7 +42,7 @@ public class PermissionResource extends BaseResource {
     }
 
     @DELETE
-    public Response remove(Permission entity) throws SQLException {
+    public Response remove(DevicePermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getDataManager().unlinkDevice(entity.getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().refresh();
