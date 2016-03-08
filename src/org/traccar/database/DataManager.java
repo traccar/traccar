@@ -39,6 +39,7 @@ import org.traccar.Config;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.model.GroupPermission;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Position;
@@ -222,9 +223,14 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
-    public Collection<DevicePermission> getPermissions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.getPermissionsAll"))
+    public Collection<DevicePermission> getDevicePermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectDevicePermissions"))
                 .executeQuery(DevicePermission.class);
+    }
+
+    public Collection<GroupPermission> getGroupPermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGroupPermissions"))
+                .executeQuery(GroupPermission.class);
     }
 
     public Collection<Device> getAllDevices() throws SQLException {

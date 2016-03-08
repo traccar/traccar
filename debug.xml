@@ -113,8 +113,12 @@
         DELETE FROM users WHERE id = :id;
     </entry>
 
-    <entry key='database.getPermissionsAll'>
+    <entry key='database.selectDevicePermissions'>
         SELECT userId, deviceId FROM user_device;
+    </entry>
+
+    <entry key='database.selectGroupPermissions'>
+        SELECT userId, groupId FROM user_group;
     </entry>
 
     <entry key='database.selectDevicesAll'>
