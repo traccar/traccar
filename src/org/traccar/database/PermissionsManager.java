@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,21 @@ public class PermissionsManager {
 
     private final Map<Long, User> users = new HashMap<>();
 
-    private final Map<Long, Set<Long>> permissions = new HashMap<>();
+    private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
+    private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
 
-    private Set<Long> getPermissions(long userId) {
-        if (!permissions.containsKey(userId)) {
-            permissions.put(userId, new HashSet<Long>());
+    private Set<Long> getGroupPermissions(long userId) {
+        if (!groupPermissions.containsKey(userId)) {
+            groupPermissions.put(userId, new HashSet<Long>());
         }
-        return permissions.get(userId);
+        return groupPermissions.get(userId);
+    }
+
+    private Set<Long> getDevicePermissions(long userId) {
+        if (!devicePermissions.containsKey(userId)) {
+            devicePermissions.put(userId, new HashSet<Long>());
+        }
+        return devicePermissions.get(userId);
     }
 
     public PermissionsManager(DataManager dataManager) {
@@ -50,14 +58,14 @@ public class PermissionsManager {
 
     public final void refresh() {
         users.clear();
-        permissions.clear();
+        devicePermissions.clear();
         try {
             server = dataManager.getServer();
             for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
             }
             for (DevicePermission permission : dataManager.getPermissions()) {
-                getPermissions(permission.getUserId()).add(permission.getDeviceId());
+                getDevicePermissions(permission.getUserId()).add(permission.getDeviceId());
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -80,12 +88,16 @@ public class PermissionsManager {
         }
     }
 
+    public Collection<Long> allowedGroups(long userId) {
+        return getGroupPermissions(userId);
+    }
+
     public Collection<Long> allowedDevices(long userId) {
-        return getPermissions(userId);
+        return getDevicePermissions(userId);
     }
 
     public void checkDevice(long userId, long deviceId) throws SecurityException {
-        if (!getPermissions(userId).contains(deviceId)) {
+        if (!getDevicePermissions(userId).contains(deviceId)) {
             throw new SecurityException("Device access denied");
         }
     }
