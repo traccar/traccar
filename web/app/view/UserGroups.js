@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.UserDevices', {
+Ext.define('Traccar.view.UserGroups', {
     extend: 'Ext.grid.Panel',
-    xtype: 'userDevicesView',
+    xtype: 'userGroupsView',
 
     requires: [
-        'Traccar.view.UserDevicesController'
+        'Traccar.view.UserGroupsController'
     ],
 
-    controller: 'userDevices',
-    store: 'AllDevices',
+    controller: 'userGroups',
+    store: 'AllGroups',
 
     selModel: {
         selType: 'checkboxmodel',
@@ -39,10 +39,6 @@ Ext.define('Traccar.view.UserDevices', {
     columns: [{
         text: Strings.sharedName,
         dataIndex: 'name',
-        flex: 1
-    }, {
-        text: Strings.deviceIdentifier,
-        dataIndex: 'uniqueId',
         flex: 1
     }]
 });
