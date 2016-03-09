@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.Users', {
+Ext.define('Traccar.view.Groups', {
     extend: 'Ext.grid.Panel',
-    xtype: 'usersView',
+    xtype: 'groupsView',
 
     requires: [
-        'Traccar.view.UsersController',
+        'Traccar.view.GroupsController',
         'Traccar.view.EditToolbar'
     ],
 
-    controller: 'users',
-    store: 'Users',
+    controller: 'groups',
+    store: 'Groups',
 
     selType: 'rowmodel',
 
     tbar: {
-        xtype: 'editToolbar',
-        items: [{
-            text: Strings.deviceTitle,
-            disabled: true,
-            handler: 'onDevicesClick',
-            reference: 'userDevicesButton'
-        }]
+        xtype: 'editToolbar'
     },
 
     listeners: {
@@ -45,14 +39,6 @@ Ext.define('Traccar.view.Users', {
     columns: [{
         text: Strings.sharedName,
         dataIndex: 'name',
-        flex: 1
-    }, {
-        text: Strings.userEmail,
-        dataIndex: 'email',
-        flex: 1
-    }, {
-        text: Strings.userAdmin,
-        dataIndex: 'admin',
         flex: 1
     }]
 });

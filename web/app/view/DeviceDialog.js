@@ -29,7 +29,7 @@ Ext.define('Traccar.view.DeviceDialog', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.deviceName,
+            fieldLabel: Strings.sharedName,
             allowBlank: false
         }, {
             xtype: 'textfield',

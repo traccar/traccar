@@ -37,7 +37,7 @@ Ext.define('Traccar.view.UserDevices', {
     },
 
     columns: [{
-        text: Strings.deviceName,
+        text: Strings.sharedName,
         dataIndex: 'name', flex: 1
     }, {
         text: Strings.deviceIdentifier,
