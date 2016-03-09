@@ -23,25 +23,26 @@ Ext.define('Traccar.view.GroupsController', {
     },
 
     onAddClick: function () {
-        /*var user, dialog;
-        user = Ext.create('Traccar.model.User');
-        dialog = Ext.create('Traccar.view.UserDialog');
-        dialog.down('form').loadRecord(user);
-        dialog.show();*/
+        var group, dialog;
+        group = Ext.create('Traccar.model.Group');
+        group.store = this.getView().getStore();
+        dialog = Ext.create('Traccar.view.GroupDialog');
+        dialog.down('form').loadRecord(group);
+        dialog.show();
     },
 
     onEditClick: function () {
-        /*var user, dialog;
-        user = this.getView().getSelectionModel().getSelection()[0];
-        dialog = Ext.create('Traccar.view.UserDialog');
-        dialog.down('form').loadRecord(user);
-        dialog.show();*/
+        var group, dialog;
+        group = this.getView().getSelectionModel().getSelection()[0];
+        dialog = Ext.create('Traccar.view.GroupDialog');
+        dialog.down('form').loadRecord(group);
+        dialog.show();
     },
 
     onRemoveClick: function () {
-        /*var user = this.getView().getSelectionModel().getSelection()[0];
+        var group = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
-            title: Strings.settingsUser,
+            title: Strings.groupDialog,
             message: Strings.sharedRemoveConfirm,
             buttons: Ext.Msg.YESNO,
             buttonText: {
@@ -49,19 +50,18 @@ Ext.define('Traccar.view.GroupsController', {
                 no: Strings.sharedCancel
             },
             fn: function (btn) {
-                var store = Ext.getStore('Users');
+                var store = Ext.getStore('Groups');
                 if (btn === 'yes') {
-                    store.remove(user);
+                    store.remove(group);
                     store.sync();
                 }
             }
-        });*/
+        });
     },
 
     onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
         this.lookupReference('toolbarEditButton').setDisabled(disabled);
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
-        this.lookupReference('userDevicesButton').setDisabled(disabled);
     }
 });

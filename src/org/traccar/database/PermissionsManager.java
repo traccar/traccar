@@ -59,6 +59,7 @@ public class PermissionsManager {
 
     public final void refresh() {
         users.clear();
+        groupPermissions.clear();
         devicePermissions.clear();
         try {
             server = dataManager.getServer();

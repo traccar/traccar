@@ -14,7 +14,7 @@
     <entry key='web.path'>web</entry>
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
-    <entry key='web.timeout'>10000</entry>
+    <entry key='web.timeout'>30000</entry>
 
     <entry key='geocoder.enable'>true</entry>
     <entry key='geocoder.type'>nominatim</entry>
