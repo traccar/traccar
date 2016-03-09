@@ -130,7 +130,7 @@
     </entry>
 
     <entry key='database.updateDevice'>
-        UPDATE devices SET name = :name, uniqueId = :uniqueId WHERE id = :id;
+        UPDATE devices SET name = :name, uniqueId = :uniqueId, groupId = :groupId WHERE id = :id;
     </entry>
 
     <entry key='database.updateDeviceStatus'>
@@ -158,7 +158,7 @@
     </entry>
 
     <entry key='database.updateGroup'>
-        UPDATE groups SET name = :name WHERE id = :id;
+        UPDATE groups SET name = :name, groupId = :groupId WHERE id = :id;
     </entry>
 
     <entry key='database.deleteGroup'>

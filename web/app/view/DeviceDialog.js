@@ -36,6 +36,13 @@ Ext.define('Traccar.view.DeviceDialog', {
             name: 'uniqueId',
             fieldLabel: Strings.deviceIdentifier,
             allowBlank: false
+        }, {
+            xtype: 'combobox',
+            name: 'groupId',
+            fieldLabel: Strings.groupParent,
+            store: 'Groups',
+            displayField: 'name',
+            valueField: 'id'
         }]
     }
 });

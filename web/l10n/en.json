@@ -35,6 +35,7 @@
     "deviceCommand": "Command",
     "deviceFollow": "Follow",
     "groupDialog": "Group",
+    "groupParent": "Group",
     "settingsTitle": "Settings",
     "settingsUser": "Account",
     "settingsGroups": "Groups",

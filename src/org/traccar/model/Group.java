@@ -15,8 +15,6 @@
  */
 package org.traccar.model;
 
-import java.util.Date;
-
 public class Group {
 
     private long id;

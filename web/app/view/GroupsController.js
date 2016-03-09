@@ -18,10 +18,6 @@ Ext.define('Traccar.view.GroupsController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.groups',
 
-    init: function () {
-        Ext.getStore('Groups').load();
-    },
-
     onAddClick: function () {
         var group, dialog;
         group = Ext.create('Traccar.model.Group');

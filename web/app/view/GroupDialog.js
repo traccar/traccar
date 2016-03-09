@@ -31,6 +31,13 @@ Ext.define('Traccar.view.GroupDialog', {
             name: 'name',
             fieldLabel: Strings.sharedName,
             allowBlank: false
+        }, {
+            xtype: 'combobox',
+            name: 'groupId',
+            fieldLabel: Strings.groupParent,
+            store: 'Groups',
+            displayField: 'name',
+            valueField: 'id'
         }]
     }
 });

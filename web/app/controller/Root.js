@@ -73,6 +73,7 @@ Ext.define('Traccar.controller.Root', {
     },
 
     loadApp: function () {
+        Ext.getStore('Groups').load();
         Ext.getStore('Devices').load();
         Ext.get('attribution').remove();
         if (this.isPhone) {
