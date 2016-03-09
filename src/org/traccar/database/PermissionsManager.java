@@ -38,14 +38,14 @@ public class PermissionsManager {
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
 
-    private Set<Long> getGroupPermissions(long userId) {
+    public Set<Long> getGroupPermissions(long userId) {
         if (!groupPermissions.containsKey(userId)) {
             groupPermissions.put(userId, new HashSet<Long>());
         }
         return groupPermissions.get(userId);
     }
 
-    private Set<Long> getDevicePermissions(long userId) {
+    public Set<Long> getDevicePermissions(long userId) {
         if (!devicePermissions.containsKey(userId)) {
             devicePermissions.put(userId, new HashSet<Long>());
         }
@@ -92,12 +92,10 @@ public class PermissionsManager {
         }
     }
 
-    public Collection<Long> allowedGroups(long userId) {
-        return getGroupPermissions(userId);
-    }
-
-    public Collection<Long> allowedDevices(long userId) {
-        return getDevicePermissions(userId);
+    public void checkGroup(long userId, long groupId) throws SecurityException {
+        if (!getGroupPermissions(userId).contains(groupId)) {
+            throw new SecurityException("Group access denied");
+        }
     }
 
     public void checkDevice(long userId, long deviceId) throws SecurityException {

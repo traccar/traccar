@@ -36,7 +36,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private Collection<Long> devices;
 
     public AsyncSocket(long userId) {
-        devices = Context.getPermissionsManager().allowedDevices(userId);
+        devices = Context.getPermissionsManager().getDevicePermissions(userId);
     }
 
     @Override

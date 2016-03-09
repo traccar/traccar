@@ -40,7 +40,7 @@ public class PositionResource extends BaseResource {
             throws SQLException {
         if (deviceId == 0) {
             return Context.getConnectionManager().getInitialState(
-                    Context.getPermissionsManager().allowedDevices(getUserId()));
+                    Context.getPermissionsManager().getDevicePermissions(getUserId()));
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             return Context.getDataManager().getPositions(

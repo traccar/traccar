@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.traccar.Config;
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -55,10 +57,14 @@ public class DataManager implements IdentityManager {
 
     private DataSource dataSource;
 
+    private final long dataRefreshDelay;
+
     private final Map<Long, Device> devicesById = new HashMap<>();
     private final Map<String, Device> devicesByUniqueId = new HashMap<>();
     private long devicesLastUpdate;
-    private final long devicesRefreshDelay;
+
+    private final Map<Long, Group> groupsById = new HashMap<>();
+    private long groupsLastUpdate;
 
     public DataManager(Config config) throws Exception {
         this.config = config;
@@ -66,7 +72,7 @@ public class DataManager implements IdentityManager {
         initDatabase();
         initDatabaseSchema();
 
-        devicesRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
+        dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
     }
 
     public DataSource getDataSource() {
@@ -114,7 +120,7 @@ public class DataManager implements IdentityManager {
     }
 
     private void updateDeviceCache(boolean force) throws SQLException {
-        if (System.currentTimeMillis() - devicesLastUpdate > devicesRefreshDelay || force) {
+        if (System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay || force) {
             devicesById.clear();
             devicesByUniqueId.clear();
             for (Device device : getAllDevices()) {
@@ -140,6 +146,25 @@ public class DataManager implements IdentityManager {
         updateDeviceCache(
                 !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown"));
         return devicesByUniqueId.get(uniqueId);
+    }
+
+    private void updateGroupCache(boolean force) throws SQLException {
+        if (System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay || force) {
+            groupsById.clear();
+            for (Group group : getAllGroups()) {
+                groupsById.put(group.getId(), group);
+            }
+            groupsLastUpdate = System.currentTimeMillis();
+        }
+    }
+
+    public Group getGroupById(long id) {
+        try {
+            updateGroupCache(!groupsById.containsKey(id));
+        } catch (SQLException e) {
+            Log.warning(e);
+        }
+        return groupsById.get(id);
     }
 
     private String getQuery(String key) {
@@ -239,9 +264,11 @@ public class DataManager implements IdentityManager {
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectDevices"))
-                .setLong("userId", userId)
-                .executeQuery(Device.class);
+        Collection<Device> devices = new ArrayList<>();
+        for (long id : Context.getPermissionsManager().getDevicePermissions(userId)) {
+            devices.add(getDeviceById(id));
+        }
+        return devices;
     }
 
     public void addDevice(Device device) throws SQLException {
@@ -291,6 +318,19 @@ public class DataManager implements IdentityManager {
                 .setLong("deviceId", deviceId)
                 .executeUpdate();
         AsyncServlet.sessionRefreshUser(userId);
+    }
+
+    public Collection<Group> getAllGroups() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGroupsAll"))
+                .executeQuery(Group.class);
+    }
+
+    public Collection<Group> getGroups(long userId) throws SQLException {
+        Collection<Group> groups = new ArrayList<>();
+        for (long id : Context.getPermissionsManager().getGroupPermissions(userId)) {
+            groups.add(getGroupById(id));
+        }
+        return groups;
     }
 
     public void addGroup(Group group) throws SQLException {

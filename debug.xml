@@ -125,10 +125,6 @@
         SELECT * FROM devices;
     </entry>
 
-    <entry key='database.selectDevices'>
-        SELECT * FROM devices d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
-    </entry>
-
     <entry key='database.insertDevice'>
         INSERT INTO devices (name, uniqueId) VALUES (:name, :uniqueId);
     </entry>
@@ -151,6 +147,10 @@
 
     <entry key='database.unlinkDevice'>
         DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId;
+    </entry>
+
+    <entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
     </entry>
 
     <entry key='database.insertGroup'>
