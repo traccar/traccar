@@ -22,7 +22,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
+import org.traccar.model.Group;
 import org.traccar.model.GroupPermission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -66,12 +68,24 @@ public class PermissionsManager {
             for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
             }
+
+            GroupTree groupTree = new GroupTree(dataManager.getAllGroups());
+            for (GroupPermission permission : dataManager.getGroupPermissions()) {
+                Set<Long> userGroupPermissions = getGroupPermissions(permission.getUserId());
+                userGroupPermissions.add(permission.getGroupId());
+                for (Group group : groupTree.getDescendants(permission.getGroupId())) {
+                    userGroupPermissions.add(group.getId());
+                }
+            }
+
             for (DevicePermission permission : dataManager.getDevicePermissions()) {
                 getDevicePermissions(permission.getUserId()).add(permission.getDeviceId());
             }
-            for (GroupPermission permission : dataManager.getGroupPermissions()) {
-                getGroupPermissions(permission.getUserId()).add(permission.getGroupId());
+
+            for (Device device : dataManager.getAllDevices()) {
+                // TODO
             }
+
         } catch (SQLException error) {
             Log.warning(error);
         }
