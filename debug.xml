@@ -126,7 +126,7 @@
     </entry>
 
     <entry key='database.insertDevice'>
-        INSERT INTO devices (name, uniqueId) VALUES (:name, :uniqueId);
+        INSERT INTO devices (name, uniqueId, groupId) VALUES (:name, :uniqueId, :groupId);
     </entry>
 
     <entry key='database.updateDevice'>
