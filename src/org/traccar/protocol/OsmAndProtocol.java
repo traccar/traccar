@@ -35,8 +35,8 @@ public class OsmAndProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                 pipeline.addLast("httpEncoder", new HttpResponseEncoder());
+                pipeline.addLast("httpDecoder", new HttpRequestDecoder());
                 pipeline.addLast("objectDecoder", new OsmAndProtocolDecoder(OsmAndProtocol.this));
             }
         });

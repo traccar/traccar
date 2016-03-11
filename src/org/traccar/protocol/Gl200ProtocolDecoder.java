@@ -17,16 +17,15 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -131,7 +130,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
-            .text("+RESP:GTFRI,")
+            .text("+").expression("(?:RESP|BUFF):GTFRI,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
@@ -146,11 +145,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
-            .number("(d{5}:dd:dd),")             // hour meter
+            .number("(d{5}:dd:dd)?,")            // hour meter
             .number("(x+)?,")                    // adc 1
             .number("(x+)?,")                    // adc 2
             .number("(d{1,3})?,")                // battery
-            .number("(d{6})?,,,,")               // device status
+            .number("(?:(xx)(xx)(xx))?,,,,")     // device status
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd)").optional(2)  // time
@@ -160,8 +159,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .expression("GT...,")
+            .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}),")                  // imei
             .expression("[^,]*,")                // device name
@@ -353,7 +351,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.PREFIX_ADC + 1, parser.next());
         position.set(Event.PREFIX_ADC + 2, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.KEY_STATUS, parser.next());
+
+        if (parser.hasNext(3)) {
+            int ignition = parser.nextInt(16);
+            if (BitUtil.check(ignition, 4)) {
+                position.set(Event.KEY_IGNITION, false);
+            } else if (BitUtil.check(ignition, 5)) {
+                position.set(Event.KEY_IGNITION, true);
+            }
+            position.set(Event.KEY_INPUT, parser.nextInt(16));
+            position.set(Event.KEY_OUTPUT, parser.nextInt(16));
+        }
 
         // workaround for wrong location time
         if (parser.hasNext(6)) {

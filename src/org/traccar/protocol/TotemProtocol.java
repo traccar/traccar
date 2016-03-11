@@ -41,10 +41,10 @@ public class TotemProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new TotemFrameDecoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new TotemProtocolDecoder(TotemProtocol.this));
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new TotemProtocolEncoder());
+                pipeline.addLast("objectDecoder", new TotemProtocolDecoder(TotemProtocol.this));
             }
         });
     }

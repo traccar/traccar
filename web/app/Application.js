@@ -26,6 +26,7 @@ Ext.define('Traccar.Application', {
     models: [
         'Server',
         'User',
+        'Group',
         'Device',
         'Position',
         'Attribute',
@@ -33,7 +34,9 @@ Ext.define('Traccar.Application', {
     ],
 
     stores: [
+        'Groups',
         'Devices',
+        'AllGroups',
         'AllDevices',
         'Positions',
         'LatestPositions',

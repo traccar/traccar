@@ -21,6 +21,7 @@ Ext.define('Traccar.view.UsersController', {
     requires: [
         'Traccar.view.UserDialog',
         'Traccar.view.UserDevices',
+        'Traccar.view.UserGroups',
         'Traccar.view.BaseWindow'
     ],
 
@@ -75,10 +76,22 @@ Ext.define('Traccar.view.UsersController', {
         }).show();
     },
 
+    onGroupsClick: function () {
+        var user = this.getView().getSelectionModel().getSelection()[0];
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.settingsGroups,
+            items: {
+                xtype: 'userGroupsView',
+                user: user
+            }
+        }).show();
+    },
+
     onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
         this.lookupReference('toolbarEditButton').setDisabled(disabled);
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
         this.lookupReference('userDevicesButton').setDisabled(disabled);
+        this.lookupReference('userGroupsButton').setDisabled(disabled);
     }
 });

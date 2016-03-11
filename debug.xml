@@ -14,7 +14,7 @@
     <entry key='web.path'>web</entry>
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
-    <entry key='web.timeout'>10000</entry>
+    <entry key='web.timeout'>30000</entry>
 
     <entry key='geocoder.enable'>true</entry>
     <entry key='geocoder.type'>nominatim</entry>
@@ -49,7 +49,7 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
     <entry key='database.xml'>false</entry>
-    <entry key='database.changelog'>./database/db.changelog-master.xml</entry>
+    <entry key='database.changelog'>./database/changelog-master.xml</entry>
 
     <entry key='database.selectServers'>
         SELECT * FROM server;
@@ -113,24 +113,24 @@
         DELETE FROM users WHERE id = :id;
     </entry>
 
-    <entry key='database.getPermissionsAll'>
+    <entry key='database.selectDevicePermissions'>
         SELECT userId, deviceId FROM user_device;
+    </entry>
+
+    <entry key='database.selectGroupPermissions'>
+        SELECT userId, groupId FROM user_group;
     </entry>
 
     <entry key='database.selectDevicesAll'>
         SELECT * FROM devices;
     </entry>
 
-    <entry key='database.selectDevices'>
-        SELECT * FROM devices d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
-    </entry>
-
     <entry key='database.insertDevice'>
-        INSERT INTO devices (name, uniqueId) VALUES (:name, :uniqueId);
+        INSERT INTO devices (name, uniqueId, groupId) VALUES (:name, :uniqueId, :groupId);
     </entry>
 
     <entry key='database.updateDevice'>
-        UPDATE devices SET name = :name, uniqueId = :uniqueId WHERE id = :id;
+        UPDATE devices SET name = :name, uniqueId = :uniqueId, groupId = :groupId WHERE id = :id;
     </entry>
 
     <entry key='database.updateDeviceStatus'>
@@ -147,6 +147,30 @@
 
     <entry key='database.unlinkDevice'>
         DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId;
+    </entry>
+
+    <entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry>
+
+    <entry key='database.insertGroup'>
+        INSERT INTO groups (name) VALUES (:name);
+    </entry>
+
+    <entry key='database.updateGroup'>
+        UPDATE groups SET name = :name, groupId = :groupId WHERE id = :id;
+    </entry>
+
+    <entry key='database.deleteGroup'>
+        DELETE FROM groups WHERE id = :id;
+    </entry>
+
+    <entry key='database.linkGroup'>
+        INSERT INTO user_group (userId, groupId) VALUES (:userId, :groupId);
+    </entry>
+
+    <entry key='database.unlinkGroup'>
+        DELETE FROM user_group WHERE userId = :userId AND groupId = :groupId;
     </entry>
 
     <entry key='database.selectPositions'>

@@ -10,6 +10,9 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         T55ProtocolDecoder decoder = new T55ProtocolDecoder(new T55Protocol());
 
+        verifyPosition(decoder, text(
+                "$GPRMC,073501.000,A,1255.5125,N,07738.2948,E,0.00,0.53,080316,,,D*73,12,865733027593268,10011"));
+
         verifyNothing(decoder, text(
                 "$GPFID,ID123456ABC"));
 
