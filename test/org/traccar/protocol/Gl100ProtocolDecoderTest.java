@@ -12,6 +12,9 @@ public class Gl100ProtocolDecoderTest extends ProtocolTest {
         Gl100ProtocolDecoder decoder = new Gl100ProtocolDecoder(new Gl100Protocol());
 
         verifyPosition(decoder, text(
+                "+RESP:GTLGL,359464030492644,1,2,1,0,0.4,0,299.7,1,5.455551,51.449776,20160311083229,0204,0016,03EC,BD94,00,0036,0102090501"));
+
+        verifyPosition(decoder, text(
                 "+RESP:GTTRI,359464030439249,1,0,61,1,0.0,346,-2.7,2,-80.392825,26.122424,20151214000354,0310,0260,72BC,35F5,00,04B6,0102070407"));
 
         verifyPosition(decoder, text(
