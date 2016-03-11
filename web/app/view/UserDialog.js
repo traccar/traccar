@@ -30,7 +30,7 @@ Ext.define('Traccar.view.UserDialog', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.userName
+            fieldLabel: Strings.sharedName
         }, {
             xtype: 'textfield',
             name: 'email',

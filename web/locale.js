@@ -16,9 +16,6 @@
 
 var Locale = {};
 
-Ext.Ajax.disableCaching = false;
-Ext.Loader.disableCaching = false;
-
 Locale.languages = {
     'ar': { name: 'العربية', code: 'en' },
     'bg': { name: 'Български', code: 'bg' },
@@ -28,12 +25,16 @@ Locale.languages = {
     'el': { name: 'Ελληνικά', code: 'el' },
     'en': { name: 'English', code: 'en' },
     'es': { name: 'Español', code: 'es' },
+    'fa': { name: 'فارسی', code: 'fa' },
+    'fi': { name: 'Suomi', code: 'fi' },
     'fr': { name: 'Français', code: 'fr' },
     'hu': { name: 'Magyar', code: 'hu' },
     'id': { name: 'Bahasa Indonesia', code: 'id' },
     'it': { name: 'Italiano', code: 'it' },
     'ka': { name: 'ქართული', code: 'en' },
     'lt': { name: 'Lietuvių', code: 'lt' },
+    'ml': { name: 'മലയാളം', code: 'en' },
+    'ms': { name: 'بهاس ملايو', code: 'en' },
     'nl': { name: 'Nederlands', code: 'nl' },
     'no': { name: 'Norsk', code: 'no_NB' },
     'pl': { name: 'Polski', code: 'pl' },
@@ -47,6 +48,7 @@ Locale.languages = {
     'sr': { name: 'Srpski', code: 'sr' },
     'ta': { name: 'தமிழ்', code: 'en' },
     'th': { name: 'ไทย', code: 'th' },
+    'tr': { name: 'Türkçe', code: 'tr' },
     'uk': { name: 'Українська', code: 'ukr' },
     'vi': { name: 'Tiếng Việt', code: 'en' },
     'zh': { name: '中文', code: 'zh_CN' }

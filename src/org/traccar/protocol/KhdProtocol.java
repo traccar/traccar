@@ -39,8 +39,8 @@ public class KhdProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(512, 3, 2));
-                pipeline.addLast("objectDecoder", new KhdProtocolDecoder(KhdProtocol.this));
                 pipeline.addLast("objectEncoder", new KhdProtocolEncoder());
+                pipeline.addLast("objectDecoder", new KhdProtocolDecoder(KhdProtocol.this));
             }
         });
     }

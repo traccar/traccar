@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 Ext.define('Traccar.view.Devices', {
-    extend: 'Ext.grid.Panel',
+    extend: 'Ext.tree.Panel',
     xtype: 'devicesView',
 
     requires: [
@@ -25,7 +25,17 @@ Ext.define('Traccar.view.Devices', {
     ],
 
     controller: 'devices',
-    store: 'Devices',
+    rootVisible: false,
+    store: {
+        type: 'tree',
+        parentIdProperty: 'groupId',
+        proxy: {
+            type: 'memory',
+            reader: {
+                type: 'json'
+            }
+        }
+    },
 
     title: Strings.deviceTitle,
     selType: 'rowmodel',
@@ -53,11 +63,13 @@ Ext.define('Traccar.view.Devices', {
     },
 
     listeners: {
-        selectionchange: 'onSelectionChange'
+        selectionchange: 'onSelectionChange',
+        beforeselect: 'onBeforeSelect'
     },
 
     columns: [{
-        text: Strings.deviceName,
+        xtype: 'treecolumn',
+        text: Strings.sharedName,
         dataIndex: 'name',
         flex: 1
     }, {
@@ -65,19 +77,20 @@ Ext.define('Traccar.view.Devices', {
         dataIndex: 'lastUpdate',
         flex: 1,
         renderer: function (value, metaData, record) {
-            var status = record.get('status');
-            switch (status) {
-                case 'online':
-                    metaData.tdCls = 'status-color-online';
-                    break;
-                case 'offline':
-                    metaData.tdCls = 'status-color-offline';
-                    break;
-                default:
-                    metaData.tdCls = 'status-color-unknown';
-                    break;
+            if (record.get('leaf')) {
+                switch (record.get('status')) {
+                    case 'online':
+                        metaData.tdCls = 'status-color-online';
+                        break;
+                    case 'offline':
+                        metaData.tdCls = 'status-color-offline';
+                        break;
+                    default:
+                        metaData.tdCls = 'status-color-unknown';
+                        break;
+                }
+                return Ext.Date.format(value, Traccar.Style.dateTimeFormat);
             }
-            return Ext.Date.format(value, Traccar.Style.dateTimeFormat);
         }
     }]
 

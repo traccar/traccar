@@ -226,7 +226,7 @@ public class AsyncServlet extends BaseServlet {
         synchronized (ASYNC_SESSIONS) {
 
             if (Boolean.parseBoolean(req.getParameter("first")) || !ASYNC_SESSIONS.containsKey(userId)) {
-                Collection<Long> devices = Context.getPermissionsManager().allowedDevices(userId);
+                Collection<Long> devices = Context.getPermissionsManager().getDevicePermissions(userId);
                 ASYNC_SESSIONS.put(userId, new AsyncSession(userId, devices));
             }
 

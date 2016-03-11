@@ -47,7 +47,7 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
             .number("G(d+)")                     // satellites
             .any()
             .compile();
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {

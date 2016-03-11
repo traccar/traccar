@@ -10,6 +10,9 @@ public class TotemProtocolDecoderTest extends ProtocolTest {
 
         TotemProtocolDecoder decoder = new TotemProtocolDecoder(new TotemProtocol());
 
+        verifyPosition(decoder, text(
+                "$$0108AA863835024426319|18004000160216160756411100007DCD0000111000000000.800000000316.3519N10228.5086E126522"));
+
         // $$0128AA867521029231005|1880100015101802314842140000000000000000000000001AB48366093127600000.900000000806.1947N09818.4795E080355
 
         verifyPosition(decoder, text(

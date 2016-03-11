@@ -42,7 +42,13 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd),")             // date
+            .expression("[^*]+")
+            .text("*")
+            .expression("[^,]+")
+            .number(",(d+)")                     // satellites
+            .number(",(d+)")                     // imei
+            .number(",(d+)").optional(3)
             .any()
             .compile();
 
@@ -84,7 +90,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position position = null;
 
-    private Position decodeGprmc(String sentence, Channel channel) {
+    private Position decodeGprmc(String sentence, SocketAddress remoteAddress, Channel channel) {
 
         if (channel != null) {
             channel.write("OK1\r\n");
@@ -113,6 +119,14 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
+
+        if (parser.hasNext(3)) {
+            position.set(Event.KEY_SATELLITES, parser.next());
+            if (!identify(parser.next(), channel, remoteAddress)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+        }
 
         if (hasDeviceId()) {
             return position;
@@ -217,7 +231,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("IMEI")) {
             identify(sentence.substring(5, sentence.length()), channel, remoteAddress);
         } else if (sentence.startsWith("$GPFID")) {
-            if (identify(sentence.substring(6, sentence.length()), channel, remoteAddress) && position != null) {
+            if (identify(sentence.substring(7, sentence.length()), channel, remoteAddress) && position != null) {
                 Position position = this.position;
                 position.setDeviceId(getDeviceId());
                 this.position = null;
@@ -226,7 +240,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         } else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
             identify(sentence, channel, remoteAddress);
         } else if (sentence.startsWith("$GPRMC")) {
-            return decodeGprmc(sentence, channel);
+            return decodeGprmc(sentence, remoteAddress, channel);
         } else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
             return decodeGpgga(sentence);
         } else if (sentence.startsWith("$GPRMA") && hasDeviceId()) {

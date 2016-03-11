@@ -113,29 +113,31 @@ Ext.define('Traccar.view.MapController', {
             deviceId = position.get('deviceId');
             device = Ext.getStore('Devices').findRecord('id', deviceId, 0, false, false, true);
 
-            geometry = new ol.geom.Point(ol.proj.fromLonLat([
-                position.get('longitude'),
-                position.get('latitude')
-            ]));
+            if (device) {
+                geometry = new ol.geom.Point(ol.proj.fromLonLat([
+                    position.get('longitude'),
+                    position.get('latitude')
+                ]));
 
-            if (deviceId in this.latestMarkers) {
-                marker = this.latestMarkers[deviceId];
-                marker.setGeometry(geometry);
-            } else {
-                marker = new ol.Feature(geometry);
-                marker.set('record', device);
-                this.latestMarkers[deviceId] = marker;
-                this.getView().getLatestSource().addFeature(marker);
+                if (deviceId in this.latestMarkers) {
+                    marker = this.latestMarkers[deviceId];
+                    marker.setGeometry(geometry);
+                } else {
+                    marker = new ol.Feature(geometry);
+                    marker.set('record', device);
+                    this.latestMarkers[deviceId] = marker;
+                    this.getView().getLatestSource().addFeature(marker);
 
-                style = this.getLatestMarker(this.getDeviceColor(device));
-                style.getText().setText(device.get('name'));
-                marker.setStyle(style);
-            }
+                    style = this.getLatestMarker(this.getDeviceColor(device));
+                    style.getText().setText(device.get('name'));
+                    marker.setStyle(style);
+                }
 
-            marker.getStyle().getImage().setRotation(position.get('course') * Math.PI / 180);
+                marker.getStyle().getImage().setRotation(position.get('course') * Math.PI / 180);
 
-            if (marker === this.selectedMarker && this.followSelected()) {
-                this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+                if (marker === this.selectedMarker && this.followSelected()) {
+                    this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+                }
             }
         }
     },

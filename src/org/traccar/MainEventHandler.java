@@ -48,7 +48,10 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             s.append("course: ").append(String.format("%.1f", position.getCourse()));
             Log.info(s.toString());
 
-            Context.getConnectionManager().updatePosition(position);
+            Position lastPosition = Context.getConnectionManager().getLastPosition(position.getDeviceId());
+            if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0) {
+                Context.getConnectionManager().updatePosition(position);
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
@@ -25,26 +23,26 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-public class TelikProtocolDecoder extends BaseProtocolDecoder {
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
-    public TelikProtocolDecoder(TelikProtocol protocol) {
+public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
+
+    public HomtecsProtocolDecoder(HomtecsProtocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("dddd")
-            .number("(d{6})")                    // device id
-            .number("(d+),")                     // type
-            .number("d{12},")                    // event time
-            .number("d+,")
-            .number("(dd)(dd)(dd)")              // date
-            .number("(dd)(dd)(dd),")             // time
-            .number("(-?d+),")                   // longitude
-            .number("(-?d+),")                   // latitude
-            .number("(d),")                      // validity
-            .number("(d+),")                     // speed
-            .number("(d+),")                     // course
+            .expression("([^,]+),")              // id
+            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd).(d+),")        // time
             .number("(d+),")                     // satellites
+            .number("(dd)(dd.d+),")              // latitude
+            .expression("([NS]),")
+            .number("(ddd)(dd.d+),")             // longitude
+            .expression("([EW]),")
+            .number("(d+.?d*)?,")                // speed
+            .number("(d+.?d*)?,")                // course
             .any()
             .compile();
 
@@ -65,20 +63,19 @@ public class TelikProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_TYPE, parser.next());
-
         DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+
         position.setTime(dateBuilder.getDate());
 
-        position.setLongitude(parser.nextDouble() / 10000);
-        position.setLatitude(parser.nextDouble() / 10000);
-        position.setValid(parser.nextInt() != 1);
+        position.setValid(true);
+        position.set(Event.KEY_SATELLITES, parser.nextInt());
+
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
-
-        position.set(Event.KEY_SATELLITES, parser.next());
 
         return position;
     }

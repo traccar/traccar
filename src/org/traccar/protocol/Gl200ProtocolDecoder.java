@@ -16,10 +16,13 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
+import java.util.LinkedList;
 import java.util.regex.Pattern;
+
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -33,7 +36,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_HEARTBEAT = new PatternBuilder()
+    private static final Pattern PATTERN_HBD = new PatternBuilder()
             .text("+ACK:GTHBD,")
             .number("([0-9A-Z]{2}xxxx),")
             .any().text(",")
@@ -68,44 +71,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    private static final Pattern PATTERN = new PatternBuilder()
-            .groupBegin()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .or()
-            .binary("00?04,")
-            .number("xxxx,")
-            .expression("[01],")
-            .groupEnd()
-            .expression("GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .expression("([^,]+),")              // imei
-
-            .groupBegin()
-            .expression("[0-9A-Z]{17},")         // vin
-            .expression("[^,]{0,20},")           // device name
-            .expression("[01],")                 // report type
-            .number("x{1,8},")                   // report mask
-            .expression("[0-9A-Z]{17},")         // vin
-            .number("[01],")                     // obd connect
-            .number("d{1,5},")                   // obd voltage
-            .number("x{8},")                     // support pids
-            .number("(d{1,5}),")                 // engine rpm
-            .number("(d{1,3}),")                 // speed
-            .number("(-?d{1,3}),")               // coolant temp
-            .number("(d+.?d*|Inf|NaN)?,")        // fuel consumption
-            .number("(d{1,5}),")                 // dtcs cleared distance
-            .number("d{1,5},")
-            .expression("([01]),")               // obd connect
-            .number("(d{1,3}),")                 // number of dtcs
-            .number("(x*),")                     // dtcs
-            .number("(d{1,3}),")                 // throttle
-            .number("d{1,3},")                   // engine load
-            .number("(d{1,3})?,")                // fuel level
-            .number("(d+)")                      // odometer
-            .or().any()
-            .groupEnd().text(",")
-
-            .number("(d{1,2})?,")                // gps accuracy
+    private static final Pattern PATTERN_LOCATION = new PatternBuilder()
+            .number("(?:d{1,2})?,")              // gps accuracy
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
             .number("(-?d{1,5}.d)?,")            // altitude
@@ -114,69 +81,134 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd)").optional(2)  // time
             .text(",")
+            .groupBegin()
             .number("(0ddd)?,")                  // mcc
             .number("(0ddd)?,")                  // mnc
-            .number("(?:xxxx)?")
-            .number("(xxxx)").optional(2)        // lac
-            .text(",")
+            .number("(xxxx)?,")                  // lac
             .number("(xxxx)?,")                  // cell
-            .groupBegin()
-            .number("(d+.d)?,")                  // odometer
-            .number("(d{1,3})?,")                // battery
-            .groupEnd("?")
-            .groupBegin()
-            .any()
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd)")              // time
             .or()
-            .any()
+            .number("(d+)?,")                    // mcc
+            .number("(d+)?,")                    // mnc
+            .number("(d+)?,")                    // lac
+            .number("(d+)?,")                    // cell
             .groupEnd()
-            .number(",(xxxx)")
+            .number("(?:d+|(d+.d))?,")           // odometer
+            .compile();
+
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .text("+RESP:GTOBD,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("(?:[0-9A-Z]{17})?,")    // vin
+            .expression("[^,]{0,20},")           // device name
+            .expression("[01],")                 // report type
+            .number("x{1,8},")                   // report mask
+            .expression("(?:[0-9A-Z]{17})?,")    // vin
+            .number("[01],")                     // obd connect
+            .number("(?:d{1,5})?,")              // obd voltage
+            .number("(?:x{8})?,")                // support pids
+            .number("(d{1,5})?,")                // engine rpm
+            .number("(d{1,3})?,")                // speed
+            .number("(-?d{1,3})?,")              // coolant temp
+            .number("(d+.?d*|Inf|NaN)?,")        // fuel consumption
+            .number("(d{1,5})?,")                // dtcs cleared distance
+            .number("(?:d{1,5})?,")
+            .expression("([01])?,")              // obd connect
+            .number("(d{1,3})?,")                // number of dtcs
+            .number("(x*),")                     // dtcs
+            .number("(d{1,3})?,")                // throttle
+            .number("(?:d{1,3})?,")              // engine load
+            .number("(d{1,3})?,")                // fuel level
+            .number("(d+),")                     // odometer
+            .expression(PATTERN_LOCATION.pattern())
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private static final Pattern PATTERN_FRI = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTFRI,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(d+)?,")                    // power
+            .number("d{1,2},")                   // report type
+            .number("d{1,2},")                   // count
+            .expression("((?:")
+            .expression(PATTERN_LOCATION.pattern())
+            .expression(")+)")
+            .groupBegin()
+            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(d{1,3})?,")                // battery
+            .or()
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(d{5}:dd:dd)?,")            // hour meter
+            .number("(x+)?,")                    // adc 1
+            .number("(x+)?,")                    // adc 2
+            .number("(d{1,3})?,")                // battery
+            .number("(?:(xx)(xx)(xx))?,,,,")     // device status
+            .groupEnd()
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
-        String sentence = (String) msg;
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("[^,]*,")                // device name
+            .number("d*,")
+            .number("d{1,2},")                   // report type
+            .number("d{1,2},")                   // count
+            .expression(PATTERN_LOCATION.pattern())
+            .groupBegin()
+            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(d{1,3})?,")                // battery
+            .or()
+            .number("(d{1,7}.d)?,")              // odometer
+            .groupEnd()
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
-        Parser parser = new Parser(PATTERN_HEARTBEAT, sentence);
-        if (parser.matches()) {
-            if (channel != null) {
-                channel.write("+SACK:GTHBD," + parser.next() + "," + parser.next() + "$", remoteAddress);
-            }
-            return null;
+    private static final Pattern PATTERN_BASIC = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF)").text(":")
+            .expression("GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .any()
+            .number("(d{1,3}.d)?,")              // speed
+            .number("(d{1,3})?,")                // course
+            .number("(-?d{1,5}.d)?,")            // altitude
+            .number("(-?d{1,3}.d{6}),")          // longitude
+            .number("(-?d{1,2}.d{6}),")          // latitude
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)")              // time
+            .text(",")
+            .any()
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeHbd(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_HBD, sentence);
+        if (parser.matches() && channel != null) {
+            channel.write("+SACK:GTHBD," + parser.next() + "," + parser.next() + "$", remoteAddress);
         }
+        return null;
+    }
 
-        parser = new Parser(PATTERN_INF, sentence);
-        if (parser.matches()) {
-
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-
-            if (!identify(parser.next(), channel, remoteAddress)) {
-                return null;
-            }
-            position.setDeviceId(getDeviceId());
-
-            position.set(Event.KEY_STATUS, parser.next());
-            position.set(Event.KEY_POWER, parser.next());
-            position.set(Event.KEY_BATTERY, parser.next());
-            position.set(Event.KEY_CHARGE, parser.next());
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-
-            getLastLocation(position, dateBuilder.getDate());
-
-            position.set(Event.KEY_INDEX, parser.next());
-
-            return position;
-        }
-
-        parser = new Parser(PATTERN, sentence);
+    private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_INF, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -189,29 +221,29 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        // RFID
-        if (sentence.startsWith("+RESP:GTIDA")) {
-            position.set(Event.KEY_RFID, sentence.split(",")[5]);
-        }
+        position.set(Event.KEY_STATUS, parser.next());
+        position.set(Event.KEY_POWER, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Event.KEY_CHARGE, parser.next());
 
-        // OBD
-        position.set(Event.KEY_RPM, parser.next());
-        position.set(Event.KEY_OBD_SPEED, parser.next());
-        position.set(Event.PREFIX_TEMP + 1, parser.next());
-        position.set("fuel-consumption", parser.next());
-        position.set("dtcs-cleared-distance", parser.next());
-        position.set("odb-connect", parser.next());
-        position.set("dtcs-number", parser.next());
-        position.set("dtcs-codes", parser.next());
-        position.set(Event.KEY_THROTTLE, parser.next());
-        position.set(Event.KEY_FUEL, parser.next());
-        position.set(Event.KEY_OBD_ODOMETER, parser.next());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        if (parser.hasNext(12)) {
-            position.setValid(parser.nextInt() < 20);
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-            position.setCourse(parser.nextDouble());
-            position.setAltitude(parser.nextDouble());
+        getLastLocation(position, dateBuilder.getDate());
+
+        position.set(Event.KEY_INDEX, parser.next());
+
+        return position;
+    }
+
+    private void decodeLocation(Position position, Parser parser) {
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
+
+        if (parser.hasNext(8)) {
+            position.setValid(true);
             position.setLongitude(parser.nextDouble());
             position.setLatitude(parser.nextDouble());
 
@@ -230,9 +262,142 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_CID, parser.nextInt(16));
         }
 
+        parser.skip(4); // alternative networks
+
+        position.set(Event.KEY_ODOMETER, parser.next());
+    }
+
+    private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_OBD, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        if (!identify(parser.next(), channel, remoteAddress)) {
+            return null;
+        }
+        position.setDeviceId(getDeviceId());
+
+        position.set(Event.KEY_RPM, parser.next());
+        position.set(Event.KEY_OBD_SPEED, parser.next());
+        position.set(Event.PREFIX_TEMP + 1, parser.next());
+        position.set("fuel-consumption", parser.next());
+        position.set("dtcs-cleared-distance", parser.next());
+        position.set("odb-connect", parser.next());
+        position.set("dtcs-number", parser.next());
+        position.set("dtcs-codes", parser.next());
+        position.set(Event.KEY_THROTTLE, parser.next());
+        position.set(Event.KEY_FUEL, parser.next());
+        position.set(Event.KEY_OBD_ODOMETER, parser.next());
+
+        decodeLocation(position, parser);
+
+        position.set(Event.KEY_ODOMETER, parser.next());
+
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                position.setTime(dateBuilder.getDate());
+            }
+        }
+
+        return position;
+    }
+
+    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_FRI, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        LinkedList<Position> positions = new LinkedList<>();
+
+        if (!identify(parser.next(), channel, remoteAddress)) {
+            return null;
+        }
+
+        int power = parser.nextInt();
+
+        Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
+        while (itemParser.find()) {
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+
+            decodeLocation(position, itemParser);
+
+            positions.add(position);
+        }
+
+        Position position = positions.getLast();
+
+        decodeLocation(position, parser);
+
+        // power value only on some devices
+        if (power > 10) {
+            position.set(Event.KEY_POWER, power);
+        }
+
         position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
 
+        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.KEY_HOURS, parser.next());
+        position.set(Event.PREFIX_ADC + 1, parser.next());
+        position.set(Event.PREFIX_ADC + 2, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
+
+        if (parser.hasNext(3)) {
+            int ignition = parser.nextInt(16);
+            if (BitUtil.check(ignition, 4)) {
+                position.set(Event.KEY_IGNITION, false);
+            } else if (BitUtil.check(ignition, 5)) {
+                position.set(Event.KEY_IGNITION, true);
+            }
+            position.set(Event.KEY_INPUT, parser.nextInt(16));
+            position.set(Event.KEY_OUTPUT, parser.nextInt(16));
+        }
+
+        // workaround for wrong location time
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                position.setTime(dateBuilder.getDate());
+            }
+        }
+
+        return positions;
+    }
+
+    private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        if (!identify(parser.next(), channel, remoteAddress)) {
+            return null;
+        }
+        position.setDeviceId(getDeviceId());
+
+        decodeLocation(position, parser);
+
+        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Event.KEY_BATTERY, parser.next());
+
+        position.set(Event.KEY_ODOMETER, parser.next());
+
+        // workaround for wrong location time
         if (parser.hasNext(6)) {
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -247,6 +412,73 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
+    }
+
+    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_BASIC, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        if (!identify(parser.next(), channel, remoteAddress)) {
+            return null;
+        }
+        position.setDeviceId(getDeviceId());
+
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
+
+        position.setValid(true);
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
+
+        return position;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+
+        int typeIndex = sentence.indexOf(":GT");
+        if (typeIndex < 0) {
+            return null;
+        }
+
+        Object result;
+        switch (sentence.substring(typeIndex + 3, typeIndex + 6)) {
+            case "HBD":
+                result = decodeHbd(channel, remoteAddress, sentence);
+                break;
+            case "INF":
+                result = decodeInf(channel, remoteAddress, sentence);
+                break;
+            case "OBD":
+                result = decodeObd(channel, remoteAddress, sentence);
+                break;
+            case "FRI":
+                result = decodeFri(channel, remoteAddress, sentence);
+                break;
+            default:
+                result = decodeOther(channel, remoteAddress, sentence);
+                break;
+        }
+
+        if (result == null) {
+            result = decodeBasic(channel, remoteAddress, sentence);
+        }
+
+        return result;
     }
 
 }

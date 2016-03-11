@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.Permission;
+import org.traccar.model.GroupPermission;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,23 +28,23 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 
-@Path("permissions")
+@Path("permissions/groups")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class PermissionResource extends BaseResource {
+public class GroupPermissionResource extends BaseResource {
 
     @POST
-    public Response add(Permission entity) throws SQLException {
+    public Response add(GroupPermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
+        Context.getDataManager().linkGroup(entity.getUserId(), entity.getGroupId());
         Context.getPermissionsManager().refresh();
         return Response.ok(entity).build();
     }
 
     @DELETE
-    public Response remove(Permission entity) throws SQLException {
+    public Response remove(GroupPermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        Context.getDataManager().unlinkDevice(entity.getUserId(), entity.getDeviceId());
+        Context.getDataManager().unlinkGroup(entity.getUserId(), entity.getGroupId());
         Context.getPermissionsManager().refresh();
         return Response.noContent().build();
     }

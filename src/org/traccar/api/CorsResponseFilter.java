@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.traccar.Context;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -37,7 +35,7 @@ public class CorsResponseFilter implements ContainerResponseFilter {
     public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_VALUE = "true";
 
     public static final String ACCESS_CONTROL_ALLOW_METHODS_KEY = "Access-Control-Allow-Methods";
-    public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET, POST, PUT, DELETE";
+    public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET, POST, PUT, DELETE, OPTIONS";
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
@@ -54,11 +52,11 @@ public class CorsResponseFilter implements ContainerResponseFilter {
         if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN_KEY)) {
             String origin = request.getHeaderString(HttpHeaders.Names.ORIGIN);
             String allowed = Context.getConfig().getString("web.origin");
-            if (allowed == null) {
+
+            if (allowed == null || origin == null) {
                 response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, ACCESS_CONTROL_ALLOW_ORIGIN_VALUE);
-            } else if (allowed.contains(origin)) {
-                String originSafe = URLEncoder.encode(origin, StandardCharsets.UTF_8.name());
-                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, originSafe);
+            } else if (allowed.equals(ACCESS_CONTROL_ALLOW_ORIGIN_VALUE) || allowed.contains(origin)) {
+                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, origin);
             }
         }
     }

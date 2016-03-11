@@ -55,6 +55,11 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+
+        if (requestContext.getMethod().equals("OPTIONS")) {
+            throw new WebApplicationException(Response.status(Response.Status.OK).build());
+        }
+
         SecurityContext securityContext = null;
 
         String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);

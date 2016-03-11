@@ -15,7 +15,6 @@ fi
 VERSION=$1
 
 check_requirement () {
-  eval $1 &>/dev/null
   if ! eval $1 &>/dev/null
   then
     echo $2

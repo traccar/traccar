@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private Collection<Long> devices;
 
     public AsyncSocket(long userId) {
-        devices = Context.getPermissionsManager().allowedDevices(userId);
+        devices = Context.getPermissionsManager().getDevicePermissions(userId);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     private void sendData(String key, Collection<?> data) {
-        if (!data.isEmpty()) {
+        if (!data.isEmpty() && isConnected()) {
             JsonObjectBuilder json = Json.createObjectBuilder();
             json.add(key, JsonConverter.arrayToJson(data));
             getRemote().sendString(json.build().toString(), null);

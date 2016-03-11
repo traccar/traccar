@@ -118,11 +118,16 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Send response #2
-        if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
+        if (Character.isDigit(sentence.charAt(0))) {
             if (channel != null) {
                 channel.write("ON", remoteAddress);
             }
-            return null;
+            int start = sentence.indexOf("imei:");
+            if (start >= 0) {
+                sentence = sentence.substring(start);
+            } else {
+                return null;
+            }
         }
 
         Position position = new Position();

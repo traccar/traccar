@@ -37,12 +37,17 @@ public class Parser {
         return matcher.find();
     }
 
+    public void skip(int number) {
+        position += number;
+    }
+
     public boolean hasNext() {
         return hasNext(1);
     }
 
     public boolean hasNext(int number) {
-        if (matcher.group(position) != null) {
+        String value = matcher.group(position);
+        if (value != null && !value.isEmpty()) {
             return true;
         } else {
             position += number;

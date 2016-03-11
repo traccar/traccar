@@ -105,7 +105,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Event.KEY_GSM, parser.nextInt());
             position.set(Event.KEY_SATELLITES, parser.nextInt());
-            position.set(Event.KEY_BATTERY  , parser.nextInt());
+            position.set(Event.KEY_BATTERY, parser.nextInt());
             position.set(Event.KEY_IGNITION, parser.nextInt() != 0);
 
             position.set("arm", parser.nextInt());

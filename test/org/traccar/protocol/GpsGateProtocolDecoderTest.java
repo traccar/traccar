@@ -11,6 +11,12 @@ public class GpsGateProtocolDecoderTest extends ProtocolTest {
         GpsGateProtocolDecoder decoder = new GpsGateProtocolDecoder(new GpsGateProtocol());
 
         verifyNothing(decoder, text(
+                "$FRCMD,862950025974620,_Ping,voltage=4*4F"));
+
+        verifyPosition(decoder, text(
+                "$FRCMD,862950025974620,_SendMessage, ,2721.5781,S,15259.145,E,61,0.00,61,080316,092612,1,SosButton=0,voltage=4*60"));
+
+        verifyNothing(decoder, text(
                 "$FRLIN,,user1,8IVHF*7A"));
         
         verifyNothing(decoder, text(
