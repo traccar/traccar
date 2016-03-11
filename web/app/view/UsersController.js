@@ -21,6 +21,7 @@ Ext.define('Traccar.view.UsersController', {
     requires: [
         'Traccar.view.UserDialog',
         'Traccar.view.UserDevices',
+        'Traccar.view.UserGroups',
         'Traccar.view.BaseWindow'
     ],
 
@@ -80,7 +81,7 @@ Ext.define('Traccar.view.UsersController', {
         Ext.create('Traccar.view.BaseWindow', {
             title: Strings.settingsGroups,
             items: {
-                xtype: 'userDevicesView',
+                xtype: 'userGroupsView',
                 user: user
             }
         }).show();
