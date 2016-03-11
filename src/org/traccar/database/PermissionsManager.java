@@ -16,7 +16,6 @@
 package org.traccar.database;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,21 +68,21 @@ public class PermissionsManager {
                 users.put(user.getId(), user);
             }
 
-            GroupTree groupTree = new GroupTree(dataManager.getAllGroups());
+            GroupTree groupTree = new GroupTree(dataManager.getAllGroups(), dataManager.getAllDevices());
             for (GroupPermission permission : dataManager.getGroupPermissions()) {
                 Set<Long> userGroupPermissions = getGroupPermissions(permission.getUserId());
+                Set<Long> userDevicePermissions = getDevicePermissions(permission.getUserId());
                 userGroupPermissions.add(permission.getGroupId());
-                for (Group group : groupTree.getDescendants(permission.getGroupId())) {
+                for (Group group : groupTree.getGroups(permission.getGroupId())) {
                     userGroupPermissions.add(group.getId());
+                }
+                for (Device device : groupTree.getDevices(permission.getGroupId())) {
+                    userDevicePermissions.add(device.getId());
                 }
             }
 
             for (DevicePermission permission : dataManager.getDevicePermissions()) {
                 getDevicePermissions(permission.getUserId()).add(permission.getDeviceId());
-            }
-
-            for (Device device : dataManager.getAllDevices()) {
-                // TODO
             }
 
         } catch (SQLException error) {
