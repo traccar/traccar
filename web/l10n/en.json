@@ -44,6 +44,7 @@
     "settingsUsers": "Users",
     "settingsDistanceUnit": "Distance",
     "settingsSpeedUnit": "Speed",
+    "settingsTwelveHourFormat": "12-hour Format",
     "reportTitle": "Reports",
     "reportDevice": "Device",
     "reportFrom": "From",

@@ -38,5 +38,17 @@
     <dropDefaultValue tableName="users" columnName="distanceunit" />
     <dropDefaultValue tableName="users" columnName="speedunit" />
 
+    <addColumn tableName="users">
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <addColumn tableName="server">
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>

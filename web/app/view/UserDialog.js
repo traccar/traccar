@@ -84,6 +84,11 @@ Ext.define('Traccar.view.UserDialog', {
             xtype: 'numberfield',
             name: 'zoom',
             fieldLabel: Strings.serverZoom
+        }, {
+            xtype: 'checkboxfield',
+            name: 'twelveHourFormat',
+            fieldLabel: Strings.settingsTwelveHourFormat,
+            allowBlank: false
         }]
     }
 });

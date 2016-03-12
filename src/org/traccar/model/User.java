@@ -140,6 +140,16 @@ public class User {
         this.zoom = zoom;
     }
 
+    private boolean twelveHourFormat;
+
+    public boolean getTwelveHourFormat() {
+        return twelveHourFormat;
+    }
+
+    public void setTwelveHourFormat(boolean twelveHourFormat) {
+        this.twelveHourFormat = twelveHourFormat;
+    }
+
     private String password;
 
     public String getPassword() {
