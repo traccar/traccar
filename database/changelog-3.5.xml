@@ -33,5 +33,10 @@
       <column name="groupid" type="INT" />
     </addColumn>
 
+    <dropDefaultValue tableName="users" columnName="map" />
+    <dropDefaultValue tableName="users" columnName="language" />
+    <dropDefaultValue tableName="users" columnName="distanceunit" />
+    <dropDefaultValue tableName="users" columnName="speedunit" />
+
   </changeSet>
 </databaseChangeLog>
