@@ -62,6 +62,31 @@ Ext.define('Traccar.view.Devices', {
         }]
     },
 
+    bbar: [{
+        xtype: 'tbtext',
+        html: Strings.sharedSearch
+    }, {
+        xtype: 'textfield',
+        listeners: {
+            change: function () {
+                var tree, expr;
+                tree = this.up('treepanel');
+                expr = new RegExp(this.getValue(), 'i');
+                tree.store.filter({
+                    id: 'nameFilter',
+                    filterFn: function (node) {
+                        var children, len, visible, i;
+                        children = node.childNodes;
+                        len = children && children.length;
+                        visible = node.isLeaf() ? expr.test(node.get('name')) : false;
+                        for (i = 0; i < len && !(visible = children[i].get('visible')); i++);
+                        return visible;
+                    }
+                });
+            }
+        }
+    }],
+
     listeners: {
         selectionchange: 'onSelectionChange',
         beforeselect: 'onBeforeSelect'
