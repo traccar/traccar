@@ -38,4 +38,5 @@ public class Command extends Extensible {
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";
     public static final String KEY_RADIUS = "radius";
 
+    public static final String TYPE_CUSTOM = "CUSTOM";
 }
