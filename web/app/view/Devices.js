@@ -114,7 +114,11 @@ Ext.define('Traccar.view.Devices', {
                         metaData.tdCls = 'status-color-unknown';
                         break;
                 }
-                return Ext.Date.format(value, Traccar.Style.dateTimeFormat);
+                if (Traccar.app.getPreference('twelveHourFormat', false)) {
+                    return Ext.Date.format(value, Traccar.Style.dateTimeFormat12);
+                } else {
+                    return Ext.Date.format(value, Traccar.Style.dateTimeFormat24);
+                }
             }
         }
     }]

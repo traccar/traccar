@@ -19,7 +19,8 @@ Ext.define('Traccar.view.Report', {
     xtype: 'reportView',
 
     requires: [
-        'Traccar.view.ReportController'
+        'Traccar.view.ReportController',
+        'Traccar.view.CustomTimeField'
     ],
 
     controller: 'report',
@@ -48,10 +49,9 @@ Ext.define('Traccar.view.Report', {
         format: Traccar.Style.dateFormat,
         value: new Date(new Date().getTime() - 30 * 60 * 1000)
     }, {
-        xtype: 'timefield',
+        xtype: 'customTimeField',
         reference: 'fromTimeField',
         maxWidth: Traccar.Style.reportTime,
-        format: Traccar.Style.timeFormat,
         value: new Date(new Date().getTime() - 30 * 60 * 1000)
     }, '-', {
         xtype: 'tbtext',
@@ -63,10 +63,9 @@ Ext.define('Traccar.view.Report', {
         format: Traccar.Style.dateFormat,
         value: new Date()
     }, {
-        xtype: 'timefield',
+        xtype: 'customTimeField',
         reference: 'toTimeField',
         maxWidth: Traccar.Style.reportTime,
-        format: Traccar.Style.timeFormat,
         value: new Date()
     }, '-', {
         text: Strings.reportShow,
