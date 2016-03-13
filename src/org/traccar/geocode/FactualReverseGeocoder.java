@@ -19,10 +19,6 @@ import javax.json.JsonObject;
 
 public class FactualReverseGeocoder extends JsonReverseGeocoder {
 
-    public FactualReverseGeocoder() {
-        this("https://api.factual.com/geotag", "ABCDE", 0);
-    }
-
     public FactualReverseGeocoder(String url, String key, int cacheSize) {
         super(url + "?latitude=%f&longitude=%f&KEY=" + key, cacheSize);
     }

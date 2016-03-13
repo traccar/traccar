@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 - 2015 Stefaan Van Dooren (stefaan.vandooren@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +21,6 @@ import javax.json.JsonObject;
 
 public class OpenCageReverseGeocoder extends JsonReverseGeocoder {
 
-    public OpenCageReverseGeocoder() {
-        this("https://api.opencagedata.com/geocode/v1", "ABCDE", 0);
-    }
-
     public OpenCageReverseGeocoder(String url, String key, int cacheSize) {
         super(url + "/json?q=%f,%f&key=" + key, cacheSize);
     }
@@ -36,11 +33,20 @@ public class OpenCageReverseGeocoder extends JsonReverseGeocoder {
             if (location != null) {
                 Address address = new Address();
 
+                if (location.containsKey("building")) {
+                    address.setHouse(location.getString("building"));
+                }
                 if (location.containsKey("house_number")) {
                     address.setHouse(location.getString("house_number"));
                 }
                 if (location.containsKey("road")) {
                     address.setStreet(location.getString("road"));
+                }
+                if (location.containsKey("suburb")) {
+                    address.setSuburb(location.getString("suburb"));
+                }
+                if (location.containsKey("city")) {
+                    address.setSettlement(location.getString("city"));
                 }
                 if (location.containsKey("city_district")) {
                     address.setSettlement(location.getString("city_district"));
