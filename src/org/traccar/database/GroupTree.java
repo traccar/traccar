@@ -33,11 +33,11 @@ public class GroupTree {
         private Device device;
         private Collection<TreeNode> children = new HashSet<>();
 
-        public TreeNode(Group group) {
+        TreeNode(Group group) {
             this.group = group;
         }
 
-        public TreeNode(Device device) {
+        TreeNode(Device device) {
             this.device = device;
         }
 
@@ -59,14 +59,10 @@ public class GroupTree {
             if (other == this) {
                 return true;
             }
-            if (group != null) {
-                if (other.group != null) {
-                    return group.getId() == other.group.getId();
-                }
-            } else if (device != null) {
-                if (other.device != null) {
-                    return device.getId() == other.device.getId();
-                }
+            if (group != null && other.group != null) {
+                return group.getId() == other.group.getId();
+            } else if (device != null && other.device != null) {
+                return device.getId() == other.device.getId();
             }
             return false;
         }
