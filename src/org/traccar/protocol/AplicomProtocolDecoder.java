@@ -222,7 +222,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         int event = buf.readUnsignedByte();
         position.set(Event.KEY_EVENT, event);
-        buf.readUnsignedByte();
+        position.set("event-info", buf.readUnsignedByte());
 
         if ((selector & 0x0008) != 0) {
             position.setValid((buf.readUnsignedByte() & 0x40) != 0);
