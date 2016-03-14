@@ -47,9 +47,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time
             .expression("([AV]),")               // validity
-            .number("-?(d+.d+),")                // latitude
+            .number(" *-?(d+.d+),")              // latitude
             .expression("([NS]),")
-            .number("-?(d+.d+),")                // longitude
+            .number(" *-?(d+.d+),")              // longitude
             .expression("([EW])?,")
             .number("(d+.d+),")                  // speed
             .number("(d+.?d*),")                 // course

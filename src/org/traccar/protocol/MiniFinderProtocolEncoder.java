@@ -21,8 +21,6 @@ import org.traccar.model.Command;
 
 public class MiniFinderProtocolEncoder extends StringProtocolEncoder {
 
-    private static final String prefix = "123456";
-
     @Override
     protected Object encodeCommand(Command command) {
 

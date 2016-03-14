@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,12 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm MMM d yyyy", Locale.ENGLISH);
             position.setTime(DateUtil.correctYear(
                     dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR))));
+
+            if (sentence.contains("Ignition on detected")) {
+                position.set(Event.KEY_IGNITION, true);
+            } else if (sentence.contains("Ignition off detected")) {
+                position.set(Event.KEY_IGNITION, false);
+            }
 
             return position;
 

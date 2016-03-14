@@ -67,7 +67,8 @@
         speedUnit = :speedUnit,
         latitude = :latitude,
         longitude = :longitude,
-        zoom = :zoom
+        zoom = :zoom,
+        twelveHourFormat = :twelveHourFormat
         WHERE id = :id;
     </entry>
 
@@ -101,7 +102,8 @@
         speedUnit = :speedUnit,
         latitude = :latitude,
         longitude = :longitude,
-        zoom = :zoom
+        zoom = :zoom,
+        twelveHourFormat = :twelveHourFormat
         WHERE id = :id;
     </entry>
 
@@ -298,5 +300,6 @@
     <entry key='kenji.port'>5102</entry>
     <entry key='astra.port'>5103</entry>
     <entry key='homtecs.port'>5104</entry>
+    <entry key='fox.port'>5105</entry>
 
 </properties>

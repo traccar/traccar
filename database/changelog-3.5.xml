@@ -33,5 +33,22 @@
       <column name="groupid" type="INT" />
     </addColumn>
 
+    <dropDefaultValue tableName="users" columnName="map" />
+    <dropDefaultValue tableName="users" columnName="language" />
+    <dropDefaultValue tableName="users" columnName="distanceunit" />
+    <dropDefaultValue tableName="users" columnName="speedunit" />
+
+    <addColumn tableName="users">
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <addColumn tableName="server">
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>

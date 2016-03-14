@@ -137,4 +137,14 @@ public class Server {
         this.zoom = zoom;
     }
 
+    private boolean twelveHourFormat;
+
+    public boolean getTwelveHourFormat() {
+        return twelveHourFormat;
+    }
+
+    public void setTwelveHourFormat(boolean twelveHourFormat) {
+        this.twelveHourFormat = twelveHourFormat;
+    }
+
 }

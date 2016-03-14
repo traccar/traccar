@@ -17,7 +17,6 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.Device;
 import org.traccar.model.Group;
 
 import javax.ws.rs.Consumes;
