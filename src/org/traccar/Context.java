@@ -148,7 +148,11 @@ public final class Context {
                     reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
                     break;
                 default:
-                    reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
+                    if (key != null) {
+                        reverseGeocoder = new GoogleReverseGeocoder(key, cacheSize);
+                    } else {
+                        reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
+                    }
                     break;
             }
         }

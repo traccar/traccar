@@ -29,6 +29,10 @@ public class GoogleReverseGeocoder extends JsonReverseGeocoder {
         super("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f", cacheSize);
     }
 
+    public GoogleReverseGeocoder(String key, int cacheSize) {
+        super("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&key=" + key, cacheSize);
+    }
+
     @Override
     public Address parseAddress(JsonObject json) {
         JsonArray results = json.getJsonArray("results");
