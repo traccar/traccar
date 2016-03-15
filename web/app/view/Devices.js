@@ -67,6 +67,7 @@ Ext.define('Traccar.view.Devices', {
         html: Strings.sharedSearch
     }, {
         xtype: 'textfield',
+        flex: 1,
         listeners: {
             change: function () {
                 var tree, expr;
