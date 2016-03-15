@@ -37,9 +37,6 @@ Ext.define('Traccar.model.Server', {
         name: 'mapUrl',
         type: 'string'
     }, {
-        name: 'language',
-        type: 'string'
-    }, {
         name: 'distanceUnit',
         type: 'string'
     }, {

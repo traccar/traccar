@@ -33,8 +33,10 @@
       <column name="groupid" type="INT" />
     </addColumn>
 
+    <dropColumn tableName="users" columnName="language" />
+    <dropColumn tableName="server" columnName="language" />
+
     <dropDefaultValue tableName="users" columnName="map" />
-    <dropDefaultValue tableName="users" columnName="language" />
     <dropDefaultValue tableName="users" columnName="distanceunit" />
     <dropDefaultValue tableName="users" columnName="speedunit" />
 

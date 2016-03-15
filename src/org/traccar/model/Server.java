@@ -77,16 +77,6 @@ public class Server {
         this.mapUrl = mapUrl;
     }
 
-    private String language;
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
     private String distanceUnit;
 
     public String getDistanceUnit() {
