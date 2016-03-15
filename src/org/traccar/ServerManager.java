@@ -68,8 +68,6 @@ public class ServerManager {
                 initProtocolServer((BaseProtocol) protocolClass.newInstance());
             }
         }
-
-        initProtocolDetector();
     }
 
     public void start() {
@@ -88,30 +86,8 @@ public class ServerManager {
         GlobalTimer.release();
     }
 
-    private boolean isProtocolEnabled(String protocol) {
-        return Context.getConfig().hasKey(protocol + ".port");
-    }
-
-    private void initProtocolDetector() {
-        String protocol = "detector";
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
-                }
-            });
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
-                }
-            });
-        }
-    }
-
     private void initProtocolServer(final Protocol protocol) {
-        if (isProtocolEnabled(protocol.getName())) {
+        if (Context.getConfig().hasKey(protocol.getName() + ".port")) {
             protocol.initTrackerServers(serverList);
         }
     }
