@@ -20,6 +20,8 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
+import java.util.Map;
+
 public class MeitrackProtocolEncoder extends StringProtocolEncoder {
 
     private Object formatCommand(Command command, char dataId, String content) {
@@ -32,6 +34,8 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
+
+        Map<String, Object> attributes = command.getAttributes();
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:
@@ -46,6 +50,9 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, 'M', "C01,0,22022");
             case Command.TYPE_REQUEST_PHOTO:
                 return formatCommand(command, 'D', "D03,1,camera_picture.jpg");
+            case Command.TYPE_SEND_SMS:
+                return formatCommand(command, 'f', "C02,0,"
+                        + attributes.get(Command.KEY_PHONE_NUMBER) + "," + attributes.get(Command.KEY_MESSAGE));
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

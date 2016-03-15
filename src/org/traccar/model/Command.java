@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Command extends Extensible {
 
+    public static final String TYPE_CUSTOM = "custom";
     public static final String TYPE_POSITION_SINGLE = "positionSingle";
     public static final String TYPE_POSITION_PERIODIC = "positionPeriodic";
     public static final String TYPE_POSITION_STOP = "positionStop";
@@ -31,12 +32,14 @@ public class Command extends Extensible {
     public static final String TYPE_REQUEST_PHOTO = "requestPhoto";
     public static final String TYPE_REBOOT_DEVICE = "rebootDevice";
     public static final String TYPE_MOVEMENT_ALARM = "movementAlarm";
+    public static final String TYPE_SEND_SMS = "sendSms";
 
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
     public static final String KEY_TIMEZONE = "timezone";
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";
     public static final String KEY_RADIUS = "radius";
+    public static final String KEY_PHONE_NUMBER = "phoneNumber";
+    public static final String KEY_MESSAGE = "message";
 
-    public static final String TYPE_CUSTOM = "CUSTOM";
 }

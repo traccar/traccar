@@ -36,7 +36,8 @@ public class MeitrackProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
-                Command.TYPE_REQUEST_PHOTO);
+                Command.TYPE_REQUEST_PHOTO,
+                Command.TYPE_SEND_SMS);
     }
 
     @Override
