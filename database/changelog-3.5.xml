@@ -36,8 +36,11 @@
     <dropColumn tableName="users" columnName="language" />
     <dropColumn tableName="server" columnName="language" />
 
+    <dropNotNullConstraint tableName="users" columnName="map" columnDataType="VARCHAR(128)" />
     <dropDefaultValue tableName="users" columnName="map" />
+    <dropNotNullConstraint tableName="users" columnName="distanceunit" columnDataType="VARCHAR(128)" />
     <dropDefaultValue tableName="users" columnName="distanceunit" />
+    <dropNotNullConstraint tableName="users" columnName="speedunit" columnDataType="VARCHAR(128)" />
     <dropDefaultValue tableName="users" columnName="speedunit" />
 
     <addColumn tableName="users">
