@@ -87,11 +87,13 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // odometer
             .number("(d+.d+)?,")                 // fuel instant
             .number("(?:d+.d+)?,")               // fuel average
+            .number("(d+),")                     // hours
             .number("(d+),")                     // speed
-            .number("d+,")                       // power load
-            .number("(d+.d+%),")                 // throttle
+            .number("d+.?d*%,")                  // power load
+            .number("(d+),")                     // temperature
+            .number("(d+.?d*%),")                // throttle
             .number("(d+),")                     // rpm
-            .number("(d+.d+%),")                 // battery
+            .number("(d+.d+),")                  // battery
             .number("[^,]*,")                    // dtc 1
             .number("[^,]*,")                    // dtc 2
             .number("[^,]*,")                    // dtc 3
@@ -166,7 +168,9 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Event.KEY_ODOMETER, parser.nextInt());
             position.set(Event.KEY_FUEL, parser.next());
+            position.set(Event.KEY_HOURS, parser.next());
             position.set(Event.KEY_OBD_SPEED, parser.next());
+            position.set(Event.PREFIX_TEMP + 1, parser.next());
             position.set(Event.KEY_THROTTLE, parser.next());
             position.set(Event.KEY_RPM, parser.next());
             position.set(Event.KEY_BATTERY, parser.next());
