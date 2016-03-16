@@ -158,6 +158,22 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private static final Pattern PATTERN_IGN = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("[^,]*,")                // device name
+            .number("d+,")                       // ignition off duration
+            .expression(PATTERN_LOCATION.pattern())
+            .number("(d{5}:dd:dd)?,")            // hour meter
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
@@ -376,6 +392,37 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
+    private Object decodeIgn(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_IGN, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        if (!identify(parser.next(), channel, remoteAddress)) {
+            return null;
+        }
+        position.setDeviceId(getDeviceId());
+
+        decodeLocation(position, parser);
+
+        position.set(Event.KEY_HOURS, parser.next());
+        position.set(Event.KEY_ODOMETER, parser.next());
+
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                position.setTime(dateBuilder.getDate());
+            }
+        }
+
+        return position;
+    }
+
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
@@ -468,6 +515,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case "FRI":
                 result = decodeFri(channel, remoteAddress, sentence);
+                break;
+            case "IGN":
+            case "IGF":
+                result = decodeIgn(channel, remoteAddress, sentence);
                 break;
             default:
                 result = decodeOther(channel, remoteAddress, sentence);
