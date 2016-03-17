@@ -21,6 +21,7 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -33,7 +34,7 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("d+,")                       // status id
+            .number("(d+),")                     // status id
             .expression("([AV]),")               // validity
             .number("(dd)(dd)(dd),")             // date
             .number("(dd)(dd)(dd),")             // time
@@ -43,7 +44,17 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .any()
+            .expression("[^,]*,")                // cell info
+            .number("([01]+) ")                  // input
+            .number("(d+) ")                     // power
+            .number("(d+) ")                     // temperature
+            .number("(d+) ")                     // rpm
+            .number("(d+) ")                     // fuel
+            .number("(d+) ")                     // adc 1
+            .number("(d+) ")                     // adc 2
+            .number("([01]+) ")                  // output
+            .number("(d+),")                     // odometer
+            .expression("(.+)")                  // status info
             .compile();
 
     private String getAttribute(String xml, String key) {
@@ -81,6 +92,8 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
+            position.set(Event.KEY_STATUS, parser.nextInt());
+
             position.setValid(parser.next().equals("A"));
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -92,6 +105,17 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
+
+            position.set(Event.KEY_INPUT, parser.nextInt(2));
+            position.set(Event.KEY_POWER, parser.nextDouble() / 10);
+            position.set(Event.PREFIX_TEMP + 1, parser.nextInt());
+            position.set(Event.KEY_FUEL, parser.nextInt());
+            position.set(Event.PREFIX_ADC + 1, parser.nextInt());
+            position.set(Event.PREFIX_ADC + 2, parser.nextInt());
+            position.set(Event.KEY_OUTPUT, parser.nextInt(2));
+            position.set(Event.KEY_ODOMETER, parser.nextInt());
+
+            position.set("status-data", parser.nextInt());
 
             return position;
 
