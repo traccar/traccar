@@ -298,5 +298,6 @@
     <entry key='astra.port'>5103</entry>
     <entry key='homtecs.port'>5104</entry>
     <entry key='fox.port'>5105</entry>
+    <entry key='gnx.port'>5106</entry>
 
 </properties>
