@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -34,9 +33,7 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
-            .text("$GNX_")
-            .expression("...,")                  // type
+    private static final Pattern PATTERN_LOCATION = new PatternBuilder()
             .number("(d+),")                     // imei
             .number("d+,")                       // length
             .expression("([01]),")               // history
@@ -49,9 +46,20 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
             .expression("([NS]),")
             .number("(ddd.d+),")                 // longitude
             .expression("([EW]),")
-            .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
-            .number("(d+),")                     // satellites
+            .compile();
+
+    private static final Pattern PATTERN_MIF = new PatternBuilder()
+            .text("$GNX_MIF,")
+            .expression(PATTERN_LOCATION.pattern())
+            .expression("[01],")                 // valid card
+            .expression("([^,]+),")              // rfid
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_OTHER = new PatternBuilder()
+            .text("$GNX_")
+            .expression("...,")
+            .expression(PATTERN_LOCATION.pattern())
             .any()
             .compile();
 
@@ -59,7 +67,20 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        String sentence = (String) msg;
+        String type = sentence.substring(5, 8);
+
+        Pattern pattern;
+        switch (type) {
+            case "MIF":
+                pattern = PATTERN_MIF;
+                break;
+            default:
+                pattern = PATTERN_OTHER;
+                break;
+        }
+
+        Parser parser = new Parser(pattern, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -93,10 +114,13 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
 
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-
-        position.set(Event.KEY_SATELLITES, parser.nextInt());
+        switch (type) {
+            case "MIF":
+                position.set(Event.KEY_RFID, parser.next());
+                break;
+            default:
+                break;
+        }
 
         return position;
     }
