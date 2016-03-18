@@ -100,7 +100,7 @@ public class WebServer {
                 writer.write("<!DOCTYPE<html><head><title>Error</title></head><html><body>"
                         + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
-        });
+        }, false);
     }
 
     private void initWebApp() {
