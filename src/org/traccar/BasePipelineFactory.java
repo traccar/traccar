@@ -106,7 +106,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
 
         if (Context.getLocationProvider() != null) {
-            locationProviderHandler = new LocationProviderHandler(Context.getLocationProvider());
+            locationProviderHandler = new LocationProviderHandler(
+                    Context.getLocationProvider(), Context.getConfig().getBoolean("location.processInvalidPositions"));
         }
 
         if (Context.getConfig().getBoolean("distance.enable")) {

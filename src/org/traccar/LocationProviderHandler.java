@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,11 @@ import org.traccar.model.Position;
 public class LocationProviderHandler implements ChannelUpstreamHandler {
 
     private final LocationProvider locationProvider;
+    private final boolean processInvalidPositions;
 
-    public LocationProviderHandler(LocationProvider locationProvider) {
+    public LocationProviderHandler(LocationProvider locationProvider, boolean processInvalidPositions) {
         this.locationProvider = locationProvider;
+        this.processInvalidPositions = processInvalidPositions;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
         Object message = e.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
-            if (locationProvider != null && position.getOutdated()) {
+            if (position.getOutdated() || (processInvalidPositions && !position.getValid())) {
                 locationProvider.getLocation(position.getAttributes(), new LocationProvider.LocationProviderCallback() {
                     @Override
                     public void onSuccess(double latitude, double longitude) {
