@@ -237,7 +237,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
                 this.position = null;
                 return position;
             }
-        } else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
+        } else if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
             identify(sentence, channel, remoteAddress);
         } else if (sentence.startsWith("$GPRMC")) {
             return decodeGprmc(sentence, remoteAddress, channel);
