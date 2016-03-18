@@ -64,7 +64,15 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .expression(",?")
             .groupEnd()
             .groupBegin()
-            .text("GSM:").expression("[^,]*,?")
+            .text("GSM:")
+            .number("d+;")                       // registration
+            .number("d+;")                       // gsm signal
+            .number("(d+);")                     // mcc
+            .number("(d+);")                     // mnc
+            .number("(x+);")                     // lac
+            .number("(x+);")                     // cid
+            .number("-d+")                       // rssi
+            .expression("[^,]*,?")
             .groupEnd("?")
             .groupBegin()
             .text("COT:")
@@ -139,6 +147,14 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble());
 
         position.set(Event.KEY_HDOP, parser.next());
+
+        if (parser.hasNext(4)) {
+            position.set(Event.KEY_MCC, parser.nextInt());
+            position.set(Event.KEY_MNC, parser.nextInt());
+            position.set(Event.KEY_LAC, parser.nextInt(16));
+            position.set(Event.KEY_CID, parser.nextInt(16));
+        }
+
         position.set(Event.KEY_ODOMETER, parser.next());
         position.set(Event.KEY_POWER, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
