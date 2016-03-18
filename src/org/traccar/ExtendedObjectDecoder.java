@@ -17,14 +17,36 @@ package org.traccar;
 
 import java.net.SocketAddress;
 import java.util.Collection;
+
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
+
+import javax.xml.bind.DatatypeConverter;
 
 public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
+
+    private void saveOriginal(Object decodedMessage, Object originalMessage) {
+        if (Context.getConfig().getBoolean("database.saveOriginal")) {
+            if (decodedMessage instanceof Position) {
+                Position position = (Position) decodedMessage;
+                if (originalMessage instanceof ChannelBuffer) {
+                    position.set(Event.KEY_ORIGINAL,
+                            ChannelBuffers.hexDump((ChannelBuffer) originalMessage));
+                } else if (originalMessage instanceof String) {
+                    position.set(Event.KEY_ORIGINAL,
+                            DatatypeConverter.printHexBinary(((String) originalMessage).getBytes()));
+                }
+            }
+        }
+    }
 
     @Override
     public void handleUpstream(
@@ -43,9 +65,11 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
         } else if (decodedMessage != null) {
             if (decodedMessage instanceof Collection) {
                 for (Object o : (Collection) decodedMessage) {
+                    saveOriginal(o, originalMessage);
                     Channels.fireMessageReceived(ctx, o, e.getRemoteAddress());
                 }
             } else {
+                saveOriginal(decodedMessage, originalMessage);
                 Channels.fireMessageReceived(ctx, decodedMessage, e.getRemoteAddress());
             }
         }
