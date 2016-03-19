@@ -302,5 +302,6 @@
     <entry key='homtecs.port'>5104</entry>
     <entry key='fox.port'>5105</entry>
     <entry key='gnx.port'>5106</entry>
+    <entry key='arknav.port'>5107</entry>
 
 </properties>
