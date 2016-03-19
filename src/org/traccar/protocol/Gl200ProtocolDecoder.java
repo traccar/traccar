@@ -211,6 +211,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // time
             .text(",")
             .any()
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
             .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
@@ -487,6 +490,15 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
+
+        if (parser.hasNext(6)) {
+            dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
+                position.setTime(dateBuilder.getDate());
+            }
+        }
 
         return position;
     }
