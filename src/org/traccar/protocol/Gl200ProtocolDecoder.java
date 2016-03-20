@@ -195,10 +195,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d*,")
-            .number("d{1,2},")                   // report type
+            .number("(d{1,2}),")                 // report type
             .number("d{1,2},")                   // count
             .expression(PATTERN_LOCATION.pattern())
             .groupBegin()
@@ -476,7 +476,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
@@ -489,6 +489,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
         position.setDeviceId(getDeviceId());
+
+        int reportType = parser.nextInt();
+        if (type.equals("NMR")) {
+            position.set(Event.KEY_MOTION, reportType);
+        }
 
         decodeLocation(position, parser);
 
@@ -565,7 +570,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Object result;
-        switch (sentence.substring(typeIndex + 3, typeIndex + 6)) {
+        String type = sentence.substring(typeIndex + 3, typeIndex + 6);
+        switch (type) {
             case "HBD":
                 result = decodeHbd(channel, remoteAddress, sentence);
                 break;
@@ -586,7 +592,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                 result = decodeIda(channel, remoteAddress, sentence);
                 break;
             default:
-                result = decodeOther(channel, remoteAddress, sentence);
+                result = decodeOther(channel, remoteAddress, sentence, type);
                 break;
         }
 
