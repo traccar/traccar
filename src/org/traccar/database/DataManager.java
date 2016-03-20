@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
@@ -59,10 +61,12 @@ public class DataManager implements IdentityManager {
 
     private final long dataRefreshDelay;
 
+    private final ReadWriteLock devicesLock = new ReentrantReadWriteLock();
     private final Map<Long, Device> devicesById = new HashMap<>();
     private final Map<String, Device> devicesByUniqueId = new HashMap<>();
     private long devicesLastUpdate;
 
+    private final ReadWriteLock groupsLock = new ReentrantReadWriteLock();
     private final Map<Long, Group> groupsById = new HashMap<>();
     private long groupsLastUpdate;
 
@@ -120,51 +124,122 @@ public class DataManager implements IdentityManager {
     }
 
     private void updateDeviceCache(boolean force) throws SQLException {
-        if (System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay || force) {
-            devicesById.clear();
-            devicesByUniqueId.clear();
-            for (Device device : getAllDevices()) {
-                devicesById.put(device.getId(), device);
-                devicesByUniqueId.put(device.getUniqueId(), device);
+        boolean needWrite;
+        devicesLock.readLock().lock();
+        try {
+            needWrite = force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay;
+        } finally {
+            devicesLock.readLock().unlock();
+        }
+
+        if (needWrite) {
+            devicesLock.writeLock().lock();
+            try {
+                if (force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay) {
+                    devicesById.clear();
+                    devicesByUniqueId.clear();
+                    for (Device device : getAllDevices()) {
+                        devicesById.put(device.getId(), device);
+                        devicesByUniqueId.put(device.getUniqueId(), device);
+                    }
+                    devicesLastUpdate = System.currentTimeMillis();
+                }
+            } finally {
+                devicesLock.writeLock().unlock();
             }
-            devicesLastUpdate = System.currentTimeMillis();
         }
     }
 
     @Override
     public Device getDeviceById(long id) {
+        boolean forceUpdate;
+        devicesLock.readLock().lock();
         try {
-            updateDeviceCache(!devicesById.containsKey(id));
+            forceUpdate = !devicesById.containsKey(id);
+        } finally {
+            devicesLock.readLock().unlock();
+        }
+
+        try {
+            updateDeviceCache(forceUpdate);
         } catch (SQLException e) {
             Log.warning(e);
         }
-        return devicesById.get(id);
+
+        devicesLock.readLock().lock();
+        try {
+            return devicesById.get(id);
+        } finally {
+            devicesLock.readLock().unlock();
+        }
     }
 
     @Override
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
-        updateDeviceCache(
-                !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown"));
-        return devicesByUniqueId.get(uniqueId);
+        boolean forceUpdate;
+        devicesLock.readLock().lock();
+        try {
+            forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
+        } finally {
+            devicesLock.readLock().unlock();
+        }
+
+        updateDeviceCache(forceUpdate);
+
+        devicesLock.readLock().lock();
+        try {
+            return devicesByUniqueId.get(uniqueId);
+        } finally {
+            devicesLock.readLock().unlock();
+        }
     }
 
     private void updateGroupCache(boolean force) throws SQLException {
-        if (System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay || force) {
-            groupsById.clear();
-            for (Group group : getAllGroups()) {
-                groupsById.put(group.getId(), group);
+        boolean needWrite;
+        groupsLock.readLock().lock();
+        try {
+            needWrite = force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay;
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+
+        if (needWrite) {
+            groupsLock.writeLock().lock();
+            try {
+                if (force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay) {
+                    groupsById.clear();
+                    for (Group group : getAllGroups()) {
+                        groupsById.put(group.getId(), group);
+                    }
+                    groupsLastUpdate = System.currentTimeMillis();
+                }
+            } finally {
+                groupsLock.writeLock().unlock();
             }
-            groupsLastUpdate = System.currentTimeMillis();
         }
     }
 
     public Group getGroupById(long id) {
+        boolean forceUpdate;
+        groupsLock.readLock().lock();
         try {
-            updateGroupCache(!groupsById.containsKey(id));
+            forceUpdate = !groupsById.containsKey(id);
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+
+        try {
+            updateGroupCache(forceUpdate);
         } catch (SQLException e) {
             Log.warning(e);
         }
-        return groupsById.get(id);
+
+        groupsLock.readLock().lock();
+        try {
+            return groupsById.get(id);
+        } finally {
+            groupsLock.readLock().unlock();
+        }
     }
 
     private String getQuery(String key) {
