@@ -45,7 +45,7 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
         Object message = e.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
-            if (position.getOutdated() || (processInvalidPositions && !position.getValid())) {
+            if (position.getOutdated() || processInvalidPositions && !position.getValid()) {
                 locationProvider.getLocation(position.getAttributes(), new LocationProvider.LocationProviderCallback() {
                     @Override
                     public void onSuccess(double latitude, double longitude) {
