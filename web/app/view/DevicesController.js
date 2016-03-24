@@ -45,20 +45,24 @@ Ext.define('Traccar.view.DevicesController', {
     },
 
     storeUpdate: function () {
-        var nodes = [];
-        Ext.getStore('Groups').each(function (record) {
+        var groupsStore, devicesStore, nodes = [];
+        groupsStore = Ext.getStore('Groups');
+        devicesStore = Ext.getStore('Devices');
+
+        groupsStore.each(function (record) {
             var groupId, node = {
                 id: 'g' + record.get('id'),
                 original: record,
-                name: record.get('name')
+                name: record.get('name'),
+                leaf: true
             };
             groupId = record.get('groupId');
-            if (groupId !== 0) {
+            if (groupId !== 0 && groupsStore.indexOfId(groupId) !== -1) {
                 node.groupId = 'g' + groupId;
             }
             nodes.push(node);
         }, this);
-        Ext.getStore('Devices').each(function (record) {
+        devicesStore.each(function (record) {
             var groupId, node = {
                 id: 'd' + record.get('id'),
                 original: record,
@@ -68,11 +72,12 @@ Ext.define('Traccar.view.DevicesController', {
                 leaf: true
             };
             groupId = record.get('groupId');
-            if (groupId !== 0) {
+            if (groupId !== 0 && groupsStore.indexOfId(groupId) !== -1) {
                 node.groupId = 'g' + groupId;
             }
             nodes.push(node);
         }, this);
+
         this.getView().getStore().getProxy().setData(nodes);
         this.getView().getStore().load();
         this.getView().expandAll();
@@ -134,7 +139,7 @@ Ext.define('Traccar.view.DevicesController', {
     },
 
     onSelectionChange: function (selected) {
-        var empty = selected.getCount() === 0 || !this.getView().getSelectionModel().getSelection()[0].get('leaf');
+        var empty = selected.getCount() === 0;
         this.lookupReference('toolbarEditButton').setDisabled(empty);
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty);
@@ -144,7 +149,7 @@ Ext.define('Traccar.view.DevicesController', {
     },
 
     onBeforeSelect: function (row, record) {
-        return record.get('leaf');
+        return record.get('original') instanceof Traccar.model.Device;
     },
 
     selectDevice: function (device, center) {

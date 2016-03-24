@@ -103,7 +103,7 @@ Ext.define('Traccar.view.Devices', {
         dataIndex: 'lastUpdate',
         flex: 1,
         renderer: function (value, metaData, record) {
-            if (record.get('leaf')) {
+            if (record.get('original') instanceof Traccar.model.Device) {
                 switch (record.get('status')) {
                     case 'online':
                         metaData.tdCls = 'status-color-online';
