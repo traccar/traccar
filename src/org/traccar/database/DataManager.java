@@ -350,12 +350,14 @@ public class DataManager implements IdentityManager {
         device.setId(QueryBuilder.create(dataSource, getQuery("database.insertDevice"), true)
                 .setObject(device)
                 .executeUpdate());
+        updateDeviceCache(true);
     }
 
     public void updateDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateDevice"))
                 .setObject(device)
                 .executeUpdate();
+        updateDeviceCache(true);
     }
 
     public void updateDeviceStatus(Device device) throws SQLException {
@@ -412,12 +414,14 @@ public class DataManager implements IdentityManager {
         group.setId(QueryBuilder.create(dataSource, getQuery("database.insertGroup"), true)
                 .setObject(group)
                 .executeUpdate());
+        updateGroupCache(true);
     }
 
     public void updateGroup(Group group) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateGroup"))
                 .setObject(group)
                 .executeUpdate();
+        updateGroupCache(true);
     }
 
     public void removeGroup(long groupId) throws SQLException {
