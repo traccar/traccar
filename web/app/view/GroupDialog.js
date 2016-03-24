@@ -36,6 +36,7 @@ Ext.define('Traccar.view.GroupDialog', {
             name: 'groupId',
             fieldLabel: Strings.groupParent,
             store: 'Groups',
+            queryMode: 'local',
             displayField: 'name',
             valueField: 'id'
         }]

@@ -41,6 +41,7 @@ Ext.define('Traccar.view.DeviceDialog', {
             name: 'groupId',
             fieldLabel: Strings.groupParent,
             store: 'Groups',
+            queryMode: 'local',
             displayField: 'name',
             valueField: 'id'
         }]
