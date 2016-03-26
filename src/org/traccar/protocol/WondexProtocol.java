@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringDecoder;
@@ -35,6 +36,13 @@ public class WondexProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new WondexFrameDecoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectDecoder", new WondexProtocolDecoder(WondexProtocol.this));
+            }
+        });
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new WondexProtocolDecoder(WondexProtocol.this));
             }
