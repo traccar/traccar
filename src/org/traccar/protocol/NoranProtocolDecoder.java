@@ -38,6 +38,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_UPLOAD_POSITION = 0x0008;
     public static final int MSG_UPLOAD_POSITION_NEW = 0x0032;
+    public static final int MSG_CONTROL = 0x0002;
     public static final int MSG_CONTROL_RESPONSE = 0x8009;
     public static final int MSG_ALARM = 0x0003;
     public static final int MSG_SHAKE_HAND = 0x0000;
