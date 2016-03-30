@@ -25,38 +25,34 @@ import javax.ws.rs.container.ContainerResponseFilter;
 
 public class CorsResponseFilter implements ContainerResponseFilter {
 
-    public static final String ACCESS_CONTROL_ALLOW_ORIGIN_KEY = "Access-Control-Allow-Origin";
-    public static final String ACCESS_CONTROL_ALLOW_ORIGIN_VALUE = "*";
-
-    public static final String ACCESS_CONTROL_ALLOW_HEADERS_KEY = "Access-Control-Allow-Headers";
-    public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "origin, content-type, accept, authorization";
-
-    public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_KEY = "Access-Control-Allow-Credentials";
-    public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_VALUE = "true";
-
-    public static final String ACCESS_CONTROL_ALLOW_METHODS_KEY = "Access-Control-Allow-Methods";
-    public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET, POST, PUT, DELETE, OPTIONS";
+    private static final String ORIGIN_ALL = "*";
+    private static final String HEADERS_ALL = "origin, content-type, accept, authorization";
+    private static final String METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_HEADERS_KEY)) {
-            response.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS_KEY, ACCESS_CONTROL_ALLOW_HEADERS_VALUE);
-        }
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_CREDENTIALS_KEY)) {
-            response.getHeaders().add(ACCESS_CONTROL_ALLOW_CREDENTIALS_KEY, ACCESS_CONTROL_ALLOW_CREDENTIALS_VALUE);
-        }
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_METHODS_KEY)) {
-            response.getHeaders().add(ACCESS_CONTROL_ALLOW_METHODS_KEY, ACCESS_CONTROL_ALLOW_METHODS_VALUE);
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS)) {
+            String headers = Context.getConfig().getString("web.origin");
+
+            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, HEADERS_ALL);
         }
 
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN_KEY)) {
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS)) {
+            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, true);
+        }
+
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS)) {
+            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, METHODS_ALL);
+        }
+
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN)) {
             String origin = request.getHeaderString(HttpHeaders.Names.ORIGIN);
             String allowed = Context.getConfig().getString("web.origin");
 
             if (allowed == null || origin == null) {
-                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, ACCESS_CONTROL_ALLOW_ORIGIN_VALUE);
-            } else if (allowed.equals(ACCESS_CONTROL_ALLOW_ORIGIN_VALUE) || allowed.contains(origin)) {
-                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, origin);
+                response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGIN_ALL);
+            } else if (allowed.equals(ORIGIN_ALL) || allowed.contains(origin)) {
+                response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
             }
         }
     }
