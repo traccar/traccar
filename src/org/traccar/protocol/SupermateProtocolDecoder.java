@@ -121,4 +121,5 @@ public class SupermateProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
 }
