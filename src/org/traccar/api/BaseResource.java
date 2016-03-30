@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package org.traccar.api;
 
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public class BaseResource {
@@ -28,6 +31,12 @@ public class BaseResource {
             return principal.getUserId();
         }
         return 0;
+    }
+
+    @PermitAll
+    @OPTIONS
+    public Response options() {
+        return Response.noContent().build();
     }
 
 }
