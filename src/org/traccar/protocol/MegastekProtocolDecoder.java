@@ -49,7 +49,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("imei:(d+),")                // imei
             .number("(d+/?d*)?,")                // satellites
             .number("(d+.d+)?,")                 // altitude
-            .number("Battery=(d+)%,,")           // battery
+            .number("Battery=(d+)%,,?")          // battery
             .number("(d)?,")                     // charger
             .number("(d+)?,")                    // mcc
             .number("(d+)?,")                    // mnc
