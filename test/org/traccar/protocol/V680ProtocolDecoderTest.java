@@ -9,7 +9,13 @@ public class V680ProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         V680ProtocolDecoder decoder = new V680ProtocolDecoder(new V680Protocol());
-        
+
+        verifyPosition(decoder, text(
+                "#355488020168617##1#0000#AUT#01#260001a412966f#1834.790700,E,5302.748800,N,0.00,0.00#310316#174538.000##"));
+
+        verifyPosition(decoder, text(
+                "#355488020168617##1#0000#AUT#01##1834.770100,E,5302.742800,N,0.62,0.00#310316#211537.000##"));
+
         verifyNothing(decoder, text(
                 "#353588102019155"));
 
