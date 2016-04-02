@@ -36,7 +36,6 @@ Locale.languages = {
     'ml': { name: 'മലയാളം', code: 'en' },
     'ms': { name: 'بهاس ملايو', code: 'en' },
     'nl': { name: 'Nederlands', code: 'nl' },
-    'no': { name: 'Norsk', code: 'no_NB' },
     'pl': { name: 'Polski', code: 'pl' },
     'pt': { name: 'Português', code: 'pt' },
     'pt_BR': { name: 'Português (Brasil)', code: 'pt_BR' },
