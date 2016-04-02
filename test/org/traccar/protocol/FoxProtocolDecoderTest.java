@@ -11,6 +11,9 @@ public class FoxProtocolDecoderTest extends ProtocolTest {
         FoxProtocolDecoder decoder = new FoxProtocolDecoder(new FoxProtocol());
 
         verifyPosition(decoder, text(
+                "<fox><gps id=\"10\" data=\"51,A,010416,085317,4444.4158,N,02025.4466,E,1,182,,1110111111110111 141 0 0 0 0 0 10010000 10142,018C81851800009B\"/></fox>"));
+
+        verifyPosition(decoder, text(
                 "<fox><gps id=\"90\" data=\"1092,V,010101,000004,0000.0000,N,00000.0000,E,0,0,,1111111111111111 123 0 0 0 0 0 00000000 47664,47664\"/></fox>"));
 
         verifyPosition(decoder, text(
