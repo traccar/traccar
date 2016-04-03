@@ -96,6 +96,7 @@ public class WebDataHandler extends BaseDataHandler {
         String attributes = MiscFormatter.toJsonString(position.getAttributes());
 
         String request = url
+                .replace("{name}", device.getName())
                 .replace("{uniqueId}", device.getUniqueId())
                 .replace("{deviceId}", String.valueOf(position.getDeviceId()))
                 .replace("{protocol}", String.valueOf(position.getProtocol()))
