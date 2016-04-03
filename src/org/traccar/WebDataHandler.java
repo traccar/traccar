@@ -89,8 +89,7 @@ public class WebDataHandler extends BaseDataHandler {
         }
     }
 
-    @Override
-    protected Position handlePosition(Position position) {
+    public String formatRequest(Position position) {
 
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
 
@@ -132,7 +131,13 @@ public class WebDataHandler extends BaseDataHandler {
             request = request.replace("{gprmc}", formatSentence(position));
         }
 
-        Context.getAsyncHttpClient().prepareGet(request).execute();
+        return request;
+    }
+
+    @Override
+    protected Position handlePosition(Position position) {
+
+        Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
 
         return position;
     }
