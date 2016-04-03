@@ -31,6 +31,7 @@ public class ProtocolTest {
             private Device createDevice() {
                 Device device = new Device();
                 device.setId(1);
+                device.setName("test");
                 device.setUniqueId("123456789012345");
                 return device;
             }
