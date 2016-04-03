@@ -62,7 +62,7 @@ Ext.define('Traccar.view.Devices', {
         }]
     },
 
-    bbar: [{
+    /*bbar: [{
         xtype: 'tbtext',
         html: Strings.sharedSearch
     }, {
@@ -86,7 +86,7 @@ Ext.define('Traccar.view.Devices', {
                 });
             }
         }
-    }],
+    }],*/
 
     listeners: {
         selectionchange: 'onSelectionChange',
