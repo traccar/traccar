@@ -36,6 +36,7 @@ Ext.define('Traccar.Application', {
     stores: [
         'Groups',
         'Devices',
+        'DevicesTree',
         'AllGroups',
         'AllDevices',
         'Positions',

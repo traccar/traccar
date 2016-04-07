@@ -26,16 +26,7 @@ Ext.define('Traccar.view.Devices', {
 
     controller: 'devices',
     rootVisible: false,
-    store: {
-        type: 'tree',
-        parentIdProperty: 'groupId',
-        proxy: {
-            type: 'memory',
-            reader: {
-                type: 'json'
-            }
-        }
-    },
+    store: 'DevicesTree',
 
     title: Strings.deviceTitle,
     selType: 'rowmodel',

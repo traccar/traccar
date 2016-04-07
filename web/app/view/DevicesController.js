@@ -30,57 +30,8 @@ Ext.define('Traccar.view.DevicesController', {
                     selectDevice: 'selectDevice',
                     selectReport: 'selectReport'
                 }
-            },
-            store: {
-                '#Groups': {
-                    datachanged: 'storeUpdate',
-                    update: 'storeUpdate'
-                },
-                '#Devices': {
-                    datachanged: 'storeUpdate',
-                    update: 'storeUpdate'
-                }
             }
         }
-    },
-
-    storeUpdate: function () {
-        var groupsStore, devicesStore, nodes = [];
-        groupsStore = Ext.getStore('Groups');
-        devicesStore = Ext.getStore('Devices');
-
-        groupsStore.each(function (record) {
-            var groupId, node = {
-                id: 'g' + record.get('id'),
-                original: record,
-                name: record.get('name'),
-                leaf: true
-            };
-            groupId = record.get('groupId');
-            if (groupId !== 0 && groupsStore.indexOfId(groupId) !== -1) {
-                node.groupId = 'g' + groupId;
-            }
-            nodes.push(node);
-        }, this);
-        devicesStore.each(function (record) {
-            var groupId, node = {
-                id: 'd' + record.get('id'),
-                original: record,
-                name: record.get('name'),
-                status: record.get('status'),
-                lastUpdate: record.get('lastUpdate'),
-                leaf: true
-            };
-            groupId = record.get('groupId');
-            if (groupId !== 0 && groupsStore.indexOfId(groupId) !== -1) {
-                node.groupId = 'g' + groupId;
-            }
-            nodes.push(node);
-        }, this);
-
-        this.getView().getStore().getProxy().setData(nodes);
-        this.getView().getStore().load();
-        this.getView().expandAll();
     },
 
     init: function () {
