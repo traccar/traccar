@@ -30,11 +30,10 @@ Ext.define('Traccar.store.DistanceUnits', {
 
     formatValue: function (value, unit) {
         var model;
-        if (unit) {
-            model = this.findRecord('key', unit);
-            return (value * model.get('factor')).toFixed(2) + ' ' + model.get('name');
-        } else {
-            return value;
+        if (!unit) {
+            unit = 'km';
         }
+        model = this.findRecord('key', unit);
+        return (value * model.get('factor')).toFixed(2) + ' ' + model.get('name');
     }
 });
