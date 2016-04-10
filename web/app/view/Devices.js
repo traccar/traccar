@@ -15,7 +15,7 @@
  */
 
 Ext.define('Traccar.view.Devices', {
-    extend: 'Ext.tree.Panel',
+    extend: 'Ext.grid.Panel',
     xtype: 'devicesView',
 
     requires: [
@@ -26,7 +26,7 @@ Ext.define('Traccar.view.Devices', {
 
     controller: 'devices',
     rootVisible: false,
-    store: 'DevicesTree',
+    store: 'Devices',
 
     title: Strings.deviceTitle,
     selType: 'rowmodel',
@@ -80,12 +80,10 @@ Ext.define('Traccar.view.Devices', {
     }],*/
 
     listeners: {
-        selectionchange: 'onSelectionChange',
-        beforeselect: 'onBeforeSelect'
+        selectionchange: 'onSelectionChange'
     },
 
     columns: [{
-        xtype: 'treecolumn',
         text: Strings.sharedName,
         dataIndex: 'name',
         flex: 1
@@ -94,23 +92,21 @@ Ext.define('Traccar.view.Devices', {
         dataIndex: 'lastUpdate',
         flex: 1,
         renderer: function (value, metaData, record) {
-            if (record.get('original') instanceof Traccar.model.Device) {
-                switch (record.get('status')) {
-                    case 'online':
-                        metaData.tdCls = 'status-color-online';
-                        break;
-                    case 'offline':
-                        metaData.tdCls = 'status-color-offline';
-                        break;
-                    default:
-                        metaData.tdCls = 'status-color-unknown';
-                        break;
-                }
-                if (Traccar.app.getPreference('twelveHourFormat', false)) {
-                    return Ext.Date.format(value, Traccar.Style.dateTimeFormat12);
-                } else {
-                    return Ext.Date.format(value, Traccar.Style.dateTimeFormat24);
-                }
+            switch (record.get('status')) {
+                case 'online':
+                    metaData.tdCls = 'status-color-online';
+                    break;
+                case 'offline':
+                    metaData.tdCls = 'status-color-offline';
+                    break;
+                default:
+                    metaData.tdCls = 'status-color-unknown';
+                    break;
+            }
+            if (Traccar.app.getPreference('twelveHourFormat', false)) {
+                return Ext.Date.format(value, Traccar.Style.dateTimeFormat12);
+            } else {
+                return Ext.Date.format(value, Traccar.Style.dateTimeFormat24);
             }
         }
     }]

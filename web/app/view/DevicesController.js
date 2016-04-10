@@ -44,7 +44,7 @@ Ext.define('Traccar.view.DevicesController', {
     onAddClick: function () {
         var device, dialog;
         device = Ext.create('Traccar.model.Device');
-        device.store = Ext.getStore('Devices');
+        device.store = this.getView().getStore();
         dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
@@ -52,14 +52,14 @@ Ext.define('Traccar.view.DevicesController', {
 
     onEditClick: function () {
         var device, dialog;
-        device = this.getView().getSelectionModel().getSelection()[0].get('original');
+        device = this.getView().getSelectionModel().getSelection()[0];
         dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
     },
 
     onRemoveClick: function () {
-        var device = this.getView().getSelectionModel().getSelection()[0].get('original');
+        var device = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
             title: Strings.deviceDialog,
             message: Strings.sharedRemoveConfirm,
@@ -81,7 +81,7 @@ Ext.define('Traccar.view.DevicesController', {
 
     onCommandClick: function () {
         var device, command, dialog;
-        device = this.getView().getSelectionModel().getSelection()[0].get('original');
+        device = this.getView().getSelectionModel().getSelection()[0];
         command = Ext.create('Traccar.model.Command');
         command.set('deviceId', device.get('id'));
         dialog = Ext.create('Traccar.view.CommandDialog');
@@ -95,17 +95,12 @@ Ext.define('Traccar.view.DevicesController', {
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty);
         if (!empty) {
-            this.fireEvent('selectDevice', selected.getLastSelected().get('original'), true);
+            this.fireEvent('selectDevice', selected.getLastSelected(), true);
         }
     },
 
-    onBeforeSelect: function (row, record) {
-        return record.get('original') instanceof Traccar.model.Device;
-    },
-
     selectDevice: function (device, center) {
-        var node = this.getView().getStore().getNodeById('d' + device.get('id'));
-        this.getView().getSelectionModel().select([node], false, true);
+        this.getView().getSelectionModel().select([device], false, true);
     },
 
     selectReport: function (position) {
