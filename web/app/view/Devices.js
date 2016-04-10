@@ -26,7 +26,13 @@ Ext.define('Traccar.view.Devices', {
 
     controller: 'devices',
     rootVisible: false,
-    store: 'Devices',
+
+    initComponent: function() {
+        this.store = Ext.create('Ext.data.ChainedStore', {
+            source: 'Devices'
+        });
+        this.callParent();
+    },
 
     title: Strings.deviceTitle,
     selType: 'rowmodel',
@@ -53,7 +59,22 @@ Ext.define('Traccar.view.Devices', {
         }]
     },
 
-    /*bbar: [{
+    bbar: [{
+        xtype: 'tbtext',
+        html: Strings.groupParent
+    }, {
+        xtype: 'combobox',
+        store: 'Groups',
+        queryMode: 'local',
+        displayField: 'name',
+        valueField: 'id',
+        flex: 1/* TODO,
+        listeners: {
+            change: function () {
+                this.up('grid').store.filter('groupId', this.getValue());
+            }
+        }*/
+    }, {
         xtype: 'tbtext',
         html: Strings.sharedSearch
     }, {
@@ -61,23 +82,10 @@ Ext.define('Traccar.view.Devices', {
         flex: 1,
         listeners: {
             change: function () {
-                var tree, expr;
-                tree = this.up('treepanel');
-                expr = new RegExp(this.getValue(), 'i');
-                tree.store.filter({
-                    id: 'nameFilter',
-                    filterFn: function (node) {
-                        var children, len, visible, i;
-                        children = node.childNodes;
-                        len = children && children.length;
-                        visible = node.isLeaf() ? expr.test(node.get('name')) : false;
-                        for (i = 0; i < len && !(visible = children[i].get('visible')); i++);
-                        return visible;
-                    }
-                });
+                this.up('grid').store.filter('name', this.getValue());
             }
         }
-    }],*/
+    }],
 
     listeners: {
         selectionchange: 'onSelectionChange'

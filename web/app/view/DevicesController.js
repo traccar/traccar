@@ -44,7 +44,7 @@ Ext.define('Traccar.view.DevicesController', {
     onAddClick: function () {
         var device, dialog;
         device = Ext.create('Traccar.model.Device');
-        device.store = this.getView().getStore();
+        device.store = Ext.getStore('Devices');
         dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
