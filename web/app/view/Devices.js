@@ -68,12 +68,39 @@ Ext.define('Traccar.view.Devices', {
         queryMode: 'local',
         displayField: 'name',
         valueField: 'id',
-        flex: 1/* TODO,
+        flex: 1,
         listeners: {
             change: function () {
-                this.up('grid').store.filter('groupId', this.getValue());
+                if (Ext.isNumber(this.getValue())) {
+                    this.up('grid').store.filter({
+                        id: 'groupFilter',
+                        filterFn: function(item) {
+                            var groupId, group, groupStore, filter = true;
+                            groupId = item.get('groupId');
+                            groupStore = Ext.getStore('Groups');
+
+                            while (groupId) {
+                                group = groupStore.getById(groupId);
+                                if (group) {
+                                    if (group.get('id') === this.getValue()) {
+                                        filter = false;
+                                        break;
+                                    }
+                                    groupId = group.get('groupId');
+                                } else {
+                                    groupId = 0;
+                                }
+                            }
+
+                            return !filter;
+                        },
+                        scope: this
+                });
+                } else {
+                    this.up('grid').store.removeFilter('groupFilter');
+                }
             }
-        }*/
+        }
     }, {
         xtype: 'tbtext',
         html: Strings.sharedSearch
