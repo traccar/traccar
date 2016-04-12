@@ -304,5 +304,6 @@
     <entry key='gnx.port'>5106</entry>
     <entry key='arknav.port'>5107</entry>
     <entry key='supermate.port'>5108</entry>
+    <entry key='appello.port'>5109</entry>
 
 </properties>
