@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
@@ -26,6 +27,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -133,6 +135,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("+").expression("(?:RESP|BUFF):GTFRI,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
+            .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
             .number("(d+)?,")                    // power
             .number("d{1,2},")                   // report type
@@ -149,7 +152,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?,")                    // adc 1
             .number("(x+)?,")                    // adc 2
             .number("(d{1,3})?,")                // battery
-            .number("(?:(xx)(xx)(xx))?,,,,")     // device status
+            .number("(?:(xx)(xx)(xx))?,")        // device status
+            .number("(d+)?,")                    // rpm
+            .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
+            .number("(d+)?,")                    // fuel level
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd)").optional(2)  // time
@@ -358,6 +364,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String vin = parser.next();
         int power = parser.nextInt();
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
@@ -365,6 +372,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
+
+            position.set(Event.KEY_VIN, vin);
 
             decodeLocation(position, itemParser);
 
@@ -388,6 +397,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.PREFIX_ADC + 1, parser.next());
         position.set(Event.PREFIX_ADC + 2, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Event.KEY_RPM, parser.next());
+        position.set(Event.KEY_FUEL, parser.next());
 
         if (parser.hasNext(3)) {
             int ignition = parser.nextInt(16);
@@ -598,6 +609,16 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         if (result == null) {
             result = decodeBasic(channel, remoteAddress, sentence);
+        }
+
+        if (result != null) {
+            if (result instanceof Position) {
+                ((Position) result).set(Event.KEY_TYPE, type);
+            } else {
+                for (Position p : (List<Position>) result) {
+                    p.set(Event.KEY_TYPE, type);
+                }
+            }
         }
 
         return result;
