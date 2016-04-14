@@ -106,7 +106,7 @@ public class LocationTree {
 
         Item best = current;
         if (next != null) {
-            findNearest(next, search, depth + 1);
+            best = findNearest(next, search, depth + 1);
         }
 
         if (current.squaredDistance(search) < best.squaredDistance(search)) {
