@@ -33,17 +33,17 @@ public class AppelloProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("FOLLOWIT,")				     // brand
-            .number("(d+),")				     // imei
+            .text("FOLLOWIT,")                   // brand
+            .number("(d+),")                     // imei
             .number("(dd)(dd)(dd)")              // date
             .number("(dd)(dd)(dd).?d*,")         // time
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(d+),")                     // speed
-            .number("(d+),")				     // course
-            .number("(d+),")				     // satellites
-            .number("(d+),")				     // altitude
-            .expression("([FL]),")			     // gps state
+            .number("(d+),")                     // course
+            .number("(d+),")                     // satellites
+            .number("(d+),")                     // altitude
+            .expression("([FL]),")               // gps state
             .any()
             .compile();
 

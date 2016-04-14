@@ -95,16 +95,27 @@ public class LocationTree {
     private Item findNearest(Item current, Item search, int depth) {
         int direction = comparators.get(depth % 2).compare(search, current);
 
-        Item next = (direction < 0) ? current.left : current.right;
-        Item other = (direction < 0) ? current.right : current.left;
-        Item best = (next == null) ? current : findNearest(next, search, depth + 1);
+        Item next, other;
+        if (direction < 0) {
+            next = current.left;
+            other = current.right;
+        } else {
+            next = current.right;
+            other = current.left;
+        }
+
+        Item best = current;
+        if (next != null) {
+            findNearest(next, search, depth + 1);
+        }
+
         if (current.squaredDistance(search) < best.squaredDistance(search)) {
             best = current;
         }
         if (other != null) {
             if (current.axisSquaredDistance(search, depth % 2) < best.squaredDistance(search)) {
                 Item possibleBest = findNearest(other, search, depth + 1);
-                if (possibleBest.squaredDistance(search) < best.squaredDistance(search) ) {
+                if (possibleBest.squaredDistance(search) < best.squaredDistance(search)) {
                     best = possibleBest;
                 }
             }
