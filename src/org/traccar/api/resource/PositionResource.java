@@ -39,8 +39,7 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
         if (deviceId == 0) {
-            return Context.getConnectionManager().getInitialState(
-                    Context.getPermissionsManager().getDevicePermissions(getUserId()));
+            return Context.getConnectionManager().getInitialState(getUserId());
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             return Context.getDataManager().getPositions(

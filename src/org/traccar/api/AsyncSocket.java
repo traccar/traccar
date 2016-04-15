@@ -33,26 +33,26 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private static final String KEY_DEVICES = "devices";
     private static final String KEY_POSITIONS = "positions";
 
-    private Collection<Long> devices;
+    private long userId;
 
     public AsyncSocket(long userId) {
-        devices = Context.getPermissionsManager().getDevicePermissions(userId);
+        this.userId = userId;
     }
 
     @Override
     public void onWebSocketConnect(Session session) {
         super.onWebSocketConnect(session);
 
-        sendData(KEY_POSITIONS, Context.getConnectionManager().getInitialState(devices));
+        sendData(KEY_POSITIONS, Context.getConnectionManager().getInitialState(userId));
 
-        Context.getConnectionManager().addListener(devices, this);
+        Context.getConnectionManager().addListener(userId, this);
     }
 
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
         super.onWebSocketClose(statusCode, reason);
 
-        Context.getConnectionManager().removeListener(devices, this);
+        Context.getConnectionManager().removeListener(userId, this);
     }
 
     @Override

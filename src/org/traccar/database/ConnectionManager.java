@@ -112,9 +112,11 @@ public class ConnectionManager {
             Log.warning(error);
         }
 
-        if (listeners.containsKey(deviceId)) {
-            for (UpdateListener listener : listeners.get(deviceId)) {
-                listener.onUpdateDevice(device);
+        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
+            if (listeners.containsKey(userId)) {
+                for (UpdateListener listener : listeners.get(userId)) {
+                    listener.onUpdateDevice(device);
+                }
             }
         }
     }
@@ -123,9 +125,11 @@ public class ConnectionManager {
         long deviceId = position.getDeviceId();
         positions.put(deviceId, position);
 
-        if (listeners.containsKey(deviceId)) {
-            for (UpdateListener listener : listeners.get(deviceId)) {
-                listener.onUpdatePosition(position);
+        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
+            if (listeners.containsKey(userId)) {
+                for (UpdateListener listener : listeners.get(userId)) {
+                    listener.onUpdatePosition(position);
+                }
             }
         }
     }
@@ -134,13 +138,13 @@ public class ConnectionManager {
         return positions.get(deviceId);
     }
 
-    public synchronized Collection<Position> getInitialState(Collection<Long> devices) {
+    public synchronized Collection<Position> getInitialState(long userId) {
 
         List<Position> result = new LinkedList<>();
 
-        for (long device : devices) {
-            if (positions.containsKey(device)) {
-                result.add(positions.get(device));
+        for (long deviceId : Context.getPermissionsManager().getDevicePermissions(userId)) {
+            if (positions.containsKey(deviceId)) {
+                result.add(positions.get(deviceId));
             }
         }
 
@@ -152,30 +156,18 @@ public class ConnectionManager {
         void onUpdatePosition(Position position);
     }
 
-    public void addListener(Collection<Long> devices, UpdateListener listener) {
-        for (long deviceId : devices) {
-            addListener(deviceId, listener);
+    public synchronized void addListener(long userId, UpdateListener listener) {
+        if (!listeners.containsKey(userId)) {
+            listeners.put(userId, new HashSet<UpdateListener>());
         }
+        listeners.get(userId).add(listener);
     }
 
-    public synchronized void addListener(long deviceId, UpdateListener listener) {
-        if (!listeners.containsKey(deviceId)) {
-            listeners.put(deviceId, new HashSet<UpdateListener>());
+    public synchronized void removeListener(long userId, UpdateListener listener) {
+        if (!listeners.containsKey(userId)) {
+            listeners.put(userId, new HashSet<UpdateListener>());
         }
-        listeners.get(deviceId).add(listener);
-    }
-
-    public void removeListener(Collection<Long> devices, UpdateListener listener) {
-        for (long deviceId : devices) {
-            removeListener(deviceId, listener);
-        }
-    }
-
-    public synchronized void removeListener(long deviceId, UpdateListener listener) {
-        if (!listeners.containsKey(deviceId)) {
-            listeners.put(deviceId, new HashSet<UpdateListener>());
-        }
-        listeners.get(deviceId).remove(listener);
+        listeners.get(userId).remove(listener);
     }
 
 }
