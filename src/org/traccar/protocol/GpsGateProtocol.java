@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ package org.traccar.protocol;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
+import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class GpsGateProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
+                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "\0", "\n", "\r\n"));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectDecoder", new GpsGateProtocolDecoder(GpsGateProtocol.this));
