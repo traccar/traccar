@@ -30,20 +30,8 @@ Ext.define('Traccar.view.DevicesController', {
                     selectDevice: 'selectDevice',
                     selectReport: 'selectReport'
                 }
-            },
-            store: {
-                '#Groups': {
-                    update: 'reloadList'
-                },
-                '#Devices': {
-                    add: 'reloadList'
-                }
             }
         }
-    },
-
-    reloadList: function() {
-        Ext.getStore('Devices').reload();
     },
 
     init: function () {

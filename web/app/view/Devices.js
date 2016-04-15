@@ -37,19 +37,6 @@ Ext.define('Traccar.view.Devices', {
 
     title: Strings.deviceTitle,
     selType: 'rowmodel',
-    features: [{
-        ftype: 'grouping',
-        groupHeaderTpl: Ext.create('Ext.XTemplate', '{name:this.getGroupName}', {
-            getGroupName: function (v) {
-                var groupId = Number(v);
-                if (groupId) {
-                    return Ext.getStore('Groups').getById(groupId).get('name');
-                } else {
-                    return Strings.groupNoGroup;
-                }
-            }
-        })
-    }],
 
     tbar: {
         xtype: 'editToolbar',
