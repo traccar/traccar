@@ -25,8 +25,8 @@ import org.traccar.web.JsonConverter;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.UpdateListener {
 
@@ -57,12 +57,12 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
 
     @Override
     public void onUpdateDevice(Device device) {
-        sendData(KEY_DEVICES, Arrays.asList(device));
+        sendData(KEY_DEVICES, Collections.singletonList(device));
     }
 
     @Override
     public void onUpdatePosition(Position position) {
-        sendData(KEY_POSITIONS, Arrays.asList(position));
+        sendData(KEY_POSITIONS, Collections.singletonList(position));
     }
 
     private void sendData(String key, Collection<?> data) {
