@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.json.JsonObject;
 public class GisgraphyReverseGeocoder extends JsonReverseGeocoder {
 
     public GisgraphyReverseGeocoder() {
-        this("http://services.gisgraphy.com/street/streetsearch", 0);
+        this("http://services.gisgraphy.com/reversegeocoding/search", 0);
     }
 
     public GisgraphyReverseGeocoder(String url, int cacheSize) {
@@ -33,11 +33,14 @@ public class GisgraphyReverseGeocoder extends JsonReverseGeocoder {
 
         JsonObject result = json.getJsonArray("result").getJsonObject(0);
 
-        if (result.containsKey("name")) {
-            address.setStreet(result.getString("name"));
+        if (result.containsKey("streetName")) {
+            address.setStreet(result.getString("streetName"));
         }
-        if (result.containsKey("isIn")) {
-            address.setSettlement(result.getString("isIn"));
+        if (result.containsKey("city")) {
+            address.setSettlement(result.getString("city"));
+        }
+        if (result.containsKey("state")) {
+            address.setState(result.getString("state"));
         }
         if (result.containsKey("countryCode")) {
             address.setCountry(result.getString("countryCode"));
