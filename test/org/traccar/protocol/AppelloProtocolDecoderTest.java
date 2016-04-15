@@ -9,6 +9,9 @@ public class AppelloProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         AppelloProtocolDecoder decoder = new AppelloProtocolDecoder(new AppelloProtocol());
+
+        verifyAttributes(decoder, text(
+                "FOLLOWIT,860719028336968,UTCTIME,-12.112660,-77.045189,0,0,3,-0,L,716,10,049C,2A47,23,,4.22,,53,999/00/00,,,,,,59826,"));
         
         verifyPosition(decoder, text(
                 "FOLLOWIT,860719028336968,160211221959,-12.112660,-77.045258,1,0,6,116,F,716,17,4E85,050C,29,,4.22,,39,999/00/00,,,,,,46206,"));

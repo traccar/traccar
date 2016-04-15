@@ -35,14 +35,18 @@ public class AppelloProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("FOLLOWIT,")                   // brand
             .number("(d+),")                     // imei
+            .groupBegin()
             .number("(dd)(dd)(dd)")              // date
             .number("(dd)(dd)(dd).?d*,")         // time
+            .or()
+            .text("UTCTIME,")
+            .groupEnd()
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("(d+),")                     // satellites
-            .number("(d+),")                     // altitude
+            .number("(-?d+),")                   // altitude
             .expression("([FL]),")               // gps state
             .any()
             .compile();
@@ -65,10 +69,14 @@ public class AppelloProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(getDeviceId());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+        } else {
+            getLastLocation(position, null);
+        }
 
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
