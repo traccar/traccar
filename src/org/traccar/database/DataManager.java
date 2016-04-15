@@ -438,11 +438,6 @@ public class DataManager implements IdentityManager {
         position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"), true)
                 .setDate("now", new Date())
                 .setObject(position)
-                .setDate("time", position.getFixTime()) // tmp
-                .setLong("device_id", position.getDeviceId()) // tmp
-                .setLong("power", 0) // tmp
-                .setString("extended_info", MiscFormatter.toXmlString(position.getAttributes())) // tmp
-                .setString("other", MiscFormatter.toXmlString(position.getAttributes())) // tmp
                 .executeUpdate());
     }
 
@@ -450,11 +445,6 @@ public class DataManager implements IdentityManager {
         QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setDate("now", new Date())
                 .setObject(position)
-                .setDate("time", position.getFixTime()) // tmp
-                .setLong("device_id", position.getDeviceId()) // tmp
-                .setLong("power", 0) // tmp
-                .setString("extended_info", MiscFormatter.toXmlString(position.getAttributes())) // tmp
-                .setString("other", MiscFormatter.toXmlString(position.getAttributes())) // tmp
                 .executeUpdate();
     }
 
