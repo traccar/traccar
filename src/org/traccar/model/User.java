@@ -15,8 +15,8 @@
  */
 package org.traccar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.helper.Hashing;
-import org.traccar.web.JsonIgnore;
 
 public class User {
 
@@ -157,7 +157,6 @@ public class User {
 
     private String hashedPassword;
 
-    @com.fasterxml.jackson.annotation.JsonIgnore
     @JsonIgnore
     public String getHashedPassword() {
         return hashedPassword;
@@ -169,7 +168,6 @@ public class User {
 
     private String salt;
 
-    @com.fasterxml.jackson.annotation.JsonIgnore
     @JsonIgnore
     public String getSalt() {
         return salt;

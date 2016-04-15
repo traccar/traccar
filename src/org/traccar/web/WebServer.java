@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,19 +76,15 @@ public class WebServer {
         this.dataSource = dataSource;
 
         initServer();
+        initApi();
+        if (config.getBoolean("web.console")) {
+            initConsole();
+        }
         switch (config.getString("web.type", "new")) {
-            case "api":
-                initOldApi();
-                break;
             case "old":
-                initOldApi();
                 initOldWebApp();
                 break;
             default:
-                initApi();
-                if (config.getBoolean("web.console")) {
-                    initConsole();
-                }
                 initWebApp();
                 break;
         }
@@ -148,21 +144,6 @@ public class WebServer {
                 GroupResource.class, DeviceResource.class, PositionResource.class);
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
-        handlers.addHandler(servletHandler);
-    }
-
-    private void initOldApi() {
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletHandler.setContextPath("/api");
-        servletHandler.getSessionHandler().setSessionManager(sessionManager);
-
-        servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
-        servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
-        servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
-        servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
-        servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
-        servletHandler.addServlet(new ServletHolder(new CommandServlet()), "/command/*");
-        servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
         handlers.addHandler(servletHandler);
     }
 
