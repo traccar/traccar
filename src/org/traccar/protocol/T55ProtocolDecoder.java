@@ -19,6 +19,7 @@ import java.net.SocketAddress;
 import java.util.Date;
 import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -92,7 +93,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeGprmc(String sentence, SocketAddress remoteAddress, Channel channel) {
 
-        if (channel != null) {
+        if (channel != null && !(channel instanceof DatagramChannel)) {
             channel.write("OK1\r\n");
         }
 
