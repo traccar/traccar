@@ -58,7 +58,7 @@ public class WebServer {
     private final Config config;
     private final DataSource dataSource;
     private final HandlerList handlers = new HandlerList();
-    private final SessionManager sessionManager = new HashSessionManager();
+    private final SessionManager sessionManager;
 
     private void initServer() {
 
@@ -74,6 +74,12 @@ public class WebServer {
     public WebServer(Config config, DataSource dataSource) {
         this.config = config;
         this.dataSource = dataSource;
+
+        sessionManager = new HashSessionManager();
+        int sessionTimeout = config.getInteger("web.sessionTimeout");
+        if (sessionTimeout != 0) {
+            sessionManager.setMaxInactiveInterval(sessionTimeout);
+        }
 
         initServer();
         initApi();
