@@ -44,7 +44,6 @@ import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupPermission;
-import org.traccar.model.MiscFormatter;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;

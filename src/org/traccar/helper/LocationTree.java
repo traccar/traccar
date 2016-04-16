@@ -112,12 +112,10 @@ public class LocationTree {
         if (current.squaredDistance(search) < best.squaredDistance(search)) {
             best = current;
         }
-        if (other != null) {
-            if (current.axisSquaredDistance(search, depth % 2) < best.squaredDistance(search)) {
-                Item possibleBest = findNearest(other, search, depth + 1);
-                if (possibleBest.squaredDistance(search) < best.squaredDistance(search)) {
-                    best = possibleBest;
-                }
+        if (other != null && current.axisSquaredDistance(search, depth % 2) < best.squaredDistance(search)) {
+            Item possibleBest = findNearest(other, search, depth + 1);
+            if (possibleBest.squaredDistance(search) < best.squaredDistance(search)) {
+                best = possibleBest;
             }
         }
 
