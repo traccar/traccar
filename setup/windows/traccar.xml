@@ -75,7 +75,8 @@
         speedUnit = :speedUnit,
         latitude = :latitude,
         longitude = :longitude,
-        zoom = :zoom
+        zoom = :zoom,
+        twelveHourFormat = :twelveHourFormat
         WHERE id = :id;
     </entry>
 
@@ -87,24 +88,24 @@
         DELETE FROM users WHERE id = :id;
     </entry>
 
-    <entry key='database.getPermissionsAll'>
+    <entry key='database.selectDevicePermissions'>
         SELECT userId, deviceId FROM user_device;
+    </entry>
+
+    <entry key='database.selectGroupPermissions'>
+        SELECT userId, groupId FROM user_group;
     </entry>
 
     <entry key='database.selectDevicesAll'>
         SELECT * FROM devices;
     </entry>
 
-    <entry key='database.selectDevices'>
-        SELECT * FROM devices d INNER JOIN user_device ud ON d.id = ud.deviceId WHERE ud.userId = :userId;
-    </entry>
-
     <entry key='database.insertDevice'>
-        INSERT INTO devices (name, uniqueId) VALUES (:name, :uniqueId);
+        INSERT INTO devices (name, uniqueId, groupId) VALUES (:name, :uniqueId, :groupId);
     </entry>
 
     <entry key='database.updateDevice'>
-        UPDATE devices SET name = :name, uniqueId = :uniqueId WHERE id = :id;
+        UPDATE devices SET name = :name, uniqueId = :uniqueId, groupId = :groupId WHERE id = :id;
     </entry>
 
     <entry key='database.updateDeviceStatus'>
