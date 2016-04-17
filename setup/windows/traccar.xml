@@ -37,12 +37,12 @@
         map = :map,
         bingKey = :bingKey,
         mapUrl = :mapUrl,
-        language = :language,
         distanceUnit = :distanceUnit,
         speedUnit = :speedUnit,
         latitude = :latitude,
         longitude = :longitude,
-        zoom = :zoom
+        zoom = :zoom,
+        twelveHourFormat = :twelveHourFormat
         WHERE id = :id;
     </entry>
 
@@ -61,8 +61,8 @@
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO users (name, email, hashedPassword, salt, admin)
-        VALUES (:name, :email, :hashedPassword, :salt, :admin);
+        INSERT INTO users (name, email, hashedPassword, salt, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat)
+        VALUES (:name, :email, :hashedPassword, :salt, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat);
     </entry>
 
     <entry key='database.updateUser'>
@@ -71,7 +71,6 @@
         email = :email,
         admin = :admin,
         map = :map,
-        language = :language,
         distanceUnit = :distanceUnit,
         speedUnit = :speedUnit,
         latitude = :latitude,
@@ -124,13 +123,37 @@
         DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId;
     </entry>
 
+    <entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry>
+
+    <entry key='database.insertGroup'>
+        INSERT INTO groups (name) VALUES (:name);
+    </entry>
+
+    <entry key='database.updateGroup'>
+        UPDATE groups SET name = :name, groupId = :groupId WHERE id = :id;
+    </entry>
+
+    <entry key='database.deleteGroup'>
+        DELETE FROM groups WHERE id = :id;
+    </entry>
+
+    <entry key='database.linkGroup'>
+        INSERT INTO user_group (userId, groupId) VALUES (:userId, :groupId);
+    </entry>
+
+    <entry key='database.unlinkGroup'>
+        DELETE FROM user_group WHERE userId = :userId AND groupId = :groupId;
+    </entry>
+
     <entry key='database.selectPositions'>
         SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;
     </entry>
 
     <entry key='database.insertPosition'>
         INSERT INTO positions (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
-        VALUES (:deviceId, :protocol, :now, :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
+        VALUES (:deviceId, :protocol, :now, :deviceTime, :fixTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
 
     <entry key='database.selectLatestPositions'>
@@ -248,5 +271,10 @@
     <entry key='kenji.port'>5102</entry>
     <entry key='astra.port'>5103</entry>
     <entry key='homtecs.port'>5104</entry>
+    <entry key='fox.port'>5105</entry>
+    <entry key='gnx.port'>5106</entry>
+    <entry key='arknav.port'>5107</entry>
+    <entry key='supermate.port'>5108</entry>
+    <entry key='appello.port'>5109</entry>
 
 </properties>
