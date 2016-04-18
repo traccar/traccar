@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         long seconds = buf.readUnsignedInt() & 0x7fffffffL;
         seconds += 946684800L; // 2000-01-01 00:00
         seconds -= timeZone;
-        position.setTime(new Date(seconds * 1000));
+        Date time = new Date(seconds * 1000);
 
         boolean hasLocation = false;
 
@@ -143,10 +143,17 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
                 case DATA_LBS:
                     position.set(Event.KEY_MCC, buf.readUnsignedShort());
-                    position.set(Event.KEY_MNC, buf.readUnsignedByte());
+                    position.set(Event.KEY_MNC, buf.readUnsignedShort());
                     position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                    position.set(Event.KEY_CID, buf.readUnsignedShort());
+                    if (length == 11) {
+                        position.set(Event.KEY_CID, buf.readUnsignedInt());
+                    } else {
+                        position.set(Event.KEY_CID, buf.readUnsignedShort());
+                    }
                     position.set(Event.KEY_GSM, -buf.readUnsignedByte());
+                    if (length > 9 && length != 11) {
+                        buf.skipBytes(length - 9);
+                    }
                     break;
 
                 case DATA_STATUS:
@@ -218,11 +225,13 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (hasLocation) {
-            return position;
+        if (!hasLocation) {
+            getLastLocation(position, time);
+        } else {
+            position.setTime(time);
         }
 
-        return null;
+        return position;
     }
 
 }

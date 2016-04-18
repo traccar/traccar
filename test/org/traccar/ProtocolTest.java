@@ -104,6 +104,10 @@ public class ProtocolTest {
         return request;
     }
 
+    protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
+        Assert.assertNotNull(decoder.decode(null, null, object));
+    }
+
     protected void verifyNothing(BaseProtocolDecoder decoder, Object object) throws Exception {
         Assert.assertNull(decoder.decode(null, null, object));
     }
