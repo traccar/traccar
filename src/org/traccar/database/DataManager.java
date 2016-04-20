@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.naming.InitialContext;
@@ -391,7 +393,24 @@ public class DataManager implements IdentityManager {
         return groups;
     }
 
+    private void checkGroupCycles(Group group) {
+        groupsLock.readLock().lock();
+        try {
+            Set<Long> groups = new HashSet<>();
+            while (group != null) {
+                if (groups.contains(group.getId())) {
+                    throw new IllegalArgumentException("Cycle in group hierarchy");
+                }
+                groups.add(group.getId());
+                group = groupsById.get(group.getGroupId());
+            }
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+    }
+
     public void addGroup(Group group) throws SQLException {
+        checkGroupCycles(group);
         group.setId(QueryBuilder.create(dataSource, getQuery("database.insertGroup"), true)
                 .setObject(group)
                 .executeUpdate());
@@ -399,6 +418,7 @@ public class DataManager implements IdentityManager {
     }
 
     public void updateGroup(Group group) throws SQLException {
+        checkGroupCycles(group);
         QueryBuilder.create(dataSource, getQuery("database.updateGroup"))
                 .setObject(group)
                 .executeUpdate();
