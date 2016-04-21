@@ -89,13 +89,14 @@ Ext.define('Traccar.view.DevicesController', {
         dialog.show();
     },
 
-    onSelectionChange: function (selected) {
-        var empty = selected.getCount() === 0;
+    onItemClick: function (selected) {
+        var selectionModel = selected.getSelectionModel();
+        var empty = selectionModel.getCount() === 0;
         this.lookupReference('toolbarEditButton').setDisabled(empty);
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty);
         if (!empty) {
-            this.fireEvent('selectDevice', selected.getLastSelected(), true);
+            this.fireEvent('selectDevice', selectionModel.getLastSelected(), true);
         }
     },
 
