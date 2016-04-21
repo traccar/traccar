@@ -116,7 +116,7 @@ Ext.define('Traccar.view.Devices', {
     }],
 
     listeners: {
-        selectionchange: 'onSelectionChange'
+        itemclick: 'onItemClick'
     },
 
     columns: [{
