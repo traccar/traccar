@@ -91,7 +91,7 @@ Ext.define('Traccar.view.DevicesController', {
 
     onFollowClick: function (button, pressed) {
         if (pressed) {
-			var device = this.getView().getSelectionModel().getSelection()[0];
+            var device = this.getView().getSelectionModel().getSelection()[0];
             this.fireEvent('selectDevice', device, true);
         }
     },
