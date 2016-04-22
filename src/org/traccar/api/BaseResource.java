@@ -33,10 +33,4 @@ public class BaseResource {
         return 0;
     }
 
-    @PermitAll
-    @OPTIONS
-    public Response options() {
-        return Response.noContent().build();
-    }
-
 }

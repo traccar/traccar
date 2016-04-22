@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) {
 
         if (requestContext.getMethod().equals("OPTIONS")) {
-            throw new WebApplicationException(Response.status(Response.Status.OK).build());
+            return;
         }
 
         SecurityContext securityContext = null;
@@ -93,6 +93,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                         Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
             }
         }
+
     }
 
 }
