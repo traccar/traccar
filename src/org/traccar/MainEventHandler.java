@@ -36,10 +36,12 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
 
             Position position = (Position) e.getMessage();
 
+            String uniqueId = Context.getDataManager().getDeviceById(position.getDeviceId()).getUniqueId();
+
             // Log position
             StringBuilder s = new StringBuilder();
             s.append(formatChannel(e.getChannel())).append(" ");
-            s.append("id: ").append(position.getDeviceId()).append(", ");
+            s.append("id: ").append(uniqueId).append(", ");
             s.append("time: ").append(
                     new SimpleDateFormat(Log.DATE_FORMAT).format(position.getFixTime())).append(", ");
             s.append("lat: ").append(String.format("%.5f", position.getLatitude())).append(", ");
