@@ -23,20 +23,15 @@ import org.traccar.model.Command;
 
 public class H02ProtocolEncoder extends StringProtocolEncoder {
 
-    DateTime getActualDateTime() {
-        return new DateTime(DateTimeZone.UTC);
-    }
+    private Object formatCommand(DateTime dt, String uniqueId, String cmd, String... params) {
 
-    private Object formatCommand(String uniqueId, String cmd, String... params) {
-
-        DateTime now = getActualDateTime();
         String result = String.format(
                 "*HQ,%s,%s,%02d%02d%02d",
                 uniqueId,
                 cmd,
-                now.getHourOfDay(),
-                now.getMinuteOfHour(),
-                now.getSecondOfMinute()
+                dt.getHourOfDay(),
+                dt.getMinuteOfHour(),
+                dt.getSecondOfMinute()
         );
 
         for(String param : params) {
@@ -48,20 +43,25 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
         return result;
     }
 
-    @Override
-    protected Object encodeCommand(Command command) {
+    protected Object encodeCommand(Command command, DateTime dt) {
         String uniqueId = getUniqueId(command.getDeviceId());
 
         switch (command.getType()) {
             case Command.TYPE_ALARM_ARM:
-                return formatCommand(uniqueId, "SCF", "0", "0");
+                return formatCommand(dt, uniqueId, "SCF", "0", "0");
             case Command.TYPE_ALARM_DISARM:
-                return formatCommand(uniqueId, "SCF", "1", "1");
+                return formatCommand(dt, uniqueId, "SCF", "1", "1");
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
         }
 
         return null;
+    }
+
+    @Override
+    protected Object encodeCommand(Command command) {
+        DateTime dt = new DateTime(DateTimeZone.UTC);
+        return encodeCommand(command, dt);
     }
 }
