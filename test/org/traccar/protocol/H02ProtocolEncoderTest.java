@@ -30,4 +30,35 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
 
         Assert.assertEquals("*HQ,123456789012345,SCF,010203,1,1#", encoder.encodeCommand(command, dt));
     }
+
+    @Test
+    public void testEngineStopEncode() throws Exception {
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_ENGINE_STOP);
+
+        Assert.assertEquals("*HQ,123456789012345,S20,010203,1,3,10,3,5,5,3,5,3,5,3,5#", encoder.encodeCommand(command, dt));
+    }
+
+    @Test
+    public void testEngineResumeEncode() throws Exception {
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_ENGINE_RESUME);
+
+        Assert.assertEquals("*HQ,123456789012345,S20,010203,0,0#", encoder.encodeCommand(command, dt));
+    }
+
+    @Test
+    public void testPositionPeriodicEncode() throws Exception {
+
+        Command command = new Command();
+        command.setDeviceId(1);
+        command.set(Command.KEY_FREQUENCY, 10);
+        command.setType(Command.TYPE_POSITION_PERIODIC);
+
+        Assert.assertEquals("*HQ,123456789012345,S71,010203,22,10#", encoder.encodeCommand(command, dt));
+    }
 }
