@@ -30,7 +30,10 @@ public class H02Protocol extends BaseProtocol {
         super("h02");
         setSupportedCommands(
                 Command.TYPE_ALARM_ARM,
-                Command.TYPE_ALARM_DISARM
+                Command.TYPE_ALARM_DISARM,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_POSITION_PERIODIC
         );
     }
 
