@@ -36,7 +36,7 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
                 dt.getSecondOfMinute()
         );
 
-        for(String param : params) {
+        for (String param : params) {
             result += "," + param;
         }
 
@@ -58,7 +58,8 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return formatCommand(dt, uniqueId, "S20", "0", "0");
             case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(dt, uniqueId, "S71", "22", command.getAttributes().get(Command.KEY_FREQUENCY).toString());
+                return formatCommand(dt, uniqueId, "S71", "22",
+                        command.getAttributes().get(Command.KEY_FREQUENCY).toString());
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
