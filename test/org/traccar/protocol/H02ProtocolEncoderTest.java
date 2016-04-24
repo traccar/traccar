@@ -8,8 +8,8 @@ import org.traccar.model.Command;
 
 public class H02ProtocolEncoderTest extends ProtocolTest {
 
-    H02ProtocolEncoder encoder = new H02ProtocolEncoder();
-    DateTime dt = new DateTime().withHourOfDay(1).withMinuteOfHour(2).withSecondOfMinute(3);;
+    private H02ProtocolEncoder encoder = new H02ProtocolEncoder();
+    private DateTime time = new DateTime().withHourOfDay(1).withMinuteOfHour(2).withSecondOfMinute(3);;
 
     @Test
     public void testAlarmArmEncode() throws Exception {
@@ -18,7 +18,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_ARM);
 
-        Assert.assertEquals("*HQ,123456789012345,SCF,010203,0,0#", encoder.encodeCommand(command, dt));
+        Assert.assertEquals("*HQ,123456789012345,SCF,010203,0,0#", encoder.encodeCommand(command, time));
     }
 
     @Test
@@ -28,7 +28,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ALARM_DISARM);
 
-        Assert.assertEquals("*HQ,123456789012345,SCF,010203,1,1#", encoder.encodeCommand(command, dt));
+        Assert.assertEquals("*HQ,123456789012345,SCF,010203,1,1#", encoder.encodeCommand(command, time));
     }
 
     @Test
@@ -38,7 +38,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        Assert.assertEquals("*HQ,123456789012345,S20,010203,1,3,10,3,5,5,3,5,3,5,3,5#", encoder.encodeCommand(command, dt));
+        Assert.assertEquals("*HQ,123456789012345,S20,010203,1,3,10,3,5,5,3,5,3,5,3,5#", encoder.encodeCommand(command, time));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_RESUME);
 
-        Assert.assertEquals("*HQ,123456789012345,S20,010203,0,0#", encoder.encodeCommand(command, dt));
+        Assert.assertEquals("*HQ,123456789012345,S20,010203,0,0#", encoder.encodeCommand(command, time));
     }
 
     @Test
@@ -59,6 +59,7 @@ public class H02ProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_FREQUENCY, 10);
         command.setType(Command.TYPE_POSITION_PERIODIC);
 
-        Assert.assertEquals("*HQ,123456789012345,S71,010203,22,10#", encoder.encodeCommand(command, dt));
+        Assert.assertEquals("*HQ,123456789012345,S71,010203,22,10#", encoder.encodeCommand(command, time));
     }
+
 }

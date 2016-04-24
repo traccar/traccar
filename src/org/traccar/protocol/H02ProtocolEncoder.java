@@ -22,19 +22,13 @@ import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 public class H02ProtocolEncoder extends StringProtocolEncoder {
+
     private static final String MARKER = "HQ";
 
-    private Object formatCommand(DateTime dt, String uniqueId, String cmd, String... params) {
+    private Object formatCommand(DateTime time, String uniqueId, String type, String... params) {
 
-        String result = String.format(
-                "*%s,%s,%s,%02d%02d%02d",
-                MARKER,
-                uniqueId,
-                cmd,
-                dt.getHourOfDay(),
-                dt.getMinuteOfHour(),
-                dt.getSecondOfMinute()
-        );
+        String result = String.format("*%s,%s,%s,%02d%02d%02d",
+                MARKER, uniqueId, type, time.getHourOfDay(), time.getMinuteOfHour(), time.getSecondOfMinute());
 
         for (String param : params) {
             result += "," + param;
@@ -45,21 +39,22 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
         return result;
     }
 
-    protected Object encodeCommand(Command command, DateTime dt) {
+    protected Object encodeCommand(Command command, DateTime time) {
         String uniqueId = getUniqueId(command.getDeviceId());
 
         switch (command.getType()) {
             case Command.TYPE_ALARM_ARM:
-                return formatCommand(dt, uniqueId, "SCF", "0", "0");
+                return formatCommand(time, uniqueId, "SCF", "0", "0");
             case Command.TYPE_ALARM_DISARM:
-                return formatCommand(dt, uniqueId, "SCF", "1", "1");
+                return formatCommand(time, uniqueId, "SCF", "1", "1");
             case Command.TYPE_ENGINE_STOP:
-                return formatCommand(dt, uniqueId, "S20", "1", "3", "10", "3", "5", "5", "3", "5", "3", "5", "3", "5");
+                return formatCommand(
+                        time, uniqueId, "S20", "1", "3", "10", "3", "5", "5", "3", "5", "3", "5", "3", "5");
             case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(dt, uniqueId, "S20", "0", "0");
+                return formatCommand(time, uniqueId, "S20", "0", "0");
             case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(dt, uniqueId, "S71", "22",
-                        command.getAttributes().get(Command.KEY_FREQUENCY).toString());
+                return formatCommand(
+                        time, uniqueId, "S71", "22", command.getAttributes().get(Command.KEY_FREQUENCY).toString());
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
@@ -70,7 +65,7 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        DateTime dt = new DateTime(DateTimeZone.UTC);
-        return encodeCommand(command, dt);
+        return encodeCommand(command, new DateTime(DateTimeZone.UTC));
     }
+
 }
