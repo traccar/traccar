@@ -12,12 +12,25 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
 
         WatchProtocolEncoder encoder = new WatchProtocolEncoder();
         
-        Command command = new Command();
+        Command command;
+
+        command = new Command();
         command.setDeviceId(1);
-        command.setType(Command.TYPE_POSITION_PERIODIC);
-        command.set(Command.KEY_FREQUENCY, 300);
-        
-        //Assert.assertEquals("**,imei:123456789012345,C,05m", encoder.encodeCommand(command));
+        command.setType(Command.TYPE_REBOOT_DEVICE);
+        Assert.assertEquals("[CS*123456789012345*0005*RESET]", encoder.encodeCommand(command));
+
+        command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_SOS_NUMBER);
+        command.set(Command.KEY_INDEX, 1);
+        command.set(Command.KEY_PHONE, "123456789");
+        Assert.assertEquals("[CS*123456789012345*000e*SOS1,123456789]", encoder.encodeCommand(command));
+
+        command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_VOICE_MESSAGE);
+        command.set(Command.KEY_DATA, "3333");
+        Assert.assertEquals("[CS*123456789012345*0005*TK,33]", encoder.encodeCommand(command));
 
     }
 

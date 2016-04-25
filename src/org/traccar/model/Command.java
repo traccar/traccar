@@ -35,6 +35,7 @@ public class Command extends Extensible {
     public static final String TYPE_SOS_NUMBER = "sosNumber";
     public static final String TYPE_SILENCE_TIME = "silenceTime";
     public static final String TYPE_SET_PHONEBOOK = "setPhonebook";
+    public static final String TYPE_VOICE_MESSAGE = "voiceMessage";
 
     public static final String TYPE_ALARM_GEOFENCE = "movementAlarm";
     public static final String TYPE_ALARM_BATTERY = "alarmBattery";
@@ -49,5 +50,9 @@ public class Command extends Extensible {
     public static final String KEY_RADIUS = "radius";
     public static final String KEY_PHONE_NUMBER = "phoneNumber";
     public static final String KEY_MESSAGE = "message";
+    public static final String KEY_ENABLE = "enable";
+    public static final String KEY_DATA = "data";
+    public static final String KEY_INDEX = "index";
+    public static final String KEY_PHONE = "phone";
 
 }
