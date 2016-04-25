@@ -32,7 +32,7 @@ public class MeiligaoProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
-                Command.TYPE_MOVEMENT_ALARM,
+                Command.TYPE_ALARM_GEOFENCE,
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_REBOOT_DEVICE);
     }

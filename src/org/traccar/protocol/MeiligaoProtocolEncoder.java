@@ -76,7 +76,7 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 content.writeByte(0x00);
                 return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
-            case Command.TYPE_MOVEMENT_ALARM:
+            case Command.TYPE_ALARM_GEOFENCE:
                 content.writeShort(((Number) attributes.get(Command.KEY_RADIUS)).intValue());
                 return encodeContent(command.getDeviceId(), MSG_MOVEMENT_ALARM, content);
             case Command.TYPE_SET_TIMEZONE:
