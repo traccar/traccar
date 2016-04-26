@@ -19,8 +19,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
@@ -114,19 +114,19 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
 
-            int battery = ChannelBufferTools.readHexInteger(buf, 2);
+            int battery = BcdUtil.readInteger(buf, 2);
             if (battery == 0) {
                 battery = 100;
             }
             position.set(Event.KEY_BATTERY, battery);
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setYear(ChannelBufferTools.readHexInteger(buf, 2))
-                    .setMonth(ChannelBufferTools.readHexInteger(buf, 2))
-                    .setDay(ChannelBufferTools.readHexInteger(buf, 2))
-                    .setHour(ChannelBufferTools.readHexInteger(buf, 2))
-                    .setMinute(ChannelBufferTools.readHexInteger(buf, 2))
-                    .setSecond(ChannelBufferTools.readHexInteger(buf, 2));
+                    .setYear(BcdUtil.readInteger(buf, 2))
+                    .setMonth(BcdUtil.readInteger(buf, 2))
+                    .setDay(BcdUtil.readInteger(buf, 2))
+                    .setHour(BcdUtil.readInteger(buf, 2))
+                    .setMinute(BcdUtil.readInteger(buf, 2))
+                    .setSecond(BcdUtil.readInteger(buf, 2));
 
             if (BitUtil.check(locationStatus, 6)) {
 
@@ -136,7 +136,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 position.setLongitude(readSwappedFloat(buf));
                 position.setLatitude(readSwappedFloat(buf));
                 position.setSpeed(UnitsConverter.knotsFromKph(
-                        ChannelBufferTools.readHexInteger(buf, 4) * 0.1));
+                        BcdUtil.readInteger(buf, 4) * 0.1));
                 position.setCourse(buf.readUnsignedShort());
 
             } else {

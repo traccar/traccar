@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,15 @@ package org.traccar.helper;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-public final class ChannelBufferTools {
+public final class BcdUtil {
 
-    private ChannelBufferTools() {
+    private BcdUtil() {
     }
 
-    /**
-     * Convert hex to integer (length in hex digits)
-     */
-    public static int readHexInteger(ChannelBuffer buf, int length) {
-
+    public static int readInteger(ChannelBuffer buf, int digits) {
         int result = 0;
 
-        for (int i = 0; i < length / 2; i++) {
+        for (int i = 0; i < digits / 2; i++) {
             int b = buf.readUnsignedByte();
             result *= 10;
             result += b >>> 4;
@@ -37,7 +33,7 @@ public final class ChannelBufferTools {
             result += b & 0x0f;
         }
 
-        if (length % 2 != 0) {
+        if (digits % 2 != 0) {
             int b = buf.getUnsignedByte(buf.readerIndex());
             result *= 10;
             result += b >>> 4;
@@ -46,9 +42,6 @@ public final class ChannelBufferTools {
         return result;
     }
 
-    /**
-     * Read BCD coded coordinate (first byte has sign bit)
-     */
     public static double readCoordinate(ChannelBuffer buf) {
         int b1 = buf.readUnsignedByte();
         int b2 = buf.readUnsignedByte();

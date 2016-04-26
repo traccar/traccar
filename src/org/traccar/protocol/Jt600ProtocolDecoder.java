@@ -22,7 +22,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -55,21 +55,21 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        int version = ChannelBufferTools.readHexInteger(buf, 1);
+        int version = BcdUtil.readInteger(buf, 1);
         buf.readUnsignedByte(); // type
         buf.readBytes(2); // length
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setDay(ChannelBufferTools.readHexInteger(buf, 2))
-                .setMonth(ChannelBufferTools.readHexInteger(buf, 2))
-                .setYear(ChannelBufferTools.readHexInteger(buf, 2))
-                .setHour(ChannelBufferTools.readHexInteger(buf, 2))
-                .setMinute(ChannelBufferTools.readHexInteger(buf, 2))
-                .setSecond(ChannelBufferTools.readHexInteger(buf, 2));
+                .setDay(BcdUtil.readInteger(buf, 2))
+                .setMonth(BcdUtil.readInteger(buf, 2))
+                .setYear(BcdUtil.readInteger(buf, 2))
+                .setHour(BcdUtil.readInteger(buf, 2))
+                .setMinute(BcdUtil.readInteger(buf, 2))
+                .setSecond(BcdUtil.readInteger(buf, 2));
         position.setTime(dateBuilder.getDate());
 
-        double latitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 8));
-        double longitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 9));
+        double latitude = convertCoordinate(BcdUtil.readInteger(buf, 8));
+        double longitude = convertCoordinate(BcdUtil.readInteger(buf, 9));
 
         byte flags = buf.readByte();
         position.setValid((flags & 0x1) == 0x1);
@@ -82,7 +82,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setLongitude(longitude);
 
-        position.setSpeed(ChannelBufferTools.readHexInteger(buf, 2));
+        position.setSpeed(BcdUtil.readInteger(buf, 2));
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
         if (version == 1) {
