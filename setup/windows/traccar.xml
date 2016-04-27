@@ -161,6 +161,10 @@
         SELECT * FROM positions WHERE id IN (SELECT positionId FROM devices);
     </entry>
 
+    <entry key='database.selectLatestPosition'>
+        SELECT TOP 1 * FROM positions WHERE deviceId = :deviceId AND protocol IS NOT NULL;
+    </entry>
+
     <entry key='database.updateLatestPosition'>
         UPDATE devices SET positionId = :id WHERE id = :deviceId;
     </entry>
