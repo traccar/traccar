@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.CommandTypes', {
+Ext.define('Traccar.store.SupportedCommands', {
     extend: 'Ext.data.Store',
-    fields: ['key', 'name'],
+    model: 'Traccar.model.SupportedCommand',
 
-    data: [{
-        key: 'positionPeriodic',
-        name: Strings.commandPositionPeriodic
-    }, {
-        key: 'positionStop',
-        name: Strings.commandPositionStop
-    }, {
-        key: 'engineStop',
-        name: Strings.commandEngineStop
-    }, {
-        key: 'engineResume',
-        name: Strings.commandEngineResume
-    }]
+    listeners: {
+        'beforeload' : function(store, options) {
+            var proxy;
+            proxy = store.getProxy();
+            proxy.setUrl('/api/devices/' + proxy.extraParams.deviceId + '/supportedcommands');
+        }
+    },
+
+    proxy: {
+        type: 'rest',
+        url: ''
+    }
 });

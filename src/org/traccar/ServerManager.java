@@ -15,19 +15,20 @@
  */
 package org.traccar;
 
+import org.traccar.model.SupportedCommand;
+
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class ServerManager {
 
+    private final Map<String, BaseProtocol> protocols = new HashMap<>();
     private final List<TrackerServer> serverList = new LinkedList<>();
 
     public ServerManager() throws Exception {
@@ -62,7 +63,9 @@ public class ServerManager {
         for (String name : names) {
             Class protocolClass = Class.forName(packageName + '.' + name);
             if (BaseProtocol.class.isAssignableFrom(protocolClass)) {
-                initProtocolServer((BaseProtocol) protocolClass.newInstance());
+                BaseProtocol baseProtocol = (BaseProtocol) protocolClass.newInstance();
+                protocols.put(baseProtocol.getName(), baseProtocol);
+                initProtocolServer(baseProtocol);
             }
         }
     }
@@ -89,4 +92,19 @@ public class ServerManager {
         }
     }
 
+    public Collection<SupportedCommand> getProtocolSuppportedCommands(String protocol) {
+        ArrayList<SupportedCommand> result = new ArrayList<>();
+
+        if (protocol != null) {
+            BaseProtocol baseProtocol = protocols.get(protocol);
+            for (String commandKey : baseProtocol.getSupportedCommands()) {
+                SupportedCommand supportedCommand = new SupportedCommand();
+                supportedCommand.setKey(commandKey);
+                supportedCommand.setName(commandKey);
+                result.add(supportedCommand);
+            }
+        }
+
+        return result;
+    }
 }

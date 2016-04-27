@@ -80,11 +80,14 @@ Ext.define('Traccar.view.DevicesController', {
     },
 
     onCommandClick: function () {
-        var device, command, dialog;
+        var device, deviceId, command, dialog, comboStore;
         device = this.getView().getSelectionModel().getSelection()[0];
+        deviceId = device.get('id');
         command = Ext.create('Traccar.model.Command');
-        command.set('deviceId', device.get('id'));
+        command.set('deviceId', deviceId);
         dialog = Ext.create('Traccar.view.CommandDialog');
+        comboStore = dialog.down('form').down('combobox').getStore();
+        comboStore.getProxy().setExtraParam('deviceId', deviceId);
         dialog.down('form').loadRecord(command);
         dialog.show();
     },
