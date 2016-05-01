@@ -87,11 +87,4 @@ public class DeviceResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    @Path("{id}/supportedcommands")
-    @GET
-    public Collection<SupportedCommand> get(@PathParam("id") long id) throws SQLException {
-        Context.getPermissionsManager().checkDevice(getUserId(), id);
-        Position latestPosition = Context.getDataManager().getLatestPosition(id);
-        return Context.getServerManager().getProtocolSuppportedCommands(latestPosition.getProtocol());
-    }
 }

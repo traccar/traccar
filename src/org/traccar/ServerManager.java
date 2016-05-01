@@ -100,7 +100,8 @@ public class ServerManager {
             for (String commandKey : baseProtocol.getSupportedCommands()) {
                 SupportedCommand supportedCommand = new SupportedCommand();
                 supportedCommand.setKey(commandKey);
-                supportedCommand.setName(commandKey);
+                String commandName = "command" + commandKey.substring(0, 1).toUpperCase() + commandKey.substring(1);
+                supportedCommand.setName(commandName);
                 result.add(supportedCommand);
             }
         }
