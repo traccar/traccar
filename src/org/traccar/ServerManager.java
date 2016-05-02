@@ -71,14 +71,14 @@ public class ServerManager {
     }
 
     public void start() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).start();
+        for (TrackerServer server: serverList) {
+            server.start();
         }
     }
 
     public void stop() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).stop();
+        for (TrackerServer server: serverList) {
+            server.stop();
         }
 
         // Release resources
@@ -108,4 +108,5 @@ public class ServerManager {
 
         return result;
     }
+
 }
