@@ -34,9 +34,9 @@ public class SupportedCommandResource extends BaseResource {
     @GET
     public Collection<SupportedCommand> get(@QueryParam("deviceId") long deviceId) throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        Position latestPosition = Context.getDataManager().getLatestPosition(deviceId);
-        if (latestPosition != null) {
-            return Context.getServerManager().getProtocolSuppportedCommands(latestPosition.getProtocol());
+        Position lastPosition = Context.getConnectionManager().getLastPosition(deviceId);
+        if (lastPosition != null) {
+            return Context.getServerManager().getProtocolSuppportedCommands(lastPosition.getProtocol());
         } else {
             return Collections.EMPTY_LIST;
         }

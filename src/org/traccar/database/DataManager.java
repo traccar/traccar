@@ -472,12 +472,6 @@ public class DataManager implements IdentityManager {
                 .executeQuery(Position.class);
     }
 
-    public Position getLatestPosition(long deviceId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectLatestPosition"))
-                .setLong("deviceId", deviceId)
-                .executeQuerySingle(Position.class);
-    }
-
     public Server getServer() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
                 .executeQuerySingle(Server.class);
