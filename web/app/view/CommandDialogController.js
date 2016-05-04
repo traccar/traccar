@@ -18,9 +18,6 @@ Ext.define('Traccar.view.CommandDialogController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.commandDialog',
 
-    onShow: function () {
-    },
-
     onSelect: function (selected) {
         this.lookupReference('paramPositionPeriodic').setHidden(
             selected.getValue() !== 'positionPeriodic');
