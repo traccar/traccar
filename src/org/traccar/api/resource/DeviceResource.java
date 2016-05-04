@@ -33,6 +33,9 @@ import javax.ws.rs.core.Response;
 
 import org.traccar.model.Device;
 
+import java.sql.SQLException;
+import java.util.Collection;
+
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
