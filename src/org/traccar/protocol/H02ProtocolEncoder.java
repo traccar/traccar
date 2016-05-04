@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
+ *           2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +28,16 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
 
     private Object formatCommand(DateTime time, String uniqueId, String type, String... params) {
 
-        String result = String.format("*%s,%s,%s,%02d%02d%02d",
-                MARKER, uniqueId, type, time.getHourOfDay(), time.getMinuteOfHour(), time.getSecondOfMinute());
+        StringBuilder result = new StringBuilder(String.format("*%s,%s,%s,%02d%02d%02d",
+                MARKER, uniqueId, type, time.getHourOfDay(), time.getMinuteOfHour(), time.getSecondOfMinute()));
 
         for (String param : params) {
-            result += "," + param;
+            result.append(",").append(param);
         }
 
-        result += "#";
+        result.append("#");
 
-        return result;
+        return result.toString();
     }
 
     protected Object encodeCommand(Command command, DateTime time) {
