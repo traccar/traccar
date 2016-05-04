@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -203,7 +204,27 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (hasDeviceId()) {
 
-            if (isSupported(type)) {
+            if (type == MSG_STRING) {
+
+                Position position = new Position();
+                position.setDeviceId(getDeviceId());
+                position.setProtocol(getProtocolName());
+
+                getLastLocation(position, null);
+
+                int commandLength = buf.readUnsignedByte();
+
+                buf.readUnsignedByte(); // server flag (reserved)
+
+                position.set("command", buf.readBytes(commandLength - 1).toString(Charset.defaultCharset()));
+
+                buf.readUnsignedShort(); // language
+
+                sendResponse(channel, type, buf.readUnsignedShort());
+
+                return position;
+
+            } else if (isSupported(type)) {
 
                 Position position = new Position();
                 position.setDeviceId(getDeviceId());
