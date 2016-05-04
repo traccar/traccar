@@ -15,9 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,6 +25,10 @@ import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
@@ -82,7 +83,7 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOCATION_REPORT || type == MSG_LOCATION_REQUEST) {
 
-            String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 8, Charset.defaultCharset());
+            String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 8, StandardCharsets.US_ASCII);
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
                 return null;

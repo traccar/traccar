@@ -17,14 +17,15 @@ package org.traccar.geocode;
 
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
+import org.traccar.Context;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import org.traccar.Context;
 
 public abstract class JsonReverseGeocoder implements ReverseGeocoder {
 

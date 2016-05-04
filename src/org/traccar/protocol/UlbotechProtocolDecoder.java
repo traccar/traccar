@@ -15,9 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.Date;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,6 +25,10 @@ import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
@@ -204,11 +205,11 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_VIN:
-                    position.set(Event.KEY_VIN, buf.readBytes(length).toString(Charset.defaultCharset()));
+                    position.set(Event.KEY_VIN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
                     break;
 
                 case DATA_RFID:
-                    position.set(Event.KEY_RFID, buf.readBytes(length - 1).toString(Charset.defaultCharset()));
+                    position.set(Event.KEY_RFID, buf.readBytes(length - 1).toString(StandardCharsets.US_ASCII));
                     position.set("authorized", buf.readUnsignedByte() != 0);
                     break;
 

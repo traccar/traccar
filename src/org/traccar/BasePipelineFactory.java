@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
@@ -31,6 +30,8 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.helper.Log;
+
+import java.net.InetSocketAddress;
 
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 

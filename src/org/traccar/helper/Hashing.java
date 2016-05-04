@@ -15,11 +15,11 @@
  */
 package org.traccar.helper;
 
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.xml.bind.DatatypeConverter;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 
 public final class Hashing {
 

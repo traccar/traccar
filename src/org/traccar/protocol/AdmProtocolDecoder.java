@@ -24,7 +24,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class AdmProtocolDecoder extends BaseProtocolDecoder {
@@ -49,7 +49,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         if (type == MSG_IMEI) {
-            identify(buf.toString(buf.readerIndex(), 15, Charset.defaultCharset()), channel, remoteAddress);
+            identify(buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII), channel, remoteAddress);
         }
 
         if (hasDeviceId() && BitUtil.to(type, 2) == 0) {

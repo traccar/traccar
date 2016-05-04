@@ -15,11 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -29,6 +24,12 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
@@ -148,7 +149,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer id = buf.readBytes(20);
         int type = ChannelBuffers.swapShort(buf.readShort());
 
-        if (!identify(id.toString(Charset.defaultCharset()).trim(), channel, remoteAddress)) {
+        if (!identify(id.toString(StandardCharsets.US_ASCII).trim(), channel, remoteAddress)) {
             return null;
         }
 

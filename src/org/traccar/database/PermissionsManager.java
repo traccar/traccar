@@ -15,11 +15,6 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
@@ -27,6 +22,12 @@ import org.traccar.model.Group;
 import org.traccar.model.GroupPermission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class PermissionsManager {
 

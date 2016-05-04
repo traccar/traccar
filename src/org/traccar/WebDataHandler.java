@@ -15,6 +15,13 @@
  */
 package org.traccar;
 
+import org.traccar.helper.Checksum;
+import org.traccar.helper.Log;
+import org.traccar.model.Device;
+import org.traccar.model.Event;
+import org.traccar.model.MiscFormatter;
+import org.traccar.model.Position;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -22,13 +29,6 @@ import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.MiscFormatter;
-import org.traccar.model.Position;
 
 public class WebDataHandler extends BaseDataHandler {
 

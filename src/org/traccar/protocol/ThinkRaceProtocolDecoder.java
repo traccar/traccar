@@ -24,7 +24,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
@@ -63,7 +63,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
             int command = buf.readUnsignedByte(); // 0x00 - heartbeat
 
             if (command == 0x01) {
-                String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
+                String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
                 if (identify(imei, channel, remoteAddress) && channel != null) {
                     ChannelBuffer response = ChannelBuffers.dynamicBuffer();
                     response.writeByte(0x48); response.writeByte(0x52); // header

@@ -15,11 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -29,6 +24,12 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
@@ -59,13 +60,13 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 13);
             response.writeBytes(
-                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", Charset.defaultCharset()));
+                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", StandardCharsets.US_ASCII));
             response.writeByte(0);
             response.writeShort(response.capacity());
             response.writeShort(MSG_SHAKE_HAND_RESPONSE);
             response.writeByte(1); // status
             response.writeBytes(
-                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
+                    ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", StandardCharsets.US_ASCII));
 
             channel.write(response, remoteAddress);
 
@@ -119,7 +120,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 rawId = buf.readBytes(11);
             }
-            String id = rawId.toString(Charset.defaultCharset()).replaceAll("[^\\p{Print}]", "");
+            String id = rawId.toString(StandardCharsets.US_ASCII).replaceAll("[^\\p{Print}]", "");
             if (!identify(id, channel, remoteAddress)) {
                 return null;
             }
@@ -127,7 +128,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             if (newFormat) {
                 DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-                position.setTime(dateFormat.parse(buf.readBytes(17).toString(Charset.defaultCharset())));
+                position.setTime(dateFormat.parse(buf.readBytes(17).toString(StandardCharsets.US_ASCII)));
                 buf.readByte();
             }
 

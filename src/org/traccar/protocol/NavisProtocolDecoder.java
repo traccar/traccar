@@ -15,11 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -30,12 +25,16 @@ import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
+
 public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private String prefix;
     private long deviceUniqueId, serverId;
-
-    private static final Charset CHARSET = Charset.defaultCharset();
 
     public NavisProtocolDecoder(NavisProtocol protocol) {
         super(protocol);
@@ -183,7 +182,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         ParseResult result = parsePosition(buf);
 
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
-        response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<T", CHARSET));
+        response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<T", StandardCharsets.US_ASCII));
         response.writeInt((int) result.getId());
         sendReply(channel, response);
 
@@ -206,7 +205,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
 
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
-        response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<A", CHARSET));
+        response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<A", StandardCharsets.US_ASCII));
         response.writeByte(count);
         sendReply(channel, response);
 
@@ -219,8 +218,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processHandshake(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
-        if (identify(buf.toString(Charset.defaultCharset()), channel, remoteAddress)) {
-            sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", CHARSET));
+        if (identify(buf.toString(StandardCharsets.US_ASCII), channel, remoteAddress)) {
+            sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", StandardCharsets.US_ASCII));
         }
         return null;
     }
@@ -235,7 +234,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendReply(Channel channel, ChannelBuffer data) {
         ChannelBuffer header = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 16);
-        header.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, prefix, CHARSET));
+        header.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, prefix, StandardCharsets.US_ASCII));
         header.writeInt((int) deviceUniqueId);
         header.writeInt((int) serverId);
         header.writeShort(data.readableBytes());
@@ -253,7 +252,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        prefix = buf.toString(buf.readerIndex(), 4, CHARSET);
+        prefix = buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII);
         buf.skipBytes(prefix.length()); // prefix @NTC by default
         serverId = buf.readUnsignedInt();
         deviceUniqueId = buf.readUnsignedInt();
@@ -264,7 +263,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             return null; // keep alive message
         }
 
-        String type = buf.toString(buf.readerIndex(), 3, CHARSET);
+        String type = buf.toString(buf.readerIndex(), 3, StandardCharsets.US_ASCII);
         buf.skipBytes(type.length());
 
         switch (type) {

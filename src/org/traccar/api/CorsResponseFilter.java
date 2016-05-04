@@ -18,10 +18,10 @@ package org.traccar.api;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.traccar.Context;
 
-import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import java.io.IOException;
 
 public class CorsResponseFilter implements ContainerResponseFilter {
 

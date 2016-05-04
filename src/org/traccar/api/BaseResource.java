@@ -15,9 +15,6 @@
  */
 package org.traccar.api;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public class BaseResource {

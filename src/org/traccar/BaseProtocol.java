@@ -15,12 +15,13 @@
  */
 package org.traccar;
 
+import org.traccar.database.ActiveDevice;
+import org.traccar.model.Command;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.traccar.database.ActiveDevice;
-import org.traccar.model.Command;
 
 public abstract class BaseProtocol implements Protocol {
 

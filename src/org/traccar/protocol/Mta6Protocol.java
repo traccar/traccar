@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.util.List;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
@@ -23,6 +22,8 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.Context;
 import org.traccar.TrackerServer;
+
+import java.util.List;
 
 public class Mta6Protocol extends BaseProtocol {
 

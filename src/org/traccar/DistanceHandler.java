@@ -16,11 +16,12 @@
  */
 package org.traccar;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class DistanceHandler extends BaseDataHandler {
 

@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -26,6 +24,9 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
@@ -75,10 +76,10 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
             String id;
             if (BitUtil.check(mask, 23)) {
-                id = buf.toString(buf.readerIndex(), 8, Charset.defaultCharset()).trim();
+                id = buf.toString(buf.readerIndex(), 8, StandardCharsets.US_ASCII).trim();
                 buf.skipBytes(8);
             } else if (BitUtil.check(mask, 2)) {
-                id = buf.toString(buf.readerIndex(), 22, Charset.defaultCharset()).trim();
+                id = buf.toString(buf.readerIndex(), 22, StandardCharsets.US_ASCII).trim();
                 buf.skipBytes(22);
             } else {
                 Log.warning("No device id field");

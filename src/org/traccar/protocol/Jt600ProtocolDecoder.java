@@ -15,9 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -29,6 +26,10 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -141,7 +142,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeAlertMessage(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
-        Parser parser = new Parser(PATTERN, buf.toString(Charset.defaultCharset()));
+        Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
         if (!parser.matches()) {
             return null;
         }

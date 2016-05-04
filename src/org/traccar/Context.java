@@ -172,9 +172,10 @@ public final class Context {
         }
 
         if (config.getBoolean("web.enable")) {
-            permissionsManager = new PermissionsManager(dataManager);
             webServer = new WebServer(config, dataManager.getDataSource());
         }
+
+        permissionsManager = new PermissionsManager(dataManager);
 
         connectionManager = new ConnectionManager(dataManager);
 

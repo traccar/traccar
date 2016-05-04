@@ -15,14 +15,14 @@
  */
 package org.traccar;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Date;
-
 import org.jboss.netty.channel.Channel;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Date;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 

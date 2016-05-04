@@ -15,8 +15,9 @@
  */
 package org.traccar;
 
-import java.util.Locale;
 import org.traccar.helper.Log;
+
+import java.util.Locale;
 
 public final class Main {
 

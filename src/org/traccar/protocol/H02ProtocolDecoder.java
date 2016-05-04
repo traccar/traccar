@@ -15,9 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -29,6 +26,10 @@ import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -193,12 +194,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-        String marker = buf.toString(0, 1, Charset.defaultCharset());
+        String marker = buf.toString(0, 1, StandardCharsets.US_ASCII);
 
         // handle X mode?
 
         if (marker.equals("*")) {
-            return decodeText(buf.toString(Charset.defaultCharset()), channel, remoteAddress);
+            return decodeText(buf.toString(StandardCharsets.US_ASCII), channel, remoteAddress);
         } else if (marker.equals("$")) {
             return decodeBinary(buf, channel, remoteAddress);
         }

@@ -25,7 +25,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.regex.Pattern;
 
@@ -116,7 +116,7 @@ public class SupermateProtocolDecoder extends BaseProtocolDecoder {
             String content = String.format("#1:%s:1:*,00000000,UP,%02x%02x%02x,%02x%02x%02x#", imei,
                     calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH),
                     calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
-            channel.write(ChannelBuffers.copiedBuffer(content, Charset.defaultCharset()));
+            channel.write(ChannelBuffers.copiedBuffer(content, StandardCharsets.US_ASCII));
         }
 
         return position;

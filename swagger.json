@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.3",
+        "version": "3.5",
         "title": "traccar"
     },
     "host": "traccar.org",
@@ -159,7 +159,41 @@
                 }
             }
         },
-        "/permissions": {
+        "/groups": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "required": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "userId",
+                        "in": "query",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Group"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -173,7 +207,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Permission"
+                            "$ref": "#/definitions/Group"
                         }
                     }
                 ],
@@ -182,7 +216,93 @@
                         "description": "OK",
                         "headers": {},
                         "schema": {
-                            "$ref": "#/definitions/Permission"
+                            "$ref": "#/definitions/Group"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        },
+        "/permissions/devices": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DevicePermission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/DevicePermission"
                         }
                     }
                 }
@@ -200,7 +320,60 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Permission"
+                            "$ref": "#/definitions/DevicePermission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        },
+        "/permissions/groups": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GroupPermission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/GroupPermission"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GroupPermission"
                         }
                     }
                 ],
@@ -556,13 +729,7 @@
                 "password": {
                     "type": "string"
                 },
-                "hashedPassword": {
-                    "type": "string"
-                },
-                "salt": {
-                    "type": "string"
-                },
-                "passwordValid": {
+                "twelveHourFormat": {
                     "type": "boolean"
                 }
             }
@@ -587,9 +754,6 @@
                 "mapUrl": {
                     "type": "string"
                 },
-                "language": {
-                    "type": "string"
-                },
                 "distanceUnit": {
                     "type": "string"
                 },
@@ -604,6 +768,9 @@
                 },
                 "zoom": {
                     "type": "number"
+                },
+                "twelveHourFormat": {
+                    "type": "boolean"
                 }
             }
         },
@@ -629,15 +796,41 @@
                 },
                 "positionId": {
                     "type": "number"
+                },
+                "groupId": {
+                    "type": "number"
                 }
             }
         },
-        "Permission": {
+        "Group": {
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "groupId": {
+                    "type": "number"
+                }
+            }
+        },
+        "DevicePermission": {
             "properties": {
                 "userId": {
                     "type": "number"
                 },
                 "deviceId": {
+                    "type": "number"
+                }
+            }
+        },
+        "GroupPermission": {
+            "properties": {
+                "userId": {
+                    "type": "number"
+                },
+                "groupId": {
                     "type": "number"
                 }
             }
