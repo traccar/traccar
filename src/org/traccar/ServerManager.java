@@ -20,7 +20,13 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -91,7 +97,7 @@ public class ServerManager {
     }
 
     public Collection<String> getProtocolSuppportedCommands(String protocol) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
 
         if (protocol != null) {
             BaseProtocol baseProtocol = protocols.get(protocol);
