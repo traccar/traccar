@@ -19,7 +19,6 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -33,11 +32,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.traccar.helper.Log;
-import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.Position;
-import org.traccar.model.SupportedCommand;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)

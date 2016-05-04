@@ -16,25 +16,15 @@
 
 Ext.define('Traccar.store.SupportedCommands', {
     extend: 'Ext.data.Store',
-    model: 'Traccar.model.SupportedCommand',
+    fields: [
+        { type: 'string', name: 'key'}
+    ],
 
     listeners: {
         'beforeload' : function(store, eOpts) {
             var proxy;
             proxy = store.getProxy();
             proxy.setUrl('/api/supportedcommands?deviceId' + proxy.extraParams.deviceId);
-        },
-        'load' : function(store, records, successful, eOpts) {
-            if (typeof records !== "undefined") {
-                records.forEach(function(entry) {
-                    if (typeof entry !== "undefined" && typeof entry.data.name !== "undefined") {
-                        var translatedName = Strings[entry.data.name];
-                        if (typeof translatedName !== "undefined") {
-                            entry.data.name = translatedName;
-                        }
-                    }
-                }, this);
-            }
         }
     },
 

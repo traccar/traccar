@@ -30,8 +30,7 @@ Ext.define('Traccar.Application', {
         'Device',
         'Position',
         'Attribute',
-        'Command',
-        'SupportedCommand'
+        'Command'
     ],
 
     stores: [

@@ -43,7 +43,6 @@ import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.*;
 import org.traccar.helper.Log;
-import org.traccar.model.SupportedCommand;
 
 public class WebServer {
 

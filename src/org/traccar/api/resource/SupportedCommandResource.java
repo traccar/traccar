@@ -18,7 +18,6 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Position;
-import org.traccar.model.SupportedCommand;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -32,7 +31,7 @@ import java.util.Collections;
 public class SupportedCommandResource extends BaseResource {
 
     @GET
-    public Collection<SupportedCommand> get(@QueryParam("deviceId") long deviceId) throws SQLException {
+    public Collection<String> get(@QueryParam("deviceId") long deviceId) throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         Position lastPosition = Context.getConnectionManager().getLastPosition(deviceId);
         if (lastPosition != null) {
