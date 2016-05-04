@@ -15,8 +15,6 @@
  */
 package org.traccar;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import org.jboss.netty.bootstrap.Bootstrap;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -27,6 +25,9 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
 
 /**
  * Tracker server

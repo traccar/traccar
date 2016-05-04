@@ -16,14 +16,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -32,6 +24,15 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
 
@@ -96,7 +97,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
             switch (tag) {
 
                 case TAG_IMEI:
-                    String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
+                    String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
                     buf.skipBytes(imei.length());
                     identify(imei, channel, remoteAddress);
                     break;

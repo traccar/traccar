@@ -26,7 +26,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -100,7 +100,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             if (BitUtil.check(reason, 6) || BitUtil.check(reason, 7)) {
 
-                position.set(Event.KEY_RFID, buf.readBytes(7).toString(Charset.defaultCharset()));
+                position.set(Event.KEY_RFID, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
                 position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
 
                 buf.readUnsignedShort(); // engine time

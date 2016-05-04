@@ -15,9 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.Date;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
@@ -27,6 +24,10 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.Date;
+import java.util.regex.Pattern;
 
 public class TaipProtocolDecoder extends BaseProtocolDecoder {
 

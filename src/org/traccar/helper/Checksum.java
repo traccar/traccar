@@ -16,7 +16,7 @@
 package org.traccar.helper;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.CRC32;
 
 public final class Checksum {
@@ -158,7 +158,7 @@ public final class Checksum {
 
     public static String nmea(String msg) {
         int checksum = 0;
-        for (byte b : msg.getBytes(Charset.defaultCharset())) {
+        for (byte b : msg.getBytes(StandardCharsets.US_ASCII)) {
             checksum ^= b;
         }
         return String.format("*%02x", checksum).toUpperCase();
@@ -166,7 +166,7 @@ public final class Checksum {
 
     public static String sum(String msg) {
         byte checksum = 0;
-        for (byte b : msg.getBytes(Charset.defaultCharset())) {
+        for (byte b : msg.getBytes(StandardCharsets.US_ASCII)) {
             checksum += b;
         }
         return String.format("%02X", checksum).toUpperCase();

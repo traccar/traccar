@@ -28,7 +28,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
 
 public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
@@ -91,7 +91,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeShort(index);
             response.writeByte(RESULT_SUCCESS);
-            response.writeBytes("authentication".getBytes(Charset.defaultCharset()));
+            response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));
             sendResponse(channel, remoteAddress, MSG_TERMINAL_REGISTER_RESPONSE, id, response);
 
         } else if (type == MSG_TERMINAL_AUTH) {

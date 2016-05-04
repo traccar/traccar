@@ -1,8 +1,9 @@
 package org.traccar;
 
-import java.util.List;
 import org.traccar.database.ActiveDevice;
 import org.traccar.model.Command;
+
+import java.util.List;
 
 public interface Protocol {
 

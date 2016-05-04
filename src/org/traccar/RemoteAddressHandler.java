@@ -15,11 +15,12 @@
  */
 package org.traccar;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import org.jboss.netty.channel.Channel;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 public class RemoteAddressHandler extends ExtendedObjectDecoder {
 

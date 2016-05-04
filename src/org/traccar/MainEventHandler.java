@@ -25,6 +25,7 @@ import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
+
 import java.text.SimpleDateFormat;
 
 public class MainEventHandler extends IdleStateAwareChannelHandler {

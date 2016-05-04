@@ -15,10 +15,11 @@
  */
 package org.traccar.database;
 
-import java.net.SocketAddress;
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
 import org.traccar.model.Command;
+
+import java.net.SocketAddress;
 
 public class ActiveDevice {
 

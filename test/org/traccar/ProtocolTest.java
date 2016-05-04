@@ -15,6 +15,7 @@ import org.traccar.model.Position;
 import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -87,7 +88,7 @@ public class ProtocolTest {
     }
 
     protected ChannelBuffer buffer(String... data) {
-        return ChannelBuffers.copiedBuffer(concatenateStrings(data), Charset.defaultCharset());
+        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.US_ASCII);
     }
 
     protected DefaultHttpRequest request(String url) {

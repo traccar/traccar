@@ -15,6 +15,16 @@
  */
 package org.traccar.database;
 
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.util.Timeout;
+import org.jboss.netty.util.TimerTask;
+import org.traccar.Context;
+import org.traccar.GlobalTimer;
+import org.traccar.Protocol;
+import org.traccar.helper.Log;
+import org.traccar.model.Device;
+import org.traccar.model.Position;
+
 import java.net.SocketAddress;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -26,16 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.TimerTask;
-import org.traccar.Context;
-import org.traccar.GlobalTimer;
-import org.traccar.Protocol;
-import org.traccar.helper.Log;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
 
 public class ConnectionManager {
 

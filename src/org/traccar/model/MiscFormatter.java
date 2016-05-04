@@ -15,17 +15,18 @@
  */
 package org.traccar.model;
 
-import java.text.DecimalFormat;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.traccar.helper.Log;
+import org.traccar.web.JsonConverter;
+
 import javax.json.Json;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
-import org.traccar.helper.Log;
-import org.traccar.web.JsonConverter;
+import java.text.DecimalFormat;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Format extended tracker status

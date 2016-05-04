@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -17,7 +18,7 @@ public class StringFinderTest {
     @Test
     public void testFind() {
 
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer("hello world", Charset.defaultCharset());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer("hello world", StandardCharsets.US_ASCII);
 
         Assert.assertEquals(-1, buf.indexOf(0, buf.writerIndex(), new StringFinder("bar")));
         Assert.assertEquals(6, buf.indexOf(0, buf.writerIndex(), new StringFinder("world")));

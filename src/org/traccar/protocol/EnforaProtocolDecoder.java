@@ -15,9 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferIndexFinder;
 import org.jboss.netty.channel.Channel;
@@ -27,6 +24,10 @@ import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.StringFinder;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
@@ -75,7 +76,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String imei = buf.toString(index, IMEI_LENGTH, Charset.defaultCharset());
+        String imei = buf.toString(index, IMEI_LENGTH, StandardCharsets.US_ASCII);
         if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
@@ -86,7 +87,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String sentence = buf.toString(start, buf.readableBytes() - start, Charset.defaultCharset());
+        String sentence = buf.toString(start, buf.readableBytes() - start, StandardCharsets.US_ASCII);
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;

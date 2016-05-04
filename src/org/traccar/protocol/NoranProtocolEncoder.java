@@ -22,7 +22,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class NoranProtocolEncoder extends BaseProtocolEncoder {
 
@@ -31,16 +31,16 @@ public class NoranProtocolEncoder extends BaseProtocolEncoder {
         ChannelBuffer buf = ChannelBuffers.buffer(ByteOrder.LITTLE_ENDIAN, 12 + 56);
 
         buf.writeBytes(
-                ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", Charset.defaultCharset()));
+                ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n*KW", StandardCharsets.US_ASCII));
         buf.writeByte(0);
         buf.writeShort(buf.capacity());
         buf.writeShort(NoranProtocolDecoder.MSG_CONTROL);
         buf.writeInt(0); // gis ip
         buf.writeShort(0); // gis port
-        buf.writeBytes(content.getBytes(Charset.defaultCharset()));
+        buf.writeBytes(content.getBytes(StandardCharsets.US_ASCII));
         buf.writerIndex(buf.writerIndex() + 50 - content.length());
         buf.writeBytes(
-                ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", Charset.defaultCharset()));
+                ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "\r\n", StandardCharsets.US_ASCII));
 
         return buf;
     }

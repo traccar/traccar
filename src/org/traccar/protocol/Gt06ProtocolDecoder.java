@@ -15,10 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.TimeZone;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -30,6 +26,10 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.TimeZone;
 
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -216,7 +216,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedByte(); // server flag (reserved)
 
-                position.set("command", buf.readBytes(commandLength - 1).toString(Charset.defaultCharset()));
+                position.set("command", buf.readBytes(commandLength - 1).toString(StandardCharsets.US_ASCII));
 
                 buf.readUnsignedShort(); // language
 

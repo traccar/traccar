@@ -24,7 +24,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +37,7 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendResponse(Channel channel, String response) {
         if (channel != null) {
-            channel.write(ChannelBuffers.copiedBuffer(response, Charset.defaultCharset()));
+            channel.write(ChannelBuffers.copiedBuffer(response, StandardCharsets.US_ASCII));
         }
     }
 
@@ -52,7 +52,7 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedShort(); // length
 
-            String imei = buf.toString(buf.readerIndex(), 15, Charset.defaultCharset());
+            String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
 
             if (!identify(imei, channel, remoteAddress)) {
                 sendResponse(channel, "NO01");

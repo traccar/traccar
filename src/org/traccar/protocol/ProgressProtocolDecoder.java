@@ -15,12 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,6 +22,13 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
@@ -77,7 +78,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
-            String imei = buf.readBytes(length).toString(Charset.defaultCharset());
+            String imei = buf.readBytes(length).toString(StandardCharsets.US_ASCII);
             identify(imei, channel, remoteAddress);
 
         } else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
@@ -135,7 +136,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
                 if (BitUtil.check(extraFlags, 1)) {
                     int size = buf.readUnsignedShort();
-                    position.set("can", buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
+                    position.set("can", buf.toString(buf.readerIndex(), size, StandardCharsets.US_ASCII));
                     buf.skipBytes(size);
                 }
 

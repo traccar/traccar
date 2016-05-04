@@ -16,10 +16,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,6 +24,11 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
@@ -158,7 +159,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
             if (channel != null) {
                 ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                response.writeBytes("resp_crc=".getBytes(Charset.defaultCharset()));
+                response.writeBytes("resp_crc=".getBytes(StandardCharsets.US_ASCII));
                 response.writeByte(buf.getByte(buf.writerIndex() - 1));
                 channel.write(response);
             }

@@ -15,10 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -30,6 +26,11 @@ import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -179,7 +180,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             case MSG_SERVER:
                 if (channel != null) {
                     response = ChannelBuffers.copiedBuffer(
-                            getMeiligaoServer(channel), Charset.defaultCharset());
+                            getMeiligaoServer(channel), StandardCharsets.US_ASCII);
                     sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
                 }
                 return null;
@@ -226,7 +227,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Parser parser = new Parser(
-                pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset()));
+                pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII));
         if (!parser.matches()) {
             return null;
         }

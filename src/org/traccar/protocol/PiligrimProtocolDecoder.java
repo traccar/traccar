@@ -15,12 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.net.SocketAddress;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -30,12 +24,17 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
-
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 
 public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
@@ -48,7 +47,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             HttpResponse response = new DefaultHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
             response.setContent(ChannelBuffers.copiedBuffer(
-                    ByteOrder.BIG_ENDIAN, message, Charset.defaultCharset()));
+                    ByteOrder.BIG_ENDIAN, message, StandardCharsets.US_ASCII));
             channel.write(response);
         }
     }

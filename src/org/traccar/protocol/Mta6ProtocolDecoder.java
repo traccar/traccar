@@ -15,11 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -35,6 +30,12 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -55,7 +56,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         HttpResponse response = new DefaultHttpResponse(
                 HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
-        ChannelBuffer begin = ChannelBuffers.copiedBuffer("#ACK#", Charset.defaultCharset());
+        ChannelBuffer begin = ChannelBuffers.copiedBuffer("#ACK#", StandardCharsets.US_ASCII);
         ChannelBuffer end = ChannelBuffers.directBuffer(3);
         end.writeByte(packetId);
         end.writeByte(packetCount);
@@ -282,7 +283,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes("id=".length());
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
-        String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), Charset.defaultCharset());
+        String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), StandardCharsets.US_ASCII);
         if (!identify(uniqueId, channel, remoteAddress)) {
             return null;
         }

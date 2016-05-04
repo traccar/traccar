@@ -15,12 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -31,6 +25,13 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
@@ -82,7 +83,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeRegularMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
-        Parser parser = new Parser(PATTERN, buf.toString(Charset.defaultCharset()));
+        Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
         if (!parser.matches()) {
             return null;
         }
@@ -159,10 +160,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     private List<Position> decodeBinaryMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<>();
 
-        String flag = buf.toString(2, 1, Charset.defaultCharset());
+        String flag = buf.toString(2, 1, StandardCharsets.US_ASCII);
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
 
-        String imei = buf.toString(index + 1, 15, Charset.defaultCharset());
+        String imei = buf.toString(index + 1, 15, StandardCharsets.US_ASCII);
         if (!identify(imei, channel, remoteAddress)) {
             return null;
         }
@@ -237,7 +238,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         index = buf.indexOf(index + 1, buf.writerIndex(), (byte) ',');
 
-        String type = buf.toString(index + 1, 3, Charset.defaultCharset());
+        String type = buf.toString(index + 1, 3, StandardCharsets.US_ASCII);
         switch (type) {
             case "D03":
                 if (channel != null) {
