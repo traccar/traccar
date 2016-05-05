@@ -103,10 +103,12 @@ public class ServerManager {
 
         if (protocol != null) {
             BaseProtocol baseProtocol = protocols.get(protocol);
-            for (String commandKey : baseProtocol.getSupportedCommands()) {
-                SupportedCommand supportedCommand = new SupportedCommand();
-                supportedCommand.setKey(commandKey);
-                result.add(supportedCommand);
+            if (baseProtocol != null) {
+                for (String commandKey : baseProtocol.getSupportedCommands()) {
+                    SupportedCommand supportedCommand = new SupportedCommand();
+                    supportedCommand.setKey(commandKey);
+                    result.add(supportedCommand);
+                }
             }
         }
 
