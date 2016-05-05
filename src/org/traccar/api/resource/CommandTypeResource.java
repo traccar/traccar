@@ -18,7 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Position;
-import org.traccar.model.SupportedCommand;
+import org.traccar.model.CommandType;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -30,17 +30,17 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 
-@Path("supportedcommands")
+@Path("commandtypes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class SupportedCommandResource extends BaseResource {
+public class CommandTypeResource extends BaseResource {
 
     @GET
-    public Collection<SupportedCommand> get(@QueryParam("deviceId") long deviceId) throws SQLException {
+    public Collection<CommandType> get(@QueryParam("deviceId") long deviceId) throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         Position lastPosition = Context.getConnectionManager().getLastPosition(deviceId);
         if (lastPosition != null) {
-            return Context.getServerManager().getProtocolSuppportedCommands(lastPosition.getProtocol());
+            return Context.getServerManager().getProtocolCommandTypes(lastPosition.getProtocol());
         } else {
             return Collections.EMPTY_LIST;
         }
