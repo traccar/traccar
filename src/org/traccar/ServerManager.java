@@ -15,6 +15,8 @@
  */
 package org.traccar;
 
+import org.traccar.model.SupportedCommand;
+
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
@@ -96,13 +98,15 @@ public class ServerManager {
         }
     }
 
-    public Collection<String> getProtocolSuppportedCommands(String protocol) {
-        List<String> result = new ArrayList<>();
+    public Collection<SupportedCommand> getProtocolSuppportedCommands(String protocol) {
+        List<SupportedCommand> result = new ArrayList<>();
 
         if (protocol != null) {
             BaseProtocol baseProtocol = protocols.get(protocol);
             for (String commandKey : baseProtocol.getSupportedCommands()) {
-                result.add(commandKey);
+                SupportedCommand supportedCommand = new SupportedCommand();
+                supportedCommand.setKey(commandKey);
+                result.add(supportedCommand);
             }
         }
 

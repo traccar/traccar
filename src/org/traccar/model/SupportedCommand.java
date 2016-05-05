@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.traccar.model;
 
-Ext.define('Traccar.store.SupportedCommands', {
-    extend: 'Ext.data.Store',
-    fields: ['key'],
+public class SupportedCommand {
 
-    listeners: {
-        'beforeload' : function(store, eOpts) {
-            var proxy;
-            proxy = store.getProxy();
-            proxy.setUrl('/api/supportedcommands?deviceId' + proxy.extraParams.deviceId);
-        }
-    },
+    private String key;
 
-    proxy: {
-        type: 'rest',
-        url: ''
+    public String getKey() {
+        return key;
     }
-});
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+}
