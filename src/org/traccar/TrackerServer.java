@@ -37,6 +37,10 @@ public abstract class TrackerServer {
     private final Bootstrap bootstrap;
     private final String protocol;
 
+    public boolean isConnectionless() {
+        return bootstrap instanceof ConnectionlessBootstrap;
+    }
+
     public String getProtocol() {
         return protocol;
     }

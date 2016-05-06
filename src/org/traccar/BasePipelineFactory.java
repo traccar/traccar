@@ -129,7 +129,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     @Override
     public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = Channels.pipeline();
-        if (timeout != 0) {
+        if (timeout > 0 && !server.isConnectionless()) {
             pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), timeout, 0, 0));
         }
         pipeline.addLast("openHandler", new OpenChannelHandler(server));
