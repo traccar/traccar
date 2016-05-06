@@ -16,10 +16,10 @@
 
 Ext.define('Traccar.store.CommandTypes', {
     extend: 'Ext.data.Store',
-    fields: ['key'],
+    fields: ['key', 'name'],
 
     listeners: {
-        'beforeload' : function(store, eOpts) {
+        'beforeload' : function(store) {
             var proxy;
             proxy = store.getProxy();
             proxy.setUrl('/api/commandtypes?deviceId' + proxy.extraParams.deviceId);
@@ -28,6 +28,22 @@ Ext.define('Traccar.store.CommandTypes', {
 
     proxy: {
         type: 'rest',
-        url: ''
+        url: '',
+        reader: {
+            type: 'json',
+            getData: function(data) {
+                Ext.each(data, function(entry) {
+                    entry.name = entry.key;
+                    if (typeof entry.key !== "undefined") {
+                        var key = 'command' + entry.key.charAt(0).toUpperCase() + entry.key.slice(1);
+                        var name = Strings[key];
+                        if (typeof name !== "undefined") {
+                            entry.name = name;
+                        }
+                    }
+                });
+                return data;
+            }
+        },
     }
 });
