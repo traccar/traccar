@@ -36,7 +36,7 @@ import java.net.InetSocketAddress;
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
-    private final int resetDelay;
+    private int timeout;
 
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
@@ -95,7 +95,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
 
-        resetDelay = Context.getConfig().getInteger(protocol + ".resetDelay", 0);
+        timeout = Context.getConfig().getInteger(protocol + ".timeout", 0);
+        if (timeout == 0) {
+            timeout = Context.getConfig().getInteger(protocol + ".resetDelay", 0); // temporary
+        }
 
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
@@ -126,8 +129,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     @Override
     public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = Channels.pipeline();
-        if (resetDelay != 0) {
-            pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), resetDelay, 0, 0));
+        if (timeout != 0) {
+            pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), timeout, 0, 0));
         }
         pipeline.addLast("openHandler", new OpenChannelHandler(server));
         if (Context.isLoggerEnabled()) {
