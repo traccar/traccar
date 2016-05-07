@@ -121,7 +121,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Send response #2
-        if (Character.isDigit(sentence.charAt(0))) {
+        if (!sentence.isEmpty() && Character.isDigit(sentence.charAt(0))) {
             if (channel != null) {
                 channel.write("ON", remoteAddress);
             }

@@ -30,7 +30,6 @@ public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
         super("minifinder");
-        setSupportedCommands(Command.TYPE_CUSTOM);
     }
 
     @Override
@@ -41,7 +40,6 @@ public class MiniFinderProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new MiniFinderProtocolEncoder());
                 pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
             }
         });
