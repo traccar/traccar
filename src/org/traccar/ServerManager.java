@@ -15,26 +15,19 @@
  */
 package org.traccar;
 
-import org.traccar.model.CommandType;
-
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class ServerManager {
 
-    private final Map<String, BaseProtocol> protocols = new HashMap<>();
     private final List<TrackerServer> serverList = new LinkedList<>();
 
     public ServerManager() throws Exception {
@@ -70,7 +63,6 @@ public class ServerManager {
             Class protocolClass = Class.forName(packageName + '.' + name);
             if (BaseProtocol.class.isAssignableFrom(protocolClass)) {
                 BaseProtocol baseProtocol = (BaseProtocol) protocolClass.newInstance();
-                protocols.put(baseProtocol.getName(), baseProtocol);
                 initProtocolServer(baseProtocol);
             }
         }
@@ -96,23 +88,6 @@ public class ServerManager {
         if (Context.getConfig().hasKey(protocol.getName() + ".port")) {
             protocol.initTrackerServers(serverList);
         }
-    }
-
-    public Collection<CommandType> getProtocolCommandTypes(String protocol) {
-        List<CommandType> result = new ArrayList<>();
-
-        if (protocol != null) {
-            BaseProtocol baseProtocol = protocols.get(protocol);
-            if (baseProtocol != null) {
-                for (String commandKey : baseProtocol.getSupportedCommands()) {
-                    CommandType commandType = new CommandType();
-                    commandType.setKey(commandKey);
-                    result.add(commandType);
-                }
-            }
-        }
-
-        return result;
     }
 
 }

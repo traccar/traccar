@@ -16,7 +16,7 @@
 
 Ext.define('Traccar.store.CommandTypes', {
     extend: 'Ext.data.Store',
-    fields: ['key', 'name'],
+    fields: ['type', 'name'],
 
     listeners: {
         'beforeload' : function(store) {
@@ -33,10 +33,10 @@ Ext.define('Traccar.store.CommandTypes', {
             type: 'json',
             getData: function(data) {
                 Ext.each(data, function(entry) {
-                    entry.name = entry.key;
-                    if (typeof entry.key !== "undefined") {
-                        var key = 'command' + entry.key.charAt(0).toUpperCase() + entry.key.slice(1);
-                        var name = Strings[key];
+                    entry.name = entry.type;
+                    if (typeof entry.type !== "undefined") {
+                        var nameKey = 'command' + entry.type.charAt(0).toUpperCase() + entry.type.slice(1);
+                        var name = Strings[nameKey];
                         if (typeof name !== "undefined") {
                             entry.name = name;
                         }
@@ -44,6 +44,6 @@ Ext.define('Traccar.store.CommandTypes', {
                 });
                 return data;
             }
-        },
+        }
     }
 });

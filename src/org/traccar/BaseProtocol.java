@@ -41,6 +41,7 @@ public abstract class BaseProtocol implements Protocol {
         supportedCommands.addAll(Arrays.asList(commands));
     }
 
+    @Override
     public Collection<String> getSupportedCommands() {
         return supportedCommands;
     }
