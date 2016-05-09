@@ -396,8 +396,6 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Event.PREFIX_ADC + 1, parser.next());
         position.set(Event.PREFIX_ADC + 2, parser.next());
         position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.KEY_RPM, parser.next());
-        position.set(Event.KEY_FUEL, parser.next());
 
         if (parser.hasNext(3)) {
             int ignition = parser.nextInt(16);
@@ -409,6 +407,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Event.KEY_INPUT, parser.nextInt(16));
             position.set(Event.KEY_OUTPUT, parser.nextInt(16));
         }
+
+        position.set(Event.KEY_RPM, parser.next());
+        position.set(Event.KEY_FUEL, parser.next());
 
         // workaround for wrong location time
         if (parser.hasNext(6)) {
