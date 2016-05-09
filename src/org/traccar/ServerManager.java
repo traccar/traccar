@@ -62,20 +62,21 @@ public class ServerManager {
         for (String name : names) {
             Class protocolClass = Class.forName(packageName + '.' + name);
             if (BaseProtocol.class.isAssignableFrom(protocolClass)) {
-                initProtocolServer((BaseProtocol) protocolClass.newInstance());
+                BaseProtocol baseProtocol = (BaseProtocol) protocolClass.newInstance();
+                initProtocolServer(baseProtocol);
             }
         }
     }
 
     public void start() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).start();
+        for (TrackerServer server: serverList) {
+            server.start();
         }
     }
 
     public void stop() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).stop();
+        for (TrackerServer server: serverList) {
+            server.stop();
         }
 
         // Release resources

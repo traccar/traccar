@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,34 @@
 
 Ext.define('Traccar.store.CommandTypes', {
     extend: 'Ext.data.Store',
-    fields: ['key', 'name'],
+    fields: ['type', 'name'],
 
-    data: [{
-        key: 'positionPeriodic',
-        name: Strings.commandPositionPeriodic
-    }, {
-        key: 'positionStop',
-        name: Strings.commandPositionStop
-    }, {
-        key: 'engineStop',
-        name: Strings.commandEngineStop
-    }, {
-        key: 'engineResume',
-        name: Strings.commandEngineResume
-    }]
+    listeners: {
+        'beforeload' : function(store) {
+            var proxy;
+            proxy = store.getProxy();
+            proxy.setUrl('/api/commandtypes?deviceId' + proxy.extraParams.deviceId);
+        }
+    },
+
+    proxy: {
+        type: 'rest',
+        url: '',
+        reader: {
+            type: 'json',
+            getData: function(data) {
+                Ext.each(data, function(entry) {
+                    entry.name = entry.type;
+                    if (typeof entry.type !== "undefined") {
+                        var nameKey = 'command' + entry.type.charAt(0).toUpperCase() + entry.type.slice(1);
+                        var name = Strings[nameKey];
+                        if (typeof name !== "undefined") {
+                            entry.name = name;
+                        }
+                    }
+                });
+                return data;
+            }
+        }
+    }
 });

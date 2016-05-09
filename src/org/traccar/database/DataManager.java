@@ -482,5 +482,4 @@ public class DataManager implements IdentityManager {
                 .setObject(server)
                 .executeUpdate();
     }
-
 }

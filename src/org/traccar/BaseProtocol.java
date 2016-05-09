@@ -22,6 +22,7 @@ import org.traccar.model.Command;
 
 import javax.xml.bind.DatatypeConverter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,6 +42,11 @@ public abstract class BaseProtocol implements Protocol {
 
     public void setSupportedCommands(String... commands) {
         supportedCommands.addAll(Arrays.asList(commands));
+    }
+
+    @Override
+    public Collection<String> getSupportedCommands() {
+        return supportedCommands;
     }
 
     @Override
