@@ -33,6 +33,8 @@
       <column name="groupid" type="INT" />
     </addColumn>
 
+    <dropNotNullConstraint tableName="users" columnName="language" columnDataType="VARCHAR(128)" />
+    <dropDefaultValue tableName="users" columnName="language" />
     <dropColumn tableName="users" columnName="language" />
     <dropColumn tableName="server" columnName="language" />
 
