@@ -120,6 +120,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // throttle
             .number("(?:d{1,3})?,")              // engine load
             .number("(d{1,3})?,")                // fuel level
+            .expression("(?:[0-9A],)?")          // obd protocol
             .number("(d+),")                     // odometer
             .expression(PATTERN_LOCATION.pattern())
             .number("(d{1,7}.d)?,")              // odometer

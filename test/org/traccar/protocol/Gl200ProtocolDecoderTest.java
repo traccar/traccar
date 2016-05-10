@@ -10,6 +10,9 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
 
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new Gl200Protocol());
 
+        verifyPosition(decoder, text(
+                "+RESP:GTOBD,360201,864251020186064,4T1BE46KX7U018210,,0,19FFFF,4T1BE46KX7U018210,1,14283,983901C0,799,36,18,,33792,0,0,0,,,38,,6,53557,0,0.0,0,219.5,-76.661456,39.832588,20160507132153,20160507132154,0230$"));
+
         verifyPositions(decoder, text(
                 "+RESP:GTFRI,360201,864251020186064,1G1JC5444R7252367,,12802,10,1,0,0.0,0,219.5,-76.661456,39.832588,20160507132235,,,,,,20460.9,00080:03:37,,,100,210000,791,,56,20160507132239,0233$"));
 
