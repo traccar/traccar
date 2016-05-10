@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,30 @@ public final class PatternUtil {
     private PatternUtil() {
     }
 
-    public static String checkPattern(String pattern, String input) {
+    public static class MatchResult {
+        public String pattern;
+        public String matched;
+        public String remaining;
+    }
 
-        String match = null;
+    public static MatchResult checkPattern(String pattern, String input) {
+
+        MatchResult result = new MatchResult();
 
         for (int i = 0; i < pattern.length(); i++) {
             try {
-                Matcher matcher = Pattern.compile(pattern.substring(0, i) + ".*").matcher(input);
+                Matcher matcher = Pattern.compile("(" + pattern.substring(0, i) + ").*").matcher(input);
                 if (matcher.matches()) {
-                    match = pattern.substring(0, i);
+                    result.pattern = pattern.substring(0, i);
+                    result.matched = matcher.group(1);
+                    result.remaining = input.substring(matcher.group(1).length());
                 }
             } catch (PatternSyntaxException error) {
                 Log.warning(error);
             }
         }
 
-        return match;
+        return result;
     }
 
 }
