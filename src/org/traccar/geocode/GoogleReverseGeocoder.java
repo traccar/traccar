@@ -30,7 +30,7 @@ public class GoogleReverseGeocoder extends JsonReverseGeocoder {
     }
 
     public GoogleReverseGeocoder(String key, int cacheSize) {
-        super("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&key=" + key, cacheSize);
+        super("https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&key=" + key, cacheSize);
     }
 
     @Override
