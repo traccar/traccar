@@ -7,8 +7,8 @@ import org.traccar.model.Command;;
 public class WondexProtocolEncoder extends StringProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
-    	
-    	// Temporary put default password
+
+        // Temporary put default password
         command.set(Command.KEY_DEVICE_PASSWORD, "0000");
 
         switch (command.getType()) {
