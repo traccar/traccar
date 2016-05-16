@@ -16,8 +16,6 @@ public class WondexProtocolEncoder extends StringProtocolEncoder {
             return formatCommand(command, "$WP+REBOOT={%s}", Command.KEY_DEVICE_PASSWORD);
         case Command.TYPE_POSITION_SINGLE:
             return formatCommand(command, "$WP+GETLOCATION={%s}", Command.KEY_DEVICE_PASSWORD);
-        case Command.TYPE_CUSTOM:
-            return formatCommand(command, Command.KEY_DATA);
         default:
             Log.warning(new UnsupportedOperationException(command.getType()));
             break;
