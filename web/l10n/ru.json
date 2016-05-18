@@ -85,6 +85,5 @@
     "commandEngineStop": "Заблокировать Двигатель",
     "commandEngineResume": "Разблокировать Двигатель",
     "commandFrequency": "Частота",
-    "commandUnit": "Единицы",
-    "commandCustom": "Пользовательская команда"
+    "commandUnit": "Единицы"
 }
