@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
@@ -38,6 +39,13 @@ public class CguardProtocol extends BaseProtocol {
                 pipeline.addLast("objectDecoder", new CguardProtocolDecoder(CguardProtocol.this));
             }
         });
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
+               /* pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());*/
+                pipeline.addLast("objectDecoder", new CguardProtocolDecoder(CguardProtocol.this));
+            }
+        });
     }
-
 }

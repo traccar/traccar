@@ -21,9 +21,9 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.DateBuilder;
+import org.traccar.Context;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
-import java.util.Date;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
 
@@ -33,82 +33,101 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    public static final int MSG_HEARTBEAT = 0x1A;
-    public static final int MSG_DATA = 0x10;
-
     public static final String NV_DATA = "NV";
     public static final String NAN_DATA = "NAN";
-    //public static
-    //3a :
-    //4e56 NV
-    //4243 BC
+    public static final String VERSION_DATA = "VERSION";
+    public static final String IDRO_DATA = "IDRO";
+    public static final String LOG_DATA = "LOG";
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
 
-        /*NV:160420 101902:55.799425:37.674033:0.94:NAN:213.59:156.6
-        BC:160420 101903:CSQ1:74:NSQ1:10:BAT1:100*/
-//4e56 3a 31363034323020313031393032 3a 35352e373939343235 3a 33372e363734303333 3a 302e39343a4e414e 3a 3231332e3539 3a 3135362e360a4e56 3a 31363034323020313031393033 3a 35352e3739312e3238 3a 4e414e 3a 3335392e3136 3a 3135362e360a 4243 3a 313630343230203130313930333a435351313a37343a4e5351313a31303a424154313a3130300a
-
-         /*NV:160420 101902:55.799425:37.674033:0.94:NAN:213.59:156.6
-        NV:160420 101903:55.791.28:NAN:359.16:156.6
-        BC:160420 101903:CSQ1:74:NSQ1:10:BAT1:100*/
         String bufString = buf.toString(Charset.defaultCharset());
         String[] bufStringRows = bufString.split("\n");
         String dataString = bufStringRows[0];
 
-        //String start = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset()); buf.skipBytes(2);
+        if(dataString.startsWith(VERSION_DATA)) {
+            /*VERSION:3.3
+            IDRO:354868050655283*/
+
+            String idString = bufStringRows[1];
+            if(idString.startsWith(IDRO_DATA)) {
+                int lenght = IDRO_DATA.length() + 1;
+                String imei = idString.substring(lenght, idString.length());
+                identify(imei, channel, remoteAddress);
+            }
+        } else if(dataString.startsWith(NV_DATA) && hasDeviceId()) {
+            return decodeNvdata(dataString);
+        }
+        /*else if(dataString.startsWith(LOG_DATA)) {
+            return decodeLogdata(dataString);
+        }*/
+
+        return null;
+    }
+
+    private Position decodeNvdata(String dataString) {
+        /*NV:160420 101902:55.799425:37.674033:0.94:NAN:213.59:156.6
+                BC:160420 101903:CSQ1:74:NSQ1:10:BAT1:100*/
+        //4e56 3a 31363034323020313031393032 3a 35352e373939343235 3a 33372e363734303333 3a 302e39343a4e414e 3a 3231332e3539 3a 3135362e360a4e56 3a 31363034323020313031393033 3a 35352e3739312e3238 3a 4e414e 3a 3335392e3136 3a 3135362e360a 4243 3a 313630343230203130313930333a435351313a37343a4e5351313a31303a424154313a3130300a
+
+         /*NV:160420 101902:55.799425:37.674033:0.94:NAN:213.59:156.6
+        NV:160420 101903:55.791.28:NAN:359.16:156.6
+        BC:160420 101903:CSQ1:74:NSQ1:10:BAT1:100*/
 
         Position position = new Position();
+
+        long deviceId = getDeviceId();
+        Device device = Context.getIdentityManager().getDeviceById(deviceId);
         position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceId);
 
-        if(dataString.startsWith(NV_DATA)) {
-            //read all as String....
-            String[] nvData = dataString.split(":");
+        //read all as String....
+        String[] nvData = dataString.split(":");
 
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyMMdd HHmmss");
-            DateTime dt = formatter.parseDateTime(nvData[1]);
-            position.setTime(dt.toDate());
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyMMdd HHmmss");
+        DateTime dt = formatter.parseDateTime(nvData[1]);
+        position.setTime(dt.toDate());
 
-            /*buf.skipBytes(1);  //3a :
-            String strYear = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-            String strMonth = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-            String strDay = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-            buf.skipBytes(1);  //3a :
-            String strHour = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-            String strMinute = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-            String strSecond = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-            int year = Integer.parseInt(strYear);
-            int month = Integer.parseInt(strMonth);
-            int day = Integer.parseInt(strDay);
-            int hour = Integer.parseInt(strHour);
-            int minute = Integer.parseInt(strMinute);
-            int second = Integer.parseInt(strSecond);
+        /*buf.skipBytes(1);  //3a :
+        String strYear = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
+        String strMonth = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
+        String strDay = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
+        buf.skipBytes(1);  //3a :
+        String strHour = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
+        String strMinute = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
+        String strSecond = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
+        int year = Integer.parseInt(strYear);
+        int month = Integer.parseInt(strMonth);
+        int day = Integer.parseInt(strDay);
+        int hour = Integer.parseInt(strHour);
+        int minute = Integer.parseInt(strMinute);
+        int second = Integer.parseInt(strSecond);
 
-            DateBuilder dateBuilder = new DateBuilder();
-            dateBuilder.setDate(year, month, day);
-            dateBuilder.setTime(hour, minute, second);
-            position.setTime(dateBuilder.getDate());*/
+        DateBuilder dateBuilder = new DateBuilder();
+        dateBuilder.setDate(year, month, day);
+        dateBuilder.setTime(hour, minute, second);
+        position.setTime(dateBuilder.getDate());*/
 
-            /*buf.skipBytes(1);  //3a :
-            String strLatitude = buf.toString(buf.readerIndex(), 9, Charset.defaultCharset());        buf.skipBytes(9);
+        /*buf.skipBytes(1);  //3a :
+        String strLatitude = buf.toString(buf.readerIndex(), 9, Charset.defaultCharset());        buf.skipBytes(9);
             double latitude = Double.parseDouble(strLatitude);*/
-            double latitude = Double.parseDouble(nvData[2]);
-            position.setLatitude(latitude);
+        double latitude = Double.parseDouble(nvData[2]);
+        position.setLatitude(latitude);
 
             /*buf.skipBytes(1);  //3a :
             String strLongitude = buf.toString(buf.readerIndex(), 9, Charset.defaultCharset());        buf.skipBytes(9);
             double longitude = Double.parseDouble(strLongitude);*/
-            double longitude = Double.parseDouble(nvData[3]);
-            position.setLongitude(longitude);
+        double longitude = Double.parseDouble(nvData[3]);
+        position.setLongitude(longitude);
 
             /*buf.skipBytes(1);  //3a :
             String strSpeed = buf.toString(buf.readerIndex(), 4, Charset.defaultCharset());        buf.skipBytes(4);
             double speed =  Double.parseDouble(strSpeed);*/
-            double speed =  Double.parseDouble(nvData[4]);
-            position.setSpeed(speed);
+        double speed =  Double.parseDouble(nvData[4]);
+        position.setSpeed(speed);
 
             /*buf.skipBytes(1);  //3a :
             String strAccuracy = buf.toString(buf.readerIndex(), 3, Charset.defaultCharset());
@@ -128,10 +147,10 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 buf.skipBytes(3);  //NAN + 3a :
             } */
-            if(!nvData[6].equalsIgnoreCase(NAN_DATA)) {
-                double cource = Double.parseDouble(nvData[6]);
-                position.setCourse(cource);
-            }
+        if(!nvData[6].equalsIgnoreCase(NAN_DATA)) {
+            double cource = Double.parseDouble(nvData[6]);
+            position.setCourse(cource);
+        }
 
             /* buf.skipBytes(1);
             String strAltitude = buf.toString(buf.readerIndex(), 3, Charset.defaultCharset());
@@ -144,12 +163,9 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 buf.skipBytes(4);  //NAN + 3a :
             }*/
-            if(!nvData[7].equalsIgnoreCase(NAN_DATA)) {
-                double altitude = Double.parseDouble(nvData[7]);
-                position.setAltitude(altitude);
-            }
-        } else {
-            return null;
+        if(!nvData[7].equalsIgnoreCase(NAN_DATA)) {
+            double altitude = Double.parseDouble(nvData[7]);
+            position.setAltitude(altitude);
         }
 
         return position;
