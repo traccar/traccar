@@ -58,6 +58,8 @@ public abstract class Event extends Extensible {
     public static final String KEY_OBD_SPEED = "obd-speed";
     public static final String KEY_OBD_ODOMETER = "obd-odometer";
 
+    public static final String KEY_RESULT = "result";
+
     // Starts with 1 not 0
     public static final String PREFIX_TEMP = "temp";
     public static final String PREFIX_ADC = "adc";

@@ -15,7 +15,9 @@
  */
 package org.traccar.protocol;
 
+import java.nio.charset.StandardCharsets;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
@@ -40,6 +42,9 @@ public class WondexFrameDecoder extends FrameDecoder {
             if (channel != null) {
                 channel.write(frame);
             }
+            // Pass deviceId to protocol decoder
+            long deviceId = ((Long.reverseBytes((frame.getLong(0)))) >> 32) & 0xFFFFFFFFL;
+            return ChannelBuffers.copiedBuffer("$ID:"+String.valueOf(deviceId), StandardCharsets.US_ASCII);
 
         } else {
 
