@@ -85,5 +85,17 @@
     "commandEngineStop": "Engine Stop",
     "commandEngineResume": "Engine Resume",
     "commandFrequency": "Frequency",
-    "commandUnit": "Unit"
+    "commandUnit": "Unit",
+    "commandCustom": "Custom command",
+    "commandPositionSingle": "Single Reporting",
+    "commandAlarmArm": "Arm Alarm",
+    "commandAlarmDisarm": "Disarm Alarm",
+    "commandSetTimezone": "Set Timezone",
+    "commandRequestPhoto": "Request Photo",
+    "commandRebootDevice": "Reboot Device",
+    "commandSendSms": "Send SMS",
+    "commandSosNumber": "Set SOS Number",
+    "commandSilenceTime": "Set Silence Time",
+    "commandSetPhonebook": "Set Phonebook",
+    "commandVoiceMessage": "Voice Message"
 }

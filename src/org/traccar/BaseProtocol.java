@@ -42,6 +42,7 @@ public abstract class BaseProtocol implements Protocol {
 
     public void setSupportedCommands(String... commands) {
         supportedCommands.addAll(Arrays.asList(commands));
+        supportedCommands.add(Command.TYPE_CUSTOM);
     }
 
     @Override
