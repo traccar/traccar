@@ -60,17 +60,14 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         if (((String) msg).startsWith("$ID:")) {
-            identify(((String) msg).substring(4), channel, remoteAddress); 
+            identify(((String) msg).substring(4), channel, remoteAddress);
             return null;
-        }
-
-        else if (((String) msg).startsWith("$OK:") || ((String) msg).startsWith("$ERR:")) {
+        } else if (((String) msg).startsWith("$OK:") || ((String) msg).startsWith("$ERR:")) {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
-            getLastLocation(position, null);
-            position.setTime(new Date());
+            getLastLocation(position, new Date());
             position.setValid(false);
             position.set(Event.KEY_RESULT, (String) msg);
 

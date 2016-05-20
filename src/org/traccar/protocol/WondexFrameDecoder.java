@@ -44,7 +44,7 @@ public class WondexFrameDecoder extends FrameDecoder {
             }
             // Pass deviceId to protocol decoder
             long deviceId = ((Long.reverseBytes((frame.getLong(0)))) >> 32) & 0xFFFFFFFFL;
-            return ChannelBuffers.copiedBuffer("$ID:"+String.valueOf(deviceId), StandardCharsets.US_ASCII);
+            return ChannelBuffers.copiedBuffer("$ID:" + String.valueOf(deviceId), StandardCharsets.US_ASCII);
 
         } else {
 
