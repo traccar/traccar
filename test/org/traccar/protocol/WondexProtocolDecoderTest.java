@@ -23,7 +23,7 @@ public class WondexProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "2000000259,20151030145653,69.380826,53.283890,9,10,15,2,1,695,1002.6,108.2,0.0"));
-        
+
         verifyPosition(decoder, text(
                 "1044989601,20130323074605,0.000000,90.000000,0,000,0,0,2"));
 
@@ -38,12 +38,21 @@ public class WondexProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "1044989601,20130322172647,13.572583,52.401070,22,204,-49,0,2"));
-        
+
         verifyPosition(decoder, text(
                 "3997324533,20140326074908,28.797603,47.041635,0,48,0,6,2,3.90V,0"));
-        
+
         verifyPosition(decoder, text(
                 "2000000001,20140529213210,-63.179111,9.781493,0,0,54.0,8,2,0.0,0,0.01,0.01,0,0,0,0"));
+
+        verifyNotNull(decoder, text(
+                "$OK:VER=M7 2.003 DVB rev02c,V2"));
+
+        verifyNotNull(decoder, text(
+                "$OK:REBOOT"));
+
+        verifyNotNull(decoder, text(
+                "$ERR:GETLOCATION=1"));
 
     }
 
