@@ -15,6 +15,19 @@
  */
 package org.traccar.protocol;
 
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
@@ -25,18 +38,19 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
+import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.ning.http.util.Base64;
 
 public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
+
+	public static final String PARAM_ID = "id";
+	public static final String PARAM_DEVICEID = "deviceid";
+	public static final String PARAM_CIPHER = "cipher";
 
     public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
         super(protocol);
@@ -55,20 +69,25 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             params = decoder.getParameters();
         }
 
+		if (!setDeviceId(params, channel, remoteAddress))
+			return null;
+
+		Set<Entry<String, List<String>>> entrys;
+		if (params.keySet().contains(PARAM_CIPHER))
+			entrys = decodedEntrys(params.get(PARAM_CIPHER));
+		else
+			entrys = params.entrySet();
+
+		if (entrys == null)
+			return null;
+		
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setValid(true);
-
-        for (Map.Entry<String, List<String>> entry : params.entrySet()) {
+        
+        for (Map.Entry<String, List<String>> entry : entrys) {
             String value = entry.getValue().get(0);
             switch (entry.getKey()) {
-                case "id":
-                case "deviceid":
-                    if (!identify(value, channel, remoteAddress)) {
-                        return null;
-                    }
-                    position.setDeviceId(getDeviceId());
-                    break;
                 case "valid":
                     position.setValid(Boolean.parseBoolean(value));
                     break;
@@ -128,6 +147,59 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
-    }
+	}
 
+	private Set<Entry<String, List<String>>> decodedEntrys(List<String> ciphers)
+	{
+		if (ciphers == null || ciphers.isEmpty())
+			return null;
+
+		String cipher = ciphers.get(0);
+		byte[] crypted = Base64.decode(cipher);
+		
+		Device device = Context.getIdentityManager().getDeviceById(getDeviceId());
+		SecretKeySpec secretKeySpec = device.getSecretKeySpec();
+
+		String decrypted = null;
+		try
+		{
+			Cipher decrypter = Cipher.getInstance("AES");
+			decrypter.init(Cipher.DECRYPT_MODE, secretKeySpec);
+			byte[] cipherData = decrypter.doFinal(crypted);
+			decrypted = new String(cipherData);
+		} catch (Exception e)
+		{
+			Log.error("Exception '" + e.getMessage() + "' during decoding message for device '" + getDeviceId() + "'");
+			return null;
+		}
+
+		QueryStringDecoder decoder = new QueryStringDecoder(decrypted);
+		return decoder.getParameters().entrySet();
+	}
+
+	/**
+	 * Trys to extract the device identifier from the given parameters. If no
+	 * parameter with key "id" or "deviceid" is given this will return false. If
+	 * a key with "id" or "deviceid" is given, these parameter will be removed
+	 * from the given parameters and and hand over to the identify method.
+	 * 
+	 * @param parameters
+	 * @param channel
+	 * @param remoteAddress
+	 * @return true, if a parameter with key "id" or "deviceid" is found and
+	 *         this parameter could be identifyed.
+	 */
+	private boolean setDeviceId(Map<String, List<String>> parameters, Channel channel, SocketAddress remoteAddress)
+	{
+		List<String> idParameter = parameters.get(PARAM_ID);
+		if (idParameter == null || idParameter.isEmpty())
+			idParameter = parameters.get(PARAM_DEVICEID);
+
+		if (idParameter == null || idParameter.isEmpty())
+			return false;
+
+		parameters.remove(PARAM_ID);
+		parameters.remove(PARAM_DEVICEID);
+		return identify(idParameter.get(0), channel, remoteAddress);
+	}
 }

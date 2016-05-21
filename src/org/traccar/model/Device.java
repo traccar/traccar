@@ -15,7 +15,13 @@
  */
 package org.traccar.model;
 
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Date;
+
+import javax.crypto.spec.SecretKeySpec;
+
+import org.traccar.helper.Log;
 
 public class Device {
 
@@ -99,6 +105,39 @@ public class Device {
 
     public void setGroupId(long groupId) {
         this.groupId = groupId;
-    }
+	}
 
+	private String cipherKey;
+
+	public String getCipherKey() {
+		return cipherKey;
+	}
+
+	public void setCipherKey(String cipherKey) {
+		this.cipherKey = cipherKey;
+	}
+
+	public SecretKeySpec getSecretKeySpec()
+	{
+		String keyString = getCipherKey();
+		if (keyString == null)
+		{
+			Log.warning("No cipherKey for device '" + getId() + "' set!");
+			return null;
+		}
+
+		try
+		{
+			byte[] key = (keyString).getBytes("UTF-8");
+			MessageDigest sha = MessageDigest.getInstance("SHA-256");
+			key = Arrays.copyOf(key, 16);
+			key = sha.digest(key);
+			return new SecretKeySpec(key, "AES");
+		} catch (Exception e)
+		{
+			Log.error("Exception '" + e.getMessage() + "' during generating SecretKeySpec for device '" + getId()
+					+ "'!");
+			return null;
+		}
+	}
 }

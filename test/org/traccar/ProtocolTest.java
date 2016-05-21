@@ -34,6 +34,7 @@ public class ProtocolTest {
                 device.setId(1);
                 device.setName("test");
                 device.setUniqueId("123456789012345");
+                device.setCipherKey("password");
                 return device;
             }
 

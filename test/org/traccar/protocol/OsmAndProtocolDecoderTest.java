@@ -1,7 +1,13 @@
 package org.traccar.protocol;
 
+import javax.crypto.Cipher;
+
 import org.junit.Test;
+import org.traccar.Context;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Device;
+
+import com.ning.http.util.Base64;
 
 public class OsmAndProtocolDecoderTest extends ProtocolTest {
 
@@ -33,4 +39,18 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
 
     }
 
+	@Test
+	public void testEncryptedDecode() throws Exception {
+		
+		OsmAndProtocolDecoder decoder = new OsmAndProtocolDecoder(new OsmAndProtocol());
+		
+		Device device = Context.getIdentityManager().getDeviceById(1);
+
+		Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.ENCRYPT_MODE, device.getSecretKeySpec());
+		
+        verifyPosition(decoder, request(
+                "/?" + OsmAndProtocolDecoder.PARAM_ID + "=902064&" + OsmAndProtocolDecoder.PARAM_CIPHER + "=" + Base64.encode(cipher.doFinal("lat=42.06288&lon=-88.23412&timestamp=2016-01-27T18%3A55%3A47Z&hdop=6.0&altitude=224.0&speed=0.0".getBytes()))));
+	}
+	
 }
