@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
@@ -25,6 +26,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -59,23 +61,26 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        if (((String) msg).startsWith("$ID:")) {
-            identify(((String) msg).substring(4), channel, remoteAddress);
+        if (((ChannelBuffer) msg).getUnsignedByte(0) == 0xD0) {
+
+            long deviceId = ((Long.reverseBytes((((ChannelBuffer) msg).getLong(0)))) >> 32) & 0xFFFFFFFFL;
+            identify(String.valueOf(deviceId), channel, remoteAddress);
+
             return null;
-        } else if (((String) msg).startsWith("$OK:") || ((String) msg).startsWith("$ERR:")) {
+        } else if (((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII).startsWith("$OK:")
+            || ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
             getLastLocation(position, new Date());
             position.setValid(false);
-            position.set(Event.KEY_RESULT, (String) msg);
+            position.set(Event.KEY_RESULT, ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII));
 
             return position;
-
         } else {
 
-            Parser parser = new Parser(PATTERN, (String) msg);
+            Parser parser = new Parser(PATTERN, ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII));
             if (!parser.matches()) {
                 return null;
             }

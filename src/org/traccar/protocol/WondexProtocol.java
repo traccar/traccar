@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
@@ -42,7 +41,6 @@ public class WondexProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new WondexFrameDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new WondexProtocolEncoder());
                 pipeline.addLast("objectDecoder", new WondexProtocolDecoder(WondexProtocol.this));
             }
@@ -51,7 +49,6 @@ public class WondexProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new WondexProtocolEncoder());
                 pipeline.addLast("objectDecoder", new WondexProtocolDecoder(WondexProtocol.this));
             }
