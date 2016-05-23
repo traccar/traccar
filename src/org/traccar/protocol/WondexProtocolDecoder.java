@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
@@ -25,6 +26,8 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class WondexProtocolDecoder extends BaseProtocolDecoder {
@@ -58,43 +61,66 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
-        if (!parser.matches()) {
+        ChannelBuffer buf = (ChannelBuffer) msg;
+
+        if (buf.getUnsignedByte(0) == 0xD0) {
+
+            long deviceId = ((Long.reverseBytes(buf.getLong(0))) >> 32) & 0xFFFFFFFFL;
+            identify(String.valueOf(deviceId), channel, remoteAddress);
+
             return null;
+        } else if (buf.toString(StandardCharsets.US_ASCII).startsWith("$OK:")
+            || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+            getLastLocation(position, new Date());
+            position.setValid(false);
+            position.set(Event.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
+
+            return position;
+        } else {
+
+            Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+
+            if (!identify(parser.next(), channel, remoteAddress)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+
+            position.setLongitude(parser.nextDouble());
+            position.setLatitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+            position.setCourse(parser.nextDouble());
+            position.setAltitude(parser.nextDouble());
+
+            int satellites = parser.nextInt();
+            position.setValid(satellites >= 3);
+            position.set(Event.KEY_SATELLITES, satellites);
+
+            position.set(Event.KEY_EVENT, parser.next());
+            position.set(Event.KEY_BATTERY, parser.next());
+            position.set(Event.KEY_ODOMETER, parser.next());
+            position.set(Event.KEY_INPUT, parser.next());
+            position.set(Event.PREFIX_ADC + 1, parser.next());
+            position.set(Event.PREFIX_ADC + 2, parser.next());
+            position.set(Event.KEY_OUTPUT, parser.next());
+
+            return position;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
-        if (!identify(parser.next(), channel, remoteAddress)) {
-            return null;
-        }
-        position.setDeviceId(getDeviceId());
-
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
-
-        position.setLongitude(parser.nextDouble());
-        position.setLatitude(parser.nextDouble());
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-        position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
-
-        int satellites = parser.nextInt();
-        position.setValid(satellites >= 3);
-        position.set(Event.KEY_SATELLITES, satellites);
-
-        position.set(Event.KEY_EVENT, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_INPUT, parser.next());
-        position.set(Event.PREFIX_ADC + 1, parser.next());
-        position.set(Event.PREFIX_ADC + 2, parser.next());
-        position.set(Event.KEY_OUTPUT, parser.next());
-
-        return position;
     }
 
 }

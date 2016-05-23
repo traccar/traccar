@@ -40,6 +40,7 @@ public class WondexFrameDecoder extends FrameDecoder {
             if (channel != null) {
                 channel.write(frame);
             }
+            return frame;
 
         } else {
 

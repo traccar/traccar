@@ -24,6 +24,7 @@ import org.jboss.netty.channel.socket.DatagramChannel;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.text.SimpleDateFormat;
@@ -49,6 +50,10 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             s.append("lon: ").append(String.format("%.5f", position.getLongitude())).append(", ");
             s.append("speed: ").append(String.format("%.1f", position.getSpeed())).append(", ");
             s.append("course: ").append(String.format("%.1f", position.getCourse()));
+            Object cmdResult = position.getAttributes().get(Event.KEY_RESULT);
+            if (cmdResult != null) {
+                s.append(", result: ").append(cmdResult);
+            }
             Log.info(s.toString());
 
             Position lastPosition = Context.getConnectionManager().getLastPosition(position.getDeviceId());
