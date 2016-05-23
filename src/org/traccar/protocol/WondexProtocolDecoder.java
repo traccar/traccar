@@ -61,26 +61,28 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        if (((ChannelBuffer) msg).getUnsignedByte(0) == 0xD0) {
+        ChannelBuffer buf = (ChannelBuffer) msg;
 
-            long deviceId = ((Long.reverseBytes((((ChannelBuffer) msg).getLong(0)))) >> 32) & 0xFFFFFFFFL;
+        if (buf.getUnsignedByte(0) == 0xD0) {
+
+            long deviceId = ((Long.reverseBytes(buf.getLong(0))) >> 32) & 0xFFFFFFFFL;
             identify(String.valueOf(deviceId), channel, remoteAddress);
 
             return null;
-        } else if (((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII).startsWith("$OK:")
-            || ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
+        } else if (buf.toString(StandardCharsets.US_ASCII).startsWith("$OK:")
+            || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
             getLastLocation(position, new Date());
             position.setValid(false);
-            position.set(Event.KEY_RESULT, ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII));
+            position.set(Event.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
 
             return position;
         } else {
 
-            Parser parser = new Parser(PATTERN, ((ChannelBuffer) msg).toString(StandardCharsets.US_ASCII));
+            Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
             if (!parser.matches()) {
                 return null;
             }

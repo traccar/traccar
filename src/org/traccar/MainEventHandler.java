@@ -50,8 +50,9 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             s.append("lon: ").append(String.format("%.5f", position.getLongitude())).append(", ");
             s.append("speed: ").append(String.format("%.1f", position.getSpeed())).append(", ");
             s.append("course: ").append(String.format("%.1f", position.getCourse()));
-            if ((position.getAttributes().get(Event.KEY_RESULT) != null)) {
-                s.append(", result: ").append(position.getAttributes().get(Event.KEY_RESULT));
+            Object cmdResult = position.getAttributes().get(Event.KEY_RESULT);
+            if (cmdResult != null) {
+                s.append(", result: ").append(cmdResult);
             }
             Log.info(s.toString());
 
