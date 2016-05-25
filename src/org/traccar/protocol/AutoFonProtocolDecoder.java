@@ -120,10 +120,12 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        if (type == MSG_LOGIN) {
+        if (type == MSG_LOGIN || type == MSG_45_LOGIN) {
 
-            buf.readUnsignedByte(); // hardware version
-            buf.readUnsignedByte(); // software version
+            if (type == MSG_LOGIN) {
+                buf.readUnsignedByte(); // hardware version
+                buf.readUnsignedByte(); // software version
+            }
 
             String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
             if (!identify(imei, channel, remoteAddress)) {
@@ -131,7 +133,10 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (channel != null) {
-                channel.write(ChannelBuffers.wrappedBuffer(new byte[] {buf.readByte()}));
+                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                response.writeBytes("resp_crc=".getBytes(StandardCharsets.US_ASCII));
+                response.writeByte(buf.getByte(buf.writerIndex() - 1));
+                channel.write(response);
             }
 
         } else if (type == MSG_LOCATION) {
@@ -149,20 +154,6 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return positions;
-
-        } else if (type == MSG_45_LOGIN) {
-
-            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-            if (!identify(imei, channel, remoteAddress)) {
-                return null;
-            }
-
-            if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                response.writeBytes("resp_crc=".getBytes(StandardCharsets.US_ASCII));
-                response.writeByte(buf.getByte(buf.writerIndex() - 1));
-                channel.write(response);
-            }
 
         } else if (type == MSG_45_LOCATION) {
 
