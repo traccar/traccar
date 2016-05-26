@@ -23,6 +23,7 @@ import org.traccar.GlobalTimer;
 import org.traccar.Protocol;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -85,14 +86,26 @@ public class ConnectionManager {
             return;
         }
 
-        device.setStatus(status);
-        if (time != null) {
-            device.setLastUpdate(time);
+        if (status.equals(Device.STATUS_MOVING) || status.equals(Device.STATUS_STOPPED)) {
+            device.setMotion(status);
+        } else {
+            if (!status.equals(device.getStatus())) {
+                Event event = new Event(Event.DEVICE_OFFLINE, deviceId);
+                if (status.equals(Device.STATUS_ONLINE)) {
+                    event.setType(Event.DEVICE_ONLINE);
+                }
+                updateEvent(event);
+            }
+            device.setStatus(status);
+
+            Timeout timeout = timeouts.remove(deviceId);
+            if (timeout != null) {
+                timeout.cancel();
+            }
         }
 
-        Timeout timeout = timeouts.remove(deviceId);
-        if (timeout != null) {
-            timeout.cancel();
+        if (time != null) {
+            device.setLastUpdate(time);
         }
 
         if (status.equals(Device.STATUS_ONLINE)) {
@@ -134,6 +147,22 @@ public class ConnectionManager {
         }
     }
 
+    public synchronized void updateEvent(Event event) {
+        long deviceId = event.getDeviceId();
+        try {
+            Context.getDataManager().addEvent(event);
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
+        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
+            if (listeners.containsKey(userId)) {
+                for (UpdateListener listener : listeners.get(userId)) {
+                    listener.onUpdateEvent(event);
+                }
+            }
+        }
+    }
+
     public Position getLastPosition(long deviceId) {
         return positions.get(deviceId);
     }
@@ -154,6 +183,7 @@ public class ConnectionManager {
     public interface UpdateListener {
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
+        void onUpdateEvent(Event event);
     }
 
     public synchronized void addListener(long userId, UpdateListener listener) {

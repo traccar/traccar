@@ -20,6 +20,7 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.traccar.Context;
 import org.traccar.database.ConnectionManager;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.web.JsonConverter;
 
@@ -32,6 +33,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
 
     private static final String KEY_DEVICES = "devices";
     private static final String KEY_POSITIONS = "positions";
+    private static final String KEY_EVENTS = "events";
 
     private long userId;
 
@@ -63,6 +65,11 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     @Override
     public void onUpdatePosition(Position position) {
         sendData(KEY_POSITIONS, Collections.singletonList(position));
+    }
+
+    @Override
+    public void onUpdateEvent(Event event) {
+        sendData(KEY_EVENTS, Collections.singletonList(event));
     }
 
     private void sendData(String key, Collection<?> data) {

@@ -27,6 +27,7 @@ import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Group;
 import org.traccar.model.GroupPermission;
@@ -482,4 +483,34 @@ public class DataManager implements IdentityManager {
                 .setObject(server)
                 .executeUpdate();
     }
+
+    public Event getEvent(long eventId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectEvent"))
+                .setLong("id", eventId)
+                .executeQuerySingle(Event.class);
+    }
+
+    public void addEvent(Event event) throws SQLException {
+        event.setId(QueryBuilder.create(dataSource, getQuery("database.insertEvent"), true)
+                .setObject(event)
+                .executeUpdate());
+    }
+
+    public Collection<Event> getEvents(long deviceId, String type, Date from, Date to) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectEvents"))
+                .setLong("deviceId", deviceId)
+                .setString("type", type)
+                .setDate("from", from)
+                .setDate("to", to)
+                .executeQuery(Event.class);
+    }
+
+    public Collection<Event> getLastEvents(long deviceId, String type, long interval) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectLastEvents"))
+                .setLong("deviceId", deviceId)
+                .setString("type", type)
+                .setLong("interval", interval)
+                .executeQuery(Event.class);
+    }
+
 }
