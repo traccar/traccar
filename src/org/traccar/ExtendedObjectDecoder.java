@@ -23,7 +23,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import javax.xml.bind.DatatypeConverter;
@@ -37,9 +36,9 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
         if (Context.getConfig().getBoolean("database.saveOriginal") && decodedMessage instanceof Position) {
             Position position = (Position) decodedMessage;
             if (originalMessage instanceof ChannelBuffer) {
-                position.set(Event.KEY_ORIGINAL, ChannelBuffers.hexDump((ChannelBuffer) originalMessage));
+                position.set(Position.KEY_ORIGINAL, ChannelBuffers.hexDump((ChannelBuffer) originalMessage));
             } else if (originalMessage instanceof String) {
-                position.set(Event.KEY_ORIGINAL, DatatypeConverter.printHexBinary(
+                position.set(Position.KEY_ORIGINAL, DatatypeConverter.printHexBinary(
                                 ((String) originalMessage).getBytes(StandardCharsets.US_ASCII)));
             }
         }

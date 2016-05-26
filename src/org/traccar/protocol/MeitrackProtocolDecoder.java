@@ -23,7 +23,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -97,7 +96,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         int event = parser.nextInt();
-        position.set(Event.KEY_EVENT, event);
+        position.set(Position.KEY_EVENT, event);
 
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
@@ -109,38 +108,38 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.set(Event.KEY_SATELLITES, parser.next());
-        position.set(Event.KEY_GSM, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_GSM, parser.next());
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.next());
 
         position.setAltitude(parser.nextDouble());
 
-        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
         position.set("runtime", parser.next());
-        position.set(Event.KEY_MCC, parser.nextInt());
-        position.set(Event.KEY_MNC, parser.nextInt());
-        position.set(Event.KEY_LAC, parser.nextInt(16));
-        position.set(Event.KEY_CID, parser.nextInt(16));
-        position.set(Event.KEY_STATUS, parser.next());
+        position.set(Position.KEY_MCC, parser.nextInt());
+        position.set(Position.KEY_MNC, parser.nextInt());
+        position.set(Position.KEY_LAC, parser.nextInt(16));
+        position.set(Position.KEY_CID, parser.nextInt(16));
+        position.set(Position.KEY_STATUS, parser.next());
 
         for (int i = 1; i <= 3; i++) {
             if (parser.hasNext()) {
-                position.set(Event.PREFIX_ADC + i, parser.nextInt(16));
+                position.set(Position.PREFIX_ADC + i, parser.nextInt(16));
             }
         }
 
-        position.set(Event.KEY_BATTERY, parser.nextInt(16));
-        position.set(Event.KEY_POWER, parser.nextInt(16));
+        position.set(Position.KEY_BATTERY, parser.nextInt(16));
+        position.set(Position.KEY_POWER, parser.nextInt(16));
 
         String eventData = parser.next();
         if (eventData != null && !eventData.isEmpty()) {
             switch (event) {
                 case 37:
-                    position.set(Event.KEY_RFID, eventData);
+                    position.set(Position.KEY_RFID, eventData);
                     break;
                 default:
                     position.set("event-data", eventData);
@@ -150,7 +149,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             String fuel = parser.next();
-            position.set(Event.KEY_FUEL,
+            position.set(Position.KEY_FUEL,
                     Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
         }
 
@@ -176,7 +175,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
-            position.set(Event.KEY_EVENT, buf.readUnsignedByte());
+            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
             position.setLatitude(buf.readInt() * 0.000001);
             position.setLongitude(buf.readInt() * 0.000001);
@@ -185,27 +184,27 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(buf.readUnsignedByte() == 1);
 
-            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Event.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+            position.set(Position.KEY_GSM, buf.readUnsignedByte());
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Event.KEY_HDOP, buf.readUnsignedShort() * 0.1);
+            position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
 
             position.setAltitude(buf.readUnsignedShort());
 
-            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             position.set("runtime", buf.readUnsignedInt());
-            position.set(Event.KEY_MCC, buf.readUnsignedShort());
-            position.set(Event.KEY_MNC, buf.readUnsignedShort());
-            position.set(Event.KEY_LAC, buf.readUnsignedShort());
-            position.set(Event.KEY_CID, buf.readUnsignedShort());
-            position.set(Event.KEY_STATUS, buf.readUnsignedShort());
+            position.set(Position.KEY_MCC, buf.readUnsignedShort());
+            position.set(Position.KEY_MNC, buf.readUnsignedShort());
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_CID, buf.readUnsignedShort());
+            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
 
-            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Event.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
-            position.set(Event.KEY_POWER, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort());
 
             buf.readUnsignedInt(); // geo-fence
 

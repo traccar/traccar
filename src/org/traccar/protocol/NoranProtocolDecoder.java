@@ -22,7 +22,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -90,7 +89,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(BitUtil.check(buf.readUnsignedByte(), 0));
 
-            position.set(Event.KEY_ALARM, buf.readUnsignedByte());
+            position.set(Position.KEY_ALARM, buf.readUnsignedByte());
 
             if (newFormat) {
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedInt()));
@@ -133,11 +132,11 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (!newFormat) {
-                position.set(Event.PREFIX_IO + 1, buf.readUnsignedByte());
-                position.set(Event.KEY_FUEL, buf.readUnsignedByte());
+                position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
+                position.set(Position.KEY_FUEL, buf.readUnsignedByte());
             } else if (type == MSG_UPLOAD_POSITION_NEW) {
-                position.set(Event.PREFIX_TEMP + 1, buf.readShort());
-                position.set(Event.KEY_ODOMETER, buf.readFloat());
+                position.set(Position.PREFIX_TEMP + 1, buf.readShort());
+                position.set(Position.KEY_ODOMETER, buf.readFloat());
             }
 
             return position;

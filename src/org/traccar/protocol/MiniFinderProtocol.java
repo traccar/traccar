@@ -22,8 +22,6 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
-
 import java.util.List;
 
 public class MiniFinderProtocol extends BaseProtocol {

@@ -21,7 +21,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -89,10 +88,10 @@ public class Tt8850ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         if (parser.hasNext(4)) {
-            position.set(Event.KEY_MCC, parser.nextInt());
-            position.set(Event.KEY_MNC, parser.nextInt());
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Position.KEY_MCC, parser.nextInt());
+            position.set(Position.KEY_MNC, parser.nextInt());
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_CID, parser.nextInt(16));
         }
 
         return position;

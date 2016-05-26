@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -79,7 +78,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             position.setProtocol(getProtocolName());
-            position.set(Event.KEY_INDEX, index);
+            position.set(Position.KEY_INDEX, index);
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1800000.0);
@@ -87,19 +86,19 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Event.KEY_MCC, buf.readUnsignedShort());
-            position.set(Event.KEY_MNC, buf.readUnsignedShort());
-            position.set(Event.KEY_LAC, buf.readUnsignedShort());
-            position.set(Event.KEY_CID, buf.readUnsignedMedium());
+            position.set(Position.KEY_MCC, buf.readUnsignedShort());
+            position.set(Position.KEY_MNC, buf.readUnsignedShort());
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_CID, buf.readUnsignedMedium());
 
             position.setValid((buf.readUnsignedByte() & 0x01) != 0);
 
             if (type == MSG_ALARM) {
-                position.set(Event.KEY_ALARM, buf.readUnsignedByte());
+                position.set(Position.KEY_ALARM, buf.readUnsignedByte());
             }
 
             if (type == MSG_STATE) {
-                position.set(Event.KEY_STATUS, buf.readUnsignedByte());
+                position.set(Position.KEY_STATUS, buf.readUnsignedByte());
             }
 
             return position;

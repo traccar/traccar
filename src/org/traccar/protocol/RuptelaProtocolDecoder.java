@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -73,37 +72,37 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(buf.readUnsignedShort() / 100.0);
 
                 int satellites = buf.readUnsignedByte();
-                position.set(Event.KEY_SATELLITES, satellites);
+                position.set(Position.KEY_SATELLITES, satellites);
                 position.setValid(satellites >= 3);
 
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
-                position.set(Event.KEY_HDOP, buf.readUnsignedByte() / 10.0);
+                position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
 
                 buf.readUnsignedByte();
 
                 // Read 1 byte data
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedByte());
                 }
 
                 // Read 2 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
                 }
 
                 // Read 4 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
                 }
 
                 // Read 8 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
                 }
 
                 positions.add(position);

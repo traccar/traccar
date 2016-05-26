@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -81,11 +80,11 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_SATELLITES, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.KEY_INPUT, parser.next());
-        position.set(Event.KEY_OUTPUT, parser.next());
-        position.set(Event.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_INPUT, parser.next());
+        position.set(Position.KEY_OUTPUT, parser.next());
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
 
         return position;
     }

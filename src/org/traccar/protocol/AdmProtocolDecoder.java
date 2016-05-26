@@ -20,7 +20,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -61,7 +60,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // firmware version
             buf.readUnsignedShort(); // index
 
-            position.set(Event.KEY_STATUS, buf.readUnsignedShort());
+            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
 
             position.setValid(true);
             position.setLatitude(buf.readFloat());
@@ -73,13 +72,13 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
             position.setAltitude(buf.readUnsignedShort());
 
-            position.set(Event.KEY_HDOP, buf.readUnsignedByte() * 0.1);
-            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte() & 0x0f);
+            position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte() & 0x0f);
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
-            position.set(Event.KEY_POWER, buf.readUnsignedShort());
-            position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_POWER, buf.readUnsignedShort());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
 
             if (BitUtil.check(type, 2)) {
                 buf.skipBytes(4);
@@ -102,7 +101,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(type, 7)) {
-                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
             return position;

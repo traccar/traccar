@@ -18,7 +18,6 @@ package org.traccar;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
-import org.traccar.model.Event;
 import org.traccar.model.MiscFormatter;
 import org.traccar.model.Position;
 
@@ -80,7 +79,7 @@ public class WebDataHandler extends BaseDataHandler {
     }
 
     private String calculateStatus(Position position) {
-        if (position.getAttributes().containsKey(Event.KEY_ALARM)) {
+        if (position.getAttributes().containsKey(Position.KEY_ALARM)) {
             return "0xF841"; // STATUS_PANIC_ON
         } else if (position.getSpeed() < 1.0) {
             return "0xF020"; // STATUS_LOCATION

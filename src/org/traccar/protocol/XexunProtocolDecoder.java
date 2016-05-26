@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -99,7 +98,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         position.set("signal", parser.next());
-        position.set(Event.KEY_ALARM, parser.next());
+        position.set(Position.KEY_ALARM, parser.next());
 
         if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
@@ -107,11 +106,11 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         if (full) {
-            position.set(Event.KEY_SATELLITES, parser.next().replaceFirst("^0*(?![\\.$])", ""));
+            position.set(Position.KEY_SATELLITES, parser.next().replaceFirst("^0*(?![\\.$])", ""));
 
             position.setAltitude(parser.nextDouble());
 
-            position.set(Event.KEY_POWER, parser.nextDouble());
+            position.set(Position.KEY_POWER, parser.nextDouble());
         }
 
         return position;

@@ -21,7 +21,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -61,7 +60,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.set(Event.KEY_INDEX, index);
+        position.set(Position.KEY_INDEX, index);
         position.setValid(true);
 
         if (!identify(String.valueOf(id), channel, remoteAddress)) {
@@ -89,7 +88,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedInt(); // distance
 
-            position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
 
             buf.readUnsignedShort(); // battery charger status
 
@@ -132,9 +131,9 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                     dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR))));
 
             if (sentence.contains("Ignition on detected")) {
-                position.set(Event.KEY_IGNITION, true);
+                position.set(Position.KEY_IGNITION, true);
             } else if (sentence.contains("Ignition off detected")) {
-                position.set(Event.KEY_IGNITION, false);
+                position.set(Position.KEY_IGNITION, false);
             }
 
             return position;

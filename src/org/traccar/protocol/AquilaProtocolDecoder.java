@@ -21,7 +21,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -86,7 +85,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_EVENT, parser.nextInt());
+        position.set(Position.KEY_EVENT, parser.nextInt());
 
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
@@ -98,17 +97,17 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.set(Event.KEY_GSM, parser.nextInt());
+        position.set(Position.KEY_GSM, parser.nextInt());
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_FUEL, parser.next());
-        position.set(Event.PREFIX_IO + 1, parser.next());
-        position.set(Event.KEY_CHARGE, parser.next());
-        position.set(Event.PREFIX_IO + 2, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_FUEL, parser.next());
+        position.set(Position.PREFIX_IO + 1, parser.next());
+        position.set(Position.KEY_CHARGE, parser.next());
+        position.set(Position.PREFIX_IO + 2, parser.next());
 
-        position.set(Event.KEY_IGNITION, parser.nextInt() == 1);
+        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
 
         int course = (parser.nextInt() << 3) + (parser.nextInt() << 2) + (parser.nextInt() << 1) + parser.nextInt();
         if (course > 0 && course <= 8) {

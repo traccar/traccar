@@ -17,7 +17,6 @@
 package org.traccar;
 
 import org.traccar.helper.DistanceCalculator;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.math.BigDecimal;
@@ -38,8 +37,8 @@ public class DistanceHandler extends BaseDataHandler {
 
         Position last = getLastPosition(position.getDeviceId());
         if (last != null) {
-            if (last.getAttributes().containsKey(Event.KEY_DISTANCE)) {
-                distance = ((Number) last.getAttributes().get(Event.KEY_DISTANCE)).doubleValue();
+            if (last.getAttributes().containsKey(Position.KEY_DISTANCE)) {
+                distance = ((Number) last.getAttributes().get(Position.KEY_DISTANCE)).doubleValue();
             }
 
             if (position.getValid()) {
@@ -51,7 +50,7 @@ public class DistanceHandler extends BaseDataHandler {
             }
         }
 
-        position.set(Event.KEY_DISTANCE, distance);
+        position.set(Position.KEY_DISTANCE, distance);
         return position;
     }
 

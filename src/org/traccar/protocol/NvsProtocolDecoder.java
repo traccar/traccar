@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -84,7 +83,7 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
                 position.setAltitude(buf.readShort());
                 position.setCourse(buf.readUnsignedShort());
 
-                position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
+                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                 position.setValid(buf.readUnsignedByte() != 0);
@@ -96,25 +95,25 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
                 // Read 1 byte data
                 int cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedByte());
                 }
 
                 // Read 2 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
                 }
 
                 // Read 4 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
                 }
 
                 // Read 8 byte data
                 cnt = buf.readUnsignedByte();
                 for (int j = 0; j < cnt; j++) {
-                    position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
+                    position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
                 }
 
                 positions.add(position);

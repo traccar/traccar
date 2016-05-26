@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -94,8 +93,8 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(buf.readUnsignedByte());
             position.setCourse(buf.readUnsignedByte());
 
-            position.set(Event.KEY_LAC, buf.readUnsignedShort());
-            position.set(Event.KEY_CID, buf.readUnsignedShort());
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_CID, buf.readUnsignedShort());
 
             return position;
 

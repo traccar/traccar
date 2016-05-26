@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -96,23 +95,23 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
 
         // Old format
         if (parser.hasNext(5)) {
-            position.set(Event.KEY_ODOMETER, parser.nextInt());
-            position.set(Event.KEY_IGNITION, parser.nextInt());
-            position.set(Event.KEY_INPUT, parser.nextInt() + parser.nextInt() << 1);
-            position.set(Event.KEY_FUEL, parser.nextInt());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_IGNITION, parser.nextInt());
+            position.set(Position.KEY_INPUT, parser.nextInt() + parser.nextInt() << 1);
+            position.set(Position.KEY_FUEL, parser.nextInt());
         }
 
         // New format
         if (parser.hasNext(10)) {
-            position.set(Event.KEY_CHARGE, parser.nextInt() == 1);
-            position.set(Event.KEY_IGNITION, parser.nextInt());
-            position.set(Event.KEY_INPUT, parser.nextInt());
-            position.set(Event.KEY_RFID, parser.next());
-            position.set(Event.KEY_ODOMETER, parser.nextInt());
-            position.set(Event.PREFIX_TEMP + 1, parser.nextInt());
-            position.set(Event.KEY_FUEL, parser.nextInt());
+            position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
+            position.set(Position.KEY_IGNITION, parser.nextInt());
+            position.set(Position.KEY_INPUT, parser.nextInt());
+            position.set(Position.KEY_RFID, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+            position.set(Position.KEY_FUEL, parser.nextInt());
             position.set("accel", parser.nextInt() == 1);
-            position.set(Event.KEY_OUTPUT, parser.nextInt() + parser.nextInt() << 1);
+            position.set(Position.KEY_OUTPUT, parser.nextInt() + parser.nextInt() << 1);
         }
 
         position.setValid(parser.next().equals("A"));

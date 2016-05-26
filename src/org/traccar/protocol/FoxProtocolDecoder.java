@@ -21,7 +21,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -92,7 +91,7 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
-            position.set(Event.KEY_STATUS, parser.nextInt());
+            position.set(Position.KEY_STATUS, parser.nextInt());
 
             position.setValid(parser.next().equals("A"));
 
@@ -106,15 +105,15 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
 
-            position.set(Event.KEY_INPUT, parser.nextInt(2));
-            position.set(Event.KEY_POWER, parser.nextDouble() / 10);
-            position.set(Event.PREFIX_TEMP + 1, parser.nextInt());
-            position.set(Event.KEY_RPM, parser.nextInt());
-            position.set(Event.KEY_FUEL, parser.nextInt());
-            position.set(Event.PREFIX_ADC + 1, parser.nextInt());
-            position.set(Event.PREFIX_ADC + 2, parser.nextInt());
-            position.set(Event.KEY_OUTPUT, parser.nextInt(2));
-            position.set(Event.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_INPUT, parser.nextInt(2));
+            position.set(Position.KEY_POWER, parser.nextDouble() / 10);
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+            position.set(Position.KEY_RPM, parser.nextInt());
+            position.set(Position.KEY_FUEL, parser.nextInt());
+            position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+            position.set(Position.PREFIX_ADC + 2, parser.nextInt());
+            position.set(Position.KEY_OUTPUT, parser.nextInt(2));
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
 
             position.set("status-data", parser.next());
 

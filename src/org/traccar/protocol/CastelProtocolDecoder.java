@@ -22,7 +22,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -79,7 +78,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(lat);
         position.setLongitude(lon);
         position.setValid((flags & 0x0C) > 0);
-        position.set(Event.KEY_SATELLITES, flags >> 4);
+        position.set(Position.KEY_SATELLITES, flags >> 4);
 
         return position;
     }
@@ -207,8 +206,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
                 for (int i = 0; i < count; i++) {
                     Position position = readPosition(buf);
-                    position.set(Event.KEY_ODOMETER, odometer);
-                    position.set(Event.KEY_STATUS, status);
+                    position.set(Position.KEY_ODOMETER, odometer);
+                    position.set(Position.KEY_STATUS, status);
                     positions.add(position);
                 }
 
@@ -236,16 +235,16 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 for (int i = 0; i < count; i++) {
                     Position position = readPosition(buf);
 
-                    position.set(Event.KEY_STATUS, buf.readUnsignedInt());
-                    position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
-                    position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                    position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
                     buf.readUnsignedByte(); // geo-fencing id
                     buf.readUnsignedByte(); // geo-fencing flags
                     buf.readUnsignedByte(); // additional flags
 
-                    position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                    position.set(Event.KEY_CID, buf.readUnsignedShort());
+                    position.set(Position.KEY_LAC, buf.readUnsignedShort());
+                    position.set(Position.KEY_CID, buf.readUnsignedShort());
 
                     positions.add(position);
                 }
@@ -258,9 +257,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
                 Position position = readPosition(buf);
 
-                position.set(Event.KEY_STATUS, buf.readUnsignedInt());
-                position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
-                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+                position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
                 buf.readUnsignedByte(); // geo-fencing id
                 buf.readUnsignedByte(); // geo-fencing flags

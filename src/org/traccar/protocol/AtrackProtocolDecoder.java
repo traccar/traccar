@@ -22,7 +22,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -84,22 +83,22 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         for (String key : keys) {
             switch (key) {
                 case "SA":
-                    position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 case "MV":
-                    position.set(Event.KEY_POWER, buf.readUnsignedShort());
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort());
                     break;
                 case "BV":
-                    position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
                     break;
                 case "GQ":
-                    position.set(Event.KEY_GSM, buf.readUnsignedByte());
+                    position.set(Position.KEY_GSM, buf.readUnsignedByte());
                     break;
                 case "CE":
-                    position.set(Event.KEY_CID, buf.readUnsignedInt());
+                    position.set(Position.KEY_CID, buf.readUnsignedInt());
                     break;
                 case "LC":
-                    position.set(Event.KEY_LAC, buf.readUnsignedShort());
+                    position.set(Position.KEY_LAC, buf.readUnsignedShort());
                     break;
                 case "CN":
                     buf.readUnsignedInt(); // mcc + mnc
@@ -114,16 +113,16 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(buf.readUnsignedInt());
                     break;
                 case "RP":
-                    position.set(Event.KEY_RPM, buf.readUnsignedShort());
+                    position.set(Position.KEY_RPM, buf.readUnsignedShort());
                     break;
                 case "GS":
                     buf.readUnsignedByte(); // gsm status
                     break;
                 case "DT":
-                    position.set(Event.KEY_ARCHIVE, buf.readUnsignedByte() == 1);
+                    position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() == 1);
                     break;
                 case "VN":
-                    position.set(Event.KEY_VIN, readString(buf));
+                    position.set(Position.KEY_VIN, readString(buf));
                     break;
                 case "MF":
                     buf.readUnsignedShort(); // mass air flow rate
@@ -132,13 +131,13 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // engine load
                     break;
                 case "TR":
-                    position.set(Event.KEY_THROTTLE, buf.readUnsignedByte());
+                    position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                     break;
                 case "ET":
                     buf.readUnsignedShort(); // engine coolant temp
                     break;
                 case "FL":
-                    position.set(Event.KEY_FUEL, buf.readUnsignedByte());
+                    position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                     break;
                 case "ML":
                     buf.readUnsignedByte(); // mil status
@@ -150,7 +149,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     readString(buf); // format string
                     break;
                 case "AV1":
-                    position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
                     break;
                 case "NC":
                     readString(buf); // gsm neighbor cell info
@@ -225,20 +224,20 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(buf.readInt() * 0.000001);
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Event.KEY_TYPE, buf.readUnsignedByte());
-            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt() * 0.1);
-            position.set(Event.KEY_HDOP, buf.readUnsignedShort() * 0.1);
-            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+            position.set(Position.KEY_TYPE, buf.readUnsignedByte());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 0.1);
+            position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
+            position.set(Position.KEY_INPUT, buf.readUnsignedByte());
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
-            position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
-            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.001);
 
             position.set("driver", readString(buf));
 
-            position.set(Event.PREFIX_TEMP + 1, buf.readShort() * 0.1);
-            position.set(Event.PREFIX_TEMP + 2, buf.readShort() * 0.1);
+            position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
+            position.set(Position.PREFIX_TEMP + 2, buf.readShort() * 0.1);
 
             position.set("message", readString(buf));
 

@@ -21,7 +21,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -49,15 +48,15 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
             switch (type) {
                 case 2:
-                    position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
                     break;
                 case 5:
-                    position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+                    position.set(Position.KEY_INPUT, buf.readUnsignedByte());
                     break;
                 case 6:
                     n = buf.readUnsignedByte() >> 4;
                     if (n < 2) {
-                        position.set(Event.PREFIX_ADC + n, buf.readFloat());
+                        position.set(Position.PREFIX_ADC + n, buf.readFloat());
                     } else {
                         position.set("di" + (n - 2), buf.readFloat());
                     }
@@ -66,7 +65,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     int alarm = buf.readUnsignedByte();
                     buf.readUnsignedByte();
                     if (BitUtil.check(alarm, 5)) {
-                        position.set(Event.KEY_ALARM, BitUtil.to(alarm, 4));
+                        position.set(Position.KEY_ALARM, BitUtil.to(alarm, 4));
                     }
                     break;
                 case 8:
@@ -80,7 +79,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 24:
                     for (int i = 0; i < length / 2; i++) {
-                        position.set(Event.PREFIX_TEMP + buf.readUnsignedByte(), buf.readByte());
+                        position.set(Position.PREFIX_TEMP + buf.readUnsignedByte(), buf.readByte());
                     }
                     break;
                 case 28:
@@ -88,27 +87,27 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte();
                     break;
                 case 90:
-                    position.set(Event.KEY_POWER, buf.readFloat());
+                    position.set(Position.KEY_POWER, buf.readFloat());
                     break;
                 case 101:
-                    position.set(Event.KEY_OBD_SPEED, buf.readUnsignedByte());
+                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
                     break;
                 case 102:
-                    position.set(Event.KEY_RPM, buf.readUnsignedByte() * 50);
+                    position.set(Position.KEY_RPM, buf.readUnsignedByte() * 50);
                     break;
                 case 107:
                     int fuel = buf.readUnsignedShort();
                     int fuelFormat = fuel >> 14;
                     if (fuelFormat == 1) {
-                        position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.4 + "%");
+                        position.set(Position.KEY_FUEL, (fuel & 0x3fff) * 0.4 + "%");
                     } else if (fuelFormat == 2) {
-                        position.set(Event.KEY_FUEL, (fuel & 0x3fff) * 0.5 + " l");
+                        position.set(Position.KEY_FUEL, (fuel & 0x3fff) * 0.5 + " l");
                     } else if (fuelFormat == 3) {
-                        position.set(Event.KEY_FUEL, (fuel & 0x3fff) * -0.5 + " l");
+                        position.set(Position.KEY_FUEL, (fuel & 0x3fff) * -0.5 + " l");
                     }
                     break;
                 case 108:
-                    position.set(Event.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
+                    position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
                     break;
                 case 150:
                     position.set("door", buf.readUnsignedByte());
@@ -154,7 +153,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
             int flags = buf.readUnsignedByte();
-            position.set(Event.KEY_SATELLITES, BitUtil.from(flags, 2));
+            position.set(Position.KEY_SATELLITES, BitUtil.from(flags, 2));
             position.setValid(BitUtil.to(flags, 2) > 0);
 
             // Latitude
@@ -169,8 +168,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
             // Status
             flags = buf.readUnsignedByte();
-            position.set(Event.KEY_IGNITION, BitUtil.check(flags, 0));
-            position.set(Event.KEY_GSM, BitUtil.between(flags, 2, 5));
+            position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
+            position.set(Position.KEY_GSM, BitUtil.between(flags, 2, 5));
             position.setCourse((BitUtil.from(flags, 5) * 45 + 180) % 360);
 
             // Speed

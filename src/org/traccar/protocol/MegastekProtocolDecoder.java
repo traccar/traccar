@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -156,29 +155,29 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             Parser parser = new Parser(PATTERN_SIMPLE, status);
             if (parser.matches()) {
 
-                position.set(Event.KEY_ALARM, parser.next());
+                position.set(Position.KEY_ALARM, parser.next());
 
                 if (!identify(parser.next(), channel, remoteAddress, false) && !identify(id, channel, remoteAddress)) {
                     return null;
                 }
                 position.setDeviceId(getDeviceId());
 
-                position.set(Event.KEY_SATELLITES, parser.next());
+                position.set(Position.KEY_SATELLITES, parser.next());
 
                 position.setAltitude(parser.nextDouble());
 
-                position.set(Event.KEY_POWER, parser.nextDouble());
+                position.set(Position.KEY_POWER, parser.nextDouble());
 
                 String charger = parser.next();
                 if (charger != null) {
-                    position.set(Event.KEY_CHARGE, Integer.parseInt(charger) == 1);
+                    position.set(Position.KEY_CHARGE, Integer.parseInt(charger) == 1);
                 }
 
                 if (parser.hasNext(3)) {
-                    position.set(Event.KEY_MCC, parser.nextInt());
-                    position.set(Event.KEY_MNC, parser.nextInt());
-                    position.set(Event.KEY_LAC, parser.nextInt(16));
-                    position.set(Event.KEY_CID, parser.nextInt(16));
+                    position.set(Position.KEY_MCC, parser.nextInt());
+                    position.set(Position.KEY_MNC, parser.nextInt());
+                    position.set(Position.KEY_LAC, parser.nextInt(16));
+                    position.set(Position.KEY_CID, parser.nextInt(16));
                 }
 
             } else {
@@ -200,21 +199,21 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 }
                 position.setDeviceId(getDeviceId());
 
-                position.set(Event.KEY_MCC, parser.nextInt());
-                position.set(Event.KEY_MNC, parser.nextInt());
-                position.set(Event.KEY_LAC, parser.nextInt(16));
-                position.set(Event.KEY_CID, parser.nextInt(16));
-                position.set(Event.KEY_GSM, parser.next());
+                position.set(Position.KEY_MCC, parser.nextInt());
+                position.set(Position.KEY_MNC, parser.nextInt());
+                position.set(Position.KEY_LAC, parser.nextInt(16));
+                position.set(Position.KEY_CID, parser.nextInt(16));
+                position.set(Position.KEY_GSM, parser.next());
 
-                position.set(Event.KEY_BATTERY, Double.parseDouble(parser.next()));
+                position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next()));
 
-                position.set(Event.KEY_FLAGS, parser.next());
-                position.set(Event.KEY_INPUT, parser.next());
-                position.set(Event.KEY_OUTPUT, parser.next());
-                position.set(Event.PREFIX_ADC + 1, parser.next());
-                position.set(Event.PREFIX_ADC + 2, parser.next());
-                position.set(Event.PREFIX_ADC + 3, parser.next());
-                position.set(Event.KEY_ALARM, parser.next());
+                position.set(Position.KEY_FLAGS, parser.next());
+                position.set(Position.KEY_INPUT, parser.next());
+                position.set(Position.KEY_OUTPUT, parser.next());
+                position.set(Position.PREFIX_ADC + 1, parser.next());
+                position.set(Position.PREFIX_ADC + 2, parser.next());
+                position.set(Position.PREFIX_ADC + 3, parser.next());
+                position.set(Position.KEY_ALARM, parser.next());
 
             }
         }
@@ -282,7 +281,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         if (parser.next().equals("S")) {
-            position.set(Event.KEY_ARCHIVE, true);
+            position.set(Position.KEY_ARCHIVE, true);
         }
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -294,46 +293,46 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        position.set(Event.KEY_SATELLITES, parser.nextInt());
-        position.set(Event.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
-        position.set(Event.KEY_ODOMETER, parser.nextDouble());
-        position.set(Event.KEY_MCC, parser.nextInt());
-        position.set(Event.KEY_MNC, parser.nextInt());
-        position.set(Event.KEY_LAC, parser.nextInt(16));
-        position.set(Event.KEY_CID, parser.nextInt(16));
+        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set(Position.KEY_MCC, parser.nextInt());
+        position.set(Position.KEY_MNC, parser.nextInt());
+        position.set(Position.KEY_LAC, parser.nextInt(16));
+        position.set(Position.KEY_CID, parser.nextInt(16));
 
         String gsm = parser.next();
         if (gsm != null) {
-            position.set(Event.KEY_GSM, Integer.parseInt(gsm));
+            position.set(Position.KEY_GSM, Integer.parseInt(gsm));
         }
 
-        position.set(Event.KEY_INPUT, parser.nextInt(2));
-        position.set(Event.KEY_OUTPUT, parser.nextInt(2));
+        position.set(Position.KEY_INPUT, parser.nextInt(2));
+        position.set(Position.KEY_OUTPUT, parser.nextInt(2));
 
         for (int i = 1; i <= 3; i++) {
-            position.set(Event.PREFIX_ADC + i, parser.nextInt());
+            position.set(Position.PREFIX_ADC + i, parser.nextInt());
         }
 
         for (int i = 1; i <= 2; i++) {
             String adc = parser.next();
             if (adc != null) {
-                position.set(Event.PREFIX_TEMP + i, Double.parseDouble(adc));
+                position.set(Position.PREFIX_TEMP + i, Double.parseDouble(adc));
             }
         }
 
-        position.set(Event.KEY_RFID, parser.next());
+        position.set(Position.KEY_RFID, parser.next());
 
         String battery = parser.next();
         if (battery != null) {
-            position.set(Event.KEY_BATTERY, Integer.parseInt(battery));
+            position.set(Position.KEY_BATTERY, Integer.parseInt(battery));
         }
 
-        position.set(Event.KEY_ALARM, parser.next());
+        position.set(Position.KEY_ALARM, parser.next());
 
         return position;
     }

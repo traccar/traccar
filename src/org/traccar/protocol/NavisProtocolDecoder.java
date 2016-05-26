@@ -22,7 +22,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -91,38 +90,38 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         position.set("format", format);
 
         long index = buf.readUnsignedInt();
-        position.set(Event.KEY_INDEX, index);
+        position.set(Position.KEY_INDEX, index);
 
-        position.set(Event.KEY_EVENT, buf.readUnsignedShort());
+        position.set(Position.KEY_EVENT, buf.readUnsignedShort());
 
         buf.skipBytes(6); // event time
 
-        position.set(Event.KEY_ALARM, buf.readUnsignedByte());
-        position.set(Event.KEY_STATUS, buf.readUnsignedByte());
-        position.set(Event.KEY_GSM, buf.readUnsignedByte());
+        position.set(Position.KEY_ALARM, buf.readUnsignedByte());
+        position.set(Position.KEY_STATUS, buf.readUnsignedByte());
+        position.set(Position.KEY_GSM, buf.readUnsignedByte());
 
         if (isFormat(format, F10, F20, F30)) {
-            position.set(Event.KEY_OUTPUT, buf.readUnsignedShort());
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedShort());
         } else if (isFormat(format, F40, F50, F51, F52)) {
-            position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
         }
 
         if (isFormat(format, F10, F20, F30, F40)) {
-            position.set(Event.KEY_INPUT, buf.readUnsignedShort());
+            position.set(Position.KEY_INPUT, buf.readUnsignedShort());
         } else if (isFormat(format, F50, F51, F52)) {
-            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+            position.set(Position.KEY_INPUT, buf.readUnsignedByte());
         }
 
-        position.set(Event.KEY_POWER, buf.readUnsignedShort() * 0.001);
-        position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+        position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
 
         if (isFormat(format, F10, F20, F30)) {
-            position.set(Event.PREFIX_TEMP + 1, buf.readShort());
+            position.set(Position.PREFIX_TEMP + 1, buf.readShort());
         }
 
         if (isFormat(format, F10, F20, F50, F52)) {
-            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
         }
 
         // Impulse counters
@@ -145,7 +144,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(buf.readFloat());
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Event.KEY_ODOMETER, buf.readFloat());
+            position.set(Position.KEY_ODOMETER, buf.readFloat());
 
             position.set("segment", buf.readFloat()); // last segment
 

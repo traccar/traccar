@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -66,9 +65,9 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_ALARM, parser.nextInt(16));
-        position.set(Event.KEY_OUTPUT, parser.nextInt(16));
-        position.set(Event.KEY_INPUT, parser.nextInt(16));
+        position.set(Position.KEY_ALARM, parser.nextInt(16));
+        position.set(Position.KEY_OUTPUT, parser.nextInt(16));
+        position.set(Position.KEY_INPUT, parser.nextInt(16));
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -83,7 +82,7 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Event.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         return position;
     }

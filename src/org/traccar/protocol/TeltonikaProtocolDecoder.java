@@ -21,7 +21,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -61,7 +60,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        position.set(Event.KEY_TYPE, buf.readUnsignedByte());
+        position.set(Position.KEY_TYPE, buf.readUnsignedByte());
 
         position.set("command", buf.readBytes(buf.readInt()).toString(StandardCharsets.US_ASCII));
 
@@ -102,17 +101,17 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
                 if (BitUtil.check(locationMask, 4)) {
                     int satellites = buf.readUnsignedByte();
-                    position.set(Event.KEY_SATELLITES, satellites);
+                    position.set(Position.KEY_SATELLITES, satellites);
                     position.setValid(satellites >= 3);
                 }
 
                 if (BitUtil.check(locationMask, 5)) {
-                    position.set(Event.KEY_LAC, buf.readUnsignedShort());
-                    position.set(Event.KEY_CID, buf.readUnsignedShort());
+                    position.set(Position.KEY_LAC, buf.readUnsignedShort());
+                    position.set(Position.KEY_CID, buf.readUnsignedShort());
                 }
 
                 if (BitUtil.check(locationMask, 6)) {
-                    position.set(Event.KEY_GSM, buf.readUnsignedByte());
+                    position.set(Position.KEY_GSM, buf.readUnsignedByte());
                 }
 
                 if (BitUtil.check(locationMask, 7)) {
@@ -137,13 +136,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             int satellites = buf.readUnsignedByte();
-            position.set(Event.KEY_SATELLITES, satellites);
+            position.set(Position.KEY_SATELLITES, satellites);
 
             position.setValid(satellites != 0);
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
 
-            position.set(Event.KEY_EVENT, buf.readUnsignedByte());
+            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
             buf.readUnsignedByte(); // total IO data records
 
@@ -155,9 +154,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < cnt; j++) {
                 int id = buf.readUnsignedByte();
                 if (id == 1) {
-                    position.set(Event.KEY_POWER, buf.readUnsignedByte());
+                    position.set(Position.KEY_POWER, buf.readUnsignedByte());
                 } else {
-                    position.set(Event.PREFIX_IO + id, buf.readUnsignedByte());
+                    position.set(Position.PREFIX_IO + id, buf.readUnsignedByte());
                 }
             }
         }
@@ -166,7 +165,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 2)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
+                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedShort());
             }
         }
 
@@ -174,7 +173,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 3)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
+                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readUnsignedInt());
             }
         }
 
@@ -182,7 +181,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_FM4X00) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                position.set(Event.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
+                position.set(Position.PREFIX_IO + buf.readUnsignedByte(), buf.readLong());
             }
         }
 

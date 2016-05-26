@@ -19,7 +19,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -75,10 +74,10 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         parser.next();
         position.setAltitude(parser.nextInt());
 
-        position.set(Event.KEY_STATUS, parser.nextInt());
-        position.set(Event.KEY_BATTERY, parser.nextInt());
-        position.set(Event.PREFIX_TEMP + 1, parser.nextInt());
-        position.set(Event.KEY_CHARGE, parser.nextInt() == 1);
+        position.set(Position.KEY_STATUS, parser.nextInt());
+        position.set(Position.KEY_BATTERY, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
 
         if (channel != null) {
             channel.write(time, remoteAddress);

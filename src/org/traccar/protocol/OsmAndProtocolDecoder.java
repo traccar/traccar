@@ -25,7 +25,6 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -106,10 +105,10 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(Double.parseDouble(value));
                     break;
                 case "hdop":
-                    position.set(Event.KEY_HDOP, Double.parseDouble(value));
+                    position.set(Position.KEY_HDOP, Double.parseDouble(value));
                     break;
                 case "batt":
-                    position.set(Event.KEY_BATTERY, value);
+                    position.set(Position.KEY_BATTERY, value);
                     break;
                 default:
                     position.set(entry.getKey(), value);
