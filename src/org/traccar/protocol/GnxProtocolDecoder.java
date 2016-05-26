@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -94,7 +93,7 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         if (parser.nextInt() == 1) {
-            position.set(Event.KEY_ARCHIVE, true);
+            position.set(Position.KEY_ARCHIVE, true);
         }
 
         DateBuilder dateBuilder;
@@ -116,7 +115,7 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
 
         switch (type) {
             case "MIF":
-                position.set(Event.KEY_RFID, parser.next());
+                position.set(Position.KEY_RFID, parser.next());
                 break;
             default:
                 break;

@@ -23,7 +23,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -264,10 +263,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_STATUS, parser.next());
-        position.set(Event.KEY_POWER, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.KEY_CHARGE, parser.next());
+        position.set(Position.KEY_STATUS, parser.next());
+        position.set(Position.KEY_POWER, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_CHARGE, parser.next());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -275,7 +274,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, dateBuilder.getDate());
 
-        position.set(Event.KEY_INDEX, parser.next());
+        position.set(Position.KEY_INDEX, parser.next());
 
         return position;
     }
@@ -299,15 +298,15 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(4)) {
-            position.set(Event.KEY_MCC, parser.nextInt());
-            position.set(Event.KEY_MNC, parser.nextInt());
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Position.KEY_MCC, parser.nextInt());
+            position.set(Position.KEY_MNC, parser.nextInt());
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_CID, parser.nextInt(16));
         }
 
         parser.skip(4); // alternative networks
 
-        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
     }
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -324,21 +323,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_RPM, parser.next());
-        position.set(Event.KEY_OBD_SPEED, parser.next());
-        position.set(Event.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.KEY_RPM, parser.next());
+        position.set(Position.KEY_OBD_SPEED, parser.next());
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
         position.set("fuel-consumption", parser.next());
         position.set("dtcs-cleared-distance", parser.next());
         position.set("odb-connect", parser.next());
         position.set("dtcs-number", parser.next());
         position.set("dtcs-codes", parser.next());
-        position.set(Event.KEY_THROTTLE, parser.next());
-        position.set(Event.KEY_FUEL, parser.next());
-        position.set(Event.KEY_OBD_ODOMETER, parser.next());
+        position.set(Position.KEY_THROTTLE, parser.next());
+        position.set(Position.KEY_FUEL, parser.next());
+        position.set(Position.KEY_OBD_ODOMETER, parser.next());
 
         decodeLocation(position, parser);
 
-        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
 
         if (parser.hasNext(6)) {
             DateBuilder dateBuilder = new DateBuilder()
@@ -373,7 +372,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
-            position.set(Event.KEY_VIN, vin);
+            position.set(Position.KEY_VIN, vin);
 
             decodeLocation(position, itemParser);
 
@@ -386,31 +385,31 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         // power value only on some devices
         if (power > 10) {
-            position.set(Event.KEY_POWER, power);
+            position.set(Position.KEY_POWER, power);
         }
 
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
 
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_HOURS, parser.next());
-        position.set(Event.PREFIX_ADC + 1, parser.next());
-        position.set(Event.PREFIX_ADC + 2, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_HOURS, parser.next());
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
 
         if (parser.hasNext(3)) {
             int ignition = parser.nextInt(16);
             if (BitUtil.check(ignition, 4)) {
-                position.set(Event.KEY_IGNITION, false);
+                position.set(Position.KEY_IGNITION, false);
             } else if (BitUtil.check(ignition, 5)) {
-                position.set(Event.KEY_IGNITION, true);
+                position.set(Position.KEY_IGNITION, true);
             }
-            position.set(Event.KEY_INPUT, parser.nextInt(16));
-            position.set(Event.KEY_OUTPUT, parser.nextInt(16));
+            position.set(Position.KEY_INPUT, parser.nextInt(16));
+            position.set(Position.KEY_OUTPUT, parser.nextInt(16));
         }
 
-        position.set(Event.KEY_RPM, parser.next());
-        position.set(Event.KEY_FUEL, parser.next());
+        position.set(Position.KEY_RPM, parser.next());
+        position.set(Position.KEY_FUEL, parser.next());
 
         // workaround for wrong location time
         if (parser.hasNext(6)) {
@@ -441,8 +440,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Event.KEY_HOURS, parser.next());
-        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_HOURS, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
 
         if (parser.hasNext(6)) {
             DateBuilder dateBuilder = new DateBuilder()
@@ -470,11 +469,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_RFID, parser.next());
+        position.set(Position.KEY_RFID, parser.next());
 
         decodeLocation(position, parser);
 
-        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
 
         if (parser.hasNext(6)) {
             DateBuilder dateBuilder = new DateBuilder()
@@ -504,15 +503,15 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         int reportType = parser.nextInt();
         if (type.equals("NMR")) {
-            position.set(Event.KEY_MOTION, reportType);
+            position.set(Position.KEY_MOTION, reportType);
         }
 
         decodeLocation(position, parser);
 
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
 
-        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
 
         // workaround for wrong location time
         if (parser.hasNext(6)) {
@@ -614,10 +613,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         if (result != null) {
             if (result instanceof Position) {
-                ((Position) result).set(Event.KEY_TYPE, type);
+                ((Position) result).set(Position.KEY_TYPE, type);
             } else {
                 for (Position p : (List<Position>) result) {
-                    p.set(Event.KEY_TYPE, type);
+                    p.set(Position.KEY_TYPE, type);
                 }
             }
         }

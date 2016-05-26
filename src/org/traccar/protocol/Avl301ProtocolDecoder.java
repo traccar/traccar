@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -90,7 +89,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateBuilder.getDate());
 
             int gpsLength = buf.readUnsignedByte(); // gps len and sat
-            position.set(Event.KEY_SATELLITES, gpsLength & 0xf);
+            position.set(Position.KEY_SATELLITES, gpsLength & 0xf);
 
             buf.readUnsignedByte(); // satellites
 
@@ -115,16 +114,16 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
                 position.set("acc", (union & 0x8000) != 0);
             }
 
-            position.set(Event.KEY_LAC, buf.readUnsignedShort());
-            position.set(Event.KEY_CID, buf.readUnsignedMedium());
-            position.set(Event.KEY_ALARM, true);
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_CID, buf.readUnsignedMedium());
+            position.set(Position.KEY_ALARM, true);
             int flags = buf.readUnsignedByte();
             position.set("acc", (flags & 0x2) != 0);
 
             // parse other flags
 
-            position.set(Event.KEY_POWER, buf.readUnsignedByte());
-            position.set(Event.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_POWER, buf.readUnsignedByte());
+            position.set(Position.KEY_GSM, buf.readUnsignedByte());
 
             return position;
         }

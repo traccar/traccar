@@ -20,7 +20,6 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -169,19 +168,19 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case TAG_STATUS:
-                    position.set(Event.KEY_STATUS, buf.readUnsignedShort());
+                    position.set(Position.KEY_STATUS, buf.readUnsignedShort());
                     break;
 
                 case TAG_POWER:
-                    position.set(Event.KEY_POWER, buf.readUnsignedShort());
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort());
                     break;
 
                 case TAG_BATTERY:
-                    position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
                     break;
 
                 case TAG_ODOMETER:
-                    position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     break;
 
                 default:

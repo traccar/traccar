@@ -21,7 +21,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -86,24 +85,24 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Event.KEY_INPUT, parser.next());
-        position.set(Event.KEY_OUTPUT, parser.next());
+        position.set(Position.KEY_INPUT, parser.next());
+        position.set(Position.KEY_OUTPUT, parser.next());
 
         if (parser.hasNext()) {
             String[] values = parser.next().split(",");
             for (int i = 0; i < values.length; i++) {
-                position.set(Event.PREFIX_ADC + (i + 1), Integer.parseInt(values[i], 16));
+                position.set(Position.PREFIX_ADC + (i + 1), Integer.parseInt(values[i], 16));
             }
         }
 
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_RFID, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_RFID, parser.next());
 
         if (parser.hasNext()) {
             int value = parser.nextInt(16);
-            position.set(Event.KEY_BATTERY, value >> 8);
-            position.set(Event.KEY_GSM, (value >> 4) & 0xf);
-            position.set(Event.KEY_SATELLITES, value & 0xf);
+            position.set(Position.KEY_BATTERY, value >> 8);
+            position.set(Position.KEY_GSM, (value >> 4) & 0xf);
+            position.set(Position.KEY_SATELLITES, value & 0xf);
         }
 
         return position;

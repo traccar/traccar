@@ -23,7 +23,6 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -101,13 +100,13 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(dateBuilder.getDate());
 
                 position.setValid(parser.next().equals("A"));
-                position.set(Event.KEY_SATELLITES, parser.next());
+                position.set(Position.KEY_SATELLITES, parser.next());
 
                 position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
                 position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
 
                 position.setSpeed(parser.nextDouble());
-                position.set(Event.KEY_HDOP, parser.nextDouble());
+                position.set(Position.KEY_HDOP, parser.nextDouble());
                 position.setAltitude(parser.nextDouble());
 
             } else {
@@ -116,10 +115,10 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
-            position.set(Event.KEY_MCC, parser.nextInt());
-            position.set(Event.KEY_MNC, parser.nextInt());
-            position.set(Event.KEY_LAC, parser.nextInt());
-            position.set(Event.KEY_CID, parser.nextInt());
+            position.set(Position.KEY_MCC, parser.nextInt());
+            position.set(Position.KEY_MNC, parser.nextInt());
+            position.set(Position.KEY_LAC, parser.nextInt());
+            position.set(Position.KEY_CID, parser.nextInt());
 
             return position;
         }

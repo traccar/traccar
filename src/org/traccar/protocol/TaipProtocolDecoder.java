@@ -22,7 +22,6 @@ import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -167,15 +166,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                             break;
 
                         case "sv":
-                            position.set(Event.KEY_SATELLITES, value);
+                            position.set(Position.KEY_SATELLITES, value);
                             break;
 
                         case "bl":
-                            position.set(Event.KEY_BATTERY, value);
+                            position.set(Position.KEY_BATTERY, value);
                             break;
 
                         case "vo":
-                            position.set(Event.KEY_ODOMETER, value);
+                            position.set(Position.KEY_ODOMETER, value);
                             break;
 
                         default:

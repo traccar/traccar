@@ -24,7 +24,6 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -65,10 +64,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private void processStatus(Position position, long status) {
         if (!BitUtil.check(status, 0) || !BitUtil.check(status, 1)
                 || !BitUtil.check(status, 3) || !BitUtil.check(status, 4)) {
-            position.set(Event.KEY_ALARM, true);
+            position.set(Position.KEY_ALARM, true);
         }
-        position.set(Event.KEY_IGNITION, !BitUtil.check(status, 10));
-        position.set(Event.KEY_STATUS, status);
+        position.set(Position.KEY_IGNITION, !BitUtil.check(status, 10));
+        position.set(Position.KEY_STATUS, status);
     }
 
     private Position decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
@@ -93,7 +92,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         double latitude = readCoordinate(buf, false);
-        position.set(Event.KEY_POWER, buf.readByte());
+        position.set(Position.KEY_POWER, buf.readByte());
         double longitude = readCoordinate(buf, true);
 
         int flags = buf.readUnsignedByte() & 0x0f;

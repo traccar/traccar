@@ -24,7 +24,6 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -104,11 +103,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
-            position.set(Event.KEY_ALARM, buf.readUnsignedInt());
+            position.set(Position.KEY_ALARM, buf.readUnsignedInt());
 
             int flags = buf.readInt();
 
-            position.set(Event.KEY_IGNITION, BitUtil.check(flags, 0));
+            position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
 
             position.setValid(BitUtil.check(flags, 1));
 

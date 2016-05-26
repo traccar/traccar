@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -94,26 +93,26 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
 
         int satellites = parser.nextInt();
         position.setValid(satellites >= 3);
-        position.set(Event.KEY_SATELLITES, satellites);
+        position.set(Position.KEY_SATELLITES, satellites);
 
-        position.set(Event.KEY_INDEX, parser.nextLong());
-        position.set(Event.KEY_INPUT, parser.next());
-        position.set(Event.KEY_OUTPUT, parser.next());
+        position.set(Position.KEY_INDEX, parser.nextLong());
+        position.set(Position.KEY_INPUT, parser.next());
+        position.set(Position.KEY_OUTPUT, parser.next());
 
-        position.set(Event.PREFIX_ADC + 1, parser.next());
-        position.set(Event.PREFIX_ADC + 2, parser.next());
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
 
         // J1939 data
-        position.set(Event.KEY_OBD_SPEED, parser.next());
-        position.set(Event.KEY_RPM, parser.next());
+        position.set(Position.KEY_OBD_SPEED, parser.next());
+        position.set(Position.KEY_RPM, parser.next());
         position.set("coolant", parser.next());
-        position.set(Event.KEY_FUEL, parser.next());
+        position.set(Position.KEY_FUEL, parser.next());
         position.set("consumption", parser.next());
-        position.set(Event.PREFIX_TEMP + 1, parser.next());
-        position.set(Event.KEY_CHARGE, parser.next());
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.KEY_CHARGE, parser.next());
         position.set("tpl", parser.next());
         position.set("axle", parser.next());
-        position.set(Event.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
 
         return position;
     }

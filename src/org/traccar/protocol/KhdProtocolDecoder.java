@@ -23,7 +23,6 @@ import org.traccar.helper.BcdUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -102,7 +101,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
             } else {
 
-                position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
 
                 buf.skipBytes(4); // status
                 buf.skipBytes(8); // other

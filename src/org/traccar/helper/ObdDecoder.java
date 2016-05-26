@@ -15,7 +15,7 @@
  */
 package org.traccar.helper;
 
-import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -86,15 +86,15 @@ public final class ObdDecoder {
             case PID_COOLANT_TEMPERATURE:
                 return createEntry("coolant-temperature", intValue - 40);
             case PID_ENGINE_RPM:
-                return createEntry(Event.KEY_RPM, intValue / 4);
+                return createEntry(Position.KEY_RPM, intValue / 4);
             case PID_VEHICLE_SPEED:
-                return createEntry(Event.KEY_OBD_SPEED, intValue);
+                return createEntry(Position.KEY_OBD_SPEED, intValue);
             case PID_THROTTLE_POSITION:
                 return createEntry("throttle", intValue * 100 / 255);
             case PID_MIL_DISTANCE:
                 return createEntry("mil-distance", intValue);
             case PID_FUEL_LEVEL:
-                return createEntry(Event.KEY_FUEL, intValue * 100 / 255);
+                return createEntry(Position.KEY_FUEL, intValue * 100 / 255);
             case PID_DISTANCE_CLEARED:
                 return createEntry("cleared-distance", intValue);
             default:

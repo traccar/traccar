@@ -9,12 +9,10 @@ import org.junit.Assert;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -198,16 +196,16 @@ public class ProtocolTest {
             Assert.assertFalse("no attributes", attributes.isEmpty());
         }
 
-        if (attributes.containsKey(Event.KEY_LAC) || attributes.containsKey(Event.KEY_CID)) {
-            checkInteger(attributes.get(Event.KEY_LAC), 1, 65535);
-            checkInteger(attributes.get(Event.KEY_CID), 0, 268435455);
+        if (attributes.containsKey(Position.KEY_LAC) || attributes.containsKey(Position.KEY_CID)) {
+            checkInteger(attributes.get(Position.KEY_LAC), 1, 65535);
+            checkInteger(attributes.get(Position.KEY_CID), 0, 268435455);
         }
 
-        if (attributes.containsKey(Event.KEY_MCC) || attributes.containsKey(Event.KEY_MNC)) {
-            checkInteger(attributes.get(Event.KEY_MCC), 100, 999);
-            checkInteger(attributes.get(Event.KEY_MNC), 0, 999);
-            Assert.assertTrue("value missing", attributes.containsKey(Event.KEY_LAC));
-            Assert.assertTrue("value missing", attributes.containsKey(Event.KEY_CID));
+        if (attributes.containsKey(Position.KEY_MCC) || attributes.containsKey(Position.KEY_MNC)) {
+            checkInteger(attributes.get(Position.KEY_MCC), 100, 999);
+            checkInteger(attributes.get(Position.KEY_MNC), 0, 999);
+            Assert.assertTrue("value missing", attributes.containsKey(Position.KEY_LAC));
+            Assert.assertTrue("value missing", attributes.containsKey(Position.KEY_CID));
         }
 
     }

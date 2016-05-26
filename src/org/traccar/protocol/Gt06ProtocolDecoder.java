@@ -24,7 +24,6 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -106,7 +105,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         int length = buf.readUnsignedByte();
-        position.set(Event.KEY_SATELLITES, BitUtil.to(length, 4));
+        position.set(Position.KEY_SATELLITES, BitUtil.to(length, 4));
         length = BitUtil.from(length, 4);
 
         double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
@@ -128,7 +127,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(longitude);
 
         if (BitUtil.check(flags, 14)) {
-            position.set(Event.KEY_IGNITION, BitUtil.check(flags, 15));
+            position.set(Position.KEY_IGNITION, BitUtil.check(flags, 15));
         }
 
         buf.skipBytes(length - 12); // skip reserved
@@ -141,10 +140,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             lbsLength = buf.readUnsignedByte();
         }
 
-        position.set(Event.KEY_MCC, buf.readUnsignedShort());
-        position.set(Event.KEY_MNC, buf.readUnsignedByte());
-        position.set(Event.KEY_LAC, buf.readUnsignedShort());
-        position.set(Event.KEY_CID, buf.readUnsignedMedium());
+        position.set(Position.KEY_MCC, buf.readUnsignedShort());
+        position.set(Position.KEY_MNC, buf.readUnsignedByte());
+        position.set(Position.KEY_LAC, buf.readUnsignedShort());
+        position.set(Position.KEY_CID, buf.readUnsignedMedium());
 
         if (lbsLength > 0) {
             buf.skipBytes(lbsLength - 9);
@@ -153,14 +152,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeStatus(Position position, ChannelBuffer buf) {
 
-        position.set(Event.KEY_ALARM, true);
+        position.set(Position.KEY_ALARM, true);
 
         int flags = buf.readUnsignedByte();
 
-        position.set(Event.KEY_IGNITION, BitUtil.check(flags, 1));
-        position.set(Event.KEY_STATUS, flags);
-        position.set(Event.KEY_POWER, buf.readUnsignedByte());
-        position.set(Event.KEY_GSM, buf.readUnsignedByte());
+        position.set(Position.KEY_IGNITION, BitUtil.check(flags, 1));
+        position.set(Position.KEY_STATUS, flags);
+        position.set(Position.KEY_POWER, buf.readUnsignedByte());
+        position.set(Position.KEY_GSM, buf.readUnsignedByte());
     }
 
     @Override
@@ -246,14 +245,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
-                    position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                 }
 
                 if (buf.readableBytes() > 6) {
                     buf.skipBytes(buf.readableBytes() - 6);
                 }
                 int index = buf.readUnsignedShort();
-                position.set(Event.KEY_INDEX, index);
+                position.set(Position.KEY_INDEX, index);
                 sendResponse(channel, type, index);
 
                 return position;

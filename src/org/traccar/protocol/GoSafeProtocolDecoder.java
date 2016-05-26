@@ -22,7 +22,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -137,10 +136,10 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(time);
         }
 
-        position.set(Event.KEY_EVENT, parser.next());
+        position.set(Position.KEY_EVENT, parser.next());
 
         position.setValid(parser.next().equals("A"));
-        position.set(Event.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.next());
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
@@ -148,23 +147,23 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
-        position.set(Event.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.next());
 
         if (parser.hasNext(4)) {
-            position.set(Event.KEY_MCC, parser.nextInt());
-            position.set(Event.KEY_MNC, parser.nextInt());
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Position.KEY_MCC, parser.nextInt());
+            position.set(Position.KEY_MNC, parser.nextInt());
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_CID, parser.nextInt(16));
         }
 
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_POWER, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_POWER, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
 
         String status = parser.next();
         if (status != null) {
-            position.set(Event.KEY_IGNITION, BitUtil.check(Integer.parseInt(status, 16), 13));
-            position.set(Event.KEY_STATUS, status);
+            position.set(Position.KEY_IGNITION, BitUtil.check(Integer.parseInt(status, 16), 13));
+            position.set(Position.KEY_STATUS, status);
         }
 
         if (parser.hasNext()) {
@@ -212,7 +211,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(parser.nextDouble());
             position.setCourse(parser.nextDouble());
 
-            position.set(Event.KEY_HDOP, parser.next());
+            position.set(Position.KEY_HDOP, parser.next());
 
             dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
             position.setTime(dateBuilder.getDate());

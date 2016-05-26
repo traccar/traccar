@@ -28,7 +28,6 @@ import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -155,39 +154,39 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(flags, 3)) {
-                    position.set(Event.KEY_ODOMETER, buf.readUnsignedShort());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedShort());
                 }
 
                 if (BitUtil.check(flags, 4)) {
-                    position.set(Event.KEY_FUEL, buf.readUnsignedInt() + "|" + buf.readUnsignedInt());
+                    position.set(Position.KEY_FUEL, buf.readUnsignedInt() + "|" + buf.readUnsignedInt());
                     position.set("hours1", buf.readUnsignedShort());
                     position.set("hours2", buf.readUnsignedShort());
                 }
 
                 if (BitUtil.check(flags, 5)) {
-                    position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort() & 0x03ff);
-                    position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort() & 0x03ff);
-                    position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort() & 0x03ff);
-                    position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Position.PREFIX_ADC + 4, buf.readUnsignedShort() & 0x03ff);
                 }
 
                 if (BitUtil.check(flags, 6)) {
-                    position.set(Event.PREFIX_TEMP + 1, buf.readByte());
+                    position.set(Position.PREFIX_TEMP + 1, buf.readByte());
                     buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
-                    position.set(Event.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
+                    position.set(Position.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
                     buf.readUnsignedShort(); // old sensor state (& 0x0fff)
                 }
 
                 if (BitUtil.check(flags, 7)) {
-                    position.set(Event.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
-                    position.set(Event.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
+                    position.set(Position.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
                     buf.readByte(); // microcontroller temperature
 
-                    position.set(Event.KEY_GSM, (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
+                    position.set(Position.KEY_GSM, (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
 
                     int satellites = buf.readUnsignedByte() & 0x0f;
                     position.setValid(satellites >= 3);
-                    position.set(Event.KEY_SATELLITES, satellites);
+                    position.set(Position.KEY_SATELLITES, satellites);
                 }
                 positions.add(position);
             }
@@ -227,7 +226,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readUnsignedShort());
             position.setSpeed(buf.readUnsignedByte());
             position.setCourse(buf.readByte());
-            position.set(Event.KEY_ODOMETER, new FloatReader().readFloat(buf));
+            position.set(Position.KEY_ODOMETER, new FloatReader().readFloat(buf));
         }
 
         if (BitUtil.check(flags, 1)) {
@@ -239,34 +238,34 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(flags, 2)) {
             position.set("engine", buf.readUnsignedShort() * 0.125);
             position.set("pedals", buf.readUnsignedByte());
-            position.set(Event.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
+            position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
             buf.readUnsignedShort(); // service odometer
         }
 
         if (BitUtil.check(flags, 3)) {
-            position.set(Event.KEY_FUEL, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort());
+            position.set(Position.KEY_FUEL, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 4, buf.readUnsignedShort());
         }
 
         if (BitUtil.check(flags, 4)) {
-            position.set(Event.PREFIX_TEMP + 1, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 1, buf.readByte());
             buf.getUnsignedByte(buf.readerIndex()); // control (>> 4)
-            position.set(Event.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
+            position.set(Position.KEY_INPUT, buf.readUnsignedShort() & 0x0fff);
             buf.readUnsignedShort(); // old sensor state (& 0x0fff)
         }
 
         if (BitUtil.check(flags, 5)) {
-            position.set(Event.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
-            position.set(Event.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
+            position.set(Position.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
             buf.readByte(); // microcontroller temperature
 
-            position.set(Event.KEY_GSM, buf.getUnsignedByte(buf.readerIndex()) >> 5);
+            position.set(Position.KEY_GSM, buf.getUnsignedByte(buf.readerIndex()) >> 5);
 
             int satellites = buf.readUnsignedByte() & 0x1f;
             position.setValid(satellites >= 3);
-            position.set(Event.KEY_SATELLITES, satellites);
+            position.set(Position.KEY_SATELLITES, satellites);
         }
 
         // other data

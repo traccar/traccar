@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -100,11 +99,11 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
 
         int satellites = parser.nextInt();
         position.setValid(satellites >= 3);
-        position.set(Event.KEY_SATELLITES, satellites);
+        position.set(Position.KEY_SATELLITES, satellites);
 
         String reportId = parser.next();
 
-        position.set(Event.KEY_STATUS, parser.next());
+        position.set(Position.KEY_STATUS, parser.next());
 
         // Send response
         if ((type.equals("KP") || type.equals("EP")) && channel != null) {

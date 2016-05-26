@@ -21,7 +21,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -96,13 +95,13 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             int flags = buf.readUnsignedByte();
             position.setValid((flags & 0x80) != 0);
-            position.set(Event.KEY_SATELLITES, flags & 0x0f);
+            position.set(Position.KEY_SATELLITES, flags & 0x0f);
 
-            position.set(Event.KEY_STATUS, buf.readUnsignedByte());
+            position.set(Position.KEY_STATUS, buf.readUnsignedByte());
             position.set("key", buf.readUnsignedByte());
             position.set("oil", buf.readUnsignedShort() / 10.0);
-            position.set(Event.KEY_POWER, buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
-            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+            position.set(Position.KEY_POWER, buf.readUnsignedByte() + buf.readUnsignedByte() / 100.0);
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
             return position;
         }

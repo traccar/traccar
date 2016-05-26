@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -82,12 +81,12 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        position.set(Event.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.next());
 
         position.setAltitude(parser.nextDouble());
 
         int fix = parser.nextInt();
-        position.set(Event.KEY_GPS, fix);
+        position.set(Position.KEY_GPS, fix);
         position.setValid(fix > 0);
 
         position.setCourse(parser.nextDouble());
@@ -96,7 +95,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Event.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.next());
 
         return position;
     }

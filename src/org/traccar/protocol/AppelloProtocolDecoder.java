@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -83,7 +82,7 @@ public class AppelloProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         position.setAltitude(parser.nextDouble());
 

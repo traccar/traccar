@@ -23,7 +23,6 @@ import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -132,7 +131,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             ChannelBuffer value = values.get(i);
             switch (buf.readInt()) {
                 case 0x20D:
-                    position.set(Event.KEY_RPM, ChannelBuffers.swapShort(value.readShort()));
+                    position.set(Position.KEY_RPM, ChannelBuffers.swapShort(value.readShort()));
                     position.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     position.set("battery-voltage", ChannelBuffers.swapShort(value.readShort()) * 0.01);
                     position.set("supply-air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
@@ -222,7 +221,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         int event = buf.readUnsignedByte();
-        position.set(Event.KEY_EVENT, event);
+        position.set(Position.KEY_EVENT, event);
         position.set("event-info", buf.readUnsignedByte());
 
         if ((selector & 0x0008) != 0) {
@@ -239,7 +238,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
-            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0010) != 0) {
@@ -249,19 +248,19 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0040) != 0) {
-            position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+            position.set(Position.KEY_INPUT, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0020) != 0) {
-            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 3, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 4, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 4, buf.readUnsignedShort());
         }
 
         if ((selector & 0x8000) != 0) {
-            position.set(Event.KEY_POWER, buf.readUnsignedShort() / 1000.0);
-            position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
         }
 
         // Pulse rate 1
@@ -285,11 +284,11 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0040) != 0) {
-            position.set(Event.KEY_OUTPUT, buf.readUnsignedByte());
+            position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0200) != 0) {
-            position.set(Event.KEY_RFID, (((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
+            position.set(Position.KEY_RFID, (((long) buf.readUnsignedShort()) << 32) + buf.readUnsignedInt());
         }
 
         if ((selector & 0x0400) != 0) {

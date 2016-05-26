@@ -21,7 +21,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -115,7 +114,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_EVENT, parser.next());
+        position.set(Position.KEY_EVENT, parser.next());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -128,18 +127,18 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_SATELLITES, parser.next());
-        position.set(Event.KEY_HDOP, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_HDOP, parser.next());
 
         if (newFormat) {
-            position.set(Event.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.next());
         }
 
-        position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.KEY_GSM, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_GSM, parser.next());
 
         if (!newFormat) {
-            position.set(Event.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.next());
         }
 
         position.setValid(parser.nextInt() == 1);

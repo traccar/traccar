@@ -21,7 +21,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -78,11 +77,11 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
 
         int satellites = parser.nextInt();
         position.setValid(satellites >= 3);
-        position.set(Event.KEY_SATELLITES, satellites);
+        position.set(Position.KEY_SATELLITES, satellites);
 
-        position.set(Event.KEY_EVENT, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.KEY_EVENT, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
 
         return position;
     }

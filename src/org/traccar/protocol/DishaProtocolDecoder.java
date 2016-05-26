@@ -20,7 +20,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -87,17 +86,17 @@ public class DishaProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_SATELLITES, parser.next());
-        position.set(Event.KEY_HDOP, parser.next());
-        position.set(Event.KEY_GSM, parser.next());
-        position.set(Event.KEY_CHARGE, parser.nextInt() == 2);
-        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_GSM, parser.next());
+        position.set(Position.KEY_CHARGE, parser.nextInt() == 2);
+        position.set(Position.KEY_BATTERY, parser.next());
 
-        position.set(Event.PREFIX_ADC + 1, parser.nextInt());
-        position.set(Event.PREFIX_ADC + 2, parser.nextInt());
+        position.set(Position.PREFIX_ADC + 1, parser.nextInt());
+        position.set(Position.PREFIX_ADC + 2, parser.nextInt());
 
-        position.set(Event.KEY_ODOMETER, parser.next());
-        position.set(Event.KEY_INPUT, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_INPUT, parser.next());
 
         return position;
     }

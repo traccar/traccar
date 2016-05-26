@@ -23,7 +23,6 @@ import org.traccar.Context;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -139,19 +138,19 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(buf.readInt() / 1000000.0);
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
                     position.setCourse(buf.readUnsignedShort());
-                    position.set(Event.KEY_HDOP, buf.readUnsignedShort());
+                    position.set(Position.KEY_HDOP, buf.readUnsignedShort());
                     break;
 
                 case DATA_LBS:
-                    position.set(Event.KEY_MCC, buf.readUnsignedShort());
-                    position.set(Event.KEY_MNC, buf.readUnsignedShort());
-                    position.set(Event.KEY_LAC, buf.readUnsignedShort());
+                    position.set(Position.KEY_MCC, buf.readUnsignedShort());
+                    position.set(Position.KEY_MNC, buf.readUnsignedShort());
+                    position.set(Position.KEY_LAC, buf.readUnsignedShort());
                     if (length == 11) {
-                        position.set(Event.KEY_CID, buf.readUnsignedInt());
+                        position.set(Position.KEY_CID, buf.readUnsignedInt());
                     } else {
-                        position.set(Event.KEY_CID, buf.readUnsignedShort());
+                        position.set(Position.KEY_CID, buf.readUnsignedShort());
                     }
-                    position.set(Event.KEY_GSM, -buf.readUnsignedByte());
+                    position.set(Position.KEY_GSM, -buf.readUnsignedByte());
                     if (length > 9 && length != 11) {
                         buf.skipBytes(length - 9);
                     }
@@ -159,19 +158,19 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
                 case DATA_STATUS:
                     int status = buf.readUnsignedShort();
-                    position.set(Event.KEY_IGNITION, BitUtil.check(status, 9));
-                    position.set(Event.KEY_STATUS, status);
-                    position.set(Event.KEY_ALARM, buf.readUnsignedShort());
+                    position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
+                    position.set(Position.KEY_STATUS, status);
+                    position.set(Position.KEY_ALARM, buf.readUnsignedShort());
                     break;
 
                 case DATA_ODOMETER:
-                    position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     break;
 
                 case DATA_ADC:
                     for (int i = 0; i < length / 2; i++) {
                         int value = buf.readUnsignedShort();
-                        position.set(Event.PREFIX_ADC + BitUtil.from(value, 12), BitUtil.to(value, 12));
+                        position.set(Position.PREFIX_ADC + BitUtil.from(value, 12), BitUtil.to(value, 12));
                     }
                     break;
 
@@ -205,16 +204,16 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_VIN:
-                    position.set(Event.KEY_VIN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
+                    position.set(Position.KEY_VIN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
                     break;
 
                 case DATA_RFID:
-                    position.set(Event.KEY_RFID, buf.readBytes(length - 1).toString(StandardCharsets.US_ASCII));
+                    position.set(Position.KEY_RFID, buf.readBytes(length - 1).toString(StandardCharsets.US_ASCII));
                     position.set("authorized", buf.readUnsignedByte() != 0);
                     break;
 
                 case DATA_EVENT:
-                    position.set(Event.KEY_EVENT, buf.readUnsignedByte());
+                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                     if (length > 1) {
                         position.set("event-mask", buf.readUnsignedInt());
                     }

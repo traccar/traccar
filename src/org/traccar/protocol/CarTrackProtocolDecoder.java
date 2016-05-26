@@ -21,7 +21,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -87,7 +86,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Event.PREFIX_IO + 1, parser.next());
+        position.set(Position.PREFIX_IO + 1, parser.next());
 
         String odometer = parser.next();
         odometer = odometer.replace(":", "A");
@@ -96,10 +95,10 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         odometer = odometer.replace("=", "D");
         odometer = odometer.replace(">", "E");
         odometer = odometer.replace("?", "F");
-        position.set(Event.KEY_ODOMETER, Integer.parseInt(odometer, 16));
+        position.set(Position.KEY_ODOMETER, Integer.parseInt(odometer, 16));
 
-        position.set(Event.KEY_ALARM, parser.next());
-        position.set(Event.PREFIX_ADC + 1, parser.next());
+        position.set(Position.KEY_ALARM, parser.next());
+        position.set(Position.PREFIX_ADC + 1, parser.next());
 
         return position;
     }

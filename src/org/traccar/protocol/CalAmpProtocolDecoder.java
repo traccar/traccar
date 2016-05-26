@@ -21,7 +21,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -86,35 +85,35 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_MINI_EVENT_REPORT) {
-            position.set(Event.KEY_SATELLITES, buf.getUnsignedByte(buf.readerIndex()) & 0xf);
+            position.set(Position.KEY_SATELLITES, buf.getUnsignedByte(buf.readerIndex()) & 0xf);
             position.setValid((buf.readUnsignedByte() & 0x20) == 0);
         } else {
-            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
             position.setValid((buf.readUnsignedByte() & 0x08) == 0);
         }
 
         if (type != MSG_MINI_EVENT_REPORT) {
             position.set("carrier", buf.readUnsignedShort());
-            position.set(Event.KEY_GSM, buf.readShort());
+            position.set(Position.KEY_GSM, buf.readShort());
         }
 
         position.set("modem", buf.readUnsignedByte());
 
         if (type != MSG_MINI_EVENT_REPORT) {
-            position.set(Event.KEY_HDOP, buf.readUnsignedByte());
+            position.set(Position.KEY_HDOP, buf.readUnsignedByte());
         }
 
-        position.set(Event.KEY_INPUT, buf.readUnsignedByte());
+        position.set(Position.KEY_INPUT, buf.readUnsignedByte());
 
         if (type != MSG_MINI_EVENT_REPORT) {
-            position.set(Event.KEY_STATUS, buf.readUnsignedByte());
+            position.set(Position.KEY_STATUS, buf.readUnsignedByte());
         }
 
         if (type == MSG_EVENT_REPORT || type == MSG_MINI_EVENT_REPORT) {
             if (type != MSG_MINI_EVENT_REPORT) {
                 buf.readUnsignedByte(); // event index
             }
-            position.set(Event.KEY_EVENT, buf.readUnsignedByte());
+            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
         }
 
         int accType = BitUtil.from(buf.getUnsignedByte(buf.readerIndex()), 6);

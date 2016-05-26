@@ -22,7 +22,6 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -58,7 +57,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_INDEX, buf.readUnsignedShort());
+        position.set(Position.KEY_INDEX, buf.readUnsignedShort());
 
         int type = buf.readUnsignedByte();
 
@@ -66,8 +65,8 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Event.KEY_POWER, power);
-            position.set(Event.KEY_GSM, gsm);
+            position.set(Position.KEY_POWER, power);
+            position.set(Position.KEY_GSM, gsm);
 
             if (channel != null) {
                 byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};

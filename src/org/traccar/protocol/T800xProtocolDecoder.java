@@ -23,7 +23,6 @@ import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -85,7 +84,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
 
-            position.set(Event.KEY_INDEX, index);
+            position.set(Position.KEY_INDEX, index);
 
             buf.readUnsignedShort(); // acc on interval
             buf.readUnsignedShort(); // acc off interval
@@ -102,23 +101,23 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // drag alarm setting
 
             int io = buf.readUnsignedShort();
-            position.set(Event.KEY_IGNITION, BitUtil.check(io, 14));
+            position.set(Position.KEY_IGNITION, BitUtil.check(io, 14));
             position.set("ac", BitUtil.check(io, 13));
 
-            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Event.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
 
-            position.set(Event.KEY_ALARM, buf.readUnsignedByte());
+            position.set(Position.KEY_ALARM, buf.readUnsignedByte());
 
             buf.readUnsignedByte(); // reserved
 
-            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
             int battery = BcdUtil.readInteger(buf, 2);
             if (battery == 0) {
                 battery = 100;
             }
-            position.set(Event.KEY_BATTERY, battery);
+            position.set(Position.KEY_BATTERY, battery);
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setYear(BcdUtil.readInteger(buf, 2))
@@ -147,10 +146,10 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 buf.readBytes(array);
                 ChannelBuffer swapped = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, array);
 
-                position.set(Event.KEY_MCC, swapped.readUnsignedShort());
-                position.set(Event.KEY_MNC, swapped.readUnsignedShort());
-                position.set(Event.KEY_LAC, swapped.readUnsignedShort());
-                position.set(Event.KEY_CID, swapped.readUnsignedShort());
+                position.set(Position.KEY_MCC, swapped.readUnsignedShort());
+                position.set(Position.KEY_MNC, swapped.readUnsignedShort());
+                position.set(Position.KEY_LAC, swapped.readUnsignedShort());
+                position.set(Position.KEY_CID, swapped.readUnsignedShort());
 
                 // two more cell towers
 

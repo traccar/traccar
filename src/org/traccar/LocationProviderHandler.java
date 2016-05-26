@@ -21,7 +21,6 @@ import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.traccar.location.LocationProvider;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class LocationProviderHandler implements ChannelUpstreamHandler {
@@ -49,7 +48,7 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
                 locationProvider.getLocation(position.getAttributes(), new LocationProvider.LocationProviderCallback() {
                     @Override
                     public void onSuccess(double latitude, double longitude) {
-                        position.set(Event.KEY_APPROXIMATE, true);
+                        position.set(Position.KEY_APPROXIMATE, true);
                         position.setValid(true);
                         position.setFixTime(position.getDeviceTime());
                         position.setLatitude(latitude);
