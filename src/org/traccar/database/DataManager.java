@@ -358,6 +358,9 @@ public class DataManager implements IdentityManager {
         QueryBuilder.create(dataSource, getQuery("database.updateDeviceStatus"))
                 .setObject(device)
                 .executeUpdate();
+        Device cachedDevice = getDeviceById(device.getId());
+        cachedDevice.setStatus(device.getStatus());
+        cachedDevice.setMotion(device.getMotion());
     }
 
     public void removeDevice(long deviceId) throws SQLException {
@@ -466,6 +469,8 @@ public class DataManager implements IdentityManager {
                 .setDate("now", new Date())
                 .setObject(position)
                 .executeUpdate();
+        Device device = getDeviceById(position.getDeviceId());
+        device.setPositionId(position.getId());
     }
 
     public Collection<Position> getLatestPositions() throws SQLException {

@@ -1,5 +1,6 @@
 package org.traccar;
 
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -14,9 +15,12 @@ public abstract class BaseEventHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        Position lastPosition = Context.getConnectionManager().getLastPosition(position.getDeviceId());
-        if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0) {
-            isLastPosition = true;
+        Device device = Context.getDataManager().getDeviceById(position.getDeviceId());
+        if (device != null) {
+            long lastPositionId = device.getPositionId();
+            if (position.getId() == lastPositionId) {
+                isLastPosition = true;
+            }
         }
 
         Event event = analizePosition(position);
