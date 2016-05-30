@@ -170,10 +170,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        if (Context.getConfig().getBoolean(getProtocolName() + ".mph")) {
-            position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
-        } else {
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        switch (Context.getConfig().getString(getProtocolName() + ".speed", "kmh")) {
+            case "kn":
+                position.setSpeed(parser.nextDouble());
+                break;
+            case "mph":
+                position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
+                break;
+            default:
+                position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+                break;
         }
 
         dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
