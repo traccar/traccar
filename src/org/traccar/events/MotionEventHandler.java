@@ -12,10 +12,10 @@ import org.traccar.model.Position;
 public class MotionEventHandler extends BaseEventHandler {
 
     private static final double SPEED_THRESHOLD  = 0.01;
-    private long suppressRepeated;
+    private int suppressRepeated;
 
     public MotionEventHandler() {
-        suppressRepeated = Context.getConfig().getLong("event.suppressrepeated", 60);
+        suppressRepeated = Context.getConfig().getInteger("event.suppressRepeated", 60);
     }
 
     @Override
@@ -35,10 +35,10 @@ public class MotionEventHandler extends BaseEventHandler {
         String motion = device.getMotion();
         if (valid && speed > SPEED_THRESHOLD && !motion.equals(Device.STATUS_MOVING)) {
             Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_MOVING, null);
-            event = new Event(Event.DEVICE_MOVING, position.getDeviceId(), position.getId());
+            event = new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId());
         } else if (valid && speed < SPEED_THRESHOLD && motion.equals(Device.STATUS_MOVING)) {
             Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_STOPPED, null);
-            event = new Event(Event.DEVICE_STOPPED, position.getDeviceId(), position.getId());
+            event = new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId());
         }
         try {
             if (event != null && !Context.getDataManager().getLastEvents(

@@ -30,18 +30,18 @@ public class Event extends Message {
         this.id = id;
     }
 
-    public static final String COMMAND_RESULT = "command-result";
+    public static final String TYPE_COMMAND_RESULT = "commandResult";
 
-    public static final String DEVICE_ONLINE = "device-online";
-    public static final String DEVICE_OFFLINE = "device-offline";
+    public static final String TYPE_DEVICE_ONLINE = "deviceOnline";
+    public static final String TYPE_DEVICE_OFFLINE = "deviceOffline";
 
-    public static final String DEVICE_MOVING = "device-moving";
-    public static final String DEVICE_STOPPED = "device-stopped";
+    public static final String TYPE_DEVICE_MOVING = "deviceMoving";
+    public static final String TYPE_DEVICE_STOPPED = "deviceStopped";
 
-    public static final String DEVICE_OVERSPEED = "device-overspeed";
+    public static final String TYPE_DEVICE_OVERSPEED = "deviceOverspeed";
 
-    public static final String GEOFENCE_ENTER = "geofence-enter";
-    public static final String GEOFENCE_EXIT = "geofence-exit";
+    public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
+    public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
 
     private Date eventTime;
 

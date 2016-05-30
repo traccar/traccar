@@ -17,12 +17,12 @@
     <entry key='logger.level'>all</entry>
     <entry key='logger.file'>/opt/traccar/logs/tracker-server.log</entry>
 
-    <entry key='event.suppressrepeated'>60</entry>
+    <entry key='event.suppressRepeated'>60</entry>
 
-    <entry key='event.overspeedhandler'>true</entry>
-    <entry key='event.globalspeedlimit'>90</entry>
+    <entry key='event.overspeedHandler'>true</entry>
+    <entry key='event.globalSpeedLimit'>90</entry>
 
-    <entry key='event.motionhandler'>true</entry>
+    <entry key='event.motionHandler'>true</entry>
 
     <!-- DATABASE CONFIG -->
 
@@ -183,10 +183,6 @@
 
     <entry key='database.selectEvents'>
         SELECT * FROM events WHERE deviceId = :deviceId AND type LIKE :type AND eventTime BETWEEN :from AND :to ORDER BY eventTime DESC;
-    </entry>
-
-    <entry key='database.selectLastEvents'>
-        SELECT * FROM events WHERE deviceId = :deviceId AND type LIKE :type AND eventTime >= NOW() - INTERVAL :interval SECOND ORDER BY eventTime DESC;
     </entry>
 
     <!-- PROTOCOL CONFIG -->

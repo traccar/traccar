@@ -90,9 +90,9 @@ public class ConnectionManager {
             device.setMotion(status);
         } else {
             if (!status.equals(device.getStatus())) {
-                Event event = new Event(Event.DEVICE_OFFLINE, deviceId);
+                Event event = new Event(Event.TYPE_DEVICE_OFFLINE, deviceId);
                 if (status.equals(Device.STATUS_ONLINE)) {
-                    event.setType(Event.DEVICE_ONLINE);
+                    event.setType(Event.TYPE_DEVICE_ONLINE);
                 }
                 updateEvent(event);
             }

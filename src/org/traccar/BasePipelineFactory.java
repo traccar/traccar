@@ -132,11 +132,11 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         commandResultEventHandler = new CommandResultEventHandler();
 
-        if (Context.getConfig().getBoolean("event.overspeedhandler")) {
+        if (Context.getConfig().getBoolean("event.overspeedHandler")) {
             overspeedEventHandler = new OverspeedEventHandler();
         }
 
-        if (Context.getConfig().getBoolean("event.motionhandler")) {
+        if (Context.getConfig().getBoolean("event.motionHandler")) {
             motionEventHandler = new MotionEventHandler();
         }
 

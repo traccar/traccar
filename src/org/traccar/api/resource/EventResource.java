@@ -32,7 +32,7 @@ public class EventResource extends BaseResource {
     @GET
     public Collection<Event> get(
             @QueryParam("deviceId") long deviceId, @QueryParam("type") String type,
-            @QueryParam("interval") long interval) throws SQLException {
+            @QueryParam("interval") int interval) throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         return Context.getDataManager().getLastEvents(deviceId, type, interval);
         }

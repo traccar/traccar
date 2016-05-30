@@ -43,6 +43,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -510,12 +511,11 @@ public class DataManager implements IdentityManager {
                 .executeQuery(Event.class);
     }
 
-    public Collection<Event> getLastEvents(long deviceId, String type, long interval) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectLastEvents"))
-                .setLong("deviceId", deviceId)
-                .setString("type", type)
-                .setLong("interval", interval)
-                .executeQuery(Event.class);
+    public Collection<Event> getLastEvents(long deviceId, String type, int interval) throws SQLException {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, -interval);
+        Date to = calendar.getTime();
+        return getEvents(deviceId, type, new Date(), to);
     }
 
 }
