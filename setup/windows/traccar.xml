@@ -177,12 +177,12 @@
     </entry>
 
     <entry key='database.insertEvent'>
-        INSERT INTO events (type, eventTime, deviceId, positionId, attributes)
-        VALUES (:type, :eventTime, :deviceId, :positionId, :attributes);
+        INSERT INTO events (type, serverTime, deviceId, positionId, attributes)
+        VALUES (:type, :serverTime, :deviceId, :positionId, :attributes);
     </entry>
 
     <entry key='database.selectEvents'>
-        SELECT * FROM events WHERE deviceId = :deviceId AND type LIKE :type AND eventTime BETWEEN :from AND :to ORDER BY eventTime DESC;
+        SELECT * FROM events WHERE deviceId = :deviceId AND type LIKE :type AND serverTime BETWEEN :from AND :to ORDER BY serverTime DESC;
     </entry>
 
     <!-- PROTOCOL CONFIG -->

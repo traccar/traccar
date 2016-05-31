@@ -14,7 +14,7 @@
       <column name="type" type="VARCHAR(128)">
         <constraints nullable="false" />
       </column>
-      <column name="eventtime" type="TIMESTAMP">
+      <column name="servertime" type="TIMESTAMP">
         <constraints nullable="false" />
       </column>
       <column name="deviceid" type="INT" />

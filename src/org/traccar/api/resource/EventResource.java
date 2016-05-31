@@ -35,5 +35,5 @@ public class EventResource extends BaseResource {
             @QueryParam("interval") int interval) throws SQLException {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
         return Context.getDataManager().getLastEvents(deviceId, type, interval);
-        }
+    }
 }

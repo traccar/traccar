@@ -8,13 +8,13 @@ public class Event extends Message {
         this.setType(type);
         this.setDeviceId(deviceId);
         this.setPositionId(positionId);
-        this.eventTime = new Date();
+        this.serverTime = new Date();
     }
 
     public Event(String type, long deviceId) {
         this.setType(type);
         this.setDeviceId(deviceId);
-        this.eventTime = new Date();
+        this.serverTime = new Date();
     }
 
     public Event() {
@@ -43,21 +43,21 @@ public class Event extends Message {
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
 
-    private Date eventTime;
+    private Date serverTime;
 
-    public Date getEventTime() {
-        if (eventTime != null) {
-            return new Date(eventTime.getTime());
+    public Date getServerTime() {
+        if (serverTime != null) {
+            return new Date(serverTime.getTime());
         } else {
             return null;
         }
     }
 
-    public void setEventTime(Date eventTime) {
-        if (eventTime != null) {
-            this.eventTime = new Date(eventTime.getTime());
+    public void setServerTime(Date serverTime) {
+        if (serverTime != null) {
+            this.serverTime = new Date(serverTime.getTime());
         } else {
-            this.eventTime = null;
+            this.serverTime = null;
         }
     }
 
