@@ -9,7 +9,7 @@ public class PatternUtilTest {
     @Test
     public void testCheckPattern() {
 
-        assertEquals("ab", PatternUtil.checkPattern("abc", "abd").pattern);
+        assertEquals("ab", PatternUtil.checkPattern("abc", "abd").getPattern());
 
     }
 
