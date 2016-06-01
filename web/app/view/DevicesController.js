@@ -30,6 +30,11 @@ Ext.define('Traccar.view.DevicesController', {
                     selectDevice: 'selectDevice',
                     selectReport: 'selectReport'
                 }
+            },
+            store: {
+                '*': {
+                    update: 'onUpdateDevice'
+                }
             }
         }
     },
@@ -117,5 +122,9 @@ Ext.define('Traccar.view.DevicesController', {
         if (position !== undefined) {
             this.getView().getSelectionModel().deselectAll();
         }
+    },
+
+    onUpdateDevice: function () {
+        this.view.fireEvent('selectionchange',this.view.getSelectionModel());
     }
 });
