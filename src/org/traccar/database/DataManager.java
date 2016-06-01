@@ -27,6 +27,7 @@ import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Group;
 import org.traccar.model.GroupPermission;
@@ -42,6 +43,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -357,6 +359,9 @@ public class DataManager implements IdentityManager {
         QueryBuilder.create(dataSource, getQuery("database.updateDeviceStatus"))
                 .setObject(device)
                 .executeUpdate();
+        Device cachedDevice = getDeviceById(device.getId());
+        cachedDevice.setStatus(device.getStatus());
+        cachedDevice.setMotion(device.getMotion());
     }
 
     public void removeDevice(long deviceId) throws SQLException {
@@ -465,6 +470,8 @@ public class DataManager implements IdentityManager {
                 .setDate("now", new Date())
                 .setObject(position)
                 .executeUpdate();
+        Device device = getDeviceById(position.getDeviceId());
+        device.setPositionId(position.getId());
     }
 
     public Collection<Position> getLatestPositions() throws SQLException {
@@ -482,4 +489,33 @@ public class DataManager implements IdentityManager {
                 .setObject(server)
                 .executeUpdate();
     }
+
+    public Event getEvent(long eventId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectEvent"))
+                .setLong("id", eventId)
+                .executeQuerySingle(Event.class);
+    }
+
+    public void addEvent(Event event) throws SQLException {
+        event.setId(QueryBuilder.create(dataSource, getQuery("database.insertEvent"), true)
+                .setObject(event)
+                .executeUpdate());
+    }
+
+    public Collection<Event> getEvents(long deviceId, String type, Date from, Date to) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectEvents"))
+                .setLong("deviceId", deviceId)
+                .setString("type", type)
+                .setDate("from", from)
+                .setDate("to", to)
+                .executeQuery(Event.class);
+    }
+
+    public Collection<Event> getLastEvents(long deviceId, String type, int interval) throws SQLException {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, -interval);
+        Date to = calendar.getTime();
+        return getEvents(deviceId, type, new Date(), to);
+    }
+
 }

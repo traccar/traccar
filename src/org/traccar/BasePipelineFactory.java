@@ -29,6 +29,9 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
+import org.traccar.events.CommandResultEventHandler;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.events.OverspeedEventHandler;
 import org.traccar.helper.Log;
 
 import java.net.InetSocketAddress;
@@ -43,6 +46,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private ReverseGeocoderHandler reverseGeocoderHandler;
     private LocationProviderHandler locationProviderHandler;
     private HemisphereHandler hemisphereHandler;
+
+    private CommandResultEventHandler commandResultEventHandler;
+    private OverspeedEventHandler overspeedEventHandler;
+    private MotionEventHandler motionEventHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -122,6 +129,17 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 || Context.getConfig().hasKey("location.longitudeHemisphere")) {
             hemisphereHandler = new HemisphereHandler();
         }
+
+        commandResultEventHandler = new CommandResultEventHandler();
+
+        if (Context.getConfig().getBoolean("event.overspeedHandler")) {
+            overspeedEventHandler = new OverspeedEventHandler();
+        }
+
+        if (Context.getConfig().getBoolean("event.motionHandler")) {
+            motionEventHandler = new MotionEventHandler();
+        }
+
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -162,9 +180,23 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
         }
+
         if (Context.getConfig().getBoolean("forward.enable")) {
             pipeline.addLast("webHandler", new WebDataHandler(Context.getConfig().getString("forward.url")));
         }
+
+        if (commandResultEventHandler != null) {
+            pipeline.addLast("CommandResultEventHandler", commandResultEventHandler);
+        }
+
+        if (overspeedEventHandler != null) {
+            pipeline.addLast("OverspeedEventHandler", overspeedEventHandler);
+        }
+
+        if (motionEventHandler != null) {
+            pipeline.addLast("MotionEventHandler", motionEventHandler);
+        }
+
         pipeline.addLast("mainHandler", new MainEventHandler());
         return pipeline;
     }
@@ -181,5 +213,4 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             }
         }
     }
-
 }

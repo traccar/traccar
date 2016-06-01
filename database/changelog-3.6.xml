@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <changeSet author="author" id="changelog-3.6">
+
+    <createTable tableName="events">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="servertime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceid" type="INT" />
+      <column name="positionid" type="INT" />
+      <column name="attributes" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="events" baseColumnNames="deviceid" constraintName="fk_event_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <addColumn tableName="devices">
+      <column name="motion" type="VARCHAR(128)" />
+    </addColumn>
+
+  </changeSet>
+</databaseChangeLog>
