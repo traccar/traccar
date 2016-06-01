@@ -24,5 +24,11 @@ Ext.define('Traccar.store.Devices', {
         writer: {
             writeAllFields: true
         }
+    },
+    listeners : {
+        update: function () {
+            devicesPanel = Ext.getCmp('devicesPanel');
+            devicesPanel.fireEvent('selectionchange',devicesPanel.getSelectionModel());
+        }
     }
 });

@@ -17,6 +17,7 @@
 Ext.define('Traccar.view.Devices', {
     extend: 'Ext.grid.Panel',
     xtype: 'devicesView',
+    id: 'devicesPanel',
 
     requires: [
         'Traccar.view.DevicesController',
