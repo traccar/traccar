@@ -110,23 +110,21 @@ public class DataManager implements IdentityManager {
                 Class.forName(driver);
             }
 
-            HikariConfig hConfig = new HikariConfig();
-            hConfig.setDriverClassName(config.getString("database.driver"));
-            hConfig.setJdbcUrl(config.getString("database.url"));
-            hConfig.setUsername(config.getString("database.user"));
-            hConfig.setPassword(config.getString("database.password"));
-            hConfig.setConnectionInitSql("SELECT 1 FROM DUAL");
-            hConfig.setIdleTimeout(600000); // milliseconds
-//            ds.setIdleConnectionTestPeriod(600);
-//            ds.setMaxStatementsPerConnection(config.getInteger("database.maxStatements"));
+            HikariConfig hikariConfig = new HikariConfig();
+            hikariConfig.setDriverClassName(config.getString("database.driver"));
+            hikariConfig.setJdbcUrl(config.getString("database.url"));
+            hikariConfig.setUsername(config.getString("database.user"));
+            hikariConfig.setPassword(config.getString("database.password"));
+            hikariConfig.setConnectionInitSql("SELECT 1 FROM DUAL");
+            hikariConfig.setIdleTimeout(600000);
 
             int maxPoolSize = config.getInteger("database.maxPoolSize");
 
             if (maxPoolSize != 0) {
-               hConfig.setMaximumPoolSize(maxPoolSize);
+               hikariConfig.setMaximumPoolSize(maxPoolSize);
             }
 
-            dataSource = new HikariDataSource(hConfig);
+            dataSource = new HikariDataSource(hikariConfig);
 
         }
     }
