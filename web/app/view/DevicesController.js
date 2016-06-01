@@ -32,7 +32,7 @@ Ext.define('Traccar.view.DevicesController', {
                 }
             },
             store: {
-                '*': {
+                '#Devices': {
                     update: 'onUpdateDevice'
                 }
             }
@@ -124,7 +124,7 @@ Ext.define('Traccar.view.DevicesController', {
         }
     },
 
-    onUpdateDevice: function () {
-        this.view.fireEvent('selectionchange',this.view.getSelectionModel());
+    onUpdateDevice: function (store, data) {
+        this.onSelectionChange(this.view.getSelectionModel());
     }
 });
