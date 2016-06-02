@@ -94,7 +94,7 @@ Ext.define('Traccar.controller.Root', {
         };
 
         socket.onmessage = function (event) {
-            var i, store, data, array, entity;
+            var i, j, store, data, array, entity, device, typeKey, text;
 
             data = Ext.decode(event.data);
 
@@ -132,9 +132,7 @@ Ext.define('Traccar.controller.Root', {
                 store = Ext.getStore('Events');
                 for (i = 0; i < array.length; i++) {
                     store.add(array[i]);
-                    var text;
                     if (array[i].type === 'commandResult' && data.positions) {
-                        var j;
                         for (j = 0; j < data.positions.length; j++) {
                             if (data.positions[j].id == array[i].positionId) {
                                 text = data.positions[j].attributes.result;
@@ -143,13 +141,13 @@ Ext.define('Traccar.controller.Root', {
                         }
                         text = Strings.eventCommandResult + text;
                     } else {
-                        var typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
-                        var text = Strings[typeKey];
+                        typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
+                        text = Strings[typeKey];
                         if (typeof text == "undefined") {
                             text = typeKey;
                         }
                     }
-                    var device = Ext.getStore('Devices').getById(array[i].deviceId);
+                    device = Ext.getStore('Devices').getById(array[i].deviceId);
                     if (typeof device != "undefined") {
                         Ext.toast(text, device.getData().name);
                     }

@@ -47,7 +47,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     public void onWebSocketConnect(Session session) {
         super.onWebSocketConnect(session);
 
-        Map<String, Collection<?>> data = new HashMap<String, Collection<?>>();
+        Map<String, Collection<?>> data = new HashMap<>();
         data.put(KEY_POSITIONS, Context.getConnectionManager().getInitialState(userId));
         sendData(data);
 
@@ -63,21 +63,21 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
 
     @Override
     public void onUpdateDevice(Device device) {
-        Map<String, Collection<?>> data = new HashMap<String, Collection<?>>();
+        Map<String, Collection<?>> data = new HashMap<>();
         data.put(KEY_DEVICES, Collections.singletonList(device));
         sendData(data);
     }
 
     @Override
     public void onUpdatePosition(Position position) {
-        Map<String, Collection<?>> data = new HashMap<String, Collection<?>>();
+        Map<String, Collection<?>> data = new HashMap<>();
         data.put(KEY_POSITIONS, Collections.singletonList(position));
         sendData(data);
     }
 
     @Override
     public void onUpdateEvent(Event event, Position position) {
-        Map<String, Collection<?>> data = new HashMap<String, Collection<?>>();
+        Map<String, Collection<?>> data = new HashMap<>();
         data.put(KEY_EVENTS, Collections.singletonList(event));
         if (position != null) {
             data.put(KEY_POSITIONS, Collections.singletonList(position));
