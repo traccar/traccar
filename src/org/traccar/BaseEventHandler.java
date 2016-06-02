@@ -25,7 +25,7 @@ public abstract class BaseEventHandler extends BaseDataHandler {
 
         Event event = analizePosition(position);
         if (event != null) {
-            Context.getConnectionManager().updateEvent(event);
+            Context.getConnectionManager().updateEvent(event, position);
         }
         return position;
     }
