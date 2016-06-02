@@ -37,6 +37,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
     public static final String NAN_DATA = "NAN";
     public static final String VERSION_DATA = "VERSION";
     public static final String IDRO_DATA = "IDRO";
+    public static final String ID_DATA = "ID";
     public static final String LOG_DATA = "LOG";
 
     @Override
@@ -57,8 +58,16 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
                 int lenght = IDRO_DATA.length() + 1;
                 String imei = idString.substring(lenght, idString.length());
                 identify(imei, channel, remoteAddress);
+                long deviceId = getDeviceId();
+                Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            } else if(idString.startsWith(ID_DATA)) {
+                int lenght = ID_DATA.length() + 1;
+                String imei = idString.substring(lenght, idString.length());
+                identify(imei, channel, remoteAddress);
+                long deviceId = getDeviceId();
+                Device device = Context.getIdentityManager().getDeviceById(deviceId);
             }
-        } else if(dataString.startsWith(NV_DATA) && hasDeviceId()) {
+        } else if(dataString.startsWith(NV_DATA)) { // && hasDeviceId()
             return decodeNvdata(dataString);
         }
         /*else if(dataString.startsWith(LOG_DATA)) {
@@ -86,6 +95,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
 
         //read all as String....
         String[] nvData = dataString.split(":");
+        int arrLength = nvData.length;
 
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyMMdd HHmmss");
         DateTime dt = formatter.parseDateTime(nvData[1]);
@@ -147,26 +157,32 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 buf.skipBytes(3);  //NAN + 3a :
             } */
-        if(!nvData[6].equalsIgnoreCase(NAN_DATA)) {
-            double cource = Double.parseDouble(nvData[6]);
-            position.setCourse(cource);
+        if(arrLength >= 7) {
+            if(!nvData[6].equalsIgnoreCase(NAN_DATA)) {
+                double cource = Double.parseDouble(nvData[6]);
+                position.setCourse(cource);
+            }
         }
 
-            /* buf.skipBytes(1);
-            String strAltitude = buf.toString(buf.readerIndex(), 3, Charset.defaultCharset());
-            if(!strAltitude.equalsIgnoreCase(NAN_DATA)) {
-                strAltitude = buf.toString(buf.readerIndex(), 4, Charset.defaultCharset());
-                buf.skipBytes(5);
-                double altitude = Double.parseDouble(strAltitude);
-                position.setAltitude(altitude);
-                buf.skipBytes(5);
-            } else {
-                buf.skipBytes(4);  //NAN + 3a :
-            }*/
-        if(!nvData[7].equalsIgnoreCase(NAN_DATA)) {
-            double altitude = Double.parseDouble(nvData[7]);
+        /* buf.skipBytes(1);
+        String strAltitude = buf.toString(buf.readerIndex(), 3, Charset.defaultCharset());
+        if(!strAltitude.equalsIgnoreCase(NAN_DATA)) {
+            strAltitude = buf.toString(buf.readerIndex(), 4, Charset.defaultCharset());
+            buf.skipBytes(5);
+            double altitude = Double.parseDouble(strAltitude);
             position.setAltitude(altitude);
+            buf.skipBytes(5);
+        } else {
+            buf.skipBytes(4);  //NAN + 3a :
+        }*/
+
+        if(arrLength >= 8) {
+            if(!nvData[7].equalsIgnoreCase(NAN_DATA)) {
+                double altitude = Double.parseDouble(nvData[7]);
+                position.setAltitude(altitude);
+            }
         }
+
 
         return position;
     }
