@@ -94,7 +94,7 @@ public class ConnectionManager {
                 if (status.equals(Device.STATUS_ONLINE)) {
                     event.setType(Event.TYPE_DEVICE_ONLINE);
                 }
-                updateEvent(event);
+                updateEvent(event, null);
             }
             device.setStatus(status);
 
@@ -147,7 +147,7 @@ public class ConnectionManager {
         }
     }
 
-    public synchronized void updateEvent(Event event) {
+    public synchronized void updateEvent(Event event, Position position) {
         long deviceId = event.getDeviceId();
         try {
             Context.getDataManager().addEvent(event);
@@ -157,7 +157,7 @@ public class ConnectionManager {
         for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
             if (listeners.containsKey(userId)) {
                 for (UpdateListener listener : listeners.get(userId)) {
-                    listener.onUpdateEvent(event);
+                    listener.onUpdateEvent(event, position);
                 }
             }
         }
@@ -183,7 +183,7 @@ public class ConnectionManager {
     public interface UpdateListener {
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
-        void onUpdateEvent(Event event);
+        void onUpdateEvent(Event event, Position position);
     }
 
     public synchronized void addListener(long userId, UpdateListener listener) {
