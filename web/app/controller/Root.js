@@ -114,7 +114,7 @@ Ext.define('Traccar.controller.Root', {
                 }
             }
 
-            if (data.positions) {
+            if (data.positions && !data.events) {
                 array = data.positions;
                 store = Ext.getStore('LatestPositions');
                 for (i = 0; i < array.length; i++) {
@@ -123,6 +123,35 @@ Ext.define('Traccar.controller.Root', {
                         entity.set(array[i]);
                     } else {
                         store.add(Ext.create('Traccar.model.Position', array[i]));
+                    }
+                }
+            }
+
+            if (data.events) {
+                array = data.events;
+                store = Ext.getStore('Events');
+                for (i = 0; i < array.length; i++) {
+                    store.add(array[i]);
+                    var text;
+                    if (array[i].type === 'commandResult' && data.positions) {
+                        var j;
+                        for (j = 0; j < data.positions.length; j++) {
+                            if (data.positions[j].id == array[i].positionId) {
+                                text = data.positions[j].attributes.result;
+                                break;
+                            }
+                        }
+                        text = Strings.eventCommandResult + text;
+                    } else {
+                        var typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
+                        var text = Strings[typeKey];
+                        if (typeof text == "undefined") {
+                            text = typeKey;
+                        }
+                    }
+                    var device = Ext.getStore('Devices').getById(array[i].deviceId);
+                    if (typeof device != "undefined") {
+                        Ext.toast(text, device.getData().name);
                     }
                 }
             }

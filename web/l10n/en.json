@@ -97,5 +97,13 @@
     "commandSosNumber": "Set SOS Number",
     "commandSilenceTime": "Set Silence Time",
     "commandSetPhonebook": "Set Phonebook",
-    "commandVoiceMessage": "Voice Message"
+    "commandVoiceMessage": "Voice Message",
+    "eventDeviceOnline": "Device is online",
+    "eventDeviceOffline": "Device is offline",
+    "eventDeviceMoving": "Device is moving",
+    "eventDeviceStopped": "Device is stopped",
+    "eventDeviceOverspeed": "Device exceeds the speed",
+    "eventCommandResult": "Command result: ",
+    "eventGeofenceEnter": "Device has entered geofence",
+    "eventGeofenceEnter": "Device has exited geofence"
 }
