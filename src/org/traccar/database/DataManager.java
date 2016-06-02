@@ -15,28 +15,6 @@
  */
 package org.traccar.database;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import liquibase.Contexts;
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import org.traccar.Config;
-import org.traccar.Context;
-import org.traccar.helper.Log;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.DevicePermission;
-import org.traccar.model.Group;
-import org.traccar.model.GroupPermission;
-import org.traccar.model.Position;
-import org.traccar.model.Server;
-import org.traccar.model.User;
-
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -52,6 +30,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+
+import org.traccar.Config;
+import org.traccar.Context;
+import org.traccar.helper.Log;
+import org.traccar.model.Device;
+import org.traccar.model.DevicePermission;
+import org.traccar.model.Event;
+import org.traccar.model.Group;
+import org.traccar.model.GroupPermission;
+import org.traccar.model.Position;
+import org.traccar.model.Server;
+import org.traccar.model.User;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class DataManager implements IdentityManager {
 
@@ -108,19 +112,21 @@ public class DataManager implements IdentityManager {
                 Class.forName(driver);
             }
 
-            ComboPooledDataSource ds = new ComboPooledDataSource();
-            ds.setDriverClass(config.getString("database.driver"));
-            ds.setJdbcUrl(config.getString("database.url"));
-            ds.setUser(config.getString("database.user"));
-            ds.setPassword(config.getString("database.password"));
-            ds.setIdleConnectionTestPeriod(600);
-            ds.setTestConnectionOnCheckin(true);
-            ds.setMaxStatementsPerConnection(config.getInteger("database.maxStatements"));
+            HikariConfig hikariConfig = new HikariConfig();
+            hikariConfig.setDriverClassName(config.getString("database.driver"));
+            hikariConfig.setJdbcUrl(config.getString("database.url"));
+            hikariConfig.setUsername(config.getString("database.user"));
+            hikariConfig.setPassword(config.getString("database.password"));
+            hikariConfig.setConnectionInitSql("SELECT 1 FROM DUAL");
+            hikariConfig.setIdleTimeout(600000);
+
             int maxPoolSize = config.getInteger("database.maxPoolSize");
+
             if (maxPoolSize != 0) {
-                ds.setMaxPoolSize(maxPoolSize);
+                hikariConfig.setMaximumPoolSize(maxPoolSize);
             }
-            dataSource = ds;
+
+            dataSource = new HikariDataSource(hikariConfig);
 
         }
     }

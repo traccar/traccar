@@ -25,9 +25,21 @@ public final class PatternUtil {
     }
 
     public static class MatchResult {
-        public String pattern;
-        public String matched;
-        public String remaining;
+        private String pattern;
+        private String matched;
+        private String remaining;
+
+        public String getPattern() {
+            return this.pattern;
+        }
+
+        public String getMatched() {
+            return  this.matched;
+        }
+
+        public String getRemaining() {
+            return this.remaining;
+        }
     }
 
     public static MatchResult checkPattern(String pattern, String input) {
