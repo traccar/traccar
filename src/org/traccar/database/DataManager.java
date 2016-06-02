@@ -123,7 +123,7 @@ public class DataManager implements IdentityManager {
             int maxPoolSize = config.getInteger("database.maxPoolSize");
 
             if (maxPoolSize != 0) {
-               hikariConfig.setMaximumPoolSize(maxPoolSize);
+                hikariConfig.setMaximumPoolSize(maxPoolSize);
             }
 
             dataSource = new HikariDataSource(hikariConfig);
