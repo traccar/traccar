@@ -17,6 +17,13 @@
     <entry key='logger.level'>all</entry>
     <entry key='logger.file'>/opt/traccar/logs/tracker-server.log</entry>
 
+    <entry key='event.suppressRepeated'>60</entry>
+
+    <entry key='event.overspeedHandler'>true</entry>
+    <entry key='event.globalSpeedLimit'>90</entry>
+
+    <entry key='event.motionHandler'>true</entry>
+
     <!-- DATABASE CONFIG -->
 
     <entry key='database.driver'>org.h2.Driver</entry>
@@ -109,7 +116,7 @@
     </entry>
 
     <entry key='database.updateDeviceStatus'>
-        UPDATE devices SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
+        UPDATE devices SET status = :status, lastUpdate = :lastUpdate, motion = :motion WHERE id = :id;
     </entry>
 
     <entry key='database.deleteDevice'>
@@ -163,6 +170,19 @@
 
     <entry key='database.updateLatestPosition'>
         UPDATE devices SET positionId = :id WHERE id = :deviceId;
+    </entry>
+
+    <entry key='database.selectEvent'>
+        SELECT * FROM events WHERE id = :id;
+    </entry>
+
+    <entry key='database.insertEvent'>
+        INSERT INTO events (type, serverTime, deviceId, positionId, attributes)
+        VALUES (:type, :serverTime, :deviceId, :positionId, :attributes);
+    </entry>
+
+    <entry key='database.selectEvents'>
+        SELECT * FROM events WHERE deviceId = :deviceId AND type LIKE :type AND serverTime BETWEEN :from AND :to ORDER BY serverTime DESC;
     </entry>
 
     <!-- PROTOCOL CONFIG -->

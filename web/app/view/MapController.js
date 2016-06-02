@@ -176,6 +176,8 @@ Ext.define('Traccar.view.MapController', {
 
             this.reportRoute.getGeometry().appendCoordinate(point);
         }
+
+        this.getView().getMapView().fit(this.reportRoute.getGeometry(), this.getView().getMap().getSize());
     },
 
     clearReport: function (store) {

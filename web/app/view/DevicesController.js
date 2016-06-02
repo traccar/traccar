@@ -30,6 +30,11 @@ Ext.define('Traccar.view.DevicesController', {
                     selectDevice: 'selectDevice',
                     selectReport: 'selectReport'
                 }
+            },
+            store: {
+                '#Devices': {
+                    update: 'onUpdateDevice'
+                }
             }
         }
     },
@@ -103,7 +108,7 @@ Ext.define('Traccar.view.DevicesController', {
         var empty = selected.getCount() === 0;
         this.lookupReference('toolbarEditButton').setDisabled(empty);
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
-        this.lookupReference('deviceCommandButton').setDisabled(empty);
+        this.lookupReference('deviceCommandButton').setDisabled(empty || (selected.getLastSelected().get('status') !== 'online'));
         if (!empty) {
             this.fireEvent('selectDevice', selected.getLastSelected(), true);
         }
@@ -117,5 +122,9 @@ Ext.define('Traccar.view.DevicesController', {
         if (position !== undefined) {
             this.getView().getSelectionModel().deselectAll();
         }
+    },
+
+    onUpdateDevice: function (store, data) {
+        this.onSelectionChange(this.getView().getSelectionModel());
     }
 });
