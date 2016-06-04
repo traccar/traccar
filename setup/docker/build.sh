@@ -1,6 +1,7 @@
 #!/bin/bash
 
 which mvn &> /dev/null || { echo >&2 "Maven package cant be found on path. Aborting."; exit 1; }
+which awk &> /dev/null  || { echo >&2 "Awk package cant be found on path. Aborting."; exit 1; }
 which docker &> /dev/null  || { echo >&2 "Docker package cant be found on path. Aborting."; exit 1; }
 mvn package || { echo >&2 "Maven package has failed. Aborting."; exit 1; }
 
