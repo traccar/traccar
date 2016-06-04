@@ -28,6 +28,8 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.UpdateListener {
 
@@ -45,7 +47,9 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     public void onWebSocketConnect(Session session) {
         super.onWebSocketConnect(session);
 
-        sendData(KEY_POSITIONS, Context.getConnectionManager().getInitialState(userId));
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_POSITIONS, Context.getConnectionManager().getInitialState(userId));
+        sendData(data);
 
         Context.getConnectionManager().addListener(userId, this);
     }
@@ -59,25 +63,35 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
 
     @Override
     public void onUpdateDevice(Device device) {
-        sendData(KEY_DEVICES, Collections.singletonList(device));
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_DEVICES, Collections.singletonList(device));
+        sendData(data);
     }
 
     @Override
     public void onUpdatePosition(Position position) {
-        sendData(KEY_POSITIONS, Collections.singletonList(position));
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_POSITIONS, Collections.singletonList(position));
+        sendData(data);
     }
 
     @Override
-    public void onUpdateEvent(Event event) {
-        sendData(KEY_EVENTS, Collections.singletonList(event));
+    public void onUpdateEvent(Event event, Position position) {
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_EVENTS, Collections.singletonList(event));
+        if (position != null) {
+            data.put(KEY_POSITIONS, Collections.singletonList(position));
+        }
+        sendData(data);
     }
 
-    private void sendData(String key, Collection<?> data) {
+    private void sendData(Map<String, Collection<?>> data) {
         if (!data.isEmpty() && isConnected()) {
             JsonObjectBuilder json = Json.createObjectBuilder();
-            json.add(key, JsonConverter.arrayToJson(data));
+            for (Map.Entry<String, Collection<?>> entry : data.entrySet()) {
+                json.add(entry.getKey(), JsonConverter.arrayToJson(entry.getValue()));
+            }
             getRemote().sendString(json.build().toString(), null);
         }
     }
-
 }

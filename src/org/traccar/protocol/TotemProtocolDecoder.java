@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)")                      // battery
             .number("(dd)")                      // external power
             .number("(dddd)")                    // adc 1
+            .groupBegin()
+            .number("(dddd)")                    // adc 2
+            .number("(dddd)")                    // adc 3
+            .number("(dddd)")                    // adc 4
+            .number("(dddd)")                    // temperature 1
+            .number("(dddd)")                    // temperature 2
+            .groupEnd("?")
             .number("(xxxx)")                    // lac
             .number("(xxxx)")                    // cid
             .number("(dd)")                      // satellites
@@ -271,7 +278,14 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_BATTERY, parser.nextDouble() / 10);
             position.set(Position.KEY_POWER, parser.nextDouble());
+
             position.set(Position.PREFIX_ADC + 1, parser.next());
+            position.set(Position.PREFIX_ADC + 2, parser.next());
+            position.set(Position.PREFIX_ADC + 3, parser.next());
+            position.set(Position.PREFIX_ADC + 4, parser.next());
+            position.set(Position.PREFIX_TEMP + 1, parser.next());
+            position.set(Position.PREFIX_TEMP + 2, parser.next());
+
             position.set(Position.KEY_LAC, parser.nextInt(16));
             position.set(Position.KEY_CID, parser.nextInt(16));
             position.set(Position.KEY_SATELLITES, parser.nextInt());
