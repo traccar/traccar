@@ -15,7 +15,7 @@ COPY ./tmp/web /opt/traccar/web
 COPY ./tmp/traccar-server.jar /opt/traccar/traccar-server.jar
 COPY ./files/start.sh /opt/traccar/start.sh
 
-RUN chmod +x /opt/traccar/start.sh 
+RUN chmod +x /opt/traccar/start.sh
 
 EXPOSE 8082
 EXPOSE 5000-5150
