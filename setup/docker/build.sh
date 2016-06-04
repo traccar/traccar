@@ -13,7 +13,8 @@ tmp="./setup/docker/tmp"
 mkdir -p ${tmp}/data/database
 cat ./setup/unix/traccar.xml | awk '/web.path/ && !modif { printf("    <entry key=\"web.debug\">true</entry>\n"); modif=1 } {print}' > ${tmp}/traccar.xml
 cp -rf ./database/*.xml ${tmp}/data
-cp -rf ./target/tracker-server-jar-with-dependencies.jar ${tmp}/traccar-server.jar
+cp -rf ./target/tracker-server.jar ${tmp}/traccar-server.jar
+cp -rf ./target/lib ${tmp}/lib
 cp -rf ./web ${tmp}/web
 
 docker build -t ${company}/${software}:${version} ./setup/docker/
