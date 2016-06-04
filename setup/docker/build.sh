@@ -11,9 +11,10 @@ export version=$(head -n 10 ./pom.xml |grep version|cut -d ">" -f2|cut -d"<" -f1
 
 tmp="./setup/docker/tmp"
 
-mkdir -p ${tmp}/data/database
+mkdir -p ${tmp}
+
 cat ./setup/unix/traccar.xml | awk '/web.path/ && !modif { printf("    <entry key=\"web.debug\">true</entry>\n"); modif=1 } {print}' > ${tmp}/traccar.xml
-cp -rf ./database/*.xml ${tmp}/data
+cp -rf ./schema ${tmp}/schema
 cp -rf ./target/tracker-server.jar ${tmp}/traccar-server.jar
 cp -rf ./target/lib ${tmp}/lib
 cp -rf ./web ${tmp}/web
