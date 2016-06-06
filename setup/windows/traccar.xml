@@ -33,6 +33,10 @@
 
     <entry key='database.changelog'>[CHANGELOG]</entry>
 
+	<entry key='database.checkConnection'>
+		SELECT 1;
+	</entry>
+
     <entry key='database.selectServers'>
         SELECT * FROM server;
     </entry>
