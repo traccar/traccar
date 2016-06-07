@@ -31,6 +31,7 @@ public class WatchProtocol extends BaseProtocol {
     public WatchProtocol() {
         super("watch");
         setSupportedCommands(
+                Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_SOS_NUMBER,
                 Command.TYPE_ALARM_SOS,
                 Command.TYPE_ALARM_BATTERY,

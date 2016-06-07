@@ -82,6 +82,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
+            case Command.TYPE_POSITION_SINGLE:
+                return formatCommand(command, "RG");
             case Command.TYPE_SOS_NUMBER:
                 return formatCommand(command, "SOS{%s},{%s}", Command.KEY_INDEX, Command.KEY_PHONE);
             case Command.TYPE_ALARM_SOS:
