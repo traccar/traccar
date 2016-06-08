@@ -117,7 +117,7 @@ public class DataManager implements IdentityManager {
             hikariConfig.setJdbcUrl(config.getString("database.url"));
             hikariConfig.setUsername(config.getString("database.user"));
             hikariConfig.setPassword(config.getString("database.password"));
-            hikariConfig.setConnectionInitSql(config.getString("database.checkConnection"));
+            hikariConfig.setConnectionInitSql(config.getString("database.checkConnection", "SELECT 1"));
             hikariConfig.setIdleTimeout(600000);
 
             int maxPoolSize = config.getInteger("database.maxPoolSize");
