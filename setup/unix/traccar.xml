@@ -32,6 +32,10 @@
     <entry key='database.password'></entry>
 
     <entry key='database.changelog'>/opt/traccar/data/changelog-master.xml</entry>
+    
+    <entry key='database.checkConnection'>
+        SELECT 1;
+    </entry>
 
     <entry key='database.selectServers'>
         SELECT * FROM server;
