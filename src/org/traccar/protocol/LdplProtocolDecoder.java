@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.protocol;
 
 import java.net.SocketAddress;
@@ -19,29 +34,29 @@ public class LdplProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-                .text("*ID")                         // start of frame
-                .number("(d+),")                     // command_code
+                .text("*ID")                       // start of frame
+                .number("(d+),")                     // command code
                 .number("(d+),")                     // imei
-                .number("(dd)(dd)(dd),")             // current_date
-                .number("(dd)(dd)(dd),")             // current_time
-                .expression("([A|V]),")              // gps_fix
+                .number("(dd)(dd)(dd),")             // current date
+                .number("(dd)(dd)(dd),")             // current time
+                .expression("([A|V]),")              // gps fix
                 .number("(dd)(dd).?(d+),([NS]),")    // latitude
                 .number("(ddd)(dd).?(d+),([EW]),")   // longitude
                 .number("(d{1,3}.dd),")              // speed
                 .number("(d{1,3}.dd),")              // course
                 .number("(d{1,2}),")                 // sats
-                .number("(d{1,3}),")                 // gsm_signal_strength
-                .expression("([A|N|S]),")            // vehicle_status
-                .expression("([0|1]),")              // main_power_status
-                .number("(d.dd),")                   // internal_battery_voltage
-                .expression("([0|1]),")              // sos_alert
-                .expression("([0|1]),")              // body_tamper
-                .expression("([0|1])([0|1]),")       // ac_status + ign_status
-                .expression("([0|1|2]),")            // output1_status
+                .number("(d{1,3}),")                 // gsm signal strength
+                .expression("([A|N|S]),")            // vehicle status
+                .expression("([0|1]),")              // main power status
+                .number("(d.dd),")                   // internal battery voltage
+                .expression("([0|1]),")              // sos alert
+                .expression("([0|1]),")              // body tamper
+                .expression("([0|1])([0|1]),")       // ac status + ign_status
+                .expression("([0|1|2]),")            // output1 status
                 .number("(d{1,3}),")                 // adc1
                 .number("(d{1,3}),")                 // adc2
-                .expression("([0-9A-Z]{3}),")        // software_version
-                .expression("([L|R]),")              // message_type
+                .expression("([0-9A-Z]{3}),")        // software version
+                .expression("([L|R]),")              // message type
                 .expression("([0-9A-Z]{4})#")        // crc
                 .compile();
 
@@ -81,25 +96,20 @@ public class LdplProtocolDecoder extends BaseProtocolDecoder {
         
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_GSM, parser.nextInt());
-        String vehicleStatus = parser.next();
+        parser.next(); // vehicle status
         position.set(Position.KEY_POWER, parser.nextInt());
         position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_ALARM, parser.nextInt());
-        Integer bodyTamper = parser.nextInt();
-        Integer acStatus = parser.nextInt();
+        parser.nextInt(); // body tamper
+        parser.nextInt(); // acStatus
         position.set(Position.KEY_IGNITION, parser.nextInt());
         position.set(Position.KEY_OUTPUT, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
         position.set(Position.PREFIX_ADC + 2, parser.nextInt());
         position.set(Position.KEY_VERSION, parser.next());
+        position.set(Position.KEY_ARCHIVE, parser.next().equals("R"));
         
-        if ("R".equals(parser.next())) {
-            position.set(Position.KEY_ARCHIVE, true);
-        } else {
-            position.set(Position.KEY_ARCHIVE, false);
-        }
-        
-        String checksum = parser.next();
+        parser.next(); // checksum
 
         return position;
     }
