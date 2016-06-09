@@ -17,7 +17,6 @@ public class LdplProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "*ID1,863071011086474,210314,162752,A,1831.4412,N,07351.0983,E,0.04,213.84,9,25,A,1,4.20,0,1,01,1,0,0,A01,L,EA01#"));
 
-
     }
 
 }

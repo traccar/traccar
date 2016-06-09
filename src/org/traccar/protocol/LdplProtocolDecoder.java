@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,34 +34,35 @@ public class LdplProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-        .text("*ID")                       // start of frame
-        .number("(d+),")                     // command code
-        .number("(d+),")                     // imei
-        .number("(dd)(dd)(dd),")             // current date
-        .number("(dd)(dd)(dd),")             // current time
-        .expression("([A|V]),")              // gps fix
-        .number("(dd)(dd).?(d+),([NS]),")    // latitude
-        .number("(ddd)(dd).?(d+),([EW]),")   // longitude
-        .number("(d{1,3}.dd),")              // speed
-        .number("(d{1,3}.dd),")              // course
-        .number("(d{1,2}),")                 // sats
-        .number("(d{1,3}),")                 // gsm signal strength
-        .expression("([A|N|S]),")            // vehicle status
-        .expression("([0|1]),")              // main power status
-        .number("(d.dd),")                   // internal battery voltage
-        .expression("([0|1]),")              // sos alert
-        .expression("([0|1]),")              // body tamper
-        .expression("([0|1])([0|1]),")       // ac status + ign_status
-        .expression("([0|1|2]),")            // output1 status
-        .number("(d{1,3}),")                 // adc1
-        .number("(d{1,3}),")                 // adc2
-        .expression("([0-9A-Z]{3}),")        // software version
-        .expression("([L|R]),")              // message type
-        .expression("([0-9A-Z]{4})#")        // crc
-        .compile();
+            .text("*ID")                         // start of frame
+            .number("(d+),")                     // command code
+            .number("(d+),")                     // imei
+            .number("(dd)(dd)(dd),")             // current date
+            .number("(dd)(dd)(dd),")             // current time
+            .expression("([A|V]),")              // gps fix
+            .number("(dd)(dd).?(d+),([NS]),")    // latitude
+            .number("(ddd)(dd).?(d+),([EW]),")   // longitude
+            .number("(d{1,3}.dd),")              // speed
+            .number("(d{1,3}.dd),")              // course
+            .number("(d{1,2}),")                 // sats
+            .number("(d{1,3}),")                 // gsm signal strength
+            .expression("([A|N|S]),")            // vehicle status
+            .expression("([0|1]),")              // main power status
+            .number("(d.dd),")                   // internal battery voltage
+            .expression("([0|1]),")              // sos alert
+            .expression("([0|1]),")              // body tamper
+            .expression("([0|1])([0|1]),")       // ac status + ign status
+            .expression("([0|1|2]),")            // output1 status
+            .number("(d{1,3}),")                 // adc1
+            .number("(d{1,3}),")                 // adc2
+            .expression("([0-9A-Z]{3}),")        // software version
+            .expression("([L|R]),")              // message type
+            .number("(x{4})#")                   // crc
+            .compile();
 
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
@@ -70,6 +71,7 @@ public class LdplProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
+
         position.set(Position.KEY_TYPE, parser.nextInt());
 
         if (!identify(parser.next(), channel, remoteAddress)) {
@@ -78,19 +80,13 @@ public class LdplProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-        .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        if ("A".equals(parser.next())) {
-            position.setValid(true);
-        } else {
-            position.setValid(false);
-        }
-        
+        position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate(CoordinateFormat.DEG_MIN_MIN_HEM));
         position.setLongitude(parser.nextCoordinate(CoordinateFormat.DEG_MIN_MIN_HEM));
-        
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
         
