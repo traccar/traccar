@@ -52,7 +52,7 @@
     <entry key='database.xml'>false</entry>
     <entry key='database.saveOriginal'>false</entry>
 
-    <entry key='database.changelog'>./database/changelog-master.xml</entry>
+    <entry key='database.changelog'>./schema/changelog-master.xml</entry>
 
     <entry key='database.selectServers'>
         SELECT * FROM server;

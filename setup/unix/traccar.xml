@@ -31,7 +31,7 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
-    <entry key='database.changelog'>/opt/traccar/data/changelog-master.xml</entry>
+    <entry key='database.changelog'>/opt/traccar/schema/changelog-master.xml</entry>
     
     <entry key='database.selectServers'>
         SELECT * FROM server;
