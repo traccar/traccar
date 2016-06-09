@@ -102,7 +102,7 @@ package_windows () {
 
 package_unix () {
 
-  mkdir -p out/{bin,conf,data,lib,logs,web}
+  mkdir -p out/{bin,conf,data,lib,logs,web,schema}
 
   cp wrapper/src/bin/sh.script.in out/bin/traccar
   cp wrapper/lib/wrapper.jar out/lib
@@ -113,7 +113,7 @@ package_unix () {
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
-  cp ../database/* out/data
+cp ../schema/* out/schema
   cp -r ../web/* out/web
   cp unix/traccar.xml out/conf
 
@@ -140,11 +140,11 @@ package_unix () {
 
 package_universal () {
 
-  mkdir -p out/{conf,data,lib,logs,web}
+  mkdir -p out/{conf,data,lib,logs,web,schema}
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
-  cp ../database/* out/data
+  cp ../schema/* out/schema
   cp -r ../web/* out/web
   cp windows/traccar.xml out/conf
   cp README.txt out
