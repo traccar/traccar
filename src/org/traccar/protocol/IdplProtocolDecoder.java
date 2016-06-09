@@ -27,9 +27,9 @@ import org.traccar.helper.Parser.CoordinateFormat;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
-public class LdplProtocolDecoder extends BaseProtocolDecoder {
+public class IdplProtocolDecoder extends BaseProtocolDecoder {
 
-    public LdplProtocolDecoder(Protocol protocol) {
+    public IdplProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

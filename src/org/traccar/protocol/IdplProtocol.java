@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import java.util.List;
 
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LineBasedFrameDecoder;
@@ -26,9 +25,9 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
-public class LdplProtocol extends BaseProtocol {
+public class IdplProtocol extends BaseProtocol {
 
-    public LdplProtocol() {
+    public IdplProtocol() {
         super("ldpl");
     }
 
@@ -40,7 +39,7 @@ public class LdplProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new LdplProtocolDecoder(LdplProtocol.this));
+                pipeline.addLast("objectDecoder", new IdplProtocolDecoder(IdplProtocol.this));
             }
         });
     }
