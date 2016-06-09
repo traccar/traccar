@@ -305,5 +305,6 @@
     <entry key='arknav.port'>5107</entry>
     <entry key='supermate.port'>5108</entry>
     <entry key='appello.port'>5109</entry>
+    <entry key='ldpl.port'>5110</entry>
 
 </properties>
