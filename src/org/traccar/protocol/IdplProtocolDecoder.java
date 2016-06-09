@@ -89,7 +89,7 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextCoordinate(CoordinateFormat.DEG_MIN_MIN_HEM));
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
-        
+
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_GSM, parser.nextInt());
         parser.next(); // vehicle status
@@ -97,14 +97,14 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_ALARM, parser.nextInt());
         parser.nextInt(); // body tamper
-        parser.nextInt(); // acStatus
+        parser.nextInt(); // ac status
         position.set(Position.KEY_IGNITION, parser.nextInt());
         position.set(Position.KEY_OUTPUT, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
         position.set(Position.PREFIX_ADC + 2, parser.nextInt());
         position.set(Position.KEY_VERSION, parser.next());
         position.set(Position.KEY_ARCHIVE, parser.next().equals("R"));
-        
+
         parser.next(); // checksum
 
         return position;
