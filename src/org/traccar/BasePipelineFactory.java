@@ -30,6 +30,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.traccar.events.CommandResultEventHandler;
+import org.traccar.events.GeofenceEventHandler;
 import org.traccar.events.MotionEventHandler;
 import org.traccar.events.OverspeedEventHandler;
 import org.traccar.helper.Log;
@@ -50,6 +51,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private CommandResultEventHandler commandResultEventHandler;
     private OverspeedEventHandler overspeedEventHandler;
     private MotionEventHandler motionEventHandler;
+    private GeofenceEventHandler geofenceEventHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -140,6 +142,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             motionEventHandler = new MotionEventHandler();
         }
 
+        if (Context.getConfig().getBoolean("event.geofenceHandler")) {
+            geofenceEventHandler = new GeofenceEventHandler();
+        }
+
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -195,6 +201,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (motionEventHandler != null) {
             pipeline.addLast("MotionEventHandler", motionEventHandler);
+        }
+
+        if (geofenceEventHandler != null) {
+            pipeline.addLast("GeofenceEventHandler", geofenceEventHandler);
         }
 
         pipeline.addLast("mainHandler", new MainEventHandler());

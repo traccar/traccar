@@ -66,16 +66,6 @@ public class Position extends Message {
     public static final String PREFIX_IO = "io";
     public static final String PREFIX_COUNT = "count";
 
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
     private String protocol;
 
     public String getProtocol() {

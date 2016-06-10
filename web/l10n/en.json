@@ -105,5 +105,5 @@
     "eventDeviceOverspeed": "Device exceeds the speed",
     "eventCommandResult": "Command result: ",
     "eventGeofenceEnter": "Device has entered geofence",
-    "eventGeofenceEnter": "Device has exited geofence"
+    "eventGeofenceExit": "Device has exited geofence"
 }

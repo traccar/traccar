@@ -48,11 +48,15 @@ import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.GroupGeofence;
 import org.traccar.model.GroupPermission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.model.UserDeviceGeofence;
+import org.traccar.model.GeofencePermission;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -368,6 +372,7 @@ public class DataManager implements IdentityManager {
         Device cachedDevice = getDeviceById(device.getId());
         cachedDevice.setStatus(device.getStatus());
         cachedDevice.setMotion(device.getMotion());
+        cachedDevice.setGeofenceId(device.getGeofenceId());
     }
 
     public void removeDevice(long deviceId) throws SQLException {
@@ -524,4 +529,91 @@ public class DataManager implements IdentityManager {
         return getEvents(deviceId, type, new Date(), to);
     }
 
+    public Collection<Geofence> getGeofences() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencesAll"))
+                .executeQuery(Geofence.class);
+    }
+
+    public Geofence getGeofence(long geofenceId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGeofences"))
+                .setLong("id", geofenceId)
+                .executeQuerySingle(Geofence.class);
+    }
+
+    public void addGeofence(Geofence geofence) throws SQLException {
+        geofence.setId(QueryBuilder.create(dataSource, getQuery("database.insertGeofence"), true)
+                .setObject(geofence)
+                .executeUpdate());
+    }
+
+    public void updateGeofence(Geofence geofence) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateGeofence"))
+                .setObject(geofence)
+                .executeUpdate();
+    }
+
+    public void removeGeofence(long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteGeofence"))
+                .setLong("id", geofenceId)
+                .executeUpdate();
+    }
+
+    public Collection<GeofencePermission> getGeofencePermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencePermissions"))
+                .executeQuery(GeofencePermission.class);
+    }
+
+    public void linkGeofence(long userId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkGeofence"))
+                .setLong("userId", userId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public void unlinkGeofence(long userId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkGeofence"))
+                .setLong("userId", userId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public Collection<GroupGeofence> getGroupGeofences() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGroupGeofences"))
+                .executeQuery(GroupGeofence.class);
+    }
+
+    public void linkGroupGeofence(long groupId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkGroupGeofence"))
+                .setLong("groupId", groupId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public void unlinkGroupGeofence(long groupId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkGroupGeofence"))
+                .setLong("groupId", groupId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public Collection<UserDeviceGeofence> getUserDeviceGeofences() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectUserDeviceGeofences"))
+                .executeQuery(UserDeviceGeofence.class);
+    }
+
+    public void linkUserDeviceGeofence(long userId, long deviceId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkUserDeviceGeofence"))
+                .setLong("userId", userId)
+                .setLong("deviceId", deviceId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public void unlinkUserDeviceGeofence(long userId, long deviceId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkUserDeviceGeofence"))
+                .setLong("userId", userId)
+                .setLong("deviceId", deviceId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
 }

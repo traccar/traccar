@@ -155,7 +155,8 @@ public class ConnectionManager {
             Log.warning(error);
         }
         for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
-            if (listeners.containsKey(userId)) {
+            if (listeners.containsKey(userId) && (event.getGeofenceId() == 0
+                    || Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId()))) {
                 for (UpdateListener listener : listeners.get(userId)) {
                     listener.onUpdateEvent(event, position);
                 }

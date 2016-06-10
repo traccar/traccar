@@ -20,6 +20,7 @@ import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
+import org.traccar.database.GeofenceManager;
 import org.traccar.geocode.BingMapsReverseGeocoder;
 import org.traccar.geocode.FactualReverseGeocoder;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
@@ -97,6 +98,12 @@ public final class Context {
 
     public static ServerManager getServerManager() {
         return serverManager;
+    }
+
+    private static GeofenceManager geofenceManager;
+
+    public static GeofenceManager getGeofenceManager() {
+        return geofenceManager;
     }
 
     private static final AsyncHttpClient ASYNC_HTTP_CLIENT = new AsyncHttpClient();
@@ -177,9 +184,12 @@ public final class Context {
 
         permissionsManager = new PermissionsManager(dataManager);
 
+        geofenceManager = new GeofenceManager(dataManager);
+
         connectionManager = new ConnectionManager(dataManager);
 
         serverManager = new ServerManager();
+
     }
 
     public static void init(IdentityManager testIdentityManager) {

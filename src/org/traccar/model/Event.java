@@ -20,16 +20,6 @@ public class Event extends Message {
     public Event() {
     }
 
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public static final String TYPE_COMMAND_RESULT = "commandResult";
 
     public static final String TYPE_DEVICE_ONLINE = "deviceOnline";
@@ -69,6 +59,16 @@ public class Event extends Message {
 
     public void setPositionId(long positionId) {
         this.positionId = positionId;
+    }
+
+    private long geofenceId = 0;
+
+    public long getGeofenceId() {
+        return geofenceId;
+    }
+
+    public void setGeofenceId(long geofenceId) {
+        this.geofenceId = geofenceId;
     }
 
 }

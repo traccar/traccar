@@ -33,6 +33,9 @@ public class MotionEventHandler extends BaseEventHandler {
             return event;
         }
         String motion = device.getMotion();
+        if (motion == null) {
+            motion = Device.STATUS_STOPPED;
+        }
         if (valid && speed > SPEED_THRESHOLD && !motion.equals(Device.STATUS_MOVING)) {
             Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_MOVING, null);
             event = new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId());

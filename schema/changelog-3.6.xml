@@ -19,6 +19,7 @@
       </column>
       <column name="deviceid" type="INT" />
       <column name="positionid" type="INT" />
+      <column name="geofenceid" type="INT" />
       <column name="attributes" type="VARCHAR(4096)">
         <constraints nullable="false" />
       </column>
@@ -29,6 +30,65 @@
     <addColumn tableName="devices">
       <column name="motion" type="VARCHAR(128)" />
     </addColumn>
+    <addColumn tableName="devices">
+      <column name="geofenceId" type="INT" />
+    </addColumn>
+
+    <createTable tableName="geofences">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(128)" />
+      <column name="area" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="user_geofence">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="geofenceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_geofence" baseColumnNames="userid" constraintName="fk_user_geofence_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_geofence" baseColumnNames="geofenceid" constraintName="fk_user_geofence_geofenceid" referencedTableName="geofences" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="group_geofence">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="geofenceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="group_geofence" baseColumnNames="groupid" constraintName="fk_group_geofence_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="group_geofence" baseColumnNames="geofenceid" constraintName="fk_group_geofence_geofenceid" referencedTableName="geofences" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="user_device_geofence">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="geofenceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_device_geofence" baseColumnNames="userid" constraintName="fk_user_device_geofence_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_device_geofence" baseColumnNames="deviceid" constraintName="fk_user_device_geofence_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_device_geofence" baseColumnNames="geofenceid" constraintName="fk_user_device_geofence_geofenceid" referencedTableName="geofences" referencedColumnNames="id" onDelete="CASCADE" />
 
   </changeSet>
 </databaseChangeLog>

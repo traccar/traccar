@@ -114,4 +114,13 @@ public class Device {
         this.motion = motion;
     }
 
+    private long geofenceId;
+
+    public long getGeofenceId() {
+        return geofenceId;
+    }
+
+    public void setGeofenceId(long geofenceId) {
+        this.geofenceId = geofenceId;
+    }
 }
