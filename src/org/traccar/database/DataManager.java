@@ -525,8 +525,8 @@ public class DataManager implements IdentityManager {
     public Collection<Event> getLastEvents(long deviceId, String type, int interval) throws SQLException {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, -interval);
-        Date to = calendar.getTime();
-        return getEvents(deviceId, type, new Date(), to);
+        Date from = calendar.getTime();
+        return getEvents(deviceId, type, from, new Date());
     }
 
     public Collection<Geofence> getGeofences() throws SQLException {
