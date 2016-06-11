@@ -7,12 +7,15 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
 import org.traccar.database.IdentityManager;
+import org.traccar.helper.Log;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import javax.xml.bind.DatatypeConverter;
+
+import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -49,6 +52,13 @@ public class ProtocolTest {
             }
 
         });
+		try
+		{
+			Log.setupLogger(null);
+		} catch (IOException e)
+		{
+
+		}
     }
 
     protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {

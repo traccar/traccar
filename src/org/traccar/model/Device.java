@@ -19,6 +19,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.traccar.helper.Log;
@@ -117,10 +118,10 @@ public class Device {
 		this.cipherKey = cipherKey;
 	}
 
-	public SecretKeySpec getSecretKeySpec()
+	public SecretKey getSecretKey()
 	{
 		String keyString = getCipherKey();
-		if (keyString == null)
+		if (keyString == null || keyString.isEmpty())
 		{
 			Log.warning("No cipherKey for device '" + getId() + "' set!");
 			return null;
@@ -128,10 +129,11 @@ public class Device {
 
 		try
 		{
+			
 			byte[] key = (keyString).getBytes("UTF-8");
-			MessageDigest sha = MessageDigest.getInstance("SHA-256");
-			key = Arrays.copyOf(key, 16);
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
 			key = sha.digest(key);
+			key = Arrays.copyOf(key, 16);
 			return new SecretKeySpec(key, "AES");
 		} catch (Exception e)
 		{

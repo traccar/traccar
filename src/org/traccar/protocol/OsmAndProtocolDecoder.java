@@ -26,7 +26,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -51,6 +52,8 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 	public static final String PARAM_ID = "id";
 	public static final String PARAM_DEVICEID = "deviceid";
 	public static final String PARAM_CIPHER = "cipher";
+
+	public static final String CIPHER_TRANSFORMATION = "AES/CBC/PKCS5PADDING";
 
     public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
         super(protocol);
@@ -154,27 +157,27 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 		if (ciphers == null || ciphers.isEmpty())
 			return null;
 
-		String cipher = ciphers.get(0);
-		byte[] crypted = Base64.decode(cipher);
-		
-		Device device = Context.getIdentityManager().getDeviceById(getDeviceId());
-		SecretKeySpec secretKeySpec = device.getSecretKeySpec();
-
-		String decrypted = null;
 		try
 		{
-			Cipher decrypter = Cipher.getInstance("AES");
-			decrypter.init(Cipher.DECRYPT_MODE, secretKeySpec);
+			String cipher = ciphers.get(0);
+			byte[] crypted = Base64.decode(cipher);
+		
+			Device device = Context.getIdentityManager().getDeviceById(getDeviceId());
+			SecretKey secretKey = device.getSecretKey();
+
+			String decrypted = null;
+			Cipher decrypter = Cipher.getInstance(CIPHER_TRANSFORMATION);
+			decrypter.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(new byte[16]));
 			byte[] cipherData = decrypter.doFinal(crypted);
-			decrypted = new String(cipherData);
+			decrypted = new String(cipherData, "UTF-8");
+			QueryStringDecoder decoder = new QueryStringDecoder(decrypted);
+			return decoder.getParameters().entrySet();
 		} catch (Exception e)
 		{
 			Log.error("Exception '" + e.getMessage() + "' during decoding message for device '" + getDeviceId() + "'");
 			return null;
 		}
 
-		QueryStringDecoder decoder = new QueryStringDecoder(decrypted);
-		return decoder.getParameters().entrySet();
 	}
 
 	/**
