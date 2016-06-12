@@ -65,6 +65,25 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeJ1708(Position position, ChannelBuffer buf, short length) {
+
+        int end = buf.readerIndex() + length;
+
+        while (buf.readerIndex() < end) {
+            int mark = buf.readUnsignedByte();
+            int len = BitUtil.between(mark, 0, 6);
+            int type = BitUtil.between(mark, 6, 8);
+            int id = buf.readUnsignedByte();
+            if (type == 3) {
+                id += 256;
+            }
+            String value = ChannelBuffers.hexDump(buf.readBytes(len - 1));
+            if (type == 2 || type == 3) {
+                position.set("pid" + id, value);
+            }
+        }
+    }
+
     private void decodeDriverBehavior(Position position, ChannelBuffer buf) {
 
         int value = buf.readUnsignedByte();
@@ -200,7 +219,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_J1708:
-                    position.set("j1708", ChannelBuffers.hexDump(buf.readBytes(length)));
+                    decodeJ1708(position, buf, length);
                     break;
 
                 case DATA_VIN:
