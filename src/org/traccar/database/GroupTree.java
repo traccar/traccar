@@ -140,9 +140,11 @@ public class GroupTree {
     }
 
     private void getNodes(Set<TreeNode> results, TreeNode node) {
-        for (TreeNode child : node.getChildren()) {
-            results.add(child);
-            getNodes(results, child);
+        if (node != null) {
+            for (TreeNode child : node.getChildren()) {
+                results.add(child);
+                getNodes(results, child);
+            }
         }
     }
 
