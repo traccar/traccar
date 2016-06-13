@@ -11,7 +11,7 @@ public class GeofencePolygon extends GeofenceGeometry {
 
     public GeofencePolygon(String wkt) throws ParseException {
         super();
-        fromWKT(wkt);
+        fromWkt(wkt);
     }
 
     private static class Coordinate {
@@ -94,9 +94,9 @@ public class GeofencePolygon extends GeofenceGeometry {
 
         for (i = 0; i < polyCorners; j = i++) {
             if (coordinates.get(i).getLon360() < longitude360
-                && coordinates.get(j).getLon360() >= longitude360
-                || coordinates.get(j).getLon360() < longitude360
-                && coordinates.get(i).getLon360() >= longitude360) {
+                    && coordinates.get(j).getLon360() >= longitude360
+                    || coordinates.get(j).getLon360() < longitude360
+                    && coordinates.get(i).getLon360() >= longitude360) {
                 oddNodes ^= longitude360 * multiple[i] + constant[i] < latitude;
             }
         }
@@ -104,7 +104,7 @@ public class GeofencePolygon extends GeofenceGeometry {
     }
 
     @Override
-    public String toWKT() {
+    public String toWkt() {
         StringBuffer buf = new StringBuffer();
         buf.append("POLYGON (");
         for (Coordinate coordinate : coordinates) {
@@ -117,7 +117,7 @@ public class GeofencePolygon extends GeofenceGeometry {
     }
 
     @Override
-    public void fromWKT(String wkt) throws ParseException {
+    public void fromWkt(String wkt) throws ParseException {
         if (coordinates == null) {
             coordinates = new ArrayList<Coordinate>();
         } else {
@@ -131,15 +131,15 @@ public class GeofencePolygon extends GeofenceGeometry {
         if (content == null || content.equals("")) {
             throw new ParseException("No content", 0);
         }
-        String[] commatokens = content.split(",");
-        if (commatokens.length < 3) {
+        String[] commaTokens = content.split(",");
+        if (commaTokens.length < 3) {
             throw new ParseException("Not valid content", 0);
         }
 
-        for (String commatoken : commatokens) {
-            String[] tokens = commatoken.trim().split("\\s");
+        for (String commaToken : commaTokens) {
+            String[] tokens = commaToken.trim().split("\\s");
             if (tokens.length != 2) {
-                throw new ParseException("Here must be two coordinates: " + commatoken, 0);
+                throw new ParseException("Here must be two coordinates: " + commaToken, 0);
             }
             Coordinate coordinate = new Coordinate();
             try {

@@ -6,8 +6,8 @@ public abstract class GeofenceGeometry {
 
     public abstract boolean containsPoint(double latitude, double longitude);
 
-    public abstract String toWKT();
+    public abstract String toWkt();
 
-    public abstract void fromWKT(String wkt) throws ParseException;
+    public abstract void fromWkt(String wkt) throws ParseException;
 
 }

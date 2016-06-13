@@ -17,7 +17,7 @@ public class GeofenceCircle extends GeofenceGeometry {
 
     public GeofenceCircle(String wkt) throws ParseException {
         super();
-        fromWKT(wkt);
+        fromWkt(wkt);
     }
 
     public GeofenceCircle(double latitude, double longitude, double radius) {
@@ -33,7 +33,7 @@ public class GeofenceCircle extends GeofenceGeometry {
     }
 
     @Override
-    public String toWKT() {
+    public String toWkt() {
         String wkt = "";
         wkt = "CIRCLE (";
         wkt += String.valueOf(centerLatitude);
@@ -47,7 +47,7 @@ public class GeofenceCircle extends GeofenceGeometry {
     }
 
     @Override
-    public void fromWKT(String wkt) throws ParseException {
+    public void fromWkt(String wkt) throws ParseException {
         if (!wkt.startsWith("CIRCLE")) {
             throw new ParseException("Mismatch geometry type", 0);
         }
