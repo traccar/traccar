@@ -154,6 +154,10 @@ public class DataManager implements IdentityManager {
                         devicesById.put(device.getId(), device);
                         devicesByUniqueId.put(device.getUniqueId(), device);
                     }
+                    GeofenceManager geofenceManager = Context.getGeofenceManager();
+                    if (geofenceManager != null) {
+                        geofenceManager.refresh();
+                    }
                     devicesLastUpdate = System.currentTimeMillis();
                 }
             } finally {
