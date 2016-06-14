@@ -1,6 +1,8 @@
 package org.traccar.events;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -20,10 +22,10 @@ public class OverspeedEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Event analizePosition(Position position) {
-        Event event = null;
+    protected Collection<Event> analizePosition(Position position) {
+        Collection<Event> events = new ArrayList<>();
         if (!isLastPosition()) {
-            return event;
+            return null;
         }
         double speed = position.getSpeed();
         boolean valid = position.getValid();
@@ -32,14 +34,14 @@ public class OverspeedEventHandler extends BaseEventHandler {
             try {
                 if (Context.getDataManager().getLastEvents(
                         position.getDeviceId(), Event.TYPE_DEVICE_OVERSPEED, suppressRepeated).isEmpty()) {
-                    event = new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId());
+                    events.add(new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
                 }
             } catch (SQLException error) {
                 Log.warning(error);
             }
 
         }
-        return event;
+        return events;
     }
 
 }

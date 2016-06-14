@@ -16,6 +16,7 @@
 package org.traccar.model;
 
 import java.util.Date;
+import java.util.List;
 
 public class Device {
 
@@ -114,13 +115,13 @@ public class Device {
         this.motion = motion;
     }
 
-    private long geofenceId;
+    private List<Long> geofenceIds;
 
-    public long getGeofenceId() {
-        return geofenceId;
+    public List<Long> getGeofenceIds() {
+        return geofenceIds;
     }
 
-    public void setGeofenceId(long geofenceId) {
-        this.geofenceId = geofenceId;
+    public void setGeofenceIds(List<Long> geofenceIds) {
+        this.geofenceIds = geofenceIds;
     }
 }

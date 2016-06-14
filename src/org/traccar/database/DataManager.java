@@ -55,7 +55,7 @@ import org.traccar.model.GroupPermission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.model.UserDeviceGeofence;
+import org.traccar.model.DeviceGeofence;
 import org.traccar.model.GeofencePermission;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -372,7 +372,6 @@ public class DataManager implements IdentityManager {
         Device cachedDevice = getDeviceById(device.getId());
         cachedDevice.setStatus(device.getStatus());
         cachedDevice.setMotion(device.getMotion());
-        cachedDevice.setGeofenceId(device.getGeofenceId());
     }
 
     public void removeDevice(long deviceId) throws SQLException {
@@ -596,22 +595,20 @@ public class DataManager implements IdentityManager {
                 .executeUpdate();
     }
 
-    public Collection<UserDeviceGeofence> getUserDeviceGeofences() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectUserDeviceGeofences"))
-                .executeQuery(UserDeviceGeofence.class);
+    public Collection<DeviceGeofence> getDeviceGeofences() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceGeofences"))
+                .executeQuery(DeviceGeofence.class);
     }
 
-    public void linkUserDeviceGeofence(long userId, long deviceId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.linkUserDeviceGeofence"))
-                .setLong("userId", userId)
+    public void linkDeviceGeofence(long deviceId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkDeviceGeofence"))
                 .setLong("deviceId", deviceId)
                 .setLong("geofenceId", geofenceId)
                 .executeUpdate();
     }
 
-    public void unlinkUserDeviceGeofence(long userId, long deviceId, long geofenceId) throws SQLException {
-        QueryBuilder.create(dataSource, getQuery("database.unlinkUserDeviceGeofence"))
-                .setLong("userId", userId)
+    public void unlinkDeviceGeofence(long deviceId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceGeofence"))
                 .setLong("deviceId", deviceId)
                 .setLong("geofenceId", geofenceId)
                 .executeUpdate();

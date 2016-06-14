@@ -12,11 +12,11 @@ public class GeofenceCircleTest {
         String test = "CIRCLE (55.75414 37.6204, 100)";
         GeofenceGeometry geofenceGeometry = new GeofenceCircle();
         try {
-        geofenceGeometry.fromWKT(test);
+        geofenceGeometry.fromWkt(test);
         } catch (ParseException e){
             Assert.assertTrue("ParseExceprion: " + e.getMessage(), true);
         }
-        Assert.assertEquals(geofenceGeometry.toWKT(), test);
+        Assert.assertEquals(geofenceGeometry.toWkt(), test);
     }
 
     @Test
@@ -24,7 +24,7 @@ public class GeofenceCircleTest {
         String test = "CIRCLE (55.75414 37.6204, 100)";
         GeofenceGeometry geofenceGeometry = new GeofenceCircle();
         try {
-        geofenceGeometry.fromWKT(test);
+        geofenceGeometry.fromWkt(test);
         } catch (ParseException e){
             Assert.assertTrue("ParseExceprion: " + e.getMessage(), true);
         }

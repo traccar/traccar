@@ -1,5 +1,7 @@
 package org.traccar;
 
+import java.util.Collection;
+
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -23,13 +25,15 @@ public abstract class BaseEventHandler extends BaseDataHandler {
             }
         }
 
-        Event event = analizePosition(position);
-        if (event != null) {
-            Context.getConnectionManager().updateEvent(event, position);
+        Collection<Event> events = analizePosition(position);
+        if (events != null) {
+            for (Event event : events) {
+                Context.getNotificationManager().updateEvent(event, position);
+            }
         }
         return position;
     }
 
-    protected abstract Event analizePosition(Position position);
+    protected abstract Collection<Event> analizePosition(Position position);
 
 }

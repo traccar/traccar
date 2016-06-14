@@ -1,20 +1,24 @@
 package org.traccar.database;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
 import org.traccar.model.GroupGeofence;
-import org.traccar.model.UserDeviceGeofence;
+import org.traccar.model.Position;
+import org.traccar.model.DeviceGeofence;
 import org.traccar.model.GeofencePermission;
 
 public class GeofenceManager {
@@ -25,8 +29,8 @@ public class GeofenceManager {
     private final Map<Long, Set<Long>> userGeofences = new HashMap<>();
     private final Map<Long, Set<Long>> groupGeofences = new HashMap<>();
 
+    private final Map<Long, Set<Long>> deviceGeofencesWithGroups = new HashMap<>();
     private final Map<Long, Set<Long>> deviceGeofences = new HashMap<>();
-    private final Map<Long, Map<Long, Set<Long>>> userDeviceGeofences = new HashMap<>();
 
     private final ReadWriteLock deviceGeofencesLock = new ReentrantReadWriteLock();
     private final ReadWriteLock geofencesLock = new ReentrantReadWriteLock();
@@ -54,17 +58,17 @@ public class GeofenceManager {
     public Set<Long> getAllDeviceGeofences(long deviceId) {
         deviceGeofencesLock.readLock().lock();
         try {
-            return getDeviceGeofences(deviceGeofences, deviceId);
+            return getDeviceGeofences(deviceGeofencesWithGroups, deviceId);
         } finally {
             deviceGeofencesLock.readLock().unlock();
         }
 
     }
 
-    public Set<Long> getUserDeviceGeofences(long userId, long deviceId) {
+    public Set<Long> getDeviceGeofences(long deviceId) {
         deviceGeofencesLock.readLock().lock();
         try {
-            return getUserDeviceGeofencesUnlocked(userId, deviceId);
+            return getDeviceGeofences(deviceGeofences, deviceId);
         } finally {
             deviceGeofencesLock.readLock().unlock();
         }
@@ -75,13 +79,6 @@ public class GeofenceManager {
             deviceGeofences.put(deviceId, new HashSet<Long>());
         }
         return deviceGeofences.get(deviceId);
-    }
-
-    private Set<Long> getUserDeviceGeofencesUnlocked(long userId, long deviceId) {
-        if (!userDeviceGeofences.containsKey(userId)) {
-            userDeviceGeofences.put(userId, new HashMap<Long, Set<Long>>());
-        }
-        return getDeviceGeofences(userDeviceGeofences.get(userId), deviceId);
     }
 
     public final void refresh() {
@@ -107,24 +104,38 @@ public class GeofenceManager {
                     }
 
                     deviceGeofences.clear();
+                    deviceGeofencesWithGroups.clear();
 
-                    for (Map.Entry<Long, Map<Long, Set<Long>>> deviceGeofence : userDeviceGeofences.entrySet()) {
-                        deviceGeofence.getValue().clear();
+                    for (DeviceGeofence deviceGeofence : dataManager.getDeviceGeofences()) {
+                        getDeviceGeofences(deviceGeofences, deviceGeofence.getDeviceId())
+                            .add(deviceGeofence.getGeofenceId());
+                        getDeviceGeofences(deviceGeofencesWithGroups, deviceGeofence.getDeviceId())
+                            .add(deviceGeofence.getGeofenceId());
                     }
-                    userDeviceGeofences.clear();
 
-                    for (UserDeviceGeofence userDeviceGeofence : dataManager.getUserDeviceGeofences()) {
-                        getDeviceGeofences(deviceGeofences, userDeviceGeofence.getDeviceId())
-                            .add(userDeviceGeofence.getGeofenceId());
-                        getUserDeviceGeofencesUnlocked(userDeviceGeofence.getUserId(), userDeviceGeofence.getDeviceId())
-                            .add(userDeviceGeofence.getGeofenceId());
-                    }
                     for (Device device : dataManager.getAllDevices()) {
                         long groupId = device.getGroupId();
                         while (groupId != 0) {
-                            getDeviceGeofences(deviceGeofences, device.getId()).addAll(getGroupGeofences(groupId));
+                            getDeviceGeofences(deviceGeofencesWithGroups,
+                                    device.getId()).addAll(getGroupGeofences(groupId));
                             groupId = dataManager.getGroupById(groupId).getGroupId();
                         }
+                        List<Long> deviceGeofenceIds = device.getGeofenceIds();
+                        if (deviceGeofenceIds == null) {
+                            deviceGeofenceIds = new ArrayList<Long>();
+                        } else {
+                            deviceGeofenceIds.clear();
+                        }
+                        Position lastPosition = Context.getConnectionManager().getLastPosition(device.getId());
+                        if (lastPosition != null) {
+                            for (Long geofenceId : deviceGeofencesWithGroups.get(device.getId())) {
+                                if (getGeofence(geofenceId).getGeometry()
+                                        .containsPoint(lastPosition.getLatitude(), lastPosition.getLongitude())) {
+                                    deviceGeofenceIds.add(geofenceId);
+                                }
+                            }
+                        }
+                        device.setGeofenceIds(deviceGeofenceIds);
                     }
 
                 } finally {
@@ -186,6 +197,16 @@ public class GeofenceManager {
 
     public boolean checkGeofence(long userId, long geofenceId) {
         return getUserGeofencesIds(userId).contains(geofenceId);
+    }
+
+    public List<Long> getCurrentDeviceGeofences(Position position) {
+        List<Long> result = new ArrayList<Long>();
+        for (Long geofenceId : getAllDeviceGeofences(position.getDeviceId())) {
+            if (getGeofence(geofenceId).getGeometry().containsPoint(position.getLatitude(), position.getLongitude())) {
+                result.add(geofenceId);
+            }
+        }
+        return result;
     }
 
 }

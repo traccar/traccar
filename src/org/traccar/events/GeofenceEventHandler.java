@@ -1,7 +1,9 @@
 package org.traccar.events;
 
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -25,50 +27,52 @@ public class GeofenceEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Event analizePosition(Position position) {
-        Event event = null;
-        if (!isLastPosition() || !position.getValid()) {
-            return event;
+    protected Collection<Event> analizePosition(Position position) {
+         if (!isLastPosition() || !position.getValid()) {
+            return null;
         }
 
         Device device = dataManager.getDeviceById(position.getDeviceId());
         if (device == null) {
-            return event;
+            return null;
         }
 
-        Set<Long> geofences = geofenceManager.getAllDeviceGeofences(position.getDeviceId());
-        if (geofences == null) {
-            return event;
+        List<Long> currentGeofences = geofenceManager.getCurrentDeviceGeofences(position);
+        List<Long> oldGeofences = new ArrayList<Long>();
+        if (device.getGeofenceIds() != null) {
+            oldGeofences.addAll(device.getGeofenceIds());
         }
-        long geofenceId = 0;
-        for (Long geofence : geofences) {
-            if (geofenceManager.getGeofence(geofence).getGeometry()
-                    .containsPoint(position.getLatitude(), position.getLongitude())) {
-                geofenceId = geofence;
-                break;
-            }
-        }
+        List<Long> newGeofences = new ArrayList<Long>(currentGeofences);
+        newGeofences.removeAll(oldGeofences);
+        oldGeofences.removeAll(currentGeofences);
 
-        if (device.getGeofenceId() != geofenceId) {
-            try {
-                if (geofenceId == 0) {
-                    event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
-                    event.setGeofenceId(device.getGeofenceId());
-                } else {
-                    event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
+        device.setGeofenceIds(currentGeofences);
+
+        Collection<Event> events = new ArrayList<>();
+        try {
+            if (dataManager.getLastEvents(position.getDeviceId(),
+                    Event.TYPE_GEOFENCE_ENTER, suppressRepeated).isEmpty()) {
+                for (Long geofenceId : newGeofences) {
+                    Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
                     event.setGeofenceId(geofenceId);
+                    events.add(event);
                 }
-                if (event != null && !dataManager.getLastEvents(
-                    position.getDeviceId(), event.getType(), suppressRepeated).isEmpty()) {
-                    event = null;
-                }
-                device.setGeofenceId(geofenceId);
-                dataManager.updateDeviceStatus(device);
-            } catch (SQLException error) {
-                Log.warning(error);
             }
-
+        } catch (SQLException error) {
+            Log.warning(error);
         }
-        return event;
+        try {
+            if (dataManager.getLastEvents(position.getDeviceId(),
+                    Event.TYPE_GEOFENCE_EXIT, suppressRepeated).isEmpty()) {
+                for (Long geofenceId : oldGeofences) {
+                    Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
+                    event.setGeofenceId(geofenceId);
+                    events.add(event);
+                }
+            }
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
+        return events;
     }
 }

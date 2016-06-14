@@ -17,7 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.UserDeviceGeofence;
+import org.traccar.model.DeviceGeofence;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -35,25 +35,21 @@ import java.sql.SQLException;
 public class DeviceGeofenceResource extends BaseResource {
 
     @POST
-    public Response add(UserDeviceGeofence entity) throws SQLException {
+    public Response add(DeviceGeofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
-        Context.getDataManager().linkUserDeviceGeofence(entity.getUserId(),
-            entity.getDeviceId(), entity.getGeofenceId());
+        Context.getDataManager().linkDeviceGeofence(entity.getDeviceId(), entity.getGeofenceId());
         Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
     }
 
     @DELETE
-    public Response remove(UserDeviceGeofence entity) throws SQLException {
+    public Response remove(DeviceGeofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
-        Context.getDataManager().unlinkUserDeviceGeofence(entity.getUserId(), entity.getDeviceId(),
-            entity.getGeofenceId());
+        Context.getDataManager().unlinkDeviceGeofence(entity.getDeviceId(), entity.getGeofenceId());
         Context.getGeofenceManager().refresh();
         return Response.noContent().build();
     }

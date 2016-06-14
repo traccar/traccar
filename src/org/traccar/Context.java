@@ -19,6 +19,7 @@ import com.ning.http.client.AsyncHttpClient;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.geocode.BingMapsReverseGeocoder;
@@ -106,6 +107,12 @@ public final class Context {
         return geofenceManager;
     }
 
+    private static NotificationManager notificationManager;
+
+    public static NotificationManager getNotificationManager() {
+        return notificationManager;
+    }
+
     private static final AsyncHttpClient ASYNC_HTTP_CLIENT = new AsyncHttpClient();
 
     public static AsyncHttpClient getAsyncHttpClient() {
@@ -184,9 +191,11 @@ public final class Context {
 
         permissionsManager = new PermissionsManager(dataManager);
 
+        connectionManager = new ConnectionManager(dataManager);
+
         geofenceManager = new GeofenceManager(dataManager);
 
-        connectionManager = new ConnectionManager(dataManager);
+        notificationManager = new NotificationManager(dataManager);
 
         serverManager = new ServerManager();
 

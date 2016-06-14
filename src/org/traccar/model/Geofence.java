@@ -60,7 +60,7 @@ public class Geofence extends Extensible {
     }
 
     public void setGeometry(GeofenceGeometry geometry) {
-        area = geometry.toWKT();
+        area = geometry.toWkt();
         this.geometry = geometry;
     }
 
