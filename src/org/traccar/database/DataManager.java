@@ -150,13 +150,18 @@ public class DataManager implements IdentityManager {
                 if (force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay) {
                     devicesById.clear();
                     devicesByUniqueId.clear();
+                    ConnectionManager connectionManager = Context.getConnectionManager();
+                    GeofenceManager geofenceManager = Context.getGeofenceManager();
                     for (Device device : getAllDevices()) {
                         devicesById.put(device.getId(), device);
                         devicesByUniqueId.put(device.getUniqueId(), device);
-                    }
-                    GeofenceManager geofenceManager = Context.getGeofenceManager();
-                    if (geofenceManager != null) {
-                        geofenceManager.refresh();
+                        if (connectionManager != null && geofenceManager != null) {
+                            Position lastPosition = Context.getConnectionManager().getLastPosition(device.getId());
+                            if (lastPosition != null) {
+                                device.setGeofenceIds(Context.getGeofenceManager()
+                                        .getCurrentDeviceGeofences(lastPosition));
+                            }
+                        }
                     }
                     devicesLastUpdate = System.currentTimeMillis();
                 }
