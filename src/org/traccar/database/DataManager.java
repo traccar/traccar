@@ -156,10 +156,9 @@ public class DataManager implements IdentityManager {
                         devicesById.put(device.getId(), device);
                         devicesByUniqueId.put(device.getUniqueId(), device);
                         if (connectionManager != null && geofenceManager != null) {
-                            Position lastPosition = Context.getConnectionManager().getLastPosition(device.getId());
+                            Position lastPosition = connectionManager.getLastPosition(device.getId());
                             if (lastPosition != null) {
-                                device.setGeofenceIds(Context.getGeofenceManager()
-                                        .getCurrentDeviceGeofences(lastPosition));
+                                device.setGeofenceIds(geofenceManager.getCurrentDeviceGeofences(lastPosition));
                             }
                         }
                     }
