@@ -29,11 +29,10 @@ public class MotionEventHandler extends BaseEventHandler {
 
         double speed = position.getSpeed();
         boolean valid = position.getValid();
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
-        if (device == null) {
+        if (getDevice() == null) {
             return null;
         }
-        String motion = device.getMotion();
+        String motion = getDevice().getMotion();
         if (motion == null) {
             motion = Device.STATUS_STOPPED;
         }

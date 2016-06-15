@@ -44,7 +44,7 @@ public class DeviceResource extends BaseResource {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getDataManager().getAllDevices();
+            return Context.getDataManager().getAllDevicesCached();
         } else {
             if (userId == 0) {
                 userId = getUserId();

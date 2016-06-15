@@ -113,7 +113,7 @@ public class GeofenceManager {
                             .add(deviceGeofence.getGeofenceId());
                     }
 
-                    for (Device device : dataManager.getAllDevices()) {
+                    for (Device device : dataManager.getAllDevicesCached()) {
                         long groupId = device.getGroupId();
                         while (groupId != 0) {
                             getDeviceGeofences(deviceGeofencesWithGroups,

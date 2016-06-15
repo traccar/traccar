@@ -342,9 +342,32 @@ public class DataManager implements IdentityManager {
                 .executeQuery(GroupPermission.class);
     }
 
-    public Collection<Device> getAllDevices() throws SQLException {
+    private Collection<Device> getAllDevices() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectDevicesAll"))
                 .executeQuery(Device.class);
+    }
+
+    public Collection<Device> getAllDevicesCached() {
+        boolean forceUpdate;
+        devicesLock.readLock().lock();
+        try {
+            forceUpdate = devicesById.values().isEmpty();
+        } finally {
+            devicesLock.readLock().unlock();
+        }
+
+        try {
+            updateDeviceCache(forceUpdate);
+        } catch (SQLException e) {
+            Log.warning(e);
+        }
+
+        devicesLock.readLock().lock();
+        try {
+            return devicesById.values();
+        } finally {
+            devicesLock.readLock().unlock();
+        }
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {

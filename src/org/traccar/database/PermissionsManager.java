@@ -78,7 +78,7 @@ public class PermissionsManager {
                 users.put(user.getId(), user);
             }
 
-            GroupTree groupTree = new GroupTree(dataManager.getAllGroups(), dataManager.getAllDevices());
+            GroupTree groupTree = new GroupTree(dataManager.getAllGroups(), dataManager.getAllDevicesCached());
             for (GroupPermission permission : dataManager.getGroupPermissions()) {
                 Set<Long> userGroupPermissions = getGroupPermissions(permission.getUserId());
                 Set<Long> userDevicePermissions = getDevicePermissions(permission.getUserId());

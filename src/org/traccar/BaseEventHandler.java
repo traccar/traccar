@@ -14,10 +14,16 @@ public abstract class BaseEventHandler extends BaseDataHandler {
         return isLastPosition;
     }
 
+    private Device device;
+
+    public Device getDevice() {
+        return device;
+    }
+
     @Override
     protected Position handlePosition(Position position) {
 
-        Device device = Context.getDataManager().getDeviceById(position.getDeviceId());
+        device = Context.getDataManager().getDeviceById(position.getDeviceId());
         if (device != null) {
             long lastPositionId = device.getPositionId();
             if (position.getId() == lastPositionId) {

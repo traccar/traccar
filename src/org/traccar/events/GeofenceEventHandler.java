@@ -10,7 +10,6 @@ import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.helper.Log;
-import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -32,21 +31,20 @@ public class GeofenceEventHandler extends BaseEventHandler {
             return null;
         }
 
-        Device device = dataManager.getDeviceById(position.getDeviceId());
-        if (device == null) {
+         if (getDevice() == null) {
             return null;
         }
 
         List<Long> currentGeofences = geofenceManager.getCurrentDeviceGeofences(position);
         List<Long> oldGeofences = new ArrayList<Long>();
-        if (device.getGeofenceIds() != null) {
-            oldGeofences.addAll(device.getGeofenceIds());
+        if (getDevice().getGeofenceIds() != null) {
+            oldGeofences.addAll(getDevice().getGeofenceIds());
         }
         List<Long> newGeofences = new ArrayList<Long>(currentGeofences);
         newGeofences.removeAll(oldGeofences);
         oldGeofences.removeAll(currentGeofences);
 
-        device.setGeofenceIds(currentGeofences);
+        getDevice().setGeofenceIds(currentGeofences);
 
         Collection<Event> events = new ArrayList<>();
         try {
