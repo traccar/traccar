@@ -12,11 +12,9 @@ public class GeofenceCircle extends GeofenceGeometry {
     private double radius;
 
     public GeofenceCircle() {
-        super();
     }
 
     public GeofenceCircle(String wkt) throws ParseException {
-        super();
         fromWkt(wkt);
     }
 

@@ -21,7 +21,7 @@ public class MotionEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Collection<Event> analizePosition(Position position) {
+    protected Collection<Event> analyzePosition(Position position) {
         Collection<Event> result = null;
         if (!isLastPosition()) {
             return null;

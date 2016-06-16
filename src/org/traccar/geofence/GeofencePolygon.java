@@ -6,11 +6,9 @@ import java.util.ArrayList;
 public class GeofencePolygon extends GeofenceGeometry {
 
     public GeofencePolygon() {
-        super();
     }
 
     public GeofencePolygon(String wkt) throws ParseException {
-        super();
         fromWkt(wkt);
     }
 

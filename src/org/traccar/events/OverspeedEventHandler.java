@@ -22,7 +22,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Collection<Event> analizePosition(Position position) {
+    protected Collection<Event> analyzePosition(Position position) {
         Collection<Event> events = new ArrayList<>();
         if (!isLastPosition()) {
             return null;

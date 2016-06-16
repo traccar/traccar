@@ -31,7 +31,7 @@ public abstract class BaseEventHandler extends BaseDataHandler {
             }
         }
 
-        Collection<Event> events = analizePosition(position);
+        Collection<Event> events = analyzePosition(position);
         if (events != null) {
             for (Event event : events) {
                 Context.getNotificationManager().updateEvent(event, position);
@@ -40,6 +40,6 @@ public abstract class BaseEventHandler extends BaseDataHandler {
         return position;
     }
 
-    protected abstract Collection<Event> analizePosition(Position position);
+    protected abstract Collection<Event> analyzePosition(Position position);
 
 }

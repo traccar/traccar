@@ -10,7 +10,7 @@ import org.traccar.model.Position;
 public class CommandResultEventHandler extends BaseEventHandler {
 
     @Override
-    protected Collection<Event> analizePosition(Position position) {
+    protected Collection<Event> analyzePosition(Position position) {
         Object commandResult = position.getAttributes().get(Position.KEY_RESULT);
         if (commandResult != null) {
             Collection<Event> events = new ArrayList<>();

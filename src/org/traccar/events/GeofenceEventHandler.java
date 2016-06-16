@@ -26,7 +26,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Collection<Event> analizePosition(Position position) {
+    protected Collection<Event> analyzePosition(Position position) {
          if (!isLastPosition() || !position.getValid()) {
             return null;
         }
