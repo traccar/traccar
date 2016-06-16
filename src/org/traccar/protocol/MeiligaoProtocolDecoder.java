@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,10 +284,10 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (parser.hasNext()) {
-                position.set(Position.KEY_ODOMETER, parser.nextInt(16));
+                position.set(Position.KEY_ODOMETER, parser.nextLong(16));
             }
             if (parser.hasNext()) {
-                position.set(Position.KEY_ODOMETER, parser.nextInt(16));
+                position.set(Position.KEY_ODOMETER, parser.nextLong(16));
             }
 
             if (parser.hasNext()) {
