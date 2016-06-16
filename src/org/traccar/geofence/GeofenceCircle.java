@@ -34,7 +34,6 @@ public class GeofenceCircle extends GeofenceGeometry {
     }
 
     public GeofenceCircle(double latitude, double longitude, double radius) {
-        super();
         this.centerLatitude = latitude;
         this.centerLongitude = longitude;
         this.radius = radius;
