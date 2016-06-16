@@ -25,6 +25,7 @@ import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -42,24 +43,24 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
-         if (!isLastPosition() || !position.getValid()) {
+        Device device = dataManager.getDeviceById(position.getDeviceId());
+        if (device == null) {
             return null;
         }
-
-         if (getDevice() == null) {
+        if (position.getId() != device.getPositionId() || !position.getValid()) {
             return null;
         }
 
         List<Long> currentGeofences = geofenceManager.getCurrentDeviceGeofences(position);
         List<Long> oldGeofences = new ArrayList<Long>();
-        if (getDevice().getGeofenceIds() != null) {
-            oldGeofences.addAll(getDevice().getGeofenceIds());
+        if (device.getGeofenceIds() != null) {
+            oldGeofences.addAll(device.getGeofenceIds());
         }
         List<Long> newGeofences = new ArrayList<Long>(currentGeofences);
         newGeofences.removeAll(oldGeofences);
         oldGeofences.removeAll(currentGeofences);
 
-        getDevice().setGeofenceIds(currentGeofences);
+        device.setGeofenceIds(currentGeofences);
 
         Collection<Event> events = new ArrayList<>();
         try {

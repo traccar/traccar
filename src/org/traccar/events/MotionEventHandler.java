@@ -37,17 +37,19 @@ public class MotionEventHandler extends BaseEventHandler {
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
-        Collection<Event> result = null;
-        if (!isLastPosition()) {
+
+        Device device = Context.getDataManager().getDeviceById(position.getDeviceId());
+        if (device == null) {
+            return null;
+        }
+        if (position.getId() != device.getPositionId() || !position.getValid()) {
             return null;
         }
 
+        Collection<Event> result = null;
         double speed = position.getSpeed();
         boolean valid = position.getValid();
-        if (getDevice() == null) {
-            return null;
-        }
-        String motion = getDevice().getMotion();
+        String motion = device.getMotion();
         if (motion == null) {
             motion = Device.STATUS_STOPPED;
         }

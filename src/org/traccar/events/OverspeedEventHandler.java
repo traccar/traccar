@@ -21,6 +21,7 @@ import java.util.Collection;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.helper.Log;
@@ -38,10 +39,16 @@ public class OverspeedEventHandler extends BaseEventHandler {
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
-        Collection<Event> events = new ArrayList<>();
-        if (!isLastPosition()) {
+
+        Device device = Context.getDataManager().getDeviceById(position.getDeviceId());
+        if (device == null) {
             return null;
         }
+        if (position.getId() != device.getPositionId() || !position.getValid()) {
+            return null;
+        }
+
+        Collection<Event> events = new ArrayList<>();
         double speed = position.getSpeed();
         boolean valid = position.getValid();
 
