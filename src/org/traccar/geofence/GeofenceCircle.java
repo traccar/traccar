@@ -67,11 +67,11 @@ public class GeofenceCircle extends GeofenceGeometry {
         if (content == null || content.equals("")) {
             throw new ParseException("No content", 0);
         }
-        String[] commatokens = content.split(",");
-        if (commatokens.length != 2) {
+        String[] commaTokens = content.split(",");
+        if (commaTokens.length != 2) {
             throw new ParseException("Not valid content", 0);
         }
-        String[] tokens = commatokens[0].split("\\s");
+        String[] tokens = commaTokens[0].split("\\s");
         if (tokens.length != 2) {
             throw new ParseException("Too much or less coordinates", 0);
         }
@@ -86,9 +86,9 @@ public class GeofenceCircle extends GeofenceGeometry {
             throw new ParseException(tokens[1] + " is not a double", 0);
         }
         try {
-            radius = Double.parseDouble(commatokens[1]);
+            radius = Double.parseDouble(commaTokens[1]);
         } catch (NumberFormatException e) {
-            throw new ParseException(commatokens[1] + " is not a double", 0);
+            throw new ParseException(commaTokens[1] + " is not a double", 0);
         }
     }
 }
