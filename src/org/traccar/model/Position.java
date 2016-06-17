@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,16 +65,6 @@ public class Position extends Message {
     public static final String PREFIX_ADC = "adc";
     public static final String PREFIX_IO = "io";
     public static final String PREFIX_COUNT = "count";
-
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     private String protocol;
 

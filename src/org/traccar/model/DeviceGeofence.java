@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.model;
 
-import java.util.Collection;
+public class DeviceGeofence {
 
-import org.traccar.model.Event;
-import org.traccar.model.Position;
+    private long deviceId;
 
-public abstract class BaseEventHandler extends BaseDataHandler {
-
-    @Override
-    protected Position handlePosition(Position position) {
-
-        Collection<Event> events = analyzePosition(position);
-        if (events != null) {
-            for (Event event : events) {
-                Context.getNotificationManager().updateEvent(event, position);
-            }
-        }
-        return position;
+    public long getDeviceId() {
+        return deviceId;
     }
 
-    protected abstract Collection<Event> analyzePosition(Position position);
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    private long geofenceId;
+
+    public long getGeofenceId() {
+        return geofenceId;
+    }
+
+    public void setGeofenceId(long geofenceId) {
+        this.geofenceId = geofenceId;
+    }
 
 }

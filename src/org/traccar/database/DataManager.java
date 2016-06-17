@@ -48,11 +48,15 @@ import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
 import org.traccar.model.Group;
+import org.traccar.model.GroupGeofence;
 import org.traccar.model.GroupPermission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.model.DeviceGeofence;
+import org.traccar.model.GeofencePermission;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -146,9 +150,17 @@ public class DataManager implements IdentityManager {
                 if (force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay) {
                     devicesById.clear();
                     devicesByUniqueId.clear();
+                    ConnectionManager connectionManager = Context.getConnectionManager();
+                    GeofenceManager geofenceManager = Context.getGeofenceManager();
                     for (Device device : getAllDevices()) {
                         devicesById.put(device.getId(), device);
                         devicesByUniqueId.put(device.getUniqueId(), device);
+                        if (connectionManager != null && geofenceManager != null) {
+                            Position lastPosition = connectionManager.getLastPosition(device.getId());
+                            if (lastPosition != null) {
+                                device.setGeofenceIds(geofenceManager.getCurrentDeviceGeofences(lastPosition));
+                            }
+                        }
                     }
                     devicesLastUpdate = System.currentTimeMillis();
                 }
@@ -334,9 +346,32 @@ public class DataManager implements IdentityManager {
                 .executeQuery(GroupPermission.class);
     }
 
-    public Collection<Device> getAllDevices() throws SQLException {
+    private Collection<Device> getAllDevices() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectDevicesAll"))
                 .executeQuery(Device.class);
+    }
+
+    public Collection<Device> getAllDevicesCached() {
+        boolean forceUpdate;
+        devicesLock.readLock().lock();
+        try {
+            forceUpdate = devicesById.values().isEmpty();
+        } finally {
+            devicesLock.readLock().unlock();
+        }
+
+        try {
+            updateDeviceCache(forceUpdate);
+        } catch (SQLException e) {
+            Log.warning(e);
+        }
+
+        devicesLock.readLock().lock();
+        try {
+            return devicesById.values();
+        } finally {
+            devicesLock.readLock().unlock();
+        }
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {
@@ -520,8 +555,93 @@ public class DataManager implements IdentityManager {
     public Collection<Event> getLastEvents(long deviceId, String type, int interval) throws SQLException {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, -interval);
-        Date to = calendar.getTime();
-        return getEvents(deviceId, type, new Date(), to);
+        Date from = calendar.getTime();
+        return getEvents(deviceId, type, from, new Date());
     }
 
+    public Collection<Geofence> getGeofences() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencesAll"))
+                .executeQuery(Geofence.class);
+    }
+
+    public Geofence getGeofence(long geofenceId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGeofences"))
+                .setLong("id", geofenceId)
+                .executeQuerySingle(Geofence.class);
+    }
+
+    public void addGeofence(Geofence geofence) throws SQLException {
+        geofence.setId(QueryBuilder.create(dataSource, getQuery("database.insertGeofence"), true)
+                .setObject(geofence)
+                .executeUpdate());
+    }
+
+    public void updateGeofence(Geofence geofence) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateGeofence"))
+                .setObject(geofence)
+                .executeUpdate();
+    }
+
+    public void removeGeofence(long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteGeofence"))
+                .setLong("id", geofenceId)
+                .executeUpdate();
+    }
+
+    public Collection<GeofencePermission> getGeofencePermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGeofencePermissions"))
+                .executeQuery(GeofencePermission.class);
+    }
+
+    public void linkGeofence(long userId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkGeofence"))
+                .setLong("userId", userId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public void unlinkGeofence(long userId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkGeofence"))
+                .setLong("userId", userId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public Collection<GroupGeofence> getGroupGeofences() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectGroupGeofences"))
+                .executeQuery(GroupGeofence.class);
+    }
+
+    public void linkGroupGeofence(long groupId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkGroupGeofence"))
+                .setLong("groupId", groupId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public void unlinkGroupGeofence(long groupId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkGroupGeofence"))
+                .setLong("groupId", groupId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public Collection<DeviceGeofence> getDeviceGeofences() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectDeviceGeofences"))
+                .executeQuery(DeviceGeofence.class);
+    }
+
+    public void linkDeviceGeofence(long deviceId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkDeviceGeofence"))
+                .setLong("deviceId", deviceId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public void unlinkDeviceGeofence(long deviceId, long geofenceId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceGeofence"))
+                .setLong("deviceId", deviceId)
+                .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
 }

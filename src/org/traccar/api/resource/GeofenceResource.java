@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
-import org.traccar.model.Device;
+import org.traccar.model.Geofence;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -34,42 +34,41 @@ import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
 
-@Path("devices")
+@Path("geofences")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class DeviceResource extends BaseResource {
+public class GeofenceResource extends BaseResource {
 
     @GET
-    public Collection<Device> get(
+    public Collection<Geofence> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getDataManager().getAllDevicesCached();
+            return Context.getGeofenceManager().getAllGeofences();
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getDataManager().getDevices(userId);
+            return Context.getGeofenceManager().getUserGeofences(userId);
         }
     }
 
     @POST
-    public Response add(Device entity) throws SQLException {
+    public Response add(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getDataManager().addDevice(entity);
-        Context.getDataManager().linkDevice(getUserId(), entity.getId());
-        Context.getPermissionsManager().refresh();
+        Context.getDataManager().addGeofence(entity);
+        Context.getDataManager().linkGeofence(getUserId(), entity.getId());
         Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
     }
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, Device entity) throws SQLException {
+    public Response update(@PathParam("id") long id, Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDevice(getUserId(), id);
-        Context.getDataManager().updateDevice(entity);
+        Context.getPermissionsManager().checkGeofence(getUserId(), id);
+        Context.getGeofenceManager().updateGeofence(entity);
         return Response.ok(entity).build();
     }
 
@@ -77,9 +76,8 @@ public class DeviceResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDevice(getUserId(), id);
-        Context.getDataManager().removeDevice(id);
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().checkGeofence(getUserId(), id);
+        Context.getDataManager().removeGeofence(id);
         Context.getGeofenceManager().refresh();
         return Response.noContent().build();
     }

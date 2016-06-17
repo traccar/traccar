@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class ConnectionManager {
                 if (status.equals(Device.STATUS_ONLINE)) {
                     event.setType(Event.TYPE_DEVICE_ONLINE);
                 }
-                updateEvent(event, null);
+                Context.getNotificationManager().updateEvent(event, null);
             }
             device.setStatus(status);
 
@@ -147,18 +147,10 @@ public class ConnectionManager {
         }
     }
 
-    public synchronized void updateEvent(Event event, Position position) {
-        long deviceId = event.getDeviceId();
-        try {
-            Context.getDataManager().addEvent(event);
-        } catch (SQLException error) {
-            Log.warning(error);
-        }
-        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
-            if (listeners.containsKey(userId)) {
-                for (UpdateListener listener : listeners.get(userId)) {
-                    listener.onUpdateEvent(event, position);
-                }
+    public synchronized void updateEvent(long userId, Event event, Position position) {
+        if (listeners.containsKey(userId)) {
+            for (UpdateListener listener : listeners.get(userId)) {
+                listener.onUpdateEvent(event, position);
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public class UserResource extends BaseResource {
         }
         Context.getDataManager().addUser(entity);
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
     }
 
@@ -65,6 +66,7 @@ public class UserResource extends BaseResource {
         }
         Context.getDataManager().updateUser(entity);
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
     }
 
@@ -74,6 +76,7 @@ public class UserResource extends BaseResource {
         Context.getPermissionsManager().checkUser(getUserId(), id);
         Context.getDataManager().removeUser(id);
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.noContent().build();
     }
 

@@ -13,27 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.geofence;
 
-import java.util.Collection;
+import java.text.ParseException;
 
-import org.traccar.model.Event;
-import org.traccar.model.Position;
+public abstract class GeofenceGeometry {
 
-public abstract class BaseEventHandler extends BaseDataHandler {
+    public abstract boolean containsPoint(double latitude, double longitude);
 
-    @Override
-    protected Position handlePosition(Position position) {
+    public abstract String toWkt();
 
-        Collection<Event> events = analyzePosition(position);
-        if (events != null) {
-            for (Event event : events) {
-                Context.getNotificationManager().updateEvent(event, position);
-            }
-        }
-        return position;
-    }
-
-    protected abstract Collection<Event> analyzePosition(Position position);
+    public abstract void fromWkt(String wkt) throws ParseException;
 
 }

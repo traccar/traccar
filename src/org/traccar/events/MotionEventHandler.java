@@ -1,6 +1,23 @@
+/*
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.events;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -19,37 +36,45 @@ public class MotionEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Event analizePosition(Position position) {
-        Event event = null;
+    protected Collection<Event> analyzePosition(Position position) {
 
-        if (!isLastPosition()) {
-            return event;
+        Device device = Context.getDataManager().getDeviceById(position.getDeviceId());
+        if (device == null) {
+            return null;
+        }
+        if (position.getId() != device.getPositionId() || !position.getValid()) {
+            return null;
         }
 
+        Collection<Event> result = null;
         double speed = position.getSpeed();
         boolean valid = position.getValid();
-        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
-        if (device == null) {
-            return event;
-        }
         String motion = device.getMotion();
+        if (motion == null) {
+            motion = Device.STATUS_STOPPED;
+        }
         if (valid && speed > SPEED_THRESHOLD && !motion.equals(Device.STATUS_MOVING)) {
             Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_MOVING, null);
-            event = new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId());
+            result = new ArrayList<>();
+            result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
         } else if (valid && speed < SPEED_THRESHOLD && motion.equals(Device.STATUS_MOVING)) {
             Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_STOPPED, null);
-            event = new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId());
+            result = new ArrayList<>();
+            result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
         }
         try {
-            if (event != null && !Context.getDataManager().getLastEvents(
-                    position.getDeviceId(), event.getType(), suppressRepeated).isEmpty()) {
-                event = null;
+            if (result != null && !result.isEmpty()) {
+                for (Event event : result) {
+                    if (!Context.getDataManager().getLastEvents(position.getDeviceId(),
+                            event.getType(), suppressRepeated).isEmpty()) {
+                        event = null;
+                    }
+                }
             }
-
         } catch (SQLException error) {
             Log.warning(error);
         }
-        return event;
+        return result;
     }
 
 }

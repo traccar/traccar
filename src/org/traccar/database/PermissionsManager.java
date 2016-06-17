@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
@@ -77,7 +78,7 @@ public class PermissionsManager {
                 users.put(user.getId(), user);
             }
 
-            GroupTree groupTree = new GroupTree(dataManager.getAllGroups(), dataManager.getAllDevices());
+            GroupTree groupTree = new GroupTree(dataManager.getAllGroups(), dataManager.getAllDevicesCached());
             for (GroupPermission permission : dataManager.getGroupPermissions()) {
                 Set<Long> userGroupPermissions = getGroupPermissions(permission.getUserId());
                 Set<Long> userDevicePermissions = getDevicePermissions(permission.getUserId());
@@ -142,6 +143,12 @@ public class PermissionsManager {
     public void checkReadonly(long userId) {
         if (server.getReadonly() && !isAdmin(userId)) {
             throw new SecurityException("Readonly user");
+        }
+    }
+
+    public void checkGeofence(long userId, long geofenceId) throws SecurityException {
+        if (!Context.getGeofenceManager().checkGeofence(userId, geofenceId) && !isAdmin(userId)) {
+            throw new SecurityException("Geofence access denied");
         }
     }
 
