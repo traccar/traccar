@@ -36,6 +36,7 @@ public class Command extends Message {
     public static final String TYPE_SILENCE_TIME = "silenceTime";
     public static final String TYPE_SET_PHONEBOOK = "setPhonebook";
     public static final String TYPE_VOICE_MESSAGE = "voiceMessage";
+    public static final String TYPE_OUTPUT_CONTROL = "outputControl";
 
     public static final String TYPE_ALARM_GEOFENCE = "movementAlarm";
     public static final String TYPE_ALARM_BATTERY = "alarmBattery";
