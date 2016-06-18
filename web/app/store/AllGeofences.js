@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.model.Event', {
-    extend: 'Ext.data.Model',
-    identifier: 'negative',
+Ext.define('Traccar.store.AllGeofences', {
+    extend: 'Ext.data.Store',
+    model: 'Traccar.model.Geofence',
 
-    fields: [{
-        name: 'id',
-        type: 'int'
-    }, {
-        name: 'type',
-        type: 'string'
-    }, {
-        name: 'serverTime',
-        type: 'date',
-        dateFormat: 'c'
-    }, {
-        name: 'deviceId',
-        type: 'int'
-    }, {
-        name: 'positionId',
-        type: 'int'
-    }, {
-        name: 'geofenceId',
-        type: 'int'
-    }, {
-        name: 'attributes'
-    }]
+    proxy: {
+        type: 'rest',
+        url: '/api/geofences',
+        extraParams: {
+            all: true
+        }
+    }
 });

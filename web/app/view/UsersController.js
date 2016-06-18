@@ -22,6 +22,7 @@ Ext.define('Traccar.view.UsersController', {
         'Traccar.view.UserDialog',
         'Traccar.view.UserDevices',
         'Traccar.view.UserGroups',
+        'Traccar.view.UserGeofences',
         'Traccar.view.BaseWindow'
     ],
 
@@ -87,11 +88,23 @@ Ext.define('Traccar.view.UsersController', {
         }).show();
     },
 
+    onGeofencesClick: function () {
+        var user = this.getView().getSelectionModel().getSelection()[0];
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.settingsGeofences,
+            items: {
+                xtype: 'userGeofencesView',
+                user: user
+            }
+        }).show();
+    },
+
     onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
         this.lookupReference('toolbarEditButton').setDisabled(disabled);
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
         this.lookupReference('userDevicesButton').setDisabled(disabled);
         this.lookupReference('userGroupsButton').setDisabled(disabled);
+        this.lookupReference('userGeofencesButton').setDisabled(disabled);
     }
 });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.model.Event', {
+Ext.define('Traccar.model.Geofence', {
     extend: 'Ext.data.Model',
     identifier: 'negative',
 
@@ -22,21 +22,14 @@ Ext.define('Traccar.model.Event', {
         name: 'id',
         type: 'int'
     }, {
-        name: 'type',
+        name: 'name',
         type: 'string'
     }, {
-        name: 'serverTime',
-        type: 'date',
-        dateFormat: 'c'
+        name: 'description',
+        type: 'string'
     }, {
-        name: 'deviceId',
-        type: 'int'
-    }, {
-        name: 'positionId',
-        type: 'int'
-    }, {
-        name: 'geofenceId',
-        type: 'int'
+        name: 'area',
+        type: 'string'
     }, {
         name: 'attributes'
     }]

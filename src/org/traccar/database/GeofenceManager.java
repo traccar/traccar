@@ -70,6 +70,15 @@ public class GeofenceManager {
         return groupGeofences.get(groupId);
     }
 
+    public Set<Long> getGroupGeofencesIds(long groupId) {
+        groupGeofencesLock.readLock().lock();
+        try {
+            return getGroupGeofences(groupId);
+        } finally {
+            groupGeofencesLock.readLock().unlock();
+        }
+    }
+
     public Set<Long> getAllDeviceGeofences(long deviceId) {
         deviceGeofencesLock.readLock().lock();
         try {
@@ -77,10 +86,9 @@ public class GeofenceManager {
         } finally {
             deviceGeofencesLock.readLock().unlock();
         }
-
     }
 
-    public Set<Long> getDeviceGeofences(long deviceId) {
+    public Set<Long> getDeviceGeofencesIds(long deviceId) {
         deviceGeofencesLock.readLock().lock();
         try {
             return getDeviceGeofences(deviceGeofences, deviceId);
@@ -174,11 +182,20 @@ public class GeofenceManager {
         }
     }
 
-    public final Collection<Geofence> getUserGeofences(long userId) {
+    public final Set<Long> getAllGeofencesIds() {
+        geofencesLock.readLock().lock();
+        try {
+            return geofences.keySet();
+        } finally {
+            geofencesLock.readLock().unlock();
+        }
+    }
+
+    public final Collection<Geofence> getGeofences(Set<Long> geofencesIds) {
         geofencesLock.readLock().lock();
         try {
             Collection<Geofence> result = new LinkedList<>();
-            for (Long geofenceId : getUserGeofencesIds(userId)) {
+            for (Long geofenceId : geofencesIds) {
                 result.add(getGeofence(geofenceId));
             }
             return result;

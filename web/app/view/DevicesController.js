@@ -20,7 +20,8 @@ Ext.define('Traccar.view.DevicesController', {
 
     requires: [
         'Traccar.view.CommandDialog',
-        'Traccar.view.DeviceDialog'
+        'Traccar.view.DeviceDialog',
+        'Traccar.view.DeviceGeofences'
     ],
 
     config: {
@@ -84,6 +85,18 @@ Ext.define('Traccar.view.DevicesController', {
         });
     },
 
+    onGeofencesClick: function () {
+        device = this.getView().getSelectionModel().getSelection()[0];
+        var admin = Traccar.app.getUser().get('admin');
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.settingsGeofences,
+            items: {
+                xtype: 'deviceGeofencesView',
+                device: device
+            }
+        }).show();
+    },
+
     onCommandClick: function () {
         var device, deviceId, command, dialog, comboStore;
         device = this.getView().getSelectionModel().getSelection()[0];
@@ -108,6 +121,7 @@ Ext.define('Traccar.view.DevicesController', {
         var empty = selected.getCount() === 0;
         this.lookupReference('toolbarEditButton').setDisabled(empty);
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
+        this.lookupReference('toolbarGeofencesButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty || (selected.getLastSelected().get('status') !== 'online'));
         if (!empty) {
             this.fireEvent('selectDevice', selected.getLastSelected(), true);

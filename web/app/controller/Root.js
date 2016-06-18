@@ -75,6 +75,7 @@ Ext.define('Traccar.controller.Root', {
     loadApp: function () {
         Ext.getStore('Groups').load();
         Ext.getStore('Devices').load();
+        Ext.getStore('Geofences').load();
         Ext.get('attribution').remove();
         if (this.isPhone) {
             Ext.create('widget.mainMobile');
@@ -145,6 +146,12 @@ Ext.define('Traccar.controller.Root', {
                         text = Strings[typeKey];
                         if (typeof text == "undefined") {
                             text = typeKey;
+                        }
+                    }
+                    if (array[i].geofenceId !== 0) {
+                        geofence = Ext.getStore('Geofences').getById(array[i].geofenceId);
+                        if (typeof geofence != "undefined") {
+                            text += ' \"' + geofence.getData().name + '"';
                         }
                     }
                     device = Ext.getStore('Devices').getById(array[i].deviceId);
