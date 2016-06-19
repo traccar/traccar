@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class H02ProtocolDecoder extends BaseProtocolDecoder {
@@ -120,7 +121,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .number("Vd,")                       // version?
             .any()
-            .number("(dd)(dd)(dd),")             // time
+            .number("(?:(dd)(dd)(dd))?,")        // time
             .expression("([AV])?,")              // validity
             .groupBegin()
             .number("-(d+)-(d+.d+),")            // latitude
@@ -136,7 +137,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(?:(dd)(dd)(dd))?,")        // date (ddmmyy)
             .number("(x{8})")                    // status
             .any()
             .compile();
@@ -156,8 +157,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        DateBuilder dateBuilder = new DateBuilder();
+        if (parser.hasNext(3)) {
+            dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        }
 
         if (parser.hasNext()) {
             position.setValid(parser.next().equals("A"));
@@ -180,8 +183,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
 
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        if (parser.hasNext(3)) {
+            dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+        } else {
+            position.setTime(new Date());
+        }
 
         processStatus(position, parser.nextLong(16));
 
