@@ -10,6 +10,15 @@ public class CarscopProtocolDecoderTest extends ProtocolTest {
 
         CarscopProtocolDecoder decoder = new CarscopProtocolDecoder(new CarscopProtocol());
 
+        verifyNothing(decoder, text(
+                "*160618233129UB00HSO"));
+
+        verifyNothing(decoder, text(
+                "*160618232614UD00232614A5009.1747N01910.3829E0.000160618298.2811000000L000000"));
+
+        verifyNothing(decoder, text(
+                "*160618232529UB05CW9999C00000538232529A5009.1747N01910.3829E0.000160618298.2811000000L000000"));
+
         verifyPosition(decoder, text(
                 "*040331141830UB05123456789012345061825A2934.0133N10627.2544E000.0040331309.6200000000L000000"),
                 position("2004-03-31 06:18:25.000", true, 29.56689, 106.45424));
