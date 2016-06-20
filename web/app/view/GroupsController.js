@@ -60,12 +60,17 @@ Ext.define('Traccar.view.GroupsController', {
     },
 
     onGeofencesClick: function () {
-        group = this.getView().getSelectionModel().getSelection()[0];
+        var admin = Traccar.app.getUser().get('admin');
+        var group = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.settingsGeofences,
+            title: Strings.sharedGeofences,
             items: {
                 xtype: 'groupGeofencesView',
-                group: group
+                baseObjectName: 'groupId',
+                linkObjectName: 'geofenceId',
+                storeName: (admin) ? 'AllGeofences' : 'Geofences',
+                urlApi: '/api/groups/geofences',
+                baseObject: group.getData().id
             }
         }).show();
     },

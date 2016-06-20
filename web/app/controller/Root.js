@@ -95,7 +95,7 @@ Ext.define('Traccar.controller.Root', {
         };
 
         socket.onmessage = function (event) {
-            var i, j, store, data, array, entity, device, typeKey, text;
+            var i, j, store, data, array, entity, device, typeKey, text, geofence;
 
             data = Ext.decode(event.data);
 

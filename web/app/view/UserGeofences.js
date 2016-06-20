@@ -19,11 +19,10 @@ Ext.define('Traccar.view.UserGeofences', {
     xtype: 'userGeofencesView',
 
     requires: [
-        'Traccar.view.UserGeofencesController'
+        'Traccar.view.BasePermissionsController'
     ],
 
-    controller: 'userGeofences',
-    store: 'AllGeofences',
+    controller: 'basePermissionsController',
 
     selModel: {
         selType: 'checkboxmodel',

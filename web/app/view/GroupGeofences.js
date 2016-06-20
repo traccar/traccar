@@ -19,10 +19,10 @@ Ext.define('Traccar.view.GroupGeofences', {
     xtype: 'groupGeofencesView',
 
     requires: [
-        'Traccar.view.GroupGeofencesController'
+        'Traccar.view.BasePermissionsController'
     ],
 
-    controller: 'groupGeofences',
+    controller: 'basePermissionsController',
 
     selModel: {
         selType: 'checkboxmodel',

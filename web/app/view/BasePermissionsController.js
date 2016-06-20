@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.UserGeofencesController', {
+Ext.define('Traccar.view.BasePermissionsController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.userGeofences',
+    alias: 'controller.basePermissionsController',
 
     init: function () {
-        this.userId = this.getView().user.getData().id;
+        var params = {};
+        params[this.getView().baseObjectName] = this.getView().baseObject;
+        var linkStoreName = this.getView().linkStoreName;
+        var storeName = this.getView().storeName;
+        linkStoreName = (typeof linkStoreName === 'undefined') ? storeName : linkStoreName;
+        this.getView().setStore(Ext.getStore(storeName));
         this.getView().getStore().load({
             scope: this,
             callback: function (records, operation, success) {
-                var userStore = Ext.create('Traccar.store.Geofences');
-
-                userStore.load({
-                    params: {
-                        userId: this.userId
-                    },
+                var linkStore = Ext.create('Traccar.store.' + linkStoreName);
+                linkStore.load({
+                    params: params,
                     scope: this,
                     callback: function (records, operation, success) {
                         var i, index;
@@ -45,13 +47,13 @@ Ext.define('Traccar.view.UserGeofencesController', {
     },
 
     onBeforeSelect: function (object, record, index) {
+        var data = {};
+        data[this.getView().baseObjectName] = this.getView().baseObject;
+        data[this.getView().linkObjectName] = record.getData().id;
         Ext.Ajax.request({
             scope: this,
-            url: '/api/permissions/geofences',
-            jsonData: {
-                userId: this.userId,
-                geofenceId: record.getData().id
-            },
+            url: this.getView().urlApi,
+            jsonData: Ext.util.JSON.encode(data),
             callback: function (options, success, response) {
                 if (!success) {
                     Traccar.app.showError(response);
@@ -61,14 +63,14 @@ Ext.define('Traccar.view.UserGeofencesController', {
     },
 
     onBeforeDeselect: function (object, record, index) {
+        var data = {};
+        data[this.getView().baseObjectName] = this.getView().baseObject;
+        data[this.getView().linkObjectName] = record.getData().id;
         Ext.Ajax.request({
             scope: this,
             method: 'DELETE',
-            url: '/api/permissions/geofences',
-            jsonData: {
-                userId: this.userId,
-                geofenceId: record.getData().id
-            },
+            url: this.getView().urlApi,
+            jsonData: Ext.util.JSON.encode(data),
             callback: function (options, success, response) {
                 if (!success) {
                     Traccar.app.showError(response);

@@ -72,7 +72,12 @@ Ext.define('Traccar.view.UsersController', {
             title: Strings.deviceTitle,
             items: {
                 xtype: 'userDevicesView',
-                user: user
+                baseObjectName: 'userId',
+                linkObjectName: 'deviceId',
+                storeName: 'AllDevices',
+                linkStoreName: 'Devices',
+                urlApi: '/api/permissions/devices',
+                baseObject: user.getData().id
             }
         }).show();
     },
@@ -83,7 +88,12 @@ Ext.define('Traccar.view.UsersController', {
             title: Strings.settingsGroups,
             items: {
                 xtype: 'userGroupsView',
-                user: user
+                baseObjectName: 'userId',
+                linkObjectName: 'groupId',
+                storeName: 'AllGroups',
+                linkStoreName: 'Groups',
+                urlApi: '/api/permissions/groups',
+                baseObject: user.getData().id
             }
         }).show();
     },
@@ -91,10 +101,15 @@ Ext.define('Traccar.view.UsersController', {
     onGeofencesClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.settingsGeofences,
+            title: Strings.sharedGeofences,
             items: {
                 xtype: 'userGeofencesView',
-                user: user
+                baseObjectName: 'userId',
+                linkObjectName: 'geofenceId',
+                storeName: 'AllGeofences',
+                linkStoreName: 'Geofences',
+                urlApi: '/api/permissions/geofences',
+                baseObject: user.getData().id
             }
         }).show();
     },
