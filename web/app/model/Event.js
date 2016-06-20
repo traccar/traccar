@@ -35,6 +35,9 @@ Ext.define('Traccar.model.Event', {
         name: 'positionId',
         type: 'int'
     }, {
+        name: 'geofenceId',
+        type: 'int'
+    }, {
         name: 'attributes'
     }]
 });

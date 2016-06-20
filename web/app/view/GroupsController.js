@@ -18,6 +18,10 @@ Ext.define('Traccar.view.GroupsController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.groups',
 
+    requires: [
+        'Traccar.view.GroupGeofences'
+    ],
+
     onAddClick: function () {
         var group, dialog;
         group = Ext.create('Traccar.model.Group');
@@ -55,9 +59,26 @@ Ext.define('Traccar.view.GroupsController', {
         });
     },
 
+    onGeofencesClick: function () {
+        var admin = Traccar.app.getUser().get('admin');
+        var group = this.getView().getSelectionModel().getSelection()[0];
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.sharedGeofences,
+            items: {
+                xtype: 'groupGeofencesView',
+                baseObjectName: 'groupId',
+                linkObjectName: 'geofenceId',
+                storeName: (admin) ? 'AllGeofences' : 'Geofences',
+                urlApi: '/api/groups/geofences',
+                baseObject: group.getData().id
+            }
+        }).show();
+    },
+
     onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
         this.lookupReference('toolbarEditButton').setDisabled(disabled);
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
+        this.lookupReference('toolbarGeofencesButton').setDisabled(disabled);
     }
 });

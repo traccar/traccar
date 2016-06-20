@@ -19,11 +19,10 @@ Ext.define('Traccar.view.UserDevices', {
     xtype: 'userDevicesView',
 
     requires: [
-        'Traccar.view.UserDevicesController'
+        'Traccar.view.BasePermissionsController'
     ],
 
-    controller: 'userDevices',
-    store: 'AllDevices',
+    controller: 'basePermissionsController',
 
     selModel: {
         selType: 'checkboxmodel',

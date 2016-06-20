@@ -19,11 +19,10 @@ Ext.define('Traccar.view.UserGroups', {
     xtype: 'userGroupsView',
 
     requires: [
-        'Traccar.view.UserGroupsController'
+        'Traccar.view.BasePermissionsController'
     ],
 
-    controller: 'userGroups',
-    store: 'AllGroups',
+    controller: 'basePermissionsController',
 
     selModel: {
         selType: 'checkboxmodel',

@@ -16,6 +16,7 @@
     "sharedSecond": "Second",
     "sharedName": "Name",
     "sharedSearch": "Search",
+    "sharedGeofences": "Geofences",
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",

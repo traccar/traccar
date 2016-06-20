@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.GeofenceManager;
 import org.traccar.model.Geofence;
 
 import javax.ws.rs.Consumes;
@@ -33,6 +34,8 @@ import javax.ws.rs.core.Response;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Path("geofences")
 @Produces(MediaType.APPLICATION_JSON)
@@ -41,17 +44,33 @@ public class GeofenceResource extends BaseResource {
 
     @GET
     public Collection<Geofence> get(
-            @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
+            @QueryParam("all") boolean all, @QueryParam("userId") long userId, @QueryParam("groupId") long groupId,
+            @QueryParam("deviceId") long deviceId) throws SQLException {
+
+        GeofenceManager geofenceManager = Context.getGeofenceManager();
+        Set<Long> result;
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getGeofenceManager().getAllGeofences();
+            result = new HashSet<>(geofenceManager.getAllGeofencesIds());
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getGeofenceManager().getUserGeofences(userId);
+            result = new HashSet<Long>(geofenceManager.getUserGeofencesIds(userId));
         }
+
+        if (groupId != 0) {
+            Context.getPermissionsManager().checkGroup(getUserId(), groupId);
+            result.retainAll(geofenceManager.getGroupGeofencesIds(groupId));
+        }
+
+        if (deviceId != 0) {
+            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+            result.retainAll(geofenceManager.getDeviceGeofencesIds(deviceId));
+        }
+        return geofenceManager.getGeofences(result);
+
     }
 
     @POST

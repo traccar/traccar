@@ -14,35 +14,25 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.Groups', {
+Ext.define('Traccar.view.DeviceGeofences', {
     extend: 'Ext.grid.Panel',
-    xtype: 'groupsView',
+    xtype: 'deviceGeofencesView',
 
     requires: [
-        'Traccar.view.GroupsController',
-        'Traccar.view.EditToolbar'
+        'Traccar.view.BasePermissionsController'
     ],
 
-    controller: 'groups',
-    store: 'Groups',
+    controller: 'basePermissionsController',
 
-    selType: 'rowmodel',
-
-    tbar: {
-        xtype: 'editToolbar',
-        items: [{
-            xtype: 'button',
-            disabled: true,
-            handler: 'onGeofencesClick',
-            reference: 'toolbarGeofencesButton',
-            glyph: 'xf21d@FontAwesome',
-            tooltip: Strings.sharedGeofences,
-            tooltipType: 'title'
-        }]
+    selModel: {
+        selType: 'checkboxmodel',
+        checkOnly: true,
+        showHeaderCheckbox: false
     },
 
     listeners: {
-        selectionchange: 'onSelectionChange'
+        beforedeselect: 'onBeforeDeselect',
+        beforeselect: 'onBeforeSelect'
     },
 
     columns: [{
