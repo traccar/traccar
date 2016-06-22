@@ -52,6 +52,7 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // satellites
             .expression("(?:[^,]*,){7}")
             .number("(d+),")                     // battery
+            .expression("[^,]*,")
             .number("(d+),")                     // external
             .any()
             .compile();
