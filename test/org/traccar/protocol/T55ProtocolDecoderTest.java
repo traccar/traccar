@@ -11,6 +11,9 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
         T55ProtocolDecoder decoder = new T55ProtocolDecoder(new T55Protocol());
 
         verifyNothing(decoder, text(
+                "086415031C20"));
+
+        verifyNothing(decoder, text(
                 "358244017671308"));
 
         verifyNotNull(decoder, text(
