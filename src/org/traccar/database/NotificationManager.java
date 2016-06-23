@@ -41,8 +41,8 @@ public class NotificationManager {
 
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(event.getDeviceId());
         for (Long userId : users) {
-            if (event.getGeofenceId() == 0
-                    || Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId())) {
+            if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
+                    && Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId())) {
                 Context.getConnectionManager().updateEvent(userId, event, position);
             }
         }

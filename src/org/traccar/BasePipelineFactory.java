@@ -132,20 +132,22 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             hemisphereHandler = new HemisphereHandler();
         }
 
-        commandResultEventHandler = new CommandResultEventHandler();
+        if (Context.getConfig().getBoolean("event.enable")) {
+            commandResultEventHandler = new CommandResultEventHandler();
 
-        if (Context.getConfig().getBoolean("event.overspeedHandler")) {
-            overspeedEventHandler = new OverspeedEventHandler();
+            if (Context.getConfig().getBoolean("event.overspeedHandler")) {
+                overspeedEventHandler = new OverspeedEventHandler();
+            }
+
+            if (Context.getConfig().getBoolean("event.motionHandler")) {
+                motionEventHandler = new MotionEventHandler();
+            }
+
+            if (Context.getConfig().getBoolean("geofence.enable")
+                    && Context.getConfig().getBoolean("event.geofenceHandler")) {
+                geofenceEventHandler = new GeofenceEventHandler();
+            }
         }
-
-        if (Context.getConfig().getBoolean("event.motionHandler")) {
-            motionEventHandler = new MotionEventHandler();
-        }
-
-        if (Context.getConfig().getBoolean("event.geofenceHandler")) {
-            geofenceEventHandler = new GeofenceEventHandler();
-        }
-
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);

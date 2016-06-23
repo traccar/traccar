@@ -41,6 +41,8 @@
     <entry key='logger.level'>all</entry>
     <entry key='logger.file'>target/tracker-server.log</entry>
 
+    <entry key='event.enable'>true</entry>
+
     <entry key='event.suppressRepeated'>60</entry>
 
     <entry key='event.overspeedHandler'>true</entry>
@@ -48,8 +50,9 @@
 
     <entry key='event.motionHandler'>true</entry>
 
-
     <entry key='event.geofenceHandler'>true</entry>
+
+    <entry key='geofence.enable'>true</entry>
 
     <!-- DATABASE CONFIG -->
 

@@ -120,6 +120,6 @@ Ext.define('Traccar.view.UsersController', {
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
         this.lookupReference('userDevicesButton').setDisabled(disabled);
         this.lookupReference('userGroupsButton').setDisabled(disabled);
-        this.lookupReference('userGeofencesButton').setDisabled(disabled);
+        this.lookupReference('userGeofencesButton').setDisabled(disabled || Traccar.app.withoutGeofences);
     }
 });

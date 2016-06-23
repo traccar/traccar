@@ -79,6 +79,6 @@ Ext.define('Traccar.view.GroupsController', {
         var disabled = selected.length > 0;
         this.lookupReference('toolbarEditButton').setDisabled(disabled);
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
-        this.lookupReference('toolbarGeofencesButton').setDisabled(disabled);
+        this.lookupReference('toolbarGeofencesButton').setDisabled(disabled || Traccar.app.withoutGeofences);
     }
 });
