@@ -142,11 +142,9 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             if (Context.getConfig().getBoolean("event.motionHandler")) {
                 motionEventHandler = new MotionEventHandler();
             }
-
-            if (Context.getConfig().getBoolean("geofence.enable")
-                    && Context.getConfig().getBoolean("event.geofenceHandler")) {
-                geofenceEventHandler = new GeofenceEventHandler();
-            }
+        }
+        if (Context.getConfig().getBoolean("event.geofenceHandler")) {
+            geofenceEventHandler = new GeofenceEventHandler();
         }
     }
 

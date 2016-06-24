@@ -29,7 +29,6 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
-import org.traccar.Context;
 import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.ObjectMapperProvider;
@@ -155,14 +154,8 @@ public class WebServer {
         resourceConfig.registerClasses(ServerResource.class, SessionResource.class, CommandResource.class,
                 GroupPermissionResource.class, DevicePermissionResource.class, UserResource.class,
                 GroupResource.class, DeviceResource.class, PositionResource.class,
-                CommandTypeResource.class);
-        if (Context.getConfig().getBoolean("event.enable")) {
-            resourceConfig.registerClasses(EventResource.class);
-        }
-        if (Context.getConfig().getBoolean("geofence.enable")) {
-            resourceConfig.registerClasses(GeofenceResource.class, DeviceGeofenceResource.class,
-                    GeofencePermissionResource.class, GroupGeofenceResource.class);
-        }
+                CommandTypeResource.class, EventResource.class, GeofenceResource.class,
+                DeviceGeofenceResource.class, GeofencePermissionResource.class, GroupGeofenceResource.class);
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
         handlers.addHandler(servletHandler);

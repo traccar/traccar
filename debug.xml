@@ -52,8 +52,6 @@
 
     <entry key='event.geofenceHandler'>true</entry>
 
-    <entry key='geofence.enable'>true</entry>
-
     <!-- DATABASE CONFIG -->
 
     <!--<entry key='database.driverFile'>hsqldb.jar</entry>-->

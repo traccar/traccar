@@ -28,8 +28,6 @@
 
     <entry key='event.geofenceHandler'>true</entry>
 
-    <entry key='geofence.enable'>true</entry>>
-
     <!-- DATABASE CONFIG -->
 
     <entry key='database.driver'>org.h2.Driver</entry>

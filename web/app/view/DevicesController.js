@@ -125,7 +125,7 @@ Ext.define('Traccar.view.DevicesController', {
         var empty = selected.getCount() === 0;
         this.lookupReference('toolbarEditButton').setDisabled(empty);
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
-        this.lookupReference('toolbarGeofencesButton').setDisabled(empty || Traccar.app.withoutGeofences);
+        this.lookupReference('toolbarGeofencesButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty || (selected.getLastSelected().get('status') !== 'online'));
         if (!empty) {
             this.fireEvent('selectDevice', selected.getLastSelected(), true);
