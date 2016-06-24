@@ -193,9 +193,13 @@ public final class Context {
 
         connectionManager = new ConnectionManager(dataManager);
 
-        geofenceManager = new GeofenceManager(dataManager);
+        if (config.getBoolean("event.geofenceHandler")) {
+            geofenceManager = new GeofenceManager(dataManager);
+        }
 
-        notificationManager = new NotificationManager(dataManager);
+        if (config.getBoolean("event.enable")) {
+            notificationManager = new NotificationManager(dataManager);
+        }
 
         serverManager = new ServerManager();
 

@@ -94,7 +94,9 @@ public class ConnectionManager {
                 if (status.equals(Device.STATUS_ONLINE)) {
                     event.setType(Event.TYPE_DEVICE_ONLINE);
                 }
-                Context.getNotificationManager().updateEvent(event, null);
+                if (Context.getNotificationManager() != null) {
+                    Context.getNotificationManager().updateEvent(event, null);
+                }
             }
             device.setStatus(status);
 
