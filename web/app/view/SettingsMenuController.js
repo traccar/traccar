@@ -24,6 +24,7 @@ Ext.define('Traccar.view.SettingsMenuController', {
         'Traccar.view.ServerDialog',
         'Traccar.view.Users',
         'Traccar.view.Groups',
+        'Traccar.view.Geofences',
         'Traccar.view.BaseWindow'
     ],
 
@@ -46,6 +47,16 @@ Ext.define('Traccar.view.SettingsMenuController', {
             modal: false,
             items: {
                 xtype: 'groupsView'
+            }
+        }).show();
+    },
+
+    onGeofencesClick: function () {
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.sharedGeofences,
+            modal: false,
+            items: {
+                xtype: 'geofencesView'
             }
         }).show();
     },

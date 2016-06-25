@@ -35,6 +35,9 @@ Ext.define('Traccar.view.SettingsMenu', {
             text: Strings.settingsGroups,
             handler: 'onGroupsClick'
         }, {
+            text: Strings.sharedGeofences,
+            handler: 'onGeofencesClick'
+        }, {
             text: Strings.settingsServer,
             hidden: true,
             handler: 'onServerClick',

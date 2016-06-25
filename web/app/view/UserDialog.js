@@ -22,7 +22,6 @@ Ext.define('Traccar.view.UserDialog', {
     ],
 
     controller: 'userDialog',
-
     title: Strings.settingsUser,
 
     items: {
