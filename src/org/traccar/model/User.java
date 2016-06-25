@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,7 @@ package org.traccar.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.helper.Hashing;
 
-public class User {
-
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+public class User extends Extensible {
 
     private String name;
 

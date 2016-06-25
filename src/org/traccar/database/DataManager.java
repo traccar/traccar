@@ -52,6 +52,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.GroupGeofence;
 import org.traccar.model.GroupPermission;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -642,6 +643,29 @@ public class DataManager implements IdentityManager {
         QueryBuilder.create(dataSource, getQuery("database.unlinkDeviceGeofence"))
                 .setLong("deviceId", deviceId)
                 .setLong("geofenceId", geofenceId)
+                .executeUpdate();
+    }
+
+    public Collection<Notification> getNotifications() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectNotifications"))
+                .executeQuery(Notification.class);
+    }
+
+    public void addNotification(Notification notification) throws SQLException {
+        notification.setId(QueryBuilder.create(dataSource, getQuery("database.insertNotification"), true)
+                .setObject(notification)
+                .executeUpdate());
+    }
+
+    public void updateNotification(Notification notification) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateNotification"))
+                .setObject(notification)
+                .executeUpdate();
+    }
+
+    public void removeNotification(Notification notification) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteNotification"))
+                .setLong("id", notification.getId())
                 .executeUpdate();
     }
 }

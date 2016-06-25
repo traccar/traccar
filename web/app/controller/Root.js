@@ -144,7 +144,7 @@ Ext.define('Traccar.controller.Root', {
                                 break;
                             }
                         }
-                        text = Strings.eventCommandResult + text;
+                        text = Strings.eventCommandResult + ": " + text;
                     } else {
                         typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
                         text = Strings[typeKey];

@@ -28,6 +28,20 @@
 
     <entry key='event.geofenceHandler'>true</entry>
 
+    <!--<entry key='mail.smtp.host'>smtp.example.com</entry>
+    for STARTTLS
+    <entry key='mail.smtp.port'>587</entry>
+    <entry key='mail.smtp.starttls.enable'>true</entry>
+    for SSL
+    <entry key='mail.smtp.port'>465</entry>
+    <entry key='mail.smtp.ssl.enable'>true</entry>
+
+    <entry key='mail.smtp.from'>traccar@example.com</entry>
+
+    <entry key='mail.smtp.auth'>true</entry>
+    <entry key='mail.smtp.username'>traccar@example.com</entry>
+    <entry key='mail.smtp.password'>password</entry>-->
+
     <!-- DATABASE CONFIG -->
 
     <entry key='database.driver'>org.h2.Driver</entry>
@@ -250,6 +264,27 @@
 
     <entry key='database.unlinkDeviceGeofence'>
         DELETE FROM device_geofence WHERE deviceId = :deviceId AND geofenceId = :geofenceId;
+    </entry>
+
+    <entry key='database.selectNotifications'>
+        SELECT * FROM notifications;
+    </entry>
+
+    <entry key='database.insertNotification'>
+        INSERT INTO notifications (userId, type, attributes)
+        VALUES (:userId, :type, :attributes);
+    </entry>
+
+    <entry key='database.updateNotification'>
+        UPDATE notifications SET
+        userId = :userId,
+        type = :type,
+        attributes = :attributes
+        WHERE id = :id;
+    </entry>
+
+    <entry key='database.deleteNotification'>
+        DELETE FROM notifications WHERE id = :id;
     </entry>
 
     <!-- PROTOCOL CONFIG -->

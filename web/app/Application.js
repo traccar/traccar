@@ -32,7 +32,8 @@ Ext.define('Traccar.Application', {
         'Attribute',
         'Command',
         'Event',
-        'Geofence'
+        'Geofence',
+        'Notification'
     ],
 
     stores: [
@@ -52,7 +53,9 @@ Ext.define('Traccar.Application', {
         'Languages',
         'Events',
         'Geofences',
-        'AllGeofences'
+        'AllGeofences',
+        'Notifications',
+        'AllNotifications'
     ],
 
     controllers: [

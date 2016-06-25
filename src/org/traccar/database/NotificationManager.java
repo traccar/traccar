@@ -15,21 +15,35 @@
  */
 package org.traccar.database;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
+import org.traccar.notification.NotificationMail;
 
 public class NotificationManager {
 
     private final DataManager dataManager;
 
+    private final Map<Long, Set<Notification>> userNotifications = new HashMap<>();
+
+    private final ReadWriteLock notificationsLock = new ReentrantReadWriteLock();
+
     public NotificationManager(DataManager dataManager) {
         this.dataManager = dataManager;
+        refresh();
     }
 
     public void updateEvent(Event event, Position position) {
@@ -43,7 +57,15 @@ public class NotificationManager {
         for (Long userId : users) {
             if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
                     && Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId())) {
-                Context.getConnectionManager().updateEvent(userId, event, position);
+                Notification notification = getUserNotificationByType(userId, event.getType());
+                if (notification != null) {
+                    if (notification.getAttributes().containsKey("web")) {
+                        Context.getConnectionManager().updateEvent(userId, event, position);
+                    }
+                    if (notification.getAttributes().containsKey("mail")) {
+                        NotificationMail.sendMailAsync(userId, event, position);
+                    }
+                }
             }
         }
     }
@@ -53,5 +75,120 @@ public class NotificationManager {
         for (Event event : events) {
             updateEvent(event, position);
         }
+    }
+
+    private Set<Notification> getUserNotificationsUnsafe(long userId) {
+        if (!userNotifications.containsKey(userId)) {
+            userNotifications.put(userId, new HashSet<Notification>());
+        }
+        return userNotifications.get(userId);
+    }
+
+    public Set<Notification> getUserNotifications(long userId) {
+        notificationsLock.readLock().lock();
+        try {
+        return getUserNotificationsUnsafe(userId);
+        } finally {
+            notificationsLock.readLock().unlock();
+        }
+    }
+
+    public final void refresh() {
+        if (dataManager != null) {
+            try {
+                notificationsLock.writeLock().lock();
+                try {
+                    userNotifications.clear();
+                    for (Notification notification : dataManager.getNotifications()) {
+                        getUserNotificationsUnsafe(notification.getUserId()).add(notification);
+                    }
+                } finally {
+                    notificationsLock.writeLock().unlock();
+                }
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
+        }
+    }
+
+    public Notification getUserNotificationByType(long userId, String type) {
+        notificationsLock.readLock().lock();
+        try {
+            for (Notification notification : getUserNotificationsUnsafe(userId)) {
+                if (notification.getType().equals(type)) {
+                    return notification;
+                }
+            }
+        } finally {
+            notificationsLock.readLock().unlock();
+        }
+        return null;
+    }
+
+    public void updateNotification(Notification notification) {
+        Notification cachedNotification = getUserNotificationByType(notification.getUserId(), notification.getType());
+        if (cachedNotification != null) {
+            if (!cachedNotification.getAttributes().equals(notification.getAttributes())) {
+                if (notification.getAttributes().isEmpty()) {
+                    try {
+                        dataManager.removeNotification(cachedNotification);
+                    } catch (SQLException error) {
+                        Log.warning(error);
+                    }
+                    notificationsLock.writeLock().lock();
+                    try {
+                        getUserNotificationsUnsafe(notification.getUserId()).remove(cachedNotification);
+                    } finally {
+                        notificationsLock.writeLock().unlock();
+                    }
+                } else {
+                    notificationsLock.writeLock().lock();
+                    try {
+                        cachedNotification.setAttributes(notification.getAttributes());
+                    } finally {
+                        notificationsLock.writeLock().unlock();
+                    }
+                    try {
+                        dataManager.updateNotification(cachedNotification);
+                    } catch (SQLException error) {
+                        Log.warning(error);
+                    }
+                }
+            } else {
+                notification.setId(cachedNotification.getId());
+            }
+        } else if (!notification.getAttributes().isEmpty()) {
+            try {
+                dataManager.addNotification(notification);
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
+            notificationsLock.writeLock().lock();
+            try {
+                getUserNotificationsUnsafe(notification.getUserId()).add(notification);
+            } finally {
+                notificationsLock.writeLock().unlock();
+            }
+        }
+    }
+
+    public Set<Notification> getAllNotifications() {
+
+        Set<Notification> notifications = new HashSet<>();
+        long id = 0;
+        Field[] fields = Event.class.getDeclaredFields();
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
+                try {
+                    Notification notification = new Notification();
+                    notification.setType(field.get(null).toString());
+                    notification.setId(id++);
+                    notifications.add(notification);
+                } catch (IllegalArgumentException | IllegalAccessException error) {
+                    Log.warning(error);
+                }
+            }
+        }
+        return notifications;
     }
 }

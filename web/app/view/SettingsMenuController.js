@@ -25,6 +25,7 @@ Ext.define('Traccar.view.SettingsMenuController', {
         'Traccar.view.Users',
         'Traccar.view.Groups',
         'Traccar.view.Geofences',
+        'Traccar.view.Notifications',
         'Traccar.view.BaseWindow'
     ],
 
@@ -73,6 +74,18 @@ Ext.define('Traccar.view.SettingsMenuController', {
             modal: false,
             items: {
                 xtype: 'usersView'
+            }
+        }).show();
+    },
+
+    onNotificationsClick: function () {
+        var user = Traccar.app.getUser();
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.sharedNotifications,
+            modal: false,
+            items: {
+                xtype: 'notificationsView',
+                user: user
             }
         }).show();
     },

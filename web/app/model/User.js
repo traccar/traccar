@@ -54,6 +54,8 @@ Ext.define('Traccar.model.User', {
     }, {
         name: 'twelveHourFormat',
         type: 'boolean'
+    }, {
+        name: 'attributes'
     }],
 
     proxy: {

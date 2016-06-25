@@ -45,6 +45,11 @@ Ext.define('Traccar.view.Users', {
             disabled: true,
             handler: 'onGeofencesClick',
             reference: 'userGeofencesButton'
+        }, {
+            text: Strings.sharedNotifications,
+            disabled: true,
+            handler: 'onNotificationsClick',
+            reference: 'userNotificationsButton'
         }]
     },
 
