@@ -19,10 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BitUtil;
-import org.traccar.helper.Checksum;
-import org.traccar.helper.DateBuilder;
-import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.*;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -44,16 +41,15 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeByte(0xC0);
             response.writeShort(0x0100);
-            response.writeShort(0x000D); // TODO: length
-            response.writeByte(MSG_LOGIN_RSP);
+            response.writeShort(response.capacity()); // TODO: length
+            response.writeByte(type);
             response.writeShort(0);
             response.writeInt(1);
-            response.writeByte(0); // success
+            response.writeBytes(content);
             response.writeByte(0xC0);
             channel.write(response);
         }
     }
-
 
     @Override
     protected Object decode(
@@ -69,7 +65,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedShort();
 
         buf.readUnsignedShort(); // checksum
-        buf.readUnsignedInt(); // index
+        int index = buf.readInt();
 
         if (type == MSG_LOGIN) {
 
@@ -79,7 +75,9 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                 if (subtype == 0x0003) {
                     String imei = buf.readBytes(length).toString(StandardCharsets.US_ASCII);
                     if (identify(imei, channel, remoteAddress) && channel != null) {
-
+                        ChannelBuffer content = ChannelBuffers.dynamicBuffer();
+                        content.writeByte(0); // success
+                        sendResponse(channel, MSG_LOGIN_RSP, content);
                     }
                 } else {
                     buf.skipBytes(length);
@@ -88,76 +86,46 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_POSITION) {
 
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
 
+            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+            position.set(Position.KEY_EVENT, buf.readUnsignedShort());
 
-        }
-
-
-
-        /*buf.skipBytes(2); // header
-        buf.readByte(); // size
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
-        // Zero for location messages
-        int power = buf.readUnsignedByte();
-        int gsm = buf.readUnsignedByte();
-
-        String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-        if (!identify(imei, channel, remoteAddress)) {
-            return null;
-        }
-        position.setDeviceId(getDeviceId());
-
-        position.set(Position.KEY_INDEX, buf.readUnsignedShort());
-
-        int type = buf.readUnsignedByte();
-
-        if (type == MSG_HEARTBEAT) {
-
-            getLastLocation(position, null);
-
-            position.set(Position.KEY_POWER, power);
-            position.set(Position.KEY_GSM, gsm);
-
-            if (channel != null) {
-                byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};
-                channel.write(ChannelBuffers.wrappedBuffer(response));
-            }
-
-        } else if (type == MSG_DATA) {
+            String time = buf.readBytes(12).toString(StandardCharsets.US_ASCII);
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    .setYear(Integer.valueOf(time.substring(0, 2)))
+                    .setMonth(Integer.valueOf(time.substring(2, 4)))
+                    .setDay(Integer.valueOf(time.substring(4, 6)))
+                    .setHour(Integer.valueOf(time.substring(6, 8)))
+                    .setMinute(Integer.valueOf(time.substring(8, 10)))
+                    .setSecond(Integer.valueOf(time.substring(10, 12)));
             position.setTime(dateBuilder.getDate());
 
-            double latitude = buf.readUnsignedInt() / (60.0 * 30000.0);
-            double longitude = buf.readUnsignedInt() / (60.0 * 30000.0);
+            position.setLongitude(buf.readInt() * 0.00001);
+            position.setLatitude(buf.readInt() * 0.00001);
 
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
             position.setCourse(buf.readUnsignedShort());
+            position.setAltitude(buf.readUnsignedShort());
 
-            buf.skipBytes(3); // reserved
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedShort());
 
-            long flags = buf.readUnsignedInt();
-            position.setValid(BitUtil.check(flags, 0));
-            if (!BitUtil.check(flags, 1)) {
-                latitude = -latitude;
-            }
-            if (!BitUtil.check(flags, 2)) {
-                longitude = -longitude;
+            while (buf.readableBytes() > 4) {
+                buf.readUnsignedShort(); // subtype
+                int length = buf.readUnsignedShort() - 4;
+                buf.skipBytes(length);
             }
 
-            position.setLatitude(latitude);
-            position.setLongitude(longitude);
+            ChannelBuffer content = ChannelBuffers.dynamicBuffer();
+            content.writeInt(index);
+            sendResponse(channel, MSG_POSITION_RSP, content);
 
-        } else {
+            return position;
 
-            return null;
-
-        }*/
+        }
 
         return null;
     }
