@@ -74,15 +74,19 @@ Ext.define('Traccar.controller.Root', {
 
     loadApp: function () {
         Ext.getStore('Groups').load();
-        Ext.getStore('Devices').load();
         Ext.getStore('Geofences').load();
+        Ext.getStore('Devices').load({
+            scope: this,
+            callback: function () {
+                this.asyncUpdate(true);
+            }
+        });
         Ext.get('attribution').remove();
         if (this.isPhone) {
             Ext.create('widget.mainMobile');
         } else {
             Ext.create('widget.main');
         }
-        this.asyncUpdate(true);
     },
 
     asyncUpdate: function (first) {
