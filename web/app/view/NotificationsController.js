@@ -45,16 +45,17 @@ Ext.define('Traccar.view.NotificationsController', {
             }
         });
     },
- 
+
     onBeforeCheckChange: function (column, rowIndex, checked, eOpts) {
+        var fields = column.dataIndex.split('\.',2);
         var record = this.getView().getStore().getAt(rowIndex);
-        var attributes = record.getData().attributes;
-        if (!attributes[column.dataIndex]) {
-            attributes[column.dataIndex] = "true";
+        var data = record.get(fields[0]);
+        if (!data[fields[1]]) {
+            data[fields[1]] = "true";
         } else {
-            delete attributes[column.dataIndex];
+            delete data[fields[1]];
         }
-        record.set('attributes', attributes);
+        record.set(fields[0], data);
         record.commit();
     },
 
