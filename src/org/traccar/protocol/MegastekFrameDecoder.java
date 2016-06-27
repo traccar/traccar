@@ -21,7 +21,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.traccar.helper.StringFinder;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class MegastekFrameDecoder extends FrameDecoder {
 
@@ -34,7 +34,7 @@ public class MegastekFrameDecoder extends FrameDecoder {
         }
 
         if (Character.isDigit(buf.getByte(buf.readerIndex()))) {
-            int length = 4 + Integer.parseInt(buf.toString(buf.readerIndex(), 4, Charset.defaultCharset()));
+            int length = 4 + Integer.parseInt(buf.toString(buf.readerIndex(), 4, StandardCharsets.US_ASCII));
             if (buf.readableBytes() >= length) {
                 return buf.readBytes(length);
             }

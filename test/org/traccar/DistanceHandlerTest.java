@@ -1,7 +1,6 @@
 package org.traccar;
 
 import org.junit.Test;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import static org.junit.Assert.assertEquals;
@@ -15,7 +14,7 @@ public class DistanceHandlerTest {
 
         Position position = distanceHandler.calculateDistance(new Position());
 
-        assertEquals(0.0, position.getAttributes().get(Event.KEY_DISTANCE));
+        assertEquals(0.0, position.getAttributes().get(Position.KEY_DISTANCE));
 
     }
 

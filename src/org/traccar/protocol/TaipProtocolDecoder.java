@@ -15,9 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.Date;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
@@ -26,6 +23,10 @@ import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.Date;
+import java.util.regex.Pattern;
 
 public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
@@ -78,7 +79,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        // Find message start
         int beginIndex = sentence.indexOf('>');
         if (beginIndex != -1) {
             sentence = sentence.substring(beginIndex + 1);
@@ -137,6 +137,54 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
         position.setValid(parser.nextInt() != 0);
+
+        String[] attributes = null;
+        beginIndex = sentence.indexOf(';');
+        if (beginIndex != -1) {
+            int endIndex = sentence.indexOf('<', beginIndex);
+            if (endIndex == -1) {
+                endIndex = sentence.length();
+            }
+            attributes = sentence.substring(beginIndex, endIndex).split(";");
+        }
+
+        if (attributes != null) {
+            for (String attribute : attributes) {
+                int index = attribute.indexOf('=');
+                if (index != -1) {
+                    String key = attribute.substring(0, index).toLowerCase();
+                    String value = attribute.substring(index + 1);
+                    switch (key) {
+
+                        case "id":
+                            if (!identify(value, channel, remoteAddress)) {
+                                return null;
+                            }
+                            if (sendResponse && channel != null) {
+                                channel.write(value);
+                            }
+                            break;
+
+                        case "sv":
+                            position.set(Position.KEY_SATELLITES, value);
+                            break;
+
+                        case "bl":
+                            position.set(Position.KEY_BATTERY, value);
+                            break;
+
+                        case "vo":
+                            position.set(Position.KEY_ODOMETER, value);
+                            break;
+
+                        default:
+                            position.set(key, value);
+                            break;
+
+                    }
+                }
+            }
+        }
 
         return position;
     }

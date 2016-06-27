@@ -15,11 +15,16 @@
  */
 package org.traccar;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
 import org.traccar.model.Command;
+
+import javax.xml.bind.DatatypeConverter;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class BaseProtocol implements Protocol {
 
@@ -37,14 +42,30 @@ public abstract class BaseProtocol implements Protocol {
 
     public void setSupportedCommands(String... commands) {
         supportedCommands.addAll(Arrays.asList(commands));
+        supportedCommands.add(Command.TYPE_CUSTOM);
+    }
+
+    @Override
+    public Collection<String> getSupportedCommands() {
+        return supportedCommands;
     }
 
     @Override
     public void sendCommand(ActiveDevice activeDevice, Command command) {
-        if (!supportedCommands.contains(command.getType())) {
-            throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());
+        if (command.getType().equals(Command.TYPE_CUSTOM)) {
+            String data = (String) command.getAttributes().get(Command.KEY_DATA);
+            if (activeDevice.getChannel().getPipeline().get(StringEncoder.class) != null) {
+                activeDevice.write(data);
+            } else {
+                activeDevice.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary(data)));
+            }
+        } else {
+            if (!supportedCommands.contains(command.getType())) {
+                throw new RuntimeException("Command "
+                     + command.getType() + " is not supported in protocol " + getName());
+            }
+            activeDevice.write(command);
         }
-        activeDevice.write(command);
     }
 
 }

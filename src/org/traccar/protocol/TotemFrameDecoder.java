@@ -15,12 +15,13 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.traccar.helper.StringFinder;
+
+import java.nio.charset.StandardCharsets;
 
 public class TotemFrameDecoder extends FrameDecoder {
 
@@ -43,9 +44,9 @@ public class TotemFrameDecoder extends FrameDecoder {
 
         int flagIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("AA"));
         if (flagIndex != -1 && flagIndex - beginIndex == 6) {
-            length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 4, Charset.defaultCharset()));
+            length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 4, StandardCharsets.US_ASCII));
         } else {
-            length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, Charset.defaultCharset()), 16);
+            length = Integer.parseInt(buf.toString(buf.readerIndex() + 2, 2, StandardCharsets.US_ASCII), 16);
         }
 
         if (length <= buf.readableBytes()) {

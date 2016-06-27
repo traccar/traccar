@@ -37,9 +37,6 @@ Ext.define('Traccar.model.User', {
         name: 'map',
         type: 'string'
     }, {
-        name: 'language',
-        type: 'string'
-    }, {
         name: 'distanceUnit',
         type: 'string'
     }, {
@@ -54,6 +51,9 @@ Ext.define('Traccar.model.User', {
     }, {
         name: 'zoom',
         type: 'int'
+    }, {
+        name: 'twelveHourFormat',
+        type: 'boolean'
     }],
 
     proxy: {

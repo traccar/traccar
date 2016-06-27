@@ -37,25 +37,27 @@ Ext.define('Traccar.view.ReportController', {
         fromDate = this.lookupReference('fromDateField').getValue();
         fromTime = this.lookupReference('fromTimeField').getValue();
 
-        from = new Date(
-            fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(),
-            fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
+        if (deviceId) {
+            from = new Date(
+                fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(),
+                fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
 
-        toDate = this.lookupReference('toDateField').getValue();
-        toTime = this.lookupReference('toTimeField').getValue();
+            toDate = this.lookupReference('toDateField').getValue();
+            toTime = this.lookupReference('toTimeField').getValue();
 
-        to = new Date(
-            toDate.getFullYear(), toDate.getMonth(), toDate.getDate(),
-            toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
+            to = new Date(
+                toDate.getFullYear(), toDate.getMonth(), toDate.getDate(),
+                toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
 
-        store = Ext.getStore('Positions');
-        store.load({
-            params: {
-                deviceId: deviceId,
-                from: from.toISOString(),
-                to: to.toISOString()
-            }
-        });
+            store = Ext.getStore('Positions');
+            store.load({
+                params: {
+                    deviceId: deviceId,
+                    from: from.toISOString(),
+                    to: to.toISOString()
+                }
+            });
+        }
     },
 
     onClearClick: function () {

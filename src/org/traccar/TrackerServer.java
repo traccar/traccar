@@ -15,8 +15,6 @@
  */
 package org.traccar;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import org.jboss.netty.bootstrap.Bootstrap;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -28,6 +26,9 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+
 /**
  * Tracker server
  */
@@ -35,6 +36,10 @@ public abstract class TrackerServer {
 
     private final Bootstrap bootstrap;
     private final String protocol;
+
+    public boolean isConnectionless() {
+        return bootstrap instanceof ConnectionlessBootstrap;
+    }
 
     public String getProtocol() {
         return protocol;

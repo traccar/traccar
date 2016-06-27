@@ -15,11 +15,12 @@
  */
 package org.traccar.protocol;
 
-import java.text.ParseException;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
+
+import java.text.ParseException;
 
 public class Jt600FrameDecoder extends FrameDecoder {
 

@@ -15,16 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
@@ -70,7 +70,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_VERSION, parser.next());
+        position.set(Position.KEY_VERSION, parser.next());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -98,12 +98,12 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble() / 10);
         position.setCourse(parser.nextDouble() / 10);
 
-        position.set(Event.KEY_STATUS, parser.next());
-        position.set(Event.KEY_GSM, parser.next());
-        position.set(Event.KEY_GPS, parser.next());
-        position.set(Event.KEY_INPUT, parser.next());
-        position.set(Event.KEY_OUTPUT, parser.next());
-        position.set(Event.KEY_BATTERY, parser.nextDouble() / 10);
+        position.set(Position.KEY_STATUS, parser.next());
+        position.set(Position.KEY_GSM, parser.next());
+        position.set(Position.KEY_GPS, parser.next());
+        position.set(Position.KEY_INPUT, parser.next());
+        position.set(Position.KEY_OUTPUT, parser.next());
+        position.set(Position.KEY_BATTERY, parser.nextDouble() / 10);
 
         return position;
     }

@@ -16,18 +16,18 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 
 public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
@@ -71,7 +71,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         if (!history) {
             buf.readUnsignedShort();
         }
-        position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
+        position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
         buf.skipBytes(6); // time
 
         if (!history) {
@@ -82,8 +82,8 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Event.PREFIX_TEMP + 1, buf.readByte());
-        position.set(Event.KEY_GSM, buf.readUnsignedByte());
+        position.set(Position.PREFIX_TEMP + 1, buf.readByte());
+        position.set(Position.KEY_GSM, buf.readUnsignedByte());
         buf.readUnsignedShort(); // mcc
         buf.readUnsignedShort(); // mnc
         buf.readUnsignedShort(); // lac
@@ -91,7 +91,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         int valid = buf.readUnsignedByte();
         position.setValid((valid & 0xc0) != 0);
-        position.set(Event.KEY_SATELLITES, valid & 0x3f);
+        position.set(Position.KEY_SATELLITES, valid & 0x3f);
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -104,7 +104,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(buf.readUnsignedByte());
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
-        position.set(Event.KEY_HDOP, buf.readUnsignedShort());
+        position.set(Position.KEY_HDOP, buf.readUnsignedShort());
 
         buf.readUnsignedShort(); // reserved
         buf.readUnsignedByte(); // checksum
@@ -119,10 +119,12 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        if (type == MSG_LOGIN) {
+        if (type == MSG_LOGIN || type == MSG_45_LOGIN) {
 
-            buf.readUnsignedByte(); // hardware version
-            buf.readUnsignedByte(); // software version
+            if (type == MSG_LOGIN) {
+                buf.readUnsignedByte(); // hardware version
+                buf.readUnsignedByte(); // software version
+            }
 
             String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
             if (!identify(imei, channel, remoteAddress)) {
@@ -130,7 +132,10 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (channel != null) {
-                channel.write(ChannelBuffers.wrappedBuffer(new byte[] {buf.readByte()}));
+                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                response.writeBytes("resp_crc=".getBytes(StandardCharsets.US_ASCII));
+                response.writeByte(buf.getByte(buf.writerIndex() - 1));
+                channel.write(response);
             }
 
         } else if (type == MSG_LOCATION) {
@@ -149,20 +154,6 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
             return positions;
 
-        } else if (type == MSG_45_LOGIN) {
-
-            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-            if (!identify(imei, channel, remoteAddress)) {
-                return null;
-            }
-
-            if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                response.writeBytes("resp_crc=".getBytes(Charset.defaultCharset()));
-                response.writeByte(buf.getByte(buf.writerIndex() - 1));
-                channel.write(response);
-            }
-
         } else if (type == MSG_45_LOCATION) {
 
             Position position = new Position();
@@ -170,12 +161,12 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(getDeviceId());
 
             short status = buf.readUnsignedByte();
-            position.set(Event.KEY_ALARM, BitUtil.check(status, 7));
-            position.set(Event.KEY_BATTERY, BitUtil.to(status, 7));
+            position.set(Position.KEY_ALARM, BitUtil.check(status, 7));
+            position.set(Position.KEY_BATTERY, BitUtil.to(status, 7));
 
             buf.skipBytes(2); // remaining time
 
-            position.set(Event.PREFIX_TEMP + 1, buf.readByte());
+            position.set(Position.PREFIX_TEMP + 1, buf.readByte());
 
             buf.skipBytes(2); // timer (interval and units)
             buf.readByte(); // mode
@@ -185,7 +176,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
             int valid = buf.readUnsignedByte();
             position.setValid(BitUtil.from(valid, 6) != 0);
-            position.set(Event.KEY_SATELLITES, BitUtil.from(valid, 6));
+            position.set(Position.KEY_SATELLITES, BitUtil.from(valid, 6));
 
             int time = buf.readUnsignedMedium();
             int date = buf.readUnsignedMedium();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,15 @@ Ext.define('Traccar.view.Devices', {
     ],
 
     controller: 'devices',
-    store: 'Devices',
+    rootVisible: false,
+
+    initComponent: function () {
+        this.store = Ext.create('Ext.data.ChainedStore', {
+            source: 'Devices',
+            groupField: 'groupId'
+        });
+        this.callParent();
+    },
 
     title: Strings.deviceTitle,
     selType: 'rowmodel',
@@ -33,6 +41,14 @@ Ext.define('Traccar.view.Devices', {
     tbar: {
         xtype: 'editToolbar',
         items: [{
+            xtype: 'button',
+            disabled: true,
+            handler: 'onGeofencesClick',
+            reference: 'toolbarGeofencesButton',
+            glyph: 'xf21d@FontAwesome',
+            tooltip: Strings.sharedGeofences,
+            tooltipType: 'title'
+        }, {
             disabled: true,
             handler: 'onCommandClick',
             reference: 'deviceCommandButton',
@@ -46,18 +62,74 @@ Ext.define('Traccar.view.Devices', {
             glyph: 'xf05b@FontAwesome',
             tooltip: Strings.deviceFollow,
             tooltipType: 'title',
-            enableToggle: true
+            enableToggle: true,
+            toggleHandler: 'onFollowClick'
         }, {
             xtype: 'settingsMenu'
         }]
     },
+
+    bbar: [{
+        xtype: 'tbtext',
+        html: Strings.groupParent
+    }, {
+        xtype: 'combobox',
+        store: 'Groups',
+        queryMode: 'local',
+        displayField: 'name',
+        valueField: 'id',
+        flex: 1,
+        listeners: {
+            change: function () {
+                if (Ext.isNumber(this.getValue())) {
+                    this.up('grid').store.filter({
+                        id: 'groupFilter',
+                        filterFn: function (item) {
+                            var groupId, group, groupStore, filter = true;
+                            groupId = item.get('groupId');
+                            groupStore = Ext.getStore('Groups');
+
+                            while (groupId) {
+                                group = groupStore.getById(groupId);
+                                if (group) {
+                                    if (group.get('id') === this.getValue()) {
+                                        filter = false;
+                                        break;
+                                    }
+                                    groupId = group.get('groupId');
+                                } else {
+                                    groupId = 0;
+                                }
+                            }
+
+                            return !filter;
+                        },
+                        scope: this
+                    });
+                } else {
+                    this.up('grid').store.removeFilter('groupFilter');
+                }
+            }
+        }
+    }, {
+        xtype: 'tbtext',
+        html: Strings.sharedSearch
+    }, {
+        xtype: 'textfield',
+        flex: 1,
+        listeners: {
+            change: function () {
+                this.up('grid').store.filter('name', this.getValue());
+            }
+        }
+    }],
 
     listeners: {
         selectionchange: 'onSelectionChange'
     },
 
     columns: [{
-        text: Strings.deviceName,
+        text: Strings.sharedName,
         dataIndex: 'name',
         flex: 1
     }, {
@@ -65,8 +137,7 @@ Ext.define('Traccar.view.Devices', {
         dataIndex: 'lastUpdate',
         flex: 1,
         renderer: function (value, metaData, record) {
-            var status = record.get('status');
-            switch (status) {
+            switch (record.get('status')) {
                 case 'online':
                     metaData.tdCls = 'status-color-online';
                     break;
@@ -77,7 +148,11 @@ Ext.define('Traccar.view.Devices', {
                     metaData.tdCls = 'status-color-unknown';
                     break;
             }
-            return Ext.Date.format(value, Traccar.Style.dateTimeFormat);
+            if (Traccar.app.getPreference('twelveHourFormat', false)) {
+                return Ext.Date.format(value, Traccar.Style.dateTimeFormat12);
+            } else {
+                return Ext.Date.format(value, Traccar.Style.dateTimeFormat24);
+            }
         }
     }]
 

@@ -15,16 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.LinkedList;
+import java.util.List;
 
 public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
@@ -80,9 +80,9 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(getDeviceId());
                 position.setProtocol(getProtocolName());
 
-                position.set(Event.KEY_EVENT, buf.readUnsignedByte());
+                position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                 buf.readUnsignedByte(); // length
-                position.set(Event.KEY_FLAGS, buf.readUnsignedShort());
+                position.set(Position.KEY_FLAGS, buf.readUnsignedShort());
 
                 position.setLatitude(convertCoordinate(buf.readInt()));
                 position.setLongitude(convertCoordinate(buf.readInt()));
@@ -97,7 +97,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
 
                 int satellites = buf.readUnsignedByte();
                 position.setValid(satellites >= 3);
-                position.set(Event.KEY_SATELLITES, satellites);
+                position.set(Position.KEY_SATELLITES, satellites);
 
                 positions.add(position);
             }

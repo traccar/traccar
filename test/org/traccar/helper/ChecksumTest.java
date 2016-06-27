@@ -6,12 +6,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class ChecksumTest {
 
     @Test
     public void testCrc16() {
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer("123456789", Charset.defaultCharset());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer("123456789", StandardCharsets.US_ASCII);
 
         Assert.assertEquals(0x906e, Checksum.crc16(Checksum.CRC16_X25, buf.toByteBuffer()));
         Assert.assertEquals(0x29b1, Checksum.crc16(Checksum.CRC16_CCITT_FALSE, buf.toByteBuffer()));

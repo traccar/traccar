@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,17 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.Date;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.Date;
+import java.util.regex.Pattern;
 
 public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -42,7 +43,13 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd),")             // date
+            .expression("[^*]+")
+            .text("*")
+            .expression("[^,]+")
+            .number(",(d+)")                     // satellites
+            .number(",(d+)")                     // imei
+            .number(",(d+)").optional(3)
             .any()
             .compile();
 
@@ -84,9 +91,9 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position position = null;
 
-    private Position decodeGprmc(String sentence, Channel channel) {
+    private Position decodeGprmc(String sentence, SocketAddress remoteAddress, Channel channel) {
 
-        if (channel != null) {
+        if (channel != null && !(channel instanceof DatagramChannel)) {
             channel.write("OK1\r\n");
         }
 
@@ -113,6 +120,14 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
+
+        if (parser.hasNext(3)) {
+            position.set(Position.KEY_SATELLITES, parser.next());
+            if (!identify(parser.next(), channel, remoteAddress)) {
+                return null;
+            }
+            position.setDeviceId(getDeviceId());
+        }
 
         if (hasDeviceId()) {
             return position;
@@ -189,7 +204,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
-        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
 
         return position;
     }
@@ -205,6 +220,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             String id = sentence.substring(0, index);
             if (id.endsWith(",")) {
                 id = id.substring(0, id.length() - 1);
+            } else if (id.endsWith("/")) {
+                id = id.substring(id.indexOf('/') + 1, id.length() - 1);
             }
             identify(id, channel, remoteAddress);
             sentence = sentence.substring(index);
@@ -217,16 +234,16 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("IMEI")) {
             identify(sentence.substring(5, sentence.length()), channel, remoteAddress);
         } else if (sentence.startsWith("$GPFID")) {
-            if (identify(sentence.substring(6, sentence.length()), channel, remoteAddress) && position != null) {
+            if (identify(sentence.substring(7, sentence.length()), channel, remoteAddress) && position != null) {
                 Position position = this.position;
                 position.setDeviceId(getDeviceId());
                 this.position = null;
                 return position;
             }
-        } else if (Character.isDigit(sentence.charAt(0)) && sentence.length() == 15) {
+        } else if (sentence.matches("^[0-9A-F]+$")) {
             identify(sentence, channel, remoteAddress);
         } else if (sentence.startsWith("$GPRMC")) {
-            return decodeGprmc(sentence, channel);
+            return decodeGprmc(sentence, remoteAddress, channel);
         } else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
             return decodeGpgga(sentence);
         } else if (sentence.startsWith("$GPRMA") && hasDeviceId()) {

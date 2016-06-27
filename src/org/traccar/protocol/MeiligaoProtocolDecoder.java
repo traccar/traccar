@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,8 +24,12 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -54,19 +54,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("|(xxxx)?")                  // state
             .groupBegin()
             .number("|(xxxx),(xxxx)")            // adc
+            .number("(?:,(xxxx),(xxxx),(xxxx),(xxxx),(xxxx),(xxxx))?")
             .groupBegin()
-            .number(",(xxxx),(xxxx),(xxxx),(xxxx),(xxxx),(xxxx)")
-            .groupEnd("?")
-            .groupBegin()
-            .text("|")
-            .groupBegin()
-            .number("(x{16})")                   // cell
+            .number("|x{16}")                    // cell
             .number("|(xx)")                     // gsm
-            .number("|(x{8})|")                  // odometer
-            .number("(x{9})")                    // odometer
+            .number("|(x{8})")                   // odometer
+            .or()
+            .number("|(x{9})")                   // odometer
             .groupBegin()
             .number("|(x{5,})")                  // rfid
-            .groupEnd("?")
             .groupEnd("?")
             .groupEnd("?")
             .groupEnd("?")
@@ -183,7 +179,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             case MSG_SERVER:
                 if (channel != null) {
                     response = ChannelBuffers.copiedBuffer(
-                            getMeiligaoServer(channel), Charset.defaultCharset());
+                            getMeiligaoServer(channel), StandardCharsets.US_ASCII);
                     sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
                 }
                 return null;
@@ -201,7 +197,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Custom data
         if (command == MSG_ALARM) {
-            position.set(Event.KEY_ALARM, buf.readUnsignedByte());
+            position.set(Position.KEY_ALARM, buf.readUnsignedByte());
         } else if (command == MSG_POSITION_LOGGED) {
             buf.skipBytes(6);
         }
@@ -217,7 +213,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 if (rfid != 0) {
                     String card = String.format("%010d", rfid);
                     position.set("card" + (i + 1), card);
-                    position.set(Event.KEY_RFID, card);
+                    position.set(Position.KEY_RFID, card);
                 }
             }
         }
@@ -230,7 +226,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Parser parser = new Parser(
-                pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, Charset.defaultCharset()));
+                pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII));
         if (!parser.matches()) {
             return null;
         }
@@ -269,34 +265,33 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
             position.setTime(dateBuilder.getDate());
 
-            position.set(Event.KEY_HDOP, parser.next());
+            position.set(Position.KEY_HDOP, parser.next());
 
             if (parser.hasNext()) {
                 position.setAltitude(parser.nextDouble());
             }
 
-            position.set(Event.KEY_STATUS, parser.next());
+            position.set(Position.KEY_STATUS, parser.next());
 
             for (int i = 1; i <= 8; i++) {
                 if (parser.hasNext()) {
-                    position.set(Event.PREFIX_ADC + i, parser.nextInt(16));
+                    position.set(Position.PREFIX_ADC + i, parser.nextInt(16));
                 }
             }
 
-            position.set(Event.KEY_CID, parser.next());
-
             if (parser.hasNext()) {
-                position.set(Event.KEY_GSM, parser.nextInt(16));
+                position.set(Position.KEY_GSM, parser.nextInt(16));
             }
 
             if (parser.hasNext()) {
-                position.set(Event.KEY_ODOMETER, parser.nextInt(16));
-            } else if (parser.hasNext()) {
-                position.set(Event.KEY_ODOMETER, parser.nextInt(16));
+                position.set(Position.KEY_ODOMETER, parser.nextLong(16));
+            }
+            if (parser.hasNext()) {
+                position.set(Position.KEY_ODOMETER, parser.nextLong(16));
             }
 
             if (parser.hasNext()) {
-                position.set(Event.KEY_RFID, parser.nextInt(16));
+                position.set(Position.KEY_RFID, parser.nextInt(16));
             }
 
         }

@@ -22,7 +22,7 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
@@ -39,7 +39,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeByte(4 + content.length()); // command length
         buf.writeInt(0);
-        buf.writeBytes(content.getBytes(Charset.defaultCharset())); // command
+        buf.writeBytes(content.getBytes(StandardCharsets.US_ASCII)); // command
 
         buf.writeShort(0); // message index
 

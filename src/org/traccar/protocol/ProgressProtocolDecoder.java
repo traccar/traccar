@@ -15,19 +15,19 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
@@ -77,7 +77,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
-            String imei = buf.readBytes(length).toString(Charset.defaultCharset());
+            String imei = buf.readBytes(length).toString(StandardCharsets.US_ASCII);
             identify(imei, channel, remoteAddress);
 
         } else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
@@ -95,17 +95,17 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceId(getDeviceId());
 
                 if (type == MSG_LOGMSG) {
-                    position.set(Event.KEY_ARCHIVE, true);
+                    position.set(Position.KEY_ARCHIVE, true);
                     int subtype = buf.readUnsignedShort();
                     if (subtype == MSG_ALARM) {
-                        position.set(Event.KEY_ALARM, true);
+                        position.set(Position.KEY_ALARM, true);
                     }
                     if (buf.readUnsignedShort() > buf.readableBytes()) {
                         lastIndex += 1;
                         break; // workaround for device bug
                     }
                     lastIndex = buf.readUnsignedInt();
-                    position.set(Event.KEY_INDEX, lastIndex);
+                    position.set(Position.KEY_INDEX, lastIndex);
                 } else {
                     newIndex = buf.readUnsignedInt();
                 }
@@ -119,23 +119,23 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
 
                 int satellites = buf.readUnsignedByte();
                 position.setValid(satellites >= 3);
-                position.set(Event.KEY_SATELLITES, satellites);
+                position.set(Position.KEY_SATELLITES, satellites);
 
-                position.set(Event.KEY_GSM, buf.readUnsignedByte());
-                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_GSM, buf.readUnsignedByte());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
                 long extraFlags = buf.readLong();
 
                 if (BitUtil.check(extraFlags, 0)) {
                     int count = buf.readUnsignedShort();
                     for (int i = 1; i <= count; i++) {
-                        position.set(Event.PREFIX_ADC + i, buf.readUnsignedShort());
+                        position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort());
                     }
                 }
 
                 if (BitUtil.check(extraFlags, 1)) {
                     int size = buf.readUnsignedShort();
-                    position.set("can", buf.toString(buf.readerIndex(), size, Charset.defaultCharset()));
+                    position.set("can", buf.toString(buf.readerIndex(), size, StandardCharsets.US_ASCII));
                     buf.skipBytes(size);
                 }
 
@@ -145,7 +145,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (type == MSG_ALARM) {
-                    position.set(Event.KEY_ALARM, true);
+                    position.set(Position.KEY_ALARM, true);
                     byte[] response = {(byte) 0xC9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
                     channel.write(ChannelBuffers.wrappedBuffer(response));
                 }

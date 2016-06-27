@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 package org.traccar.api.resource;
 
-import java.sql.SQLException;
-import java.util.Collection;
+import org.traccar.Context;
+import org.traccar.api.BaseResource;
+import org.traccar.model.User;
+
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,10 +30,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.traccar.Context;
-import org.traccar.api.BaseResource;
-import org.traccar.model.User;
+import java.sql.SQLException;
+import java.util.Collection;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -52,6 +52,7 @@ public class UserResource extends BaseResource {
         }
         Context.getDataManager().addUser(entity);
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
     }
 
@@ -65,6 +66,7 @@ public class UserResource extends BaseResource {
         }
         Context.getDataManager().updateUser(entity);
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
     }
 
@@ -74,6 +76,7 @@ public class UserResource extends BaseResource {
         Context.getPermissionsManager().checkUser(getUserId(), id);
         Context.getDataManager().removeUser(id);
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.noContent().build();
     }
 

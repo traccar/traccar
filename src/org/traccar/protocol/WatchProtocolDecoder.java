@@ -21,7 +21,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -47,9 +46,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time
             .expression("([AV]),")               // validity
-            .number("-?(d+.d+),")                // latitude
+            .number(" *-?(d+.d+),")              // latitude
             .expression("([NS]),")
-            .number("-?(d+.d+),")                // longitude
+            .number(" *-?(d+.d+),")              // longitude
             .expression("([EW])?,")
             .number("(d+.d+),")                  // speed
             .number("(d+.?d*),")                 // course
@@ -100,7 +99,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    position.set(Event.KEY_BATTERY, values[3]);
+                    position.set(Position.KEY_BATTERY, values[3]);
 
                     return position;
                 }
@@ -133,9 +132,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(parser.nextDouble());
             position.setAltitude(parser.nextDouble());
 
-            position.set(Event.KEY_SATELLITES, parser.nextInt());
-            position.set(Event.KEY_GSM, parser.nextInt());
-            position.set(Event.KEY_BATTERY, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_BATTERY, parser.nextInt());
 
             position.set("steps", parser.nextInt());
 

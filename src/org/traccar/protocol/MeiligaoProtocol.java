@@ -15,13 +15,14 @@
  */
 package org.traccar.protocol;
 
-import java.util.List;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
+
+import java.util.List;
 
 public class MeiligaoProtocol extends BaseProtocol {
 
@@ -32,7 +33,7 @@ public class MeiligaoProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
-                Command.TYPE_MOVEMENT_ALARM,
+                Command.TYPE_ALARM_GEOFENCE,
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_REBOOT_DEVICE);
     }
@@ -43,15 +44,15 @@ public class MeiligaoProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new MeiligaoFrameDecoder());
-                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
                 pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
+                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
                 pipeline.addLast("objectEncoder", new MeiligaoProtocolEncoder());
+                pipeline.addLast("objectDecoder", new MeiligaoProtocolDecoder(MeiligaoProtocol.this));
             }
         });
     }

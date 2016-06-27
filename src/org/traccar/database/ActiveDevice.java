@@ -15,10 +15,15 @@
  */
 package org.traccar.database;
 
-import java.net.SocketAddress;
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
 import org.traccar.model.Command;
+import org.traccar.model.CommandType;
+
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class ActiveDevice {
 
@@ -40,6 +45,16 @@ public class ActiveDevice {
 
     public long getDeviceId() {
         return deviceId;
+    }
+
+    public Collection<CommandType> getCommandTypes() {
+        List<CommandType> result = new ArrayList<>();
+
+        for (String commandKey : protocol.getSupportedCommands()) {
+            result.add(new CommandType(commandKey));
+        }
+
+        return result;
     }
 
     public void sendCommand(Command command) {

@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import java.net.InetSocketAddress;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelEvent;
@@ -30,18 +29,29 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
+import org.traccar.events.CommandResultEventHandler;
+import org.traccar.events.GeofenceEventHandler;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.events.OverspeedEventHandler;
 import org.traccar.helper.Log;
+
+import java.net.InetSocketAddress;
 
 public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
     private final TrackerServer server;
-    private final int resetDelay;
+    private int timeout;
 
     private FilterHandler filterHandler;
     private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
     private LocationProviderHandler locationProviderHandler;
     private HemisphereHandler hemisphereHandler;
+
+    private CommandResultEventHandler commandResultEventHandler;
+    private OverspeedEventHandler overspeedEventHandler;
+    private MotionEventHandler motionEventHandler;
+    private GeofenceEventHandler geofenceEventHandler;
 
     private static final class OpenChannelHandler extends SimpleChannelHandler {
 
@@ -94,7 +104,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
 
-        resetDelay = Context.getConfig().getInteger(protocol + ".resetDelay", 0);
+        timeout = Context.getConfig().getInteger(protocol + ".timeout", 0);
+        if (timeout == 0) {
+            timeout = Context.getConfig().getInteger(protocol + ".resetDelay", 0); // temporary
+        }
 
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
@@ -106,7 +119,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         }
 
         if (Context.getLocationProvider() != null) {
-            locationProviderHandler = new LocationProviderHandler(Context.getLocationProvider());
+            locationProviderHandler = new LocationProviderHandler(
+                    Context.getLocationProvider(), Context.getConfig().getBoolean("location.processInvalidPositions"));
         }
 
         if (Context.getConfig().getBoolean("distance.enable")) {
@@ -117,6 +131,21 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                 || Context.getConfig().hasKey("location.longitudeHemisphere")) {
             hemisphereHandler = new HemisphereHandler();
         }
+
+        if (Context.getConfig().getBoolean("event.enable")) {
+            commandResultEventHandler = new CommandResultEventHandler();
+
+            if (Context.getConfig().getBoolean("event.overspeedHandler")) {
+                overspeedEventHandler = new OverspeedEventHandler();
+            }
+
+            if (Context.getConfig().getBoolean("event.motionHandler")) {
+                motionEventHandler = new MotionEventHandler();
+            }
+        }
+        if (Context.getConfig().getBoolean("event.geofenceHandler")) {
+            geofenceEventHandler = new GeofenceEventHandler();
+        }
     }
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
@@ -124,8 +153,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     @Override
     public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = Channels.pipeline();
-        if (resetDelay != 0) {
-            pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), resetDelay, 0, 0));
+        if (timeout > 0 && !server.isConnectionless()) {
+            pipeline.addLast("idleHandler", new IdleStateHandler(GlobalTimer.getTimer(), timeout, 0, 0));
         }
         pipeline.addLast("openHandler", new OpenChannelHandler(server));
         if (Context.isLoggerEnabled()) {
@@ -157,9 +186,27 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (Context.getDataManager() != null) {
             pipeline.addLast("dataHandler", new DefaultDataHandler());
         }
+
         if (Context.getConfig().getBoolean("forward.enable")) {
             pipeline.addLast("webHandler", new WebDataHandler(Context.getConfig().getString("forward.url")));
         }
+
+        if (commandResultEventHandler != null) {
+            pipeline.addLast("CommandResultEventHandler", commandResultEventHandler);
+        }
+
+        if (overspeedEventHandler != null) {
+            pipeline.addLast("OverspeedEventHandler", overspeedEventHandler);
+        }
+
+        if (motionEventHandler != null) {
+            pipeline.addLast("MotionEventHandler", motionEventHandler);
+        }
+
+        if (geofenceEventHandler != null) {
+            pipeline.addLast("GeofenceEventHandler", geofenceEventHandler);
+        }
+
         pipeline.addLast("mainHandler", new MainEventHandler());
         return pipeline;
     }
@@ -176,5 +223,4 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             }
         }
     }
-
 }

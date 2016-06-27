@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,17 @@
  */
 package org.traccar.database;
 
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.util.Timeout;
+import org.jboss.netty.util.TimerTask;
+import org.traccar.Context;
+import org.traccar.GlobalTimer;
+import org.traccar.Protocol;
+import org.traccar.helper.Log;
+import org.traccar.model.Device;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
+
 import java.net.SocketAddress;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -26,16 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.util.Timeout;
-import org.jboss.netty.util.TimerTask;
-import org.traccar.Context;
-import org.traccar.GlobalTimer;
-import org.traccar.Protocol;
-import org.traccar.helper.Log;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
 
 public class ConnectionManager {
 
@@ -85,14 +86,28 @@ public class ConnectionManager {
             return;
         }
 
-        device.setStatus(status);
-        if (time != null) {
-            device.setLastUpdate(time);
+        if (status.equals(Device.STATUS_MOVING) || status.equals(Device.STATUS_STOPPED)) {
+            device.setMotion(status);
+        } else {
+            if (!status.equals(device.getStatus())) {
+                Event event = new Event(Event.TYPE_DEVICE_OFFLINE, deviceId);
+                if (status.equals(Device.STATUS_ONLINE)) {
+                    event.setType(Event.TYPE_DEVICE_ONLINE);
+                }
+                if (Context.getNotificationManager() != null) {
+                    Context.getNotificationManager().updateEvent(event, null);
+                }
+            }
+            device.setStatus(status);
+
+            Timeout timeout = timeouts.remove(deviceId);
+            if (timeout != null) {
+                timeout.cancel();
+            }
         }
 
-        Timeout timeout = timeouts.remove(deviceId);
-        if (timeout != null) {
-            timeout.cancel();
+        if (time != null) {
+            device.setLastUpdate(time);
         }
 
         if (status.equals(Device.STATUS_ONLINE)) {
@@ -112,9 +127,11 @@ public class ConnectionManager {
             Log.warning(error);
         }
 
-        if (listeners.containsKey(deviceId)) {
-            for (UpdateListener listener : listeners.get(deviceId)) {
-                listener.onUpdateDevice(device);
+        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
+            if (listeners.containsKey(userId)) {
+                for (UpdateListener listener : listeners.get(userId)) {
+                    listener.onUpdateDevice(device);
+                }
             }
         }
     }
@@ -123,9 +140,19 @@ public class ConnectionManager {
         long deviceId = position.getDeviceId();
         positions.put(deviceId, position);
 
-        if (listeners.containsKey(deviceId)) {
-            for (UpdateListener listener : listeners.get(deviceId)) {
-                listener.onUpdatePosition(position);
+        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
+            if (listeners.containsKey(userId)) {
+                for (UpdateListener listener : listeners.get(userId)) {
+                    listener.onUpdatePosition(position);
+                }
+            }
+        }
+    }
+
+    public synchronized void updateEvent(long userId, Event event, Position position) {
+        if (listeners.containsKey(userId)) {
+            for (UpdateListener listener : listeners.get(userId)) {
+                listener.onUpdateEvent(event, position);
             }
         }
     }
@@ -134,13 +161,13 @@ public class ConnectionManager {
         return positions.get(deviceId);
     }
 
-    public synchronized Collection<Position> getInitialState(Collection<Long> devices) {
+    public synchronized Collection<Position> getInitialState(long userId) {
 
         List<Position> result = new LinkedList<>();
 
-        for (long device : devices) {
-            if (positions.containsKey(device)) {
-                result.add(positions.get(device));
+        for (long deviceId : Context.getPermissionsManager().getDevicePermissions(userId)) {
+            if (positions.containsKey(deviceId)) {
+                result.add(positions.get(deviceId));
             }
         }
 
@@ -150,32 +177,21 @@ public class ConnectionManager {
     public interface UpdateListener {
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
+        void onUpdateEvent(Event event, Position position);
     }
 
-    public void addListener(Collection<Long> devices, UpdateListener listener) {
-        for (long deviceId : devices) {
-            addListener(deviceId, listener);
+    public synchronized void addListener(long userId, UpdateListener listener) {
+        if (!listeners.containsKey(userId)) {
+            listeners.put(userId, new HashSet<UpdateListener>());
         }
+        listeners.get(userId).add(listener);
     }
 
-    public synchronized void addListener(long deviceId, UpdateListener listener) {
-        if (!listeners.containsKey(deviceId)) {
-            listeners.put(deviceId, new HashSet<UpdateListener>());
+    public synchronized void removeListener(long userId, UpdateListener listener) {
+        if (!listeners.containsKey(userId)) {
+            listeners.put(userId, new HashSet<UpdateListener>());
         }
-        listeners.get(deviceId).add(listener);
-    }
-
-    public void removeListener(Collection<Long> devices, UpdateListener listener) {
-        for (long deviceId : devices) {
-            removeListener(deviceId, listener);
-        }
-    }
-
-    public synchronized void removeListener(long deviceId, UpdateListener listener) {
-        if (!listeners.containsKey(deviceId)) {
-            listeners.put(deviceId, new HashSet<UpdateListener>());
-        }
-        listeners.get(deviceId).remove(listener);
+        listeners.get(userId).remove(listener);
     }
 
 }

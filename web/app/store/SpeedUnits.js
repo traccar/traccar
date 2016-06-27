@@ -19,6 +19,10 @@ Ext.define('Traccar.store.SpeedUnits', {
     fields: ['key', 'name', 'factor'],
 
     data: [{
+        key: 'kn',
+        name: Strings.sharedKn,
+        factor: 1
+    }, {
         key: 'kmh',
         name: Strings.sharedKmh,
         factor: 1.852
@@ -30,11 +34,10 @@ Ext.define('Traccar.store.SpeedUnits', {
 
     formatValue: function (value, unit) {
         var model;
-        if (unit) {
-            model = this.findRecord('key', unit);
-            return (value * model.get('factor')).toFixed(1) + ' ' + model.get('name');
-        } else {
-            return value;
+        if (!unit) {
+            unit = 'kn';
         }
+        model = this.findRecord('key', unit);
+        return (value * model.get('factor')).toFixed(1) + ' ' + model.get('name');
     }
 });

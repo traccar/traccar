@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.model.Device;
 
-import java.sql.SQLException;
-import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -31,7 +30,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.traccar.model.Device;
+
+import java.sql.SQLException;
+import java.util.Collection;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,7 +44,7 @@ public class DeviceResource extends BaseResource {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getDataManager().getAllDevices();
+            return Context.getDataManager().getAllDevicesCached();
         } else {
             if (userId == 0) {
                 userId = getUserId();
@@ -59,6 +60,7 @@ public class DeviceResource extends BaseResource {
         Context.getDataManager().addDevice(entity);
         Context.getDataManager().linkDevice(getUserId(), entity.getId());
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.ok(entity).build();
     }
 
@@ -78,6 +80,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkDevice(getUserId(), id);
         Context.getDataManager().removeDevice(id);
         Context.getPermissionsManager().refresh();
+        Context.getGeofenceManager().refresh();
         return Response.noContent().build();
     }
 

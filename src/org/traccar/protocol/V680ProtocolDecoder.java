@@ -15,15 +15,15 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -85,9 +85,9 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.set("user", parser.next());
             position.setValid(parser.nextInt() > 0);
             position.set("password", parser.next());
-            position.set(Event.KEY_EVENT, parser.next());
+            position.set(Position.KEY_EVENT, parser.next());
             position.set("packet", parser.next());
-            position.set(Event.KEY_GSM, parser.next());
+            position.set(Position.KEY_GSM, parser.next());
 
             position.setLongitude(parser.nextCoordinate());
             position.setLatitude(parser.nextCoordinate());

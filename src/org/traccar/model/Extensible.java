@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,17 @@ package org.traccar.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class Extensible extends Message {
+public class Extensible {
+
+    private long id;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     private Map<String, Object> attributes = new LinkedHashMap<>();
 

@@ -15,8 +15,8 @@
  */
 package org.traccar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.helper.Hashing;
-import org.traccar.web.JsonIgnore;
 
 public class User {
 
@@ -80,16 +80,6 @@ public class User {
         this.map = map;
     }
 
-    private String language;
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
     private String distanceUnit;
 
     public String getDistanceUnit() {
@@ -140,6 +130,16 @@ public class User {
         this.zoom = zoom;
     }
 
+    private boolean twelveHourFormat;
+
+    public boolean getTwelveHourFormat() {
+        return twelveHourFormat;
+    }
+
+    public void setTwelveHourFormat(boolean twelveHourFormat) {
+        this.twelveHourFormat = twelveHourFormat;
+    }
+
     private String password;
 
     public String getPassword() {
@@ -157,7 +157,6 @@ public class User {
 
     private String hashedPassword;
 
-    @com.fasterxml.jackson.annotation.JsonIgnore
     @JsonIgnore
     public String getHashedPassword() {
         return hashedPassword;
@@ -169,7 +168,6 @@ public class User {
 
     private String salt;
 
-    @com.fasterxml.jackson.annotation.JsonIgnore
     @JsonIgnore
     public String getSalt() {
         return salt;

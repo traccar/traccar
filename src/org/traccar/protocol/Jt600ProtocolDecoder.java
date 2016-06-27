@@ -15,20 +15,20 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.ChannelBufferTools;
+import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -55,21 +55,21 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        int version = ChannelBufferTools.readHexInteger(buf, 1);
+        int version = BcdUtil.readInteger(buf, 1);
         buf.readUnsignedByte(); // type
         buf.readBytes(2); // length
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setDay(ChannelBufferTools.readHexInteger(buf, 2))
-                .setMonth(ChannelBufferTools.readHexInteger(buf, 2))
-                .setYear(ChannelBufferTools.readHexInteger(buf, 2))
-                .setHour(ChannelBufferTools.readHexInteger(buf, 2))
-                .setMinute(ChannelBufferTools.readHexInteger(buf, 2))
-                .setSecond(ChannelBufferTools.readHexInteger(buf, 2));
+                .setDay(BcdUtil.readInteger(buf, 2))
+                .setMonth(BcdUtil.readInteger(buf, 2))
+                .setYear(BcdUtil.readInteger(buf, 2))
+                .setHour(BcdUtil.readInteger(buf, 2))
+                .setMinute(BcdUtil.readInteger(buf, 2))
+                .setSecond(BcdUtil.readInteger(buf, 2));
         position.setTime(dateBuilder.getDate());
 
-        double latitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 8));
-        double longitude = convertCoordinate(ChannelBufferTools.readHexInteger(buf, 9));
+        double latitude = convertCoordinate(BcdUtil.readInteger(buf, 8));
+        double longitude = convertCoordinate(BcdUtil.readInteger(buf, 9));
 
         byte flags = buf.readByte();
         position.setValid((flags & 0x1) == 0x1);
@@ -82,13 +82,13 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setLongitude(longitude);
 
-        position.setSpeed(ChannelBufferTools.readHexInteger(buf, 2));
+        position.setSpeed(BcdUtil.readInteger(buf, 2));
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
         if (version == 1) {
 
-            position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Event.KEY_POWER, buf.readUnsignedByte());
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+            position.set(Position.KEY_POWER, buf.readUnsignedByte());
 
             buf.readByte(); // other flags and sensors
 
@@ -97,21 +97,21 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             int cid = buf.readUnsignedShort();
             int lac = buf.readUnsignedShort();
             if (cid != 0 && lac != 0) {
-                position.set(Event.KEY_CID, cid);
-                position.set(Event.KEY_LAC, lac);
+                position.set(Position.KEY_CID, cid);
+                position.set(Position.KEY_LAC, lac);
             }
 
-            position.set(Event.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_GSM, buf.readUnsignedByte());
 
         } else if (version == 2) {
 
             int fuel = buf.readUnsignedByte() << 8;
 
-            position.set(Event.KEY_STATUS, buf.readUnsignedInt());
-            position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+            position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
             fuel += buf.readUnsignedByte();
-            position.set(Event.KEY_FUEL, fuel);
+            position.set(Position.KEY_FUEL, fuel);
 
         }
 
@@ -141,7 +141,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeAlertMessage(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
-        Parser parser = new Parser(PATTERN, buf.toString(Charset.defaultCharset()));
+        Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
         if (!parser.matches()) {
             return null;
         }
@@ -149,7 +149,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        position.set(Event.KEY_ALARM, true);
+        position.set(Position.KEY_ALARM, true);
 
         if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
@@ -168,7 +168,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_POWER, parser.nextDouble());
 
         return position;
     }

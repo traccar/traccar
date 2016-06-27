@@ -15,12 +15,13 @@
  */
 package org.traccar.protocol;
 
-import java.util.List;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+
+import java.util.List;
 
 public class TzoneProtocol extends BaseProtocol {
 

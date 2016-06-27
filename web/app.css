@@ -8,6 +8,10 @@
     background-color: rgba(255, 84, 104, 0.3);
 }
 
+.x-tree-icon {
+    display: none !important;
+}
+
 .state-indicator {
     position: absolute;
     top: -999em;

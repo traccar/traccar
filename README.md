@@ -13,7 +13,7 @@ Traccar is open source server for various GPS tracking devices. Project is writt
 
 ## Build
 
-Please read <a href="https://www.traccar.org/build/">build from source documentation</a> on the official website.
+Please read [build from source documentation](https://www.traccar.org/build/) on the official website.
 
 ## License
 

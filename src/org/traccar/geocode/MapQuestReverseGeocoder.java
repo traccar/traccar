@@ -20,10 +20,6 @@ import javax.json.JsonObject;
 
 public class MapQuestReverseGeocoder extends JsonReverseGeocoder {
 
-    public MapQuestReverseGeocoder() {
-        this("http://www.mapquestapi.com/geocoding/v1/reverse", "ABCDE", 0);
-    }
-
     public MapQuestReverseGeocoder(String url, String key, int cacheSize) {
         super(url + "?key=" + key + "&location=%f,%f", cacheSize);
     }

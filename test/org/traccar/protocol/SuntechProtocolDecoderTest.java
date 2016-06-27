@@ -9,7 +9,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         SuntechProtocolDecoder decoder = new SuntechProtocolDecoder(new SuntechProtocol());
-        
+
+        verifyPosition(decoder, text(
+                "ST300ALT;205174410;14;712;20110101;00:00:07;00000;+20.593923;-100.336716;000.000;000.00;0;0;0;16.57;000000;81;000000;4.0;0;0.00;0000;0000;0;0"));
+
         verifyNothing(decoder, text(
                 "SA200ALV;317652"));
         

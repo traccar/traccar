@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
@@ -25,8 +23,10 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -116,12 +116,12 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
             int battery = parser.nextInt();
             if (battery != 65535) {
-                position.set(Event.KEY_BATTERY, battery);
+                position.set(Position.KEY_BATTERY, battery);
             }
 
             int power = parser.nextInt();
             if (power != 65535) {
-                position.set(Event.KEY_POWER, battery);
+                position.set(Position.KEY_POWER, battery);
             }
 
             return position;
@@ -136,10 +136,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Event.KEY_MCC, parser.nextInt());
-            position.set(Event.KEY_MNC, parser.nextInt());
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Position.KEY_MCC, parser.nextInt());
+            position.set(Position.KEY_MNC, parser.nextInt());
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_CID, parser.nextInt(16));
 
             return position;
         }
@@ -156,7 +156,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         int alarm = sentence.indexOf("BO01");
         if (alarm != -1) {
-            position.set(Event.KEY_ALARM, Integer.parseInt(sentence.substring(alarm + 4, alarm + 5)));
+            position.set(Position.KEY_ALARM, Integer.parseInt(sentence.substring(alarm + 4, alarm + 5)));
         }
 
         DateBuilder dateBuilder = new DateBuilder();
@@ -170,10 +170,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        if (Context.getConfig().getBoolean(getProtocolName() + ".mph")) {
-            position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
-        } else {
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        switch (Context.getConfig().getString(getProtocolName() + ".speed", "kmh")) {
+            case "kn":
+                position.setSpeed(parser.nextDouble());
+                break;
+            case "mph":
+                position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
+                break;
+            default:
+                position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+                break;
         }
 
         dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -184,16 +190,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         // Status
         String status = parser.next();
         if (status != null) {
-            position.set(Event.KEY_STATUS, status); // binary status
+            position.set(Position.KEY_STATUS, status); // binary status
 
             int value = Integer.parseInt(new StringBuilder(status).reverse().toString(), 2);
-            position.set(Event.KEY_CHARGE, !BitUtil.check(value, 0));
-            position.set(Event.KEY_IGNITION, BitUtil.check(value, 1));
+            position.set(Position.KEY_CHARGE, !BitUtil.check(value, 0));
+            position.set(Position.KEY_IGNITION, BitUtil.check(value, 1));
         }
-        position.set(Event.KEY_STATUS, parser.next()); // hex status
+        position.set(Position.KEY_STATUS, parser.next()); // hex status
 
         if (parser.hasNext()) {
-            position.set(Event.KEY_ODOMETER, parser.nextLong(16));
+            position.set(Position.KEY_ODOMETER, parser.nextLong(16));
         }
 
         return position;

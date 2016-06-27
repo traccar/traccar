@@ -31,7 +31,7 @@ public class MeiligaoProtocolEncoderTest extends ProtocolTest {
 
         verifyCommand(encoder, command, binary("40400011123456789012344902d53d0d0a"));
 
-        command.setType(Command.TYPE_MOVEMENT_ALARM);
+        command.setType(Command.TYPE_ALARM_GEOFENCE);
         command.set(Command.KEY_RADIUS, 1000);
 
         verifyCommand(encoder, command, binary("4040001312345678901234410603e87bb00d0a"));

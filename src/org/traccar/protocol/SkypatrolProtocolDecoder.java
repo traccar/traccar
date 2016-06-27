@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.nio.charset.Charset;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -24,8 +22,10 @@ import org.traccar.Context;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
@@ -70,15 +70,15 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
 
             if (BitUtil.check(mask, 1)) {
-                position.set(Event.KEY_STATUS, buf.readUnsignedInt());
+                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
             }
 
             String id;
             if (BitUtil.check(mask, 23)) {
-                id = buf.toString(buf.readerIndex(), 8, Charset.defaultCharset()).trim();
+                id = buf.toString(buf.readerIndex(), 8, StandardCharsets.US_ASCII).trim();
                 buf.skipBytes(8);
             } else if (BitUtil.check(mask, 2)) {
-                id = buf.toString(buf.readerIndex(), 22, Charset.defaultCharset()).trim();
+                id = buf.toString(buf.readerIndex(), 22, StandardCharsets.US_ASCII).trim();
                 buf.skipBytes(22);
             } else {
                 Log.warning("No device id field");
@@ -144,7 +144,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(mask, 16)) {
-                position.set(Event.KEY_SATELLITES, buf.readUnsignedByte());
+                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
             }
 
             if (BitUtil.check(mask, 17)) {
@@ -156,7 +156,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(mask, 21)) {
-                position.set(Event.KEY_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
             if (BitUtil.check(mask, 22)) {
@@ -164,7 +164,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(mask, 24)) {
-                position.set(Event.KEY_POWER, buf.readUnsignedShort() / 1000.0);
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
             }
 
             if (BitUtil.check(mask, 25)) {
@@ -176,7 +176,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(mask, 28)) {
-                position.set(Event.KEY_INDEX, buf.readUnsignedShort());
+                position.set(Position.KEY_INDEX, buf.readUnsignedShort());
             }
 
             return position;

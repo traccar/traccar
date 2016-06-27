@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.5">
+
+  <changeSet author="author" id="changelog-3.5">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="groups" />
+      </not>
+    </preConditions>
+
+    <createTable tableName="groups">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="groupid" type="INT" />
+    </createTable>
+
+    <createTable tableName="user_group">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_group" baseColumnNames="userid" constraintName="fk_user_group_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_group" baseColumnNames="groupid" constraintName="fk_user_group_groupid" referencedTableName="groups" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <addColumn tableName="devices">
+      <column name="groupid" type="INT" />
+    </addColumn>
+
+    <dropNotNullConstraint tableName="users" columnName="language" columnDataType="VARCHAR(128)" />
+    <dropDefaultValue tableName="users" columnName="language" />
+    <dropColumn tableName="users" columnName="language" />
+    <dropColumn tableName="server" columnName="language" />
+
+    <dropNotNullConstraint tableName="users" columnName="map" columnDataType="VARCHAR(128)" />
+    <dropDefaultValue tableName="users" columnName="map" />
+    <dropNotNullConstraint tableName="users" columnName="distanceunit" columnDataType="VARCHAR(128)" />
+    <dropDefaultValue tableName="users" columnName="distanceunit" />
+    <dropNotNullConstraint tableName="users" columnName="speedunit" columnDataType="VARCHAR(128)" />
+    <dropDefaultValue tableName="users" columnName="speedunit" />
+
+    <addColumn tableName="users">
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <addColumn tableName="server">
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+  </changeSet>
+</databaseChangeLog>

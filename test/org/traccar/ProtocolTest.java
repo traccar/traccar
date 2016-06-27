@@ -9,12 +9,11 @@ import org.junit.Assert;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,6 +30,7 @@ public class ProtocolTest {
             private Device createDevice() {
                 Device device = new Device();
                 device.setId(1);
+                device.setName("test");
                 device.setUniqueId("123456789012345");
                 return device;
             }
@@ -86,7 +86,7 @@ public class ProtocolTest {
     }
 
     protected ChannelBuffer buffer(String... data) {
-        return ChannelBuffers.copiedBuffer(concatenateStrings(data), Charset.defaultCharset());
+        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.US_ASCII);
     }
 
     protected DefaultHttpRequest request(String url) {
@@ -101,6 +101,10 @@ public class ProtocolTest {
         DefaultHttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, url);
         request.setContent(data);
         return request;
+    }
+
+    protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
+        Assert.assertNotNull(decoder.decode(null, null, object));
     }
 
     protected void verifyNothing(BaseProtocolDecoder decoder, Object object) throws Exception {
@@ -192,16 +196,16 @@ public class ProtocolTest {
             Assert.assertFalse("no attributes", attributes.isEmpty());
         }
 
-        if (attributes.containsKey(Event.KEY_LAC) || attributes.containsKey(Event.KEY_CID)) {
-            checkInteger(attributes.get(Event.KEY_LAC), 1, 65535);
-            checkInteger(attributes.get(Event.KEY_CID), 0, 268435455);
+        if (attributes.containsKey(Position.KEY_LAC) || attributes.containsKey(Position.KEY_CID)) {
+            checkInteger(attributes.get(Position.KEY_LAC), 1, 65535);
+            checkInteger(attributes.get(Position.KEY_CID), 0, 268435455);
         }
 
-        if (attributes.containsKey(Event.KEY_MCC) || attributes.containsKey(Event.KEY_MNC)) {
-            checkInteger(attributes.get(Event.KEY_MCC), 100, 999);
-            checkInteger(attributes.get(Event.KEY_MNC), 0, 999);
-            Assert.assertTrue("value missing", attributes.containsKey(Event.KEY_LAC));
-            Assert.assertTrue("value missing", attributes.containsKey(Event.KEY_CID));
+        if (attributes.containsKey(Position.KEY_MCC) || attributes.containsKey(Position.KEY_MNC)) {
+            checkInteger(attributes.get(Position.KEY_MCC), 100, 999);
+            checkInteger(attributes.get(Position.KEY_MNC), 0, 999);
+            Assert.assertTrue("value missing", attributes.containsKey(Position.KEY_LAC));
+            Assert.assertTrue("value missing", attributes.containsKey(Position.KEY_CID));
         }
 
     }

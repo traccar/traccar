@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelPipeline;
 
 public class ServerManager {
 
@@ -65,22 +62,21 @@ public class ServerManager {
         for (String name : names) {
             Class protocolClass = Class.forName(packageName + '.' + name);
             if (BaseProtocol.class.isAssignableFrom(protocolClass)) {
-                initProtocolServer((BaseProtocol) protocolClass.newInstance());
+                BaseProtocol baseProtocol = (BaseProtocol) protocolClass.newInstance();
+                initProtocolServer(baseProtocol);
             }
         }
-
-        initProtocolDetector();
     }
 
     public void start() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).start();
+        for (TrackerServer server: serverList) {
+            server.start();
         }
     }
 
     public void stop() {
-        for (Object server: serverList) {
-            ((TrackerServer) server).stop();
+        for (TrackerServer server: serverList) {
+            server.stop();
         }
 
         // Release resources
@@ -88,30 +84,8 @@ public class ServerManager {
         GlobalTimer.release();
     }
 
-    private boolean isProtocolEnabled(String protocol) {
-        return Context.getConfig().hasKey(protocol + ".port");
-    }
-
-    private void initProtocolDetector() {
-        String protocol = "detector";
-        if (isProtocolEnabled(protocol)) {
-            serverList.add(new TrackerServer(new ServerBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
-                }
-            });
-            serverList.add(new TrackerServer(new ConnectionlessBootstrap(), protocol) {
-                @Override
-                protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                    pipeline.addLast("detectorHandler", new DetectorHandler(serverList));
-                }
-            });
-        }
-    }
-
     private void initProtocolServer(final Protocol protocol) {
-        if (isProtocolEnabled(protocol.getName())) {
+        if (Context.getConfig().hasKey(protocol.getName() + ".port")) {
             protocol.initTrackerServers(serverList);
         }
     }

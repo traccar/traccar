@@ -2,12 +2,7 @@ package org.traccar.location;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.traccar.geocode.AddressFormat;
-import org.traccar.geocode.GisgraphyReverseGeocoder;
-import org.traccar.geocode.GoogleReverseGeocoder;
-import org.traccar.geocode.NominatimReverseGeocoder;
-import org.traccar.geocode.ReverseGeocoder;
-import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,10 +22,10 @@ public class LocationProviderTest {
         OpenCellIdLocationProvider locationProvider = new OpenCellIdLocationProvider("fake");
 
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put(Event.KEY_MCC, 260);
-        attributes.put(Event.KEY_MNC, 2);
-        attributes.put(Event.KEY_LAC, 10250);
-        attributes.put(Event.KEY_CID, 26511);
+        attributes.put(Position.KEY_MCC, 260);
+        attributes.put(Position.KEY_MNC, 2);
+        attributes.put(Position.KEY_LAC, 10250);
+        attributes.put(Position.KEY_CID, 26511);
 
         locationProvider.getLocation(attributes, new LocationProvider.LocationProviderCallback() {
             @Override

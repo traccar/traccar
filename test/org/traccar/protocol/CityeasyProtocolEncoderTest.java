@@ -1,13 +1,8 @@
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.junit.Assert;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
-import org.traccar.helper.ChannelBufferTools;
 import org.traccar.model.Command;
-
-import javax.xml.bind.DatatypeConverter;
 
 public class CityeasyProtocolEncoderTest extends ProtocolTest {
 

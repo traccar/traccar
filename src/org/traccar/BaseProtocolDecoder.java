@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 package org.traccar;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.Date;
-
 import org.jboss.netty.channel.Channel;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Date;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
@@ -102,6 +102,19 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     protected void onMessageEvent(Channel channel, SocketAddress remoteAddress, Object msg) {
         if (hasDeviceId()) {
             Context.getConnectionManager().updateDevice(deviceId, Device.STATUS_ONLINE, new Date());
+        }
+    }
+
+    @Override
+    protected Object handleEmptyMessage(Channel channel, SocketAddress remoteAddress, Object msg) {
+        if (Context.getConfig().getBoolean("database.saveEmpty") && hasDeviceId()) {
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(getDeviceId());
+            getLastLocation(position, null);
+            return position;
+        } else {
+            return null;
         }
     }
 

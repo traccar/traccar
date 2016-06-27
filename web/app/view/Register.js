@@ -33,7 +33,7 @@ Ext.define('Traccar.view.Register', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.userName,
+            fieldLabel: Strings.sharedName,
             allowBlank: false
         }, {
             xtype: 'textfield',

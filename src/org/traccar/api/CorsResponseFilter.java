@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,47 +18,39 @@ package org.traccar.api;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.traccar.Context;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import java.io.IOException;
 
 public class CorsResponseFilter implements ContainerResponseFilter {
 
-    public static final String ACCESS_CONTROL_ALLOW_ORIGIN_KEY = "Access-Control-Allow-Origin";
-    public static final String ACCESS_CONTROL_ALLOW_ORIGIN_VALUE = "*";
-
-    public static final String ACCESS_CONTROL_ALLOW_HEADERS_KEY = "Access-Control-Allow-Headers";
-    public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "origin, content-type, accept, authorization";
-
-    public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_KEY = "Access-Control-Allow-Credentials";
-    public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_VALUE = "true";
-
-    public static final String ACCESS_CONTROL_ALLOW_METHODS_KEY = "Access-Control-Allow-Methods";
-    public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET, POST, PUT, DELETE";
+    private static final String ORIGIN_ALL = "*";
+    private static final String HEADERS_ALL = "origin, content-type, accept, authorization";
+    private static final String METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_HEADERS_KEY)) {
-            response.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS_KEY, ACCESS_CONTROL_ALLOW_HEADERS_VALUE);
-        }
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_CREDENTIALS_KEY)) {
-            response.getHeaders().add(ACCESS_CONTROL_ALLOW_CREDENTIALS_KEY, ACCESS_CONTROL_ALLOW_CREDENTIALS_VALUE);
-        }
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_METHODS_KEY)) {
-            response.getHeaders().add(ACCESS_CONTROL_ALLOW_METHODS_KEY, ACCESS_CONTROL_ALLOW_METHODS_VALUE);
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS)) {
+            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, HEADERS_ALL);
         }
 
-        if (!response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN_KEY)) {
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS)) {
+            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, true);
+        }
+
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS)) {
+            response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, METHODS_ALL);
+        }
+
+        if (!response.getHeaders().containsKey(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN)) {
             String origin = request.getHeaderString(HttpHeaders.Names.ORIGIN);
             String allowed = Context.getConfig().getString("web.origin");
-            if (allowed == null) {
-                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, ACCESS_CONTROL_ALLOW_ORIGIN_VALUE);
-            } else if (allowed.contains(origin)) {
-                String originSafe = URLEncoder.encode(origin, StandardCharsets.UTF_8.name());
-                response.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_KEY, originSafe);
+
+            if (origin == null) {
+                response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, ORIGIN_ALL);
+            } else if (allowed == null || allowed.equals(ORIGIN_ALL) || allowed.contains(origin)) {
+                response.getHeaders().add(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
             }
         }
     }

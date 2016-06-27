@@ -15,15 +15,15 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -87,11 +87,13 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // odometer
             .number("(d+.d+)?,")                 // fuel instant
             .number("(?:d+.d+)?,")               // fuel average
+            .number("(d+),")                     // hours
             .number("(d+),")                     // speed
-            .number("d+,")                       // power load
-            .number("(d+.d+%),")                 // throttle
+            .number("d+.?d*%,")                  // power load
+            .number("(d+),")                     // temperature
+            .number("(d+.?d*%),")                // throttle
             .number("(d+),")                     // rpm
-            .number("(d+.d+%),")                 // battery
+            .number("(d+.d+),")                  // battery
             .number("[^,]*,")                    // dtc 1
             .number("[^,]*,")                    // dtc 2
             .number("[^,]*,")                    // dtc 3
@@ -118,11 +120,16 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Send response #2
-        if (sentence.length() == 15 && Character.isDigit(sentence.charAt(0))) {
+        if (!sentence.isEmpty() && Character.isDigit(sentence.charAt(0))) {
             if (channel != null) {
                 channel.write("ON", remoteAddress);
             }
-            return null;
+            int start = sentence.indexOf("imei:");
+            if (start >= 0) {
+                sentence = sentence.substring(start);
+            } else {
+                return null;
+            }
         }
 
         Position position = new Position();
@@ -138,8 +145,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_CID, parser.nextInt(16));
 
             return position;
 
@@ -159,12 +166,14 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, dateBuilder.getDate());
 
-            position.set(Event.KEY_ODOMETER, parser.nextInt());
-            position.set(Event.KEY_FUEL, parser.next());
-            position.set(Event.KEY_OBD_SPEED, parser.next());
-            position.set(Event.KEY_THROTTLE, parser.next());
-            position.set(Event.KEY_RPM, parser.next());
-            position.set(Event.KEY_BATTERY, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_FUEL, parser.next());
+            position.set(Position.KEY_HOURS, parser.next());
+            position.set(Position.KEY_OBD_SPEED, parser.next());
+            position.set(Position.PREFIX_TEMP + 1, parser.next());
+            position.set(Position.KEY_THROTTLE, parser.next());
+            position.set(Position.KEY_RPM, parser.next());
+            position.set(Position.KEY_BATTERY, parser.next());
 
             return position;
 
@@ -182,7 +191,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(getDeviceId());
 
         String alarm = parser.next();
-        position.set(Event.KEY_ALARM, alarm);
+        position.set(Position.KEY_ALARM, alarm);
         if (channel != null && alarm.equals("help me")) {
             channel.write("**,imei:" + imei + ",E;", remoteAddress);
         }
@@ -195,7 +204,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         String rfid = parser.next();
         if (alarm.equals("rfid")) {
-            position.set(Event.KEY_RFID, rfid);
+            position.set(Position.KEY_RFID, rfid);
         }
 
         String utcHours = parser.next();
@@ -224,7 +233,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble());
 
         for (int i = 1; i <= 5; i++) {
-            position.set(Event.PREFIX_IO + i, parser.next());
+            position.set(Position.PREFIX_IO + i, parser.next());
         }
 
         return position;

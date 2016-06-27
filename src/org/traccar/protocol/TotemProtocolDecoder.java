@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
@@ -136,6 +136,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)")                      // battery
             .number("(dd)")                      // external power
             .number("(dddd)")                    // adc 1
+            .groupBegin()
+            .number("(dddd)")                    // adc 2
+            .number("(dddd)")                    // adc 3
+            .number("(dddd)")                    // adc 4
+            .number("(dddd)")                    // temperature 1
+            .number("(dddd)")                    // temperature 2
+            .groupEnd("?")
             .number("(xxxx)")                    // lac
             .number("(xxxx)")                    // cid
             .number("(dd)")                      // satellites
@@ -185,7 +192,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         if (pattern == PATTERN1 || pattern == PATTERN2) {
 
-            position.set(Event.KEY_ALARM, parser.next());
+            position.set(Position.KEY_ALARM, parser.next());
 
             DateBuilder dateBuilder = new DateBuilder();
             int year = 0;
@@ -212,76 +219,83 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setTime(dateBuilder.getDate());
 
-            position.set(Event.KEY_HDOP, parser.next());
-            position.set(Event.PREFIX_IO + 1, parser.next());
-            position.set(Event.KEY_BATTERY, parser.next());
-            position.set(Event.KEY_POWER, parser.nextDouble());
-            position.set(Event.PREFIX_ADC + 1, parser.next());
+            position.set(Position.KEY_HDOP, parser.next());
+            position.set(Position.PREFIX_IO + 1, parser.next());
+            position.set(Position.KEY_BATTERY, parser.next());
+            position.set(Position.KEY_POWER, parser.nextDouble());
+            position.set(Position.PREFIX_ADC + 1, parser.next());
 
             int lac = parser.nextInt(16);
             int cid = parser.nextInt(16);
             if (lac != 0 && cid != 0) {
-                position.set(Event.KEY_LAC, lac);
-                position.set(Event.KEY_CID, cid);
+                position.set(Position.KEY_LAC, lac);
+                position.set(Position.KEY_CID, cid);
             }
 
-            position.set(Event.PREFIX_TEMP + 1, parser.next());
-            position.set(Event.KEY_ODOMETER, parser.next());
+            position.set(Position.PREFIX_TEMP + 1, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.next());
 
         } else if (pattern == PATTERN3) {
 
-            position.set(Event.KEY_ALARM, parser.next());
+            position.set(Position.KEY_ALARM, parser.next());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
             position.setTime(dateBuilder.getDate());
 
-            position.set(Event.PREFIX_IO + 1, parser.next());
-            position.set(Event.KEY_BATTERY, parser.nextDouble() / 10);
-            position.set(Event.KEY_POWER, parser.nextDouble());
-            position.set(Event.PREFIX_ADC + 1, parser.next());
-            position.set(Event.PREFIX_ADC + 2, parser.next());
-            position.set(Event.PREFIX_TEMP + 1, parser.next());
-            position.set(Event.PREFIX_TEMP + 2, parser.next());
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
+            position.set(Position.PREFIX_IO + 1, parser.next());
+            position.set(Position.KEY_BATTERY, parser.nextDouble() / 10);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+            position.set(Position.PREFIX_ADC + 1, parser.next());
+            position.set(Position.PREFIX_ADC + 2, parser.next());
+            position.set(Position.PREFIX_TEMP + 1, parser.next());
+            position.set(Position.PREFIX_TEMP + 2, parser.next());
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_CID, parser.nextInt(16));
 
             position.setValid(parser.next().equals("A"));
-            position.set(Event.KEY_SATELLITES, parser.next());
+            position.set(Position.KEY_SATELLITES, parser.next());
 
             position.setCourse(parser.nextDouble());
             position.setSpeed(parser.nextDouble());
 
             position.set("pdop", parser.next());
 
-            position.set(Event.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.next());
 
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
 
         } else if (pattern == PATTERN4) {
 
-            position.set(Event.KEY_STATUS, parser.next());
+            position.set(Position.KEY_STATUS, parser.next());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
             position.setTime(dateBuilder.getDate());
 
-            position.set(Event.KEY_BATTERY, parser.nextDouble() / 10);
-            position.set(Event.KEY_POWER, parser.nextDouble());
-            position.set(Event.PREFIX_ADC + 1, parser.next());
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_CID, parser.nextInt(16));
-            position.set(Event.KEY_SATELLITES, parser.nextInt());
-            position.set(Event.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_BATTERY, parser.nextDouble() / 10);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+
+            position.set(Position.PREFIX_ADC + 1, parser.next());
+            position.set(Position.PREFIX_ADC + 2, parser.next());
+            position.set(Position.PREFIX_ADC + 3, parser.next());
+            position.set(Position.PREFIX_ADC + 4, parser.next());
+            position.set(Position.PREFIX_TEMP + 1, parser.next());
+            position.set(Position.PREFIX_TEMP + 2, parser.next());
+
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_CID, parser.nextInt(16));
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_GSM, parser.nextInt());
 
             position.setCourse(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-            position.set(Event.KEY_HDOP, parser.nextDouble());
-            position.set(Event.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
 
             position.setValid(true);
             position.setLatitude(parser.nextCoordinate());

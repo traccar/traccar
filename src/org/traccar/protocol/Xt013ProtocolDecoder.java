@@ -15,16 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -85,10 +85,10 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble());
         position.setValid(parser.next().equals("F"));
 
-        position.set(Event.KEY_GPS, parser.next());
-        position.set(Event.KEY_GSM, parser.next());
-        position.set(Event.KEY_BATTERY, parser.next());
-        position.set(Event.KEY_CHARGE, parser.next());
+        position.set(Position.KEY_GPS, parser.next());
+        position.set(Position.KEY_GSM, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_CHARGE, parser.next());
 
         return position;
     }

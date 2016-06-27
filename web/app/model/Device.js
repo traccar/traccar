@@ -33,6 +33,11 @@ Ext.define('Traccar.model.Device', {
     }, {
         name: 'lastUpdate',
         type: 'date',
-        dateWriteFormat: 'c'
+        dateFormat: 'c'
+    }, {
+        name: 'groupId',
+        type: 'int'
+    }, {
+        name: 'geofenceIds'
     }]
 });

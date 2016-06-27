@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.model;
 
 import java.util.Date;
+import java.util.List;
 
 public class Device {
 
@@ -91,4 +92,36 @@ public class Device {
         this.positionId = positionId;
     }
 
+    private long groupId;
+
+    public long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(long groupId) {
+        this.groupId = groupId;
+    }
+
+    public static final String STATUS_MOVING = "moving";
+    public static final String STATUS_STOPPED = "stopped";
+
+    private String motion;
+
+    public String getMotion() {
+        return motion;
+    }
+
+    public void setMotion(String motion) {
+        this.motion = motion;
+    }
+
+    private List<Long> geofenceIds;
+
+    public List<Long> getGeofenceIds() {
+        return geofenceIds;
+    }
+
+    public void setGeofenceIds(List<Long> geofenceIds) {
+        this.geofenceIds = geofenceIds;
+    }
 }

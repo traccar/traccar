@@ -15,12 +15,13 @@
  */
 package org.traccar.protocol;
 
-import java.util.List;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
+
+import java.util.List;
 
 public class Gt06Protocol extends BaseProtocol {
 
@@ -37,8 +38,8 @@ public class Gt06Protocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new Gt06FrameDecoder());
-                pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(Gt06Protocol.this));
                 pipeline.addLast("objectEncoder", new Gt06ProtocolEncoder());
+                pipeline.addLast("objectDecoder", new Gt06ProtocolDecoder(Gt06Protocol.this));
             }
         });
     }

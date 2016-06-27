@@ -15,15 +15,15 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class CarscopProtocolDecoder extends BaseProtocolDecoder {
 
@@ -84,8 +84,8 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
 
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_STATUS, parser.next());
-        position.set(Event.KEY_ODOMETER, parser.nextInt());
+        position.set(Position.KEY_STATUS, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextInt());
 
         return position;
     }

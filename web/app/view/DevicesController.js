@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ Ext.define('Traccar.view.DevicesController', {
 
     requires: [
         'Traccar.view.CommandDialog',
-        'Traccar.view.DeviceDialog'
+        'Traccar.view.DeviceDialog',
+        'Traccar.view.DeviceGeofences'
     ],
 
     config: {
@@ -30,9 +31,15 @@ Ext.define('Traccar.view.DevicesController', {
                     selectDevice: 'selectDevice',
                     selectReport: 'selectReport'
                 }
+            },
+            store: {
+                '#Devices': {
+                    update: 'onUpdateDevice'
+                }
             }
         }
     },
+
     init: function () {
         var readonly = Traccar.app.getServer().get('readonly') && !Traccar.app.getUser().get('admin');
         this.lookupReference('toolbarAddButton').setVisible(!readonly);
@@ -43,7 +50,7 @@ Ext.define('Traccar.view.DevicesController', {
     onAddClick: function () {
         var device, dialog;
         device = Ext.create('Traccar.model.Device');
-        device.store = this.getView().getStore();
+        device.store = Ext.getStore('Devices');
         dialog = Ext.create('Traccar.view.DeviceDialog');
         dialog.down('form').loadRecord(device);
         dialog.show();
@@ -78,21 +85,48 @@ Ext.define('Traccar.view.DevicesController', {
         });
     },
 
+    onGeofencesClick: function () {
+        var admin = Traccar.app.getUser().get('admin');
+        var device = this.getView().getSelectionModel().getSelection()[0];
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.sharedGeofences,
+            items: {
+                xtype: 'deviceGeofencesView',
+                baseObjectName: 'deviceId',
+                linkObjectName: 'geofenceId',
+                storeName: (admin) ? 'AllGeofences' : 'Geofences',
+                urlApi: '/api/devices/geofences',
+                baseObject: device.getData().id
+            }
+        }).show();
+    },
+
     onCommandClick: function () {
-        var device, command, dialog;
+        var device, deviceId, command, dialog, comboStore;
         device = this.getView().getSelectionModel().getSelection()[0];
+        deviceId = device.get('id');
         command = Ext.create('Traccar.model.Command');
-        command.set('deviceId', device.get('id'));
+        command.set('deviceId', deviceId);
         dialog = Ext.create('Traccar.view.CommandDialog');
+        comboStore = dialog.down('form').down('combobox').getStore();
+        comboStore.getProxy().setExtraParam('deviceId', deviceId);
         dialog.down('form').loadRecord(command);
         dialog.show();
+    },
+
+    onFollowClick: function (button, pressed) {
+        if (pressed) {
+            var device = this.getView().getSelectionModel().getSelection()[0];
+            this.fireEvent('selectDevice', device, true);
+        }
     },
 
     onSelectionChange: function (selected) {
         var empty = selected.getCount() === 0;
         this.lookupReference('toolbarEditButton').setDisabled(empty);
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
-        this.lookupReference('deviceCommandButton').setDisabled(empty);
+        this.lookupReference('toolbarGeofencesButton').setDisabled(empty);
+        this.lookupReference('deviceCommandButton').setDisabled(empty || (selected.getLastSelected().get('status') !== 'online'));
         if (!empty) {
             this.fireEvent('selectDevice', selected.getLastSelected(), true);
         }
@@ -106,5 +140,9 @@ Ext.define('Traccar.view.DevicesController', {
         if (position !== undefined) {
             this.getView().getSelectionModel().deselectAll();
         }
+    },
+
+    onUpdateDevice: function (store, data) {
+        this.onSelectionChange(this.getView().getSelectionModel());
     }
 });

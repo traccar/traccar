@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,57 +20,78 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.traccar.Context;
 import org.traccar.database.ConnectionManager;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.web.JsonConverter;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.UpdateListener {
 
     private static final String KEY_DEVICES = "devices";
     private static final String KEY_POSITIONS = "positions";
+    private static final String KEY_EVENTS = "events";
 
-    private Collection<Long> devices;
+    private long userId;
 
     public AsyncSocket(long userId) {
-        devices = Context.getPermissionsManager().allowedDevices(userId);
+        this.userId = userId;
     }
 
     @Override
     public void onWebSocketConnect(Session session) {
         super.onWebSocketConnect(session);
 
-        sendData(KEY_POSITIONS, Context.getConnectionManager().getInitialState(devices));
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_POSITIONS, Context.getConnectionManager().getInitialState(userId));
+        sendData(data);
 
-        Context.getConnectionManager().addListener(devices, this);
+        Context.getConnectionManager().addListener(userId, this);
     }
 
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
         super.onWebSocketClose(statusCode, reason);
 
-        Context.getConnectionManager().removeListener(devices, this);
+        Context.getConnectionManager().removeListener(userId, this);
     }
 
     @Override
     public void onUpdateDevice(Device device) {
-        sendData(KEY_DEVICES, Arrays.asList(device));
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_DEVICES, Collections.singletonList(device));
+        sendData(data);
     }
 
     @Override
     public void onUpdatePosition(Position position) {
-        sendData(KEY_POSITIONS, Arrays.asList(position));
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_POSITIONS, Collections.singletonList(position));
+        sendData(data);
     }
 
-    private void sendData(String key, Collection<?> data) {
-        if (!data.isEmpty()) {
+    @Override
+    public void onUpdateEvent(Event event, Position position) {
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_EVENTS, Collections.singletonList(event));
+        if (position != null) {
+            data.put(KEY_POSITIONS, Collections.singletonList(position));
+        }
+        sendData(data);
+    }
+
+    private void sendData(Map<String, Collection<?>> data) {
+        if (!data.isEmpty() && isConnected()) {
             JsonObjectBuilder json = Json.createObjectBuilder();
-            json.add(key, JsonConverter.arrayToJson(data));
+            for (Map.Entry<String, Collection<?>> entry : data.entrySet()) {
+                json.add(entry.getKey(), JsonConverter.arrayToJson(entry.getValue()));
+            }
             getRemote().sendString(json.build().toString(), null);
         }
     }
-
 }

@@ -15,6 +15,19 @@
  */
 package org.traccar.web;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import org.traccar.helper.Log;
+import org.traccar.model.MiscFormatter;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 import java.beans.Introspector;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
@@ -23,19 +36,6 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-import org.traccar.helper.Log;
-import org.traccar.model.MiscFormatter;
 
 public final class JsonConverter {
 
@@ -106,9 +106,6 @@ public final class JsonConverter {
         Method[] methods = object.getClass().getMethods();
 
         for (Method method : methods) {
-            if (method.isAnnotationPresent(JsonIgnore.class)) {
-                continue;
-            }
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = Introspector.decapitalize(method.getName().substring(3));
                 try {

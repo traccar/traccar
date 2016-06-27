@@ -23,7 +23,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
 import javax.xml.bind.DatatypeConverter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
@@ -76,12 +76,12 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 content.writeByte(0x00);
                 return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
-            case Command.TYPE_MOVEMENT_ALARM:
+            case Command.TYPE_ALARM_GEOFENCE:
                 content.writeShort(((Number) attributes.get(Command.KEY_RADIUS)).intValue());
                 return encodeContent(command.getDeviceId(), MSG_MOVEMENT_ALARM, content);
             case Command.TYPE_SET_TIMEZONE:
                 int offset = ((Number) attributes.get(Command.KEY_TIMEZONE)).intValue() / 60;
-                content.writeBytes(String.valueOf(offset).getBytes(Charset.defaultCharset()));
+                content.writeBytes(String.valueOf(offset).getBytes(StandardCharsets.US_ASCII));
                 return encodeContent(command.getDeviceId(), MSG_TIME_ZONE, content);
             case Command.TYPE_REBOOT_DEVICE:
                 return encodeContent(command.getDeviceId(), MSG_REBOOT_GPS, content);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@ import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.model.User;
 
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.sql.SQLException;
 import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -31,6 +28,9 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.xml.bind.DatatypeConverter;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 
 public class SecurityRequestFilter implements ContainerRequestFilter {
 
@@ -42,7 +42,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         auth = auth.replaceFirst("[B|b]asic ", "");
         byte[] decodedBytes = DatatypeConverter.parseBase64Binary(auth);
         if (decodedBytes != null && decodedBytes.length > 0) {
-            return new String(decodedBytes, Charset.defaultCharset()).split(":", 2);
+            return new String(decodedBytes, StandardCharsets.US_ASCII).split(":", 2);
         }
         return null;
     }
@@ -55,6 +55,11 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+
+        if (requestContext.getMethod().equals("OPTIONS")) {
+            return;
+        }
+
         SecurityContext securityContext = null;
 
         String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
@@ -88,6 +93,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                         Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
             }
         }
+
     }
 
 }

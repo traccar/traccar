@@ -15,8 +15,9 @@
  */
 package org.traccar;
 
-import java.util.Map;
 import org.traccar.model.Command;
+
+import java.util.Map;
 
 public abstract class StringProtocolEncoder extends BaseProtocolEncoder {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,16 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.Channel;
+import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DateUtil;
+import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Position;
+
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -24,14 +32,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.DateUtil;
-import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
 
 public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -60,7 +60,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.set(Event.KEY_INDEX, index);
+        position.set(Position.KEY_INDEX, index);
         position.setValid(true);
 
         if (!identify(String.valueOf(id), channel, remoteAddress)) {
@@ -88,7 +88,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedInt(); // distance
 
-            position.set(Event.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
 
             buf.readUnsignedShort(); // battery charger status
 
@@ -101,10 +101,10 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         } else if (protocol == 0x80) {
 
             if (channel != null) {
-                channel.write(ChannelBuffers.copiedBuffer("gprs,ack," + index, Charset.defaultCharset()));
+                channel.write(ChannelBuffers.copiedBuffer("gprs,ack," + index, StandardCharsets.US_ASCII));
             }
 
-            String sentence = buf.toString(Charset.defaultCharset());
+            String sentence = buf.toString(StandardCharsets.US_ASCII);
 
             Pattern pattern = Pattern.compile("(-?\\d+\\.\\d+), (-?\\d+\\.\\d+)");
             Matcher matcher = pattern.matcher(sentence);
@@ -129,6 +129,12 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm MMM d yyyy", Locale.ENGLISH);
             position.setTime(DateUtil.correctYear(
                     dateFormat.parse(matcher.group(1) + " " + Calendar.getInstance().get(Calendar.YEAR))));
+
+            if (sentence.contains("Ignition on detected")) {
+                position.set(Position.KEY_IGNITION, true);
+            } else if (sentence.contains("Ignition off detected")) {
+                position.set(Position.KEY_IGNITION, false);
+            }
 
             return position;
 

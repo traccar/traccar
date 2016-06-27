@@ -22,11 +22,10 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -78,12 +77,13 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedByte() * 2);
 
             int reason = buf.readUnsignedMedium();
-            int status = buf.readUnsignedShort();
+            position.set(Position.KEY_EVENT, reason);
 
-            position.set(Event.PREFIX_IO + 1, buf.readUnsignedByte());
-            position.set(Event.PREFIX_ADC + 1, buf.readUnsignedByte());
-            position.set(Event.KEY_BATTERY, buf.readUnsignedByte());
-            position.set(Event.KEY_POWER, buf.readUnsignedByte());
+            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+            position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedByte());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
+            position.set(Position.KEY_POWER, buf.readUnsignedByte());
 
             buf.readUnsignedByte(); // max journey speed
             buf.skipBytes(6); // accelerometer
@@ -93,25 +93,21 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readUnsignedByte() * 20);
 
             int quality = buf.readUnsignedByte();
-            position.set(Event.KEY_SATELLITES, quality & 0xf);
-            position.set(Event.KEY_GSM, quality >> 4);
+            position.set(Position.KEY_SATELLITES, quality & 0xf);
+            position.set(Position.KEY_GSM, quality >> 4);
 
             buf.readUnsignedByte(); // geofence events
 
             if (BitUtil.check(reason, 6) || BitUtil.check(reason, 7)) {
 
-                position.set(Event.KEY_RFID, buf.readBytes(7).toString(Charset.defaultCharset()));
-                position.set(Event.KEY_ODOMETER, buf.readUnsignedMedium());
+                position.set(Position.KEY_RFID, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
 
                 buf.readUnsignedShort(); // engine time
 
             }
 
-            if (BitUtil.check(status, 6)) {
-
-                // extra data
-
-            }
+            // extra data
 
             positions.add(position);
 

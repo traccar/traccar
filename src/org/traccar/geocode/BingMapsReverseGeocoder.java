@@ -20,10 +20,6 @@ import javax.json.JsonObject;
 
 public class BingMapsReverseGeocoder extends JsonReverseGeocoder {
 
-    public BingMapsReverseGeocoder() {
-        this("http://dev.virtualearth.net/REST/v1", "ABCDE", 0);
-    }
-
     public BingMapsReverseGeocoder(String url, String key, int cacheSize) {
         super(url + "/Locations/%f,%f?key=" + key + "&include=ciso2", cacheSize);
     }

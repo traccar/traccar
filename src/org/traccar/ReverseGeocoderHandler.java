@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class ReverseGeocoderHandler implements ChannelUpstreamHandler {
         Object message = e.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
-            if (geocoder != null && (processInvalidPositions || position.getValid())) {
+            if (processInvalidPositions || position.getValid()) {
                 geocoder.getAddress(addressFormat, position.getLatitude(), position.getLongitude(),
                         new ReverseGeocoder.ReverseGeocoderCallback() {
                     @Override

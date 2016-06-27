@@ -15,16 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
@@ -67,7 +67,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             String type = parser.next();
             if (type.equals("Alert") || type.equals("Emergency")) {
-                position.set(Event.KEY_ALARM, true);
+                position.set(Position.KEY_ALARM, true);
             }
         }
 
@@ -76,7 +76,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(getDeviceId());
 
-        position.set(Event.KEY_VERSION, parser.next());
+        position.set(Position.KEY_VERSION, parser.next());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -91,7 +91,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
-        position.set(Event.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
 
         return position;
     }

@@ -77,16 +77,6 @@ public class Server {
         this.mapUrl = mapUrl;
     }
 
-    private String language;
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
     private String distanceUnit;
 
     public String getDistanceUnit() {
@@ -135,6 +125,16 @@ public class Server {
 
     public void setZoom(int zoom) {
         this.zoom = zoom;
+    }
+
+    private boolean twelveHourFormat;
+
+    public boolean getTwelveHourFormat() {
+        return twelveHourFormat;
+    }
+
+    public void setTwelveHourFormat(boolean twelveHourFormat) {
+        this.twelveHourFormat = twelveHourFormat;
     }
 
 }

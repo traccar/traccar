@@ -17,7 +17,7 @@ package org.traccar.location;
 
 import org.traccar.Config;
 import org.traccar.Context;
-import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 import java.util.Map;
 
@@ -28,18 +28,18 @@ public abstract class BaseLocationProvider implements LocationProvider {
 
         Config config = Context.getConfig();
 
-        Number mcc = (Number) attributes.get(Event.KEY_MCC);
+        Number mcc = (Number) attributes.get(Position.KEY_MCC);
         if (mcc == null && config.hasKey("location.mcc")) {
             mcc = config.getInteger("location.mcc");
         }
 
-        Number mnc = (Number) attributes.get(Event.KEY_MNC);
+        Number mnc = (Number) attributes.get(Position.KEY_MNC);
         if (mnc == null && config.hasKey("location.mnc")) {
             mnc = config.getInteger("location.mnc");
         }
 
-        Number lac = (Number) attributes.get(Event.KEY_LAC);
-        Number cid = (Number) attributes.get(Event.KEY_CID);
+        Number lac = (Number) attributes.get(Position.KEY_LAC);
+        Number cid = (Number) attributes.get(Position.KEY_CID);
 
         if (mcc != null && mnc != null && lac != null && cid != null) {
             getLocation(mcc.intValue(), mnc.intValue(), lac.longValue(), cid.longValue(), callback);

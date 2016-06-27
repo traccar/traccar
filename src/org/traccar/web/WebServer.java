@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,6 @@
  */
 package org.traccar.web;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.net.InetSocketAddress;
-import javax.naming.InitialContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
-
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionManager;
@@ -32,6 +25,7 @@ import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.traccar.Config;
@@ -41,13 +35,28 @@ import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.CommandResource;
-import org.traccar.api.resource.DeviceResource;
-import org.traccar.api.resource.PermissionResource;
-import org.traccar.api.resource.PositionResource;
+import org.traccar.api.resource.GroupPermissionResource;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.api.resource.DevicePermissionResource;
 import org.traccar.api.resource.UserResource;
+import org.traccar.api.resource.GroupResource;
+import org.traccar.api.resource.DeviceResource;
+import org.traccar.api.resource.PositionResource;
+import org.traccar.api.resource.CommandTypeResource;
+import org.traccar.api.resource.DeviceGeofenceResource;
+import org.traccar.api.resource.EventResource;
+import org.traccar.api.resource.GeofencePermissionResource;
+import org.traccar.api.resource.GeofenceResource;
+import org.traccar.api.resource.GroupGeofenceResource;
 import org.traccar.helper.Log;
+
+import javax.naming.InitialContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.Writer;
+import java.net.InetSocketAddress;
 
 public class WebServer {
 
@@ -55,7 +64,7 @@ public class WebServer {
     private final Config config;
     private final DataSource dataSource;
     private final HandlerList handlers = new HandlerList();
-    private final SessionManager sessionManager = new HashSessionManager();
+    private final SessionManager sessionManager;
 
     private void initServer() {
 
@@ -72,20 +81,22 @@ public class WebServer {
         this.config = config;
         this.dataSource = dataSource;
 
+        sessionManager = new HashSessionManager();
+        int sessionTimeout = config.getInteger("web.sessionTimeout");
+        if (sessionTimeout != 0) {
+            sessionManager.setMaxInactiveInterval(sessionTimeout);
+        }
+
         initServer();
+        initApi();
+        if (config.getBoolean("web.console")) {
+            initConsole();
+        }
         switch (config.getString("web.type", "new")) {
-            case "api":
-                initOldApi();
-                break;
             case "old":
-                initOldApi();
                 initOldWebApp();
                 break;
             default:
-                initApi();
-                if (config.getBoolean("web.console")) {
-                    initConsole();
-                }
                 initWebApp();
                 break;
         }
@@ -98,7 +109,7 @@ public class WebServer {
                 writer.write("<!DOCTYPE<html><head><title>Error</title></head><html><body>"
                         + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
-        });
+        }, false);
     }
 
     private void initWebApp() {
@@ -136,28 +147,17 @@ public class WebServer {
 
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.register(ObjectMapperProvider.class);
+        resourceConfig.register(JacksonFeature.class);
         resourceConfig.register(ResourceErrorHandler.class);
         resourceConfig.register(SecurityRequestFilter.class);
         resourceConfig.register(CorsResponseFilter.class);
         resourceConfig.registerClasses(ServerResource.class, SessionResource.class, CommandResource.class,
-                PermissionResource.class, DeviceResource.class, UserResource.class, PositionResource.class);
+                GroupPermissionResource.class, DevicePermissionResource.class, UserResource.class,
+                GroupResource.class, DeviceResource.class, PositionResource.class,
+                CommandTypeResource.class, EventResource.class, GeofenceResource.class,
+                DeviceGeofenceResource.class, GeofencePermissionResource.class, GroupGeofenceResource.class);
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
-        handlers.addHandler(servletHandler);
-    }
-
-    private void initOldApi() {
-        ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletHandler.setContextPath("/api");
-        servletHandler.getSessionHandler().setSessionManager(sessionManager);
-
-        servletHandler.addServlet(new ServletHolder(new AsyncServlet()), "/async/*");
-        servletHandler.addServlet(new ServletHolder(new ServerServlet()), "/server/*");
-        servletHandler.addServlet(new ServletHolder(new UserServlet()), "/user/*");
-        servletHandler.addServlet(new ServletHolder(new DeviceServlet()), "/device/*");
-        servletHandler.addServlet(new ServletHolder(new PositionServlet()), "/position/*");
-        servletHandler.addServlet(new ServletHolder(new CommandServlet()), "/command/*");
-        servletHandler.addServlet(new ServletHolder(new MainServlet()), "/*");
         handlers.addHandler(servletHandler);
     }
 

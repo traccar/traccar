@@ -10,6 +10,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
 
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
+        verifyAttributes(decoder, text(
+                "(087072009461BR00000007V0000.0000N00000.0000E000.00014039900000000L00000000"));
+
         verifyPosition(decoder, text(
                 "(013612345678BO012061830A2934.0133N10627.2544E040.0080331309.6200000000L000770AD"));
 

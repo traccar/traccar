@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.3">
+
+  <changeSet author="author" id="changelog-3.3">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="server" />
+      </not>
+    </preConditions>
+
+    <createTable tableName="users">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="email" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="hashedpassword" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="salt" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="readonly" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="admin" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="map" type="VARCHAR(128)" defaultValue="osm">
+        <constraints nullable="false" />
+      </column>
+      <column name="language" type="VARCHAR(128)" defaultValue="en">
+        <constraints nullable="false" />
+      </column>
+      <column name="distanceunit" type="VARCHAR(128)" defaultValue="km">
+        <constraints nullable="false" />
+      </column>
+      <column name="speedunit" type="VARCHAR(128)" defaultValue="kmh">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="zoom" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addUniqueConstraint tableName="users" columnNames="email" constraintName="uk_user_email" />
+
+    <createTable tableName="devices">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="uniqueid" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="status" type="VARCHAR(128)" />
+      <column name="lastupdate" type="TIMESTAMP" />
+      <column name="positionid" type="INT" />
+    </createTable>
+
+    <addUniqueConstraint tableName="devices" columnNames="uniqueid" constraintName="uk_device_uniqueid" />
+
+    <createTable tableName="user_device">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_device" baseColumnNames="userid" constraintName="fk_user_device_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_device" baseColumnNames="deviceid" constraintName="fk_user_device_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createIndex tableName="user_device" indexName="user_device_user_id">
+      <column name="userid" />
+    </createIndex>
+
+    <createTable tableName="positions">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="protocol" type="VARCHAR(128)" />
+      <column name="deviceid" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="servertime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="devicetime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="fixtime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="valid" type="BOOLEAN">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="altitude" type="FLOAT">
+        <constraints nullable="false" />
+      </column>
+      <column name="speed" type="FLOAT">
+        <constraints nullable="false" />
+      </column>
+      <column name="course" type="FLOAT">
+        <constraints nullable="false" />
+      </column>
+      <column name="address" type="VARCHAR(512)" />
+      <column name="attributes" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="positions" baseColumnNames="deviceid" constraintName="fk_position_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createIndex tableName="positions" indexName="position_deviceid_fixtime">
+      <column name="deviceid" />
+      <column name="fixtime" />
+    </createIndex>
+
+    <createTable tableName="server">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="registration" type="BOOLEAN" defaultValueBoolean="true">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="zoom" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="map" type="VARCHAR(128)" />
+      <column name="language" type="VARCHAR(128)" />
+      <column name="distanceunit" type="VARCHAR(128)" />
+      <column name="speedunit" type="VARCHAR(128)" />
+      <column name="bingkey" type="VARCHAR(128)" />
+      <column name="mapurl" type="VARCHAR(128)" />
+      <column name="readonly" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <insert tableName="server">
+      <column name="registration" valueBoolean="true" />
+      <column name="latitude" valueNumeric="0" />
+      <column name="longitude" valueNumeric="0" />
+      <column name="zoom" valueNumeric="0" />
+    </insert>
+
+    <insert tableName="users">
+      <column name="name" value="admin" />
+      <column name="email" value="admin" />
+      <column name="hashedpassword" value="D33DCA55ABD4CC5BC76F2BC0B4E603FE2C6F61F4C1EF2D47" />
+      <column name="salt" value="000000000000000000000000000000000000000000000000" />
+      <column name="admin" valueBoolean="true" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

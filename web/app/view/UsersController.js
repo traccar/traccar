@@ -21,6 +21,8 @@ Ext.define('Traccar.view.UsersController', {
     requires: [
         'Traccar.view.UserDialog',
         'Traccar.view.UserDevices',
+        'Traccar.view.UserGroups',
+        'Traccar.view.UserGeofences',
         'Traccar.view.BaseWindow'
     ],
 
@@ -70,7 +72,44 @@ Ext.define('Traccar.view.UsersController', {
             title: Strings.deviceTitle,
             items: {
                 xtype: 'userDevicesView',
-                user: user
+                baseObjectName: 'userId',
+                linkObjectName: 'deviceId',
+                storeName: 'AllDevices',
+                linkStoreName: 'Devices',
+                urlApi: '/api/permissions/devices',
+                baseObject: user.getData().id
+            }
+        }).show();
+    },
+
+    onGroupsClick: function () {
+        var user = this.getView().getSelectionModel().getSelection()[0];
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.settingsGroups,
+            items: {
+                xtype: 'userGroupsView',
+                baseObjectName: 'userId',
+                linkObjectName: 'groupId',
+                storeName: 'AllGroups',
+                linkStoreName: 'Groups',
+                urlApi: '/api/permissions/groups',
+                baseObject: user.getData().id
+            }
+        }).show();
+    },
+
+    onGeofencesClick: function () {
+        var user = this.getView().getSelectionModel().getSelection()[0];
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.sharedGeofences,
+            items: {
+                xtype: 'userGeofencesView',
+                baseObjectName: 'userId',
+                linkObjectName: 'geofenceId',
+                storeName: 'AllGeofences',
+                linkStoreName: 'Geofences',
+                urlApi: '/api/permissions/geofences',
+                baseObject: user.getData().id
             }
         }).show();
     },
@@ -80,5 +119,7 @@ Ext.define('Traccar.view.UsersController', {
         this.lookupReference('toolbarEditButton').setDisabled(disabled);
         this.lookupReference('toolbarRemoveButton').setDisabled(disabled);
         this.lookupReference('userDevicesButton').setDisabled(disabled);
+        this.lookupReference('userGroupsButton').setDisabled(disabled);
+        this.lookupReference('userGeofencesButton').setDisabled(disabled);
     }
 });

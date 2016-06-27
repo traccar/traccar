@@ -15,6 +15,12 @@
  */
 package org.traccar;
 
+import org.traccar.helper.Checksum;
+import org.traccar.helper.Log;
+import org.traccar.model.Device;
+import org.traccar.model.MiscFormatter;
+import org.traccar.model.Position;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -22,13 +28,6 @@ import java.util.Calendar;
 import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.traccar.helper.Checksum;
-import org.traccar.helper.Log;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.MiscFormatter;
-import org.traccar.model.Position;
 
 public class WebDataHandler extends BaseDataHandler {
 
@@ -80,7 +79,7 @@ public class WebDataHandler extends BaseDataHandler {
     }
 
     private String calculateStatus(Position position) {
-        if (position.getAttributes().containsKey(Event.KEY_ALARM)) {
+        if (position.getAttributes().containsKey(Position.KEY_ALARM)) {
             return "0xF841"; // STATUS_PANIC_ON
         } else if (position.getSpeed() < 1.0) {
             return "0xF020"; // STATUS_LOCATION
@@ -89,14 +88,14 @@ public class WebDataHandler extends BaseDataHandler {
         }
     }
 
-    @Override
-    protected Position handlePosition(Position position) {
+    public String formatRequest(Position position) {
 
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
 
         String attributes = MiscFormatter.toJsonString(position.getAttributes());
 
         String request = url
+                .replace("{name}", device.getName())
                 .replace("{uniqueId}", device.getUniqueId())
                 .replace("{deviceId}", String.valueOf(position.getDeviceId()))
                 .replace("{protocol}", String.valueOf(position.getProtocol()))
@@ -132,7 +131,13 @@ public class WebDataHandler extends BaseDataHandler {
             request = request.replace("{gprmc}", formatSentence(position));
         }
 
-        Context.getAsyncHttpClient().prepareGet(request).execute();
+        return request;
+    }
+
+    @Override
+    protected Position handlePosition(Position position) {
+
+        Context.getAsyncHttpClient().prepareGet(formatRequest(position)).execute();
 
         return position;
     }

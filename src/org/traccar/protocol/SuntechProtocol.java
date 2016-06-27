@@ -41,10 +41,10 @@ public class SuntechProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(SuntechProtocol.this));
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new SuntechProtocolEncoder());
+                pipeline.addLast("objectDecoder", new SuntechProtocolDecoder(SuntechProtocol.this));
             }
         });
     }

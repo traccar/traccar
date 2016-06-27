@@ -15,16 +15,16 @@
  */
 package org.traccar.protocol;
 
-import java.net.SocketAddress;
-import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
@@ -115,19 +115,19 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
             position.setCourse(parser.nextInt());
 
-            position.set(Event.KEY_SATELLITES, parser.nextInt());
-            position.set(Event.KEY_BATTERY, parser.nextInt());
-            position.set(Event.KEY_GSM, parser.nextInt());
-            position.set(Event.KEY_STATUS, parser.nextInt(16));
-            position.set(Event.KEY_MCC, parser.nextInt());
-            position.set(Event.KEY_MNC, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_BATTERY, parser.nextInt());
+            position.set(Position.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_STATUS, parser.nextInt(16));
+            position.set(Position.KEY_MCC, parser.nextInt());
+            position.set(Position.KEY_MNC, parser.nextInt());
 
             position.setAltitude(parser.nextInt());
 
-            position.set(Event.KEY_HDOP, parser.nextInt() * 0.1);
-            position.set(Event.KEY_CID, parser.nextInt(16));
-            position.set(Event.KEY_LAC, parser.nextInt(16));
-            position.set(Event.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_HDOP, parser.nextInt() * 0.1);
+            position.set(Position.KEY_CID, parser.nextInt(16));
+            position.set(Position.KEY_LAC, parser.nextInt(16));
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
 
             return position;
         }
