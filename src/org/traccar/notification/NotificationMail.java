@@ -51,70 +51,70 @@ public final class NotificationMail {
         String password = null;
 
         try {
-        User user = dataManager.getUser(userId);
+            User user = dataManager.getUser(userId);
 
-        mailServerProperties = new Properties();
-        String host = config.getString("mail.smtp.host", null);
-        if (host != null) {
-            mailServerProperties.put("mail.smtp.host", host);
-            mailServerProperties.put("mail.smtp.port", config.getString("mail.smtp.port", "25"));
+            mailServerProperties = new Properties();
+            String host = config.getString("mail.smtp.host", null);
+            if (host != null) {
+                mailServerProperties.put("mail.smtp.host", host);
+                mailServerProperties.put("mail.smtp.port", config.getString("mail.smtp.port", "25"));
 
-            if (config.getBoolean("mail.smtp.starttls.enable")) {
-                mailServerProperties.put("mail.smtp.starttls.enable",
-                        config.getBoolean("mail.smtp.starttls.enable"));
-            } else if (config.getBoolean("mail.smtp.ssl.enable")) {
-                mailServerProperties.put("mail.smtp.socketFactory.port",
-                        mailServerProperties.getProperty("mail.smtp.port"));
-                mailServerProperties.put("mail.smtp.socketFactory.class",
-                        "javax.net.ssl.SSLSocketFactory");
-            }
-
-            mailServerProperties.put("mail.smtp.auth", config.getBoolean("mail.smtp.auth"));
-            username = config.getString("mail.smtp.username", null);
-            password = config.getString("mail.smtp.password", null);
-            from = config.getString("mail.smtp.from", null);
-        } else if (user.getAttributes().containsKey("mail.smtp.host")) {
-            mailServerProperties.put("mail.smtp.host", user.getAttributes().get("mail.smtp.host"));
-            String port = (String) user.getAttributes().get("mail.smtp.port");
-            mailServerProperties.put("mail.smtp.port", (port != null) ? port : "25");
-            if (user.getAttributes().containsKey("mail.smtp.starttls.enable")) {
-                boolean tls = Boolean.parseBoolean((String) user.getAttributes().get("mail.smtp.starttls.enable"));
-                mailServerProperties.put("mail.smtp.starttls.enable", tls);
-            } else if (user.getAttributes().containsKey("mail.smtp.ssl.enable")) {
-                boolean ssl = Boolean.parseBoolean((String) user.getAttributes().get("mail.smtp.ssl.enable"));
-                if (ssl) {
+                if (config.getBoolean("mail.smtp.starttls.enable")) {
+                    mailServerProperties.put("mail.smtp.starttls.enable",
+                            config.getBoolean("mail.smtp.starttls.enable"));
+                } else if (config.getBoolean("mail.smtp.ssl.enable")) {
                     mailServerProperties.put("mail.smtp.socketFactory.port",
                             mailServerProperties.getProperty("mail.smtp.port"));
                     mailServerProperties.put("mail.smtp.socketFactory.class",
                             "javax.net.ssl.SSLSocketFactory");
                 }
+
+                mailServerProperties.put("mail.smtp.auth", config.getBoolean("mail.smtp.auth"));
+                username = config.getString("mail.smtp.username", null);
+                password = config.getString("mail.smtp.password", null);
+                from = config.getString("mail.smtp.from", null);
+            } else if (user.getAttributes().containsKey("mail.smtp.host")) {
+                mailServerProperties.put("mail.smtp.host", user.getAttributes().get("mail.smtp.host"));
+                String port = (String) user.getAttributes().get("mail.smtp.port");
+                mailServerProperties.put("mail.smtp.port", (port != null) ? port : "25");
+                if (user.getAttributes().containsKey("mail.smtp.starttls.enable")) {
+                    boolean tls = Boolean.parseBoolean((String) user.getAttributes().get("mail.smtp.starttls.enable"));
+                    mailServerProperties.put("mail.smtp.starttls.enable", tls);
+                } else if (user.getAttributes().containsKey("mail.smtp.ssl.enable")) {
+                    boolean ssl = Boolean.parseBoolean((String) user.getAttributes().get("mail.smtp.ssl.enable"));
+                    if (ssl) {
+                        mailServerProperties.put("mail.smtp.socketFactory.port",
+                                mailServerProperties.getProperty("mail.smtp.port"));
+                        mailServerProperties.put("mail.smtp.socketFactory.class",
+                                "javax.net.ssl.SSLSocketFactory");
+                    }
+                }
+                boolean auth = Boolean.parseBoolean((String) user.getAttributes().get("mail.smtp.auth"));
+                mailServerProperties.put("mail.smtp.auth", auth);
+
+                username = (String) user.getAttributes().get("mail.smtp.username");
+                password = (String) user.getAttributes().get("mail.smtp.password");
+                from = (String) user.getAttributes().get("mail.smtp.from");
+            } else {
+                return;
             }
-            boolean auth = Boolean.parseBoolean((String) user.getAttributes().get("mail.smtp.auth"));
-            mailServerProperties.put("mail.smtp.auth", auth);
 
-            username = (String) user.getAttributes().get("mail.smtp.username");
-            password = (String) user.getAttributes().get("mail.smtp.password");
-            from = (String) user.getAttributes().get("mail.smtp.from");
-        } else {
-            return;
-        }
+            mailSession = Session.getDefaultInstance(mailServerProperties, null);
 
-        mailSession = Session.getDefaultInstance(mailServerProperties, null);
+            mailMessage = new MimeMessage(mailSession);
 
-        mailMessage = new MimeMessage(mailSession);
+            if (from != null) {
+                mailMessage.setFrom(new InternetAddress(from));
+            }
+            mailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(
+                    Context.getDataManager().getUser(userId).getEmail()));
+            mailMessage.setSubject(NotificationFormatter.formatTitle(userId, event, position));
+            mailMessage.setText(NotificationFormatter.formatMessage(userId, event, position));
 
-        if (from != null) {
-            mailMessage.setFrom(new InternetAddress(from));
-        }
-        mailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(
-                Context.getDataManager().getUser(userId).getEmail()));
-        mailMessage.setSubject(NotificationFormatter.formatTitle(userId, event, position));
-        mailMessage.setText(NotificationFormatter.formatMessage(userId, event, position));
-
-        Transport transport = mailSession.getTransport("smtp");
-        transport.connect(mailServerProperties.getProperty("mail.smtp.host"), username, password);
-        transport.sendMessage(mailMessage, mailMessage.getAllRecipients());
-        transport.close();
+            Transport transport = mailSession.getTransport("smtp");
+            transport.connect(mailServerProperties.getProperty("mail.smtp.host"), username, password);
+            transport.sendMessage(mailMessage, mailMessage.getAllRecipients());
+            transport.close();
 
         } catch (MessagingException | SQLException error) {
             Log.warning(error);

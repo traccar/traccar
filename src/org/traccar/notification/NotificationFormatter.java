@@ -76,24 +76,33 @@ public final class NotificationFormatter {
         Formatter formatter = new Formatter(stringBuilder, Locale.getDefault());
 
         switch (event.getType()) {
-            case Event.TYPE_COMMAND_RESULT  : formatter.format(TITLE_TEMPLATE_TYPE_COMMAND_RESULT, device.getName());
-                                              break;
-            case Event.TYPE_DEVICE_ONLINE   : formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName());
-                                              break;
-            case Event.TYPE_DEVICE_OFFLINE  : formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_OFFLINE, device.getName());
-                                              break;
-            case Event.TYPE_DEVICE_MOVING   : formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_MOVING, device.getName());
-                                              break;
-            case Event.TYPE_DEVICE_STOPPED  : formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_STOPPED, device.getName());
-                                              break;
-            case Event.TYPE_DEVICE_OVERSPEED: formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_OVERSPEED, device.getName());
-                                              break;
-            case Event.TYPE_GEOFENCE_ENTER  : formatter.format(TITLE_TEMPLATE_TYPE_GEOFENCE_ENTER, device.getName());
-                                              break;
-            case Event.TYPE_GEOFENCE_EXIT   : formatter.format(TITLE_TEMPLATE_TYPE_GEOFENCE_EXIT, device.getName());
-                                              break;
-            default                         : formatter.format("Unknown type");
-                                              break;
+            case Event.TYPE_COMMAND_RESULT:
+                formatter.format(TITLE_TEMPLATE_TYPE_COMMAND_RESULT, device.getName());
+                break;
+            case Event.TYPE_DEVICE_ONLINE:
+                formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName());
+                break;
+            case Event.TYPE_DEVICE_OFFLINE:
+                formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_OFFLINE, device.getName());
+                break;
+            case Event.TYPE_DEVICE_MOVING:
+                formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_MOVING, device.getName());
+                break;
+            case Event.TYPE_DEVICE_STOPPED:
+                formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_STOPPED, device.getName());
+                break;
+            case Event.TYPE_DEVICE_OVERSPEED:
+                formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_OVERSPEED, device.getName());
+                break;
+            case Event.TYPE_GEOFENCE_ENTER:
+                formatter.format(TITLE_TEMPLATE_TYPE_GEOFENCE_ENTER, device.getName());
+                break;
+            case Event.TYPE_GEOFENCE_EXIT:
+                formatter.format(TITLE_TEMPLATE_TYPE_GEOFENCE_EXIT, device.getName());
+                break;
+            default:
+                formatter.format("Unknown type");
+                break;
         }
         String result = formatter.toString();
         formatter.close();
@@ -106,56 +115,41 @@ public final class NotificationFormatter {
         Formatter formatter = new Formatter(stringBuilder, Locale.getDefault());
 
         switch (event.getType()) {
-            case Event.TYPE_COMMAND_RESULT  : formatter.format(MESSAGE_TEMPLATE_TYPE_COMMAND_RESULT,
-                    device.getName(),
-                    event.getServerTime(),
-                    position.getAttributes().get("result"));
-                                              break;
-            case Event.TYPE_DEVICE_ONLINE   : formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_ONLINE,
-                    device.getName(),
-                    event.getServerTime());
-                                              break;
-            case Event.TYPE_DEVICE_OFFLINE  : formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OFFLINE,
-                    device.getName(),
-                    event.getServerTime());
-                                              break;
-            case Event.TYPE_DEVICE_MOVING   : formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_MOVING,
-                    device.getName(),
-                    position.getFixTime(),
-                    position.getLatitude(),
-                    position.getLongitude());
-                                              break;
-            case Event.TYPE_DEVICE_STOPPED  : formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_STOPPED,
-                    device.getName(),
-                    position.getFixTime(),
-                    position.getLatitude(),
-                    position.getLongitude());
-                                              break;
-            case Event.TYPE_DEVICE_OVERSPEED: formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED,
-                    device.getName(),
-                    position.getFixTime(),
-                    position.getLatitude(),
-                    position.getLongitude(),
-                    position.getSpeed());
-                                              break;
-            case Event.TYPE_GEOFENCE_ENTER  : formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_ENTER,
-                    device.getName(),
-                    position.getFixTime(),
-                    position.getLatitude(),
-                    position.getLongitude(),
-                    (Context.getGeofenceManager() != null)
-                            ? Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName() : "");
-                                              break;
-            case Event.TYPE_GEOFENCE_EXIT   : formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_EXIT,
-                    device.getName(),
-                    position.getFixTime(),
-                    position.getLatitude(),
-                    position.getLongitude(),
-                    (Context.getGeofenceManager() != null)
-                            ? Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName() : "");
-                                              break;
-            default                         : formatter.format("Unknown type");
-                                              break;
+            case Event.TYPE_COMMAND_RESULT:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_COMMAND_RESULT, device.getName(), event.getServerTime(),
+                        position.getAttributes().get("result"));
+                break;
+            case Event.TYPE_DEVICE_ONLINE:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName(), event.getServerTime());
+                break;
+            case Event.TYPE_DEVICE_OFFLINE:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OFFLINE, device.getName(), event.getServerTime());
+                break;
+            case Event.TYPE_DEVICE_MOVING:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_MOVING, device.getName(), position.getFixTime(),
+                    position.getLatitude(), position.getLongitude());
+                break;
+            case Event.TYPE_DEVICE_STOPPED:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_STOPPED, device.getName(), position.getFixTime(),
+                    position.getLatitude(), position.getLongitude());
+                break;
+            case Event.TYPE_DEVICE_OVERSPEED:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED, device.getName(), position.getFixTime(),
+                    position.getLatitude(), position.getLongitude(), position.getSpeed());
+                break;
+            case Event.TYPE_GEOFENCE_ENTER:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_ENTER, device.getName(), position.getFixTime(),
+                    position.getLatitude(), position.getLongitude(), Context.getGeofenceManager() != null
+                    ? Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName() : "");
+                break;
+            case Event.TYPE_GEOFENCE_EXIT:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_EXIT, device.getName(), position.getFixTime(),
+                    position.getLatitude(), position.getLongitude(), Context.getGeofenceManager() != null
+                    ? Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName() : "");
+                break;
+            default:
+                formatter.format("Unknown type");
+                break;
         }
         String result = formatter.toString();
         formatter.close();
