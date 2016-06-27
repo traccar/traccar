@@ -36,13 +36,7 @@ Ext.define('Traccar.view.NotificationsController', {
                                 index = this.getView().getStore().find('type', records[i].getData().type);
                                 attributes = records[i].getData().attributes;
                                 storeRecord = this.getView().getStore().getAt(index);
-                                if (typeof attributes.web != 'undefined') {
-                                    storeRecord.set('web', attributes.web);
-                                }
-                                if (typeof attributes.mail != 'undefined') {
-                                    storeRecord.set('mail', attributes.mail);
-                                }
-                                
+                                storeRecord.set('attributes', attributes);
                                 storeRecord.commit();
                             }
                         }
@@ -52,32 +46,33 @@ Ext.define('Traccar.view.NotificationsController', {
         });
     },
  
+    onBeforeCheckChange: function (column, rowIndex, checked, eOpts) {
+        var record = this.getView().getStore().getAt(rowIndex);
+        var attributes = record.getData().attributes;
+        if (!attributes[column.dataIndex]) {
+            attributes[column.dataIndex] = "true";
+        } else {
+            delete attributes[column.dataIndex];
+        }
+        record.set('attributes', attributes);
+        record.commit();
+    },
+
     onCheckChange: function (column, rowIndex, checked, eOpts) {
         var record = this.getView().getStore().getAt(rowIndex);
-        var web, mail;
-        var data = {
-            userId: this.userId,
-            type: record.getData().type,
-            attributes: {}
-        };
-        web = record.getData().web;
-        if (typeof web != 'undefined' && web) {
-            data.attributes.web = "true";
-        }
-        mail = record.getData().mail;
-        if (typeof mail != 'undefined' && mail) {
-            data.attributes.mail = "true";
-        }
         Ext.Ajax.request({
             scope: this,
             url: '/api/users/notifications',
-            jsonData: data,
+            jsonData: {
+                userId: this.userId,
+                type: record.getData().type,
+                attributes: record.getData().attributes
+            },
             callback: function (options, success, response) {
                 if (!success) {
                     Traccar.app.showError(response);
                 }
             }
         });
-        
     }
 });
