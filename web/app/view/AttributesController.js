@@ -24,7 +24,7 @@ Ext.define('Traccar.view.AttributesController', {
     ],
 
     init: function () {
-        var attribute, store, record, data = [], i = 0;
+        var store, i = 0;
         store = Ext.create('Traccar.store.Attributes');
         store.setProxy(Ext.create('Ext.data.proxy.Memory'));
         for(var propertyName in this.getView().attributes) {
