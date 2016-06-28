@@ -20,6 +20,7 @@
     "sharedGeofence": "Geofence",
     "sharedGeofences": "Geofences",
     "sharedNotifications": "Notifications",
+    "sharedAttributes": "Attributes",
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",
