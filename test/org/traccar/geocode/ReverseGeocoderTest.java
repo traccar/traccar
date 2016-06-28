@@ -10,7 +10,7 @@ public class ReverseGeocoderTest {
     @Test
     public void test() throws InterruptedException {
         if (enable) {
-            testGoogle();
+            testGeocodeFarm();
         }
     }
 
@@ -77,6 +77,18 @@ public class ReverseGeocoderTest {
             }
         });
         Assert.assertEquals("Charleston Road, California, US",  waitAddress());
+    }
+
+    public void testGeocodeFarm() throws InterruptedException {
+        ReverseGeocoder reverseGeocoder = new GeocodeFarmReverseGeocoder(0);
+
+        reverseGeocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new ReverseGeocoder.ReverseGeocoderCallback() {
+            @Override
+            public void onResult(String address) {
+                setAddress(address);
+            }
+        });
+        Assert.assertEquals("Estrella Avenue, Arcadia, California, United States",  waitAddress());
     }
 
 }

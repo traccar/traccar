@@ -24,6 +24,7 @@ import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.geocode.BingMapsReverseGeocoder;
 import org.traccar.geocode.FactualReverseGeocoder;
+import org.traccar.geocode.GeocodeFarmReverseGeocoder;
 import org.traccar.geocode.GisgraphyReverseGeocoder;
 import org.traccar.geocode.GoogleReverseGeocoder;
 import org.traccar.geocode.MapQuestReverseGeocoder;
@@ -161,6 +162,12 @@ public final class Context {
                 case "factual":
                     reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
                     break;
+                case "geocodefarm":
+                    if (key != null) {
+                        reverseGeocoder = new GeocodeFarmReverseGeocoder(key, cacheSize);
+                    } else {
+                        reverseGeocoder = new GeocodeFarmReverseGeocoder(cacheSize);
+                    }
                 default:
                     if (key != null) {
                         reverseGeocoder = new GoogleReverseGeocoder(key, cacheSize);
