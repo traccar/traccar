@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public final class JsonConverter {
@@ -129,6 +130,8 @@ public final class JsonConverter {
                         }
                     } else if (method.getReturnType().equals(Map.class)) {
                         json.add(name, MiscFormatter.toJson((Map) method.invoke(object)));
+                    } else if (method.getReturnType().equals(List.class)) {
+                        json.add(name, arrayToJson((List) method.invoke(object)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
                     Log.warning(error);
@@ -144,7 +147,23 @@ public final class JsonConverter {
         JsonArrayBuilder json = Json.createArrayBuilder();
 
         for (Object object : array) {
-            json.add(objectToJson(object));
+            switch (object.getClass().getSimpleName().toLowerCase()) {
+                case "string":
+                    json.add(object.toString());
+                    break;
+                case "long":
+                    json.add((long) object);
+                    break;
+                case "double":
+                    json.add((double) object);
+                    break;
+                case "boolean":
+                    json.add((boolean) object);
+                    break;
+                default:
+                    json.add(objectToJson(object));
+                    break;
+            }
         }
 
         return json.build();
