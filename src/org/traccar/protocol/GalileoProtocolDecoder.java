@@ -50,6 +50,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_ODOMETER = 0xd4;
     private static final int TAG_REFRIGERATOR = 0x5b;
     private static final int TAG_PRESSURE = 0x5c;
+    private static final int TAG_CAN = 0xc1;
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -74,10 +75,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e
         };
         int[] l4 = {
-            0x20, 0x33, 0x44, 0x90, 0xc0, 0xc1, 0xc2, 0xc3,
-            0xd3, 0xd4, 0xdb, 0xdc, 0xdd, 0xde, 0xdf, 0xf0,
-            0xf9, 0x5a, 0x47, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5,
-            0xf6, 0xf7, 0xf8
+            0x20, 0x33, 0x44, 0x90, 0xc0, 0xc2, 0xc3, 0xd3,
+            0xd4, 0xdb, 0xdc, 0xdd, 0xde, 0xdf, 0xf0, 0xf9,
+            0x5a, 0x47, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6,
+            0xf7, 0xf8
         };
         for (int i : l1) {
             TAG_LENGTH_MAP.put(i, 1);
@@ -181,6 +182,12 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
                 case TAG_ODOMETER:
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    break;
+
+                case TAG_CAN:
+                    position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
+                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
+                    position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
                     break;
 
                 default:
