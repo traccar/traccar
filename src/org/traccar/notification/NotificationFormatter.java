@@ -127,25 +127,25 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_DEVICE_MOVING:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_MOVING, device.getName(), position.getFixTime(),
-                    position.getLatitude(), position.getLongitude());
+                        position.getLatitude(), position.getLongitude());
                 break;
             case Event.TYPE_DEVICE_STOPPED:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_STOPPED, device.getName(), position.getFixTime(),
-                    position.getLatitude(), position.getLongitude());
+                        position.getLatitude(), position.getLongitude());
                 break;
             case Event.TYPE_DEVICE_OVERSPEED:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED, device.getName(), position.getFixTime(),
-                    position.getLatitude(), position.getLongitude(), position.getSpeed());
+                        position.getLatitude(), position.getLongitude(), position.getSpeed());
                 break;
             case Event.TYPE_GEOFENCE_ENTER:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_ENTER, device.getName(), position.getFixTime(),
-                    position.getLatitude(), position.getLongitude(), Context.getGeofenceManager() != null
-                    ? Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName() : "");
+                        position.getLatitude(), position.getLongitude(),
+                        Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName());
                 break;
             case Event.TYPE_GEOFENCE_EXIT:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_EXIT, device.getName(), position.getFixTime(),
-                    position.getLatitude(), position.getLongitude(), Context.getGeofenceManager() != null
-                    ? Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName() : "");
+                        position.getLatitude(), position.getLongitude(),
+                        Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName());
                 break;
             default:
                 formatter.format("Unknown type");
