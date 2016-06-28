@@ -23,6 +23,7 @@ Ext.define('Traccar.view.UsersController', {
         'Traccar.view.UserDevices',
         'Traccar.view.UserGroups',
         'Traccar.view.UserGeofences',
+        'Traccar.view.Notifications',
         'Traccar.view.BaseWindow'
     ],
 
@@ -114,6 +115,18 @@ Ext.define('Traccar.view.UsersController', {
         }).show();
     },
 
+    onNotificationsClick: function () {
+        var user = this.getView().getSelectionModel().getSelection()[0];
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.sharedNotifications,
+            modal: false,
+            items: {
+                xtype: 'notificationsView',
+                user: user
+            }
+        }).show();
+    },
+
     onSelectionChange: function (selected) {
         var disabled = selected.length > 0;
         this.lookupReference('toolbarEditButton').setDisabled(disabled);
@@ -121,5 +134,6 @@ Ext.define('Traccar.view.UsersController', {
         this.lookupReference('userDevicesButton').setDisabled(disabled);
         this.lookupReference('userGroupsButton').setDisabled(disabled);
         this.lookupReference('userGeofencesButton').setDisabled(disabled);
+        this.lookupReference('userNotificationsButton').setDisabled(disabled);
     }
 });

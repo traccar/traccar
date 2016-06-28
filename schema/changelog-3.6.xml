@@ -90,5 +90,28 @@
     <addForeignKeyConstraint baseTableName="device_geofence" baseColumnNames="deviceid" constraintName="fk_user_device_geofence_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="device_geofence" baseColumnNames="geofenceid" constraintName="fk_user_device_geofence_geofenceid" referencedTableName="geofences" referencedColumnNames="id" onDelete="CASCADE" />
 
+    <createTable tableName="notifications">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="notifications" baseColumnNames="userid" constraintName="fk_notifications_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <addColumn tableName="users">
+      <column name="attributes" type="VARCHAR(4096)" />
+    </addColumn>
+
+    <addNotNullConstraint tableName="users" columnName="attributes" columnDataType="VARCHAR(4096)" defaultNullValue="{}" />
+
   </changeSet>
 </databaseChangeLog>

@@ -48,6 +48,9 @@ Ext.define('Traccar.view.SettingsMenu', {
             handler: 'onUsersClick',
             reference: 'settingsUsersButton'
         }, {
+            text: Strings.sharedNotifications,
+            handler: 'onNotificationsClick',
+        }, {
             text: Strings.loginLogout,
             handler: 'onLogoutClick'
         }]

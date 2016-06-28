@@ -19,6 +19,7 @@
     "sharedSearch": "Search",
     "sharedGeofence": "Geofence",
     "sharedGeofences": "Geofences",
+    "sharedNotifications": "Notifications",
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",
@@ -106,7 +107,10 @@
     "eventDeviceMoving": "Device is moving",
     "eventDeviceStopped": "Device is stopped",
     "eventDeviceOverspeed": "Device exceeds the speed",
-    "eventCommandResult": "Command result: ",
+    "eventCommandResult": "Command result",
     "eventGeofenceEnter": "Device has entered geofence",
-    "eventGeofenceExit": "Device has exited geofence"
+    "eventGeofenceExit": "Device has exited geofence",
+    "notificationType": "Type of Notification",
+    "notificationWeb": "Send via Web",
+    "notificationMail": "Send via Mail"
 }

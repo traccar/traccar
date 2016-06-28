@@ -252,6 +252,27 @@
         DELETE FROM device_geofence WHERE deviceId = :deviceId AND geofenceId = :geofenceId;
     </entry>
 
+    <entry key='database.selectNotifications'>
+        SELECT * FROM notifications;
+    </entry>
+
+    <entry key='database.insertNotification'>
+        INSERT INTO notifications (userId, type, attributes)
+        VALUES (:userId, :type, :attributes);
+    </entry>
+
+    <entry key='database.updateNotification'>
+        UPDATE notifications SET
+        userId = :userId,
+        type = :type,
+        attributes = :attributes
+        WHERE id = :id;
+    </entry>
+
+    <entry key='database.deleteNotification'>
+        DELETE FROM notifications WHERE id = :id;
+    </entry>
+
     <!-- PROTOCOL CONFIG -->
 
     <entry key='gps103.port'>5001</entry>
