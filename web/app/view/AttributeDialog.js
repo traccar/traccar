@@ -22,7 +22,7 @@ Ext.define('Traccar.view.AttributeDialog', {
     ],
 
     controller: 'baseEditDialog',
-    title: Strings.stateName,
+    title: Strings.sharedAttribute,
 
     items: {
         xtype: 'form',

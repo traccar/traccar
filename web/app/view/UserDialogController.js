@@ -50,7 +50,7 @@ Ext.define('Traccar.view.UserDialogController', {
         button.up('window').close();
     },
 
-    attributesView: function (button) {
+    showAttributesView: function (button) {
         var dialog, record;
         dialog = button.up('window').down('form');
         record = dialog.getRecord();

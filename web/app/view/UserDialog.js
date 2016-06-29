@@ -92,6 +92,6 @@ Ext.define('Traccar.view.UserDialog', {
     }, {
         xtype: 'button',
         text : Strings.sharedAttributes,
-        handler: 'attributesView'
+        handler: 'showAttributesView'
     }]
 });
