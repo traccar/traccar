@@ -24,7 +24,7 @@ Ext.define('Traccar.view.UserDialog', {
     controller: 'userDialog',
     title: Strings.settingsUser,
 
-    items: {
+    items: [{
         xtype: 'form',
         items: [{
             xtype: 'textfield',
@@ -89,5 +89,9 @@ Ext.define('Traccar.view.UserDialog', {
             fieldLabel: Strings.settingsTwelveHourFormat,
             allowBlank: false
         }]
-    }
+    }, {
+        xtype: 'button',
+        text : Strings.sharedAttributes,
+        handler: 'showAttributesView'
+    }]
 });
