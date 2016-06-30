@@ -1,0 +1,24 @@
+{
+  "name": "allTrac",
+  "homepage": "https://github.com/slawik1984/traccar",
+  "authors": [
+    "slawik <w.seller@outlook.de>"
+  ],
+  "description": "",
+  "main": "debug.html",
+  "moduleType": [
+    "es6"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ol3-popup": "~1.0.1"
+  }
+}

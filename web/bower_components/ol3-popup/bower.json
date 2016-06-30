@@ -1,0 +1,27 @@
+{
+  "name": "ol3-popup",
+  "version": "1.0.1",
+  "homepage": "https://github.com/walkermatt/ol3-popup",
+  "authors": [
+    "Matt Walker (http://longwayaround.org.uk)"
+  ],
+  "description": "Popup overlay for OpenLayers 3",
+  "main": [
+    "src/ol3-popup.js",
+    "src/ol3-popup.css"
+  ],
+  "keywords": [
+    "openlayers",
+    "ol3",
+    "overlay",
+    "popup",
+    "info"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ]
+}

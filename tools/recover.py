@@ -32,4 +32,4 @@ for session in ports:
     s.connect(("localhost", int(port)))
     for message in messages[session]:
         s.send(binascii.unhexlify(message))
-    s.close()
+    s.close() 

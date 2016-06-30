@@ -1,0 +1,27 @@
+{
+  "name": "ol3-popup",
+  "version": "1.0.1",
+  "description": "Popup overlay for OpenLayers 3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walkermatt/ol3-popup.git"
+  },
+  "author": "Matt Walker (http://longwayaround.org.uk)",
+  "contributors": [
+      "Avi Kelman <patcherton.fixesthings@gmail.com>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/walkermatt/ol3-popup/issues"
+  },
+  "scripts": {
+    "doc": "node_modules/.bin/jsdoc --explain src/ol3-popup.js | node_modules/.bin/dirtydocs util/README.md > README.md"
+  },
+  "dependencies": {
+    "openlayers": "~3.3.0"
+  },
+  "devDependencies": {
+    "jsdoc": "~3.3.0-beta1",
+    "dirtydocs": "0.0.1"
+  }
+}
