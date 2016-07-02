@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,8 +73,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]*,")                // reserved
             .number("d*,")                       // protocol
             .number("(x{4})?")                   // fuel
-            .groupEnd("?")
+            .number("(?:,(x{6}(?:|x{6})*))?")    // temperature
+            .or()
             .any()
+            .groupEnd()
             .text("*")
             .number("xx")
             .text("\r\n").optional()
@@ -151,6 +153,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             String fuel = parser.next();
             position.set(Position.KEY_FUEL,
                     Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
+        }
+
+        if (parser.hasNext()) {
+            for (String temp : parser.next().split("\\|")) {
+                int index = Integer.valueOf(temp.substring(0, 2), 16);
+                int value = Integer.valueOf(temp.substring(2), 16);
+                position.set(Position.PREFIX_TEMP + index, value);
+            }
         }
 
         return position;
