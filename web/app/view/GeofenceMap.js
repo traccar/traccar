@@ -23,61 +23,71 @@ Ext.define('Traccar.view.GeofenceMap', {
     ],
 
     controller: 'geofenceMap',
+    bodyBorder: true,
+
+    tbar: {
+        items: [{
+            xtype: 'combobox',
+            store: 'GeozoneTypes',
+            valueField: 'id',
+            displayField: 'name'
+        }, {
+            xtype: 'tbfill'
+        }, {
+            text: Strings.sharedSave,
+            handler: 'onSaveClick'
+        }, {
+            text: Strings.sharedCancel,
+            handler: 'onCancelClick'
+        }]
+    },
 
     initMap: function () {
+        var map, featureOverlay;
         this.callParent();
 
-        var map = this.map;
+        map = this.map;
 
-        var features = new ol.Collection();
-        var featureOverlay = new ol.layer.Vector({
-            source: new ol.source.Vector({features: features}),
+        this.features = new ol.Collection();
+        featureOverlay = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: this.features
+            }),
             style: new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: 'rgba(255, 255, 255, 0.2)'
+                    color: Traccar.Style.mapColorOverlay
                 }),
                 stroke: new ol.style.Stroke({
-                    color: '#ffcc33',
-                    width: 2
+                    color: Traccar.Style.mapColorReport,
+                    width: Traccar.Style.mapRouteWidth
                 }),
                 image: new ol.style.Circle({
-                    radius: 7,
+                    radius: Traccar.Style.mapRadiusNormal,
                     fill: new ol.style.Fill({
-                        color: '#ffcc33'
+                        color: Traccar.Style.mapColorReport
                     })
                 })
             })
         });
         featureOverlay.setMap(map);
 
-        var modify = new ol.interaction.Modify({
-            features: features,
-            // the SHIFT key must be pressed to delete vertices, so
-            // that new vertices can be drawn at the same position
-            // of existing vertices
+        map.addInteraction(new ol.interaction.Modify({
+            features: this.features,
             deleteCondition: function(event) {
-                return ol.events.condition.shiftKeyOnly(event) &&
-                    ol.events.condition.singleClick(event);
+                return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(event);
             }
+        }));
+    },
+
+    addInteraction: function () {
+        this.draw = new ol.interaction.Draw({
+            features: this.features,
+            type: 'Polygon' // (typeSelect.value)
         });
-        map.addInteraction(modify);
+        this.map.addInteraction(this.draw);
+    },
 
-        var draw; // global so we can remove it later
-        //var typeSelect = document.getElementById('type');
-
-        function addInteraction() {
-            draw = new ol.interaction.Draw({
-                features: features,
-                type: 'Polygon' // (typeSelect.value)
-            });
-            map.addInteraction(draw);
-        }
-
-        /*typeSelect.onchange = function() {
-            map.removeInteraction(draw);
-            addInteraction();
-        };*/
-
-        addInteraction();
+    removeInteraction: function () {
+        this.map.removeInteraction(this.draw);
     }
 });

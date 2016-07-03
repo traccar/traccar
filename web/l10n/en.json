@@ -80,6 +80,8 @@
     "mapBingKey": "Bing Maps Key",
     "mapBingRoad": "Bing Maps Road",
     "mapBingAerial": "Bing Maps Aerial",
+    "mapShapePolygon": "Polygon",
+    "mapShapeCircle": "Circle",
     "stateTitle": "State",
     "stateName": "Attribute",
     "stateValue": "Value",

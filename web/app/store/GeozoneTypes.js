@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.GeofenceMapController', {
-    extend: 'Ext.app.ViewController',
-    alias: 'controller.geofenceMap',
+Ext.define('Traccar.store.GeozoneTypes', {
+    extend: 'Ext.data.Store',
+    fields: ['key', 'name'],
 
-    onSaveClick: function (button) {
-        button.up('window').close();
-    },
-
-    onCancelClick: function (button) {
-        button.up('window').close();
-    }
+    data: [{
+        key: 'Polygon',
+        name: Strings.mapShapePolygon
+    }, {
+        key: 'Circle',
+        name: Strings.mapShapeCircle
+    }]
 });
