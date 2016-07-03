@@ -119,14 +119,14 @@ public class GeofencePolygon extends GeofenceGeometry {
     @Override
     public String toWkt() {
         StringBuilder buf = new StringBuilder();
-        buf.append("POLYGON (");
+        buf.append("POLYGON ((");
         for (Coordinate coordinate : coordinates) {
             buf.append(String.valueOf(coordinate.getLat()));
             buf.append(" ");
             buf.append(String.valueOf(coordinate.getLon()));
             buf.append(", ");
         }
-        return buf.substring(0, buf.length() - 2) + ")";
+        return buf.substring(0, buf.length() - 2) + "))";
     }
 
     @Override
@@ -140,7 +140,7 @@ public class GeofencePolygon extends GeofenceGeometry {
         if (!wkt.startsWith("POLYGON")) {
             throw new ParseException("Mismatch geometry type", 0);
         }
-        String content = wkt.substring(wkt.indexOf("(") + 1, wkt.indexOf(")"));
+        String content = wkt.substring(wkt.indexOf("((") + 2, wkt.indexOf("))"));
         if (content.isEmpty()) {
             throw new ParseException("No content", 0);
         }

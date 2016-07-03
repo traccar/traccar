@@ -9,7 +9,7 @@ public class GeofencePolygonTest {
 
     @Test
     public void testPolygonWKT() {
-        String test = "POLYGON (55.75474 37.61823, 55.75513 37.61888, 55.7535 37.6222, 55.75315 37.62165)";
+        String test = "POLYGON ((55.75474 37.61823, 55.75513 37.61888, 55.7535 37.6222, 55.75315 37.62165))";
         GeofenceGeometry geofenceGeometry = new GeofencePolygon();
         try {
         geofenceGeometry.fromWkt(test);
@@ -21,7 +21,7 @@ public class GeofencePolygonTest {
 
     @Test
     public void testContainsPolygon() {
-        String test = "POLYGON (55.75474 37.61823, 55.75513 37.61888, 55.7535 37.6222, 55.75315 37.62165)";
+        String test = "POLYGON ((55.75474 37.61823, 55.75513 37.61888, 55.7535 37.6222, 55.75315 37.62165))";
         GeofenceGeometry geofenceGeometry = new GeofencePolygon();
         try {
         geofenceGeometry.fromWkt(test);
