@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.GeofenceDialogController', {
-    extend: 'Traccar.view.BaseEditDialogController',
-    alias: 'controller.geofenceDialog',
-
-    requires: [
-        'Traccar.view.GeofenceMap'
-    ],
-
-    onAreaClick: function (button) {
-        Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedArea,
-            items: {
-                xtype: 'geofenceMapView'
-            }
-        }).show();
-    }
+Ext.define('Traccar.view.GeofenceMapController', {
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.geofenceMap'
 });
