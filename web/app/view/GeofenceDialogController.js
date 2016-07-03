@@ -22,6 +22,20 @@ Ext.define('Traccar.view.GeofenceDialogController', {
         'Traccar.view.GeofenceMap'
     ],
 
+    config: {
+        listen: {
+            controller: {
+                '*': {
+                    saveArea: 'saveArea'
+                }
+            }
+        }
+    },
+
+    saveArea: function (value) {
+        this.lookupReference('areaField').setValue(value);
+    },
+
     onAreaClick: function (button) {
         Ext.create('Traccar.view.BaseWindow', {
             title: Strings.sharedArea,

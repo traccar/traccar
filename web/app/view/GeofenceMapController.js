@@ -19,10 +19,21 @@ Ext.define('Traccar.view.GeofenceMapController', {
     alias: 'controller.geofenceMap',
 
     onSaveClick: function (button) {
-        button.up('window').close();
+        var feature, formatter;
+        if (this.getView().getFeatures().getLength() > 0) {
+            feature = this.getView().getFeatures().pop();
+            formatter = new ol.format.WKT();
+            this.fireEvent('saveArea', formatter.writeFeature(feature));
+            button.up('window').close();
+        }
     },
 
     onCancelClick: function (button) {
         button.up('window').close();
+    },
+
+    onTypeSelect: function (combo) {
+        this.getView().removeInteraction();
+        this.getView().addInteraction(combo.getValue());
     }
 });

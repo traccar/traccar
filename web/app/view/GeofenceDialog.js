@@ -34,6 +34,11 @@ Ext.define('Traccar.view.GeofenceDialog', {
             xtype: 'textfield',
             name: 'description',
             fieldLabel: Strings.sharedDescription
+        }, {
+            xtype: 'hiddenfield',
+            name: 'area',
+            allowBlank: false,
+            reference: 'areaField'
         }]
     },
 

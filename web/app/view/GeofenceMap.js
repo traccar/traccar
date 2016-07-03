@@ -28,9 +28,12 @@ Ext.define('Traccar.view.GeofenceMap', {
     tbar: {
         items: [{
             xtype: 'combobox',
-            store: 'GeozoneTypes',
-            valueField: 'id',
-            displayField: 'name'
+            store: 'GeofenceTypes',
+            valueField: 'key',
+            displayField: 'name',
+            listeners: {
+                select: 'onTypeSelect'
+            }
         }, {
             xtype: 'tbfill'
         }, {
@@ -40,6 +43,10 @@ Ext.define('Traccar.view.GeofenceMap', {
             text: Strings.sharedCancel,
             handler: 'onCancelClick'
         }]
+    },
+
+    getFeatures: function () {
+        return this.features;
     },
 
     initMap: function () {
@@ -79,15 +86,21 @@ Ext.define('Traccar.view.GeofenceMap', {
         }));
     },
 
-    addInteraction: function () {
+    addInteraction: function (type) {
         this.draw = new ol.interaction.Draw({
             features: this.features,
-            type: 'Polygon' // (typeSelect.value)
+            type: type
         });
+        this.draw.on('drawstart', function () {
+            this.features.clear();
+        }, this);
         this.map.addInteraction(this.draw);
     },
 
     removeInteraction: function () {
-        this.map.removeInteraction(this.draw);
+        if (this.draw) {
+            this.map.removeInteraction(this.draw);
+            this.draw = null;
+        }
     }
 });
