@@ -150,7 +150,7 @@ public class GeofenceManager {
                             deviceGeofenceIds.clear();
                         }
                         Position lastPosition = Context.getConnectionManager().getLastPosition(device.getId());
-                        if (lastPosition != null) {
+                        if (lastPosition != null && deviceGeofencesWithGroups.containsKey(device.getId())) {
                             for (Long geofenceId : deviceGeofencesWithGroups.get(device.getId())) {
                                 if (getGeofence(geofenceId).getGeometry()
                                         .containsPoint(lastPosition.getLatitude(), lastPosition.getLongitude())) {
