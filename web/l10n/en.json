@@ -22,6 +22,7 @@
     "sharedNotifications": "Notifications",
     "sharedAttributes": "Attributes",
     "sharedAttribute": "Attribute",
+    "sharedArea": "Area",
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",

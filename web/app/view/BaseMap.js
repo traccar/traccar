@@ -18,7 +18,6 @@ Ext.define('Traccar.view.BaseMap', {
     extend: 'Ext.form.Panel',
     xtype: 'baseMapView',
 
-    title: Strings.mapTitle,
     layout: 'fit',
 
     getMap: function () {

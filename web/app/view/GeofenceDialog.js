@@ -15,13 +15,13 @@
  */
 
 Ext.define('Traccar.view.GeofenceDialog', {
-    extend: 'Traccar.view.BaseEditDialog',
+    extend: 'Traccar.view.BaseDialog',
 
     requires: [
-        'Traccar.view.BaseEditDialogController'
+        'Traccar.view.GeofenceDialogController'
     ],
 
-    controller: 'baseEditDialog',
+    controller: 'geofenceDialog',
     title: Strings.sharedGeofence,
 
     items: {
@@ -35,5 +35,19 @@ Ext.define('Traccar.view.GeofenceDialog', {
             name: 'description',
             fieldLabel: Strings.sharedDescription
         }]
-    }
+    },
+
+    buttons: [{
+        text: Strings.sharedArea,
+        glyph: 'xf21d@FontAwesome',
+        handler: 'onAreaClick'
+    }, {
+        xtype: 'tbfill'
+    }, {
+        text: Strings.sharedSave,
+        handler: 'onSaveClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
+    }]
 });

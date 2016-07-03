@@ -24,6 +24,8 @@ Ext.define('Traccar.view.Map', {
 
     controller: 'map',
 
+    title: Strings.mapTitle,
+
     getLatestSource: function () {
         return this.latestSource;
     },
