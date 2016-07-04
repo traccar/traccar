@@ -18,35 +18,33 @@ Ext.define('Traccar.GeofenceConverter', {
     singleton: true,
 
     wktToGeometry: function (mapView, wkt) {
-        var geometry, points = [];
-        var projection, resolutionAtEquator, pointResolution, resolutionFactor;
-        var center, radius;
-        var m, i, lat, lon, tmp;
+        var geometry, projection, resolutionAtEquator, pointResolution, resolutionFactor, points = [], center, radius,
+                content, i, lat, lon, coordinates;
         if (wkt.startsWith("POLYGON")) {
-            m = wkt.match(/\([^\(\)]+\)/);
-            if (m !== null) {
-                tmp = m[0].match(/-?\d+\.?\d*/g);
-                if (tmp !== null) {
+            content = wkt.match(/\([^\(\)]+\)/);
+            if (content !== null) {
+                coordinates = content[0].match(/-?\d+\.?\d*/g);
+                if (coordinates !== null) {
                     projection = mapView.getProjection();
-                    for (i = 0; i < tmp.length; i += 2) {
-                        lat = Number(tmp[i]);
-                        lon = Number(tmp[i + 1]);
+                    for (i = 0; i < coordinates.length; i += 2) {
+                        lat = Number(coordinates[i]);
+                        lon = Number(coordinates[i + 1]);
                         points.push(ol.proj.transform([lon, lat], 'EPSG:4326', projection));
                     }
                     geometry = new ol.geom.Polygon([points]);
                 }
             }
         } else if (wkt.startsWith("CIRCLE")) {
-            m = wkt.match(/\([^\(\)]+\)/);
-            if (m !== null) {
-                tmp = m[0].match(/-?\d+\.?\d*/g);
-                if (tmp !== null) {
+            content = wkt.match(/\([^\(\)]+\)/);
+            if (content !== null) {
+                coordinates = content[0].match(/-?\d+\.?\d*/g);
+                if (coordinates !== null) {
                     projection = mapView.getProjection();
-                    center = ol.proj.transform([Number(tmp[1]), Number(tmp[0])], 'EPSG:4326', projection);
+                    center = ol.proj.transform([Number(coordinates[1]), Number(coordinates[0])], 'EPSG:4326', projection);
                     resolutionAtEquator = mapView.getResolution();
                     pointResolution = projection.getPointResolution(resolutionAtEquator, center);
                     resolutionFactor = resolutionAtEquator / pointResolution;
-                    radius = (Number(tmp[2]) / ol.proj.METERS_PER_UNIT.m) * resolutionFactor;
+                    radius = (Number(coordinates[2]) / ol.proj.METERS_PER_UNIT.m) * resolutionFactor;
                     geometry = new ol.geom.Circle(center, radius);
                 }
             }
@@ -55,8 +53,7 @@ Ext.define('Traccar.GeofenceConverter', {
     },
 
     geometryToWkt: function (projection, geometry) {
-        var result;
-        var i, center, radius, edgeCoordinate, earthSphere, groundRadius, points;
+        var result, i, center, radius, edgeCoordinate, earthSphere, groundRadius, points;
         if (geometry instanceof ol.geom.Circle) {
             center = geometry.getCenter();
             radius = geometry.getRadius();
