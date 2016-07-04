@@ -19,7 +19,8 @@ Ext.define('Traccar.view.GeofenceMap', {
     xtype: 'geofenceMapView',
 
     requires: [
-        'Traccar.view.GeofenceMapController'
+        'Traccar.view.GeofenceMapController',
+        'Traccar.GeofenceConverter'
     ],
 
     controller: 'geofenceMap',
@@ -56,6 +57,9 @@ Ext.define('Traccar.view.GeofenceMap', {
         map = this.map;
 
         this.features = new ol.Collection();
+        if (this.area !== "") {
+            this.features.push(new ol.Feature(Traccar.GeofenceConverter.wktToGeometry(this.mapView, this.area)));
+        }
         featureOverlay = new ol.layer.Vector({
             source: new ol.source.Vector({
                 features: this.features
