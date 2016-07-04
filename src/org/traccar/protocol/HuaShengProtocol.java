@@ -34,7 +34,7 @@ public class HuaShengProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2, 0, 0));
+                pipeline.addLast("frameDecoder", new HuaShengFrameDecoder());
                 pipeline.addLast("objectDecoder", new HuaShengProtocolDecoder(HuaShengProtocol.this));
             }
         });
