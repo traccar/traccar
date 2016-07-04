@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,9 +129,15 @@ public final class JsonConverter {
                             json.add(name, DATE_FORMAT.print(new DateTime(value)));
                         }
                     } else if (method.getReturnType().equals(Map.class)) {
-                        json.add(name, MiscFormatter.toJson((Map) method.invoke(object)));
+                        Map value = (Map) method.invoke(object);
+                        if (value != null) {
+                            json.add(name, MiscFormatter.toJson(value));
+                        }
                     } else if (method.getReturnType().equals(List.class)) {
-                        json.add(name, arrayToJson((List) method.invoke(object)));
+                        List value = (List) method.invoke(object);
+                        if (value != null) {
+                            json.add(name, arrayToJson(value));
+                        }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
                     Log.warning(error);
