@@ -37,10 +37,14 @@ Ext.define('Traccar.view.GeofenceDialogController', {
     },
 
     onAreaClick: function (button) {
+        var dialog, record;
+        dialog = button.up('window').down('form');
+        record = dialog.getRecord();
         Ext.create('Traccar.view.BaseWindow', {
             title: Strings.sharedArea,
             items: {
-                xtype: 'geofenceMapView'
+                xtype: 'geofenceMapView',
+                area: record.get('area')
             }
         }).show();
     }
