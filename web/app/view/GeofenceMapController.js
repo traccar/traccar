@@ -18,12 +18,16 @@ Ext.define('Traccar.view.GeofenceMapController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.geofenceMap',
 
+    requires: [
+        'Traccar.GeofenceConverter'
+    ],
+
     onSaveClick: function (button) {
-        var feature, formatter;
+        var geometry, projection;
         if (this.getView().getFeatures().getLength() > 0) {
-            feature = this.getView().getFeatures().pop();
-            formatter = new ol.format.WKT();
-            this.fireEvent('saveArea', formatter.writeFeature(feature));
+            geometry = this.getView().getFeatures().pop().getGeometry();
+            projection = this.getView().getMapView().getProjection();
+            this.fireEvent('saveArea', Traccar.GeofenceConverter.geometryToWkt(projection, geometry));
             button.up('window').close();
         }
     },
