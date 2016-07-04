@@ -21,8 +21,8 @@ Ext.define('Traccar.store.GeofenceTypes', {
     data: [{
         key: 'Polygon',
         name: Strings.mapShapePolygon
-    }/*, {
+    }, {
         key: 'Circle',
         name: Strings.mapShapeCircle
-    }*/]
+    }]
 });
