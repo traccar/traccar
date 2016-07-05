@@ -41,8 +41,8 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeByte(0xC0);
             response.writeShort(0x0100);
-            response.writeShort(response.capacity()); // TODO: length
-            response.writeByte(type);
+            response.writeShort(12 + content.readableBytes());
+            response.writeShort(type);
             response.writeShort(0);
             response.writeInt(1);
             response.writeBytes(content);
