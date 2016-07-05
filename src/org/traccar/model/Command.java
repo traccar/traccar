@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Command extends Message {
 
     public static final String TYPE_CUSTOM = "custom";
+    public static final String TYPE_IDENTIFICATION = "deviceIdentification";
     public static final String TYPE_POSITION_SINGLE = "positionSingle";
     public static final String TYPE_POSITION_PERIODIC = "positionPeriodic";
     public static final String TYPE_POSITION_STOP = "positionStop";

@@ -386,5 +386,6 @@
     <entry key='supermate.port'>5108</entry>
     <entry key='appello.port'>5109</entry>
     <entry key='idpl.port'>5110</entry>
+    <entry key='granit.port'>5113</entry>
 
 </properties>
