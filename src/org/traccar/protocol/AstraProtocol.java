@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
@@ -35,6 +36,12 @@ public class AstraProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 1, 2, -3, 0));
+                pipeline.addLast("objectDecoder", new AstraProtocolDecoder(AstraProtocol.this));
+            }
+        });
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("objectDecoder", new AstraProtocolDecoder(AstraProtocol.this));
             }
         });
