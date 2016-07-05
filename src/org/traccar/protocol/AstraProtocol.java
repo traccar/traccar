@@ -42,7 +42,6 @@ public class AstraProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 1, 2, -3, 0));
                 pipeline.addLast("objectDecoder", new AstraProtocolDecoder(AstraProtocol.this));
             }
         });
