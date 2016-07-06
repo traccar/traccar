@@ -26,7 +26,11 @@ public class Pt502ProtocolEncoder extends StringProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_OUTPUT_CONTROL:
-                return formatCommand(command, "000000OPC{%s},{%s}", Command.KEY_INDEX, Command.KEY_DATA);
+                return formatCommand(command, "#OPC{%s},{%s}\r\n", Command.KEY_INDEX, Command.KEY_DATA);
+            case Command.TYPE_SET_TIMEZONE:
+                return formatCommand(command, "#TMZ{%s}\r\n", Command.KEY_TIMEZONE);
+            case Command.TYPE_ALARM_SPEED:
+                return formatCommand(command, "#SPD{%s}\r\n", Command.KEY_DATA);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
