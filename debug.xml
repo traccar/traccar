@@ -431,5 +431,6 @@
     <entry key='idpl.port'>5110</entry>
     <entry key='huasheng.port'>5111</entry>
     <entry key='l100.port'>5112</entry>
+    <entry key='granit.port'>5113</entry>
 
 </properties>
