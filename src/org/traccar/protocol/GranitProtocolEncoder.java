@@ -15,7 +15,6 @@
  */
  package org.traccar.protocol;
 
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -28,29 +27,28 @@ public class GranitProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        ChannelBuffer commandString;
+        String commandString = "";
 
         switch (command.getType()) {
         case Command.TYPE_IDENTIFICATION:
-            commandString = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 12);
-            commandString.writeBytes("BB+IDNT".getBytes(StandardCharsets.US_ASCII));
-            GranitProtocolDecoder.appendChecksum(commandString, 7);
-            return commandString;
+            commandString = "BB+IDNT";
+            break;
         case Command.TYPE_REBOOT_DEVICE:
-            commandString = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 13);
-            commandString.writeBytes("BB+RESET".getBytes(StandardCharsets.US_ASCII));
-            GranitProtocolDecoder.appendChecksum(commandString, 8);
-            return commandString;
+            commandString = "BB+RESET";
+            break;
         case Command.TYPE_POSITION_SINGLE:
-            commandString = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 12);
-            commandString.writeBytes("BB+RRCD".getBytes(StandardCharsets.US_ASCII));
-            GranitProtocolDecoder.appendChecksum(commandString, 7);
-            return commandString;
+            commandString = "BB+RRCD";
+            break;
         default:
             Log.warning(new UnsupportedOperationException(command.getType()));
-            break;
+            return null;
         }
-
+        if (!commandString.isEmpty()) {
+            ChannelBuffer commandBuf = ChannelBuffers.dynamicBuffer();
+            commandBuf.writeBytes(commandString.getBytes(StandardCharsets.US_ASCII));
+            GranitProtocolDecoder.appendChecksum(commandBuf, commandString.length());
+            return commandBuf;
+        }
         return null;
     }
 
