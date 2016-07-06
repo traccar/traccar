@@ -40,7 +40,7 @@ public class GranitProtocol extends BaseProtocol {
         TrackerServer server = new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024, true, false));
+                pipeline.addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                 pipeline.addLast("objectEncoder", new GranitProtocolEncoder());
                 pipeline.addLast("objectDecoder", new GranitProtocolDecoder(GranitProtocol.this));
             }

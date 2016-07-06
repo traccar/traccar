@@ -81,8 +81,8 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         int latDegrees = buf.readUnsignedByte();
         int lonMinutes = buf.readUnsignedShort();
         int latMinutes = buf.readUnsignedShort();
-        double latitude = latDegrees + (double) latMinutes / 60000;
-        double longitude = lonDegrees + (double) lonMinutes / 60000;
+        double latitude = latDegrees + latMinutes / 60000.0;
+        double longitude = lonDegrees + lonMinutes / 60000.0;
         if (!BitUtil.check(flags, 4)) {
             latitude = -latDegrees;
         }
