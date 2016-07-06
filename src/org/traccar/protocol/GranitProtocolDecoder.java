@@ -39,11 +39,11 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static void appendChecksum(ChannelBuffer buffer, int length) {
-        buffer.writeByte(0x2a); // asterisk
+        buffer.writeByte('*');
         int checksum = Checksum.xor(buffer.toByteBuffer(0, length)) & 0xFF;
         String checksumString = String.format("%02X", checksum);
         buffer.writeBytes(checksumString.getBytes(StandardCharsets.US_ASCII));
-        buffer.writeByte(0x0D); buffer.writeByte(0x0A);
+        buffer.writeByte('\r'); buffer.writeByte('\n');
     }
 
     private static void sendResponseCurrent(Channel channel, int deviceId, long time) {
@@ -132,12 +132,10 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-
-        if (hasDeviceId() &&  buf.toString(StandardCharsets.US_ASCII).contains("OK")
-                || buf.toString(StandardCharsets.US_ASCII).startsWith("ERROR")
-                || buf.toString(StandardCharsets.US_ASCII).startsWith("+PR")
-                || buf.toString(StandardCharsets.US_ASCII).startsWith("+IDNT")
-                || buf.toString(StandardCharsets.US_ASCII).startsWith("+BBMD")) {
+        String bufString = buf.toString(StandardCharsets.US_ASCII);
+        if (hasDeviceId() &&  bufString.contains("OK") || bufString.startsWith("ERROR")
+                || bufString.startsWith("+PR") || bufString.startsWith("+IDNT")
+                || bufString.startsWith("+BBMD")) {
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
@@ -145,7 +143,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
             getLastLocation(position, new Date());
             position.setValid(false);
-            position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
+            position.set(Position.KEY_RESULT, bufString);
 
             return position;
         }
@@ -153,10 +151,9 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         if (buf.readableBytes() < HEADER_LENGTH) {
             return null;
         }
+        buf.skipBytes(HEADER_LENGTH);
 
-        String header = buf.readBytes(HEADER_LENGTH).toString(StandardCharsets.US_ASCII);
-
-        if (header.equals("+RRCB~")) {
+        if (bufString.startsWith("+RRCB~")) {
             buf.skipBytes(2); //binary length 26
             int deviceId = buf.readUnsignedShort();
             if (!identify(String.valueOf(deviceId), channel, remoteAddress)) {
@@ -175,7 +172,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
             decodeStructure(buf, position);
             return position;
 
-        } else if (header.equals("+DDAT~")) {
+        } else if (bufString.startsWith("+DDAT~")) {
             buf.skipBytes(2); //binary length
             int deviceId = buf.readUnsignedShort();
             if (!identify(String.valueOf(deviceId), channel, remoteAddress)) {
