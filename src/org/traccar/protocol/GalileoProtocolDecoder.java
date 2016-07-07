@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_REFRIGERATOR = 0x5b;
     private static final int TAG_PRESSURE = 0x5c;
     private static final int TAG_CAN = 0xc1;
+    private static final int TAG_ADC0 = 0x50;
+    private static final int TAG_ADC1 = 0x51;
+    private static final int TAG_ADC2 = 0x52;
+    private static final int TAG_ADC3 = 0x53;
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -64,11 +68,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         };
         int[] l2 = {
             0x04, 0x10, 0x34, 0x40, 0x41, 0x42, 0x45, 0x46,
-            0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
-            0x58, 0x59, 0x60, 0x61, 0x62, 0x70, 0x71, 0x72,
-            0x73, 0x74, 0x75, 0x76, 0x77, 0xb0, 0xb1, 0xb2,
-            0xb3, 0xb4, 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xd6,
-            0xd7, 0xd8, 0xd9, 0xda
+            0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x60, 0x61,
+            0x62, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76,
+            0x77, 0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6,
+            0xb7, 0xb8, 0xb9, 0xd6, 0xd7, 0xd8, 0xd9, 0xda
         };
         int[] l3 = {
             0x63, 0x64, 0x6f, 0x5d, 0x65, 0x66, 0x67, 0x68,
@@ -188,6 +191,22 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
                     position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
                     position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
+                    break;
+
+                case TAG_ADC0:
+                    position.set(Position.PREFIX_ADC + 0, buf.readUnsignedShort());
+                    break;
+
+                case TAG_ADC1:
+                    position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                    break;
+
+                case TAG_ADC2:
+                    position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+                    break;
+
+                case TAG_ADC3:
+                    position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
                     break;
 
                 default:
