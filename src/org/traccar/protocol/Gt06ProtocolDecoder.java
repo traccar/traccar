@@ -87,9 +87,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(10);
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeByte(0x78); response.writeByte(0x78); // header
-            response.writeByte(0x05); // size
+            response.writeByte(5); // size
             response.writeByte(type);
             response.writeShort(index);
             response.writeShort(Checksum.crc16(Checksum.CRC16_X25, response.toByteBuffer(2, 4)));
