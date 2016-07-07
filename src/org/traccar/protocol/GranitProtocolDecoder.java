@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.StringFinder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -132,10 +133,11 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
-        String bufString = buf.toString(StandardCharsets.US_ASCII);
-        if (hasDeviceId() &&  bufString.contains("OK") || bufString.startsWith("ERROR")
-                || bufString.startsWith("+PR") || bufString.startsWith("+IDNT")
-                || bufString.startsWith("+BBMD")) {
+
+        int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("~"));
+
+        if (hasDeviceId() && indexTilde == -1) {
+            String bufString = buf.toString(StandardCharsets.US_ASCII);
             Position position = new Position();
             position.setProtocol(getProtocolName());
             position.setDeviceId(getDeviceId());
@@ -144,16 +146,15 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, new Date());
             position.setValid(false);
             position.set(Position.KEY_RESULT, bufString);
-
             return position;
         }
 
         if (buf.readableBytes() < HEADER_LENGTH) {
             return null;
         }
-        buf.skipBytes(HEADER_LENGTH);
+        String header = buf.readBytes(HEADER_LENGTH).toString(StandardCharsets.US_ASCII);
 
-        if (bufString.startsWith("+RRCB~")) {
+        if (header.equals("+RRCB~")) {
             buf.skipBytes(2); //binary length 26
             int deviceId = buf.readUnsignedShort();
             if (!identify(String.valueOf(deviceId), channel, remoteAddress)) {
@@ -172,7 +173,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
             decodeStructure(buf, position);
             return position;
 
-        } else if (bufString.startsWith("+DDAT~")) {
+        } else if (header.equals("+DDAT~")) {
             buf.skipBytes(2); //binary length
             int deviceId = buf.readUnsignedShort();
             if (!identify(String.valueOf(deviceId), channel, remoteAddress)) {
