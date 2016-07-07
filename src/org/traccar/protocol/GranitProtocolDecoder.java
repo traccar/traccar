@@ -192,12 +192,13 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
             while (nblocks > 0) {
                 nblocks--;
                 long unixTime = buf.readUnsignedInt();
+                int timeIncrement = buf.getUnsignedShort(buf.readerIndex() + 120);
                 for (int i = 0; i < 6; i++) {
                     if (buf.getUnsignedByte(buf.readerIndex()) != 0xFE) {
                         Position position = new Position();
                         position.setProtocol(getProtocolName());
                         position.setDeviceId(getDeviceId());
-                        position.setTime(new Date(unixTime * 1000));
+                        position.setTime(new Date((unixTime + i * timeIncrement) * 1000));
                         decodeStructure(buf, position);
                         positions.add(position);
                     } else {
