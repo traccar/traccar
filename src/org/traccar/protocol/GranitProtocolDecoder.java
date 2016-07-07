@@ -136,7 +136,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
         int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("~"));
 
-        if (hasDeviceId() &&  indexTilde == -1) {
+        if (hasDeviceId() && indexTilde == -1) {
             String bufString = buf.toString(StandardCharsets.US_ASCII);
             Position position = new Position();
             position.setProtocol(getProtocolName());
