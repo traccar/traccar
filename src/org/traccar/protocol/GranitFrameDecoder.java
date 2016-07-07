@@ -15,10 +15,7 @@
  */
 package org.traccar.protocol;
 
-import java.nio.charset.StandardCharsets;
-
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
@@ -26,39 +23,24 @@ import org.traccar.helper.StringFinder;
 
 public class GranitFrameDecoder extends FrameDecoder {
 
-    private static final int HEADER_LENGTH = 6;
-    private static final int CHECKSUM_LENGTH = 3;
-    private static final int SHORT_LENGTH = 2;
-
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
-        if (buf.readableBytes() > HEADER_LENGTH + SHORT_LENGTH) {
-            ChannelBuffer frame = ChannelBuffers.dynamicBuffer();
-            buf.getBytes(buf.readerIndex(), frame, HEADER_LENGTH);
-            String headerString = frame.toString(StandardCharsets.US_ASCII);
-            if (headerString.equals("+RRCB~") || headerString.equals("+DDAT~")) {
-                int length = buf.getUnsignedShort(buf.readerIndex() + HEADER_LENGTH);
-                if (buf.readableBytes() >= HEADER_LENGTH + SHORT_LENGTH + length + CHECKSUM_LENGTH) {
-                    frame = buf.readBytes(HEADER_LENGTH + SHORT_LENGTH + length + CHECKSUM_LENGTH);
-                    if (buf.readableBytes() > 2) {
-                        buf.skipBytes(2); //skip \r\n
-                    }
-                    return frame;
-                } else {
-                    return null; //damaged packet
+        int indexEnd = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
+        if (indexEnd != -1) {
+            int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("~"));
+            if (indexTilde != -1 && indexTilde < indexEnd) {
+                int length = buf.getUnsignedShort(indexTilde + 1);
+                indexEnd = buf.indexOf(indexTilde + 2 + length, buf.writerIndex(), new StringFinder("\r\n"));
+                if (indexEnd == -1) {
+                    return null;
                 }
             }
-        }
-
-        int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
-        if (index != -1) {
-            ChannelBuffer frame = buf.readBytes(index - buf.readerIndex());
+            ChannelBuffer frame = buf.readBytes(indexEnd - buf.readerIndex());
             buf.skipBytes(2);
             return frame;
         }
-
         return null;
     }
 
