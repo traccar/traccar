@@ -60,7 +60,16 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        String sentence = (String) msg;
+
+        if (sentence.startsWith("$PHO")) {
+            if (channel != null) {
+                channel.write("#PHD0," + sentence.substring(4));
+            }
+            return null;
+        }
+
+        Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }

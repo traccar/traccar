@@ -33,7 +33,8 @@ public class Pt502Protocol extends BaseProtocol {
         setSupportedCommands(
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_ALARM_SPEED,
-                Command.TYPE_OUTPUT_CONTROL);
+                Command.TYPE_OUTPUT_CONTROL,
+                Command.TYPE_REQUEST_PHOTO);
     }
 
     @Override

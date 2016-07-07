@@ -31,6 +31,8 @@ public class Pt502ProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "#TMZ{%s}\r\n", Command.KEY_TIMEZONE);
             case Command.TYPE_ALARM_SPEED:
                 return formatCommand(command, "#SPD{%s}\r\n", Command.KEY_DATA);
+            case Command.TYPE_REQUEST_PHOTO:
+                return formatCommand(command, "#PHO\r\n");
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
