@@ -85,7 +85,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         double latitude = latDegrees + latMinutes / 60000.0;
         double longitude = lonDegrees + lonMinutes / 60000.0;
         if (!BitUtil.check(flags, 4)) {
-            latitude = -latDegrees;
+            latitude = -latitude;
         }
         if (!BitUtil.check(flags, 5)) {
             longitude = -longitude;
