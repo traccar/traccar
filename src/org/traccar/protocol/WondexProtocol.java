@@ -31,7 +31,8 @@ public class WondexProtocol extends BaseProtocol {
         super("wondex");
         setSupportedCommands(
                 Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_SINGLE);
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_IDENTIFICATION);
     }
 
     @Override
