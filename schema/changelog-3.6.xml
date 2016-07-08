@@ -108,10 +108,10 @@
     <addForeignKeyConstraint baseTableName="notifications" baseColumnNames="userid" constraintName="fk_notifications_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
 
     <addColumn tableName="users">
-      <column name="attributes" type="VARCHAR(4096)" />
+      <column name="attributes" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
     </addColumn>
-
-    <addNotNullConstraint tableName="users" columnName="attributes" columnDataType="VARCHAR(4096)" defaultNullValue="{}" />
 
   </changeSet>
 </databaseChangeLog>
