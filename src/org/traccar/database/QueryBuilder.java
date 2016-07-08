@@ -357,10 +357,13 @@ public final class QueryBuilder {
             processors.add(new ResultSetProcessor<T>() {
                 @Override
                 public void process(T object, ResultSet resultSet) throws SQLException {
-                    try (JsonReader reader = Json.createReader(new StringReader(resultSet.getString(name)))) {
-                        method.invoke(object, MiscFormatter.fromJson(reader.readObject()));
-                    } catch (IllegalAccessException | InvocationTargetException | JsonParsingException error) {
-                        Log.warning(error);
+                    String value = resultSet.getString(name);
+                    if (value != null) {
+                        try (JsonReader reader = Json.createReader(new StringReader(value))) {
+                            method.invoke(object, MiscFormatter.fromJson(reader.readObject()));
+                        } catch (IllegalAccessException | InvocationTargetException | JsonParsingException error) {
+                            Log.warning(error);
+                        }
                     }
                 }
             });
