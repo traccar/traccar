@@ -59,7 +59,7 @@ Ext.define('Traccar.view.UserDialogController', {
             modal: false,
             items: {
                 xtype: 'attributesView',
-                attributes: record.get('attributes')
+                record: record
             }
         }).show();
     }

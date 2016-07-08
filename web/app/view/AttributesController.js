@@ -27,27 +27,30 @@ Ext.define('Traccar.view.AttributesController', {
         var store, propertyName, i = 0;
         store = Ext.create('Traccar.store.Attributes');
         store.setProxy(Ext.create('Ext.data.proxy.Memory'));
-        for (propertyName in this.getView().attributes) {
+        for (propertyName in this.getView().record.get('attributes')) {
             store.add(Ext.create('Traccar.model.Attribute', {
                 priority: i++,
                 name: propertyName,
-                value:this.getView().attributes[propertyName]
+                value:this.getView().record.get('attributes')[propertyName]
             }));
         }
         store.addListener('add', function (store , records , index , eOpts) {
             for (var i = 0; i < records.length; i++) {
-                this.getView().attributes[records[i].get('name')] = records[i].get('value');
+                this.getView().record.get('attributes')[records[i].get('name')] = records[i].get('value');
+                this.getView().record.dirty = true;
             }
         }, this);
         store.addListener('update', function  (store, record, operation , modifiedFieldNames , details , eOpts) {
             if (operation === Ext.data.Model.EDIT) {
-                this.getView().attributes[record.get('name')] = record.get('value');
+                this.getView().record.get('attributes')[record.get('name')] = record.get('value');
+                this.getView().record.dirty = true;
             }
         }, this);
         store.addListener('remove', function (store , records , index , isMove , eOpts) {
-            delete this.getView().attributes[records[index].get('name')];
+            delete this.getView().record.get('attributes')[records[index].get('name')];
+            this.getView().record.dirty = true;
         }, this);
-        
+
         this.getView().setStore(store);
     },
 
