@@ -29,6 +29,10 @@ Ext.define('Traccar.view.Notifications', {
         selType: 'cellmodel',
     },
 
+    viewConfig:{
+        markDirty:false
+    },
+
     columns: [{
         text: Strings.notificationType,
         dataIndex: 'type',
