@@ -52,11 +52,11 @@ public class GeofenceEventHandler extends BaseEventHandler {
         }
 
         List<Long> currentGeofences = geofenceManager.getCurrentDeviceGeofences(position);
-        List<Long> oldGeofences = new ArrayList<Long>();
+        List<Long> oldGeofences = new ArrayList<>();
         if (device.getGeofenceIds() != null) {
             oldGeofences.addAll(device.getGeofenceIds());
         }
-        List<Long> newGeofences = new ArrayList<Long>(currentGeofences);
+        List<Long> newGeofences = new ArrayList<>(currentGeofences);
         newGeofences.removeAll(oldGeofences);
         oldGeofences.removeAll(currentGeofences);
 
