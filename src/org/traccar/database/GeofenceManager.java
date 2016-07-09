@@ -30,11 +30,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceGeofence;
 import org.traccar.model.Geofence;
+import org.traccar.model.GeofencePermission;
+import org.traccar.model.Group;
 import org.traccar.model.GroupGeofence;
 import org.traccar.model.Position;
-import org.traccar.model.DeviceGeofence;
-import org.traccar.model.GeofencePermission;
 
 public class GeofenceManager {
 
@@ -137,15 +138,15 @@ public class GeofenceManager {
                     }
 
                     for (Device device : dataManager.getAllDevicesCached()) {
-                        long groupId = device.getGroupId();
-                        while (groupId != 0) {
+                        Group group = dataManager.getGroupById(device.getGroupId());
+                        while (group != null) {
                             getDeviceGeofences(deviceGeofencesWithGroups,
-                                    device.getId()).addAll(getGroupGeofences(groupId));
-                            groupId = dataManager.getGroupById(groupId).getGroupId();
+                                    device.getId()).addAll(getGroupGeofences(group.getGroupId()));
+                            group = dataManager.getGroupById(group.getGroupId());
                         }
                         List<Long> deviceGeofenceIds = device.getGeofenceIds();
                         if (deviceGeofenceIds == null) {
-                            deviceGeofenceIds = new ArrayList<Long>();
+                            deviceGeofenceIds = new ArrayList<>();
                         } else {
                             deviceGeofenceIds.clear();
                         }
@@ -232,7 +233,7 @@ public class GeofenceManager {
     }
 
     public List<Long> getCurrentDeviceGeofences(Position position) {
-        List<Long> result = new ArrayList<Long>();
+        List<Long> result = new ArrayList<>();
         for (Long geofenceId : getAllDeviceGeofences(position.getDeviceId())) {
             if (getGeofence(geofenceId).getGeometry().containsPoint(position.getLatitude(), position.getLongitude())) {
                 result.add(geofenceId);
