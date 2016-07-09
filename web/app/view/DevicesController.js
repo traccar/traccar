@@ -123,13 +123,17 @@ Ext.define('Traccar.view.DevicesController', {
         }
     },
 
-    onSelectionChange: function (selected) {
+    updateButtons: function (selected) {
         var empty = selected.getCount() === 0;
         this.lookupReference('toolbarEditButton').setDisabled(empty);
         this.lookupReference('toolbarRemoveButton').setDisabled(empty);
         this.lookupReference('toolbarGeofencesButton').setDisabled(empty);
         this.lookupReference('deviceCommandButton').setDisabled(empty || (selected.getLastSelected().get('status') !== 'online'));
-        if (!empty) {
+    },
+
+    onSelectionChange: function (selected) {
+        this.updateButtons(selected);
+        if (selected.getCount() > 0) {
             this.fireEvent('selectDevice', selected.getLastSelected(), true);
         }
     },
@@ -145,6 +149,6 @@ Ext.define('Traccar.view.DevicesController', {
     },
 
     onUpdateDevice: function (store, data) {
-        this.onSelectionChange(this.getView().getSelectionModel());
+        this.updateButtons(this.getView().getSelectionModel());
     }
 });
