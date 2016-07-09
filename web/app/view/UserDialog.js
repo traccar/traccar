@@ -89,9 +89,18 @@ Ext.define('Traccar.view.UserDialog', {
             fieldLabel: Strings.settingsTwelveHourFormat,
             allowBlank: false
         }]
-    }, {
-        xtype: 'button',
+    }],
+
+    buttons: [{
         text : Strings.sharedAttributes,
         handler: 'showAttributesView'
+    }, {
+        xtype: 'tbfill'
+    }, {
+        text: Strings.sharedSave,
+        handler: 'onSaveClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
     }]
 });
