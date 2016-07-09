@@ -20,7 +20,7 @@ Ext.define('Traccar.GeofenceConverter', {
     wktToGeometry: function (mapView, wkt) {
         var geometry, projection, resolutionAtEquator, pointResolution, resolutionFactor, points = [], center, radius,
                 content, i, lat, lon, coordinates;
-        if (wkt.startsWith("POLYGON")) {
+        if (wkt.startsWith('POLYGON')) {
             content = wkt.match(/\([^\(\)]+\)/);
             if (content !== null) {
                 coordinates = content[0].match(/-?\d+\.?\d*/g);
@@ -34,7 +34,7 @@ Ext.define('Traccar.GeofenceConverter', {
                     geometry = new ol.geom.Polygon([points]);
                 }
             }
-        } else if (wkt.startsWith("CIRCLE")) {
+        } else if (wkt.startsWith('CIRCLE')) {
             content = wkt.match(/\([^\(\)]+\)/);
             if (content !== null) {
                 coordinates = content[0].match(/-?\d+\.?\d*/g);
@@ -62,17 +62,17 @@ Ext.define('Traccar.GeofenceConverter', {
             earthSphere = new ol.Sphere(6378137);
             groundRadius = earthSphere.haversineDistance(center,
                 ol.proj.transform(edgeCoordinate, projection, 'EPSG:4326'));
-            result = "CIRCLE (";
-            result += center[1] + " " + center[0] + ", ";
-            result += Number((groundRadius).toFixed(1)) + ")";
+            result = 'CIRCLE (';
+            result += center[1] + ' ' + center[0] + ', ';
+            result += Number((groundRadius).toFixed(1)) + ')';
         } else if (geometry instanceof ol.geom.Polygon) {
             geometry.transform(projection, 'EPSG:4326');
             points = geometry.getCoordinates();
-            result = "POLYGON((";
+            result = 'POLYGON((';
             for (i = 0; i < points[0].length; i += 1) {
-                result += points[0][i][1] + " " + points[0][i][0] + ", ";
+                result += points[0][i][1] + ' ' + points[0][i][0] + ', ';
             }
-            result = result.substring(0, result.length - 2) + "))";
+            result = result.substring(0, result.length - 2) + '))';
         }
         return result;
     }

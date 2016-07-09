@@ -19,10 +19,10 @@ Ext.define('Traccar.view.BasePermissionsController', {
     alias: 'controller.basePermissionsController',
 
     init: function () {
-        var params = {};
+        var params = {}, linkStoreName, storeName;
         params[this.getView().baseObjectName] = this.getView().baseObject;
-        var linkStoreName = this.getView().linkStoreName;
-        var storeName = this.getView().storeName;
+        linkStoreName = this.getView().linkStoreName;
+        storeName = this.getView().storeName;
         linkStoreName = (typeof linkStoreName === 'undefined') ? storeName : linkStoreName;
         this.getView().setStore(Ext.getStore(storeName));
         this.getView().getStore().load({

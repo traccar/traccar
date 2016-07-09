@@ -86,15 +86,16 @@ Ext.define('Traccar.view.DevicesController', {
     },
 
     onGeofencesClick: function () {
-        var admin = Traccar.app.getUser().get('admin');
-        var device = this.getView().getSelectionModel().getSelection()[0];
+        var admin, device;
+        admin = Traccar.app.getUser().get('admin');
+        device = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
             title: Strings.sharedGeofences,
             items: {
                 xtype: 'deviceGeofencesView',
                 baseObjectName: 'deviceId',
                 linkObjectName: 'geofenceId',
-                storeName: (admin) ? 'AllGeofences' : 'Geofences',
+                storeName: admin ? 'AllGeofences' : 'Geofences',
                 urlApi: '/api/devices/geofences',
                 baseObject: device.getData().id
             }
@@ -115,8 +116,9 @@ Ext.define('Traccar.view.DevicesController', {
     },
 
     onFollowClick: function (button, pressed) {
+        var device;
         if (pressed) {
-            var device = this.getView().getSelectionModel().getSelection()[0];
+            device = this.getView().getSelectionModel().getSelection()[0];
             this.fireEvent('selectDevice', device, true);
         }
     },

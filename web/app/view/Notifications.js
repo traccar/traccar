@@ -26,7 +26,7 @@ Ext.define('Traccar.view.Notifications', {
     store: 'AllNotifications',
 
     selModel: {
-        selType: 'cellmodel',
+        selType: 'cellmodel'
     },
 
     columns: [{
@@ -47,7 +47,7 @@ Ext.define('Traccar.view.Notifications', {
             checkChange: 'onCheckChange'
         },
         renderer: function (value, metaData, record) {
-            var fields = this.dataIndex.split('\.',2);
+            var fields = this.dataIndex.split('\.', 2);
             return (new Ext.ux.CheckColumn()).renderer(record.get(fields[0])[fields[1]], metaData);
         }
     }, {
@@ -60,9 +60,8 @@ Ext.define('Traccar.view.Notifications', {
             checkChange: 'onCheckChange'
         },
         renderer: function (value, metaData, record) {
-            var fields = this.dataIndex.split('\.',2);
+            var fields = this.dataIndex.split('\.', 2);
             return (new Ext.ux.CheckColumn()).renderer(record.get(fields[0])[fields[1]], metaData);
         }
-    }],
-
+    }]
 });

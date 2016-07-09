@@ -24,29 +24,32 @@ Ext.define('Traccar.view.AttributesController', {
     ],
 
     init: function () {
-        var store, propertyName, i = 0;
+        var store, propertyName, i = 0, attributes;
         store = Ext.create('Traccar.store.Attributes');
         store.setProxy(Ext.create('Ext.data.proxy.Memory'));
-        for (propertyName in this.getView().record.get('attributes')) {
-            store.add(Ext.create('Traccar.model.Attribute', {
-                priority: i++,
-                name: propertyName,
-                value:this.getView().record.get('attributes')[propertyName]
-            }));
+        attributes = this.getView().record.get('attributes');
+        for (propertyName in attributes) {
+            if (attributes.hasOwnProperty(propertyName)) {
+                store.add(Ext.create('Traccar.model.Attribute', {
+                    priority: i++,
+                    name: propertyName,
+                    value: this.getView().record.get('attributes')[propertyName]
+                }));
+            }
         }
-        store.addListener('add', function (store , records , index , eOpts) {
-            for (var i = 0; i < records.length; i++) {
+        store.addListener('add', function (store, records, index, eOpts) {
+            for (i = 0; i < records.length; i++) {
                 this.getView().record.get('attributes')[records[i].get('name')] = records[i].get('value');
                 this.getView().record.dirty = true;
             }
         }, this);
-        store.addListener('update', function  (store, record, operation , modifiedFieldNames , details , eOpts) {
+        store.addListener('update', function (store, record, operation, modifiedFieldNames, details, eOpts) {
             if (operation === Ext.data.Model.EDIT) {
                 this.getView().record.get('attributes')[record.get('name')] = record.get('value');
                 this.getView().record.dirty = true;
             }
         }, this);
-        store.addListener('remove', function (store , records , index , isMove , eOpts) {
+        store.addListener('remove', function (store, records, index, isMove, eOpts) {
             delete this.getView().record.get('attributes')[records[index].get('name')];
             this.getView().record.dirty = true;
         }, this);

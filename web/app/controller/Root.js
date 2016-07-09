@@ -139,27 +139,27 @@ Ext.define('Traccar.controller.Root', {
                     store.add(array[i]);
                     if (array[i].type === 'commandResult' && data.positions) {
                         for (j = 0; j < data.positions.length; j++) {
-                            if (data.positions[j].id == array[i].positionId) {
+                            if (data.positions[j].id === array[i].positionId) {
                                 text = data.positions[j].attributes.result;
                                 break;
                             }
                         }
-                        text = Strings.eventCommandResult + ": " + text;
+                        text = Strings.eventCommandResult + ': ' + text;
                     } else {
                         typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
                         text = Strings[typeKey];
-                        if (typeof text == "undefined") {
+                        if (typeof text === 'undefined') {
                             text = typeKey;
                         }
                     }
                     if (array[i].geofenceId !== 0) {
                         geofence = Ext.getStore('Geofences').getById(array[i].geofenceId);
-                        if (typeof geofence != "undefined") {
+                        if (typeof geofence !== 'undefined') {
                             text += ' \"' + geofence.getData().name + '"';
                         }
                     }
                     device = Ext.getStore('Devices').getById(array[i].deviceId);
-                    if (typeof device != "undefined") {
+                    if (typeof device !== 'undefined') {
                         Ext.toast(text, device.getData().name);
                     }
                 }

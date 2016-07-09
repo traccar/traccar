@@ -57,7 +57,7 @@ Ext.define('Traccar.view.GeofenceMap', {
         map = this.map;
 
         this.features = new ol.Collection();
-        if (this.area !== "") {
+        if (this.area !== '') {
             geometry = Traccar.GeofenceConverter.wktToGeometry(this.mapView, this.area);
             this.features.push(new ol.Feature(geometry));
             if (geometry instanceof ol.geom.Circle) {
@@ -90,7 +90,7 @@ Ext.define('Traccar.view.GeofenceMap', {
 
         map.addInteraction(new ol.interaction.Modify({
             features: this.features,
-            deleteCondition: function(event) {
+            deleteCondition: function (event) {
                 return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(event);
             }
         }));

@@ -28,7 +28,7 @@ Ext.define('Traccar.view.BaseMap', {
         return this.mapView;
     },
 
-    initMap: function() {
+    initMap: function () {
         var user, server, layer, type, bingKey, lat, lon, zoom, target;
 
         user = Traccar.app.getUser();
