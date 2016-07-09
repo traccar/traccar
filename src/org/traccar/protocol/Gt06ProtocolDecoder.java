@@ -271,9 +271,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (header == 0x7979) {
 
-            int length = buf.readUnsignedShort();
-            int dataLength = length - 6;
-
+            buf.readUnsignedShort(); // length
             int type = buf.readUnsignedByte();
 
             if (type == MSG_INFO) {

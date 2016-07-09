@@ -5,3 +5,4 @@ nbactions.xml
 .settings
 .idea
 *.iml
+.DS_Store

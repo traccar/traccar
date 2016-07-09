@@ -19,7 +19,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.*;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -96,12 +97,12 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             String time = buf.readBytes(12).toString(StandardCharsets.US_ASCII);
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setYear(Integer.valueOf(time.substring(0, 2)))
-                    .setMonth(Integer.valueOf(time.substring(2, 4)))
-                    .setDay(Integer.valueOf(time.substring(4, 6)))
-                    .setHour(Integer.valueOf(time.substring(6, 8)))
-                    .setMinute(Integer.valueOf(time.substring(8, 10)))
-                    .setSecond(Integer.valueOf(time.substring(10, 12)));
+                    .setYear(Integer.parseInt(time.substring(0, 2)))
+                    .setMonth(Integer.parseInt(time.substring(2, 4)))
+                    .setDay(Integer.parseInt(time.substring(4, 6)))
+                    .setHour(Integer.parseInt(time.substring(6, 8)))
+                    .setMinute(Integer.parseInt(time.substring(8, 10)))
+                    .setSecond(Integer.parseInt(time.substring(10, 12)));
             position.setTime(dateBuilder.getDate());
 
             position.setLongitude(buf.readInt() * 0.00001);
