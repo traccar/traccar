@@ -94,7 +94,7 @@ package_windows () {
 
   wine app/ISCC.exe windows/traccar.iss
 
-  zip -j traccar-$1-$VERSION.zip windows/Output/setup.exe README.txt
+  zip -j traccar-$1-$VERSION.zip windows/Output/traccar-setup.exe README.txt
 
   rm -rf windows/Output/
   rm -rf tmp/
@@ -108,26 +108,26 @@ package_unix () {
   cp wrapper/lib/wrapper.jar out/lib
   cp wrapper/src/conf/wrapper.conf.in out/conf/wrapper.conf
 
-  sed -i 's/tail -1/tail -n 1/g' out/bin/traccar
+  perl -i -pe 's/tail -1/tail -n 1/g' out/bin/traccar
   chmod +x out/bin/traccar
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
-cp ../schema/* out/schema
+  cp ../schema/* out/schema
   cp -r ../web/* out/web
   cp unix/traccar.xml out/conf
 
-  sed -i 's/@app.name@/traccar/g' out/bin/traccar
-  sed -i 's/@app.long.name@/traccar/g' out/bin/traccar
+  perl -i -pe 's/@app.name@/traccar/g' out/bin/traccar
+  perl -i -pe 's/@app.long.name@/traccar/g' out/bin/traccar
 
-  sed -i '/wrapper.java.classpath.1/i\wrapper.java.classpath.2=../tracker-server.jar' out/conf/wrapper.conf
-  sed -i '/wrapper.app.parameter.1/i\wrapper.app.parameter.2=../conf/traccar.xml' out/conf/wrapper.conf
-  sed -i 's/wrapper.java.additional.1=/wrapper.java.additional.1=-Dfile.encoding=UTF-8/g' out/conf/wrapper.conf
-  sed -i 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
-  sed -i 's/@app.name@/traccar/g' out/conf/wrapper.conf
-  sed -i 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
-  sed -i 's/@app.description@/traccar/g' out/conf/wrapper.conf
-  sed -i 's/wrapper.logfile=..\/logs\/wrapper.log/wrapper.logfile=..\/logs\/wrapper.log.YYYYMMDD\nwrapper.logfile.rollmode=DATE/g' out/conf/wrapper.conf
+  perl -i -pe '/wrapper.java.classpath.1/i\wrapper.java.classpath.2=../tracker-server.jar' out/conf/wrapper.conf
+  perl -i -pe '/wrapper.app.parameter.1/i\wrapper.app.parameter.2=../conf/traccar.xml' out/conf/wrapper.conf
+  perl -i -pe 's/wrapper.java.additional.1=/wrapper.java.additional.1=-Dfile.encoding=UTF-8/g' out/conf/wrapper.conf
+  perl -i -pe 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
+  perl -i -pe 's/@app.name@/traccar/g' out/conf/wrapper.conf
+  perl -i -pe 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
+  perl -i -pe 's/@app.description@/traccar/g' out/conf/wrapper.conf
+  perl -i -pe 's/wrapper.logfile=..\/logs\/wrapper.log/wrapper.logfile=..\/logs\/wrapper.log.YYYYMMDD\nwrapper.logfile.rollmode=DATE/g' out/conf/wrapper.conf
 
   eval $2
 

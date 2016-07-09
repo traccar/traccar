@@ -3,6 +3,7 @@ AppName=Traccar
 AppVersion=3.6
 DefaultDirName={pf}\Traccar
 AlwaysRestart=yes
+OutputBaseFilename=traccar-setup
 
 [Dirs]
 Name: "{app}\bin"
@@ -11,6 +12,7 @@ Name: "{app}\data"
 Name: "{app}\lib"
 Name: "{app}\logs"
 Name: "{app}\web"
+Name: "{app}\schema"
 
 [Files]
 Source: "..\wrapper\bin\wrapper-windows-x86-32.exe"; DestDir: "{app}\bin"; DestName: "wrapper.exe"
@@ -23,7 +25,7 @@ Source: "..\wrapper\src\conf\wrapper.conf.in"; DestDir: "{app}\conf"; DestName: 
 
 Source: "..\..\target\tracker-server.jar"; DestDir: "{app}"
 Source: "..\..\target\lib\*"; DestDir: "{app}\lib"
-Source: "..\..\database\*"; DestDir: "{app}\data"
+Source: "..\..\schema\*"; DestDir: "{app}\schema"
 Source: "..\..\web\*"; DestDir: "{app}\web"; Flags: recursesubdirs
 Source: "traccar.xml"; DestDir: "{app}\conf"; AfterInstall: ConfigureApplication
 
