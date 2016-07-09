@@ -108,7 +108,7 @@ package_unix () {
   cp wrapper/lib/wrapper.jar out/lib
   cp wrapper/src/conf/wrapper.conf.in out/conf/wrapper.conf
 
-  perl -i -pe 's/tail -1/tail -n 1/g' out/bin/traccar
+  sed -i.bak 's/tail -1/tail -n 1/g' out/bin/traccar
   chmod +x out/bin/traccar
 
   cp ../target/tracker-server.jar out
@@ -117,17 +117,20 @@ package_unix () {
   cp -r ../web/* out/web
   cp unix/traccar.xml out/conf
 
-  perl -i -pe 's/@app.name@/traccar/g' out/bin/traccar
-  perl -i -pe 's/@app.long.name@/traccar/g' out/bin/traccar
+  sed -i.bak 's/@app.name@/traccar/g' out/bin/traccar
+  sed -i.bak 's/@app.long.name@/traccar/g' out/bin/traccar
 
-  perl -i -pe '/wrapper.java.classpath.1/i\wrapper.java.classpath.2=../tracker-server.jar' out/conf/wrapper.conf
-  perl -i -pe '/wrapper.app.parameter.1/i\wrapper.app.parameter.2=../conf/traccar.xml' out/conf/wrapper.conf
-  perl -i -pe 's/wrapper.java.additional.1=/wrapper.java.additional.1=-Dfile.encoding=UTF-8/g' out/conf/wrapper.conf
-  perl -i -pe 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
-  perl -i -pe 's/@app.name@/traccar/g' out/conf/wrapper.conf
-  perl -i -pe 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
-  perl -i -pe 's/@app.description@/traccar/g' out/conf/wrapper.conf
-  perl -i -pe 's/wrapper.logfile=..\/logs\/wrapper.log/wrapper.logfile=..\/logs\/wrapper.log.YYYYMMDD\nwrapper.logfile.rollmode=DATE/g' out/conf/wrapper.conf
+  sed -i.bak '/wrapper.java.classpath.1/i\wrapper.java.classpath.2=../tracker-server.jar' out/conf/wrapper.conf
+  sed -i.bak '/wrapper.app.parameter.1/i\wrapper.app.parameter.2=../conf/traccar.xml' out/conf/wrapper.conf
+  sed -i.bak 's/wrapper.java.additional.1=/wrapper.java.additional.1=-Dfile.encoding=UTF-8/g' out/conf/wrapper.conf
+  sed -i.bak 's/<YourMainClass>/org.traccar.Main/g' out/conf/wrapper.conf
+  sed -i.bak 's/@app.name@/traccar/g' out/conf/wrapper.conf
+  sed -i.bak 's/@app.long.name@/traccar/g' out/conf/wrapper.conf
+  sed -i.bak 's/@app.description@/traccar/g' out/conf/wrapper.conf
+  sed -i.bak 's/wrapper.logfile=..\/logs\/wrapper.log/wrapper.logfile=..\/logs\/wrapper.log.YYYYMMDD\nwrapper.logfile.rollmode=DATE/g' out/conf/wrapper.conf
+
+  rm out/bin/traccar.bak
+  rm out/conf/wrapper.conf.bak
 
   eval $2
 
