@@ -18,14 +18,10 @@
     <entry key='logger.file'>/opt/traccar/logs/tracker-server.log</entry>
 
     <entry key='event.enable'>true</entry>
-
     <entry key='event.suppressRepeated'>60</entry>
-
     <entry key='event.overspeedHandler'>true</entry>
     <entry key='event.globalSpeedLimit'>90</entry>
-
     <entry key='event.motionHandler'>true</entry>
-
     <entry key='event.geofenceHandler'>true</entry>
 
     <!-- DATABASE CONFIG -->
@@ -386,6 +382,8 @@
     <entry key='supermate.port'>5108</entry>
     <entry key='appello.port'>5109</entry>
     <entry key='idpl.port'>5110</entry>
+    <entry key='huasheng.port'>5111</entry>
+    <entry key='l100.port'>5112</entry>
     <entry key='granit.port'>5113</entry>
 
 </properties>
