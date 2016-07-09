@@ -123,7 +123,7 @@ ol.style.Arrow = function(options) {
   var rotateWithView = options.rotateWithView !== undefined ?
       options.rotateWithView : false;
 
-  goog.base(this, {
+  ol.style.Image.call(this, {
     opacity: 1,
     rotateWithView: rotateWithView,
     rotation: options.rotation !== undefined ? options.rotation : 0,
@@ -132,7 +132,7 @@ ol.style.Arrow = function(options) {
   });
 
 };
-goog.inherits(ol.style.Arrow, ol.style.Image);
+ol.inherits(ol.style.Arrow, ol.style.Image);
 
 
 /**
@@ -282,7 +282,7 @@ ol.style.Arrow.prototype.unlistenImageChange = ol.nullFunction;
  *   miterLimit: number
  * }}
  */
-ol.style.Arrow.RenderOptions;
+ol.ArrowRenderOptions;
 
 
 /**
@@ -324,7 +324,7 @@ ol.style.Arrow.prototype.render_ = function(atlasManager) {
 
   var size = 2 * (this.radius_ + strokeWidth) + 1;
 
-  /** @type {ol.style.Arrow.RenderOptions} */
+  /** @type {ol.ArrowRenderOptions} */
   var renderOptions = {
     strokeStyle: strokeStyle,
     strokeWidth: strokeWidth,
@@ -387,7 +387,7 @@ ol.style.Arrow.prototype.render_ = function(atlasManager) {
 
 /**
  * @private
- * @param {ol.style.Arrow.RenderOptions} renderOptions Render options.
+ * @param {ol.ArrowRenderOptions} renderOptions Render options.
  * @param {CanvasRenderingContext2D} context The rendering context.
  * @param {number} x The origin for the symbol (x).
  * @param {number} y The origin for the symbol (y).
@@ -438,7 +438,7 @@ ol.style.Arrow.prototype.draw_ = function(renderOptions, context, x, y) {
 
 /**
  * @private
- * @param {ol.style.Arrow.RenderOptions} renderOptions Render options.
+ * @param {ol.ArrowRenderOptions} renderOptions Render options.
  */
 ol.style.Arrow.prototype.createHitDetectionCanvas_ = function(renderOptions) {
   this.hitDetectionImageSize_ = [renderOptions.size, renderOptions.size];
@@ -458,7 +458,7 @@ ol.style.Arrow.prototype.createHitDetectionCanvas_ = function(renderOptions) {
 
 /**
  * @private
- * @param {ol.style.Arrow.RenderOptions} renderOptions Render options.
+ * @param {ol.ArrowRenderOptions} renderOptions Render options.
  * @param {CanvasRenderingContext2D} context The context.
  * @param {number} x The origin for the symbol (x).
  * @param {number} y The origin for the symbol (y).
