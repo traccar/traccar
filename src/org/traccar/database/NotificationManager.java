@@ -87,7 +87,7 @@ public class NotificationManager {
     public Set<Notification> getUserNotifications(long userId) {
         notificationsLock.readLock().lock();
         try {
-        return getUserNotificationsUnsafe(userId);
+            return getUserNotificationsUnsafe(userId);
         } finally {
             notificationsLock.readLock().unlock();
         }
