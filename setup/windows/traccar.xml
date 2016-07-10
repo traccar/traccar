@@ -31,6 +31,8 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
+    <entry key='database.ignoreUnknown'>true</entry>
+
     <entry key='database.changelog'>[CHANGELOG]</entry>
 
     <entry key='database.selectServers'>
