@@ -39,7 +39,7 @@ public class GeofencePermissionResource extends BaseResource {
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
         Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
         Context.getDataManager().linkGeofence(entity.getUserId(), entity.getGeofenceId());
-        Context.getGeofenceManager().refresh();
+        Context.getGeofenceManager().refreshUserGeofences();
         return Response.ok(entity).build();
     }
 
@@ -49,7 +49,7 @@ public class GeofencePermissionResource extends BaseResource {
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
         Context.getPermissionsManager().checkGeofence(getUserId(), entity.getGeofenceId());
         Context.getDataManager().unlinkGeofence(entity.getUserId(), entity.getGeofenceId());
-        Context.getGeofenceManager().refresh();
+        Context.getGeofenceManager().refreshUserGeofences();
         return Response.noContent().build();
     }
 

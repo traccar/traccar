@@ -33,7 +33,6 @@ import org.traccar.model.Device;
 import org.traccar.model.DeviceGeofence;
 import org.traccar.model.Geofence;
 import org.traccar.model.GeofencePermission;
-import org.traccar.model.Group;
 import org.traccar.model.GroupGeofence;
 import org.traccar.model.Position;
 
@@ -51,17 +50,27 @@ public class GeofenceManager {
     private final ReadWriteLock deviceGeofencesLock = new ReentrantReadWriteLock();
     private final ReadWriteLock geofencesLock = new ReentrantReadWriteLock();
     private final ReadWriteLock groupGeofencesLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock userGeofencesLock = new ReentrantReadWriteLock();
 
     public GeofenceManager(DataManager dataManager) {
         this.dataManager = dataManager;
-        refresh();
+        refreshGeofences();
     }
 
-    public Set<Long> getUserGeofencesIds(long userId) {
+    private Set<Long> getUserGeofences(long userId) {
         if (!userGeofences.containsKey(userId)) {
             userGeofences.put(userId, new HashSet<Long>());
         }
         return userGeofences.get(userId);
+    }
+
+    public Set<Long> getUserGeofencesIds(long userId) {
+        userGeofencesLock.readLock().lock();
+        try {
+            return getUserGeofences(userId);
+        } finally {
+            userGeofencesLock.readLock().unlock();
+        }
     }
 
     private Set<Long> getGroupGeofences(long groupId) {
@@ -105,23 +114,50 @@ public class GeofenceManager {
         return deviceGeofences.get(deviceId);
     }
 
-    public final void refresh() {
+    public final void refreshGeofences() {
         if (dataManager != null) {
             try {
                 geofencesLock.writeLock().lock();
-                groupGeofencesLock.writeLock().lock();
-                deviceGeofencesLock.writeLock().lock();
                 try {
                     geofences.clear();
                     for (Geofence geofence : dataManager.getGeofences()) {
                         geofences.put(geofence.getId(), geofence);
                     }
+                } finally {
+                    geofencesLock.writeLock().unlock();
+                }
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
+        }
+        refreshUserGeofences();
+        refresh();
+    }
 
+    public final void refreshUserGeofences() {
+        if (dataManager != null) {
+            try {
+                userGeofencesLock.writeLock().lock();
+                try {
                     userGeofences.clear();
                     for (GeofencePermission geofencePermission : dataManager.getGeofencePermissions()) {
-                        getUserGeofencesIds(geofencePermission.getUserId()).add(geofencePermission.getGeofenceId());
+                        getUserGeofences(geofencePermission.getUserId()).add(geofencePermission.getGeofenceId());
                     }
+                } finally {
+                    userGeofencesLock.writeLock().unlock();
+                }
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
+        }
+    }
 
+    public final void refresh() {
+        if (dataManager != null) {
+            try {
+                groupGeofencesLock.writeLock().lock();
+                deviceGeofencesLock.writeLock().lock();
+                try {
                     groupGeofences.clear();
                     for (GroupGeofence groupGeofence : dataManager.getGroupGeofences()) {
                         getGroupGeofences(groupGeofence.getGroupId()).add(groupGeofence.getGeofenceId());
@@ -138,11 +174,15 @@ public class GeofenceManager {
                     }
 
                     for (Device device : dataManager.getAllDevicesCached()) {
-                        Group group = dataManager.getGroupById(device.getGroupId());
-                        while (group != null) {
+                        long groupId = device.getGroupId();
+                        while (groupId != 0) {
                             getDeviceGeofences(deviceGeofencesWithGroups,
-                                    device.getId()).addAll(getGroupGeofences(group.getGroupId()));
-                            group = dataManager.getGroupById(group.getGroupId());
+                                    device.getId()).addAll(getGroupGeofences(groupId));
+                            if (dataManager.getGroupById(groupId) != null) {
+                                groupId = dataManager.getGroupById(groupId).getGroupId();
+                            } else {
+                                groupId = 0;
+                            }
                         }
                         List<Long> deviceGeofenceIds = device.getGeofenceIds();
                         if (deviceGeofenceIds == null) {
@@ -163,7 +203,6 @@ public class GeofenceManager {
                     }
 
                 } finally {
-                    geofencesLock.writeLock().unlock();
                     groupGeofencesLock.writeLock().unlock();
                     deviceGeofencesLock.writeLock().unlock();
                 }
