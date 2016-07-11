@@ -36,10 +36,8 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_GPS = new PatternBuilder()
             .expression("([$%])")                // memory flag
             .number("(d+),")                     // imei
-            .expression("([NS])")
-            .number("(dd)(dd).(dddd),")          // latitude
-            .expression("([EW])")
-            .number("(ddd)(dd).(dddd),")         // longitude
+            .number("([NS])(dd)(dd).(dddd),")    // latitude
+            .number("([EW])(ddd)(dd).(dddd),")   // longitude
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("([-+]ddd)([-+]ddd)([-+]ddd),")       // x,y,z
@@ -63,10 +61,8 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .expression("([$%])")                // memory flag
             .number("(d+),")                     // imei
             .text("CEL,")
-            .expression("([NS])")
-            .number("(d+.d+),")                  // latitude
-            .expression("([EW])")
-            .number("(d+.d+),")                  // longitude
+            .number("([NS])(d+.d+),")            // latitude
+            .number("([EW])(d+.d+),")            // longitude
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("([-+]ddd)([-+]ddd)([-+]ddd),")       // x,y,z
