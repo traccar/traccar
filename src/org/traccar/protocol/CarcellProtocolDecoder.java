@@ -93,7 +93,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         Pattern pattern = null;
         String sentence = (String) msg;
         
-        if ( sentence.indexOf("CEL,") < 0 ) {
+        if (sentence.indexOf("CEL,") < 0) {
             pattern = PATTERN_GPS;
         } else {
             pattern = PATTERN_CEL;
@@ -116,7 +116,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         
         position.setDeviceId(getDeviceId());
         
-        if ( PATTERN_GPS == pattern ) {
+        if (PATTERN_GPS == pattern) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
         } else {
