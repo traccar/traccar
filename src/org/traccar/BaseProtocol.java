@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,9 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public void sendCommand(ActiveDevice activeDevice, Command command) {
-        if (command.getType().equals(Command.TYPE_CUSTOM)) {
+        if (supportedCommands.contains(command.getType())) {
+            activeDevice.write(command);
+        } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = (String) command.getAttributes().get(Command.KEY_DATA);
             if (activeDevice.getChannel().getPipeline().get(StringEncoder.class) != null) {
                 activeDevice.write(data);
@@ -60,11 +62,7 @@ public abstract class BaseProtocol implements Protocol {
                 activeDevice.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary(data)));
             }
         } else {
-            if (!supportedCommands.contains(command.getType())) {
-                throw new RuntimeException("Command "
-                     + command.getType() + " is not supported in protocol " + getName());
-            }
-            activeDevice.write(command);
+            throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());
         }
     }
 
