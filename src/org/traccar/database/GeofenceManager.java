@@ -192,7 +192,7 @@ public class GeofenceManager {
                         }
                         Position lastPosition = Context.getConnectionManager().getLastPosition(device.getId());
                         if (lastPosition != null && deviceGeofencesWithGroups.containsKey(device.getId())) {
-                            for (Long geofenceId : deviceGeofencesWithGroups.get(device.getId())) {
+                            for (long geofenceId : deviceGeofencesWithGroups.get(device.getId())) {
                                 Geofence geofence = getGeofence(geofenceId);
                                 if (geofence != null && geofence.getGeometry()
                                         .containsPoint(lastPosition.getLatitude(), lastPosition.getLongitude())) {
@@ -236,7 +236,7 @@ public class GeofenceManager {
         geofencesLock.readLock().lock();
         try {
             Collection<Geofence> result = new LinkedList<>();
-            for (Long geofenceId : geofencesIds) {
+            for (long geofenceId : geofencesIds) {
                 result.add(getGeofence(geofenceId));
             }
             return result;
@@ -245,7 +245,7 @@ public class GeofenceManager {
         }
     }
 
-    public final Geofence getGeofence(Long geofenceId) {
+    public final Geofence getGeofence(long geofenceId) {
         geofencesLock.readLock().lock();
         try {
             return geofences.get(geofenceId);
@@ -274,7 +274,7 @@ public class GeofenceManager {
 
     public List<Long> getCurrentDeviceGeofences(Position position) {
         List<Long> result = new ArrayList<>();
-        for (Long geofenceId : getAllDeviceGeofences(position.getDeviceId())) {
+        for (long geofenceId : getAllDeviceGeofences(position.getDeviceId())) {
             if (getGeofence(geofenceId).getGeometry().containsPoint(position.getLatitude(), position.getLongitude())) {
                 result.add(geofenceId);
             }

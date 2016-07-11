@@ -66,7 +66,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
         try {
             if (dataManager.getLastEvents(position.getDeviceId(),
                     Event.TYPE_GEOFENCE_ENTER, suppressRepeated).isEmpty()) {
-                for (Long geofenceId : newGeofences) {
+                for (long geofenceId : newGeofences) {
                     Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
                     event.setGeofenceId(geofenceId);
                     events.add(event);
@@ -78,7 +78,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
         try {
             if (dataManager.getLastEvents(position.getDeviceId(),
                     Event.TYPE_GEOFENCE_EXIT, suppressRepeated).isEmpty()) {
-                for (Long geofenceId : oldGeofences) {
+                for (long geofenceId : oldGeofences) {
                     Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
                     event.setGeofenceId(geofenceId);
                     events.add(event);
