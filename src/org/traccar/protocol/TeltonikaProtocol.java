@@ -20,6 +20,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -27,6 +28,8 @@ public class TeltonikaProtocol extends BaseProtocol {
 
     public TeltonikaProtocol() {
         super("teltonika");
+        setSupportedCommands(
+                Command.TYPE_CUSTOM);
     }
 
     @Override
@@ -35,12 +38,14 @@ public class TeltonikaProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
+                pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
                 pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());
                 pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this));
             }
         });

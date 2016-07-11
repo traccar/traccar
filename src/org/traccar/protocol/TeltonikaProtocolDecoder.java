@@ -52,9 +52,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private static final int CODEC_GH3000 = 0x07;
-    private static final int CODEC_FM4X00 = 0x08;
-    private static final int CODEC_12 = 0x0C;
+    public static final int CODEC_GH3000 = 0x07;
+    public static final int CODEC_FM4X00 = 0x08;
+    public static final int CODEC_12 = 0x0C;
 
     private void decodeSerial(Position position, ChannelBuffer buf) {
 
