@@ -32,7 +32,7 @@ public class SuntechProtocol extends BaseProtocol {
         super("suntech");
         setSupportedCommands(
                 Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_STOP);
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
