@@ -241,7 +241,7 @@ public class DataManager implements IdentityManager {
     }
 
     public Group getGroupById(long id) {
-        /*boolean forceUpdate;
+        boolean forceUpdate;
         groupsLock.readLock().lock();
         try {
             forceUpdate = !groupsById.containsKey(id);
@@ -253,7 +253,7 @@ public class DataManager implements IdentityManager {
             updateGroupCache(forceUpdate);
         } catch (SQLException e) {
             Log.warning(e);
-        }*/
+        }
 
         groupsLock.readLock().lock();
         try {
