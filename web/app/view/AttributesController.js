@@ -37,17 +37,22 @@ Ext.define('Traccar.view.AttributesController', {
         store.addListener('add', function (store , records , index , eOpts) {
             for (var i = 0; i < records.length; i++) {
                 this.getView().record.get('attributes')[records[i].get('name')] = records[i].get('value');
-                this.getView().record.dirty = true;
             }
+            this.getView().record.dirty = true;
         }, this);
         store.addListener('update', function  (store, record, operation , modifiedFieldNames , details , eOpts) {
             if (operation === Ext.data.Model.EDIT) {
+                if (record.modified.name !== record.get('name')) {
+                    delete this.getView().record.get('attributes')[record.modified.name];
+                }
                 this.getView().record.get('attributes')[record.get('name')] = record.get('value');
                 this.getView().record.dirty = true;
             }
         }, this);
         store.addListener('remove', function (store , records , index , isMove , eOpts) {
-            delete this.getView().record.get('attributes')[records[index].get('name')];
+            for (var i = 0; i < records.length; i++) {
+                delete this.getView().record.get('attributes')[records[i].get('name')];
+            }
             this.getView().record.dirty = true;
         }, this);
 
