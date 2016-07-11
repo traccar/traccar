@@ -87,9 +87,15 @@ public final class NotificationMail {
             boolean auth = Boolean.parseBoolean((String) object.getAttributes().get("mail.smtp.auth"));
             result.put("mail.smtp.auth", auth);
 
-            result.put("mail.smtp.username", object.getAttributes().get("mail.smtp.username"));
-            result.put("mail.smtp.password", object.getAttributes().get("mail.smtp.password"));
-            result.put("mail.smtp.from", object.getAttributes().get("mail.smtp.from"));
+            if (object.getAttributes().containsKey("mail.smtp.username")) {
+                result.put("mail.smtp.username", object.getAttributes().get("mail.smtp.username"));
+            }
+            if (object.getAttributes().containsKey("mail.smtp.password")) {
+                result.put("mail.smtp.password", object.getAttributes().get("mail.smtp.password"));
+            }
+            if (object.getAttributes().containsKey("mail.smtp.from")) {
+                result.put("mail.smtp.from", object.getAttributes().get("mail.smtp.from"));
+            }
         }
         return result;
     }
@@ -114,6 +120,10 @@ public final class NotificationMail {
             mailSession = Session.getDefaultInstance(mailServerProperties, null);
 
             mailMessage = new MimeMessage(mailSession);
+
+            if (mailServerProperties.getProperty("mail.smtp.from") != null) {
+                mailMessage.setFrom(new InternetAddress(mailServerProperties.getProperty("mail.smtp.from")));
+            }
 
             mailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(
                     Context.getDataManager().getUser(userId).getEmail()));
