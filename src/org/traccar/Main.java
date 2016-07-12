@@ -16,7 +16,8 @@
 package org.traccar;
 
 import org.traccar.helper.Log;
-
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Locale;
 
 public final class Main {
@@ -34,6 +35,20 @@ public final class Main {
         if (Context.getWebServer() != null) {
             Context.getWebServer().start();
         }
+
+        //added by Erez
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                // Clean positions history every day
+                try {
+                    Context.getDataManager().clearPositionsHistory();
+                } catch (Exception error) {
+                    Log.warning(error);
+                }
+            }
+        }, 10*1000, 24*60*60*1000);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

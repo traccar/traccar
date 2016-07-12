@@ -57,6 +57,26 @@ Ext.define('Traccar.view.Devices', {
             tooltipType: 'title'
         }, {
             xtype: 'tbfill'
+        },{
+            id: 'showAlarmButton',//added by Erez
+            glyph: 'xf0a2@FontAwesome',
+            tooltip: 'Show Alarms',
+            tooltipType: 'title',
+            pressed : true,
+            enableToggle: true,
+            listeners:{
+                toggle: function(button, pressed){
+                    if(pressed){
+                        button.setGlyph('xf0a2@FontAwesome');
+                        //Ext.getCmp('useAlarmSoundButton').enable();
+                    }
+                    else {
+                        button.setGlyph('xf1f7@FontAwesome');
+                        //Ext.getCmp('useAlarmSoundButton').disable();
+                    }
+                },
+                scope:this
+            }
         }, {
             id: 'deviceFollowButton',
             glyph: 'xf05b@FontAwesome',

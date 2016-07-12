@@ -34,6 +34,34 @@ Ext.define('Traccar.AttributeFormatter', {
         return Ext.getStore('DistanceUnits').formatValue(value, Traccar.app.getPreference('distanceUnit'));
     },
 
+    //added by Erez
+    alarmFormatter: function (attributes) {
+        if (attributes instanceof Object) {
+            if (attributes.hasOwnProperty('alarm')){
+                var value = attributes.alarm;
+                if (typeof value === 'boolean') {
+                    value = (value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no);
+                }
+                return '<span style="color:red;">' + value + '</span>';
+            }
+        }
+        return '';
+    },
+
+    //added by Erez
+    alarmTypeFormatter: function (attributes) {
+        var alatmType = '';
+        if (attributes instanceof Object) {
+            for (key in attributes) {
+                if (attributes.hasOwnProperty(key) && key.toLowerCase()=='alarm-type') {
+                    alatmType = attributes[key];
+                    break;
+                }
+            }
+        }
+        return '<span style="color:red;">' + alatmType + '</span>';
+    },
+
     defaultFormatter: function (value) {
         if (typeof value === 'number') {
             return Number(value.toFixed(Traccar.Style.numberPrecision));
@@ -58,6 +86,10 @@ Ext.define('Traccar.AttributeFormatter', {
             return this.courseFormatter;
         } else if (key === 'distance' || key === 'odometer') {
             return this.distanceFormatter;
+        } else if (key === 'alarm') {//added by Erez
+            return this.alarmFormatter;
+        } else if (key === 'alarm-type') {//added by Erez
+            return this.alarmTypeFormatter;
         } else {
             return this.defaultFormatter;
         }

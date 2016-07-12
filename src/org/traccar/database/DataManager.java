@@ -521,6 +521,31 @@ public class DataManager implements IdentityManager {
                 .executeQuery(Position.class);
     }
 
+    //added by Erez
+    public void clearPositionsHistory() throws SQLException {
+        //SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd");
+        String histDays = config.getString("database.positionsHistoryDays");
+        if (histDays == null) {
+            histDays = "7";
+        }
+        int n = Integer.parseInt(histDays);
+
+        for (Device device : getAllDevices()) {
+            Date lastUpdate = device.getLastUpdate();
+            if(lastUpdate != null){
+
+                Date dateBefore = new Date(lastUpdate.getTime() - n * 24 * 3600 * 1000 ); //Subtract n days
+                //String dt = s.format(dateBefore);
+                String sql = "DELETE FROM positions WHERE deviceid=:deviceId and servertime<:serverTime";
+
+                QueryBuilder.create(dataSource, sql)
+                        .setLong("deviceId", device.getId())
+                        .setDate("serverTime", dateBefore)
+                        .executeUpdate();
+            }
+        }
+    }
+
     public Server getServer() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
                 .executeQuerySingle(Server.class);
