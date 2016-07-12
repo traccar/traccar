@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.7">
+
+  <changeSet author="author" id="changelog-3.7">
+
+    <update tableName="devices">
+        <column name="groupid"/>
+        <where>groupid NOT IN (SELECT id FROM groups)</where>
+    </update>
+
+    <addForeignKeyConstraint baseColumnNames="groupid" baseTableName="devices" constraintName="fk_device_group_groupid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="groups"/>
+
+    <update tableName="groups">
+        <column name="groupid"/>
+        <where>groupid NOT IN (SELECT id FROM (SELECT id FROM groups) AS groups_1)</where>
+    </update>
+
+  </changeSet>
+</databaseChangeLog>
