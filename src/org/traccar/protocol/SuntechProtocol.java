@@ -31,6 +31,9 @@ public class SuntechProtocol extends BaseProtocol {
     public SuntechProtocol() {
         super("suntech");
         setSupportedCommands(
+                Command.TYPE_OUTPUT_CONTROL,
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
     }
