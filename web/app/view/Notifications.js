@@ -30,7 +30,7 @@ Ext.define('Traccar.view.Notifications', {
     },
 
     viewConfig: {
-        markDirty:false
+        markDirty: false
     },
 
     columns: [{

@@ -38,6 +38,7 @@ Ext.define('Traccar.view.AttributesController', {
             }
         }
         store.addListener('add', function (store, records, index, eOpts) {
+            var i;
             for (i = 0; i < records.length; i++) {
                 this.getView().record.get('attributes')[records[i].get('name')] = records[i].get('value');
             }
@@ -53,7 +54,8 @@ Ext.define('Traccar.view.AttributesController', {
             }
         }, this);
         store.addListener('remove', function (store, records, index, isMove, eOpts) {
-            for (var i = 0; i < records.length; i++) {
+            var i;
+            for (i = 0; i < records.length; i++) {
                 delete this.getView().record.get('attributes')[records[i].get('name')];
             }
             this.getView().record.dirty = true;
