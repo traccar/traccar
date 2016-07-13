@@ -17,14 +17,14 @@
 
     <update tableName="groups">
       <column name="groupid"/>
-      <where>groupid NOT IN (SELECT id FROM (SELECT id FROM groups) AS groups_1)</where>
+      <where>groupid NOT IN (SELECT id FROM (SELECT id FROM groups) AS groups_ids)</where>
     </update>
 
   </changeSet>
 
   <changeSet author="author" id="changelog-3.7-notmssql">
 
-    <preConditions onFail="CONTINUE">
+    <preConditions onFail="MARK_RAN">
       <not>
         <dbms type="mssql" />
       </not>
