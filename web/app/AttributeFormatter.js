@@ -34,7 +34,6 @@ Ext.define('Traccar.AttributeFormatter', {
         return Ext.getStore('DistanceUnits').formatValue(value, Traccar.app.getPreference('distanceUnit'));
     },
 
-    //added by Erez
     alarmFormatter: function (attributes) {
         if (attributes instanceof Object) {
             if (attributes.hasOwnProperty('alarm')){
@@ -48,7 +47,6 @@ Ext.define('Traccar.AttributeFormatter', {
         return '';
     },
 
-    //added by Erez
     alarmTypeFormatter: function (attributes) {
         var alatmType = '';
         if (attributes instanceof Object) {
@@ -86,9 +84,9 @@ Ext.define('Traccar.AttributeFormatter', {
             return this.courseFormatter;
         } else if (key === 'distance' || key === 'odometer') {
             return this.distanceFormatter;
-        } else if (key === 'alarm') {//added by Erez
+        } else if (key === 'alarm') {
             return this.alarmFormatter;
-        } else if (key === 'alarm-type') {//added by Erez
+        } else if (key === 'alarm-type') {
             return this.alarmTypeFormatter;
         } else {
             return this.defaultFormatter;

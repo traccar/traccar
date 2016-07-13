@@ -116,12 +116,12 @@ Ext.define('Traccar.view.Report', {
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('address')
     }, {
-        text: 'Alarm',//added by Erez
+        text: 'Alarm',
         dataIndex: 'attributes',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('alarm')
     }, {
-        text: 'Alarm Type',//added by Erez
+        text: 'Alarm Type',
         dataIndex: 'attributes',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('alarm-type')

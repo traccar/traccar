@@ -28,7 +28,7 @@ public class Position extends Message {
     public static final String KEY_GPS = "gps";
     public static final String KEY_EVENT = "event";
     public static final String KEY_ALARM = "alarm";
-    public static final String KEY_ALARM_TYPE = "alarm-type";   //added by Erez
+    public static final String KEY_ALARM_TYPE = "alarm-type";
     public static final String KEY_STATUS = "status";
     public static final String KEY_ODOMETER = "odometer";
     public static final String KEY_HOURS = "hours";

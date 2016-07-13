@@ -21,6 +21,8 @@ import java.util.TimerTask;
 import java.util.Locale;
 
 public final class Main {
+    static final long cleanDelay = 10*1000;           //10 sec
+    static final long cleanPeriod = 24*60*60*1000;    //24 hr
 
     private Main() {
     }
@@ -36,19 +38,18 @@ public final class Main {
             Context.getWebServer().start();
         }
 
-        //added by Erez
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                // Clean positions history every day
+                // Clean positions history
                 try {
                     Context.getDataManager().clearPositionsHistory();
                 } catch (Exception error) {
                     Log.warning(error);
                 }
             }
-        }, 10*1000, 24*60*60*1000);
+        }, cleanDelay, cleanPeriod);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

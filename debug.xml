@@ -65,15 +65,10 @@
     <!-- DATABASE CONFIG -->
 
     <!--<entry key='database.driverFile'>hsqldb.jar</entry>-->
-    <!--<entry key='database.driver'>org.h2.Driver</entry>
+    <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./target/database</entry>
     <entry key='database.user'>sa</entry>
-    <entry key='database.password'></entry>-->
-
-    <entry key='database.driver'>com.mysql.jdbc.Driver</entry>
-    <entry key='database.url'>jdbc:mysql://127.0.0.1:3306/traccar?allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=ANSI_QUOTES</entry>
-    <entry key='database.user'>traccar</entry>
-    <entry key='database.password'>###########</entry>
+    <entry key='database.password'></entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
 
@@ -318,6 +313,10 @@
 
     <entry key='database.deleteNotification'>
         DELETE FROM notifications WHERE id = :id;
+    </entry>
+
+    <entry key='database.clearPositionsHistory'>
+        DELETE FROM positions WHERE deviceid = :deviceId and servertime &lt; :serverTime;
     </entry>
 
     <!-- PROTOCOL CONFIG -->

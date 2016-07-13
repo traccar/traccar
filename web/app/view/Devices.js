@@ -58,7 +58,7 @@ Ext.define('Traccar.view.Devices', {
         }, {
             xtype: 'tbfill'
         },{
-            id: 'showAlarmButton',//added by Erez
+            id: 'showAlarmButton',
             glyph: 'xf0a2@FontAwesome',
             tooltip: 'Show Alarms',
             tooltipType: 'title',

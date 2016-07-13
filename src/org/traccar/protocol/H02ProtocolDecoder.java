@@ -64,19 +64,19 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private void processStatus(Position position, long status) {
         if (!BitUtil.check(status, 0) || !BitUtil.check(status, 1)
-                || !BitUtil.check(status, 3) || !BitUtil.check(status, 4) || !BitUtil.check(status, 7)) {//added by Erez
+                || !BitUtil.check(status, 3) || !BitUtil.check(status, 4) || !BitUtil.check(status, 7)) {
             position.set(Position.KEY_ALARM, true);
 
-            if (!BitUtil.check(status, 0)){//added by Erez
-                position.set(Position.KEY_ALARM_TYPE, "theft alarm");
+            if (!BitUtil.check(status, 0)){
+                position.set(Position.KEY_ALARM_TYPE, "theft");
             } else if (!BitUtil.check(status, 1)){
-                position.set(Position.KEY_ALARM_TYPE, "robbery alarm");
+                position.set(Position.KEY_ALARM_TYPE, "robbery");
             } else if (!BitUtil.check(status, 3)){
-                position.set(Position.KEY_ALARM_TYPE, "illegal ignition alarm");
+                position.set(Position.KEY_ALARM_TYPE, "illegal ignition");
             } else if (!BitUtil.check(status, 4)){
-                position.set(Position.KEY_ALARM_TYPE, "entering alarm");
+                position.set(Position.KEY_ALARM_TYPE, "entering");
             } else if (!BitUtil.check(status, 7)){
-                position.set(Position.KEY_ALARM_TYPE, "out alarm");
+                position.set(Position.KEY_ALARM_TYPE, "out");
             }
 
         }

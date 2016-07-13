@@ -118,13 +118,9 @@ public class WebServer {
         resourceHandler.setResourceBase(config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
             resourceHandler.setWelcomeFiles(new String[] {"debug.html"});
-            //Troubleshooting Locked Files on Windows (changed by Erez)
+            //Troubleshooting Locked UI Files on Windows while app is running (like html, js, css, etc...),
+            //you can make changes to the UI Files and refresh the page in the browser without stopping the app first
             resourceHandler.setMinMemoryMappedContentLength(-1);
-
-            /*DefaultServlet defaultServlet = new DefaultServlet();
-            ServletHolder holder = new ServletHolder(defaultServlet);
-            holder.setInitParameter("useFileMappedBuffer", "false");
-            handler.addServlet(holder, "/");*/
         } else {
             resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         }

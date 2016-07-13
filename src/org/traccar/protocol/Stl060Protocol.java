@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
@@ -36,6 +37,7 @@ public class Stl060Protocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new Stl060FrameDecoder(1024));
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectDecoder", new Stl060ProtocolDecoder(Stl060Protocol.this));
             }
         });
