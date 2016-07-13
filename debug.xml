@@ -48,6 +48,12 @@
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
 
+    <!--<entry key='event.forward.enable'>true</entry>
+    <entry key='event.forward.url'>http://localhost/</entry>
+    <entry key='event.forward.header'>
+        Authorization: Basic QWxhZGRpbjpPcGVuU2VzYW1l
+    </entry>-->
+
     <!--<entry key='mail.smtp.host'>smtp.example.com</entry>
     for STARTTLS
     <entry key='mail.smtp.port'>587</entry>
