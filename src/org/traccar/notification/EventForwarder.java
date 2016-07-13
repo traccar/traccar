@@ -14,9 +14,14 @@ import org.traccar.web.JsonConverter;
 
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 
-public final class NotificationForward {
+public final class EventForwarder {
 
-    private NotificationForward() {
+    private String url;
+    private String header;
+
+    public EventForwarder() {
+        url = Context.getConfig().getString("event.forward.url", "http://localhost/");
+        header = Context.getConfig().getString("event.forward.header", "");
     }
 
     private static final String USER_AGENT = "Traccar Server";
@@ -26,9 +31,8 @@ public final class NotificationForward {
     private static final String KEY_GEOFENCE = "geofence";
     private static final String KEY_DEVICE = "device";
 
-    public static void forwardEvent(Event event, Position position) {
-        String url = Context.getConfig().getString("event.forward.url", "http://localhost/");
-        String header = Context.getConfig().getString("event.forward.header", "");
+    public void forwardEvent(Event event, Position position) {
+
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
 
@@ -48,7 +52,7 @@ public final class NotificationForward {
         requestBuilder.execute();
     }
 
-    private static byte[] preparePayload(Event event, Position position) {
+    private byte[] preparePayload(Event event, Position position) {
         JsonObjectBuilder json = Json.createObjectBuilder();
         json.add(KEY_EVENT, JsonConverter.objectToJson(event));
         if (position != null) {

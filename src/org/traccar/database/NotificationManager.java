@@ -31,7 +31,6 @@ import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
-import org.traccar.notification.NotificationForward;
 import org.traccar.notification.NotificationMail;
 
 public class NotificationManager {
@@ -42,11 +41,8 @@ public class NotificationManager {
 
     private final ReadWriteLock notificationsLock = new ReentrantReadWriteLock();
 
-    private final boolean forward;
-
     public NotificationManager(DataManager dataManager) {
         this.dataManager = dataManager;
-        forward = Context.getConfig().getBoolean("event.forward.enable");
         refresh();
     }
 
@@ -72,8 +68,8 @@ public class NotificationManager {
                 }
             }
         }
-        if (forward) {
-            NotificationForward.forwardEvent(event, position);
+        if (Context.getEventForvarder() != null) {
+            Context.getEventForvarder().forwardEvent(event, position);
         }
     }
 
