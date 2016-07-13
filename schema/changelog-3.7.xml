@@ -21,4 +21,15 @@
     </update>
 
   </changeSet>
+
+  <changeSet author="author" id="changelog-3.7-notmssql">
+
+    <preConditions onFail="CONTINUE">
+      <not>
+        <dbms type="mssql" />
+      </not>
+    </preConditions>
+    <addForeignKeyConstraint baseColumnNames="groupid" baseTableName="groups" constraintName="fk_group_group_groupid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="groups"/>
+
+  </changeSet>
 </databaseChangeLog>

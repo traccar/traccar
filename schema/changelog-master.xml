@@ -9,5 +9,4 @@
   <include file="changelog-3.5.xml" relativeToChangelogFile="true" />
   <include file="changelog-3.6.xml" relativeToChangelogFile="true" />
   <include file="changelog-3.7.xml" relativeToChangelogFile="true" />
-  <include file="changelog-3.7-notmssql.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
