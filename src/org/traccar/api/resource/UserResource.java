@@ -52,9 +52,6 @@ public class UserResource extends BaseResource {
         }
         Context.getDataManager().addUser(entity);
         Context.getPermissionsManager().refresh();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
@@ -71,9 +68,6 @@ public class UserResource extends BaseResource {
         }
         Context.getDataManager().updateUser(entity);
         Context.getPermissionsManager().refresh();
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
-        }
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
@@ -87,7 +81,7 @@ public class UserResource extends BaseResource {
         Context.getDataManager().removeUser(id);
         Context.getPermissionsManager().refresh();
         if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refresh();
+            Context.getGeofenceManager().refreshUserGeofences();
         }
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
