@@ -26,6 +26,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public class CguardProtocolDecoder extends BaseProtocolDecoder {
 
@@ -34,11 +35,14 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final String NV_DATA = "NV";
+    public static final String BC_DATA = "BC";
     public static final String NAN_DATA = "NAN";
     public static final String VERSION_DATA = "VERSION";
     public static final String IDRO_DATA = "IDRO";
     public static final String ID_DATA = "ID";
     public static final String LOG_DATA = "LOG";
+    public static final String BAT = "BAT1";
+
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -50,9 +54,6 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
         String dataString = bufStringRows[0];
 
         if(dataString.startsWith(VERSION_DATA)) {
-            /*VERSION:3.3
-            IDRO:354868050655283*/
-
             String idString = bufStringRows[1];
             if(idString.startsWith(IDRO_DATA)) {
                 int lenght = IDRO_DATA.length() + 1;
@@ -64,34 +65,40 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
                 int lenght = ID_DATA.length() + 1;
                 String imei = idString.substring(lenght, idString.length());
                 identify(imei, channel, remoteAddress);
-                long deviceId = getDeviceId();
-                Device device = Context.getIdentityManager().getDeviceById(deviceId);
             }
-        } else if(dataString.startsWith(NV_DATA)) { // && hasDeviceId()
-            return decodeNvdata(dataString);
+        } else if(dataString.startsWith(NV_DATA)) {
+            Position position = decodeNvData(dataString);
+            int arrLength = bufStringRows.length;
+            for(int i = 1; i < arrLength; i++) {
+                if(bufStringRows[i].startsWith(BC_DATA)) {
+                    position = decodeBcData(bufStringRows[i], position);
+                }
+            }
+            return position;
         }
-        /*else if(dataString.startsWith(LOG_DATA)) {
-            return decodeLogdata(dataString);
-        }*/
 
         return null;
     }
 
-    private Position decodeNvdata(String dataString) {
-        /*NV:160420 101902:55.799425:37.674033:0.94:NAN:213.59:156.6
-                BC:160420 101903:CSQ1:74:NSQ1:10:BAT1:100*/
-        //4e56 3a 31363034323020313031393032 3a 35352e373939343235 3a 33372e363734303333 3a 302e39343a4e414e 3a 3231332e3539 3a 3135362e360a4e56 3a 31363034323020313031393033 3a 35352e3739312e3238 3a 4e414e 3a 3335392e3136 3a 3135362e360a 4243 3a 313630343230203130313930333a435351313a37343a4e5351313a31303a424154313a3130300a
+    private Position decodeBcData(String dataString, Position position) {
+        if(dataString.toLowerCase().contains(BAT.toLowerCase())) {
+            String[] bcData = dataString.split(":");
+            int batIndex = Arrays.asList(bcData).indexOf(BAT);
+            if(!bcData[batIndex + 1].equalsIgnoreCase(NAN_DATA)) {
+                double bat = Double.parseDouble(bcData[batIndex + 1]);
+                position.set(Position.KEY_BATTERY, bat);
+            }
+            return position;
+        } else {
+            return null;
+        }
+    }
 
-         /*NV:160420 101902:55.799425:37.674033:0.94:NAN:213.59:156.6
-        NV:160420 101903:55.791.28:NAN:359.16:156.6
-        BC:160420 101903:CSQ1:74:NSQ1:10:BAT1:100*/
-
+    private Position decodeNvData(String dataString) {
         Position position = new Position();
 
-        long deviceId = getDeviceId();
-        Device device = Context.getIdentityManager().getDeviceById(deviceId);
         position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceId);
+        position.setDeviceId(getDeviceId());
 
         //read all as String....
         String[] nvData = dataString.split(":");
@@ -101,62 +108,15 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
         DateTime dt = formatter.parseDateTime(nvData[1]);
         position.setTime(dt.toDate());
 
-        /*buf.skipBytes(1);  //3a :
-        String strYear = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-        String strMonth = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-        String strDay = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-        buf.skipBytes(1);  //3a :
-        String strHour = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-        String strMinute = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-        String strSecond = buf.toString(buf.readerIndex(), 2, Charset.defaultCharset());        buf.skipBytes(2);
-        int year = Integer.parseInt(strYear);
-        int month = Integer.parseInt(strMonth);
-        int day = Integer.parseInt(strDay);
-        int hour = Integer.parseInt(strHour);
-        int minute = Integer.parseInt(strMinute);
-        int second = Integer.parseInt(strSecond);
-
-        DateBuilder dateBuilder = new DateBuilder();
-        dateBuilder.setDate(year, month, day);
-        dateBuilder.setTime(hour, minute, second);
-        position.setTime(dateBuilder.getDate());*/
-
-        /*buf.skipBytes(1);  //3a :
-        String strLatitude = buf.toString(buf.readerIndex(), 9, Charset.defaultCharset());        buf.skipBytes(9);
-            double latitude = Double.parseDouble(strLatitude);*/
         double latitude = Double.parseDouble(nvData[2]);
         position.setLatitude(latitude);
 
-            /*buf.skipBytes(1);  //3a :
-            String strLongitude = buf.toString(buf.readerIndex(), 9, Charset.defaultCharset());        buf.skipBytes(9);
-            double longitude = Double.parseDouble(strLongitude);*/
         double longitude = Double.parseDouble(nvData[3]);
         position.setLongitude(longitude);
 
-            /*buf.skipBytes(1);  //3a :
-            String strSpeed = buf.toString(buf.readerIndex(), 4, Charset.defaultCharset());        buf.skipBytes(4);
-            double speed =  Double.parseDouble(strSpeed);*/
         double speed =  Double.parseDouble(nvData[4]);
         position.setSpeed(speed);
 
-            /*buf.skipBytes(1);  //3a :
-            String strAccuracy = buf.toString(buf.readerIndex(), 3, Charset.defaultCharset());
-            if(!nvData[4].equalsIgnoreCase(NAN_DATA)) {
-                buf.skipBytes(5);
-            } else {
-                buf.skipBytes(3);  //NAN + 3a :
-            }*/
-
-            /*buf.skipBytes(1);
-            String strCource = buf.toString(buf.readerIndex(), 3, Charset.defaultCharset());
-            if(!strCource.equalsIgnoreCase(NAN_DATA)) {
-                strCource = buf.toString(buf.readerIndex(), 5, Charset.defaultCharset());
-                buf.skipBytes(5);
-                double cource = Double.parseDouble(strCource);
-                position.setCourse(cource);
-            } else {
-                buf.skipBytes(3);  //NAN + 3a :
-            } */
         if(arrLength >= 7) {
             if(!nvData[6].equalsIgnoreCase(NAN_DATA)) {
                 double cource = Double.parseDouble(nvData[6]);
@@ -164,25 +124,12 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        /* buf.skipBytes(1);
-        String strAltitude = buf.toString(buf.readerIndex(), 3, Charset.defaultCharset());
-        if(!strAltitude.equalsIgnoreCase(NAN_DATA)) {
-            strAltitude = buf.toString(buf.readerIndex(), 4, Charset.defaultCharset());
-            buf.skipBytes(5);
-            double altitude = Double.parseDouble(strAltitude);
-            position.setAltitude(altitude);
-            buf.skipBytes(5);
-        } else {
-            buf.skipBytes(4);  //NAN + 3a :
-        }*/
-
         if(arrLength >= 8) {
             if(!nvData[7].equalsIgnoreCase(NAN_DATA)) {
                 double altitude = Double.parseDouble(nvData[7]);
                 position.setAltitude(altitude);
             }
         }
-
 
         return position;
     }
