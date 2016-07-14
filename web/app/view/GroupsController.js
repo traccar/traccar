@@ -19,6 +19,7 @@ Ext.define('Traccar.view.GroupsController', {
     alias: 'controller.groups',
 
     requires: [
+        'Traccar.view.GroupDialog',
         'Traccar.view.GroupGeofences'
     ],
 

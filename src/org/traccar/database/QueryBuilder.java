@@ -175,7 +175,11 @@ public final class QueryBuilder {
     public QueryBuilder setLong(String name, long value) throws SQLException {
         for (int i : indexes(name)) {
             try {
-                statement.setLong(i, value);
+                if (value == 0) {
+                    statement.setNull(i, Types.INTEGER);
+                } else {
+                	statement.setLong(i, value);
+                }
             } catch (SQLException error) {
                 statement.close();
                 connection.close();
