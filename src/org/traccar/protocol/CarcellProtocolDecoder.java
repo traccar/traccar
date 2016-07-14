@@ -22,9 +22,9 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
+import org.traccar.helper.Parser.CoordinateFormat;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.helper.Parser.CoordinateFormat;
 import org.traccar.model.Position;
 
 public class CarcellProtocolDecoder extends BaseProtocolDecoder {
@@ -33,11 +33,20 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_GPS = new PatternBuilder()
+    private static final Pattern PATTERN = new PatternBuilder()
             .expression("([$%])")                // memory flag
             .number("(d+),")                     // imei
+            .text("CEL,").optional()
+            .groupBegin()
             .number("([NS])(dd)(dd).(dddd),")    // latitude
+            .or()
+            .number("([NS])(d+.d+),")            // latitude
+            .groupEnd()
+            .groupBegin()
             .number("([EW])(ddd)(dd).(dddd),")   // longitude
+            .or()
+            .number("([EW])(d+.d+),")            // longitude
+            .groupEnd()
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
             .number("([-+]ddd)([-+]ddd)([-+]ddd),")       // x,y,z
@@ -57,45 +66,13 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .any()                               // full format
             .compile();
     
-    private static final Pattern PATTERN_CEL = new PatternBuilder()
-            .expression("([$%])")                // memory flag
-            .number("(d+),")                     // imei
-            .text("CEL,")
-            .number("([NS])(d+.d+),")            // latitude
-            .number("([EW])(d+.d+),")            // longitude
-            .number("(d+),")                     // speed
-            .number("(d+),")                     // course
-            .number("([-+]ddd)([-+]ddd)([-+]ddd),")       // x,y,z
-            .number("(d+),")                     // battery
-            .number("(d+),")                     // csq
-            .number("(d),")                      // jamming
-            .number("(d+),")                     // hdop
-            .expression("([CG])")                // clock type
-            .number("(dd)(dd)(dd),")             // date
-            .number("(dd)(dd)(dd),")             // time
-            .number("(d),")                      // block
-            .number("(d),")                      // ignition
-            .number("(d),")                      // cloned
-            .expression("([AF])")                // panic
-            .number("(d),")                      // painel
-            .number("(d+),")                     // battery voltage
-            .any()                               // full format
-            .compile();
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Pattern pattern = null;
         String sentence = (String) msg;
         
-        if (sentence.indexOf("CEL,") < 0) {
-            pattern = PATTERN_GPS;
-        } else {
-            pattern = PATTERN_CEL;
-        }
-        
-        Parser parser = new Parser(pattern, (String) msg);
+        Parser parser = new Parser(PATTERN, sentence);
         
         if (!parser.matches()) {
             return null;
@@ -112,11 +89,23 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         
         position.setDeviceId(getDeviceId());
         
-        if (PATTERN_GPS == pattern) {
+        if (sentence.indexOf("CEL,") < 0) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
+            parser.next();
+            parser.next();
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
+            parser.next();
+            parser.next();
         } else {
+            parser.next();
+            parser.next();
+            parser.next();
+            parser.next();
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
+            parser.next();
+            parser.next();
+            parser.next();
+            parser.next();
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
         }
         
