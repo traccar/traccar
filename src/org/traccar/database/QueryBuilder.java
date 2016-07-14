@@ -175,7 +175,20 @@ public final class QueryBuilder {
     public QueryBuilder setLong(String name, long value) throws SQLException {
         for (int i : indexes(name)) {
             try {
-                if (value == 0) {
+                statement.setLong(i, value);
+            } catch (SQLException error) {
+                statement.close();
+                connection.close();
+                throw error;
+            }
+        }
+        return this;
+    }
+
+    public QueryBuilder setLong(String name, long value, boolean nullIfZero) throws SQLException {
+        for (int i : indexes(name)) {
+            try {
+                if (value == 0 && nullIfZero) {
                     statement.setNull(i, Types.INTEGER);
                 } else {
                     statement.setLong(i, value);
@@ -249,7 +262,11 @@ public final class QueryBuilder {
                     } else if (method.getReturnType().equals(int.class)) {
                         setInteger(name, (Integer) method.invoke(object));
                     } else if (method.getReturnType().equals(long.class)) {
-                        setLong(name, (Long) method.invoke(object));
+                        if (name.endsWith("Id")) {
+                            setLong(name, (Long) method.invoke(object), true);
+                        } else {
+                            setLong(name, (Long) method.invoke(object));
+                        }
                     } else if (method.getReturnType().equals(double.class)) {
                         setDouble(name, (Double) method.invoke(object));
                     } else if (method.getReturnType().equals(String.class)) {
