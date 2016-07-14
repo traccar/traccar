@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -41,6 +42,16 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_INTERACTIVE = 0x80;
     public static final int MSG_DATA = 0x81;
 
+    public static final int MSG_NORMAL = 0x12;
+    public static final int MSG_WARNING = 0x14;
+    public static final int MSG_REPORT = 0x15;
+    public static final int MSG_COMMAND = 0x16;
+    public static final int MSG_OBD_DATA = 0x17;
+    public static final int MSG_OBD_BODY = 0x18;
+    public static final int MSG_OBD_CODE = 0x19;
+    public static final int MSG_CAMERA_INFO = 0x1E;
+    public static final int MSG_CAMERA_DATA = 0x1F;
+
     private void sendResponse(Channel channel, int type, int index) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.buffer(7);
@@ -50,6 +61,90 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(index);
             channel.write(response);
         }
+    }
+
+    private Position decodeOld(ChannelBuffer buf, int type, int index) {
+
+        Position position = new Position();
+        position.setDeviceId(getDeviceId());
+        position.setProtocol(getProtocolName());
+
+        position.set(Position.KEY_INDEX, index);
+
+        position.setTime(new Date(buf.readUnsignedInt() * 1000));
+        position.setLatitude(buf.readInt() / 1800000.0);
+        position.setLongitude(buf.readInt() / 1800000.0);
+        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+        position.setCourse(buf.readUnsignedShort());
+
+        position.set(Position.KEY_MCC, buf.readUnsignedShort());
+        position.set(Position.KEY_MNC, buf.readUnsignedShort());
+        position.set(Position.KEY_LAC, buf.readUnsignedShort());
+        position.set(Position.KEY_CID, buf.readUnsignedMedium());
+
+        position.setValid((buf.readUnsignedByte() & 0x01) != 0);
+
+        if (type == MSG_ALARM) {
+            position.set(Position.KEY_ALARM, buf.readUnsignedByte());
+        }
+
+        if (type == MSG_STATE) {
+            position.set(Position.KEY_STATUS, buf.readUnsignedByte());
+        }
+
+        return position;
+    }
+
+    private Position decodeNew(ChannelBuffer buf, int type, int index) {
+
+        Position position = new Position();
+        position.setDeviceId(getDeviceId());
+        position.setProtocol(getProtocolName());
+
+        position.set(Position.KEY_INDEX, index);
+
+        position.setTime(new Date(buf.readUnsignedInt() * 1000));
+
+        int flags = buf.readUnsignedByte();
+
+        if (BitUtil.check(flags, 0)) {
+            position.setLatitude(buf.readInt() / 1800000.0);
+            position.setLongitude(buf.readInt() / 1800000.0);
+            position.setAltitude(buf.readShort());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+            position.setCourse(buf.readUnsignedShort());
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(flags, 1)) {
+            position.set(Position.KEY_MCC, buf.readUnsignedShort());
+            position.set(Position.KEY_MNC, buf.readUnsignedShort());
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_CID, buf.readUnsignedInt());
+            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+        }
+
+        if (BitUtil.check(flags, 2)) {
+            buf.skipBytes(7); // bsid1
+        }
+
+        if (BitUtil.check(flags, 3)) {
+            buf.skipBytes(7); // bsid2
+        }
+
+        if (BitUtil.check(flags, 4)) {
+            buf.skipBytes(7); // bss0
+        }
+
+        if (BitUtil.check(flags, 5)) {
+            buf.skipBytes(7); // bss1
+        }
+
+        if (BitUtil.check(flags, 6)) {
+            buf.skipBytes(7); // bss2
+        }
+
+        return position;
     }
 
     @Override
@@ -71,38 +166,12 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             identify(ChannelBuffers.hexDump(buf.readBytes(8)).substring(1), channel, remoteAddress);
 
-        } else if (hasDeviceId()
-                && (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS)) {
-
-            Position position = new Position();
-            position.setDeviceId(getDeviceId());
-
-            position.setProtocol(getProtocolName());
-            position.set(Position.KEY_INDEX, index);
-
-            position.setTime(new Date(buf.readUnsignedInt() * 1000));
-            position.setLatitude(buf.readInt() / 1800000.0);
-            position.setLongitude(buf.readInt() / 1800000.0);
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-            position.setCourse(buf.readUnsignedShort());
-
-            position.set(Position.KEY_MCC, buf.readUnsignedShort());
-            position.set(Position.KEY_MNC, buf.readUnsignedShort());
-            position.set(Position.KEY_LAC, buf.readUnsignedShort());
-            position.set(Position.KEY_CID, buf.readUnsignedMedium());
-
-            position.setValid((buf.readUnsignedByte() & 0x01) != 0);
-
-            if (type == MSG_ALARM) {
-                position.set(Position.KEY_ALARM, buf.readUnsignedByte());
+        } else if (hasDeviceId()) {
+            if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
+                return decodeOld(buf, type, index);
+            } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
+                return decodeNew(buf, type, index);
             }
-
-            if (type == MSG_STATE) {
-                position.set(Position.KEY_STATUS, buf.readUnsignedByte());
-            }
-
-            return position;
-
         }
 
         return null;
