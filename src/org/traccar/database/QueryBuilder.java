@@ -178,7 +178,7 @@ public final class QueryBuilder {
                 if (value == 0) {
                     statement.setNull(i, Types.INTEGER);
                 } else {
-                	statement.setLong(i, value);
+                    statement.setLong(i, value);
                 }
             } catch (SQLException error) {
                 statement.close();
