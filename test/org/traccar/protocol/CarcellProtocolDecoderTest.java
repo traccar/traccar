@@ -6,8 +6,8 @@ import org.traccar.ProtocolTest;
 public class CarcellProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecode() throws Exception {
-
+    public void testDecodeCR2000() throws Exception {
+        
         CarcellProtocolDecoder decoder = new CarcellProtocolDecoder(new CarcellProtocol());
 
         verifyPosition(decoder, text(
