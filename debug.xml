@@ -187,7 +187,7 @@
     </entry>
 
     <entry key='database.insertGroup'>
-        INSERT INTO groups (name) VALUES (:name);
+        INSERT INTO groups (name, groupId) VALUES (:name, :groupId);
     </entry>
 
     <entry key='database.updateGroup'>
