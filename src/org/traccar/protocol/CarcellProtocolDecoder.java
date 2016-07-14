@@ -65,15 +65,15 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // battery voltage
             .any()                               // full format
             .compile();
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        
+
         Parser parser = new Parser(PATTERN, sentence);
-        
+
         if (!parser.matches()) {
             return null;
         }
@@ -82,13 +82,13 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.set(Position.KEY_ARCHIVE, parser.next().equals("%"));
         position.setValid(true);
-        
+
         if (!identify(parser.next(), channel, remoteAddress)) {
             return null;
         }
-        
+
         position.setDeviceId(getDeviceId());
-        
+
         if (sentence.indexOf("CEL,") < 0) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
             parser.next();
@@ -108,36 +108,36 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             parser.next();
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
         }
-        
+
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
         position.setCourse(parser.nextInt());
         position.set("x", parser.nextInt());
         position.set("y", parser.nextInt());
         position.set("z", parser.nextInt());
-        
+
         Double internalBattery = (parser.nextDouble() + 100d) * 0.0294d;
         position.set(Position.KEY_BATTERY, internalBattery);
         position.set(Position.KEY_GSM, parser.nextInt());
         position.set("jamming", parser.next().equals("1"));
         position.set(Position.KEY_GPS, parser.nextInt());
-        
+
         parser.next(); // clock type
-        
+
         DateBuilder dateBuilder = new DateBuilder().
                 setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
-        
+
         position.set("blocked", parser.next().equals("1"));
         position.set(Position.KEY_IGNITION, parser.next().equals("1"));
         position.set("cloned", parser.next().equals("1"));
-        
+
         parser.next(); // panic button status
-        
+
         Integer painelStatus = parser.nextInt();
         position.set(Position.KEY_ALARM, painelStatus.equals("1"));
         position.set("painel", painelStatus.equals("2"));
-        
+
         Double mainVoltage = parser.nextDouble() / 100d;
         position.set(Position.KEY_POWER, mainVoltage);
 
