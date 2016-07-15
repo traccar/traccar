@@ -33,18 +33,15 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
+    private static final Pattern PATTERN_CR2000 = new PatternBuilder()
             .expression("([$%])")                // memory flag
             .number("(d+),")                     // imei
-            .text("CEL,").optional()
             .groupBegin()
             .number("([NS])(dd)(dd).(dddd),")    // latitude
-            .or()
-            .number("([NS])(d+.d+),")            // latitude
-            .groupEnd()
-            .groupBegin()
             .number("([EW])(ddd)(dd).(dddd),")   // longitude
             .or()
+            .text("CEL,")
+            .number("([NS])(d+.d+),")            // latitude
             .number("([EW])(d+.d+),")            // longitude
             .groupEnd()
             .number("(d+),")                     // speed
@@ -65,12 +62,43 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // battery voltage
             .any()                               // full format
             .compile();
+    
+    private static final Pattern PATTERN_CR250 = new PatternBuilder()
+            .expression("([$%])")                // memory flag
+            .number("(d+),")                     // imei
+            .groupBegin()
+            .number("([NS])(dd)(dd).(dddd),")    // latitude
+            .number("([EW])(ddd)(dd).(dddd),")   // longitude
+            .or()
+            .text("CEL,")
+            .number("([NS])(d+.d+),")            // latitude
+            .number("([EW])(d+.d+),")            // longitude
+            .groupEnd()
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("(d+),")                     // accel
+            .number("(d+),")                     // battery
+            .number("(d+),")                     // csq
+            .number("(d+),")                     // jamming
+            .number("(d+),")                     // hdop
+            .expression("([CG]),")               // clock type
+            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(d),")                      // block
+            .number("(d),")                      // ignition
+            .number("(dd),")                     // time
+            .number("(xx),")                     // aux
+            .number("(d+),")                     // battery voltage
+            .number("(d+),")                     // ccid
+            .number("(xx)")                      // crc
+            .any()                               // full format
+            .compile();
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        Parser parser = new Parser(PATTERN_CR250, (String) msg);
 
         if (!parser.matches()) {
             return null;
@@ -86,15 +114,14 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.setDeviceId(getDeviceId());
-
-        if (parser.hasNext(4)) {
+        
+        if (parser.hasNext(8)) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
-            parser.skip(2);
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
-            parser.skip(2);
-        } else {
+        }
+        
+        if (parser.hasNext(4)) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
-            parser.skip(4);
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
         }
 
