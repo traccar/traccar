@@ -33,7 +33,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_CR2000 = new PatternBuilder()
+    private static final Pattern PATTERN = new PatternBuilder()
             .expression("([$%])")                // memory flag
             .number("(d+),")                     // imei
             .groupBegin()
@@ -46,50 +46,32 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
+            .groupBegin()
             .number("([-+]ddd)([-+]ddd)([-+]ddd),")       // x,y,z
+            .or()
+            .number("(d+),")                     // accel
+            .groupEnd()
             .number("(d+),")                     // battery
             .number("(d+),")                     // csq
             .number("(d),")                      // jamming
             .number("(d+),")                     // hdop
-            .expression("([CG])")                // clock type
+            .expression("([CG]),?")                // clock type
             .number("(dd)(dd)(dd),")             // date
             .number("(dd)(dd)(dd),")             // time
             .number("(d),")                      // block
             .number("(d),")                      // ignition
+            .groupBegin()
             .number("(d),")                      // cloned
             .expression("([AF])")                // panic
             .number("(d),")                      // painel
             .number("(d+),")                     // battery voltage
-            .any()                               // full format
-            .compile();
-    
-    private static final Pattern PATTERN_CR250 = new PatternBuilder()
-            .expression("([$%])")                // memory flag
-            .number("(d+),")                     // imei
-            .groupBegin()
-            .number("([NS])(dd)(dd).(dddd),")    // latitude
-            .number("([EW])(ddd)(dd).(dddd),")   // longitude
             .or()
-            .text("CEL,")
-            .number("([NS])(d+.d+),")            // latitude
-            .number("([EW])(d+.d+),")            // longitude
-            .groupEnd()
-            .number("(d+),")                     // speed
-            .number("(d+),")                     // course
-            .number("(d+),")                     // accel
-            .number("(d+),")                     // battery
-            .number("(d+),")                     // csq
-            .number("(d+),")                     // jamming
-            .number("(d+),")                     // hdop
-            .expression("([CG]),")               // clock type
-            .number("(dd)(dd)(dd),")             // date
-            .number("(dd)(dd)(dd),")             // time
-            .number("(d),")                      // block
-            .number("(d),")                      // ignition
             .number("(dd),")                     // time
-            .number("(xx),")                     // aux
-            .number("(d+),")                     // battery voltage
-            .number("(d+),")                     // ccid
+            .expression("([AF])")                // panic
+            .number("(d),")                      // aux
+            .number("(d{2,4}),")                 // battery voltage
+            .number("(d{20}),")                  // ccid
+            .groupEnd()
             .number("(xx)")                      // crc
             .any()                               // full format
             .compile();
@@ -98,7 +80,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN_CR2000, (String) msg);
+        Parser parser = new Parser(PATTERN, (String) msg);
 
         if (!parser.matches()) {
             return null;
@@ -114,12 +96,12 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.setDeviceId(getDeviceId());
-        
+
         if (parser.hasNext(8)) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
         }
-        
+
         if (parser.hasNext(4)) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
@@ -127,9 +109,16 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
         position.setCourse(parser.nextInt());
-        position.set("x", parser.nextInt());
-        position.set("y", parser.nextInt());
-        position.set("z", parser.nextInt());
+
+        if (parser.hasNext(3)) {
+            position.set("x", parser.nextInt());
+            position.set("y", parser.nextInt());
+            position.set("z", parser.nextInt());
+        }
+
+        if (parser.hasNext(1)) {
+            position.set("accel", parser.nextInt());
+        }
 
         Double internalBattery = (parser.nextDouble() + 100d) * 0.0294d;
         position.set(Position.KEY_BATTERY, internalBattery);
@@ -146,16 +135,30 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         position.set("blocked", parser.next().equals("1"));
         position.set(Position.KEY_IGNITION, parser.next().equals("1"));
-        position.set("cloned", parser.next().equals("1"));
 
-        parser.next(); // panic button status
+        if (parser.hasNext(4)) {
+            position.set("cloned", parser.next().equals("1"));
 
-        Integer painelStatus = parser.nextInt();
-        position.set(Position.KEY_ALARM, painelStatus.equals("1"));
-        position.set("painel", painelStatus.equals("2"));
+            parser.next(); // panic button status
 
-        Double mainVoltage = parser.nextDouble() / 100d;
-        position.set(Position.KEY_POWER, mainVoltage);
+            Integer painelStatus = parser.nextInt();
+            position.set(Position.KEY_ALARM, painelStatus.equals("1"));
+            position.set("painel", painelStatus.equals("2"));
+
+            Double mainVoltage = parser.nextDouble() / 100d;
+            position.set(Position.KEY_POWER, mainVoltage);
+        }
+
+        if (parser.hasNext(5)) {
+            position.set("timeUntilDelivery", parser.nextInt());
+            parser.next(); // panic button status
+            parser.next(); // aux
+
+            Double mainVoltage = parser.nextDouble() / 100d;
+            position.set(Position.KEY_POWER, mainVoltage);
+
+            position.set("iccid", parser.next());
+        }
 
         return position;
     }
