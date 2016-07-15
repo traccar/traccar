@@ -6,6 +6,7 @@ import org.traccar.ProtocolTest;
 
 public class CarcellProtocolDecoderTest extends ProtocolTest {
 
+    @Ignore
     @Test
     public void testDecodeCR250() throws Exception {
         

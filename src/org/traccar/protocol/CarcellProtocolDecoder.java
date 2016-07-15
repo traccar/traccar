@@ -98,7 +98,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN_CR250, (String) msg);
+        Parser parser = new Parser(PATTERN_CR2000, (String) msg);
 
         if (!parser.matches()) {
             return null;
