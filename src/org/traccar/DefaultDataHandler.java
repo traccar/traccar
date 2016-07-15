@@ -25,10 +25,7 @@ public class DefaultDataHandler extends BaseDataHandler {
 
         try {
             Context.getDataManager().addPosition(position);
-            Position lastPosition = Context.getConnectionManager().getLastPosition(position.getDeviceId());
-            if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0) {
-                Context.getDataManager().updateLatestPosition(position);
-            }
+            Context.getDeviceManager().updateLatestPosition(position);
         } catch (Exception error) {
             Log.warning(error);
         }

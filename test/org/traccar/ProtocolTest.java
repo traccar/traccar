@@ -44,6 +44,11 @@ public class ProtocolTest {
             public Device getDeviceByUniqueId(String uniqueId) {
                 return createDevice();
             }
+            
+            @Override
+            public Position getLastPosition(long deviceId) {
+                return null;
+            }
 
         });
     }

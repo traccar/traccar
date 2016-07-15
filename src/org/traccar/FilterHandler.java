@@ -57,8 +57,8 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private Position getLastPosition(long deviceId) {
-        if (Context.getConnectionManager() != null) {
-            return Context.getConnectionManager().getLastPosition(deviceId);
+        if (Context.getIdentityManager() != null) {
+            return Context.getIdentityManager().getLastPosition(deviceId);
         }
         return null;
     }

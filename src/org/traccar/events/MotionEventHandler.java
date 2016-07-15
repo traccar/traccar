@@ -38,7 +38,7 @@ public class MotionEventHandler extends BaseEventHandler {
     @Override
     protected Collection<Event> analyzePosition(Position position) {
 
-        Device device = Context.getDataManager().getDeviceById(position.getDeviceId());
+        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
         if (device == null) {
             return null;
         }
@@ -53,16 +53,19 @@ public class MotionEventHandler extends BaseEventHandler {
         if (motion == null) {
             motion = Device.STATUS_STOPPED;
         }
-        if (valid && speed > SPEED_THRESHOLD && !motion.equals(Device.STATUS_MOVING)) {
-            Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_MOVING, null);
-            result = new ArrayList<>();
-            result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
-        } else if (valid && speed < SPEED_THRESHOLD && motion.equals(Device.STATUS_MOVING)) {
-            Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_STOPPED, null);
-            result = new ArrayList<>();
-            result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
-        }
         try {
+            if (valid && speed > SPEED_THRESHOLD && !motion.equals(Device.STATUS_MOVING)) {
+                device.setMotion(Device.STATUS_MOVING);
+                Context.getDeviceManager().updateDeviceStatus(device);
+                result = new ArrayList<>();
+                result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
+            } else if (valid && speed < SPEED_THRESHOLD && motion.equals(Device.STATUS_MOVING)) {
+                device.setMotion(Device.STATUS_STOPPED);
+                Context.getDeviceManager().updateDeviceStatus(device);
+                result = new ArrayList<>();
+                result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
+            }
+
             if (result != null && !result.isEmpty()) {
                 for (Event event : result) {
                     if (!Context.getDataManager().getLastEvents(position.getDeviceId(),

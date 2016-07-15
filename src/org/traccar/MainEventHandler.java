@@ -37,7 +37,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
 
             Position position = (Position) e.getMessage();
 
-            String uniqueId = Context.getDataManager().getDeviceById(position.getDeviceId()).getUniqueId();
+            String uniqueId = Context.getIdentityManager().getDeviceById(position.getDeviceId()).getUniqueId();
 
             // Log position
             StringBuilder s = new StringBuilder();
@@ -54,11 +54,6 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
                 s.append(", result: ").append(cmdResult);
             }
             Log.info(s.toString());
-
-            Position lastPosition = Context.getConnectionManager().getLastPosition(position.getDeviceId());
-            if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0) {
-                Context.getConnectionManager().updatePosition(position);
-            }
         }
     }
 
