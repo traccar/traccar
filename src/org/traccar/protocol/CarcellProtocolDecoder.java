@@ -89,17 +89,12 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(4)) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
-            parser.next();
-            parser.next();
+            parser.skip(2);
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
-            parser.next();
-            parser.next();
+            parser.skip(2);
         } else {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
-            parser.next();
-            parser.next();
-            parser.next();
-            parser.next();
+            parser.skip(4);
             position.setLongitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
         }
 
