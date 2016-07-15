@@ -2,4 +2,4 @@ language: java
 jdk:
   - openjdk7
 script: 
-  - mvn clean test site
+  - mvn clean test checkstyle::check
