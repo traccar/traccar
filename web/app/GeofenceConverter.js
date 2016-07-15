@@ -20,7 +20,7 @@ Ext.define('Traccar.GeofenceConverter', {
     wktToGeometry: function (mapView, wkt) {
         var geometry, projection, resolutionAtEquator, pointResolution, resolutionFactor, points = [], center, radius,
                 content, i, lat, lon, coordinates;
-        if (wkt.startsWith('POLYGON')) {
+        if (wkt.lastIndexOf('POLYGON', 0) === 0) {
             content = wkt.match(/\([^\(\)]+\)/);
             if (content !== null) {
                 coordinates = content[0].match(/-?\d+\.?\d*/g);
@@ -34,7 +34,7 @@ Ext.define('Traccar.GeofenceConverter', {
                     geometry = new ol.geom.Polygon([points]);
                 }
             }
-        } else if (wkt.startsWith('CIRCLE')) {
+        } else if (wkt.lastIndexOf('CIRCLE', 0) === 0) {
             content = wkt.match(/\([^\(\)]+\)/);
             if (content !== null) {
                 coordinates = content[0].match(/-?\d+\.?\d*/g);
