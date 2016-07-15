@@ -1,10 +1,23 @@
 package org.traccar.protocol;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
 public class CarcellProtocolDecoderTest extends ProtocolTest {
 
+    @Test
+    public void testDecodeCR250() throws Exception {
+        
+        CarcellProtocolDecoder decoder = new CarcellProtocolDecoder(new CarcellProtocol());
+        
+        verifyPosition(decoder, text(
+                "$863071010274949,S2331.4774,W04629.5123,000,194,0,01,16,0,01,G,230715,115017,0,0,01,A0,1246,89551093619008954621,1D\r\n"));
+        
+        verifyPosition(decoder, text(
+                "$863071010274949,CEL,S23.5257,W046.4953,000,000,0,01,16,0,00,C,230715,114612,0,0,01,A0,1246,89551093619008954621,5E\r\n"));
+    }
+    
     @Test
     public void testDecodeCR2000() throws Exception {
         
