@@ -1,12 +1,10 @@
 package org.traccar.protocol;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
 public class CarcellProtocolDecoderTest extends ProtocolTest {
 
-    @Ignore
     @Test
     public void testDecodeCR250() throws Exception {
         
