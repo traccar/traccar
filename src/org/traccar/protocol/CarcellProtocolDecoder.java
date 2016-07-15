@@ -70,9 +70,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
-
-        Parser parser = new Parser(PATTERN, sentence);
+        Parser parser = new Parser(PATTERN, (String) msg);
 
         if (!parser.matches()) {
             return null;
@@ -89,7 +87,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         position.setDeviceId(getDeviceId());
 
-        if (sentence.indexOf("CEL,") < 0) {
+        if (parser.hasNext(4)) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));
             parser.next();
             parser.next();
@@ -97,10 +95,6 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             parser.next();
             parser.next();
         } else {
-            parser.next();
-            parser.next();
-            parser.next();
-            parser.next();
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG));
             parser.next();
             parser.next();
