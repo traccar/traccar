@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int MSG_LOGIN = 0x01;
-    private static final int MSG_GPS = 0x02;
-    private static final int MSG_HEARTBEAT = 0x03;
-    private static final int MSG_ALARM = 0x04;
+    public static final int MSG_LOGIN = 0x01;
+    public static final int MSG_GPS = 0x02;
+    public static final int MSG_HEARTBEAT = 0x03;
+    public static final int MSG_ALARM = 0x04;
+    public static final int MSG_COMMAND = 0x81;
 
     private static float readSwappedFloat(ChannelBuffer buf) {
         byte[] bytes = new byte[4];
