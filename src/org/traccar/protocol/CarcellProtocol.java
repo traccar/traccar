@@ -40,14 +40,11 @@ public class CarcellProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                // inbound
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
-                pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectDecoder", new CarcellProtocolDecoder(CarcellProtocol.this));
-
-                // outbound
                 pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("objectEncoder", new CarcellProtocolEncoder()); // cmd
+                pipeline.addLast("objectDecoder", new CarcellProtocolDecoder(CarcellProtocol.this));
             }
         });
     }
