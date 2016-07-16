@@ -173,7 +173,7 @@ public class GeofenceManager {
                             .add(deviceGeofence.getGeofenceId());
                     }
 
-                    for (Device device : dataManager.getAllDevicesCached()) {
+                    for (Device device : Context.getDeviceManager().getAllDevices()) {
                         long groupId = device.getGroupId();
                         while (groupId != 0) {
                             getDeviceGeofences(deviceGeofencesWithGroups,
@@ -190,7 +190,7 @@ public class GeofenceManager {
                         } else {
                             deviceGeofenceIds.clear();
                         }
-                        Position lastPosition = Context.getConnectionManager().getLastPosition(device.getId());
+                        Position lastPosition = Context.getIdentityManager().getLastPosition(device.getId());
                         if (lastPosition != null && deviceGeofencesWithGroups.containsKey(device.getId())) {
                             for (long geofenceId : deviceGeofencesWithGroups.get(device.getId())) {
                                 Geofence geofence = getGeofence(geofenceId);

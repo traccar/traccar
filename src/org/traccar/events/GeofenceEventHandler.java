@@ -43,7 +43,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
-        Device device = dataManager.getDeviceById(position.getDeviceId());
+        Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
         if (device == null) {
             return null;
         }

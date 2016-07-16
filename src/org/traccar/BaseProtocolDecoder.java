@@ -47,7 +47,9 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             Device device = Context.getIdentityManager().getDeviceByUniqueId(uniqueId);
             if (device != null) {
                 deviceId = device.getId();
-                Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                if (Context.getConnectionManager() != null) {
+                    Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                }
                 return true;
             } else {
                 deviceId = 0;
@@ -78,7 +80,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     public void getLastLocation(Position position, Date deviceTime) {
         position.setOutdated(true);
 
-        Position last = Context.getConnectionManager().getLastPosition(getDeviceId());
+        Position last = Context.getIdentityManager().getLastPosition(getDeviceId());
         if (last != null) {
             position.setFixTime(last.getFixTime());
             position.setValid(last.getValid());

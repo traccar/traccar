@@ -44,20 +44,20 @@ public class DeviceResource extends BaseResource {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getDataManager().getAllDevicesCached();
+            return Context.getDeviceManager().getAllDevices();
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getDataManager().getDevices(userId);
+            return Context.getDeviceManager().getDevices(userId);
         }
     }
 
     @POST
     public Response add(Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getDataManager().addDevice(entity);
+        Context.getDeviceManager().addDevice(entity);
         Context.getDataManager().linkDevice(getUserId(), entity.getId());
         Context.getPermissionsManager().refresh();
         if (Context.getGeofenceManager() != null) {
@@ -71,7 +71,7 @@ public class DeviceResource extends BaseResource {
     public Response update(@PathParam("id") long id, Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), id);
-        Context.getDataManager().updateDevice(entity);
+        Context.getDeviceManager().updateDevice(entity);
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
@@ -83,7 +83,7 @@ public class DeviceResource extends BaseResource {
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), id);
-        Context.getDataManager().removeDevice(id);
+        Context.getDeviceManager().removeDevice(id);
         Context.getPermissionsManager().refresh();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();

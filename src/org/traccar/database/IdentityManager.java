@@ -16,11 +16,14 @@
 package org.traccar.database;
 
 import org.traccar.model.Device;
+import org.traccar.model.Position;
 
 public interface IdentityManager {
 
     Device getDeviceById(long id);
 
     Device getDeviceByUniqueId(String uniqueId) throws Exception;
+
+    Position getLastPosition(long deviceId);
 
 }

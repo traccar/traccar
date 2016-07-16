@@ -62,20 +62,15 @@ import org.traccar.model.GeofencePermission;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-public class DataManager implements IdentityManager {
+public class DataManager {
 
-    private static final long DEFAULT_REFRESH_DELAY = 300;
+    public static final long DEFAULT_REFRESH_DELAY = 300;
 
     private final Config config;
 
     private DataSource dataSource;
 
     private final long dataRefreshDelay;
-
-    private final ReadWriteLock devicesLock = new ReentrantReadWriteLock();
-    private final Map<Long, Device> devicesById = new HashMap<>();
-    private final Map<String, Device> devicesByUniqueId = new HashMap<>();
-    private long devicesLastUpdate;
 
     private final ReadWriteLock groupsLock = new ReentrantReadWriteLock();
     private final Map<Long, Group> groupsById = new HashMap<>();
@@ -133,85 +128,6 @@ public class DataManager implements IdentityManager {
 
             dataSource = new HikariDataSource(hikariConfig);
 
-        }
-    }
-
-    private void updateDeviceCache(boolean force) throws SQLException {
-        boolean needWrite;
-        devicesLock.readLock().lock();
-        try {
-            needWrite = force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay;
-        } finally {
-            devicesLock.readLock().unlock();
-        }
-
-        if (needWrite) {
-            devicesLock.writeLock().lock();
-            try {
-                if (force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay) {
-                    devicesById.clear();
-                    devicesByUniqueId.clear();
-                    ConnectionManager connectionManager = Context.getConnectionManager();
-                    GeofenceManager geofenceManager = Context.getGeofenceManager();
-                    for (Device device : getAllDevices()) {
-                        devicesById.put(device.getId(), device);
-                        devicesByUniqueId.put(device.getUniqueId(), device);
-                        if (connectionManager != null && geofenceManager != null) {
-                            Position lastPosition = connectionManager.getLastPosition(device.getId());
-                            if (lastPosition != null) {
-                                device.setGeofenceIds(geofenceManager.getCurrentDeviceGeofences(lastPosition));
-                            }
-                        }
-                    }
-                    devicesLastUpdate = System.currentTimeMillis();
-                }
-            } finally {
-                devicesLock.writeLock().unlock();
-            }
-        }
-    }
-
-    @Override
-    public Device getDeviceById(long id) {
-        boolean forceUpdate;
-        devicesLock.readLock().lock();
-        try {
-            forceUpdate = !devicesById.containsKey(id);
-        } finally {
-            devicesLock.readLock().unlock();
-        }
-
-        try {
-            updateDeviceCache(forceUpdate);
-        } catch (SQLException e) {
-            Log.warning(e);
-        }
-
-        devicesLock.readLock().lock();
-        try {
-            return devicesById.get(id);
-        } finally {
-            devicesLock.readLock().unlock();
-        }
-    }
-
-    @Override
-    public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
-        boolean forceUpdate;
-        devicesLock.readLock().lock();
-        try {
-            forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
-        } finally {
-            devicesLock.readLock().unlock();
-        }
-
-        updateDeviceCache(forceUpdate);
-
-        devicesLock.readLock().lock();
-        try {
-            return devicesByUniqueId.get(uniqueId);
-        } finally {
-            devicesLock.readLock().unlock();
         }
     }
 
@@ -347,72 +263,33 @@ public class DataManager implements IdentityManager {
                 .executeQuery(GroupPermission.class);
     }
 
-    private Collection<Device> getAllDevices() throws SQLException {
+    public Collection<Device> getAllDevices() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectDevicesAll"))
                 .executeQuery(Device.class);
-    }
-
-    public Collection<Device> getAllDevicesCached() {
-        boolean forceUpdate;
-        devicesLock.readLock().lock();
-        try {
-            forceUpdate = devicesById.isEmpty();
-        } finally {
-            devicesLock.readLock().unlock();
-        }
-
-        try {
-            updateDeviceCache(forceUpdate);
-        } catch (SQLException e) {
-            Log.warning(e);
-        }
-
-        devicesLock.readLock().lock();
-        try {
-            return devicesById.values();
-        } finally {
-            devicesLock.readLock().unlock();
-        }
-    }
-
-    public Collection<Device> getDevices(long userId) throws SQLException {
-        Collection<Device> devices = new ArrayList<>();
-        for (long id : Context.getPermissionsManager().getDevicePermissions(userId)) {
-            devices.add(getDeviceById(id));
-        }
-        return devices;
     }
 
     public void addDevice(Device device) throws SQLException {
         device.setId(QueryBuilder.create(dataSource, getQuery("database.insertDevice"), true)
                 .setObject(device)
                 .executeUpdate());
-        updateDeviceCache(true);
     }
 
     public void updateDevice(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateDevice"))
                 .setObject(device)
                 .executeUpdate();
-        updateDeviceCache(true);
     }
 
     public void updateDeviceStatus(Device device) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.updateDeviceStatus"))
                 .setObject(device)
                 .executeUpdate();
-        if (devicesById.containsKey(device.getId())) {
-            Device cachedDevice = devicesById.get(device.getId());
-            cachedDevice.setStatus(device.getStatus());
-            cachedDevice.setMotion(device.getMotion());
-        }
     }
 
     public void removeDevice(long deviceId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteDevice"))
                 .setLong("id", deviceId)
                 .executeUpdate();
-        updateDeviceCache(true);
     }
 
     public void linkDevice(long userId, long deviceId) throws SQLException {
@@ -514,10 +391,6 @@ public class DataManager implements IdentityManager {
                 .setDate("now", new Date())
                 .setObject(position)
                 .executeUpdate();
-        if (devicesById.containsKey(position.getDeviceId())) {
-            Device cachedDevice = devicesById.get(position.getDeviceId());
-            cachedDevice.setPositionId(position.getId());
-        }
     }
 
     public Collection<Position> getLatestPositions() throws SQLException {

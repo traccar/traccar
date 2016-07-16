@@ -18,6 +18,7 @@ package org.traccar;
 import com.ning.http.client.AsyncHttpClient;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
+import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
@@ -65,6 +66,12 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
+    }
+
+    private static DeviceManager deviceManager;
+
+    public static DeviceManager getDeviceManager() {
+        return deviceManager;
     }
 
     private static ConnectionManager connectionManager;
@@ -142,7 +149,12 @@ public final class Context {
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);
         }
-        identityManager = dataManager;
+
+        if (dataManager != null) {
+            deviceManager = new DeviceManager(dataManager);
+        }
+
+        identityManager = deviceManager;
 
         if (config.getBoolean("geocoder.enable")) {
             String type = config.getString("geocoder.type", "google");
@@ -205,7 +217,7 @@ public final class Context {
 
         permissionsManager = new PermissionsManager(dataManager);
 
-        connectionManager = new ConnectionManager(dataManager);
+        connectionManager = new ConnectionManager();
 
         if (config.getBoolean("event.geofenceHandler")) {
             geofenceManager = new GeofenceManager(dataManager);
@@ -225,7 +237,6 @@ public final class Context {
 
     public static void init(IdentityManager testIdentityManager) {
         config = new Config();
-        connectionManager = new ConnectionManager(null);
         identityManager = testIdentityManager;
     }
 
