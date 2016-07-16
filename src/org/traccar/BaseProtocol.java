@@ -33,7 +33,6 @@ public abstract class BaseProtocol implements Protocol {
 
     public BaseProtocol(String name) {
         this.name = name;
-        supportedCommands.add(Command.TYPE_CUSTOM);
     }
 
     @Override
@@ -47,7 +46,9 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public Collection<String> getSupportedCommands() {
-        return supportedCommands;
+        Set<String> commands = new HashSet<>(supportedCommands);
+        commands.add(Command.TYPE_CUSTOM);
+        return commands;
     }
 
     @Override
