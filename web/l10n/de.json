@@ -118,6 +118,10 @@
     "eventCommandResult": "Ergrbnis des Befehls",
     "eventGeofenceEnter": "Gerät hat Geo-Zaun betreten",
     "eventGeofenceExit": "Gerät hat Geo-Zaun verlassen",
+    "eventSosAlarm": "SOS alarm",
+    "eventVibrationAlarm": "Vibration alarm",
+    "eventMovementAlarm": "Movement alarm",
+    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Art der Benachrichtigung ",
     "notificationWeb": "Per Web senden",
     "notificationMail": "Per E-Mail senden"

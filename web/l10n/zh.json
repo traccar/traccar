@@ -118,6 +118,10 @@
     "eventCommandResult": "Command result",
     "eventGeofenceEnter": "Device has entered geofence",
     "eventGeofenceExit": "Device has exited geofence",
+    "eventSosAlarm": "SOS alarm",
+    "eventVibrationAlarm": "Vibration alarm",
+    "eventMovementAlarm": "Movement alarm",
+    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Type of Notification",
     "notificationWeb": "Send via Web",
     "notificationMail": "Send via Mail"

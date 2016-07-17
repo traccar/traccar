@@ -120,10 +120,5 @@ Ext.define('Traccar.view.Report', {
         dataIndex: 'attributes',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('alarm')
-    }, {
-        text: 'Alarm Type',
-        dataIndex: 'attributes',
-        flex: 1,
-        renderer: Traccar.AttributeFormatter.getFormatter('alarm-type')
     }]
 });

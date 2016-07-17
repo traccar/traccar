@@ -118,6 +118,10 @@
     "eventCommandResult": "Výsledek příkazu",
     "eventGeofenceEnter": "Zařízení vstoupilo do geografické hranice",
     "eventGeofenceExit": "Zařízení opustilo geografickou hranici",
+    "eventSosAlarm": "SOS alarm",
+    "eventVibrationAlarm": "Vibration alarm",
+    "eventMovementAlarm": "Movement alarm",
+    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Typ oznámení",
     "notificationWeb": "Odeslat přes web",
     "notificationMail": "Odeslat přes mail"

@@ -35,7 +35,7 @@ for i in range(0, len(waypoints)):
 def send(lat, lon, course, alarm):
     params = (('id', id), ('timestamp', int(time.time())), ('lat', lat), ('lon', lon), ('bearing', course))
     if alarm:
-        params = params + (('alarm', 'true'),)
+        params = params + (('alarm', 'sosAlarm'),)
     urllib2.urlopen(server + '?' + urllib.urlencode(params)).read()
 
 def course(lat1, lon1, lat2, lon2):
@@ -52,7 +52,7 @@ index = 0
 while True:
     (lat1, lon1) = points[index % len(points)]
     (lat2, lon2) = points[(index + 1) % len(points)]
-    alarm = False  #((index % 10) == 0)
+    alarm = ((index % 10) == 0)
     send(lat1, lon1, course(lat1, lon1, lat2, lon2), alarm)
     time.sleep(period)
     index += 1

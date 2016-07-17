@@ -118,6 +118,10 @@
     "eventCommandResult": "Résultat de la commande",
     "eventGeofenceEnter": "L'appareil est entré dans un périmètre virtuel",
     "eventGeofenceExit": "L'appareil est sorti d'un périmètre virtuel",
+    "eventSosAlarm": "SOS alarm",
+    "eventVibrationAlarm": "Vibration alarm",
+    "eventMovementAlarm": "Movement alarm",
+    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Type de notification",
     "notificationWeb": "Envoyer par internet",
     "notificationMail": "Envoyer par E-mail"

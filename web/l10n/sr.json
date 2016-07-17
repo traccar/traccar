@@ -118,6 +118,10 @@
     "eventCommandResult": "Stanje komande",
     "eventGeofenceEnter": "Uređaj je ušao u geoogradu",
     "eventGeofenceExit": "Uređaj je izašao iz geoograde",
+    "eventSosAlarm": "SOS alarm",
+    "eventVibrationAlarm": "Vibration alarm",
+    "eventMovementAlarm": "Movement alarm",
+    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Tip obaveštenja",
     "notificationWeb": "Pošalji preko Web-a",
     "notificationMail": "Pošalji putem Email-a"

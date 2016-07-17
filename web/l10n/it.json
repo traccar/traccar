@@ -118,6 +118,10 @@
     "eventCommandResult": "Risultato comando",
     "eventGeofenceEnter": "Il dipositivo e` entrato nel GeoRecinto",
     "eventGeofenceExit": "Il dipositivo e` uscito dal GeoRecinto",
+    "eventSosAlarm": "SOS alarm",
+    "eventVibrationAlarm": "Vibration alarm",
+    "eventMovementAlarm": "Movement alarm",
+    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Tipo notica",
     "notificationWeb": "Invia tramite Web",
     "notificationMail": "Invia tramite Mail"

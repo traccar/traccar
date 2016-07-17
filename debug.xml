@@ -47,6 +47,7 @@
     <entry key='event.globalSpeedLimit'>90</entry>
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
+    <entry key='event.alertHandler'>true</entry>
 
     <!--<entry key='mail.smtp.host'>smtp.example.com</entry>
     for STARTTLS

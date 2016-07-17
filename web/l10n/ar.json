@@ -118,6 +118,10 @@
     "eventCommandResult": "نتيجة الأمر",
     "eventGeofenceEnter": "Device has entered geofence",
     "eventGeofenceExit": "Device has exited geofence",
+    "eventSosAlarm": "SOS alarm",
+    "eventVibrationAlarm": "Vibration alarm",
+    "eventMovementAlarm": "Movement alarm",
+    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "نوع الملاحظة",
     "notificationWeb": "أرسل عن طريق صفحة الويب",
     "notificationMail": "أرسل عن طريق البريد الإلكتروني"

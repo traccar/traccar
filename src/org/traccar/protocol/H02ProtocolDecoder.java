@@ -24,6 +24,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -65,18 +66,17 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private void processStatus(Position position, long status) {
         if (!BitUtil.check(status, 0) || !BitUtil.check(status, 1)
                 || !BitUtil.check(status, 3) || !BitUtil.check(status, 4) || !BitUtil.check(status, 7)) {
-            position.set(Position.KEY_ALARM, true);
 
             if (!BitUtil.check(status, 0)){
-                position.set(Position.KEY_ALARM_TYPE, "theft");
+                position.set(Position.KEY_ALARM, Event.TYPE_VIBRATION_ALARM);//theft alarm
             } else if (!BitUtil.check(status, 1)){
-                position.set(Position.KEY_ALARM_TYPE, "robbery");
+                position.set(Position.KEY_ALARM, "robbery");
             } else if (!BitUtil.check(status, 3)){
-                position.set(Position.KEY_ALARM_TYPE, "illegal ignition");
+                position.set(Position.KEY_ALARM, "illegal ignition");
             } else if (!BitUtil.check(status, 4)){
-                position.set(Position.KEY_ALARM_TYPE, "entering");
+                position.set(Position.KEY_ALARM, "entering");
             } else if (!BitUtil.check(status, 7)){
-                position.set(Position.KEY_ALARM_TYPE, "out");
+                position.set(Position.KEY_ALARM, "out");
             }
 
         }
