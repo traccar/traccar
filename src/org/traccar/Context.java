@@ -35,6 +35,7 @@ import org.traccar.helper.Log;
 import org.traccar.location.LocationProvider;
 import org.traccar.location.MozillaLocationProvider;
 import org.traccar.location.OpenCellIdLocationProvider;
+import org.traccar.notification.EventForwarder;
 import org.traccar.web.WebServer;
 
 public final class Context {
@@ -118,6 +119,12 @@ public final class Context {
 
     public static AsyncHttpClient getAsyncHttpClient() {
         return ASYNC_HTTP_CLIENT;
+    }
+
+    private static EventForwarder eventForwarder;
+
+    public static EventForwarder getEventForvarder() {
+        return eventForwarder;
     }
 
     public static void init(String[] arguments) throws Exception {
@@ -209,6 +216,10 @@ public final class Context {
         }
 
         serverManager = new ServerManager();
+
+        if (config.getBoolean("event.forward.enable")) {
+            eventForwarder = new EventForwarder();
+        }
 
     }
 

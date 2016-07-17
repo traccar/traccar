@@ -68,6 +68,9 @@ public class NotificationManager {
                 }
             }
         }
+        if (Context.getEventForvarder() != null) {
+            Context.getEventForvarder().forwardEvent(event, position);
+        }
     }
 
     public void updateEvents(Collection<Event> events, Position position) {

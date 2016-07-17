@@ -11,6 +11,15 @@ public class EelinkProtocolDecoderTest extends ProtocolTest {
         EelinkProtocolDecoder decoder = new EelinkProtocolDecoder(new EelinkProtocol());
 
         verifyNothing(decoder, binary(
+                "676701000c007b03525440717505180104"));
+
+        verifyPosition(decoder, binary(
+                "676712003400505784cc0b130246479b07d05a06001800000000070195039f046100002cc52e6466b391604a4900890e7c00000000000006ca"));
+
+        verifyPosition(decoder, binary(
+                "676714002b00515784cc24130246479b07d05a06001800010000060195039f046100002cc52f6466b391604a49020089"));
+
+        verifyNothing(decoder, binary(
                 "676701000c002603541880486128290120"));
 
         verifyPosition(decoder, binary(
