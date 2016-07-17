@@ -34,9 +34,20 @@ Ext.define('Traccar.AttributeFormatter', {
         return Ext.getStore('DistanceUnits').formatValue(value, Traccar.app.getPreference('distanceUnit'));
     },
 
-    alarmFormatter: function (value) {
-        if (typeof value === 'boolean') {
-            value = (value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no);
+    alarmFormatter: function (attributes) {
+        var value = '';
+        if (attributes instanceof Object) {//for Traccar.view.Attributes
+            if (attributes.hasOwnProperty('alarm')){
+                value = attributes.alarm;
+                if (typeof value === 'boolean') {
+                    value = (value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no);
+                }
+            }
+        } else {//for Traccar.view.Report
+            value = attributes;
+            if (typeof value === 'boolean') {
+                value = (value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no);
+            }
         }
         return '<span style="color:red;">' + value + '</span>';
     },
