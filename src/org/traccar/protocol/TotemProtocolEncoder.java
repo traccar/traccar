@@ -30,11 +30,10 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
         command.set(Command.KEY_DEVICE_PASSWORD, "000000");
         if (Context.getDeviceManager() != null) {
             Device device = Context.getDeviceManager().getDeviceById(command.getDeviceId());
-            if (device != null) {
-                if (device.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-                    command.set(Command.KEY_DEVICE_PASSWORD, device.getAttributes().get(Command.KEY_DEVICE_PASSWORD).toString());
+            if (device != null && device.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
+                command.set(Command.KEY_DEVICE_PASSWORD, device.getAttributes()
+                        .get(Command.KEY_DEVICE_PASSWORD).toString());
                 }
-            }
         }
 
         switch (command.getType()) {
