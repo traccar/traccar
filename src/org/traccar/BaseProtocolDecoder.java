@@ -78,25 +78,27 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public void getLastLocation(Position position, Date deviceTime) {
-        position.setOutdated(true);
+        if (position.getDeviceId() != 0) {
+            position.setOutdated(true);
 
-        Position last = Context.getIdentityManager().getLastPosition(getDeviceId());
-        if (last != null) {
-            position.setFixTime(last.getFixTime());
-            position.setValid(last.getValid());
-            position.setLatitude(last.getLatitude());
-            position.setLongitude(last.getLongitude());
-            position.setAltitude(last.getAltitude());
-            position.setSpeed(last.getSpeed());
-            position.setCourse(last.getCourse());
-        } else {
-            position.setFixTime(new Date(0));
-        }
+            Position last = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+            if (last != null) {
+                position.setFixTime(last.getFixTime());
+                position.setValid(last.getValid());
+                position.setLatitude(last.getLatitude());
+                position.setLongitude(last.getLongitude());
+                position.setAltitude(last.getAltitude());
+                position.setSpeed(last.getSpeed());
+                position.setCourse(last.getCourse());
+            } else {
+                position.setFixTime(new Date(0));
+            }
 
-        if (deviceTime != null) {
-            position.setDeviceTime(deviceTime);
-        } else {
-            position.setDeviceTime(new Date());
+            if (deviceTime != null) {
+                position.setDeviceTime(deviceTime);
+            } else {
+                position.setDeviceTime(new Date());
+            }
         }
     }
 
