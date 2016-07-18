@@ -118,10 +118,6 @@
     "eventCommandResult": "Komut sonucu",
     "eventGeofenceEnter": "Cihaz güvenli bölgede",
     "eventGeofenceExit": "Cihaz güvenli bölgeden çıktı",
-    "eventSosAlarm": "SOS alarm",
-    "eventVibrationAlarm": "Vibration alarm",
-    "eventMovementAlarm": "Movement alarm",
-    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Bildirim tipi",
     "notificationWeb": "Wed ile gönder",
     "notificationMail": "E-posta ile gönder"

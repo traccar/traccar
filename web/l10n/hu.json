@@ -118,10 +118,6 @@
     "eventCommandResult": "Parancs eredmény",
     "eventGeofenceEnter": "Eszköz belépett a geokerítésbe",
     "eventGeofenceExit": "Eszköz kilépett a geokerítésből",
-    "eventSosAlarm": "SOS alarm",
-    "eventVibrationAlarm": "Vibration alarm",
-    "eventMovementAlarm": "Movement alarm",
-    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Értesítés Típusa",
     "notificationWeb": "Küldés Weben",
     "notificationMail": "Küldés E-mailben"

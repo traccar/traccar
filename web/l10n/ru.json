@@ -118,10 +118,6 @@
     "eventCommandResult": "Результат команды",
     "eventGeofenceEnter": "Устройство вошло в геозону",
     "eventGeofenceExit": "Устройство покинуло геозону",
-    "eventSosAlarm": "SOS alarm",
-    "eventVibrationAlarm": "Vibration alarm",
-    "eventMovementAlarm": "Movement alarm",
-    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Тип уведомления",
     "notificationWeb": "Отправлять через Веб",
     "notificationMail": "Отправлять через Почту"

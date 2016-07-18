@@ -118,10 +118,6 @@
     "eventCommandResult": "Αποτέλεσμα εντολής",
     "eventGeofenceEnter": "Η συσσκευή εισήλθε του γεωφράχτη",
     "eventGeofenceExit": "Η συσκευή εξήλθε του γεωφράχτη",
-    "eventSosAlarm": "SOS alarm",
-    "eventVibrationAlarm": "Vibration alarm",
-    "eventMovementAlarm": "Movement alarm",
-    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Τύπος ειδοποίησης",
     "notificationWeb": "Αποστολή μέσω διαδικτύου",
     "notificationMail": "Αποστολή μέσω ηλ. ταχυδρομείου"

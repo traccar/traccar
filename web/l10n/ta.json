@@ -118,10 +118,6 @@
     "eventCommandResult": "கட்டளை விளைவு",
     "eventGeofenceEnter": "சாதனம் பூகோள வேலியினுள் நுழைந்துள்ளது",
     "eventGeofenceExit": "சாதனம் பூகோள வேலியை விட்டு வெளியேறியது",
-    "eventSosAlarm": "SOS alarm",
-    "eventVibrationAlarm": "Vibration alarm",
-    "eventMovementAlarm": "Movement alarm",
-    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "type of notification",
     "notificationWeb": "வலைதளம்  வழி அனுப்புக ",
     "notificationMail": "மின்னஞ்சல்  வழி அனுப்புக"

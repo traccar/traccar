@@ -118,10 +118,6 @@
     "eventCommandResult": "Commando resultaat",
     "eventGeofenceEnter": "Appraat is binnen geografisch gebied",
     "eventGeofenceExit": "Apparaat verlaat geografisch gebied",
-    "eventSosAlarm": "SOS alarm",
-    "eventVibrationAlarm": "Vibration alarm",
-    "eventMovementAlarm": "Movement alarm",
-    "eventOverspeedAlarm": "Overspeed alarm",
     "notificationType": "Type notificatie",
     "notificationWeb": "Stuur via web",
     "notificationMail": "Stuur via mail"
