@@ -66,6 +66,15 @@ public class Position extends Message {
     public static final String PREFIX_IO = "io";
     public static final String PREFIX_COUNT = "count";
 
+    public static final String ALARM_SOS = "sos";
+    public static final String ALARM_VIBRATION = "vibration";
+    public static final String ALARM_MOVEMENT = "movement";
+    public static final String ALARM_OVERSPEED = "overspeed";
+    public static final String ALARM_FALL_DOWN = "fallDown";
+    public static final String ALARM_LOW_BATTERY = "lowBattery";
+    public static final String ALARM_MOTION = "motion";
+    public static final String ALARM_FAULT = "fault";
+
     private String protocol;
 
     public String getProtocol() {
