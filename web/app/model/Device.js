@@ -39,5 +39,7 @@ Ext.define('Traccar.model.Device', {
         type: 'int'
     }, {
         name: 'geofenceIds'
+    }, {
+        name: 'attributes'
     }]
 });
