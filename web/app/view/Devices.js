@@ -68,11 +68,9 @@ Ext.define('Traccar.view.Devices', {
                 toggle: function(button, pressed){
                     if(pressed){
                         button.setGlyph('xf0a2@FontAwesome');
-                        //Ext.getCmp('useAlarmSoundButton').enable();
                     }
                     else {
                         button.setGlyph('xf1f7@FontAwesome');
-                        //Ext.getCmp('useAlarmSoundButton').disable();
                     }
                 },
                 scope:this

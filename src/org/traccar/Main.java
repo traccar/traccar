@@ -21,8 +21,8 @@ import java.util.TimerTask;
 import java.util.Locale;
 
 public final class Main {
-    static final long cleanDelay = 10*1000;           //10 sec
-    static final long cleanPeriod = 24*60*60*1000;    //24 hr
+    static final long cleanDelay = 10*1000;
+    static final long cleanPeriod = 24*60*60*1000;
 
     private Main() {
     }
@@ -42,7 +42,6 @@ public final class Main {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                // Clean positions history
                 try {
                     Context.getDataManager().clearPositionsHistory();
                 } catch (Exception error) {

@@ -541,7 +541,7 @@ public class DataManager implements IdentityManager {
             Date lastUpdate = device.getLastUpdate();
             if(lastUpdate != null){
 
-                Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000 ); //Subtract histDays days
+                Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000 );
                 //String dt = s.format(dateBefore);
 
                 QueryBuilder.create(dataSource, sql)
