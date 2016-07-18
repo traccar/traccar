@@ -277,7 +277,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_INFO) {
                 int subType = buf.readUnsignedByte();
 
-                if (subType == 0x05) {
+                if (subType == 0x00) {
+
+                    Position position = new Position();
+                    position.setDeviceId(getDeviceId());
+                    position.setProtocol(getProtocolName());
+
+                    getLastLocation(position, null);
+
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+
+                    return position;
+
+                } else if (subType == 0x05) {
 
                     Position position = new Position();
                     position.setDeviceId(getDeviceId());
