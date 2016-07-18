@@ -20,6 +20,10 @@
       <where>groupid NOT IN (SELECT id FROM (SELECT id FROM groups) AS groups_ids)</where>
     </update>
 
+    <addColumn tableName="devices">
+      <column name="attributes" type="VARCHAR(4096)" />
+    </addColumn>
+
   </changeSet>
 
   <changeSet author="author" id="changelog-3.7-notmssql">
