@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -63,10 +64,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodeOld(ChannelBuffer buf, int type, int index) {
+    private Position decodeOld(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
 
         Position position = new Position();
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, index);
@@ -95,10 +96,10 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(ChannelBuffer buf, int type, int index) {
+    private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
 
         Position position = new Position();
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, index);
@@ -164,13 +165,18 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOGIN) {
 
-            identify(ChannelBuffers.hexDump(buf.readBytes(8)).substring(1), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(8)).substring(1));
 
-        } else if (hasDeviceId()) {
+        } else {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
             if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
-                return decodeOld(buf, type, index);
+                return decodeOld(deviceSession, buf, type, index);
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
-                return decodeNew(buf, type, index);
+                return decodeNew(deviceSession, buf, type, index);
             }
         }
 

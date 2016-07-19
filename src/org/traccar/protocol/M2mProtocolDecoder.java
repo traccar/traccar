@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -58,13 +59,18 @@ public class M2mProtocolDecoder extends BaseProtocolDecoder {
                 imei.append(b % 10);
             }
 
-            identify(imei.toString(), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, imei.toString());
 
-        } else if (hasDeviceId()) {
+        } else {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDay(buf.readUnsignedByte() & 0x3f)

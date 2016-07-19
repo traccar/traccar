@@ -18,17 +18,7 @@ package org.traccar.model;
 import java.util.Date;
 import java.util.List;
 
-public class Device {
-
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+public class Device extends Extensible {
 
     private String name;
 

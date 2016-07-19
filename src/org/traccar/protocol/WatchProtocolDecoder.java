@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -79,7 +80,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         String manufacturer = parser.next();
         String id = parser.next();
-        if (!identify(id, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -95,7 +97,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 if (values.length >= 4) {
                     Position position = new Position();
                     position.setProtocol(getProtocolName());
-                    position.setDeviceId(getDeviceId());
+                    position.setDeviceId(deviceSession.getDeviceId());
 
                     getLastLocation(position, null);
 
@@ -118,7 +120,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())

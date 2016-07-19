@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -136,7 +137,8 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String id = String.valueOf(buf.readUnsignedInt());
-        if (!identify(id, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -146,7 +148,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             int end = buf.readerIndex() + buf.readUnsignedByte();
 

@@ -19,7 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.Log;
+import org.traccar.DeviceSession;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -146,9 +146,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             switch (tag) {
 
                 case TAG_IMEI:
-                    String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
-                    buf.skipBytes(imei.length());
-                    identify(imei, channel, remoteAddress);
+                    getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
                     break;
 
                 case TAG_DATE:
@@ -219,8 +217,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        if (!hasDeviceId()) {
-            Log.warning("Unknown device");
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -228,7 +226,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         for (Position p : positions) {
             p.setProtocol(getProtocolName());
-            p.setDeviceId(getDeviceId());
+            p.setDeviceId(deviceSession.getDeviceId());
         }
 
         if (positions.isEmpty()) {

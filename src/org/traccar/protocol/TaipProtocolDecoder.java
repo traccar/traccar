@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
@@ -84,27 +85,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(beginIndex + 1);
         }
 
-        // Find device identifier
-        beginIndex = sentence.indexOf(";ID=");
-        if (beginIndex != -1) {
-            beginIndex += 4;
-            int endIndex = sentence.indexOf(';', beginIndex);
-            if (endIndex == -1) {
-                endIndex = sentence.length();
-            }
-
-            String id = sentence.substring(beginIndex, endIndex);
-            if (!identify(id, channel, remoteAddress)) {
-                return null;
-            }
-
-            if (sendResponse && channel != null) {
-                channel.write(id);
-            }
-        } else {
-            return null;
-        }
-
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
@@ -112,7 +92,6 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
 
         String week = parser.next();
         String day = parser.next();
@@ -157,8 +136,9 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     switch (key) {
 
                         case "id":
-                            if (!identify(value, channel, remoteAddress)) {
-                                return null;
+                            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
+                            if (deviceSession != null) {
+                                position.setDeviceId(deviceSession.getDeviceId());
                             }
                             if (sendResponse && channel != null) {
                                 channel.write(value);
@@ -186,7 +166,10 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        return position;
+        if (position.getDeviceId() != 0) {
+            return position;
+        }
+        return null;
     }
 
 }

@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -126,11 +127,11 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private Position decodePosition(Parser parser, Date time) {
+    private Position decodePosition(DeviceSession deviceSession, Parser parser, Date time) {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (time != null) {
             position.setTime(time);
@@ -192,7 +193,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (!identify(parser.next(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
             return null;
         }
 
@@ -200,7 +202,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -231,7 +233,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             List<Position> positions = new LinkedList<>();
             Parser itemParser = new Parser(PATTERN_ITEM, parser.next());
             while (itemParser.find()) {
-                positions.add(decodePosition(itemParser, time));
+                positions.add(decodePosition(deviceSession, itemParser, time));
             }
 
             return positions;

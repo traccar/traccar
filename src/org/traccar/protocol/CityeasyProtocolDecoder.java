@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -73,8 +74,9 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // length
 
         String imei = ChannelBuffers.hexDump(buf.readBytes(7));
-        if (!identify(imei, channel, remoteAddress, false)
-                && !identify(imei + Checksum.luhn(Long.parseLong(imei)), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(
+                channel, remoteAddress, imei, imei + Checksum.luhn(Long.parseLong(imei)));
+        if (deviceSession == null) {
             return null;
         }
 
@@ -90,7 +92,7 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             if (parser.hasNext(15)) {
 

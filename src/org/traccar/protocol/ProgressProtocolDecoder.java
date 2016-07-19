@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Position;
 
@@ -78,9 +79,14 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
             String imei = buf.readBytes(length).toString(StandardCharsets.US_ASCII);
-            identify(imei, channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, imei);
 
-        } else if (hasDeviceId() && (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG)) {
+        } else if (type == MSG_POINT || type == MSG_ALARM || type == MSG_LOGMSG) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             List<Position> positions = new LinkedList<>();
 
@@ -92,7 +98,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
                 position.setProtocol(getProtocolName());
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
 
                 if (type == MSG_LOGMSG) {
                     position.set(Position.KEY_ARCHIVE, true);

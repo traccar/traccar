@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -52,11 +53,11 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     private static final short MSG_CC_HEARTBEAT = 0x4206;
     private static final short MSG_CC_HEARTBEAT_RESPONSE = (short) 0x8206;
 
-    private Position readPosition(ChannelBuffer buf) {
+    private Position readPosition(DeviceSession deviceSession, ChannelBuffer buf) {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -148,7 +149,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer id = buf.readBytes(20);
         int type = ChannelBuffers.swapShort(buf.readShort());
 
-        if (!identify(id.toString(StandardCharsets.US_ASCII).trim(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(
+                channel, remoteAddress, id.toString(StandardCharsets.US_ASCII).trim());
+        if (deviceSession == null) {
             return null;
         }
 
@@ -162,7 +165,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedInt(); // unix time
                 buf.readUnsignedByte();
 
-                return readPosition(buf);
+                return readPosition(deviceSession, buf);
 
             }
 
@@ -205,7 +208,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 List<Position> positions = new LinkedList<>();
 
                 for (int i = 0; i < count; i++) {
-                    Position position = readPosition(buf);
+                    Position position = readPosition(deviceSession, buf);
                     position.set(Position.KEY_ODOMETER, odometer);
                     position.set(Position.KEY_STATUS, status);
                     positions.add(position);
@@ -217,7 +220,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (type == MSG_SC_GPS_SLEEP || type == MSG_SC_AGPS_REQUEST) {
 
-                return readPosition(buf);
+                return readPosition(deviceSession, buf);
 
             }
 
@@ -233,7 +236,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 List<Position> positions = new LinkedList<>();
 
                 for (int i = 0; i < count; i++) {
-                    Position position = readPosition(buf);
+                    Position position = readPosition(deviceSession, buf);
 
                     position.set(Position.KEY_STATUS, buf.readUnsignedInt());
                     position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
@@ -255,7 +258,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
                 sendResponse(channel, remoteAddress, version, id, MSG_CC_LOGIN_RESPONSE, null);
 
-                Position position = readPosition(buf);
+                Position position = readPosition(deviceSession, buf);
 
                 position.set(Position.KEY_STATUS, buf.readUnsignedInt());
                 position.set(Position.KEY_BATTERY, buf.readUnsignedByte());

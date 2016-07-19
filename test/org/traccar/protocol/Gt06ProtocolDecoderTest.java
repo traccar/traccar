@@ -13,11 +13,11 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyNothing(decoder, binary(
                 "787805120099abec0d0a"));
 
-        verifyAttributes(decoder, binary(
-                "797900089400000002e852d70d0a"));
-
         verifyNothing(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
+
+        verifyAttributes(decoder, binary(
+                "797900089400000002e852d70d0a"));
 
         verifyAttributes(decoder, binary(
                 "7979000794050000c9b63e0d0a"));

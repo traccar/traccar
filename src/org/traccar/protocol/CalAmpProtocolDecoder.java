@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -63,10 +64,10 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodePosition(int type, ChannelBuffer buf) {
+    private Position decodePosition(DeviceSession deviceSession, int type, ChannelBuffer buf) {
 
         Position position = new Position();
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
@@ -157,7 +158,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
 
-                identify(String.valueOf(id), channel, remoteAddress);
+                getDeviceSession(channel, remoteAddress, String.valueOf(id));
+
             }
 
             if (BitUtil.check(content, 1)) {
@@ -182,7 +184,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (!hasDeviceId()) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -195,7 +198,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT || type == MSG_MINI_EVENT_REPORT) {
-            return decodePosition(type, buf);
+            return decodePosition(deviceSession, type, buf);
         }
 
         return null;

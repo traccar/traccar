@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -46,7 +47,8 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         String id = String.valueOf(buf.readUnsignedInt());
-        if (!identify(id, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -54,7 +56,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             buf.readUnsignedByte(); // protocol
             int infoGroups = buf.readUnsignedByte();

@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -91,10 +92,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readByte(); // marker
 
-        if (!identify(ChannelBuffers.hexDump(buf.readBytes(5)), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(
+                channel, remoteAddress, ChannelBuffers.hexDump(buf.readBytes(5)));
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setHour(BcdUtil.readInteger(buf, 2))
@@ -165,10 +168,11 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        if (!identify(parser.next(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder();
         if (parser.hasNext(3)) {

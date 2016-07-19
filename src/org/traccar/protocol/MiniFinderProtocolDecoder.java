@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -60,9 +61,14 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.startsWith("!1")) {
 
-            identify(sentence.substring(3, sentence.length()), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, sentence.substring(3, sentence.length()));
 
-        } else if (sentence.matches("![A-D].*") && hasDeviceId()) {
+        } else if (sentence.matches("![A-D].*")) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
@@ -71,7 +77,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())

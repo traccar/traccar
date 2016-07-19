@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
@@ -131,10 +132,11 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
 
         String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-        if (!identify(imei, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         long seconds = buf.readUnsignedInt() & 0x7fffffffL;
         seconds += 946684800L; // 2000-01-01 00:00

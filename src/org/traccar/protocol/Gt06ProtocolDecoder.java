@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
@@ -159,7 +160,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_IGNITION, BitUtil.check(flags, 1));
         position.set(Position.KEY_STATUS, flags);
-        position.set(Position.KEY_POWER, buf.readUnsignedByte());
+        position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
         position.set(Position.KEY_GSM, buf.readUnsignedByte());
     }
 
@@ -175,7 +176,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             int length = buf.readUnsignedByte();
             int dataLength = length - 5;
-
             int type = buf.readUnsignedByte();
 
             if (type == MSG_LOGIN) {
@@ -197,17 +197,23 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
 
-                if (identify(imei, channel, remoteAddress)) {
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                if (deviceSession != null) {
                     buf.skipBytes(buf.readableBytes() - 6);
                     sendResponse(channel, type, buf.readUnsignedShort());
                 }
 
-            } else if (hasDeviceId()) {
+            } else {
+
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+                if (deviceSession == null) {
+                    return null;
+                }
 
                 if (type == MSG_STRING) {
 
                     Position position = new Position();
-                    position.setDeviceId(getDeviceId());
+                    position.setDeviceId(deviceSession.getDeviceId());
                     position.setProtocol(getProtocolName());
 
                     getLastLocation(position, null);
@@ -228,7 +234,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 } else if (isSupported(type)) {
 
                     Position position = new Position();
-                    position.setDeviceId(getDeviceId());
+                    position.setDeviceId(deviceSession.getDeviceId());
                     position.setProtocol(getProtocolName());
 
                     if (hasGps(type)) {
@@ -271,39 +277,31 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (header == 0x7979) {
 
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
             buf.readUnsignedShort(); // length
             int type = buf.readUnsignedByte();
 
             if (type == MSG_INFO) {
                 int subType = buf.readUnsignedByte();
 
+                Position position = new Position();
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setProtocol(getProtocolName());
+
+                getLastLocation(position, null);
+
                 if (subType == 0x00) {
-
-                    Position position = new Position();
-                    position.setDeviceId(getDeviceId());
-                    position.setProtocol(getProtocolName());
-
-                    getLastLocation(position, null);
-
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-
                     return position;
-
                 } else if (subType == 0x05) {
-
-                    Position position = new Position();
-                    position.setDeviceId(getDeviceId());
-                    position.setProtocol(getProtocolName());
-
-                    getLastLocation(position, null);
-
                     int flags = buf.readUnsignedByte();
-
                     position.set("door", BitUtil.check(flags, 0));
                     position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
-
                     return position;
-
                 }
             }
 

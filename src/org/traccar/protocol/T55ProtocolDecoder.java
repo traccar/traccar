@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -91,7 +92,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position position = null;
 
-    private Position decodeGprmc(String sentence, SocketAddress remoteAddress, Channel channel) {
+    private Position decodeGprmc(
+            DeviceSession deviceSession, String sentence, SocketAddress remoteAddress, Channel channel) {
 
         if (channel != null && !(channel instanceof DatagramChannel)) {
             channel.write("OK1\r\n");
@@ -105,8 +107,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        if (hasDeviceId()) {
-            position.setDeviceId(getDeviceId());
+        if (deviceSession != null) {
+            position.setDeviceId(deviceSession.getDeviceId());
         }
 
         DateBuilder dateBuilder = new DateBuilder()
@@ -123,13 +125,14 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(3)) {
             position.set(Position.KEY_SATELLITES, parser.next());
-            if (!identify(parser.next(), channel, remoteAddress)) {
+            deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
         }
 
-        if (hasDeviceId()) {
+        if (deviceSession != null) {
             return position;
         } else {
             this.position = position; // save position
@@ -137,7 +140,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodeGpgga(String sentence) {
+    private Position decodeGpgga(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN_GPGGA, sentence);
         if (!parser.matches()) {
@@ -146,7 +149,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setCurrentDate()
@@ -160,7 +163,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeGprma(String sentence) {
+    private Position decodeGprma(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN_GPRMA, sentence);
         if (!parser.matches()) {
@@ -169,7 +172,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(new Date());
         position.setValid(parser.next().equals("A"));
@@ -181,7 +184,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeTrccr(String sentence) {
+    private Position decodeTrccr(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN_TRCCR, sentence);
         if (!parser.matches()) {
@@ -190,7 +193,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -215,6 +218,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
+        DeviceSession deviceSession;
+
         if (!sentence.startsWith("$") && sentence.contains("$")) {
             int index = sentence.indexOf("$");
             String id = sentence.substring(0, index);
@@ -223,33 +228,36 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             } else if (id.endsWith("/")) {
                 id = id.substring(id.indexOf('/') + 1, id.length() - 1);
             }
-            identify(id, channel, remoteAddress);
+            deviceSession = getDeviceSession(channel, remoteAddress, id);
             sentence = sentence.substring(index);
+        } else {
+            deviceSession = getDeviceSession(channel, remoteAddress);
         }
 
         if (sentence.startsWith("$PGID")) {
-            identify(sentence.substring(6, sentence.length() - 3), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, sentence.substring(6, sentence.length() - 3));
         } else if (sentence.startsWith("$PCPTI")) {
-            identify(sentence.substring(7, sentence.indexOf(",", 7)), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.indexOf(",", 7)));
         } else if (sentence.startsWith("IMEI")) {
-            identify(sentence.substring(5, sentence.length()), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, sentence.substring(5, sentence.length()));
         } else if (sentence.startsWith("$GPFID")) {
-            if (identify(sentence.substring(7, sentence.length()), channel, remoteAddress) && position != null) {
+            deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(7, sentence.length()));
+            if (deviceSession != null && position != null) {
                 Position position = this.position;
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
                 this.position = null;
                 return position;
             }
         } else if (sentence.matches("^[0-9A-F]+$")) {
-            identify(sentence, channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, sentence);
         } else if (sentence.startsWith("$GPRMC")) {
-            return decodeGprmc(sentence, remoteAddress, channel);
-        } else if (sentence.startsWith("$GPGGA") && hasDeviceId()) {
-            return decodeGpgga(sentence);
-        } else if (sentence.startsWith("$GPRMA") && hasDeviceId()) {
-            return decodeGprma(sentence);
-        } else if (sentence.startsWith("$TRCCR") && hasDeviceId()) {
-            return decodeTrccr(sentence);
+            return decodeGprmc(deviceSession, sentence, remoteAddress, channel);
+        } else if (sentence.startsWith("$GPGGA") && deviceSession != null) {
+            return decodeGpgga(deviceSession, sentence);
+        } else if (sentence.startsWith("$GPRMA") && deviceSession != null) {
+            return decodeGprma(deviceSession, sentence);
+        } else if (sentence.startsWith("$TRCCR") && deviceSession != null) {
+            return decodeTrccr(deviceSession, sentence);
         }
 
         return null;

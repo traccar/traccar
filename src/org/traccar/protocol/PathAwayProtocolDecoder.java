@@ -24,6 +24,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -61,7 +62,9 @@ public class PathAwayProtocolDecoder extends BaseProtocolDecoder {
         HttpRequest request = (HttpRequest) msg;
         QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
 
-        if (!identify(decoder.getParameters().get("UserName").get(0), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(
+                channel, remoteAddress, decoder.getParameters().get("UserName").get(0));
+        if (deviceSession == null) {
             return null;
         }
 
@@ -72,7 +75,7 @@ public class PathAwayProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())

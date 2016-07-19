@@ -24,6 +24,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -110,7 +111,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private List<Position> parseFormatA(ChannelBuffer buf) {
+    private List<Position> parseFormatA(DeviceSession deviceSession, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<>();
 
         FloatReader latitudeReader = new FloatReader();
@@ -120,8 +121,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         try {
             while (buf.readable()) {
                 Position position = new Position();
-                position.setDeviceId(getDeviceId());
                 position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
 
                 short flags = buf.readUnsignedByte();
 
@@ -197,9 +198,9 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private Position parseFormatA1(ChannelBuffer buf) {
+    private Position parseFormatA1(DeviceSession deviceSession, ChannelBuffer buf) {
         Position position = new Position();
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
         short flags = buf.readUnsignedByte();
@@ -283,7 +284,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes("id=".length());
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
         String uniqueId = buf.toString(buf.readerIndex(), index - buf.readerIndex(), StandardCharsets.US_ASCII);
-        if (!identify(uniqueId, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+        if (deviceSession == null) {
             return null;
         }
         buf.skipBytes(uniqueId.length());
@@ -303,9 +305,9 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         if (packetId == 0x31 || packetId == 0x32 || packetId == 0x36) {
             if (simple) {
-                return parseFormatA1(buf);
+                return parseFormatA1(deviceSession, buf);
             } else {
-                return parseFormatA(buf);
+                return parseFormatA(deviceSession, buf);
             }
         } //else if (0x34 0x38 0x4F 0x59)
 

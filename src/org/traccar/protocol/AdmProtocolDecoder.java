@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -47,15 +48,23 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
+        DeviceSession deviceSession;
         if (type == MSG_IMEI) {
-            identify(buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII), channel, remoteAddress);
+            deviceSession = getDeviceSession(
+                    channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
+        } else {
+            deviceSession = getDeviceSession(channel, remoteAddress);
         }
 
-        if (hasDeviceId() && BitUtil.to(type, 2) == 0) {
+        if (deviceSession == null) {
+            return null;
+        }
+
+        if (BitUtil.to(type, 2) == 0) {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             buf.readUnsignedByte(); // firmware version
             buf.readUnsignedShort(); // index

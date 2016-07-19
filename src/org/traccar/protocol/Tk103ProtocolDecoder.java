@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -103,10 +104,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN_BATTERY, sentence);
         if (parser.matches()) {
-            if (!identify(parser.next(), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -121,7 +123,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
             int power = parser.nextInt();
             if (power != 65535) {
-                position.set(Position.KEY_POWER, battery);
+                position.set(Position.KEY_POWER, power);
             }
 
             return position;
@@ -129,10 +131,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         parser = new Parser(PATTERN_NETWORK, sentence);
         if (parser.matches()) {
-            if (!identify(parser.next(), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);
 
@@ -149,10 +152,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (!identify(parser.next(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         int alarm = sentence.indexOf("BO01");
         if (alarm != -1) {

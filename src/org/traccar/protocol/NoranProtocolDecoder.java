@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -120,10 +121,11 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
                 rawId = buf.readBytes(11);
             }
             String id = rawId.toString(StandardCharsets.US_ASCII).replaceAll("[^\\p{Print}]", "");
-            if (!identify(id, channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             if (newFormat) {
                 DateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");

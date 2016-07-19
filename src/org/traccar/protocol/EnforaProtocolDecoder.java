@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferIndexFinder;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -77,7 +78,8 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String imei = buf.toString(index, IMEI_LENGTH, StandardCharsets.US_ASCII);
-        if (!identify(imei, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -95,7 +97,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());

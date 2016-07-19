@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -110,7 +111,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             int length = buf.readUnsignedShort();
             buf.skipBytes(length);
             length = buf.readUnsignedShort();
-            identify(buf.readBytes(length).toString(StandardCharsets.US_ASCII), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
 
         } else if (type == MSG_LAST_LOG_INDEX) {
 
@@ -120,8 +121,12 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 requestArchive(channel);
             }
 
-        } else if (hasDeviceId()
-                && (type == MSG_CURRENT_GPS_DATA || type == MSG_STATE_FULL_INFO_T104 || type == MSG_LOG_RECORDS)) {
+        } else if (type == MSG_CURRENT_GPS_DATA || type == MSG_STATE_FULL_INFO_T104 || type == MSG_LOG_RECORDS) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             List<Position> positions = new LinkedList<>();
 
@@ -133,7 +138,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < recordCount; j++) {
                 Position position = new Position();
                 position.setProtocol(getProtocolName());
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
 
                 int subtype = type;
                 if (type == MSG_LOG_RECORDS) {
