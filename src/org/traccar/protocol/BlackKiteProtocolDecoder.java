@@ -22,7 +22,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
-import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
