@@ -68,7 +68,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                 || !BitUtil.check(status, 3) || !BitUtil.check(status, 4) || !BitUtil.check(status, 7)) {
 
             if (!BitUtil.check(status, 0)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);//theft alarm in protocol
+                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
             } else if (!BitUtil.check(status, 1)) {
                 position.set(Position.KEY_ALARM, "robbery");
             } else if (!BitUtil.check(status, 3)) {
