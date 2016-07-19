@@ -155,25 +155,34 @@ public class GeofenceManager {
     public final void refresh() {
         if (dataManager != null) {
             try {
+
+                Collection<GroupGeofence> databaseGroupGeofences = dataManager.getGroupGeofences();
                 groupGeofencesLock.writeLock().lock();
-                deviceGeofencesLock.writeLock().lock();
                 try {
                     groupGeofences.clear();
-                    for (GroupGeofence groupGeofence : dataManager.getGroupGeofences()) {
+                    for (GroupGeofence groupGeofence : databaseGroupGeofences) {
                         getGroupGeofences(groupGeofence.getGroupId()).add(groupGeofence.getGeofenceId());
                     }
+                } finally {
+                    groupGeofencesLock.writeLock().unlock();
+                }
 
+                Collection<DeviceGeofence> databaseDeviceGeofences = dataManager.getDeviceGeofences();
+                Collection<Device> allDevices = Context.getDeviceManager().getAllDevices();
+
+                deviceGeofencesLock.writeLock().lock();
+                try {
                     deviceGeofences.clear();
                     deviceGeofencesWithGroups.clear();
 
-                    for (DeviceGeofence deviceGeofence : dataManager.getDeviceGeofences()) {
+                    for (DeviceGeofence deviceGeofence : databaseDeviceGeofences) {
                         getDeviceGeofences(deviceGeofences, deviceGeofence.getDeviceId())
                             .add(deviceGeofence.getGeofenceId());
                         getDeviceGeofences(deviceGeofencesWithGroups, deviceGeofence.getDeviceId())
                             .add(deviceGeofence.getGeofenceId());
                     }
 
-                    for (Device device : Context.getDeviceManager().getAllDevices()) {
+                    for (Device device : allDevices) {
                         long groupId = device.getGroupId();
                         while (groupId != 0) {
                             getDeviceGeofences(deviceGeofencesWithGroups,
@@ -204,7 +213,6 @@ public class GeofenceManager {
                     }
 
                 } finally {
-                    groupGeofencesLock.writeLock().unlock();
                     deviceGeofencesLock.writeLock().unlock();
                 }
 
