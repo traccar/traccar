@@ -411,7 +411,7 @@ public class DataManager {
 
         for (Device device : getAllDevices()) {
             Date lastUpdate = device.getLastUpdate();
-            if(lastUpdate != null){
+            if (lastUpdate != null) {
 
                 Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000);
 

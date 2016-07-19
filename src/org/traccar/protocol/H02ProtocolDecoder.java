@@ -25,7 +25,6 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -68,15 +67,15 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (!BitUtil.check(status, 0) || !BitUtil.check(status, 1)
                 || !BitUtil.check(status, 3) || !BitUtil.check(status, 4) || !BitUtil.check(status, 7)) {
 
-            if (!BitUtil.check(status, 0)){
+            if (!BitUtil.check(status, 0)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);//theft alarm in protocol
-            } else if (!BitUtil.check(status, 1)){
+            } else if (!BitUtil.check(status, 1)) {
                 position.set(Position.KEY_ALARM, "robbery");
-            } else if (!BitUtil.check(status, 3)){
+            } else if (!BitUtil.check(status, 3)) {
                 position.set(Position.KEY_ALARM, "illegal ignition");
-            } else if (!BitUtil.check(status, 4)){
+            } else if (!BitUtil.check(status, 4)) {
                 position.set(Position.KEY_ALARM, "entering");
-            } else if (!BitUtil.check(status, 7)){
+            } else if (!BitUtil.check(status, 7)) {
                 position.set(Position.KEY_ALARM, "out");
             }
 
