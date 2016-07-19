@@ -118,12 +118,12 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
             int battery = parser.nextInt();
             if (battery != 65535) {
-                position.set(Position.KEY_BATTERY, battery);
+                position.set(Position.KEY_BATTERY, battery * 0.01);
             }
 
             int power = parser.nextInt();
             if (power != 65535) {
-                position.set(Position.KEY_POWER, power);
+                position.set(Position.KEY_POWER, power * 0.1);
             }
 
             return position;
