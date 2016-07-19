@@ -156,6 +156,21 @@ Ext.define('Traccar.controller.Root', {
                             }
                         }
                         text = Strings.eventCommandResult + ': ' + text;
+                    } else if (array[i].type === 'alarm' && data.positions) {
+                        text = 'Alarm';
+                        for (j = 0; j < data.positions.length; j++) {
+                            if (data.positions[j].id === array[i].positionId && data.positions[j].attributes.alarm != null) {
+                                if (typeof data.positions[j].attributes.alarm === 'string' && data.positions[j].attributes.alarm.length >= 2){
+                                    var alarmKey = 'alarm' + data.positions[j].attributes.alarm.charAt(0).toUpperCase() + data.positions[j].attributes.alarm.slice(1);
+                                    text = Strings[alarmKey];
+                                    if (typeof text === 'undefined') {
+                                        text = alarmKey;
+                                    }
+                                    text = 'Alarm: ' + text;
+                                }
+                                break;
+                            }
+                        }
                     } else {
                         typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
                         text = Strings[typeKey];

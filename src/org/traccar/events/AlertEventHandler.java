@@ -29,15 +29,7 @@ public class AlertEventHandler extends BaseEventHandler {
         Object alarm = position.getAttributes().get(Position.KEY_ALARM);
         if (alarm != null) {
             Collection<Event> events = new ArrayList<>();
-            if(alarm.equals(Event.TYPE_SOS_ALARM)){
-                events.add(new Event(Event.TYPE_SOS_ALARM, position.getDeviceId(), position.getId()));
-            } else if(alarm.equals(Event.TYPE_VIBRATION_ALARM)){
-                events.add(new Event(Event.TYPE_VIBRATION_ALARM, position.getDeviceId(), position.getId()));
-            } else if(alarm.equals(Event.TYPE_MOVEMENT_ALARM)){
-                events.add(new Event(Event.TYPE_MOVEMENT_ALARM, position.getDeviceId(), position.getId()));
-            } else if(alarm.equals(Event.TYPE_OVERSPEED_ALARM)){
-                events.add(new Event(Event.TYPE_OVERSPEED_ALARM, position.getDeviceId(), position.getId()));
-            }
+            events.add(new Event(Event.TYPE_ALARM, position.getDeviceId(), position.getId()));
             return events;
         }
         return null;

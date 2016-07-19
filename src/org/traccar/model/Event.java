@@ -48,10 +48,7 @@ public class Event extends Message {
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
 
-    public static final String TYPE_SOS_ALARM = "sosAlarm";
-    public static final String TYPE_VIBRATION_ALARM = "vibrationAlarm";
-    public static final String TYPE_MOVEMENT_ALARM = "movementAlarm";
-    public static final String TYPE_OVERSPEED_ALARM = "overspeedAlarm";
+    public static final String TYPE_ALARM = "alarm";
 
     private Date serverTime;
 

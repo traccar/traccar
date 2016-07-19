@@ -35,7 +35,7 @@ for i in range(0, len(waypoints)):
 def send(lat, lon, course, alarm):
     params = (('id', id), ('timestamp', int(time.time())), ('lat', lat), ('lon', lon), ('bearing', course))
     if alarm:
-        params = params + (('alarm', 'sosAlarm'),)
+        params = params + (('alarm', 'sos'),)
     urllib2.urlopen(server + '?' + urllib.urlencode(params)).read()
 
 def course(lat1, lon1, lat2, lon2):
