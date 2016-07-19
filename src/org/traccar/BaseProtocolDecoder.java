@@ -77,6 +77,9 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             } else if (deviceId != 0) {
                 deviceSession = new DeviceSession(deviceId);
                 addressDeviceSessions.put(remoteAddress, deviceSession);
+                if (Context.getConnectionManager() != null) {
+                    Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                }
                 return deviceSession;
             } else {
                 return null;
@@ -86,6 +89,9 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 long deviceId = findDeviceId(remoteAddress, uniqueIds);
                 if (deviceId != 0) {
                     channelDeviceSession = new DeviceSession(deviceId);
+                    if (Context.getConnectionManager() != null) {
+                        Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                    }
                 }
             }
             return channelDeviceSession;
