@@ -29,7 +29,11 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.logging.LoggingHandler;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
-import org.traccar.events.*;
+import org.traccar.events.CommandResultEventHandler;
+import org.traccar.events.GeofenceEventHandler;
+import org.traccar.events.MotionEventHandler;
+import org.traccar.events.OverspeedEventHandler;
+import org.traccar.events.AlertEventHandler;
 import org.traccar.helper.Log;
 
 import java.net.InetSocketAddress;

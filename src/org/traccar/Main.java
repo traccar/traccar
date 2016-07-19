@@ -16,6 +16,8 @@
 package org.traccar;
 
 import org.traccar.helper.Log;
+
+import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Locale;
@@ -44,7 +46,7 @@ public final class Main {
             public void run() {
                 try {
                     Context.getDataManager().clearPositionsHistory();
-                } catch (Exception error) {
+                } catch (SQLException error) {
                     Log.warning(error);
                 }
             }

@@ -399,7 +399,6 @@ public class DataManager {
     }
 
     public void clearPositionsHistory() throws SQLException {
-        //SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd");
         int histDays = config.getInteger("database.positionsHistoryDays");
         if (histDays == 0) {
             return;
@@ -414,8 +413,7 @@ public class DataManager {
             Date lastUpdate = device.getLastUpdate();
             if(lastUpdate != null){
 
-                Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000 );
-                //String dt = s.format(dateBefore);
+                Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000);
 
                 QueryBuilder.create(dataSource, sql)
                         .setLong("deviceId", device.getId())
