@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
@@ -78,13 +79,14 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position parseUnitReport(ChannelBuffer buf, int sequenceNumber) {
+    private Position parseUnitReport(
+            DeviceSession deviceSession, ChannelBuffer buf, int sequenceNumber) {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
         position.setValid(true);
         position.set(Position.KEY_INDEX, sequenceNumber);
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         buf.readUnsignedShort(); // report trigger
         buf.readUnsignedShort(); // flags
@@ -112,13 +114,14 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position parseTg2Report(ChannelBuffer buf, int sequenceNumber) {
+    private Position parseTg2Report(
+            DeviceSession deviceSession, ChannelBuffer buf, int sequenceNumber) {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
         position.setValid(true);
         position.set(Position.KEY_INDEX, sequenceNumber);
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         buf.readUnsignedShort(); // report trigger
         buf.readUnsignedByte(); // reserved
@@ -148,12 +151,13 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position parsePositionReport(ChannelBuffer buf, int sequenceNumber, long timestamp) {
+    private Position parsePositionReport(
+            DeviceSession deviceSession, ChannelBuffer buf, int sequenceNumber, long timestamp) {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, sequenceNumber);
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setTime(convertTimestamp(timestamp));
 
         position.setLatitude(buf.readMedium() * 0.00002);
@@ -169,12 +173,13 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position parsePositionReport2(ChannelBuffer buf, int sequenceNumber, long timestamp) {
+    private Position parsePositionReport2(
+            DeviceSession deviceSession, ChannelBuffer buf, int sequenceNumber, long timestamp) {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, sequenceNumber);
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setTime(convertTimestamp(timestamp));
 
         position.setLatitude(buf.readInt() * 0.0000001);
@@ -192,12 +197,13 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position parseSnapshot4(ChannelBuffer buf, int sequenceNumber) {
+    private Position parseSnapshot4(
+            DeviceSession deviceSession, ChannelBuffer buf, int sequenceNumber) {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, sequenceNumber);
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         buf.readUnsignedByte(); // report trigger
         buf.readUnsignedByte(); // position fix source
@@ -230,12 +236,13 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position parseTrackingData(ChannelBuffer buf, int sequenceNumber, long timestamp) {
+    private Position parseTrackingData(
+            DeviceSession deviceSession, ChannelBuffer buf, int sequenceNumber, long timestamp) {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
         position.set(Position.KEY_INDEX, sequenceNumber);
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setTime(convertTimestamp(timestamp));
 
         buf.readUnsignedByte(); // tracking mode
@@ -273,32 +280,30 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         int flags = buf.readUnsignedShort();
         buf.readUnsignedShort(); // checksum
 
-        // Get device identifier
-        if (!identify(String.valueOf(buf.readUnsignedInt()), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedInt()));
+        if (deviceSession == null) {
             return null;
         }
 
-        long timestamp = buf.readUnsignedInt(); // message timestamp
+        long timestamp = buf.readUnsignedInt();
 
-        // Acknowledgment
         if ((flags & 0x1) == 0x0) {
             sendAcknowledgment(channel, sequenceNumber);
         }
 
-        // Parse messages
         switch (messageId) {
             case MSG_UNIT_REPORT:
-                return parseUnitReport(buf, sequenceNumber);
+                return parseUnitReport(deviceSession, buf, sequenceNumber);
             case MSG_TG2_REPORT:
-                return parseTg2Report(buf, sequenceNumber);
+                return parseTg2Report(deviceSession, buf, sequenceNumber);
             case MSG_POSITION_REPORT:
-                return parsePositionReport(buf, sequenceNumber, timestamp);
+                return parsePositionReport(deviceSession, buf, sequenceNumber, timestamp);
             case MSG_POSITION_REPORT_2:
-                return parsePositionReport2(buf, sequenceNumber, timestamp);
+                return parsePositionReport2(deviceSession, buf, sequenceNumber, timestamp);
             case MSG_SNAPSHOT4:
-                return parseSnapshot4(buf, sequenceNumber);
+                return parseSnapshot4(deviceSession, buf, sequenceNumber);
             case MSG_TRACKING_DATA:
-                return parseTrackingData(buf, sequenceNumber, timestamp);
+                return parseTrackingData(deviceSession, buf, sequenceNumber, timestamp);
             default:
                 Log.warning(new UnsupportedOperationException(String.valueOf(messageId)));
                 break;

@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -157,10 +158,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
                 position.set(Position.KEY_ALARM, parser.next());
 
-                if (!identify(parser.next(), channel, remoteAddress, false) && !identify(id, channel, remoteAddress)) {
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next(), id);
+                if (deviceSession == null) {
                     return null;
                 }
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
 
                 position.set(Position.KEY_SATELLITES, parser.next());
 
@@ -182,10 +184,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
             } else {
 
-                if (!identify(id, channel, remoteAddress)) {
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+                if (deviceSession == null) {
                     return null;
                 }
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
 
             }
 
@@ -194,10 +197,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             Parser parser = new Parser(PATTERN_ALTERNATIVE, status);
             if (parser.matches()) {
 
-                if (!identify(id, channel, remoteAddress)) {
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+                if (deviceSession == null) {
                     return null;
                 }
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
 
                 position.set(Position.KEY_MCC, parser.nextInt());
                 position.set(Position.KEY_MNC, parser.nextInt());
@@ -275,10 +279,11 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        if (!identify(parser.next(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.next().equals("S")) {
             position.set(Position.KEY_ARCHIVE, true);

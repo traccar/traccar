@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -50,10 +51,11 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         buf.readByte(); // header
 
         String id = String.valueOf(Long.parseLong(ChannelBuffers.hexDump(buf.readBytes(5))));
-        if (!identify(id, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         int version = BcdUtil.readInteger(buf, 1);
         buf.readUnsignedByte(); // type
@@ -151,10 +153,11 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ALARM, true);
 
-        if (!identify(parser.next(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         position.setLongitude(parser.nextCoordinate());
         position.setLatitude(parser.nextCoordinate());

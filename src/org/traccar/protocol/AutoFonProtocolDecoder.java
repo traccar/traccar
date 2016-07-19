@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
@@ -57,11 +58,11 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodePosition(ChannelBuffer buf, boolean history) {
+    private Position decodePosition(DeviceSession deviceSession, ChannelBuffer buf, boolean history) {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (!history) {
             buf.readUnsignedByte(); // interval
@@ -127,20 +128,27 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-            if (!identify(imei, channel, remoteAddress)) {
-                return null;
-            }
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
-            if (channel != null) {
+            if (deviceSession != null && channel != null) {
                 ChannelBuffer response = ChannelBuffers.dynamicBuffer();
                 response.writeBytes("resp_crc=".getBytes(StandardCharsets.US_ASCII));
                 response.writeByte(buf.getByte(buf.writerIndex() - 1));
                 channel.write(response);
             }
 
-        } else if (type == MSG_LOCATION) {
+            return null;
 
-            return decodePosition(buf, false);
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        if (type == MSG_LOCATION) {
+
+            return decodePosition(deviceSession, buf, false);
 
         } else if (type == MSG_HISTORY) {
 
@@ -149,7 +157,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             List<Position> positions = new LinkedList<>();
 
             for (int i = 0; i < count; i++) {
-                positions.add(decodePosition(buf, true));
+                positions.add(decodePosition(deviceSession, buf, true));
             }
 
             return positions;
@@ -158,7 +166,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             short status = buf.readUnsignedByte();
             position.set(Position.KEY_ALARM, BitUtil.check(status, 7));

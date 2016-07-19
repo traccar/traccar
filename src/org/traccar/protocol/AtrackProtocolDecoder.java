@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -188,7 +189,8 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
 
         long id = buf.readLong();
-        if (!identify(String.valueOf(id), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
+        if (deviceSession == null) {
             return null;
         }
 
@@ -200,7 +202,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             if (longDate) {
 

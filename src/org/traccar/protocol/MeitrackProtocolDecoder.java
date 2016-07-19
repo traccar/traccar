@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -92,10 +93,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        if (!identify(parser.next(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         int event = parser.nextInt();
         position.set(Position.KEY_EVENT, event);
@@ -173,7 +175,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
 
         String imei = buf.toString(index + 1, 15, StandardCharsets.US_ASCII);
-        if (!identify(imei, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -183,7 +186,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
@@ -251,7 +254,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case "D03":
                 if (channel != null) {
-                    String imei = Context.getIdentityManager().getDeviceById(getDeviceId()).getUniqueId();
+                    DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+                    String imei = Context.getIdentityManager().getDeviceById(deviceSession.getDeviceId()).getUniqueId();
                     channel.write("@@O46," + imei + ",D00,camera_picture.jpg,0*00\r\n");
                 }
                 return null;

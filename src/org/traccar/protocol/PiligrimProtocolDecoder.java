@@ -25,6 +25,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
@@ -79,7 +80,9 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, "BINGPS: OK");
 
             QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
-            if (!identify(decoder.getParameters().get("imei").get(0), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(
+                    channel, remoteAddress, decoder.getParameters().get("imei").get(0));
+            if (deviceSession == null) {
                 return null;
             }
 
@@ -96,7 +99,7 @@ public class PiligrimProtocolDecoder extends BaseProtocolDecoder {
 
                     Position position = new Position();
                     position.setProtocol(getProtocolName());
-                    position.setDeviceId(getDeviceId());
+                    position.setDeviceId(deviceSession.getDeviceId());
 
                     DateBuilder dateBuilder = new DateBuilder()
                             .setDay(buf.readUnsignedByte())

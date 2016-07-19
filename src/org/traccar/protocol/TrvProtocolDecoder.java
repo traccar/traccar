@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -81,11 +82,12 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type.equals("AP00")) {
-            identify(sentence.substring(7), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, sentence.substring(7));
             return null;
         }
 
-        if (!hasDeviceId()) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
             return null;
         }
 
@@ -98,7 +100,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);
 
@@ -121,7 +123,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt());

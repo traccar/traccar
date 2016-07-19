@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -90,7 +91,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_RFID = 0x9966;
 
-    private boolean identify(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
+    private DeviceSession identify(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < 7; i++) {
@@ -113,13 +114,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         String id = builder.toString();
 
-        // Try to recreate full IMEI number
-        // Sometimes first digit is cut, so this won't work
-        if (id.length() == 14 && identify(id + Checksum.luhn(Long.parseLong(id)), channel, remoteAddress, false)) {
-            return true;
+        if (id.length() == 14) {
+            return getDeviceSession(channel, remoteAddress, id, id + Checksum.luhn(Long.parseLong(id)));
+        } else {
+            return getDeviceSession(channel, remoteAddress, id);
         }
-
-        return identify(id, channel, remoteAddress);
     }
 
     private static void sendResponse(
@@ -202,10 +201,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             buf.skipBytes(6);
         }
 
-        if (!identify(id, channel, remoteAddress)) {
+        DeviceSession deviceSession = identify(id, channel, remoteAddress);
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (command == MSG_RFID) {
             for (int i = 0; i < 15; i++) {

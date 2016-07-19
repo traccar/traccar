@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.StringFinder;
@@ -136,11 +137,13 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
         int indexTilde = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("~"));
 
-        if (hasDeviceId() && indexTilde == -1) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+
+        if (deviceSession != null && indexTilde == -1) {
             String bufString = buf.toString(StandardCharsets.US_ASCII);
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.setTime(new Date());
             getLastLocation(position, new Date());
@@ -155,9 +158,11 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         String header = buf.readBytes(HEADER_LENGTH).toString(StandardCharsets.US_ASCII);
 
         if (header.equals("+RRCB~")) {
+
             buf.skipBytes(2); //binary length 26
             int deviceId = buf.readUnsignedShort();
-            if (!identify(String.valueOf(deviceId), channel, remoteAddress)) {
+            deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceId));
+            if (deviceSession == null) {
                 return null;
             }
             long unixTime = buf.readUnsignedInt();
@@ -166,7 +171,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
             }
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.setTime(new Date(unixTime * 1000));
 
@@ -174,9 +179,11 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         } else if (header.equals("+DDAT~")) {
+
             buf.skipBytes(2); //binary length
             int deviceId = buf.readUnsignedShort();
-            if (!identify(String.valueOf(deviceId), channel, remoteAddress)) {
+            deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceId));
+            if (deviceSession == null) {
                 return null;
             }
             byte format = buf.readByte();
@@ -197,7 +204,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
                     if (buf.getUnsignedByte(buf.readerIndex()) != 0xFE) {
                         Position position = new Position();
                         position.setProtocol(getProtocolName());
-                        position.setDeviceId(getDeviceId());
+                        position.setDeviceId(deviceSession.getDeviceId());
                         position.setTime(new Date((unixTime + i * timeIncrement) * 1000));
                         decodeStructure(buf, position);
                         positions.add(position);
@@ -208,7 +215,10 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(2); // increment
             }
             return positions;
+
         }
+
         return null;
     }
+
 }

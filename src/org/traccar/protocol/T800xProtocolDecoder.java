@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -71,7 +72,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShort();
         ChannelBuffer imei = buf.readBytes(8);
 
-        if (!identify(ChannelBuffers.hexDump(imei).substring(1), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(
+                channel, remoteAddress, ChannelBuffers.hexDump(imei).substring(1));
+        if (deviceSession == null) {
             return null;
         }
 
@@ -83,7 +86,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_INDEX, index);
 

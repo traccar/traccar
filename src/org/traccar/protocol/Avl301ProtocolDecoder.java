@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -46,7 +47,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_STATUS = 'H';
     public static final int MSG_GPS_LBS_STATUS = '$';
 
-    private static void sendResponse(Channel channel, int type) {
+    private void sendResponse(Channel channel, int type) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(5);
             response.writeByte('$');
@@ -69,18 +70,24 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_LOGIN) {
 
-            if (identify(readImei(buf), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, readImei(buf));
+            if (deviceSession == null) {
                 sendResponse(channel, type);
             }
 
-        } else if (hasDeviceId() && type == MSG_STATUS) {
+        } else if (type == MSG_STATUS) {
 
             sendResponse(channel, type);
 
-        } else if (hasDeviceId() && type == MSG_GPS_LBS_STATUS) {
+        } else if (type == MSG_GPS_LBS_STATUS) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             Position position = new Position();
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
             position.setProtocol(getProtocolName());
 
             DateBuilder dateBuilder = new DateBuilder()
