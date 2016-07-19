@@ -90,8 +90,32 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             if (parser.hasNext(5)) {
 
                 int flags = parser.nextInt(16);
-                position.set(Position.KEY_FLAGS, flags);
+
                 position.setValid(BitUtil.check(flags, 0));
+
+                if (BitUtil.check(flags, 2)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
+                }
+                if (BitUtil.check(flags, 6)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
+                if (BitUtil.check(flags, 7)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                }
+                if (BitUtil.check(flags, 8)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+                }
+                if (BitUtil.check(flags, 12)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                }
+                if (BitUtil.check(flags, 14)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_MOTION);
+                }
+                if (BitUtil.check(flags, 15)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                }
+
+                position.set(Position.KEY_GSM, BitUtil.between(flags, 16, 20));
 
                 position.setAltitude(parser.nextDouble());
 

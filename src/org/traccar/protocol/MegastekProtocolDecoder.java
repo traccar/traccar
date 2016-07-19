@@ -173,7 +173,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_CHARGE, Integer.parseInt(charger) == 1);
                 }
 
-                if (parser.hasNext(3)) {
+                if (parser.hasNext(4)) {
                     position.set(Position.KEY_MCC, parser.nextInt());
                     position.set(Position.KEY_MNC, parser.nextInt());
                     position.set(Position.KEY_LAC, parser.nextInt(16));

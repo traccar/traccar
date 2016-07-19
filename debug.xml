@@ -190,7 +190,7 @@
     </entry>
 
     <entry key='database.insertGroup'>
-        INSERT INTO groups (name) VALUES (:name);
+        INSERT INTO groups (name, groupId) VALUES (:name, :groupId);
     </entry>
 
     <entry key='database.updateGroup'>
@@ -443,5 +443,6 @@
     <entry key='huasheng.port'>5111</entry>
     <entry key='l100.port'>5112</entry>
     <entry key='granit.port'>5113</entry>
+    <entry key='carcell.port'>5114</entry>
 
 </properties>

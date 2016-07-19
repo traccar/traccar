@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,36 @@
  */
 package org.traccar.protocol;
 
+import java.util.List;
+
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
+import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
-import java.util.List;
+public class CarcellProtocol extends BaseProtocol {
 
-public class T800xProtocol extends BaseProtocol {
-
-    public T800xProtocol() {
-        super("t800x");
+    public CarcellProtocol() {
+        super("carcell");
         setSupportedCommands(
-                Command.TYPE_CUSTOM);
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
+        serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 3, 2, -5, 0));
-                pipeline.addLast("objectEncoder", new T800xProtocolEncoder());
-                pipeline.addLast("objectDecoder", new T800xProtocolDecoder(T800xProtocol.this));
+                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '\r'));
+                pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectEncoder", new CarcellProtocolEncoder());
+                pipeline.addLast("objectDecoder", new CarcellProtocolDecoder(CarcellProtocol.this));
             }
         });
     }
