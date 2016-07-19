@@ -170,6 +170,7 @@ public class GeofenceManager {
                 Collection<DeviceGeofence> databaseDeviceGeofences = dataManager.getDeviceGeofences();
                 Collection<Device> allDevices = Context.getDeviceManager().getAllDevices();
 
+                groupGeofencesLock.readLock().lock();
                 deviceGeofencesLock.writeLock().lock();
                 try {
                     deviceGeofences.clear();
@@ -214,6 +215,7 @@ public class GeofenceManager {
 
                 } finally {
                     deviceGeofencesLock.writeLock().unlock();
+                    groupGeofencesLock.readLock().unlock();
                 }
 
             } catch (SQLException error) {
