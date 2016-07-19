@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.model.Position;
 
@@ -68,7 +69,9 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
                 sendResponse(channel, buf);
             }
 
-            if (!identify(String.valueOf(buf.readUnsignedInt()), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(
+                    channel, remoteAddress, String.valueOf(buf.readUnsignedInt()));
+            if (deviceSession == null) {
                 return null;
             }
 
@@ -77,7 +80,7 @@ public class OrionProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 0; i < (header & 0x0f); i++) {
 
                 Position position = new Position();
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
                 position.setProtocol(getProtocolName());
 
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte());

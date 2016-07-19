@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -53,13 +54,18 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
 
             String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
 
-            if (!identify(imei, channel, remoteAddress)) {
-                sendResponse(channel, "NO01");
-            } else {
+            if (getDeviceSession(channel, remoteAddress, imei) != null) {
                 sendResponse(channel, "OK");
+            } else {
+                sendResponse(channel, "NO01");
             }
 
-        } else if (hasDeviceId()) {
+        } else {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             List<Position> positions = new LinkedList<>();
 
@@ -72,7 +78,7 @@ public class NvsProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 0; i < count; i++) {
                 Position position = new Position();
                 position.setProtocol(getProtocolName());
-                position.setDeviceId(getDeviceId());
+                position.setDeviceId(deviceSession.getDeviceId());
 
                 position.setTime(new Date(buf.readUnsignedInt() * 1000));
 

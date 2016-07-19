@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -78,7 +79,8 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
 
         if (id != null && data != null) {
 
-            if (!identify(id, channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+            if (deviceSession == null) {
                 return null;
             }
 
@@ -89,7 +91,7 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_STATUS, parser.nextInt());
 

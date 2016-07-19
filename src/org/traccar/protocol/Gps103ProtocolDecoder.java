@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -113,7 +114,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                 channel.write("LOAD", remoteAddress);
                 Parser handshakeParser = new Parser(PATTERN_HANDSHAKE, sentence);
                 if (handshakeParser.matches()) {
-                    identify(handshakeParser.next(), channel, remoteAddress);
+                    getDeviceSession(channel, remoteAddress, handshakeParser.next());
                 }
             }
             return null;
@@ -138,10 +139,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         Parser parser = new Parser(PATTERN_NETWORK, sentence);
         if (parser.matches()) {
 
-            if (!identify(parser.next(), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);
 
@@ -155,10 +157,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         parser = new Parser(PATTERN_OBD, sentence);
         if (parser.matches()) {
 
-            if (!identify(parser.next(), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -185,10 +188,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String imei = parser.next();
-        if (!identify(imei, channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         String alarm = parser.next();
         position.set(Position.KEY_ALARM, alarm);

@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -39,11 +40,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, StandardCharsets.US_ASCII);
-        boolean result =  identify(imei, channel, remoteAddress);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
 
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(1);
-            if (result) {
+            if (deviceSession != null) {
                 response.writeByte(1);
             } else {
                 response.writeByte(0);
@@ -187,7 +188,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private List<Position> parseData(Channel channel, ChannelBuffer buf) {
+    private List<Position> parseData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<>();
 
         buf.skipBytes(4); // marker
@@ -195,11 +196,16 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         int codec = buf.readUnsignedByte();
         int count = buf.readUnsignedByte();
 
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
         for (int i = 0; i < count; i++) {
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             if (codec == CODEC_12) {
                 decodeSerial(position, buf);
@@ -228,7 +234,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (buf.getUnsignedShort(0) > 0) {
             parseIdentification(channel, remoteAddress, buf);
         } else {
-            return parseData(channel, buf);
+            return parseData(channel, remoteAddress, buf);
         }
 
         return null;

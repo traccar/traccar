@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -57,7 +58,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
 
             int index = sentence.indexOf(',', 2) + 1;
             String id = sentence.substring(index, sentence.indexOf(',', index));
-            identify(id, channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, id);
 
         } else if (sentence.startsWith("E,")) {
 
@@ -65,7 +66,12 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
                 channel.write("A," + sentence.substring(2) + "\r");
             }
 
-        } else if (sentence.startsWith("L,") && hasDeviceId()) {
+        } else if (sentence.startsWith("L,")) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
@@ -73,7 +79,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             }
 
             Position position = new Position();
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
             position.setProtocol(getProtocolName());
 
             DateBuilder dateBuilder = new DateBuilder()

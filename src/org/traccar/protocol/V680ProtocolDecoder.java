@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -62,7 +63,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.length() == 16) {
 
-            identify(sentence.substring(1, sentence.length()), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, sentence.substring(1, sentence.length()));
 
         } else {
 
@@ -74,13 +75,16 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
+            DeviceSession deviceSession;
             if (parser.hasNext()) {
-                identify(parser.next(), channel, remoteAddress);
+                deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            } else {
+                deviceSession = getDeviceSession(channel, remoteAddress);
             }
-            if (!hasDeviceId()) {
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.set("user", parser.next());
             position.setValid(parser.nextInt() > 0);

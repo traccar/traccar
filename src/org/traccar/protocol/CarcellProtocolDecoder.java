@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.Parser.CoordinateFormat;
@@ -91,11 +92,11 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ARCHIVE, parser.next().equals("%"));
         position.setValid(true);
 
-        if (!identify(parser.next(), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
             return null;
         }
-
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext(8)) {
             position.setLatitude(parser.nextCoordinate(CoordinateFormat.HEM_DEG_MIN_MIN));

@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -66,16 +67,21 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Position decodePosition(String substring) {
+    private Position decodePosition(Channel channel, SocketAddress remoteAddress, String substring) {
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
 
         Parser parser = new Parser(PATTERN, substring);
-        if (!hasDeviceId() || !parser.matches()) {
+        if (!parser.matches()) {
             return null;
         }
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -129,7 +135,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.startsWith("#L#")) {
 
             String imei = sentence.substring(3, sentence.indexOf(';'));
-            if (identify(imei, channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+            if (deviceSession != null) {
                 sendResponse(channel, "#AL#", 1);
             }
 
@@ -140,7 +147,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         } else if (sentence.startsWith("#SD#") || sentence.startsWith("#D#")) {
 
             Position position = decodePosition(
-                    sentence.substring(sentence.indexOf('#', 1) + 1));
+                    channel, remoteAddress, sentence.substring(sentence.indexOf('#', 1) + 1));
 
             if (position != null) {
                 sendResponse(channel, "#AD#", 1);
@@ -153,7 +160,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             List<Position> positions = new LinkedList<>();
 
             for (String message : messages) {
-                Position position = decodePosition(message);
+                Position position = decodePosition(channel, remoteAddress, message);
                 if (position != null) {
                     positions.add(position);
                 }

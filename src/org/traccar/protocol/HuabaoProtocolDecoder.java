@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
@@ -81,7 +82,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer id = buf.readBytes(6); // phone number
         int index = buf.readUnsignedShort();
 
-        if (!identify(ChannelBuffers.hexDump(id), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(id));
+        if (deviceSession == null) {
             return null;
         }
 
@@ -101,7 +103,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_ALARM, buf.readUnsignedInt());
 

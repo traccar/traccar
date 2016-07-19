@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Log;
@@ -84,10 +85,11 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
                 Log.warning("No device id field");
                 return null;
             }
-            if (!identify(id, channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             if (BitUtil.check(mask, 3)) {
                 buf.readUnsignedShort(); // io data

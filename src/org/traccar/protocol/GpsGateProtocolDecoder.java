@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -85,7 +86,8 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
                 int endIndex = sentence.indexOf(',', beginIndex);
                 if (endIndex != -1) {
                     String imei = sentence.substring(beginIndex, endIndex);
-                    if (identify(imei, channel, remoteAddress)) {
+                    DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                    if (deviceSession != null) {
                         if (channel != null) {
                             send(channel, "$FRSES," + channel.getId());
                         }
@@ -106,14 +108,19 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (sentence.startsWith("$GPRMC,")) {
 
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
             Parser parser = new Parser(PATTERN_GPRMC, sentence);
-            if (!parser.matches() || !hasDeviceId()) {
+            if (!parser.matches()) {
                 return null;
             }
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -139,10 +146,11 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            if (!identify(parser.next(), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());

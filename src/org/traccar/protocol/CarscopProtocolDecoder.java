@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -53,12 +54,15 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
+        DeviceSession deviceSession;
         int index = sentence.indexOf("UB05");
         if (index != -1) {
             String imei = sentence.substring(index + 4, index + 4 + 15);
-            identify(imei, channel, remoteAddress);
+            deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        } else {
+            deviceSession = getDeviceSession(channel, remoteAddress);
         }
-        if (!hasDeviceId()) {
+        if (deviceSession == null) {
             return null;
         }
 
@@ -68,7 +72,7 @@ public class CarscopProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Position position = new Position();
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setProtocol(getProtocolName());
 
         DateBuilder dateBuilder = new DateBuilder()

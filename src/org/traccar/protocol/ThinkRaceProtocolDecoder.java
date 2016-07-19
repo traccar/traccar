@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Position;
 
@@ -63,7 +64,8 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
 
             if (command == 0x01) {
                 String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
-                if (identify(imei, channel, remoteAddress) && channel != null) {
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                if (deviceSession != null && channel != null) {
                     ChannelBuffer response = ChannelBuffers.dynamicBuffer();
                     response.writeByte(0x48); response.writeByte(0x52); // header
                     response.writeBytes(id);
@@ -76,11 +78,16 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-        } else if (hasDeviceId() && type == MSG_GPS) {
+        } else if (type == MSG_GPS) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 

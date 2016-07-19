@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -65,15 +66,17 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
         if (buf.getUnsignedByte(0) == 0xD0) {
 
             long deviceId = ((Long.reverseBytes(buf.getLong(0))) >> 32) & 0xFFFFFFFFL;
-            identify(String.valueOf(deviceId), channel, remoteAddress);
+            getDeviceSession(channel, remoteAddress, String.valueOf(deviceId));
 
             return null;
         } else if (buf.toString(StandardCharsets.US_ASCII).startsWith("$OK:")
-            || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
+                || buf.toString(StandardCharsets.US_ASCII).startsWith("$ERR:")) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, new Date());
             position.setValid(false);
             position.set(Position.KEY_RESULT, buf.toString(StandardCharsets.US_ASCII));
@@ -89,10 +92,11 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position();
             position.setProtocol(getProtocolName());
 
-            if (!identify(parser.next(), channel, remoteAddress)) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
                 return null;
             }
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())

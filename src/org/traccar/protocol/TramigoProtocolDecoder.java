@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -63,10 +64,11 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INDEX, index);
         position.setValid(true);
 
-        if (!identify(String.valueOf(id), channel, remoteAddress)) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
+        if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (protocol == 0x01 && (type == MSG_COMPACT || type == MSG_FULL)) {
 

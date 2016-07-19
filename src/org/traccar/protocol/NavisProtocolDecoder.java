@@ -19,9 +19,9 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
-import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -39,7 +39,6 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    // Format types
     public static final int F10 = 0x01;
     public static final int F20 = 0x02;
     public static final int F30 = 0x03;
@@ -75,11 +74,11 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private ParseResult parsePosition(ChannelBuffer buf) {
+    private ParseResult parsePosition(DeviceSession deviceSession, ChannelBuffer buf) {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        position.setDeviceId(getDeviceId());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         int format;
         if (buf.getUnsignedByte(buf.readerIndex()) == 0) {
@@ -177,8 +176,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return new ParseResult(index, position);
     }
 
-    private Object processSingle(Channel channel, ChannelBuffer buf) {
-        ParseResult result = parsePosition(buf);
+    private Object processSingle(DeviceSession deviceSession, Channel channel, ChannelBuffer buf) {
+        ParseResult result = parsePosition(deviceSession, buf);
 
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 8);
         response.writeBytes(ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<T", StandardCharsets.US_ASCII));
@@ -192,12 +191,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         return result.getPosition();
     }
 
-    private Object processArray(Channel channel, ChannelBuffer buf) {
+    private Object processArray(DeviceSession deviceSession, Channel channel, ChannelBuffer buf) {
         List<Position> positions = new LinkedList<>();
         int count = buf.readUnsignedByte();
 
         for (int i = 0; i < count; i++) {
-            Position position = parsePosition(buf).getPosition();
+            Position position = parsePosition(deviceSession, buf).getPosition();
             if (position.getFixTime() != null) {
                 positions.add(position);
             }
@@ -217,7 +216,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private Object processHandshake(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
         buf.readByte(); // semicolon symbol
-        if (identify(buf.toString(StandardCharsets.US_ASCII), channel, remoteAddress)) {
+        if (getDeviceSession(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII)) != null) {
             sendReply(channel, ChannelBuffers.copiedBuffer(ByteOrder.LITTLE_ENDIAN, "*<S", StandardCharsets.US_ASCII));
         }
         return null;
@@ -265,16 +264,17 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         String type = buf.toString(buf.readerIndex(), 3, StandardCharsets.US_ASCII);
         buf.skipBytes(type.length());
 
-        switch (type) {
-            case "*>T":
-                return processSingle(channel, buf);
-            case "*>A":
-                return processArray(channel, buf);
-            case "*>S":
-                return processHandshake(channel, remoteAddress, buf);
-            default:
-                Log.warning(new UnsupportedOperationException(type));
-                break;
+        if (type.equals("*>S")) {
+            return processHandshake(channel, remoteAddress, buf);
+        } else {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession != null) {
+                if (type.equals("*>T")) {
+                    return processSingle(deviceSession, channel, buf);
+                } else if (type.equals("*>A")) {
+                    return processArray(deviceSession, channel, buf);
+                }
+            }
         }
 
         return null;

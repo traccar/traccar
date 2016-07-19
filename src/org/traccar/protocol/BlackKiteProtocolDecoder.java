@@ -1,6 +1,6 @@
 /*
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  * Copyright 2015 Vijay Kumar (vijaykumar@zilogic.com)
- * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
@@ -96,9 +97,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
             switch (tag) {
 
                 case TAG_IMEI:
-                    String imei = buf.toString(buf.readerIndex(), 15, StandardCharsets.US_ASCII);
-                    buf.skipBytes(imei.length());
-                    identify(imei, channel, remoteAddress);
+                    getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
                     break;
 
                 case TAG_DATE:
@@ -174,15 +173,15 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        if (!hasDeviceId()) {
-            Log.warning("Unknown device");
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
             return null;
         }
 
         sendReply(channel, buf.readUnsignedShort());
 
         for (Position p : positions) {
-            p.setDeviceId(getDeviceId());
+            p.setDeviceId(deviceSession.getDeviceId());
         }
 
         if (positions.isEmpty()) {

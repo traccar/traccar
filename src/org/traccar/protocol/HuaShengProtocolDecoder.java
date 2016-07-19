@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -75,7 +76,8 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                 int length = buf.readUnsignedShort() - 4;
                 if (subtype == 0x0003) {
                     String imei = buf.readBytes(length).toString(StandardCharsets.US_ASCII);
-                    if (identify(imei, channel, remoteAddress) && channel != null) {
+                    DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                    if (deviceSession != null && channel != null) {
                         ChannelBuffer content = ChannelBuffers.dynamicBuffer();
                         content.writeByte(0); // success
                         sendResponse(channel, MSG_LOGIN_RSP, content);
@@ -87,9 +89,14 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_POSITION) {
 
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
             Position position = new Position();
             position.setProtocol(getProtocolName());
-            position.setDeviceId(getDeviceId());
+            position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_STATUS, buf.readUnsignedShort());
             position.set(Position.KEY_EVENT, buf.readUnsignedShort());

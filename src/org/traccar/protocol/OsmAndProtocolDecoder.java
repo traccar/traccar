@@ -25,6 +25,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.joda.time.format.ISODateTimeFormat;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.DeviceSession;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -63,10 +64,11 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             switch (entry.getKey()) {
                 case "id":
                 case "deviceid":
-                    if (!identify(value, channel, remoteAddress)) {
+                    DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
+                    if (deviceSession == null) {
                         return null;
                     }
-                    position.setDeviceId(getDeviceId());
+                    position.setDeviceId(deviceSession.getDeviceId());
                     break;
                 case "valid":
                     position.setValid(Boolean.parseBoolean(value));
