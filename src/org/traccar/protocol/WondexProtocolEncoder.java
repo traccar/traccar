@@ -11,12 +11,10 @@ public class WondexProtocolEncoder extends StringProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         command.set(Command.KEY_DEVICE_PASSWORD, "0000");
-        if (Context.getDeviceManager() != null) {
-            Device device = Context.getDeviceManager().getDeviceById(command.getDeviceId());
-            if (device != null && device.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-                command.set(Command.KEY_DEVICE_PASSWORD, device.getAttributes()
-                        .get(Command.KEY_DEVICE_PASSWORD).toString());
-                }
+        Device device = Context.getIdentityManager().getDeviceById(command.getDeviceId());
+        if (device.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
+            command.set(Command.KEY_DEVICE_PASSWORD, (String) device.getAttributes()
+                    .get(Command.KEY_DEVICE_PASSWORD));
         }
 
         switch (command.getType()) {
