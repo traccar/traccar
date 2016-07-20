@@ -123,9 +123,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            HttpResponse response = new DefaultHttpResponse(
-                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            channel.write(response).addListener(ChannelFutureListener.CLOSE);
+            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
         }
 
         return position;
