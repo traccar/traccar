@@ -188,8 +188,8 @@ public class GeofenceManager {
                         while (groupId != 0) {
                             getDeviceGeofences(deviceGeofencesWithGroups,
                                     device.getId()).addAll(getGroupGeofences(groupId));
-                            if (dataManager.getGroupById(groupId) != null) {
-                                groupId = dataManager.getGroupById(groupId).getGroupId();
+                            if (Context.getDeviceManager().getGroupById(groupId) != null) {
+                                groupId = Context.getDeviceManager().getGroupById(groupId).getGroupId();
                             } else {
                                 groupId = 0;
                             }

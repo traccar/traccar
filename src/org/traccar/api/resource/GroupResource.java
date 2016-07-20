@@ -43,20 +43,20 @@ public class GroupResource extends BaseResource {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getDataManager().getAllGroups();
+            return Context.getDeviceManager().getAllGroups();
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            return Context.getDataManager().getGroups(userId);
+            return Context.getDeviceManager().getGroups(userId);
         }
     }
 
     @POST
     public Response add(Group entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getDataManager().addGroup(entity);
+        Context.getDeviceManager().addGroup(entity);
         Context.getDataManager().linkGroup(getUserId(), entity.getId());
         Context.getPermissionsManager().refresh();
         if (Context.getGeofenceManager() != null) {
@@ -70,7 +70,7 @@ public class GroupResource extends BaseResource {
     public Response update(@PathParam("id") long id, Group entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), id);
-        Context.getDataManager().updateGroup(entity);
+        Context.getDeviceManager().updateGroup(entity);
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
@@ -82,7 +82,7 @@ public class GroupResource extends BaseResource {
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), id);
-        Context.getDataManager().removeGroup(id);
+        Context.getDeviceManager().removeGroup(id);
         Context.getPermissionsManager().refresh();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
