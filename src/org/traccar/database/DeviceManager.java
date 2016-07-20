@@ -60,8 +60,8 @@ public class DeviceManager implements IdentityManager {
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         if (dataManager != null) {
             try {
-                updateDeviceCache(true);
                 updateGroupCache(true);
+                updateDeviceCache(true);
                 for (Position position : dataManager.getLatestPositions()) {
                     positions.put(position.getDeviceId(), position);
                 }
