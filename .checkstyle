@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fileset-config file-format-version="1.2.0" simple-config="false" sync-formatter="false">
+  <local-check-config name="traccar" location="checkstyle.xml" type="project" description="">
+    <additional-data name="protect-config-file" value="true"/>
+  </local-check-config>
+  <fileset name="java-sources-checkstyle" enabled="true" check-config-name="traccar" local="true">
+    <file-match-pattern match-pattern="src/.*\.java" include-pattern="true"/>
+  </fileset>
+</fileset-config>

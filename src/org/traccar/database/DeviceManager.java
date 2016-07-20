@@ -19,9 +19,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -30,9 +32,12 @@ import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
 
 public class DeviceManager implements IdentityManager {
+
+    public static final long DEFAULT_REFRESH_DELAY = 300;
 
     private final Config config;
     private final DataManager dataManager;
@@ -43,14 +48,20 @@ public class DeviceManager implements IdentityManager {
     private final Map<String, Device> devicesByUniqueId = new HashMap<>();
     private long devicesLastUpdate;
 
+    private final ReadWriteLock groupsLock = new ReentrantReadWriteLock();
+    private final Map<Long, Group> groupsById = new HashMap<>();
+    private long groupsLastUpdate;
+
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
     public DeviceManager(DataManager dataManager) {
         this.dataManager = dataManager;
         this.config = Context.getConfig();
-        dataRefreshDelay = config.getLong("database.refreshDelay", DataManager.DEFAULT_REFRESH_DELAY) * 1000;
+        dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         if (dataManager != null) {
             try {
+                updateDeviceCache(true);
+                updateGroupCache(true);
                 for (Position position : dataManager.getLatestPositions()) {
                     positions.put(position.getDeviceId(), position);
                 }
@@ -96,20 +107,6 @@ public class DeviceManager implements IdentityManager {
 
     @Override
     public Device getDeviceById(long id) {
-        boolean forceUpdate;
-        devicesLock.readLock().lock();
-        try {
-            forceUpdate = !devicesById.containsKey(id);
-        } finally {
-            devicesLock.readLock().unlock();
-        }
-
-        try {
-            updateDeviceCache(forceUpdate);
-        } catch (SQLException e) {
-            Log.warning(e);
-        }
-
         devicesLock.readLock().lock();
         try {
             return devicesById.get(id);
@@ -272,5 +269,118 @@ public class DeviceManager implements IdentityManager {
         }
 
         return result;
+    }
+
+    private void updateGroupCache(boolean force) throws SQLException {
+        boolean needWrite;
+        groupsLock.readLock().lock();
+        try {
+            needWrite = force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay;
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+
+        if (needWrite) {
+            groupsLock.writeLock().lock();
+            try {
+                if (force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay) {
+                    groupsById.clear();
+                    for (Group group : dataManager.getAllGroups()) {
+                        groupsById.put(group.getId(), group);
+                    }
+                    groupsLastUpdate = System.currentTimeMillis();
+                }
+            } finally {
+                groupsLock.writeLock().unlock();
+            }
+        }
+    }
+
+    public Group getGroupById(long id) {
+        groupsLock.readLock().lock();
+        try {
+            return groupsById.get(id);
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+    }
+
+    public Collection<Group> getAllGroups() {
+        boolean forceUpdate;
+        groupsLock.readLock().lock();
+        try {
+            forceUpdate = groupsById.isEmpty();
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+
+        try {
+            updateGroupCache(forceUpdate);
+        } catch (SQLException e) {
+            Log.warning(e);
+        }
+
+        groupsLock.readLock().lock();
+        try {
+            return groupsById.values();
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+    }
+
+    public Collection<Group> getGroups(long userId) throws SQLException {
+        Collection<Group> groups = new ArrayList<>();
+        for (long id : Context.getPermissionsManager().getGroupPermissions(userId)) {
+            groups.add(getGroupById(id));
+        }
+        return groups;
+    }
+
+    private void checkGroupCycles(Group group) {
+        groupsLock.readLock().lock();
+        try {
+            Set<Long> groups = new HashSet<>();
+            while (group != null) {
+                if (groups.contains(group.getId())) {
+                    throw new IllegalArgumentException("Cycle in group hierarchy");
+                }
+                groups.add(group.getId());
+                group = groupsById.get(group.getGroupId());
+            }
+        } finally {
+            groupsLock.readLock().unlock();
+        }
+    }
+
+    public void addGroup(Group group) throws SQLException {
+        checkGroupCycles(group);
+        dataManager.addGroup(group);
+        groupsLock.writeLock().lock();
+        try {
+            groupsById.put(group.getId(), group);
+        } finally {
+            groupsLock.writeLock().unlock();
+        }
+    }
+
+    public void updateGroup(Group group) throws SQLException {
+        checkGroupCycles(group);
+        dataManager.updateGroup(group);
+        groupsLock.writeLock().lock();
+        try {
+            groupsById.put(group.getId(), group);
+        } finally {
+            groupsLock.writeLock().unlock();
+        }
+    }
+
+    public void removeGroup(long groupId) throws SQLException {
+        dataManager.removeGroup(groupId);
+        groupsLock.writeLock().lock();
+        try {
+            groupsById.remove(groupId);
+        } finally {
+            groupsLock.writeLock().unlock();
+        }
     }
 }

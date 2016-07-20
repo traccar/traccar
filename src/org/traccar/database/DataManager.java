@@ -20,16 +20,9 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -43,7 +36,6 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.traccar.Config;
-import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
@@ -64,25 +56,15 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class DataManager {
 
-    public static final long DEFAULT_REFRESH_DELAY = 300;
-
     private final Config config;
 
     private DataSource dataSource;
-
-    private final long dataRefreshDelay;
-
-    private final ReadWriteLock groupsLock = new ReentrantReadWriteLock();
-    private final Map<Long, Group> groupsById = new HashMap<>();
-    private long groupsLastUpdate;
 
     public DataManager(Config config) throws Exception {
         this.config = config;
 
         initDatabase();
         initDatabaseSchema();
-
-        dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
     }
 
     public DataSource getDataSource() {
@@ -128,54 +110,6 @@ public class DataManager {
 
             dataSource = new HikariDataSource(hikariConfig);
 
-        }
-    }
-
-    private void updateGroupCache(boolean force) throws SQLException {
-        boolean needWrite;
-        groupsLock.readLock().lock();
-        try {
-            needWrite = force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay;
-        } finally {
-            groupsLock.readLock().unlock();
-        }
-
-        if (needWrite) {
-            groupsLock.writeLock().lock();
-            try {
-                if (force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay) {
-                    groupsById.clear();
-                    for (Group group : getAllGroups()) {
-                        groupsById.put(group.getId(), group);
-                    }
-                    groupsLastUpdate = System.currentTimeMillis();
-                }
-            } finally {
-                groupsLock.writeLock().unlock();
-            }
-        }
-    }
-
-    public Group getGroupById(long id) {
-        boolean forceUpdate;
-        groupsLock.readLock().lock();
-        try {
-            forceUpdate = !groupsById.containsKey(id);
-        } finally {
-            groupsLock.readLock().unlock();
-        }
-
-        try {
-            updateGroupCache(forceUpdate);
-        } catch (SQLException e) {
-            Log.warning(e);
-        }
-
-        groupsLock.readLock().lock();
-        try {
-            return groupsById.get(id);
-        } finally {
-            groupsLock.readLock().unlock();
         }
     }
 
@@ -311,44 +245,16 @@ public class DataManager {
                 .executeQuery(Group.class);
     }
 
-    public Collection<Group> getGroups(long userId) throws SQLException {
-        Collection<Group> groups = new ArrayList<>();
-        for (long id : Context.getPermissionsManager().getGroupPermissions(userId)) {
-            groups.add(getGroupById(id));
-        }
-        return groups;
-    }
-
-    private void checkGroupCycles(Group group) {
-        groupsLock.readLock().lock();
-        try {
-            Set<Long> groups = new HashSet<>();
-            while (group != null) {
-                if (groups.contains(group.getId())) {
-                    throw new IllegalArgumentException("Cycle in group hierarchy");
-                }
-                groups.add(group.getId());
-                group = groupsById.get(group.getGroupId());
-            }
-        } finally {
-            groupsLock.readLock().unlock();
-        }
-    }
-
     public void addGroup(Group group) throws SQLException {
-        checkGroupCycles(group);
         group.setId(QueryBuilder.create(dataSource, getQuery("database.insertGroup"), true)
                 .setObject(group)
                 .executeUpdate());
-        updateGroupCache(true);
     }
 
     public void updateGroup(Group group) throws SQLException {
-        checkGroupCycles(group);
         QueryBuilder.create(dataSource, getQuery("database.updateGroup"))
                 .setObject(group)
                 .executeUpdate();
-        updateGroupCache(true);
     }
 
     public void removeGroup(long groupId) throws SQLException {
