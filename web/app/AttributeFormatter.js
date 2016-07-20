@@ -37,7 +37,7 @@ Ext.define('Traccar.AttributeFormatter', {
     alarmFormatter: function (attributes) {
         var value = '';
         if (attributes instanceof Object) {//for Traccar.view.Attributes
-            if (attributes.hasOwnProperty('alarm')){
+            if (attributes.hasOwnProperty('alarm')) {
                 value = attributes.alarm;
                 if (typeof value === 'boolean') {
                     value = (value ? Ext.Msg.buttonText.yes : Ext.Msg.buttonText.no);

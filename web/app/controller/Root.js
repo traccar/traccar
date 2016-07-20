@@ -89,9 +89,9 @@ Ext.define('Traccar.controller.Root', {
         }
     },
 
-    beep: function() {
-        if(this.snd == null){
-            this.snd = new Audio("beep.wav");
+    beep: function () {
+        if (this.snd === null) {
+            this.snd = new Audio('beep.wav');
         }
         this.snd.play();
     },
@@ -163,8 +163,8 @@ Ext.define('Traccar.controller.Root', {
                             text = alarmKey;
                         }
                         for (j = 0; j < data.positions.length; j++) {
-                            if (data.positions[j].id === array[i].positionId && data.positions[j].attributes.alarm != null) {
-                                if (typeof data.positions[j].attributes.alarm === 'string' && data.positions[j].attributes.alarm.length >= 2){
+                            if (data.positions[j].id === array[i].positionId && data.positions[j].attributes.alarm !== null) {
+                                if (typeof data.positions[j].attributes.alarm === 'string' && data.positions[j].attributes.alarm.length >= 2) {
                                     alarmKey = 'alarm' + data.positions[j].attributes.alarm.charAt(0).toUpperCase() + data.positions[j].attributes.alarm.slice(1);
                                     text = Strings[alarmKey];
                                     if (typeof text === 'undefined') {
@@ -189,7 +189,7 @@ Ext.define('Traccar.controller.Root', {
                     }
                     device = Ext.getStore('Devices').getById(array[i].deviceId);
                     if (typeof device !== 'undefined') {
-                        if(self.showAlarmSelected()){
+                        if (self.showAlarmSelected()) {
                             self.beep();
                             Ext.toast(text, device.getData().name);
                         }

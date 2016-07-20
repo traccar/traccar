@@ -64,16 +64,15 @@ Ext.define('Traccar.view.Devices', {
             tooltipType: 'title',
             pressed : true,
             enableToggle: true,
-            listeners:{
-                toggle: function(button, pressed){
-                    if(pressed){
+            listeners: {
+                toggle: function (button, pressed) {
+                    if (pressed) {
                         button.setGlyph('xf0a2@FontAwesome');
-                    }
-                    else {
+                    } else {
                         button.setGlyph('xf1f7@FontAwesome');
                     }
                 },
-                scope:this
+                scope: this
             }
         }, {
             id: 'deviceFollowButton',
