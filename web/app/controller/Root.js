@@ -81,7 +81,7 @@ Ext.define('Traccar.controller.Root', {
                 this.asyncUpdate(true);
             }
         });
-        Ext.get('attribution').remove();
+        if (Ext.get('attribution') !== null) Ext.get('attribution').remove();
         if (this.isPhone) {
             Ext.create('widget.mainMobile');
         } else {

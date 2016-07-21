@@ -416,6 +416,7 @@ public class DataManager {
                 Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000);
 
                 QueryBuilder.create(dataSource, sql)
+                        .setLong("positionId", device.getPositionId())
                         .setLong("deviceId", device.getId())
                         .setDate("serverTime", dateBefore)
                         .executeUpdate();

@@ -324,7 +324,7 @@
     </entry>
 
     <entry key='database.clearPositionsHistory'>
-        DELETE FROM positions WHERE deviceid = :deviceId and servertime &lt; :serverTime;
+        DELETE FROM positions WHERE id != :positionId and deviceid = :deviceId and servertime &lt; :serverTime;
     </entry>
 
     <!-- PROTOCOL CONFIG -->
