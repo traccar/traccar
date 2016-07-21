@@ -43,10 +43,10 @@ public class DeviceManager implements IdentityManager {
 
     private Map<Long, Device> devicesById;
     private Map<String, Device> devicesByUniqueId;
-    private AtomicLong devicesLastUpdate = new AtomicLong(0);
+    private AtomicLong devicesLastUpdate = new AtomicLong();
 
     private Map<Long, Group> groupsById;
-    private AtomicLong groupsLastUpdate = new AtomicLong(0);
+    private AtomicLong groupsLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
@@ -68,8 +68,10 @@ public class DeviceManager implements IdentityManager {
     }
 
     private void updateDeviceCache(boolean force) throws SQLException {
-        boolean needWrite = force || System.currentTimeMillis() - devicesLastUpdate.get() > dataRefreshDelay;
-        if (needWrite) {
+
+        long lastUpdate = devicesLastUpdate.get();
+        if (force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay
+                && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
             GeofenceManager geofenceManager = Context.getGeofenceManager();
             Collection<Device> databaseDevices = dataManager.getAllDevices();
             if (devicesById == null) {
@@ -79,10 +81,10 @@ public class DeviceManager implements IdentityManager {
                 devicesByUniqueId = new ConcurrentHashMap<>(databaseDevices.size());
             }
             Set<Long> databaseDevicesIds = new HashSet<>();
-            Set<String> databaseDevicesUniqIds = new HashSet<>();
+            Set<String> databaseDevicesUniqueIds = new HashSet<>();
             for (Device device : databaseDevices) {
                 databaseDevicesIds.add(device.getId());
-                databaseDevicesUniqIds.add(device.getUniqueId());
+                databaseDevicesUniqueIds.add(device.getUniqueId());
                 if (devicesById.containsKey(device.getId())) {
                     Device cachedDevice = devicesById.get(device.getId());
                     cachedDevice.setName(device.getName());
@@ -112,13 +114,12 @@ public class DeviceManager implements IdentityManager {
                 }
             }
             for (String cachedDeviceUniqId : devicesByUniqueId.keySet()) {
-                if (!databaseDevicesUniqIds.contains(cachedDeviceUniqId)) {
+                if (!databaseDevicesUniqueIds.contains(cachedDeviceUniqId)) {
                     devicesByUniqueId.remove(cachedDeviceUniqId);
                 }
             }
             databaseDevicesIds.clear();
-            databaseDevicesUniqIds.clear();
-            devicesLastUpdate.set(System.currentTimeMillis());
+            databaseDevicesUniqueIds.clear();
         }
     }
 
@@ -230,9 +231,10 @@ public class DeviceManager implements IdentityManager {
     }
 
     private void updateGroupCache(boolean force) throws SQLException {
-        boolean needWrite = force || System.currentTimeMillis() - groupsLastUpdate.get() > dataRefreshDelay;
 
-        if (needWrite) {
+        long lastUpdate = groupsLastUpdate.get();
+        if (force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay
+                && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
             Collection<Group> databaseGroups = dataManager.getAllGroups();
             if (groupsById == null) {
                 groupsById = new ConcurrentHashMap<>(databaseGroups.size());
@@ -254,7 +256,6 @@ public class DeviceManager implements IdentityManager {
                 }
             }
             databaseGroupsIds.clear();
-            groupsLastUpdate.set(System.currentTimeMillis());
         }
     }
 
