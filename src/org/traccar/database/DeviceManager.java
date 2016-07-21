@@ -70,7 +70,7 @@ public class DeviceManager implements IdentityManager {
     private void updateDeviceCache(boolean force) throws SQLException {
 
         long lastUpdate = devicesLastUpdate.get();
-        if (force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay
+        if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
             GeofenceManager geofenceManager = Context.getGeofenceManager();
             Collection<Device> databaseDevices = dataManager.getAllDevices();
@@ -233,7 +233,7 @@ public class DeviceManager implements IdentityManager {
     private void updateGroupCache(boolean force) throws SQLException {
 
         long lastUpdate = groupsLastUpdate.get();
-        if (force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay
+        if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
             Collection<Group> databaseGroups = dataManager.getAllGroups();
             if (groupsById == null) {
