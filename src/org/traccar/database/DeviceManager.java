@@ -18,15 +18,13 @@ package org.traccar.database;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.traccar.Config;
 import org.traccar.Context;
@@ -43,14 +41,12 @@ public class DeviceManager implements IdentityManager {
     private final DataManager dataManager;
     private final long dataRefreshDelay;
 
-    private final ReadWriteLock devicesLock = new ReentrantReadWriteLock();
-    private final Map<Long, Device> devicesById = new HashMap<>();
-    private final Map<String, Device> devicesByUniqueId = new HashMap<>();
-    private long devicesLastUpdate;
+    private Map<Long, Device> devicesById;
+    private Map<String, Device> devicesByUniqueId;
+    private AtomicLong devicesLastUpdate = new AtomicLong();
 
-    private final ReadWriteLock groupsLock = new ReentrantReadWriteLock();
-    private final Map<Long, Group> groupsById = new HashMap<>();
-    private long groupsLastUpdate;
+    private Map<Long, Group> groupsById;
+    private AtomicLong groupsLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
@@ -72,77 +68,77 @@ public class DeviceManager implements IdentityManager {
     }
 
     private void updateDeviceCache(boolean force) throws SQLException {
-        boolean needWrite;
-        devicesLock.readLock().lock();
-        try {
-            needWrite = force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay;
-        } finally {
-            devicesLock.readLock().unlock();
-        }
 
-        if (needWrite) {
-            devicesLock.writeLock().lock();
-            try {
-                if (force || System.currentTimeMillis() - devicesLastUpdate > dataRefreshDelay) {
-                    devicesById.clear();
-                    devicesByUniqueId.clear();
-                    GeofenceManager geofenceManager = Context.getGeofenceManager();
-                    for (Device device : dataManager.getAllDevices()) {
-                        devicesById.put(device.getId(), device);
-                        devicesByUniqueId.put(device.getUniqueId(), device);
-                        if (geofenceManager != null) {
-                            Position lastPosition = getLastPosition(device.getId());
-                            if (lastPosition != null) {
-                                device.setGeofenceIds(geofenceManager.getCurrentDeviceGeofences(lastPosition));
-                            }
+        long lastUpdate = devicesLastUpdate.get();
+        if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
+                && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
+            GeofenceManager geofenceManager = Context.getGeofenceManager();
+            Collection<Device> databaseDevices = dataManager.getAllDevices();
+            if (devicesById == null) {
+                devicesById = new ConcurrentHashMap<>(databaseDevices.size());
+            }
+            if (devicesByUniqueId == null) {
+                devicesByUniqueId = new ConcurrentHashMap<>(databaseDevices.size());
+            }
+            Set<Long> databaseDevicesIds = new HashSet<>();
+            Set<String> databaseDevicesUniqueIds = new HashSet<>();
+            for (Device device : databaseDevices) {
+                databaseDevicesIds.add(device.getId());
+                databaseDevicesUniqueIds.add(device.getUniqueId());
+                if (devicesById.containsKey(device.getId())) {
+                    Device cachedDevice = devicesById.get(device.getId());
+                    cachedDevice.setName(device.getName());
+                    cachedDevice.setGroupId(device.getGroupId());
+                    cachedDevice.setAttributes(device.getAttributes());
+                    if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
+                        devicesByUniqueId.remove(cachedDevice.getUniqueId());
+                        devicesByUniqueId.put(device.getUniqueId(), cachedDevice);
+                    }
+                    cachedDevice.setUniqueId(device.getUniqueId());
+                } else {
+                    devicesById.put(device.getId(), device);
+                    devicesByUniqueId.put(device.getUniqueId(), device);
+                    if (geofenceManager != null) {
+                        Position lastPosition = getLastPosition(device.getId());
+                        if (lastPosition != null) {
+                            device.setGeofenceIds(geofenceManager.getCurrentDeviceGeofences(lastPosition));
                         }
                     }
-                    devicesLastUpdate = System.currentTimeMillis();
+                    device.setStatus(Device.STATUS_OFFLINE);
+                    device.setMotion(Device.STATUS_STOPPED);
                 }
-            } finally {
-                devicesLock.writeLock().unlock();
             }
+            for (Long cachedDeviceId : devicesById.keySet()) {
+                if (!databaseDevicesIds.contains(cachedDeviceId)) {
+                    devicesById.remove(cachedDeviceId);
+                }
+            }
+            for (String cachedDeviceUniqId : devicesByUniqueId.keySet()) {
+                if (!databaseDevicesUniqueIds.contains(cachedDeviceUniqId)) {
+                    devicesByUniqueId.remove(cachedDeviceUniqId);
+                }
+            }
+            databaseDevicesIds.clear();
+            databaseDevicesUniqueIds.clear();
         }
     }
 
     @Override
     public Device getDeviceById(long id) {
-        devicesLock.readLock().lock();
-        try {
-            return devicesById.get(id);
-        } finally {
-            devicesLock.readLock().unlock();
-        }
+        return devicesById.get(id);
     }
 
     @Override
     public Device getDeviceByUniqueId(String uniqueId) throws SQLException {
-        boolean forceUpdate;
-        devicesLock.readLock().lock();
-        try {
-            forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
-        } finally {
-            devicesLock.readLock().unlock();
-        }
+        boolean forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean("database.ignoreUnknown");
 
         updateDeviceCache(forceUpdate);
 
-        devicesLock.readLock().lock();
-        try {
-            return devicesByUniqueId.get(uniqueId);
-        } finally {
-            devicesLock.readLock().unlock();
-        }
+        return devicesByUniqueId.get(uniqueId);
     }
 
     public Collection<Device> getAllDevices() {
-        boolean forceUpdate;
-        devicesLock.readLock().lock();
-        try {
-            forceUpdate = devicesById.isEmpty();
-        } finally {
-            devicesLock.readLock().unlock();
-        }
+        boolean forceUpdate = devicesById.isEmpty();
 
         try {
             updateDeviceCache(forceUpdate);
@@ -150,23 +146,13 @@ public class DeviceManager implements IdentityManager {
             Log.warning(e);
         }
 
-        devicesLock.readLock().lock();
-        try {
-            return devicesById.values();
-        } finally {
-            devicesLock.readLock().unlock();
-        }
+        return devicesById.values();
     }
 
     public Collection<Device> getDevices(long userId) throws SQLException {
         Collection<Device> devices = new ArrayList<>();
-        devicesLock.readLock().lock();
-        try {
-            for (long id : Context.getPermissionsManager().getDevicePermissions(userId)) {
-                    devices.add(devicesById.get(id));
-            }
-        } finally {
-            devicesLock.readLock().unlock();
+        for (long id : Context.getPermissionsManager().getDevicePermissions(userId)) {
+            devices.add(devicesById.get(id));
         }
         return devices;
     }
@@ -174,56 +160,34 @@ public class DeviceManager implements IdentityManager {
     public void addDevice(Device device) throws SQLException {
         dataManager.addDevice(device);
 
-        devicesLock.writeLock().lock();
-        try {
-            devicesById.put(device.getId(), device);
-            devicesByUniqueId.put(device.getUniqueId(), device);
-        } finally {
-            devicesLock.writeLock().unlock();
-        }
+        devicesById.put(device.getId(), device);
+        devicesByUniqueId.put(device.getUniqueId(), device);
     }
 
     public void updateDevice(Device device) throws SQLException {
         dataManager.updateDevice(device);
 
-        devicesLock.writeLock().lock();
-        try {
-            devicesById.put(device.getId(), device);
-            devicesByUniqueId.put(device.getUniqueId(), device);
-        } finally {
-            devicesLock.writeLock().unlock();
-        }
+        devicesById.put(device.getId(), device);
+        devicesByUniqueId.put(device.getUniqueId(), device);
     }
 
     public void updateDeviceStatus(Device device) throws SQLException {
         dataManager.updateDeviceStatus(device);
-
-        devicesLock.writeLock().lock();
-        try {
-            if (devicesById.containsKey(device.getId())) {
-                Device cachedDevice = devicesById.get(device.getId());
-                cachedDevice.setStatus(device.getStatus());
-                cachedDevice.setMotion(device.getMotion());
-            }
-        } finally {
-            devicesLock.writeLock().unlock();
+        if (devicesById.containsKey(device.getId())) {
+            Device cachedDevice = devicesById.get(device.getId());
+            cachedDevice.setStatus(device.getStatus());
+            cachedDevice.setMotion(device.getMotion());
         }
     }
 
     public void removeDevice(long deviceId) throws SQLException {
         dataManager.removeDevice(deviceId);
 
-        devicesLock.writeLock().lock();
-        try {
-            if (devicesById.containsKey(deviceId)) {
-                String deviceUniqueId = devicesById.get(deviceId).getUniqueId();
-                devicesById.remove(deviceId);
-                devicesByUniqueId.remove(deviceUniqueId);
-            }
-        } finally {
-            devicesLock.writeLock().unlock();
+        if (devicesById.containsKey(deviceId)) {
+            String deviceUniqueId = devicesById.get(deviceId).getUniqueId();
+            devicesById.remove(deviceId);
+            devicesByUniqueId.remove(deviceUniqueId);
         }
-
         positions.remove(deviceId);
     }
 
@@ -234,13 +198,8 @@ public class DeviceManager implements IdentityManager {
 
             dataManager.updateLatestPosition(position);
 
-            devicesLock.writeLock().lock();
-            try {
-                if (devicesById.containsKey(position.getDeviceId())) {
-                    devicesById.get(position.getDeviceId()).setPositionId(position.getId());
-                }
-            } finally {
-                devicesLock.writeLock().unlock();
+            if (devicesById.containsKey(position.getDeviceId())) {
+                devicesById.get(position.getDeviceId()).setPositionId(position.getId());
             }
 
             positions.put(position.getDeviceId(), position);
@@ -272,47 +231,40 @@ public class DeviceManager implements IdentityManager {
     }
 
     private void updateGroupCache(boolean force) throws SQLException {
-        boolean needWrite;
-        groupsLock.readLock().lock();
-        try {
-            needWrite = force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay;
-        } finally {
-            groupsLock.readLock().unlock();
-        }
 
-        if (needWrite) {
-            groupsLock.writeLock().lock();
-            try {
-                if (force || System.currentTimeMillis() - groupsLastUpdate > dataRefreshDelay) {
-                    groupsById.clear();
-                    for (Group group : dataManager.getAllGroups()) {
-                        groupsById.put(group.getId(), group);
-                    }
-                    groupsLastUpdate = System.currentTimeMillis();
-                }
-            } finally {
-                groupsLock.writeLock().unlock();
+        long lastUpdate = groupsLastUpdate.get();
+        if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
+                && groupsLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
+            Collection<Group> databaseGroups = dataManager.getAllGroups();
+            if (groupsById == null) {
+                groupsById = new ConcurrentHashMap<>(databaseGroups.size());
             }
+            Set<Long> databaseGroupsIds = new HashSet<>();
+            for (Group group : databaseGroups) {
+                databaseGroupsIds.add(group.getId());
+                if (groupsById.containsKey(group.getId())) {
+                    Group cachedGroup = groupsById.get(group.getId());
+                    cachedGroup.setName(group.getName());
+                    cachedGroup.setGroupId(group.getGroupId());
+                } else {
+                    groupsById.put(group.getId(), group);
+                }
+            }
+            for (Long cachedGroupId : groupsById.keySet()) {
+                if (!databaseGroupsIds.contains(cachedGroupId)) {
+                    devicesById.remove(cachedGroupId);
+                }
+            }
+            databaseGroupsIds.clear();
         }
     }
 
     public Group getGroupById(long id) {
-        groupsLock.readLock().lock();
-        try {
-            return groupsById.get(id);
-        } finally {
-            groupsLock.readLock().unlock();
-        }
+        return groupsById.get(id);
     }
 
     public Collection<Group> getAllGroups() {
-        boolean forceUpdate;
-        groupsLock.readLock().lock();
-        try {
-            forceUpdate = groupsById.isEmpty();
-        } finally {
-            groupsLock.readLock().unlock();
-        }
+        boolean forceUpdate = groupsById.isEmpty();
 
         try {
             updateGroupCache(forceUpdate);
@@ -320,12 +272,7 @@ public class DeviceManager implements IdentityManager {
             Log.warning(e);
         }
 
-        groupsLock.readLock().lock();
-        try {
-            return groupsById.values();
-        } finally {
-            groupsLock.readLock().unlock();
-        }
+        return groupsById.values();
     }
 
     public Collection<Group> getGroups(long userId) throws SQLException {
@@ -337,50 +284,30 @@ public class DeviceManager implements IdentityManager {
     }
 
     private void checkGroupCycles(Group group) {
-        groupsLock.readLock().lock();
-        try {
-            Set<Long> groups = new HashSet<>();
-            while (group != null) {
-                if (groups.contains(group.getId())) {
-                    throw new IllegalArgumentException("Cycle in group hierarchy");
-                }
-                groups.add(group.getId());
-                group = groupsById.get(group.getGroupId());
+        Set<Long> groups = new HashSet<>();
+        while (group != null) {
+            if (groups.contains(group.getId())) {
+                throw new IllegalArgumentException("Cycle in group hierarchy");
             }
-        } finally {
-            groupsLock.readLock().unlock();
+            groups.add(group.getId());
+            group = groupsById.get(group.getGroupId());
         }
     }
 
     public void addGroup(Group group) throws SQLException {
         checkGroupCycles(group);
         dataManager.addGroup(group);
-        groupsLock.writeLock().lock();
-        try {
-            groupsById.put(group.getId(), group);
-        } finally {
-            groupsLock.writeLock().unlock();
-        }
+        groupsById.put(group.getId(), group);
     }
 
     public void updateGroup(Group group) throws SQLException {
         checkGroupCycles(group);
         dataManager.updateGroup(group);
-        groupsLock.writeLock().lock();
-        try {
-            groupsById.put(group.getId(), group);
-        } finally {
-            groupsLock.writeLock().unlock();
-        }
+        groupsById.put(group.getId(), group);
     }
 
     public void removeGroup(long groupId) throws SQLException {
         dataManager.removeGroup(groupId);
-        groupsLock.writeLock().lock();
-        try {
-            groupsById.remove(groupId);
-        } finally {
-            groupsLock.writeLock().unlock();
-        }
+        groupsById.remove(groupId);
     }
 }
