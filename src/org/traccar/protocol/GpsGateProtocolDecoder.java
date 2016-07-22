@@ -58,10 +58,10 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*),")                 // altitude
             .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
+            .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd).?(d+)?,")      // time
-            .expression("([01]),")               // validity
+            .expression("([01])")                // validity
             .any()
             .compile();
 
