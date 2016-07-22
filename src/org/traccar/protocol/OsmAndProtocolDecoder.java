@@ -64,6 +64,9 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                 case "deviceid":
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                     if (deviceSession == null) {
+                        if (channel != null) {
+                            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+                        }
                         return null;
                     }
                     position.setDeviceId(deviceSession.getDeviceId());
