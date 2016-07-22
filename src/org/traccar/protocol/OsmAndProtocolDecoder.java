@@ -48,8 +48,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
         Map<String, List<String>> params = decoder.getParameters();
         if (params.isEmpty()) {
-            decoder = new QueryStringDecoder(
-                    request.getContent().toString(StandardCharsets.US_ASCII), false);
+            decoder = new QueryStringDecoder(request.getContent().toString(StandardCharsets.US_ASCII), false);
             params = decoder.getParameters();
         }
 
@@ -65,7 +64,8 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                     if (deviceSession == null) {
                         if (channel != null) {
-                            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+                            channel.write(
+                                    new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
                         }
                         return null;
                     }
