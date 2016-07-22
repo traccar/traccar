@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -33,8 +34,9 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    public static final int MSG_HEARTBEAT = 0x1A;
     public static final int MSG_DATA = 0x10;
+    public static final int MSG_HEARTBEAT = 0x1A;
+    public static final int MSG_RESPONSE = 0x1C;
 
     @Override
     protected Object decode(
@@ -101,6 +103,13 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(latitude);
             position.setLongitude(longitude);
+
+        } else if (type == MSG_RESPONSE) {
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT,
+                    buf.readBytes(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
 
         } else {
 

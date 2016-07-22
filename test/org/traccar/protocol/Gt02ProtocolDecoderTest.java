@@ -11,6 +11,12 @@ public class Gt02ProtocolDecoderTest extends ProtocolTest {
         Gt02ProtocolDecoder decoder = new Gt02ProtocolDecoder(new Gt02Protocol());
 
         verifyAttributes(decoder, binary(
+                "6868150000035889905895258400831c07415045584f4b210d0a"));
+
+        verifyAttributes(decoder, binary(
+                "68682d0000035889905895258400951c1f415045584572726f723a20506172616d65746572203120284f4e2f4f4646290d0a"));
+
+        verifyAttributes(decoder, binary(
                 "68680f0504035889905831401700df1a00000d0a"));
 
         verifyAttributes(decoder, binary(
