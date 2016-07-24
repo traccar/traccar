@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time
             .expression("([AV]),")               // validity
-            .number(" *-?(d+.d+),")              // latitude
+            .number(" *(-?d+.d+),")              // latitude
             .expression("([NS]),")
-            .number(" *-?(d+.d+),")              // longitude
+            .number(" *(-?d+.d+),")              // longitude
             .expression("([EW])?,")
             .number("(d+.d+),")                  // speed
             .number("(d+.?d*),")                 // course

@@ -6,3 +6,4 @@ nbactions.xml
 .idea
 *.iml
 .DS_Store
+.checkstyle

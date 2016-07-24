@@ -11,6 +11,9 @@ public class GpsGateProtocolDecoderTest extends ProtocolTest {
         GpsGateProtocolDecoder decoder = new GpsGateProtocolDecoder(new GpsGateProtocol());
 
         verifyPosition(decoder, text(
+                "$FRCMD,356406061385182,_SendMessage,,5223.88542,N,11440.45866,W,951.2,0.027,,220716,153507.00,1*5F"));
+
+        verifyPosition(decoder, text(
                 "$FRCMD,353067011068246,_SendMessage,,1918.1942,N,09906.3696,W,2246.5,000.0,295.9,150416,213147.00,1,Odometer=*70"));
 
         verifyNothing(decoder, text(
