@@ -3,11 +3,11 @@
 import sys
 import math
 import urllib
-import urllib2
+import httplib
 import time
 
 id = '123456789012345'
-server = 'http://localhost:5055'
+server = 'localhost:5055'
 period = 1
 step = 0.001
 
@@ -32,11 +32,12 @@ for i in range(0, len(waypoints)):
         lon = lon1 + (lon2 - lon1) * j / count
         points.append((lat, lon))
 
-def send(lat, lon, course, alarm):
+def send(conn, lat, lon, course, alarm):
     params = (('id', id), ('timestamp', int(time.time())), ('lat', lat), ('lon', lon), ('bearing', course))
     if alarm:
         params = params + (('alarm', 'sos'),)
-    urllib2.urlopen(server + '?' + urllib.urlencode(params)).read()
+    conn.request('GET', '?' + urllib.urlencode(params))
+    conn.getresponse()
 
 def course(lat1, lon1, lat2, lon2):
     lat1 = lat1 * math.pi / 180
@@ -49,10 +50,12 @@ def course(lat1, lon1, lat2, lon2):
 
 index = 0
 
+conn = httplib.HTTPConnection(server)
+
 while True:
     (lat1, lon1) = points[index % len(points)]
     (lat2, lon2) = points[(index + 1) % len(points)]
     alarm = ((index % 10) == 0)
-    send(lat1, lon1, course(lat1, lon1, lat2, lon2), alarm)
+    send(conn, lat1, lon1, course(lat1, lon1, lat2, lon2), alarm)
     time.sleep(period)
     index += 1
