@@ -99,8 +99,9 @@ Ext.define('Traccar.controller.Root', {
         this.beepSound.play();
     },
 
-    showNotificationsSelected: function () {
-        return Ext.getCmp('showNotificationsButton') && Ext.getCmp('showNotificationsButton').pressed;
+    mutePressed: function () {
+        var muteButton = Ext.getCmp('nuteButton');
+        return muteButton && !muteButton.pressed;
     },
 
     asyncUpdate: function (first) {
@@ -192,10 +193,10 @@ Ext.define('Traccar.controller.Root', {
                     }
                     device = Ext.getStore('Devices').getById(array[i].deviceId);
                     if (typeof device !== 'undefined') {
-                        if (self.showNotificationsSelected()) {
+                        if (self.mutePressed()) {
                             self.beep();
-                            Ext.toast(text, device.get('name'));
                         }
+                        Ext.toast(text, device.get('name'));
                     }
                 }
             }

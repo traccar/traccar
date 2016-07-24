@@ -58,18 +58,18 @@ Ext.define('Traccar.view.Devices', {
         }, {
             xtype: 'tbfill'
         },{
-            id: 'showNotificationsButton',
-            glyph: 'xf0a2@FontAwesome',
-            tooltip: Strings.showNotifications,
+            id: 'nuteButton',
+            glyph: 'xf1f7@FontAwesome',
+            tooltip: Strings.nuteButton,
             tooltipType: 'title',
             pressed : true,
             enableToggle: true,
             listeners: {
                 toggle: function (button, pressed) {
                     if (pressed) {
-                        button.setGlyph('xf0a2@FontAwesome');
-                    } else {
                         button.setGlyph('xf1f7@FontAwesome');
+                    } else {
+                        button.setGlyph('xf0a2@FontAwesome');
                     }
                 },
                 scope: this
