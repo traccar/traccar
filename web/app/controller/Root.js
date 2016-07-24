@@ -90,7 +90,7 @@ Ext.define('Traccar.controller.Root', {
     },
 
     beep: function () {
-        if (this.beepSound === null) {
+        if (!this.beepSound) {
             this.beepSound = new Audio('beep.wav');
         }
         this.beepSound.play();
