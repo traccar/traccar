@@ -86,13 +86,13 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
                 .setTime(parser.nextInt(16), parser.nextInt(16), parser.nextInt(16));
         position.setTime(dateBuilder.getDate());
 
-        if (BitUtil.check(parser.nextInt(16), 7)) {
+        if (BitUtil.check(parser.nextInt(16), 3)) {
             position.setLatitude(-parser.nextInt(16) / 600000.0);
         } else {
             position.setLatitude(parser.nextInt(16) / 600000.0);
         }
 
-        if (BitUtil.check(parser.nextInt(16), 7)) {
+        if (BitUtil.check(parser.nextInt(16), 3)) {
             position.setLongitude(-parser.nextInt(16) / 600000.0);
         } else {
             position.setLongitude(parser.nextInt(16) / 600000.0);
