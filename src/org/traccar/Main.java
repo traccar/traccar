@@ -23,7 +23,7 @@ import java.util.TimerTask;
 import java.util.Locale;
 
 public final class Main {
-    static final long CLEAN_DELAY = 500;
+    static final long CLEAN_DELAY = 0;
     static final long CLEAN_PERIOD = 24 * 60 * 60 * 1000;
 
     private Main() {
