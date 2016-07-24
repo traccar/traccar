@@ -60,7 +60,7 @@ Ext.define('Traccar.view.Devices', {
         },{
             id: 'nuteButton',
             glyph: 'xf1f7@FontAwesome',
-            tooltip: Strings.nuteButton,
+            tooltip: Strings.muteButton,
             tooltipType: 'title',
             pressed : true,
             enableToggle: true,
