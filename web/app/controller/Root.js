@@ -90,14 +90,14 @@ Ext.define('Traccar.controller.Root', {
     },
 
     beep: function () {
-        if (this.snd === null) {
-            this.snd = new Audio('beep.wav');
+        if (this.beepSound === null) {
+            this.beepSound = new Audio('beep.wav');
         }
-        this.snd.play();
+        this.beepSound.play();
     },
 
-    showAlarmSelected: function () {
-        return Ext.getCmp('showAlarmButton') && Ext.getCmp('showAlarmButton').pressed;
+    showNotificationsSelected: function () {
+        return Ext.getCmp('showNotificationsButton') && Ext.getCmp('showNotificationsButton').pressed;
     },
 
     asyncUpdate: function (first) {
@@ -159,7 +159,7 @@ Ext.define('Traccar.controller.Root', {
                     } else if (array[i].type === 'alarm' && data.positions) {
                         alarmKey = 'alarm';
                         text = Strings[alarmKey];
-                        if (typeof text === 'undefined') {
+                        if (!text) {
                             text = alarmKey;
                         }
                         for (j = 0; j < data.positions.length; j++) {
@@ -167,7 +167,7 @@ Ext.define('Traccar.controller.Root', {
                                 if (typeof data.positions[j].attributes.alarm === 'string' && data.positions[j].attributes.alarm.length >= 2) {
                                     alarmKey = 'alarm' + data.positions[j].attributes.alarm.charAt(0).toUpperCase() + data.positions[j].attributes.alarm.slice(1);
                                     text = Strings[alarmKey];
-                                    if (typeof text === 'undefined') {
+                                    if (!text) {
                                         text = alarmKey;
                                     }
                                 }
@@ -177,7 +177,7 @@ Ext.define('Traccar.controller.Root', {
                     } else {
                         typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
                         text = Strings[typeKey];
-                        if (typeof text === 'undefined') {
+                        if (!text) {
                             text = typeKey;
                         }
                     }
@@ -189,9 +189,9 @@ Ext.define('Traccar.controller.Root', {
                     }
                     device = Ext.getStore('Devices').getById(array[i].deviceId);
                     if (typeof device !== 'undefined') {
-                        if (self.showAlarmSelected()) {
+                        if (self.showNotificationsSelected()) {
                             self.beep();
-                            Ext.toast(text, device.getData().name);
+                            Ext.toast(text, device.get('name'));
                         }
                     }
                 }
