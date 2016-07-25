@@ -15,7 +15,7 @@
  */
 
 Ext.define('Traccar.view.UserDialogController', {
-    extend: 'Traccar.view.BaseEditDialogWithAttributesController',
+    extend: 'Traccar.view.BaseEditDialogController',
     alias: 'controller.userDialog',
 
     init: function () {
