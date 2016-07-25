@@ -15,13 +15,13 @@
  */
 
 Ext.define('Traccar.view.AttributeDialog', {
-    extend: 'Traccar.view.BaseEditDialog',
+    extend: 'Traccar.view.BaseDialog',
 
     requires: [
-        'Traccar.view.BaseEditDialogController'
+        'Traccar.view.AttributeController'
     ],
 
-    controller: 'baseEditDialog',
+    controller: 'attributeDialog',
     title: Strings.sharedAttribute,
 
     items: {
@@ -35,5 +35,13 @@ Ext.define('Traccar.view.AttributeDialog', {
             name: 'value',
             fieldLabel: Strings.stateValue
         }]
-    }
+    },
+
+    buttons: [{
+        text: Strings.sharedSave,
+        handler: 'onSaveClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
+    }]
 });

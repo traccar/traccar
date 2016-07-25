@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.BaseEditDialogController', {
+Ext.define('Traccar.view.AttributeController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.baseEditDialog',
-
-    requires: [
-        'Traccar.view.Attributes'
-    ],
+    alias: 'controller.attributeDialog',
 
     onSaveClick: function (button) {
         var dialog, store, record;
@@ -42,19 +38,5 @@ Ext.define('Traccar.view.BaseEditDialogController', {
             record.save();
         }
         button.up('window').close();
-    },
-
-    showAttributesView: function (button) {
-        var dialog, record;
-        dialog = button.up('window').down('form');
-        record = dialog.getRecord();
-        Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedAttributes,
-            modal: false,
-            items: {
-                xtype: 'attributesView',
-                record: record
-            }
-        }).show();
     }
 });
