@@ -26,6 +26,14 @@
 
     <dropColumn tableName="devices" columnName="motion" />
 
+    <addColumn tableName="groups">
+      <column name="attributes" type="VARCHAR(4096)" />
+    </addColumn>
+
+    <addColumn tableName="server">
+      <column name="attributes" type="VARCHAR(4096)" />
+    </addColumn>
+
   </changeSet>
 
   <changeSet author="author" id="changelog-3.7-notmssql">

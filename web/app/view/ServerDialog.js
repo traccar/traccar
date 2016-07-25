@@ -31,7 +31,7 @@ Ext.define('Traccar.view.ServerDialog', {
             name: 'registration',
             fieldLabel: Strings.serverRegistration,
             allowBlank: false
-        },{
+        }, {
             xtype: 'checkboxfield',
             name: 'readonly',
             fieldLabel: Strings.serverReadonly,
