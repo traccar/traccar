@@ -28,7 +28,7 @@ import org.traccar.model.Position;
 
 public class MotionEventHandler extends BaseEventHandler {
 
-    private static final double SPEED_THRESHOLD  = 0.01;
+    private static final double SPEED_THRESHOLD = 0.01;
     private int suppressRepeated;
 
     public MotionEventHandler() {
