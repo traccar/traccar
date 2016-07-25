@@ -15,17 +15,7 @@
  */
 package org.traccar.model;
 
-public class Group {
-
-    private long id;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+public class Group extends Extensible {
 
     private String name;
 

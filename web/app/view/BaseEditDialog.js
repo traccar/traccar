@@ -18,6 +18,11 @@ Ext.define('Traccar.view.BaseEditDialog', {
     extend: 'Traccar.view.BaseDialog',
 
     buttons: [{
+        text: Strings.sharedAttributes,
+        handler: 'showAttributesView'
+    }, {
+        xtype: 'tbfill'
+    }, {
         text: Strings.sharedSave,
         handler: 'onSaveClick'
     }, {
