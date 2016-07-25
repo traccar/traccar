@@ -18,10 +18,10 @@ Ext.define('Traccar.view.GroupDialog', {
     extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.BaseEditDialogController'
+        'Traccar.view.BaseEditDialogWithAttributesController'
     ],
 
-    controller: 'baseEditDialog',
+    controller: 'baseEditDialogWithAttributes',
     title: Strings.groupDialog,
 
     items: {
@@ -40,5 +40,18 @@ Ext.define('Traccar.view.GroupDialog', {
             displayField: 'name',
             valueField: 'id'
         }]
-    }
+    },
+
+    buttons: [{
+        text: Strings.sharedAttributes,
+        handler: 'showAttributesView'
+    }, {
+        xtype: 'tbfill'
+    }, {
+        text: Strings.sharedSave,
+        handler: 'onSaveClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
+    }]
 });

@@ -18,10 +18,10 @@ Ext.define('Traccar.view.DeviceDialog', {
     extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.DeviceDialogController'
+        'Traccar.view.BaseEditDialogWithAttributesController'
     ],
 
-    controller: 'deviceDialog',
+    controller: 'baseEditDialogWithAttributes',
     title: Strings.deviceDialog,
 
     items: {
@@ -48,7 +48,7 @@ Ext.define('Traccar.view.DeviceDialog', {
     },
 
     buttons: [{
-        text : Strings.sharedAttributes,
+        text: Strings.sharedAttributes,
         handler: 'showAttributesView'
     }, {
         xtype: 'tbfill'

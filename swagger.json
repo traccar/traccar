@@ -1235,7 +1235,8 @@
                 },
                 "twelveHourFormat": {
                     "type": "boolean"
-                }
+                },
+                "attributes": {}
             }
         },
         "Command": {
@@ -1286,7 +1287,8 @@
                 },
                 "groupId": {
                     "type": "integer"
-                }
+                },
+                "attributes": {}
             }
         },
         "DevicePermission": {
