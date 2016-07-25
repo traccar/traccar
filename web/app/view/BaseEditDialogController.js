@@ -38,5 +38,19 @@ Ext.define('Traccar.view.BaseEditDialogController', {
             record.save();
         }
         button.up('window').close();
+    },
+
+    showAttributesView: function (button) {
+        var dialog, record;
+        dialog = button.up('window').down('form');
+        record = dialog.getRecord();
+        Ext.create('Traccar.view.BaseWindow', {
+            title: Strings.sharedAttributes,
+            modal: false,
+            items: {
+                xtype: 'attributesView',
+                record: record
+            }
+        }).show();
     }
 });
