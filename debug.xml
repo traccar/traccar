@@ -323,8 +323,8 @@
         DELETE FROM notifications WHERE id = :id;
     </entry>
 
-    <entry key='database.clearPositionsHistory'>
-        DELETE FROM positions WHERE id != :positionId and deviceid = :deviceId and servertime &lt; :serverTime;
+    <entry key='database.deletePositions'>
+        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices);
     </entry>
 
     <!-- PROTOCOL CONFIG -->

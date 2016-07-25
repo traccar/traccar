@@ -305,28 +305,11 @@ public class DataManager {
     }
 
     public void clearPositionsHistory() throws SQLException {
-        int histDays = config.getInteger("database.positionsHistoryDays");
-        if (histDays == 0) {
-            return;
-        }
-
-        String sql = getQuery("database.clearPositionsHistory");
-        if (sql == null) {
-            return;
-        }
-
-        for (Device device : getAllDevices()) {
-            Date lastUpdate = device.getLastUpdate();
-            if (lastUpdate != null) {
-
-                Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000);
-
-                QueryBuilder.create(dataSource, sql)
-                        .setLong("positionId", device.getPositionId())
-                        .setLong("deviceId", device.getId())
-                        .setDate("serverTime", dateBefore)
-                        .executeUpdate();
-            }
+        int historyDays = config.getInteger("database.positionsHistoryDays");
+        if (historyDays != 0) {
+            QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
+                    .setDate("serverTime", new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000))
+                    .executeUpdate();
         }
     }
 

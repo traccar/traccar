@@ -23,8 +23,8 @@ import java.util.TimerTask;
 import java.util.Locale;
 
 public final class Main {
-    static final long CLEAN_DELAY = 0;
-    static final long CLEAN_PERIOD = 24 * 60 * 60 * 1000;
+
+    private static final long CLEAN_PERIOD = 24 * 60 * 60 * 1000;
 
     private Main() {
     }
@@ -40,8 +40,7 @@ public final class Main {
             Context.getWebServer().start();
         }
 
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -50,7 +49,7 @@ public final class Main {
                     Log.warning(error);
                 }
             }
-        }, CLEAN_DELAY, CLEAN_PERIOD);
+        }, 0, CLEAN_PERIOD);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
