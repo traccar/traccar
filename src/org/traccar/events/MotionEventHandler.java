@@ -42,26 +42,22 @@ public class MotionEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (position.getId() != device.getPositionId() || !position.getValid()) {
+        if (!Context.getDeviceManager().isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 
         Collection<Event> result = null;
         double speed = position.getSpeed();
-        boolean valid = position.getValid();
-        String motion = device.getMotion();
-        if (motion == null) {
-            motion = Device.STATUS_STOPPED;
+        double oldSpeed = 0;
+        Position lastPosition = Context.getDeviceManager().getLastPosition(position.getDeviceId());
+        if (lastPosition != null) {
+            oldSpeed = lastPosition.getSpeed();
         }
         try {
-            if (valid && speed > SPEED_THRESHOLD && !motion.equals(Device.STATUS_MOVING)) {
-                device.setMotion(Device.STATUS_MOVING);
-                Context.getDeviceManager().updateDeviceStatus(device);
+            if (speed > SPEED_THRESHOLD && oldSpeed <= SPEED_THRESHOLD) {
                 result = new ArrayList<>();
                 result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
-            } else if (valid && speed < SPEED_THRESHOLD && motion.equals(Device.STATUS_MOVING)) {
-                device.setMotion(Device.STATUS_STOPPED);
-                Context.getDeviceManager().updateDeviceStatus(device);
+            } else if (speed <= SPEED_THRESHOLD && oldSpeed > SPEED_THRESHOLD) {
                 result = new ArrayList<>();
                 result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
             }

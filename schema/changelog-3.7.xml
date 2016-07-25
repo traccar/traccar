@@ -24,6 +24,8 @@
       <column name="attributes" type="VARCHAR(4096)" />
     </addColumn>
 
+    <dropColumn tableName="devices" columnName="motion" />
+
   </changeSet>
 
   <changeSet author="author" id="changelog-3.7-notmssql">

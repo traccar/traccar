@@ -47,7 +47,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (position.getId() != device.getPositionId() || !position.getValid()) {
+        if (!Context.getDeviceManager().isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 

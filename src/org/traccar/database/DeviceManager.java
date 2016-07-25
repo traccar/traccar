@@ -105,7 +105,6 @@ public class DeviceManager implements IdentityManager {
                         }
                     }
                     device.setStatus(Device.STATUS_OFFLINE);
-                    device.setMotion(Device.STATUS_STOPPED);
                 }
             }
             for (Long cachedDeviceId : devicesById.keySet()) {
@@ -176,7 +175,6 @@ public class DeviceManager implements IdentityManager {
         if (devicesById.containsKey(device.getId())) {
             Device cachedDevice = devicesById.get(device.getId());
             cachedDevice.setStatus(device.getStatus());
-            cachedDevice.setMotion(device.getMotion());
         }
     }
 
@@ -191,10 +189,14 @@ public class DeviceManager implements IdentityManager {
         positions.remove(deviceId);
     }
 
+    public boolean isLatestPosition(Position position) {
+        Position lastPosition = getLastPosition(position.getDeviceId());
+        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0;
+    }
+
     public void updateLatestPosition(Position position) throws SQLException {
 
-        Position lastPosition = getLastPosition(position.getDeviceId());
-        if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0) {
+        if (isLatestPosition(position)) {
 
             dataManager.updateLatestPosition(position);
 
