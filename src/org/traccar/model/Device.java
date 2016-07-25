@@ -92,19 +92,6 @@ public class Device extends Extensible {
         this.groupId = groupId;
     }
 
-    public static final String STATUS_MOVING = "moving";
-    public static final String STATUS_STOPPED = "stopped";
-
-    private String motion;
-
-    public String getMotion() {
-        return motion;
-    }
-
-    public void setMotion(String motion) {
-        this.motion = motion;
-    }
-
     private List<Long> geofenceIds;
 
     public List<Long> getGeofenceIds() {

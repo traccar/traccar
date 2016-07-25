@@ -44,15 +44,14 @@ public class OverspeedEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (position.getId() != device.getPositionId() || !position.getValid()) {
+        if (!Context.getDeviceManager().isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 
         Collection<Event> events = new ArrayList<>();
         double speed = position.getSpeed();
-        boolean valid = position.getValid();
 
-        if (valid && globalSpeedLimit != 0 && speed > globalSpeedLimit) {
+        if (globalSpeedLimit != 0 && speed > globalSpeedLimit) {
             try {
                 if (Context.getDataManager().getLastEvents(
                         position.getDeviceId(), Event.TYPE_DEVICE_OVERSPEED, suppressRepeated).isEmpty()) {
