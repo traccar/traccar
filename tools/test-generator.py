@@ -32,8 +32,10 @@ for i in range(0, len(waypoints)):
         lon = lon1 + (lon2 - lon1) * j / count
         points.append((lat, lon))
 
-def send(conn, lat, lon, course):
+def send(conn, lat, lon, course, alarm):
     params = (('id', id), ('timestamp', int(time.time())), ('lat', lat), ('lon', lon), ('bearing', course))
+    if alarm:
+        params = params + (('alarm', 'sos'),)
     conn.request('GET', '?' + urllib.urlencode(params))
     conn.getresponse()
 
@@ -53,6 +55,7 @@ conn = httplib.HTTPConnection(server)
 while True:
     (lat1, lon1) = points[index % len(points)]
     (lat2, lon2) = points[(index + 1) % len(points)]
-    send(conn, lat1, lon1, course(lat1, lon1, lat2, lon2))
+    alarm = ((index % 10) == 0)
+    send(conn, lat1, lon1, course(lat1, lon1, lat2, lon2), alarm)
     time.sleep(period)
     index += 1

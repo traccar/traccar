@@ -81,12 +81,27 @@ Ext.define('Traccar.controller.Root', {
                 this.asyncUpdate(true);
             }
         });
-        Ext.get('attribution').remove();
+        var attribution = Ext.get('attribution');
+        if (attribution) {
+            attribution.remove();
+        }
         if (this.isPhone) {
             Ext.create('widget.mainMobile');
         } else {
             Ext.create('widget.main');
         }
+    },
+
+    beep: function () {
+        if (!this.beepSound) {
+            this.beepSound = new Audio('beep.wav');
+        }
+        this.beepSound.play();
+    },
+
+    mutePressed: function () {
+        var muteButton = Ext.getCmp('nuteButton');
+        return muteButton && !muteButton.pressed;
     },
 
     asyncUpdate: function (first) {
@@ -99,7 +114,7 @@ Ext.define('Traccar.controller.Root', {
         };
 
         socket.onmessage = function (event) {
-            var i, j, store, data, array, entity, device, typeKey, text, geofence;
+            var i, j, store, data, array, entity, device, typeKey, alarmKey, text, geofence;
 
             data = Ext.decode(event.data);
 
@@ -145,10 +160,28 @@ Ext.define('Traccar.controller.Root', {
                             }
                         }
                         text = Strings.eventCommandResult + ': ' + text;
+                    } else if (array[i].type === 'alarm' && data.positions) {
+                        alarmKey = 'alarm';
+                        text = Strings[alarmKey];
+                        if (!text) {
+                            text = alarmKey;
+                        }
+                        for (j = 0; j < data.positions.length; j++) {
+                            if (data.positions[j].id === array[i].positionId && data.positions[j].attributes.alarm !== null) {
+                                if (typeof data.positions[j].attributes.alarm === 'string' && data.positions[j].attributes.alarm.length >= 2) {
+                                    alarmKey = 'alarm' + data.positions[j].attributes.alarm.charAt(0).toUpperCase() + data.positions[j].attributes.alarm.slice(1);
+                                    text = Strings[alarmKey];
+                                    if (!text) {
+                                        text = alarmKey;
+                                    }
+                                }
+                                break;
+                            }
+                        }
                     } else {
                         typeKey = 'event' + array[i].type.charAt(0).toUpperCase() + array[i].type.slice(1);
                         text = Strings[typeKey];
-                        if (typeof text === 'undefined') {
+                        if (!text) {
                             text = typeKey;
                         }
                     }
@@ -160,7 +193,10 @@ Ext.define('Traccar.controller.Root', {
                     }
                     device = Ext.getStore('Devices').getById(array[i].deviceId);
                     if (typeof device !== 'undefined') {
-                        Ext.toast(text, device.getData().name);
+                        if (self.mutePressed()) {
+                            self.beep();
+                        }
+                        Ext.toast(text, device.get('name'));
                     }
                 }
             }

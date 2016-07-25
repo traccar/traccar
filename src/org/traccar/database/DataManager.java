@@ -304,6 +304,32 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
+    public void clearPositionsHistory() throws SQLException {
+        int histDays = config.getInteger("database.positionsHistoryDays");
+        if (histDays == 0) {
+            return;
+        }
+
+        String sql = getQuery("database.clearPositionsHistory");
+        if (sql == null) {
+            return;
+        }
+
+        for (Device device : getAllDevices()) {
+            Date lastUpdate = device.getLastUpdate();
+            if (lastUpdate != null) {
+
+                Date dateBefore = new Date(lastUpdate.getTime() - histDays * 24 * 3600 * 1000);
+
+                QueryBuilder.create(dataSource, sql)
+                        .setLong("positionId", device.getPositionId())
+                        .setLong("deviceId", device.getId())
+                        .setDate("serverTime", dateBefore)
+                        .executeUpdate();
+            }
+        }
+    }
+
     public Server getServer() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectServers"))
                 .executeQuerySingle(Server.class);

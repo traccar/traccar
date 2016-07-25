@@ -17,9 +17,14 @@ package org.traccar;
 
 import org.traccar.helper.Log;
 
+import java.sql.SQLException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Locale;
 
 public final class Main {
+    static final long CLEAN_DELAY = 0;
+    static final long CLEAN_PERIOD = 24 * 60 * 60 * 1000;
 
     private Main() {
     }
@@ -34,6 +39,18 @@ public final class Main {
         if (Context.getWebServer() != null) {
             Context.getWebServer().start();
         }
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Context.getDataManager().clearPositionsHistory();
+                } catch (SQLException error) {
+                    Log.warning(error);
+                }
+            }
+        }, CLEAN_DELAY, CLEAN_PERIOD);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

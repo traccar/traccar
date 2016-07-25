@@ -115,5 +115,10 @@ Ext.define('Traccar.view.Report', {
         dataIndex: 'address',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('address')
+    }, {
+        text: 'Alarm',
+        dataIndex: 'attributes',
+        flex: 1,
+        renderer: Traccar.AttributeFormatter.getFormatter('alarm')
     }]
 });

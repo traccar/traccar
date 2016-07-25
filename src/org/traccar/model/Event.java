@@ -48,6 +48,8 @@ public class Event extends Message {
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
 
+    public static final String TYPE_ALARM = "alarm";
+
     private Date serverTime;
 
     public Date getServerTime() {
