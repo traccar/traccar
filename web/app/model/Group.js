@@ -27,5 +27,7 @@ Ext.define('Traccar.model.Group', {
     }, {
         name: 'groupId',
         type: 'int'
+    }, {
+        name: 'attributes'
     }]
 });

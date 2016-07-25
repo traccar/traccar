@@ -18,10 +18,10 @@ Ext.define('Traccar.view.ServerDialog', {
     extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.BaseEditDialogController'
+        'Traccar.view.BaseEditDialogWithAttributesController'
     ],
 
-    controller: 'baseEditDialog',
+    controller: 'baseEditDialogWithAttributes',
     title: Strings.serverTitle,
 
     items: {
@@ -31,7 +31,7 @@ Ext.define('Traccar.view.ServerDialog', {
             name: 'registration',
             fieldLabel: Strings.serverRegistration,
             allowBlank: false
-        },{
+        }, {
             xtype: 'checkboxfield',
             name: 'readonly',
             fieldLabel: Strings.serverReadonly,
@@ -85,5 +85,18 @@ Ext.define('Traccar.view.ServerDialog', {
             fieldLabel: Strings.settingsTwelveHourFormat,
             allowBlank: false
         }]
-    }
+    },
+
+    buttons: [{
+        text: Strings.sharedAttributes,
+        handler: 'showAttributesView'
+    }, {
+        xtype: 'tbfill'
+    }, {
+        text: Strings.sharedSave,
+        handler: 'onSaveClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
+    }]
 });
