@@ -100,7 +100,7 @@ Ext.define('Traccar.controller.Root', {
     },
 
     mutePressed: function () {
-        var muteButton = Ext.getCmp('nuteButton');
+        var muteButton = Ext.getCmp('muteButton');
         return muteButton && !muteButton.pressed;
     },
 

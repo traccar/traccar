@@ -58,7 +58,7 @@ Ext.define('Traccar.view.Devices', {
         }, {
             xtype: 'tbfill'
         },{
-            id: 'nuteButton',
+            id: 'muteButton',
             glyph: 'xf1f7@FontAwesome',
             tooltip: Strings.muteButton,
             tooltipType: 'title',
