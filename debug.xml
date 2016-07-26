@@ -44,7 +44,7 @@
     <entry key='event.enable'>true</entry>
     <entry key='event.suppressRepeated'>60</entry>
     <entry key='event.overspeedHandler'>true</entry>
-    <entry key='event.globalSpeedLimit'>90</entry>
+    <entry key='event.overspeed.groupsEnabled'>true</entry>
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
     <entry key='event.alertHandler'>true</entry>
