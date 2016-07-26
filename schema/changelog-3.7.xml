@@ -26,6 +26,8 @@
 
     <dropColumn tableName="devices" columnName="motion" />
 
+    <dropColumn tableName="devices" columnName="status" />
+
     <addColumn tableName="groups">
       <column name="attributes" type="VARCHAR(4096)" />
     </addColumn>
