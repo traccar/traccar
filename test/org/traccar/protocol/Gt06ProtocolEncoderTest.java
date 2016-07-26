@@ -15,7 +15,7 @@ public class Gt06ProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_ENGINE_STOP);
 
-        verifyCommand(encoder, command, binary("787812800c0000000052656c61792c312300009dee0d0a"));
+        verifyCommand(encoder, command, binary("787815800f000000004459442c303030303030230000e6c40d0a"));
 
     }
 
