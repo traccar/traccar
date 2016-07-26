@@ -24,6 +24,14 @@
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
 
+    <entry key='mail.smtp.host'>127.0.0.1</entry>
+    <entry key='mail.smtp.port'>25</entry>
+    <entry key='mail.smtp.auth'>false</entry>
+    <entry key='mail.smtp.username'></entry>
+    <entry key='mail.smtp.password'></entry>
+    <entry key='mail.smtp.from'>me@mydomain.com</entry>
+    <entry key='mail.smtp.starttls.enable'>false</entry>
+
     <!-- DATABASE CONFIG -->
 
     <entry key='database.driver'>org.h2.Driver</entry>
