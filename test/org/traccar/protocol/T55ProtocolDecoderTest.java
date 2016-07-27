@@ -23,7 +23,7 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
                 "4711/022789000688081/$GPRMC,133343,A,5308.56325,N,1029.12850,E,0.000000,0.000000,290316,,*2A"));
 
         verifyPosition(decoder, text(
-                "$GPRMC,073501.000,A,1255.5125,N,07738.2948,E,0.00,0.53,080316,,,D*73,12,865733027593268,10011"));
+                "$GPRMC,073446.000,A,1255.5125,N,07738.2948,E,0.00,0.53,080316,D*71,11,865733027593268,1,090,086"));
 
         verifyNothing(decoder, text(
                 "$GPFID,ID123456ABC"));
