@@ -33,10 +33,12 @@ public class OverspeedEventHandler extends BaseEventHandler {
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
     private boolean checkGroups;
+    private boolean riseOnce;
     private int suppressRepeated;
 
     public OverspeedEventHandler() {
         checkGroups = Context.getConfig().getBoolean("event.overspeed.groupsEnabled");
+        riseOnce = Context.getConfig().getBoolean("event.overspeed.riseOnce");
         suppressRepeated = Context.getConfig().getInteger("event.suppressRepeated", 60);
     }
 
@@ -86,7 +88,15 @@ public class OverspeedEventHandler extends BaseEventHandler {
                 Log.warning(error);
             }
         }
-        if (speedLimit != 0 && speed > UnitsConverter.knotsFromKph(speedLimit)) {
+        double oldSpeed = 0;
+        if (riseOnce) {
+            Position lastPosition = Context.getDeviceManager().getLastPosition(position.getDeviceId());
+            if (lastPosition != null) {
+                oldSpeed = lastPosition.getSpeed();
+            }
+        }
+        speedLimit = UnitsConverter.knotsFromKph(speedLimit);
+        if (speedLimit != 0 && speed > speedLimit && oldSpeed <= speedLimit) {
             try {
                 if (Context.getDataManager().getLastEvents(
                         position.getDeviceId(), Event.TYPE_DEVICE_OVERSPEED, suppressRepeated).isEmpty()) {
@@ -95,7 +105,6 @@ public class OverspeedEventHandler extends BaseEventHandler {
             } catch (SQLException error) {
                 Log.warning(error);
             }
-
         }
         return events;
     }

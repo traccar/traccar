@@ -45,6 +45,7 @@
     <entry key='event.suppressRepeated'>60</entry>
     <entry key='event.overspeedHandler'>true</entry>
     <entry key='event.overspeed.groupsEnabled'>true</entry>
+    <entry key='event.overspeed.riseOnce'>true</entry>
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
     <entry key='event.alertHandler'>true</entry>
