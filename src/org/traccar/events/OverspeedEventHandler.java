@@ -29,10 +29,10 @@ public class OverspeedEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
-    private boolean riseOnce;
+    private boolean notRepeat;
 
     public OverspeedEventHandler() {
-        riseOnce = Context.getConfig().getBoolean("event.overspeed.riseOnce");
+        notRepeat = Context.getConfig().getBoolean("event.overspeed.notRepeat");
     }
 
     @Override
@@ -57,7 +57,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             return null;
         }
         double oldSpeed = 0;
-        if (riseOnce) {
+        if (notRepeat) {
             Position lastPosition = Context.getDeviceManager().getLastPosition(position.getDeviceId());
             if (lastPosition != null) {
                 oldSpeed = lastPosition.getSpeed();
