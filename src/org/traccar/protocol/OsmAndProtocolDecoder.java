@@ -15,9 +15,11 @@
  */
 package org.traccar.protocol;
 
+import org.eclipse.jetty.http.HttpHeader;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
@@ -38,6 +40,14 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
     public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
         super(protocol);
+    }
+
+    private void sendResponse(Channel channel, HttpResponseStatus status) {
+        if (channel != null) {
+            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
+            response.headers().add(HttpHeader.CONTENT_LENGTH.asString(), 0);
+            channel.write(response);
+        }
     }
 
     @Override
@@ -64,8 +74,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                     if (deviceSession == null) {
                         if (channel != null) {
-                            channel.write(
-                                    new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+                            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
                         }
                         return null;
                     }
@@ -124,7 +133,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+            sendResponse(channel, HttpResponseStatus.OK);
         }
 
         return position;
