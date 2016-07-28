@@ -34,7 +34,7 @@ public class PermissionsManager {
 
     private final DataManager dataManager;
 
-    private Server server;
+    private volatile Server server;
 
     private final Map<Long, User> users = new HashMap<>();
 
@@ -151,6 +151,15 @@ public class PermissionsManager {
         if (!Context.getGeofenceManager().checkGeofence(userId, geofenceId) && !isAdmin(userId)) {
             throw new SecurityException("Geofence access denied");
         }
+    }
+
+    public Server getServer() {
+        return server;
+    }
+
+    public void updateServer(Server server) throws SQLException {
+        dataManager.updateServer(server);
+        this.server = server;
     }
 
 }

@@ -15,7 +15,6 @@
  */
 package org.traccar.events;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -24,19 +23,15 @@ import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.model.Server;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 
 public class OverspeedEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
-    private boolean checkGroups;
     private boolean riseOnce;
 
     public OverspeedEventHandler() {
-        checkGroups = Context.getConfig().getBoolean("event.overspeed.groupsEnabled");
         riseOnce = Context.getConfig().getBoolean("event.overspeed.riseOnce");
     }
 
@@ -54,37 +49,12 @@ public class OverspeedEventHandler extends BaseEventHandler {
         Collection<Event> events = new ArrayList<>();
         double speed = position.getSpeed();
         double speedLimit = 0;
-
-        if (device.getAttributes().containsKey(ATTRIBUTE_SPEED_LIMIT)) {
-            speedLimit = Double.parseDouble((String) device.getAttributes().get(ATTRIBUTE_SPEED_LIMIT));
-        }
-        if (speedLimit == 0 && checkGroups) {
-            long groupId = device.getGroupId();
-            while (groupId != 0) {
-                if (Context.getDeviceManager().getGroupById(groupId).getAttributes()
-                        .containsKey(ATTRIBUTE_SPEED_LIMIT)) {
-                    speedLimit = Double.parseDouble((String) Context.getDeviceManager().getGroupById(groupId)
-                            .getAttributes().get(ATTRIBUTE_SPEED_LIMIT));
-                    if (speedLimit != 0) {
-                        break;
-                    }
-                }
-                if (Context.getDeviceManager().getGroupById(groupId) != null) {
-                    groupId = Context.getDeviceManager().getGroupById(groupId).getGroupId();
-                } else {
-                    groupId = 0;
-                }
-            }
+        String speedLimitAttribute = Context.getDeviceManager().lookupAttribute(device.getId(), ATTRIBUTE_SPEED_LIMIT);
+        if (speedLimitAttribute != null) {
+            speedLimit = Double.parseDouble(speedLimitAttribute);
         }
         if (speedLimit == 0) {
-            try {
-                Server server = Context.getDataManager().getServer();
-                if (server.getAttributes().containsKey(ATTRIBUTE_SPEED_LIMIT)) {
-                    speedLimit = Double.parseDouble((String) server.getAttributes().get(ATTRIBUTE_SPEED_LIMIT));
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
-            }
+            return null;
         }
         double oldSpeed = 0;
         if (riseOnce) {
@@ -94,7 +64,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             }
         }
         speedLimit = UnitsConverter.knotsFromKph(speedLimit);
-        if (speedLimit != 0 && speed > speedLimit && oldSpeed <= speedLimit) {
+        if (speed > speedLimit && oldSpeed <= speedLimit) {
             events.add(new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
         }
         return events;

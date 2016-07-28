@@ -41,9 +41,10 @@
     <entry key='logger.level'>all</entry>
     <entry key='logger.file'>target/tracker-server.log</entry>
 
+    <entry key='deviceManager.lookupGroupsAttribute'>true</entry>
+
     <entry key='event.enable'>true</entry>
     <entry key='event.overspeedHandler'>true</entry>
-    <entry key='event.overspeed.groupsEnabled'>true</entry>
     <entry key='event.overspeed.riseOnce'>true</entry>
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
