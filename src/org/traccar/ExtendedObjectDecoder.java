@@ -36,7 +36,8 @@ public abstract class ExtendedObjectDecoder implements ChannelUpstreamHandler {
         if (Context.getConfig().getBoolean("database.saveOriginal") && decodedMessage instanceof Position) {
             Position position = (Position) decodedMessage;
             if (originalMessage instanceof ChannelBuffer) {
-                position.set(Position.KEY_ORIGINAL, ChannelBuffers.hexDump((ChannelBuffer) originalMessage));
+                ChannelBuffer buf = (ChannelBuffer) originalMessage;
+                position.set(Position.KEY_ORIGINAL, ChannelBuffers.hexDump(buf, 0, buf.writerIndex()));
             } else if (originalMessage instanceof String) {
                 position.set(Position.KEY_ORIGINAL, DatatypeConverter.printHexBinary(
                                 ((String) originalMessage).getBytes(StandardCharsets.US_ASCII)));

@@ -80,7 +80,7 @@
     <entry key='database.ignoreUnknown'>true</entry>
 
     <entry key='database.xml'>false</entry>
-    <entry key='database.saveOriginal'>false</entry>
+    <entry key='database.saveOriginal'>true</entry>
 
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
 
