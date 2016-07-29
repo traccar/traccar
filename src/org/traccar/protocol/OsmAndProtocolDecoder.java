@@ -15,9 +15,9 @@
  */
 package org.traccar.protocol;
 
-import org.eclipse.jetty.http.HttpHeader;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -45,7 +45,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, HttpResponseStatus status) {
         if (channel != null) {
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
-            response.headers().add(HttpHeader.CONTENT_LENGTH.asString(), 0);
+            response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, 0);
             channel.write(response);
         }
     }
