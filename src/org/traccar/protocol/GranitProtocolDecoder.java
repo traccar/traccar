@@ -71,7 +71,9 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     private static void decodeStructure(ChannelBuffer buf, Position position) {
         short flags = buf.readUnsignedByte();
         position.setValid(BitUtil.check(flags, 7));
-        position.set(Position.KEY_ALARM, BitUtil.check(flags, 1));
+        if (BitUtil.check(flags, 1)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        }
 
         short satDel = buf.readUnsignedByte();
         position.set(Position.KEY_SATELLITES, BitUtil.from(satDel, 4));

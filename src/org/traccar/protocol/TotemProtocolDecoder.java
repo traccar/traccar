@@ -159,6 +159,34 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(String value) {
+        switch (value) {
+        case "01": return Position.ALARM_SOS;
+        case "49": return Position.PREFIX_BUTTON + "A" + Position.ENDING_PRESSED;
+        case "09": return Position.ALARM_SHUTDOWN;
+        case "10": return Position.ALARM_LOW_BATTERY;
+        case "11": return Position.ALARM_OVERSPEED;
+        case "13": return Position.ALARM_OVERSPEED_END;
+        case "30": return Position.ALARM_PARKING;
+        case "42": return Position.ALARM_GEOFENCE_EXIT;
+        case "43": return Position.ALARM_GEOFENCE_ENTER;
+        case "50": return Position.PREFIX_IO + "1" + Position.ENDING_CLOSE;
+        case "51": return Position.PREFIX_IO + "1" + Position.ENDING_OPEN;
+        case "52": return Position.PREFIX_IO + "2" + Position.ENDING_CLOSE;
+        case "53": return Position.PREFIX_IO + "2" + Position.ENDING_OPEN;
+        case "54": return Position.PREFIX_IO + "3" + Position.ENDING_CLOSE;
+        case "55": return Position.PREFIX_IO + "3" + Position.ENDING_OPEN;
+        case "56": return Position.PREFIX_IO + "4" + Position.ENDING_CLOSE;
+        case "57": return Position.PREFIX_IO + "4" + Position.ENDING_OPEN;
+        case "60": return Position.ALARM_CHARGE_BEGIN;
+        case "61": return Position.ALARM_CHARGE_END;
+        case "66": return Position.ALARM_RFID_NEW;
+        case "91": return Position.ALARM_SLEEP_INTO;
+        case "92": return Position.ALARM_SLEEP_FROM;
+        default: return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -193,9 +221,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (pattern == PATTERN1 || pattern == PATTERN2) {
-
-            position.set(Position.KEY_ALARM, parser.next());
-
+            String alarm = decodeAlarm(parser.next());
+            if (alarm != null) {
+                position.set(Position.KEY_ALARM, alarm);
+            }
             DateBuilder dateBuilder = new DateBuilder();
             int year = 0;
             if (pattern == PATTERN2) {
@@ -238,9 +267,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.next());
 
         } else if (pattern == PATTERN3) {
-
-            position.set(Position.KEY_ALARM, parser.next());
-
+            String alarm = decodeAlarm(parser.next());
+            if (alarm != null) {
+                position.set(Position.KEY_ALARM, alarm);
+            }
             DateBuilder dateBuilder = new DateBuilder()
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -304,11 +334,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate());
 
         }
-
         if (channel != null) {
             channel.write("ACK OK\r\n");
         }
-
         return position;
     }
 
