@@ -73,9 +73,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                 case "deviceid":
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                     if (deviceSession == null) {
-                        if (channel != null) {
-                            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
-                        }
+                        sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
                         return null;
                     }
                     position.setDeviceId(deviceSession.getDeviceId());
@@ -132,11 +130,14 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
         }
 
-        if (channel != null) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession != null) {
             sendResponse(channel, HttpResponseStatus.OK);
+            return position;
+        } else {
+            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+            return null;
         }
-
-        return position;
     }
 
 }
