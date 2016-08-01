@@ -125,9 +125,6 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(alarm, 2)) {
             return Position.ALARM_OVERSPEED;
         }
-        if (BitUtil.check(alarm, 3)) {
-            return Position.ALARM_JAMMING;
-        }
         if (BitUtil.check(alarm, 4)) {
             return Position.ALARM_GEOFENCE;
         }
