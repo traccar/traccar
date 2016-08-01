@@ -57,10 +57,10 @@ Ext.define('Traccar.view.Devices', {
             tooltipType: 'title'
         }, {
             xtype: 'tbfill'
-        },{
-            id: 'nuteButton',
+        }, {
+            id: 'muteButton',
             glyph: 'xf1f7@FontAwesome',
-            tooltip: Strings.muteButton,
+            tooltip: Strings.sharedMute,
             tooltipType: 'title',
             pressed : true,
             enableToggle: true,
@@ -156,13 +156,13 @@ Ext.define('Traccar.view.Devices', {
         renderer: function (value, metaData, record) {
             switch (record.get('status')) {
                 case 'online':
-                    metaData.tdCls = 'status-color-online';
+                    metaData.tdCls = 'view-color-green';
                     break;
                 case 'offline':
-                    metaData.tdCls = 'status-color-offline';
+                    metaData.tdCls = 'view-color-red';
                     break;
                 default:
-                    metaData.tdCls = 'status-color-unknown';
+                    metaData.tdCls = 'view-color-yellow';
                     break;
             }
             if (Traccar.app.getPreference('twelveHourFormat', false)) {

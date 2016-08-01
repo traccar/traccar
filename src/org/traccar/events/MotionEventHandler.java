@@ -15,25 +15,18 @@
  */
 package org.traccar.events;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 public class MotionEventHandler extends BaseEventHandler {
 
-    private static final double SPEED_THRESHOLD  = 0.01;
-    private int suppressRepeated;
-
-    public MotionEventHandler() {
-        suppressRepeated = Context.getConfig().getInteger("event.suppressRepeated", 60);
-    }
+    private static final double SPEED_THRESHOLD = 0.01;
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
@@ -42,40 +35,23 @@ public class MotionEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (position.getId() != device.getPositionId() || !position.getValid()) {
+        if (!Context.getDeviceManager().isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 
         Collection<Event> result = null;
         double speed = position.getSpeed();
-        boolean valid = position.getValid();
-        String motion = device.getMotion();
-        if (motion == null) {
-            motion = Device.STATUS_STOPPED;
+        double oldSpeed = 0;
+        Position lastPosition = Context.getDeviceManager().getLastPosition(position.getDeviceId());
+        if (lastPosition != null) {
+            oldSpeed = lastPosition.getSpeed();
         }
-        try {
-            if (valid && speed > SPEED_THRESHOLD && !motion.equals(Device.STATUS_MOVING)) {
-                device.setMotion(Device.STATUS_MOVING);
-                Context.getDeviceManager().updateDeviceStatus(device);
-                result = new ArrayList<>();
-                result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
-            } else if (valid && speed < SPEED_THRESHOLD && motion.equals(Device.STATUS_MOVING)) {
-                device.setMotion(Device.STATUS_STOPPED);
-                Context.getDeviceManager().updateDeviceStatus(device);
-                result = new ArrayList<>();
-                result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
-            }
-
-            if (result != null && !result.isEmpty()) {
-                for (Event event : result) {
-                    if (!Context.getDataManager().getLastEvents(position.getDeviceId(),
-                            event.getType(), suppressRepeated).isEmpty()) {
-                        event = null;
-                    }
-                }
-            }
-        } catch (SQLException error) {
-            Log.warning(error);
+        if (speed > SPEED_THRESHOLD && oldSpeed <= SPEED_THRESHOLD) {
+            result = new ArrayList<>();
+            result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
+        } else if (speed <= SPEED_THRESHOLD && oldSpeed > SPEED_THRESHOLD) {
+            result = new ArrayList<>();
+            result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
         }
         return result;
     }

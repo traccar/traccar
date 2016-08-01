@@ -17,7 +17,9 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
@@ -38,6 +40,14 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
 
     public OsmAndProtocolDecoder(OsmAndProtocol protocol) {
         super(protocol);
+    }
+
+    private void sendResponse(Channel channel, HttpResponseStatus status) {
+        if (channel != null) {
+            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
+            response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, 0);
+            channel.write(response);
+        }
     }
 
     @Override
@@ -63,10 +73,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                 case "deviceid":
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                     if (deviceSession == null) {
-                        if (channel != null) {
-                            channel.write(
-                                    new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
-                        }
+                        sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
                         return null;
                     }
                     position.setDeviceId(deviceSession.getDeviceId());
@@ -123,11 +130,14 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
         }
 
-        if (channel != null) {
-            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession != null) {
+            sendResponse(channel, HttpResponseStatus.OK);
+            return position;
+        } else {
+            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
+            return null;
         }
-
-        return position;
     }
 
 }

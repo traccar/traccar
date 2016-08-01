@@ -50,7 +50,9 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+")
             .number(",(d+)")                     // satellites
             .number(",(d+)")                     // imei
-            .number(",(d+)").optional(3)
+            .number(",([01])")                   // ignition
+            .number(",(d+)")                     // fuel
+            .number(",(d+)").optional(5)         // battery
             .any()
             .compile();
 
@@ -123,13 +125,18 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
-        if (parser.hasNext(3)) {
+        if (parser.hasNext(5)) {
             position.set(Position.KEY_SATELLITES, parser.next());
+
             deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession == null) {
                 return null;
             }
             position.setDeviceId(deviceSession.getDeviceId());
+
+            position.set(Position.KEY_IGNITION, parser.hasNext() && parser.next().equals("1"));
+            position.set(Position.KEY_FUEL, parser.nextInt());
+            position.set(Position.KEY_BATTERY, parser.nextInt());
         }
 
         if (deviceSession != null) {

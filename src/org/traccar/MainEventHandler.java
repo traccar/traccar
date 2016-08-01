@@ -26,6 +26,7 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 
 public class MainEventHandler extends IdleStateAwareChannelHandler {
@@ -36,6 +37,11 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         if (e.getMessage() != null && e.getMessage() instanceof Position) {
 
             Position position = (Position) e.getMessage();
+            try {
+                Context.getDeviceManager().updateLatestPosition(position);
+            } catch (SQLException error) {
+                Log.warning(error);
+            }
 
             String uniqueId = Context.getIdentityManager().getDeviceById(position.getDeviceId()).getUniqueId();
 
@@ -54,6 +60,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
                 s.append(", result: ").append(cmdResult);
             }
             Log.info(s.toString());
+
         }
     }
 

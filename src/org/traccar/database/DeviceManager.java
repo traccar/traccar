@@ -32,6 +32,7 @@ import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 
 public class DeviceManager implements IdentityManager {
 
@@ -40,6 +41,7 @@ public class DeviceManager implements IdentityManager {
     private final Config config;
     private final DataManager dataManager;
     private final long dataRefreshDelay;
+    private boolean lookupGroupsAttribute;
 
     private Map<Long, Device> devicesById;
     private Map<String, Device> devicesByUniqueId;
@@ -54,6 +56,7 @@ public class DeviceManager implements IdentityManager {
         this.dataManager = dataManager;
         this.config = Context.getConfig();
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
+        lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
         if (dataManager != null) {
             try {
                 updateGroupCache(true);
@@ -105,7 +108,6 @@ public class DeviceManager implements IdentityManager {
                         }
                     }
                     device.setStatus(Device.STATUS_OFFLINE);
-                    device.setMotion(Device.STATUS_STOPPED);
                 }
             }
             for (Long cachedDeviceId : devicesById.keySet()) {
@@ -176,7 +178,6 @@ public class DeviceManager implements IdentityManager {
         if (devicesById.containsKey(device.getId())) {
             Device cachedDevice = devicesById.get(device.getId());
             cachedDevice.setStatus(device.getStatus());
-            cachedDevice.setMotion(device.getMotion());
         }
     }
 
@@ -191,10 +192,14 @@ public class DeviceManager implements IdentityManager {
         positions.remove(deviceId);
     }
 
+    public boolean isLatestPosition(Position position) {
+        Position lastPosition = getLastPosition(position.getDeviceId());
+        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0;
+    }
+
     public void updateLatestPosition(Position position) throws SQLException {
 
-        Position lastPosition = getLastPosition(position.getDeviceId());
-        if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0) {
+        if (isLatestPosition(position)) {
 
             dataManager.updateLatestPosition(position);
 
@@ -309,5 +314,34 @@ public class DeviceManager implements IdentityManager {
     public void removeGroup(long groupId) throws SQLException {
         dataManager.removeGroup(groupId);
         groupsById.remove(groupId);
+    }
+
+    public String lookupAttribute(long deviceId, String attributeName) {
+        String result = null;
+        Device device = getDeviceById(deviceId);
+        if (device != null) {
+            if (device.getAttributes().containsKey(attributeName)) {
+                result = (String) device.getAttributes().get(attributeName);
+            }
+            if (result == null && lookupGroupsAttribute) {
+                long groupId = device.getGroupId();
+                while (groupId != 0) {
+                    if (getGroupById(groupId) != null) {
+                        result = (String)  getGroupById(groupId).getAttributes().get(attributeName);
+                        if (result != null) {
+                            break;
+                        }
+                        groupId = getGroupById(groupId).getGroupId();
+                    } else {
+                        groupId = 0;
+                    }
+                }
+            }
+            if (result == null) {
+                Server server = Context.getPermissionsManager().getServer();
+                result = (String) server.getAttributes().get(attributeName);
+            }
+        }
+        return result;
     }
 }

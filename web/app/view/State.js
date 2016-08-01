@@ -34,6 +34,12 @@ Ext.define('Traccar.view.State', {
     }, {
         text: Strings.stateValue,
         dataIndex: 'value',
-        flex: 1
+        flex: 1,
+        renderer: function (value, metaData, record) {
+            if (record.get('name') === 'Alarm') {
+                metaData.tdCls = 'view-color-red';
+            }
+            return value;
+        }
     }]
 });

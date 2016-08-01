@@ -1,10 +1,10 @@
-.status-color-online {
+.view-color-green {
     background-color: rgba(77, 250, 144, 0.3);
 }
-.status-color-unknown {
+.view-color-yellow {
     background-color: rgba(250, 190, 77, 0.3);
 }
-.status-color-offline {
+.view-color-red {
     background-color: rgba(255, 84, 104, 0.3);
 }
 

@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.DeviceDialogController', {
-    extend: 'Traccar.view.BaseEditDialogController',
-    alias: 'controller.deviceDialog',
+Ext.define('Traccar.view.AttributeController', {
+    extend: 'Ext.app.ViewController',
+    alias: 'controller.attributeDialog',
 
-    requires: [
-        'Traccar.view.Attributes'
-    ],
-
-    showAttributesView: function (button) {
-        var dialog, record;
+    onSaveClick: function (button) {
+        var dialog, store, record;
         dialog = button.up('window').down('form');
+        dialog.updateRecord();
         record = dialog.getRecord();
-        Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedAttributes,
-            modal: false,
-            items: {
-                xtype: 'attributesView',
-                record: record
+        store = record.store;
+        if (store) {
+            if (record.phantom) {
+                store.add(record);
             }
-        }).show();
+            store.sync({
+                failure: function (batch) {
+                    store.rejectChanges();
+                    Traccar.app.showError(batch.exceptions[0].getError().response);
+                }
+            });
+        } else {
+            record.save();
+        }
+        button.up('window').close();
     }
 });

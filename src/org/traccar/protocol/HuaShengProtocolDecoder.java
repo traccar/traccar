@@ -38,7 +38,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LOGIN = 0xAA02;
     public static final int MSG_LOGIN_RSP = 0xFF03;
 
-    private static void sendResponse(Channel channel, int type, ChannelBuffer content) {
+    private static void sendResponse(Channel channel, int type, int index, ChannelBuffer content) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer();
             response.writeByte(0xC0);
@@ -46,7 +46,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(12 + content.readableBytes());
             response.writeShort(type);
             response.writeShort(0);
-            response.writeInt(1);
+            response.writeInt(index);
             response.writeBytes(content);
             response.writeByte(0xC0);
             channel.write(response);
@@ -80,7 +80,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     if (deviceSession != null && channel != null) {
                         ChannelBuffer content = ChannelBuffers.dynamicBuffer();
                         content.writeByte(0); // success
-                        sendResponse(channel, MSG_LOGIN_RSP, content);
+                        sendResponse(channel, MSG_LOGIN_RSP, index, content);
                     }
                 } else {
                     buf.skipBytes(length);
@@ -127,9 +127,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                 buf.skipBytes(length);
             }
 
-            ChannelBuffer content = ChannelBuffers.dynamicBuffer();
-            content.writeInt(index);
-            sendResponse(channel, MSG_POSITION_RSP, content);
+            sendResponse(channel, MSG_POSITION_RSP, index, ChannelBuffers.dynamicBuffer());
 
             return position;
 

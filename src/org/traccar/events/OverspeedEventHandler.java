@@ -15,7 +15,6 @@
  */
 package org.traccar.events;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -24,17 +23,16 @@ import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 
 public class OverspeedEventHandler extends BaseEventHandler {
 
-    private double globalSpeedLimit;
-    private int suppressRepeated;
+    public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
+
+    private boolean notRepeat;
 
     public OverspeedEventHandler() {
-        globalSpeedLimit = UnitsConverter.knotsFromKph(Context.getConfig().getInteger("event.globalSpeedLimit", 0));
-        suppressRepeated = Context.getConfig().getInteger("event.suppressRepeated", 60);
+        notRepeat = Context.getConfig().getBoolean("event.overspeed.notRepeat");
     }
 
     @Override
@@ -44,24 +42,30 @@ public class OverspeedEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (position.getId() != device.getPositionId() || !position.getValid()) {
+        if (!Context.getDeviceManager().isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 
         Collection<Event> events = new ArrayList<>();
         double speed = position.getSpeed();
-        boolean valid = position.getValid();
-
-        if (valid && globalSpeedLimit != 0 && speed > globalSpeedLimit) {
-            try {
-                if (Context.getDataManager().getLastEvents(
-                        position.getDeviceId(), Event.TYPE_DEVICE_OVERSPEED, suppressRepeated).isEmpty()) {
-                    events.add(new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
-                }
-            } catch (SQLException error) {
-                Log.warning(error);
+        double speedLimit = 0;
+        String speedLimitAttribute = Context.getDeviceManager().lookupAttribute(device.getId(), ATTRIBUTE_SPEED_LIMIT);
+        if (speedLimitAttribute != null) {
+            speedLimit = Double.parseDouble(speedLimitAttribute);
+        }
+        if (speedLimit == 0) {
+            return null;
+        }
+        double oldSpeed = 0;
+        if (notRepeat) {
+            Position lastPosition = Context.getDeviceManager().getLastPosition(position.getDeviceId());
+            if (lastPosition != null) {
+                oldSpeed = lastPosition.getSpeed();
             }
-
+        }
+        speedLimit = UnitsConverter.knotsFromKph(speedLimit);
+        if (speed > speedLimit && oldSpeed <= speedLimit) {
+            events.add(new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
         }
         return events;
     }
