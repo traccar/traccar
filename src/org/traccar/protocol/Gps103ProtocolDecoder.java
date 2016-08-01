@@ -102,6 +102,23 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(String value) {
+        if (value == "tracker") {
+            return null;
+        } else if (value == "help me") {
+            return Position.ALARM_SOS;
+        } else if (value == "low battery") {
+            return Position.ALARM_LOW_BATTERY;
+        } else if (value == "stockade") {
+            return Position.ALARM_GEOFENCE;
+        } else if (value == "move") {
+            return Position.ALARM_MOVEMENT;
+        } else if (value == "speed") {
+            return Position.ALARM_OVERSPEED;
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -195,7 +212,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         String alarm = parser.next();
-        position.set(Position.KEY_ALARM, alarm);
+        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
         if (channel != null && alarm.equals("help me")) {
             channel.write("**,imei:" + imei + ",E;", remoteAddress);
         }

@@ -143,7 +143,9 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             parser.next(); // panic button status
 
             String painelStatus = parser.next();
-            position.set(Position.KEY_ALARM, painelStatus.equals("1"));
+            if (painelStatus.equals("1")) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            }
             position.set("painel", painelStatus.equals("2"));
 
             Double mainVoltage = parser.nextDouble() / 100d;

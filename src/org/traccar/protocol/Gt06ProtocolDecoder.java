@@ -154,7 +154,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeStatus(Position position, ChannelBuffer buf) {
 
-        position.set(Position.KEY_ALARM, true);
+        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
 
         int flags = buf.readUnsignedByte();
 

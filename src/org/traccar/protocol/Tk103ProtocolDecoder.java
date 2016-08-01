@@ -75,6 +75,19 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(int value) {
+        switch (value) {
+        case 0: return Position.ALARM_OIL_CUT;
+        case 1: return Position.ALARM_ACCIDENT;
+        case 2: return Position.ALARM_SOS;
+        case 3: return Position.ALARM_VIBRATION;
+        case 4: return Position.ALARM_LOW_SPEED;
+        case 5: return Position.ALARM_OVERSPEED;
+        case 6: return Position.ALARM_GEOFENCE_EXIT;
+        default: return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -160,7 +173,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         int alarm = sentence.indexOf("BO01");
         if (alarm != -1) {
-            position.set(Position.KEY_ALARM, Integer.parseInt(sentence.substring(alarm + 4, alarm + 5)));
+            position.set(Position.KEY_ALARM, decodeAlarm(Integer.parseInt(sentence.substring(alarm + 4, alarm + 5))));
         }
 
         DateBuilder dateBuilder = new DateBuilder();

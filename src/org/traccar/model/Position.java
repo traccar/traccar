@@ -68,20 +68,12 @@ public class Position extends Message {
     public static final String PREFIX_COUNT = "count";
     public static final String PREFIX_BUTTON = "button";
 
-    public static final String ENDING_PRESSED = "Pressed";
-    public static final String ENDING_RELEASED = "Released";
-    public static final String ENDING_OPEN = "Open";
-    public static final String ENDING_CLOSE = "Close";
-    public static final String ENDING_ACTIVE = "Active";
-    public static final String ENDING_INACTIVE = "Inactive";
-
-
     public static final String ALARM_GENERAL = "general";
     public static final String ALARM_SOS = "sos";
     public static final String ALARM_VIBRATION = "vibration";
     public static final String ALARM_MOVEMENT = "movement";
+    public static final String ALARM_LOW_SPEED = "lowspeed";
     public static final String ALARM_OVERSPEED = "overspeed";
-    public static final String ALARM_OVERSPEED_END = "overspeedEnd";
     public static final String ALARM_FALL_DOWN = "fallDown";
     public static final String ALARM_LOW_BATTERY = "lowBattery";
     public static final String ALARM_MOTION = "motion";
@@ -91,19 +83,9 @@ public class Position extends Message {
     public static final String ALARM_GEOFENCE = "geofence";
     public static final String ALARM_GEOFENCE_ENTER = "geofenceEnter";
     public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
-    public static final String ALARM_ODB = "odb";
-    public static final String ALARM_POWER_LOW = "powerLow";
-    public static final String ALARM_PARKING = "parking";
-    public static final String ALARM_CHARGE_BEGIN = "chargeBegin";
-    public static final String ALARM_CHARGE_END = "chargeEnd";
-    public static final String ALARM_RFID_NEW = "rfidNew";
-    public static final String ALARM_SLEEP_INTO = "intoSleep";
-    public static final String ALARM_SLEEP_FROM = "fromSleep";
-    public static final String ALARM_TRACKER_ON = "trackerOn";
-    public static final String ALARM_SHUTDOWN = "shutdown";
-    public static final String ALARM_GPS_BLIND_ENTER = "gpsBlindEnter";
-    public static final String ALARM_GPS_BLIND_EXIT = "gpsBlindExit";
     public static final String ALARM_GPS_ANTENNA_CUT = "gpsAntennaCut";
+    public static final String ALARM_OIL_CUT = "oilCut";
+    public static final String ALARM_ACCIDENT = "accident";
 
 
     private String protocol;

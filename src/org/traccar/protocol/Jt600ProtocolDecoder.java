@@ -151,7 +151,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        position.set(Position.KEY_ALARM, true);
+        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

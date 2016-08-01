@@ -150,26 +150,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
         return server;
     }
-    
+
     private String decodeAlarm(short value) {
         switch (value) {
         case 0x01: return Position.ALARM_SOS;
-        case 0x02: return Position.PREFIX_BUTTON + "B" + Position.ENDING_PRESSED;
-        case 0x03: return Position.PREFIX_BUTTON + "C" + Position.ENDING_PRESSED;
-        case 0x04: return Position.PREFIX_IO + "4" + Position.ENDING_ACTIVE;
-        case 0x05: return Position.PREFIX_IO + "5" + Position.ENDING_ACTIVE;
         case 0x10: return Position.ALARM_LOW_BATTERY;
         case 0x11: return Position.ALARM_OVERSPEED;
         case 0x12: return Position.ALARM_MOVEMENT;
         case 0x13: return Position.ALARM_GEOFENCE_ENTER;
-        case 0x14: return Position.ALARM_TRACKER_ON;
-        case 0x15: return Position.ALARM_GPS_BLIND_ENTER;
-        case 0x16: return Position.ALARM_GPS_BLIND_EXIT;
-        case 0x31: return Position.ALARM_SOS + Position.ENDING_RELEASED;
-        case 0x32: return Position.PREFIX_BUTTON + "B" + Position.ENDING_RELEASED;
-        case 0x33: return Position.PREFIX_BUTTON + "C" + Position.ENDING_RELEASED;
-        case 0x34: return Position.PREFIX_IO + "4" + Position.ENDING_INACTIVE;
-        case 0x35: return Position.PREFIX_IO + "5" + Position.ENDING_INACTIVE;
         case 0x50: return Position.ALARM_POWER_OFF;
         case 0x53: return Position.ALARM_GPS_ANTENNA_CUT;
         default: return null;

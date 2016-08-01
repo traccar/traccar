@@ -134,12 +134,6 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(alarm, 10)) {
             return Position.ALARM_SOS;
         }
-        if (BitUtil.check(alarm, 11)) {
-            return Position.ALARM_ODB;
-        }
-        if (BitUtil.check(alarm, 15)) {
-            return Position.ALARM_POWER_LOW;
-        }
         return null;
     }
 
@@ -209,10 +203,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     int status = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
                     position.set(Position.KEY_STATUS, status);
-                    String alarm = decodeAlarm(buf.readUnsignedShort());
-                    if (alarm != null) {
-                        position.set(Position.KEY_ALARM, alarm);
-                    }
+                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedShort()));
                     break;
 
                 case DATA_ODOMETER:

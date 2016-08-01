@@ -91,16 +91,14 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(BitUtil.check(buf.readUnsignedByte(), 0));
 
             short alarm = buf.readUnsignedByte();
-            if (alarm != 0x80) {
-                if (alarm == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                } else if (alarm == 2) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                } else if (alarm == 3) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
-                } else if (alarm == 9) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
-                }
+            if (alarm == 1) {
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            } else if (alarm == 2) {
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            } else if (alarm == 3) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+            } else if (alarm == 9) {
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
             }
 
             if (newFormat) {
