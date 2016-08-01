@@ -209,10 +209,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         // Custom data
         if (command == MSG_ALARM) {
-            String alarm = decodeAlarm(buf.readUnsignedByte());
-            if (alarm != null) {
-                position.set(Position.KEY_ALARM, alarm);
-            }
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
         } else if (command == MSG_POSITION_LOGGED) {
             buf.skipBytes(6);
         }
