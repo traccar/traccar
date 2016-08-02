@@ -29,8 +29,8 @@ Ext.define('Traccar.view.LoginController', {
         var user = Ext.util.Cookies.get('user');
         var pass = Ext.util.Cookies.get('pass');
         if (user && pass) {
-            Ext.getCmp('txtUser').setValue(user);
-            Ext.getCmp('txtPassword').setValue(pass);
+            this.lookupReference('txtUser').setValue(user);
+            this.lookupReference('txtPassword').setValue(pass);
             this.login();
         }
     },
@@ -47,9 +47,9 @@ Ext.define('Traccar.view.LoginController', {
                 callback: function (options, success, response) {
                     Ext.getBody().unmask();
                     if (success) {
-                        if (Ext.getCmp('chkRememberMe').getValue()) {
-                            Ext.util.Cookies.set('user', Ext.getCmp('txtUser').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
-                            Ext.util.Cookies.set('pass', Ext.getCmp('txtPassword').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
+                        if (this.lookupReference('chkRememberMe').getValue()) {
+                            Ext.util.Cookies.set('user', this.lookupReference('txtUser').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
+                            Ext.util.Cookies.set('pass', this.lookupReference('txtPassword').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
                         }
                         Traccar.app.setUser(Ext.decode(response.responseText));
                         this.fireViewEvent('login');
