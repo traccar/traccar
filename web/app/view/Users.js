@@ -31,22 +31,22 @@ Ext.define('Traccar.view.Users', {
     tbar: {
         xtype: 'editToolbar',
         items: [{
-            text: Strings.deviceTitle,
+            text: getString('deviceTitle'),
             disabled: true,
             handler: 'onDevicesClick',
             reference: 'userDevicesButton'
         }, {
-            text: Strings.settingsGroups,
+            text: getString('settingsGroups'),
             disabled: true,
             handler: 'onGroupsClick',
             reference: 'userGroupsButton'
         }, {
-            text: Strings.sharedGeofences,
+            text: getString('sharedGeofences'),
             disabled: true,
             handler: 'onGeofencesClick',
             reference: 'userGeofencesButton'
         }, {
-            text: Strings.sharedNotifications,
+            text: getString('sharedNotifications'),
             disabled: true,
             handler: 'onNotificationsClick',
             reference: 'userNotificationsButton'
@@ -58,15 +58,15 @@ Ext.define('Traccar.view.Users', {
     },
 
     columns: [{
-        text: Strings.sharedName,
+        text: getString('sharedName'),
         dataIndex: 'name',
         flex: 1
     }, {
-        text: Strings.userEmail,
+        text: getString('userEmail'),
         dataIndex: 'email',
         flex: 1
     }, {
-        text: Strings.userAdmin,
+        text: getString('userAdmin'),
         dataIndex: 'admin',
         flex: 1
     }]

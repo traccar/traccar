@@ -75,4 +75,17 @@ Ext.Ajax.request({
     }
 });
 
+Ext.Ajax.request({
+    url: '/l10n/en.json',
+    callback: function (options, success, response) {
+        Strings_en = Ext.decode(response.responseText);
+    }
+});
+
 Ext.Loader.loadScript('//cdnjs.cloudflare.com/ajax/libs/extjs/6.0.0/classic/locale/locale-' + Locale.languages[Locale.language].code + '.js');
+
+function getString(key, defaultVal){
+    if (!defaultVal) defaultVal = '';
+    var retVal = ((Strings[key]) ? Strings[key] : Strings_en[key]);
+    return ((retVal) ? retVal : defaultVal);
+}

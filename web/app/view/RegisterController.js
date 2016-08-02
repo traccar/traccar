@@ -34,7 +34,7 @@ Ext.define('Traccar.view.RegisterController', {
     onCreateReturn: function (options, success, response) {
         if (success) {
             this.closeView();
-            Ext.toast(Strings.loginCreated);
+            Ext.toast(getString('loginCreated'));
         } else {
             Traccar.app.showError(response);
         }

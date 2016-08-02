@@ -36,7 +36,7 @@ Ext.define('Traccar.view.GroupGeofences', {
     },
 
     columns: [{
-        text: Strings.sharedName,
+        text: getString('sharedName'),
         dataIndex: 'name',
         flex: 1
     }]

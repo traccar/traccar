@@ -38,7 +38,7 @@ Ext.define('Traccar.view.LoginController', {
     login: function () {
         var form = this.lookupReference('form');
         if (form.isValid()) {
-            Ext.getBody().mask(Strings.sharedLoading);
+            Ext.getBody().mask(getString('sharedLoading'));
             Ext.Ajax.request({
                 scope: this,
                 method: 'POST',
@@ -54,7 +54,7 @@ Ext.define('Traccar.view.LoginController', {
                         Traccar.app.setUser(Ext.decode(response.responseText));
                         this.fireViewEvent('login');
                     } else {
-                        Traccar.app.showError(Strings.loginFailed);
+                        Traccar.app.showError(getString('loginFailed'));
                     }
                 }
             });

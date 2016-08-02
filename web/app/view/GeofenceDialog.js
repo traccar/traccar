@@ -22,18 +22,18 @@ Ext.define('Traccar.view.GeofenceDialog', {
     ],
 
     controller: 'geofenceDialog',
-    title: Strings.sharedGeofence,
+    title: getString('sharedGeofence'),
 
     items: {
         xtype: 'form',
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.sharedName
+            fieldLabel: getString('sharedName')
         }, {
             xtype: 'textfield',
             name: 'description',
-            fieldLabel: Strings.sharedDescription
+            fieldLabel: getString('sharedDescription')
         }, {
             xtype: 'hiddenfield',
             name: 'area',
@@ -43,16 +43,16 @@ Ext.define('Traccar.view.GeofenceDialog', {
     },
 
     buttons: [{
-        text: Strings.sharedArea,
+        text: getString('sharedArea'),
         glyph: 'xf21d@FontAwesome',
         handler: 'onAreaClick'
     }, {
         xtype: 'tbfill'
     }, {
-        text: Strings.sharedSave,
+        text: getString('sharedSave'),
         handler: 'onSaveClick'
     }, {
-        text: Strings.sharedCancel,
+        text: getString('sharedCancel'),
         handler: 'closeView'
     }]
 });

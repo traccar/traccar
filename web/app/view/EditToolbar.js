@@ -25,7 +25,7 @@ Ext.define('Traccar.view.EditToolbar', {
             handler: 'onAddClick',
             reference: 'toolbarAddButton',
             glyph: 'xf067@FontAwesome',
-            tooltip: Strings.sharedAdd,
+            tooltip: getString('sharedAdd'),
             tooltipType: 'title'
         }, {
             xtype: 'button',
@@ -33,7 +33,7 @@ Ext.define('Traccar.view.EditToolbar', {
             handler: 'onEditClick',
             reference: 'toolbarEditButton',
             glyph: 'xf040@FontAwesome',
-            tooltip: Strings.sharedEdit,
+            tooltip: getString('sharedEdit'),
             tooltipType: 'title'
         }, {
             xtype: 'button',
@@ -41,7 +41,7 @@ Ext.define('Traccar.view.EditToolbar', {
             handler: 'onRemoveClick',
             reference: 'toolbarRemoveButton',
             glyph: 'xf00d@FontAwesome',
-            tooltip: Strings.sharedRemove,
+            tooltip: getString('sharedRemove'),
             tooltipType: 'title'
         }]);
     }

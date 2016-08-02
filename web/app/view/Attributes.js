@@ -36,11 +36,11 @@ Ext.define('Traccar.view.Attributes', {
     },
 
     columns: [{
-        text: Strings.sharedName,
+        text: getString('sharedName'),
         dataIndex: 'name',
         flex: 1
     }, {
-        text: Strings.stateValue,
+        text: getString('stateValue'),
         dataIndex: 'value',
         flex: 1
     }]

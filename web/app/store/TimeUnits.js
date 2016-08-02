@@ -19,13 +19,13 @@ Ext.define('Traccar.store.TimeUnits', {
     fields: ['name', 'factor'],
 
     data: [{
-        name: Strings.sharedSecond,
+        name: getString('sharedSecond'),
         factor: 1
     }, {
-        name: Strings.sharedMinute,
+        name: getString('sharedMinute'),
         factor: 60
     }, {
-        name: Strings.sharedHour,
+        name: getString('sharedHour'),
         factor: 3600
     }]
 });

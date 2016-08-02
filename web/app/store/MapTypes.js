@@ -20,15 +20,15 @@ Ext.define('Traccar.store.MapTypes', {
 
     data: [{
         key: 'osm',
-        name: Strings.mapOsm
+        name: getString('mapOsm')
     }, {
         key: 'bingRoad',
-        name: Strings.mapBingRoad
+        name: getString('mapBingRoad')
     }, {
         key: 'bingAerial',
-        name: Strings.mapBingAerial
+        name: getString('mapBingAerial')
     }, {
         key: 'custom',
-        name: Strings.mapCustom
+        name: getString('mapCustom')
     }]
 });

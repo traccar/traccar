@@ -49,7 +49,7 @@ Ext.define('Traccar.view.BaseEditDialogController', {
         dialog = button.up('window').down('form');
         record = dialog.getRecord();
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedAttributes,
+            title: getString('sharedAttributes'),
             modal: false,
             items: {
                 xtype: 'attributesView',

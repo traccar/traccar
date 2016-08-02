@@ -37,11 +37,11 @@ Ext.define('Traccar.view.Geofences', {
     },
 
     columns: [{
-        text: Strings.sharedName,
+        text: getString('sharedName'),
         dataIndex: 'name',
         flex: 1
     }, {
-        text: Strings.sharedDescription,
+        text: getString('sharedDescription'),
         dataIndex: 'description',
         flex: 1
     }]

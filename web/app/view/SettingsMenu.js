@@ -23,35 +23,35 @@ Ext.define('Traccar.view.SettingsMenu', {
     ],
 
     glyph: 'xf013@FontAwesome',
-    text: Strings.settingsTitle,
+    text: getString('settingsTitle'),
 
     menu: {
         controller: 'settings',
 
         items: [{
-            text: Strings.settingsUser,
+            text: getString('settingsUser'),
             handler: 'onUserClick'
         }, {
-            text: Strings.settingsGroups,
+            text: getString('settingsGroups'),
             handler: 'onGroupsClick'
         }, {
-            text: Strings.sharedGeofences,
+            text: getString('sharedGeofences'),
             handler: 'onGeofencesClick'
         }, {
-            text: Strings.settingsServer,
+            text: getString('settingsServer'),
             hidden: true,
             handler: 'onServerClick',
             reference: 'settingsServerButton'
         }, {
-            text: Strings.settingsUsers,
+            text: getString('settingsUsers'),
             hidden: true,
             handler: 'onUsersClick',
             reference: 'settingsUsersButton'
         }, {
-            text: Strings.sharedNotifications,
+            text: getString('sharedNotifications'),
             handler: 'onNotificationsClick'
         }, {
-            text: Strings.loginLogout,
+            text: getString('loginLogout'),
             handler: 'onLogoutClick'
         }]
     }

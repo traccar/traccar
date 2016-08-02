@@ -47,12 +47,12 @@ Ext.define('Traccar.view.GeofencesController', {
     onRemoveClick: function () {
         var geofence = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
-            title: Strings.sharedGeofence,
-            message: Strings.sharedRemoveConfirm,
+            title: getString('sharedGeofence'),
+            message: getString('sharedRemoveConfirm'),
             buttons: Ext.Msg.YESNO,
             buttonText: {
-                yes: Strings.sharedRemove,
-                no: Strings.sharedCancel
+                yes: getString('sharedRemove'),
+                no: getString('sharedCancel')
             },
             fn: function (btn) {
                 var store = Ext.getStore('Geofences');

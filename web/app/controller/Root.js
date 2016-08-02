@@ -159,7 +159,7 @@ Ext.define('Traccar.controller.Root', {
                                 break;
                             }
                         }
-                        text = Strings.eventCommandResult + ': ' + text;
+                        text = getString('eventCommandResult') + ': ' + text;
                     } else if (array[i].type === 'alarm' && data.positions) {
                         alarmKey = 'alarm';
                         text = Strings[alarmKey];

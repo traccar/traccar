@@ -36,7 +36,7 @@ Ext.define('Traccar.view.Groups', {
             handler: 'onGeofencesClick',
             reference: 'toolbarGeofencesButton',
             glyph: 'xf21d@FontAwesome',
-            tooltip: Strings.sharedGeofences,
+            tooltip: getString('sharedGeofences'),
             tooltipType: 'title'
         }]
     },
@@ -46,7 +46,7 @@ Ext.define('Traccar.view.Groups', {
     },
 
     columns: [{
-        text: Strings.sharedName,
+        text: getString('sharedName'),
         dataIndex: 'name',
         flex: 1
     }]

@@ -34,7 +34,7 @@ Ext.define('Traccar.view.Notifications', {
     },
 
     columns: [{
-        text: Strings.notificationType,
+        text: getString('notificationType'),
         dataIndex: 'type',
         flex: 1,
         renderer: function (value) {
@@ -42,7 +42,7 @@ Ext.define('Traccar.view.Notifications', {
             return Strings[typeKey];
         }
     }, {
-        text: Strings.notificationWeb,
+        text: getString('notificationWeb'),
         dataIndex: 'attributes.web',
         xtype: 'checkcolumn',
         flex: 1,
@@ -55,7 +55,7 @@ Ext.define('Traccar.view.Notifications', {
             return (new Ext.ux.CheckColumn()).renderer(record.get(fields[0])[fields[1]], metaData);
         }
     }, {
-        text: Strings.notificationMail,
+        text: getString('notificationMail'),
         dataIndex: 'attributes.mail',
         xtype: 'checkcolumn',
         flex: 1,

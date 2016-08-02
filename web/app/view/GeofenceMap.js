@@ -38,10 +38,10 @@ Ext.define('Traccar.view.GeofenceMap', {
         }, {
             xtype: 'tbfill'
         }, {
-            text: Strings.sharedSave,
+            text: getString('sharedSave'),
             handler: 'onSaveClick'
         }, {
-            text: Strings.sharedCancel,
+            text: getString('sharedCancel'),
             handler: 'onCancelClick'
         }]
     },

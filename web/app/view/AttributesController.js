@@ -87,12 +87,12 @@ Ext.define('Traccar.view.AttributesController', {
     onRemoveClick: function () {
         var attribute = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
-            title: Strings.stateName,
-            message: Strings.sharedRemoveConfirm,
+            title: getString('stateName'),
+            message: getString('sharedRemoveConfirm'),
             buttons: Ext.Msg.YESNO,
             buttonText: {
-                yes: Strings.sharedRemove,
-                no: Strings.sharedCancel
+                yes: getString('sharedRemove'),
+                no: getString('sharedCancel')
             },
             scope: this,
             fn: function (btn) {

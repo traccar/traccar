@@ -20,11 +20,11 @@ Ext.define('Traccar.store.DistanceUnits', {
 
     data: [{
         key: 'km',
-        name: Strings.sharedKm,
+        name: getString('sharedKm'),
         factor: 0.001
     }, {
         key: 'mi',
-        name: Strings.sharedMi,
+        name: getString('sharedMi'),
         factor: 0.000621371
     }],
 

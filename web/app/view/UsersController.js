@@ -50,12 +50,12 @@ Ext.define('Traccar.view.UsersController', {
     onRemoveClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
-            title: Strings.settingsUser,
-            message: Strings.sharedRemoveConfirm,
+            title: getString('settingsUser'),
+            message: getString('sharedRemoveConfirm'),
             buttons: Ext.Msg.YESNO,
             buttonText: {
-                yes: Strings.sharedRemove,
-                no: Strings.sharedCancel
+                yes: getString('sharedRemove'),
+                no: getString('sharedCancel')
             },
             fn: function (btn) {
                 var store = Ext.getStore('Users');
@@ -70,7 +70,7 @@ Ext.define('Traccar.view.UsersController', {
     onDevicesClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.deviceTitle,
+            title: getString('deviceTitle'),
             items: {
                 xtype: 'userDevicesView',
                 baseObjectName: 'userId',
@@ -86,7 +86,7 @@ Ext.define('Traccar.view.UsersController', {
     onGroupsClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.settingsGroups,
+            title: getString('settingsGroups'),
             items: {
                 xtype: 'userGroupsView',
                 baseObjectName: 'userId',
@@ -102,7 +102,7 @@ Ext.define('Traccar.view.UsersController', {
     onGeofencesClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedGeofences,
+            title: getString('sharedGeofences'),
             items: {
                 xtype: 'userGeofencesView',
                 baseObjectName: 'userId',
@@ -118,7 +118,7 @@ Ext.define('Traccar.view.UsersController', {
     onNotificationsClick: function () {
         var user = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedNotifications,
+            title: getString('sharedNotifications'),
             modal: false,
             items: {
                 xtype: 'notificationsView',

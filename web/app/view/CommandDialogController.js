@@ -59,7 +59,7 @@ Ext.define('Traccar.view.CommandDialogController', {
 
     onSendResult: function (options, success, response) {
         if (success) {
-            Ext.toast(Strings.commandSent);
+            Ext.toast(getString('commandSent'));
             this.closeView();
         } else {
             Traccar.app.showError(response);

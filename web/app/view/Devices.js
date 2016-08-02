@@ -35,7 +35,7 @@ Ext.define('Traccar.view.Devices', {
         this.callParent();
     },
 
-    title: Strings.deviceTitle,
+    title: getString('deviceTitle'),
     selType: 'rowmodel',
 
     tbar: {
@@ -46,21 +46,21 @@ Ext.define('Traccar.view.Devices', {
             handler: 'onGeofencesClick',
             reference: 'toolbarGeofencesButton',
             glyph: 'xf21d@FontAwesome',
-            tooltip: Strings.sharedGeofences,
+            tooltip: getString('sharedGeofences'),
             tooltipType: 'title'
         }, {
             disabled: true,
             handler: 'onCommandClick',
             reference: 'deviceCommandButton',
             glyph: 'xf093@FontAwesome',
-            tooltip: Strings.deviceCommand,
+            tooltip: getString('deviceCommand'),
             tooltipType: 'title'
         }, {
             xtype: 'tbfill'
         }, {
             id: 'muteButton',
             glyph: 'xf1f7@FontAwesome',
-            tooltip: Strings.sharedMute,
+            tooltip: getString('sharedMute'),
             tooltipType: 'title',
             pressed : true,
             enableToggle: true,
@@ -77,7 +77,7 @@ Ext.define('Traccar.view.Devices', {
         }, {
             id: 'deviceFollowButton',
             glyph: 'xf05b@FontAwesome',
-            tooltip: Strings.deviceFollow,
+            tooltip: getString('deviceFollow'),
             tooltipType: 'title',
             enableToggle: true,
             toggleHandler: 'onFollowClick'
@@ -88,7 +88,7 @@ Ext.define('Traccar.view.Devices', {
 
     bbar: [{
         xtype: 'tbtext',
-        html: Strings.groupParent
+        html: getString('groupParent')
     }, {
         xtype: 'combobox',
         store: 'Groups',
@@ -130,7 +130,7 @@ Ext.define('Traccar.view.Devices', {
         }
     }, {
         xtype: 'tbtext',
-        html: Strings.sharedSearch
+        html: getString('sharedSearch')
     }, {
         xtype: 'textfield',
         flex: 1,
@@ -146,11 +146,11 @@ Ext.define('Traccar.view.Devices', {
     },
 
     columns: [{
-        text: Strings.sharedName,
+        text: getString('sharedName'),
         dataIndex: 'name',
         flex: 1
     }, {
-        text: Strings.deviceLastUpdate,
+        text: getString('deviceLastUpdate'),
         dataIndex: 'lastUpdate',
         flex: 1,
         renderer: function (value, metaData, record) {

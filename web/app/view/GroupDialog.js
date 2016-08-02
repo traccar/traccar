@@ -22,19 +22,19 @@ Ext.define('Traccar.view.GroupDialog', {
     ],
 
     controller: 'baseEditDialog',
-    title: Strings.groupDialog,
+    title: getString('groupDialog'),
 
     items: {
         xtype: 'form',
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.sharedName,
+            fieldLabel: getString('sharedName'),
             allowBlank: false
         }, {
             xtype: 'combobox',
             name: 'groupId',
-            fieldLabel: Strings.groupParent,
+            fieldLabel: getString('groupParent'),
             store: 'Groups',
             queryMode: 'local',
             displayField: 'name',

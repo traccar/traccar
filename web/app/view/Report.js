@@ -26,11 +26,11 @@ Ext.define('Traccar.view.Report', {
     controller: 'report',
     store: 'Positions',
 
-    title: Strings.reportTitle,
+    title: getString('reportTitle'),
 
     tbar: [{
         xtype: 'tbtext',
-        html: Strings.reportDevice
+        html: getString('reportDevice')
     }, {
         xtype: 'combobox',
         reference: 'deviceField',
@@ -41,7 +41,7 @@ Ext.define('Traccar.view.Report', {
         queryMode: 'local'
     }, '-', {
         xtype: 'tbtext',
-        html: Strings.reportFrom
+        html: getString('reportFrom')
     }, {
         xtype: 'datefield',
         reference: 'fromDateField',
@@ -55,7 +55,7 @@ Ext.define('Traccar.view.Report', {
         value: new Date(new Date().getTime() - 30 * 60 * 1000)
     }, '-', {
         xtype: 'tbtext',
-        html: Strings.reportTo
+        html: getString('reportTo')
     }, {
         xtype: 'datefield',
         reference: 'toDateField',
@@ -68,10 +68,10 @@ Ext.define('Traccar.view.Report', {
         maxWidth: Traccar.Style.reportTime,
         value: new Date()
     }, '-', {
-        text: Strings.reportShow,
+        text: getString('reportShow'),
         handler: 'onShowClick'
     }, {
-        text: Strings.reportClear,
+        text: getString('reportClear'),
         handler: 'onClearClick'
     }],
 
@@ -80,38 +80,38 @@ Ext.define('Traccar.view.Report', {
     },
 
     columns: [{
-        text: Strings.positionValid,
+        text: getString('positionValid'),
         dataIndex: 'valid',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('valid')
     }, {
-        text: Strings.positionFixTime,
+        text: getString('positionFixTime'),
         dataIndex: 'fixTime',
         flex: 1,
         xtype: 'datecolumn',
         renderer: Traccar.AttributeFormatter.getFormatter('fixTime')
     }, {
-        text: Strings.positionLatitude,
+        text: getString('positionLatitude'),
         dataIndex: 'latitude',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('latitude')
     }, {
-        text: Strings.positionLongitude,
+        text: getString('positionLongitude'),
         dataIndex: 'longitude',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('latitude')
     }, {
-        text: Strings.positionAltitude,
+        text: getString('positionAltitude'),
         dataIndex: 'altitude',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('altitude')
     }, {
-        text: Strings.positionSpeed,
+        text: getString('positionSpeed'),
         dataIndex: 'speed',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('speed')
     }, {
-        text: Strings.positionAddress,
+        text: getString('positionAddress'),
         dataIndex: 'address',
         flex: 1,
         renderer: Traccar.AttributeFormatter.getFormatter('address')

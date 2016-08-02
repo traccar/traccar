@@ -22,26 +22,26 @@ Ext.define('Traccar.view.AttributeDialog', {
     ],
 
     controller: 'attributeDialog',
-    title: Strings.sharedAttribute,
+    title: getString('sharedAttribute'),
 
     items: {
         xtype: 'form',
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.sharedName
+            fieldLabel: getString('sharedName')
         }, {
             xtype: 'textfield',
             name: 'value',
-            fieldLabel: Strings.stateValue
+            fieldLabel: getString('stateValue')
         }]
     },
 
     buttons: [{
-        text: Strings.sharedSave,
+        text: getString('sharedSave'),
         handler: 'onSaveClick'
     }, {
-        text: Strings.sharedCancel,
+        text: getString('sharedCancel'),
         handler: 'closeView'
     }]
 });

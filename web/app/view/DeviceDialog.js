@@ -22,24 +22,24 @@ Ext.define('Traccar.view.DeviceDialog', {
     ],
 
     controller: 'baseEditDialog',
-    title: Strings.deviceDialog,
+    title: getString('deviceDialog'),
 
     items: {
         xtype: 'form',
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.sharedName,
+            fieldLabel: getString('sharedName'),
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'uniqueId',
-            fieldLabel: Strings.deviceIdentifier,
+            fieldLabel: getString('deviceIdentifier'),
             allowBlank: false
         }, {
             xtype: 'combobox',
             name: 'groupId',
-            fieldLabel: Strings.groupParent,
+            fieldLabel: getString('groupParent'),
             store: 'Groups',
             queryMode: 'local',
             displayField: 'name',

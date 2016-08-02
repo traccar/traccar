@@ -22,14 +22,14 @@ Ext.define('Traccar.view.CommandDialog', {
     ],
 
     controller: 'commandDialog',
-    title: Strings.commandTitle,
+    title: getString('commandTitle'),
 
     items: {
         xtype: 'form',
         items: [{
             xtype: 'combobox',
             name: 'type',
-            fieldLabel: Strings.commandType,
+            fieldLabel: getString('commandType'),
             store: 'CommandTypes',
             displayField: 'name',
             valueField: 'type',
@@ -44,11 +44,11 @@ Ext.define('Traccar.view.CommandDialog', {
 
             items: [{
                 xtype: 'numberfield',
-                fieldLabel: Strings.commandFrequency,
+                fieldLabel: getString('commandFrequency'),
                 name: 'frequency'
             }, {
                 xtype: 'combobox',
-                fieldLabel: Strings.commandUnit,
+                fieldLabel: getString('commandUnit'),
                 name: 'unit',
                 store: 'TimeUnits',
                 displayField: 'name',
@@ -57,7 +57,7 @@ Ext.define('Traccar.view.CommandDialog', {
         }, {
             xtype: 'textfield',
             reference: 'paramCustom',
-            fieldLabel: Strings.commandCustom,
+            fieldLabel: getString('commandCustom'),
             name: 'customCommand',
             hidden: true,
             allowBlank: false
@@ -65,10 +65,10 @@ Ext.define('Traccar.view.CommandDialog', {
     },
 
     buttons: [{
-        text: Strings.commandSend,
+        text: getString('commandSend'),
         handler: 'onSendClick'
     }, {
-        text: Strings.sharedCancel,
+        text: getString('sharedCancel'),
         handler: 'closeView'
     }]
 });

@@ -22,67 +22,67 @@ Ext.define('Traccar.view.ServerDialog', {
     ],
 
     controller: 'baseEditDialog',
-    title: Strings.serverTitle,
+    title: getString('serverTitle'),
 
     items: {
         xtype: 'form',
         items: [{
             xtype: 'checkboxfield',
             name: 'registration',
-            fieldLabel: Strings.serverRegistration,
+            fieldLabel: getString('serverRegistration'),
             allowBlank: false
         }, {
             xtype: 'checkboxfield',
             name: 'readonly',
-            fieldLabel: Strings.serverReadonly,
+            fieldLabel: getString('serverReadonly'),
             allowBlank: false
         }, {
             xtype: 'combobox',
             name: 'map',
-            fieldLabel: Strings.mapLayer,
+            fieldLabel: getString('mapLayer'),
             store: 'MapTypes',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'textfield',
             name: 'bingKey',
-            fieldLabel: Strings.mapBingKey
+            fieldLabel: getString('mapBingKey')
         }, {
             xtype: 'textfield',
             name: 'mapUrl',
-            fieldLabel: Strings.mapCustom
+            fieldLabel: getString('mapCustom')
         }, {
             xtype: 'combobox',
             name: 'distanceUnit',
-            fieldLabel: Strings.settingsDistanceUnit,
+            fieldLabel: getString('settingsDistanceUnit'),
             store: 'DistanceUnits',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'combobox',
             name: 'speedUnit',
-            fieldLabel: Strings.settingsSpeedUnit,
+            fieldLabel: getString('settingsSpeedUnit'),
             store: 'SpeedUnits',
             displayField: 'name',
             valueField: 'key'
         }, {
             xtype: 'numberfield',
             name: 'latitude',
-            fieldLabel: Strings.positionLatitude,
+            fieldLabel: getString('positionLatitude'),
             decimalPrecision: Traccar.Style.coordinatePrecision
         }, {
             xtype: 'numberfield',
             name: 'longitude',
-            fieldLabel: Strings.positionLongitude,
+            fieldLabel: getString('positionLongitude'),
             decimalPrecision: Traccar.Style.coordinatePrecision
         }, {
             xtype: 'numberfield',
             name: 'zoom',
-            fieldLabel: Strings.serverZoom
+            fieldLabel: getString('serverZoom')
         }, {
             xtype: 'checkboxfield',
             name: 'twelveHourFormat',
-            fieldLabel: Strings.settingsTwelveHourFormat,
+            fieldLabel: getString('settingsTwelveHourFormat'),
             allowBlank: false
         }]
     }

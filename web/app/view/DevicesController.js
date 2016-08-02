@@ -67,12 +67,12 @@ Ext.define('Traccar.view.DevicesController', {
     onRemoveClick: function () {
         var device = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
-            title: Strings.deviceDialog,
-            message: Strings.sharedRemoveConfirm,
+            title: getString('deviceDialog'),
+            message: getString('sharedRemoveConfirm'),
             buttons: Ext.Msg.YESNO,
             buttonText: {
-                yes: Strings.sharedRemove,
-                no: Strings.sharedCancel
+                yes: getString('sharedRemove'),
+                no: getString('sharedCancel')
             },
             fn: function (btn) {
                 var store;
@@ -90,7 +90,7 @@ Ext.define('Traccar.view.DevicesController', {
         admin = Traccar.app.getUser().get('admin');
         device = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedGeofences,
+            title: getString('sharedGeofences'),
             items: {
                 xtype: 'deviceGeofencesView',
                 baseObjectName: 'deviceId',

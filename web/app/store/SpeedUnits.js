@@ -20,15 +20,15 @@ Ext.define('Traccar.store.SpeedUnits', {
 
     data: [{
         key: 'kn',
-        name: Strings.sharedKn,
+        name: getString('sharedKn'),
         factor: 1
     }, {
         key: 'kmh',
-        name: Strings.sharedKmh,
+        name: getString('sharedKmh'),
         factor: 1.852
     }, {
         key: 'mph',
-        name: Strings.sharedMph,
+        name: getString('sharedMph'),
         factor: 1.15078
     }],
 

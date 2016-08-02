@@ -43,12 +43,12 @@ Ext.define('Traccar.view.GroupsController', {
     onRemoveClick: function () {
         var group = this.getView().getSelectionModel().getSelection()[0];
         Ext.Msg.show({
-            title: Strings.groupDialog,
-            message: Strings.sharedRemoveConfirm,
+            title: getString('groupDialog'),
+            message: getString('sharedRemoveConfirm'),
             buttons: Ext.Msg.YESNO,
             buttonText: {
-                yes: Strings.sharedRemove,
-                no: Strings.sharedCancel
+                yes: getString('sharedRemove'),
+                no: getString('sharedCancel')
             },
             fn: function (btn) {
                 var store = Ext.getStore('Groups');
@@ -65,7 +65,7 @@ Ext.define('Traccar.view.GroupsController', {
         admin = Traccar.app.getUser().get('admin');
         group = this.getView().getSelectionModel().getSelection()[0];
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedGeofences,
+            title: getString('sharedGeofences'),
             items: {
                 xtype: 'groupGeofencesView',
                 baseObjectName: 'groupId',

@@ -44,7 +44,7 @@ Ext.define('Traccar.view.SettingsMenuController', {
 
     onGroupsClick: function () {
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.settingsGroups,
+            title: getString('settingsGroups'),
             modal: false,
             items: {
                 xtype: 'groupsView'
@@ -54,7 +54,7 @@ Ext.define('Traccar.view.SettingsMenuController', {
 
     onGeofencesClick: function () {
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedGeofences,
+            title: getString('sharedGeofences'),
             modal: false,
             items: {
                 xtype: 'geofencesView'
@@ -70,7 +70,7 @@ Ext.define('Traccar.view.SettingsMenuController', {
 
     onUsersClick: function () {
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.settingsUsers,
+            title: getString('settingsUsers'),
             modal: false,
             items: {
                 xtype: 'usersView'
@@ -81,7 +81,7 @@ Ext.define('Traccar.view.SettingsMenuController', {
     onNotificationsClick: function () {
         var user = Traccar.app.getUser();
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedNotifications,
+            title: getString('sharedNotifications'),
             modal: false,
             items: {
                 xtype: 'notificationsView',

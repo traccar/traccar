@@ -23,7 +23,7 @@ Ext.define('Traccar.view.Register', {
 
     controller: 'register',
 
-    title: Strings.loginRegister,
+    title: getString('loginRegister'),
 
     items: {
         xtype: 'form',
@@ -33,28 +33,28 @@ Ext.define('Traccar.view.Register', {
         items: [{
             xtype: 'textfield',
             name: 'name',
-            fieldLabel: Strings.sharedName,
+            fieldLabel: getString('sharedName'),
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'email',
-            fieldLabel: Strings.userEmail,
+            fieldLabel: getString('userEmail'),
             vtype: 'email',
             allowBlank: false
         }, {
             xtype: 'textfield',
             name: 'password',
-            fieldLabel: Strings.userPassword,
+            fieldLabel: getString('userPassword'),
             inputType: 'password',
             allowBlank: false
         }]
     },
 
     buttons: [{
-        text: Strings.sharedSave,
+        text: getString('sharedSave'),
         handler: 'onCreateClick'
     }, {
-        text: Strings.sharedCancel,
+        text: getString('sharedCancel'),
         handler: 'closeView'
     }]
 });

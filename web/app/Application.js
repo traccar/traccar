@@ -92,18 +92,18 @@ Ext.define('Traccar.Application', {
     showError: function (response) {
         var data;
         if (Ext.isString(response)) {
-            Ext.Msg.alert(Strings.errorTitle, response);
+            Ext.Msg.alert(getString('errorTitle'), response);
         } else if (response.responseText) {
             data = Ext.decode(response.responseText);
             if (data.details) {
-                Ext.Msg.alert(Strings.errorTitle, data.details);
+                Ext.Msg.alert(getString('errorTitle'), data.details);
             } else {
-                Ext.Msg.alert(Strings.errorTitle, data.message);
+                Ext.Msg.alert(getString('errorTitle'), data.message);
             }
         } else if (response.statusText) {
-            Ext.Msg.alert(Strings.errorTitle, response.statusText);
+            Ext.Msg.alert(getString('errorTitle'), response.statusText);
         } else {
-            Ext.Msg.alert(Strings.errorTitle, Strings.errorConnection);
+            Ext.Msg.alert(getString('errorTitle'), Strings.errorConnection);
         }
     }
 });

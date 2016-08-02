@@ -41,7 +41,7 @@ Ext.define('Traccar.view.GeofenceDialogController', {
         dialog = button.up('window').down('form');
         record = dialog.getRecord();
         Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedArea,
+            title: getString('sharedArea'),
             items: {
                 xtype: 'geofenceMapView',
                 area: record.get('area')
