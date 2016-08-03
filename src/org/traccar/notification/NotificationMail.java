@@ -112,7 +112,7 @@ public final class NotificationMail {
                     return;
                 }
             }
-            mailSession = Session.getDefaultInstance(mailServerProperties, null);
+            mailSession = Session.getInstance(mailServerProperties, null);
 
             mailMessage = new MimeMessage(mailSession);
 
