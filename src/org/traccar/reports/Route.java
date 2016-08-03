@@ -31,13 +31,11 @@ public final class Route {
     public static byte[] getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
         CsvBuilder csv = new CsvBuilder();
+        csv.addHeaderLine(new Position());
         for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            csv.addLine(deviceId);
-            csv.addHeaderLine(new Position());
             csv.addArray(Context.getDataManager().getPositions(deviceId, from, to));
         }
         return csv.get();
     }
-
 }
