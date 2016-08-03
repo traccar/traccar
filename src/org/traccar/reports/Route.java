@@ -1,0 +1,43 @@
+package org.traccar.reports;
+
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Date;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
+
+import org.traccar.Context;
+import org.traccar.model.Position;
+import org.traccar.web.CsvBuilder;
+import org.traccar.web.JsonConverter;
+
+public final class Route {
+
+    private Route() {
+    }
+
+    public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            Date from, Date to) throws SQLException {
+        JsonObjectBuilder json = Json.createObjectBuilder();
+        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+            Context.getPermissionsManager().checkDevice(userId, deviceId);
+            json.add(String.valueOf(deviceId), JsonConverter.arrayToJson(Context.getDataManager()
+                    .getPositions(deviceId, from, to)));
+        }
+        return json.build().toString();
+    }
+
+    public static byte[] getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            Date from, Date to) throws SQLException {
+        CsvBuilder csv = new CsvBuilder();
+        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+            Context.getPermissionsManager().checkDevice(userId, deviceId);
+            csv.addLine(deviceId);
+            csv.addHeaderLine(new Position());
+            csv.addArray(Context.getDataManager().getPositions(deviceId, from, to));
+        }
+        return csv.get();
+    }
+
+}
