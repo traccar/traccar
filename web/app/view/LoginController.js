@@ -26,6 +26,13 @@ Ext.define('Traccar.view.LoginController', {
         this.lookupReference('registerButton').setDisabled(
             !Traccar.app.getServer().get('registration'));
         this.lookupReference('languageField').setValue(Locale.language);
+        var user = Ext.util.Cookies.get('user');
+        var pass = Ext.util.Cookies.get('pass');
+        if (user && pass) {
+            this.lookupReference('userField').setValue(user);
+            this.lookupReference('passwordField').setValue(pass);
+            this.login();
+        }
     },
 
     login: function () {
@@ -40,6 +47,10 @@ Ext.define('Traccar.view.LoginController', {
                 callback: function (options, success, response) {
                     Ext.getBody().unmask();
                     if (success) {
+                        if (this.lookupReference('rememberMeField').getValue()) {
+                            Ext.util.Cookies.set('user', this.lookupReference('userField').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
+                            Ext.util.Cookies.set('pass', this.lookupReference('passwordField').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
+                        }
                         Traccar.app.setUser(Ext.decode(response.responseText));
                         this.fireViewEvent('login');
                     } else {
@@ -51,6 +62,8 @@ Ext.define('Traccar.view.LoginController', {
     },
 
     logout: function () {
+        Ext.util.Cookies.clear('user');
+        Ext.util.Cookies.clear('pass');
         Ext.Ajax.request({
             scope: this,
             method: 'DELETE',
