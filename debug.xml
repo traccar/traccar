@@ -63,6 +63,8 @@
     for SSL
     <entry key='mail.smtp.port'>465</entry>
     <entry key='mail.smtp.ssl.enable'>true</entry>
+    for self-signed server sertificates
+    <entry key='mail.smtp.ssl.trust'>smtp.example.com</entry>
 
     <entry key='mail.smtp.from'>traccar@example.com</entry>
 

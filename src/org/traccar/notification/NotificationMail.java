@@ -48,14 +48,11 @@ public final class NotificationMail {
             result.put("mail.smtp.port", config.getString("mail.smtp.port", "25"));
 
             if (config.getBoolean("mail.smtp.starttls.enable")) {
-                result.put("mail.smtp.starttls.enable",
-                        config.getBoolean("mail.smtp.starttls.enable"));
+                result.put("mail.smtp.starttls.enable", config.getBoolean("mail.smtp.starttls.enable"));
             } else if (config.getBoolean("mail.smtp.ssl.enable")) {
-                result.put("mail.smtp.socketFactory.port",
-                        result.getProperty("mail.smtp.port"));
-                result.put("mail.smtp.socketFactory.class",
-                        "javax.net.ssl.SSLSocketFactory");
+                result.put("mail.smtp.ssl.enable", config.getBoolean("mail.smtp.ssl.enable"));
             }
+            result.put("mail.smtp.ssl.trust", config.getBoolean("mail.smtp.ssl.trust"));
 
             result.put("mail.smtp.auth", config.getBoolean("mail.smtp.auth"));
             result.put("mail.smtp.user", config.getString("mail.smtp.username", null));
@@ -77,12 +74,10 @@ public final class NotificationMail {
                 result.put("mail.smtp.starttls.enable", tls);
             } else if (object.getAttributes().containsKey("mail.smtp.ssl.enable")) {
                 boolean ssl = Boolean.parseBoolean((String) object.getAttributes().get("mail.smtp.ssl.enable"));
-                if (ssl) {
-                    result.put("mail.smtp.socketFactory.port",
-                            result.getProperty("mail.smtp.port"));
-                    result.put("mail.smtp.socketFactory.class",
-                            "javax.net.ssl.SSLSocketFactory");
-                }
+                result.put("mail.smtp.ssl.enable", ssl);
+            }
+            if (object.getAttributes().containsKey("mail.smtp.ssl.trust")) {
+                result.put("mail.smtp.ssl.trust", object.getAttributes().get("mail.smtp.ssl.trust"));
             }
             boolean auth = Boolean.parseBoolean((String) object.getAttributes().get("mail.smtp.auth"));
             result.put("mail.smtp.auth", auth);
@@ -117,7 +112,7 @@ public final class NotificationMail {
                     return;
                 }
             }
-            mailSession = Session.getDefaultInstance(mailServerProperties, null);
+            mailSession = Session.getInstance(mailServerProperties, null);
 
             mailMessage = new MimeMessage(mailSession);
 
