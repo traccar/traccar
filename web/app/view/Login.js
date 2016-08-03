@@ -54,7 +54,7 @@ Ext.define('Traccar.view.Login', {
         }, {
             xtype: 'textfield',
             name: 'email',
-            reference: 'txtUser',
+            reference: 'userField',
             fieldLabel: Strings.userEmail,
             allowBlank: false,
             enableKeyEvents: true,
@@ -66,7 +66,7 @@ Ext.define('Traccar.view.Login', {
         }, {
             xtype: 'textfield',
             name: 'password',
-            reference: 'txtPassword',
+            reference: 'passwordField',
             fieldLabel: Strings.userPassword,
             inputType: 'password',
             allowBlank: false,
@@ -77,7 +77,7 @@ Ext.define('Traccar.view.Login', {
             inputAttrTpl: ['autocomplete="on"']
         }, {
             xtype: 'checkboxfield',
-            reference: 'chkRememberMe',
+            reference: 'rememberMeField',
             fieldLabel: Strings.rememberMe
         }, {
             xtype: 'component',
