@@ -34,7 +34,7 @@ public class TzoneProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 2));
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 2, 2, 0));
                 pipeline.addLast("objectDecoder", new TzoneProtocolDecoder(TzoneProtocol.this));
             }
         });
