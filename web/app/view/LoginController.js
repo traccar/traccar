@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ Ext.define('Traccar.view.LoginController', {
             !Traccar.app.getServer().get('registration'));
         this.lookupReference('languageField').setValue(Locale.language);
         var user = Ext.util.Cookies.get('user');
-        var pass = Ext.util.Cookies.get('pass');
-        if (user && pass) {
+        var password = Ext.util.Cookies.get('password');
+        if (user && password) {
             this.lookupReference('userField').setValue(user);
-            this.lookupReference('passwordField').setValue(pass);
+            this.lookupReference('passwordField').setValue(password);
             this.login();
         }
     },
@@ -49,7 +49,7 @@ Ext.define('Traccar.view.LoginController', {
                     if (success) {
                         if (this.lookupReference('rememberField').getValue()) {
                             Ext.util.Cookies.set('user', this.lookupReference('userField').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
-                            Ext.util.Cookies.set('pass', this.lookupReference('passwordField').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
+                            Ext.util.Cookies.set('password', this.lookupReference('passwordField').getValue(), Ext.Date.add(new Date(), Ext.Date.YEAR, 1));
                         }
                         Traccar.app.setUser(Ext.decode(response.responseText));
                         this.fireViewEvent('login');
@@ -63,7 +63,7 @@ Ext.define('Traccar.view.LoginController', {
 
     logout: function () {
         Ext.util.Cookies.clear('user');
-        Ext.util.Cookies.clear('pass');
+        Ext.util.Cookies.clear('password');
         Ext.Ajax.request({
             scope: this,
             method: 'DELETE',
