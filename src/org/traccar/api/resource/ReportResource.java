@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.traccar.api.BaseResource;
 import org.traccar.reports.Events;
+import org.traccar.reports.General;
 import org.traccar.reports.ReportUtils;
 import org.traccar.reports.Route;
 import org.traccar.web.JsonConverter;
@@ -49,6 +50,23 @@ public class ReportResource extends BaseResource {
             return response.build();
         }
         ResponseBuilder response = Response.ok(Events.getJson(getUserId(), deviceIds, groupIds, types,
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
+        response.type(MediaType.APPLICATION_JSON);
+        return response.build();
+    }
+
+    @Path("general")
+    @GET
+    public Response getGeneral(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+        if (getAcceptHeader().equals("application/ms-excel")) {
+            ResponseBuilder response = Response.ok(ReportUtils.getOut(General.getCsv(getUserId(), deviceIds, groupIds,
+                    JsonConverter.parseDate(from), JsonConverter.parseDate(to))));
+            response.type("application/ms-excel");
+            return response.build();
+        }
+        ResponseBuilder response = Response.ok(General.getJson(getUserId(), deviceIds, groupIds,
                 JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
         response.type(MediaType.APPLICATION_JSON);
         return response.build();
