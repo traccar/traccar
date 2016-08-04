@@ -55,9 +55,19 @@ public final class NotificationMail {
             result.put("mail.smtp.ssl.trust", config.getBoolean("mail.smtp.ssl.trust"));
 
             result.put("mail.smtp.auth", config.getBoolean("mail.smtp.auth"));
-            result.put("mail.smtp.user", config.getString("mail.smtp.username", null));
-            result.put("mail.smtp.password", config.getString("mail.smtp.password", null));
-            result.put("mail.smtp.from", config.getString("mail.smtp.from", null));
+
+            String username = config.getString("mail.smtp.username");
+            if (username != null) {
+                result.put("mail.smtp.user", username);
+            }
+            String password = config.getString("mail.smtp.password");
+            if (password != null) {
+                result.put("mail.smtp.password", password);
+            }
+            String from = config.getString("mail.smtp.from");
+            if (from != null) {
+                result.put("mail.smtp.from", from);
+            }
         }
         return result;
     }
