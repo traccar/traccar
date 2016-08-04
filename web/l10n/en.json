@@ -30,7 +30,7 @@
     "userEmail": "Email",
     "userPassword": "Password",
     "userAdmin": "Admin",
-    "rememberMe": "Remember Me",
+    "userRemember": "Remember",
     "loginTitle": "Login",
     "loginLanguage": "Language",
     "loginRegister": "Register",
