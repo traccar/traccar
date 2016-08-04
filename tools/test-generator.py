@@ -37,7 +37,7 @@ def send(conn, lat, lon, course, alarm):
     if alarm:
         params = params + (('alarm', 'sos'),)
     conn.request('GET', '?' + urllib.urlencode(params))
-    conn.getresponse()
+    conn.getresponse().read()
 
 def course(lat1, lon1, lat2, lon2):
     lat1 = lat1 * math.pi / 180
