@@ -79,8 +79,8 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
         closeChannel(e.getChannel());
 
-        if (ctx.getPipeline().get("httpDecoder") == null &&
-                !(ctx.getPipeline().get("objectDecoder") instanceof TeltonikaProtocolDecoder)) {
+        if (ctx.getPipeline().get("httpDecoder") == null
+                && !(ctx.getPipeline().get("objectDecoder") instanceof TeltonikaProtocolDecoder)) {
             Context.getConnectionManager().removeActiveDevice(e.getChannel());
         }
     }
