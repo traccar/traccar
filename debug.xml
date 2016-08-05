@@ -448,5 +448,6 @@
     <entry key='l100.port'>5112</entry>
     <entry key='granit.port'>5113</entry>
     <entry key='carcell.port'>5114</entry>
+    <entry key='obddongle.port'>5115</entry>
 
 </properties>
