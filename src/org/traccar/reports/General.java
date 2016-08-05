@@ -56,9 +56,9 @@ public final class General {
     public static String getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
         CsvBuilder csv = new CsvBuilder();
+        csv.addHeaderLine(new GeneralReport());
         for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            csv.addHeaderLine(new GeneralReport());
             csv.addLine(calculateGeneralResult(deviceId, from, to));
         }
         return csv.get();
