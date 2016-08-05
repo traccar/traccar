@@ -104,7 +104,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ARCHIVE, true);
                     int subtype = buf.readUnsignedShort();
                     if (subtype == MSG_ALARM) {
-                        position.set(Position.KEY_ALARM, true);
+                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                     }
                     if (buf.readUnsignedShort() > buf.readableBytes()) {
                         lastIndex += 1;

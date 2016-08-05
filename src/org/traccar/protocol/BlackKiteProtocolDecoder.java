@@ -122,7 +122,9 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                 case TAG_STATUS:
                     int status = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
-                    position.set(Position.KEY_ALARM, BitUtil.check(status, 15));
+                    if (BitUtil.check(status, 15)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    }
                     position.set(Position.KEY_POWER, BitUtil.check(status, 2));
                     break;
 

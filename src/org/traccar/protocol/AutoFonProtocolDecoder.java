@@ -169,7 +169,9 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             short status = buf.readUnsignedByte();
-            position.set(Position.KEY_ALARM, BitUtil.check(status, 7));
+            if (BitUtil.check(status, 7)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            }
             position.set(Position.KEY_BATTERY, BitUtil.to(status, 7));
 
             buf.skipBytes(2); // remaining time

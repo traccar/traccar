@@ -123,7 +123,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_LAC, buf.readUnsignedShort());
             position.set(Position.KEY_CID, buf.readUnsignedMedium());
-            position.set(Position.KEY_ALARM, true);
+            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
             int flags = buf.readUnsignedByte();
             position.set("acc", (flags & 0x2) != 0);
 

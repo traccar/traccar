@@ -68,7 +68,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             String type = parser.next();
             if (type.equals("Alert") || type.equals("Emergency")) {
-                position.set(Position.KEY_ALARM, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
             }
         }
 
