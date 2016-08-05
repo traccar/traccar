@@ -1,12 +1,7 @@
 package org.traccar.reports;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.traccar.Context;
 
@@ -24,12 +19,4 @@ public final class ReportUtils {
         return result;
     }
 
-    public static StreamingOutput getOut(final byte[] csvBytes) {
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream out) throws IOException, WebApplicationException {
-                out.write(csvBytes);
-            }
-        };
-    }
 }

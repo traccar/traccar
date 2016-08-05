@@ -28,7 +28,7 @@ public final class Route {
         return json.build().toString();
     }
 
-    public static byte[] getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static String getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
         CsvBuilder csv = new CsvBuilder();
         csv.addHeaderLine(new Position());

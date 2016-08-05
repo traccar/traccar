@@ -3,10 +3,13 @@ package org.traccar.web;
 import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -75,9 +78,21 @@ public class CsvBuilder {
         addSeparator();
     }
 
+    private SortedSet<Method> getSortedMethods(Object object) {
+        Method[] methodArray = object.getClass().getMethods();
+        SortedSet<Method> methods = new TreeSet<Method>(new Comparator<Method>() {
+            @Override
+            public int compare(Method m1, Method m2) {
+                return m1.getName().compareTo(m2.getName());
+            }
+        });
+        methods.addAll(Arrays.asList(methodArray));
+        return methods;
+    }
+
     public void addLine(Object object) {
 
-        Method[] methods = object.getClass().getMethods();
+        SortedSet<Method> methods = getSortedMethods(object);
 
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
@@ -110,7 +125,8 @@ public class CsvBuilder {
     }
 
     public void addHeaderLine(Object object) {
-        Method[] methods = object.getClass().getMethods();
+
+        SortedSet<Method> methods = getSortedMethods(object);
 
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
@@ -145,7 +161,7 @@ public class CsvBuilder {
         }
     }
 
-    public byte[] get() {
-        return String.valueOf(builder).getBytes(StandardCharsets.UTF_8);
+    public String get() {
+        return builder.toString();
     }
 }

@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.traccar.api.BaseResource;
 import org.traccar.reports.Events;
 import org.traccar.reports.General;
-import org.traccar.reports.ReportUtils;
 import org.traccar.reports.Route;
 import org.traccar.web.JsonConverter;
 
@@ -26,8 +25,8 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         if (getAcceptHeader().equals("application/ms-excel")) {
-            ResponseBuilder response = Response.ok(ReportUtils.getOut(Route.getCsv(getUserId(), deviceIds, groupIds,
-                    JsonConverter.parseDate(from), JsonConverter.parseDate(to))));
+            ResponseBuilder response = Response.ok(Route.getCsv(getUserId(), deviceIds, groupIds,
+                    JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
             response.type("application/ms-excel");
             return response.build();
         }
@@ -44,8 +43,8 @@ public class ReportResource extends BaseResource {
             @QueryParam("type") final List<String> types,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         if (getAcceptHeader().equals("application/ms-excel")) {
-            ResponseBuilder response = Response.ok(ReportUtils.getOut(Events.getCsv(getUserId(), deviceIds, groupIds,
-                    types, JsonConverter.parseDate(from), JsonConverter.parseDate(to))));
+            ResponseBuilder response = Response.ok(Events.getCsv(getUserId(), deviceIds, groupIds,
+                    types, JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
             response.type("application/ms-excel");
             return response.build();
         }
@@ -61,8 +60,8 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         if (getAcceptHeader().equals("application/ms-excel")) {
-            ResponseBuilder response = Response.ok(ReportUtils.getOut(General.getCsv(getUserId(), deviceIds, groupIds,
-                    JsonConverter.parseDate(from), JsonConverter.parseDate(to))));
+            ResponseBuilder response = Response.ok(General.getCsv(getUserId(), deviceIds, groupIds,
+                    JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
             response.type("application/ms-excel");
             return response.build();
         }
