@@ -99,7 +99,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         odometer = odometer.replace("?", "F");
         position.set(Position.KEY_ODOMETER, Integer.parseInt(odometer, 16));
 
-        parser.next(); //there is no meaningful alarms
+        parser.next(); // there is no meaningful alarms
         position.set(Position.PREFIX_ADC + 1, parser.next());
 
         return position;

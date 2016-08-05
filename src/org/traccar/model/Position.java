@@ -54,7 +54,7 @@ public class Position extends Message {
     public static final String KEY_APPROXIMATE = "approximate";
     public static final String KEY_THROTTLE = "throttle";
     public static final String KEY_MOTION = "motion";
-    public static final String KEY_GUARD = "guard";
+    public static final String KEY_ARMED = "armed";
 
     public static final String KEY_OBD_SPEED = "obd-speed";
     public static final String KEY_OBD_ODOMETER = "obd-odometer";
@@ -83,7 +83,6 @@ public class Position extends Message {
     public static final String ALARM_GEOFENCE_ENTER = "geofenceEnter";
     public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
     public static final String ALARM_GPS_ANTENNA_CUT = "gpsAntennaCut";
-    public static final String ALARM_OIL_CUT = "oilCut";
     public static final String ALARM_ACCIDENT = "accident";
 
 

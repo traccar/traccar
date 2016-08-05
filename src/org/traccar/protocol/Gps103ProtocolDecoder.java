@@ -103,20 +103,22 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(String value) {
-        if (value == "tracker") {
+        switch (value) {
+        case "tracker":
             return null;
-        } else if (value == "help me") {
+        case "help me":
             return Position.ALARM_SOS;
-        } else if (value == "low battery") {
+        case "low battery":
             return Position.ALARM_LOW_BATTERY;
-        } else if (value == "stockade") {
+        case "stockade":
             return Position.ALARM_GEOFENCE;
-        } else if (value == "move") {
+        case "move":
             return Position.ALARM_MOVEMENT;
-        } else if (value == "speed") {
+        case "speed":
             return Position.ALARM_OVERSPEED;
+        default:
+            return null;
         }
-        return null;
     }
 
     @Override
