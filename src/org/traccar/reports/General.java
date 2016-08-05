@@ -1,5 +1,7 @@
 package org.traccar.reports;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -76,6 +78,7 @@ public final class General {
                 result.setMaxSpeed(position.getSpeed());
             }
             result.setAverageSpeed(speedSum / positions.size());
+            result.setDistance(new BigDecimal(result.getDistance()).setScale(2, RoundingMode.HALF_UP).doubleValue());
         }
         return result;
     }

@@ -3,6 +3,7 @@ package org.traccar.web;
 import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -145,6 +146,6 @@ public class CsvBuilder {
     }
 
     public byte[] get() {
-        return String.valueOf(builder).getBytes();
+        return String.valueOf(builder).getBytes(StandardCharsets.UTF_8);
     }
 }
