@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:([01]{8})|(x{8}))?,?")   // state
             .number("(?:L(x+))?")                // odometer
             .any()
+            .number("([+-]ddd.d)?")              // temperature
             .text(")").optional()
             .compile();
 
@@ -223,6 +224,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextLong(16));
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
         }
 
         return position;
