@@ -218,7 +218,13 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     return positions;
                 }
 
-            } else if (type == MSG_SC_GPS_SLEEP || type == MSG_SC_AGPS_REQUEST) {
+            } else if (type == MSG_SC_GPS_SLEEP) {
+
+                buf.readUnsignedInt(); // device time
+
+                return readPosition(deviceSession, buf);
+
+            } else if (type == MSG_SC_AGPS_REQUEST) {
 
                 return readPosition(deviceSession, buf);
 
