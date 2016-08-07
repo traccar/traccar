@@ -63,7 +63,7 @@ public class SessionResource extends BaseResource {
                     }
                 }
             }
-            if (email != null && password != null){
+            if (email != null && password != null) {
                 User user = Context.getDataManager().login(email, password);
                 if (user != null) {
                     userId = user.getId();
