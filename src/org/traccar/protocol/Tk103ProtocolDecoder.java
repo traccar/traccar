@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:([01]{8})|(x{8}))?,?")   // state
             .number("(?:L(x+))?")                // odometer
             .any()
+            .number("([+-]ddd.d)?")              // temperature
             .text(")").optional()
             .compile();
 
@@ -74,6 +75,25 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+),")                     // cid
             .any()
             .compile();
+
+    private String decodeAlarm(int value) {
+        switch (value) {
+        case 1:
+            return Position.ALARM_ACCIDENT;
+        case 2:
+            return Position.ALARM_SOS;
+        case 3:
+            return Position.ALARM_VIBRATION;
+        case 4:
+            return Position.ALARM_LOW_SPEED;
+        case 5:
+            return Position.ALARM_OVERSPEED;
+        case 6:
+            return Position.ALARM_GEOFENCE_EXIT;
+        default:
+            return null;
+        }
+    }
 
     @Override
     protected Object decode(
@@ -160,7 +180,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         int alarm = sentence.indexOf("BO01");
         if (alarm != -1) {
-            position.set(Position.KEY_ALARM, Integer.parseInt(sentence.substring(alarm + 4, alarm + 5)));
+            position.set(Position.KEY_ALARM, decodeAlarm(Integer.parseInt(sentence.substring(alarm + 4, alarm + 5))));
         }
 
         DateBuilder dateBuilder = new DateBuilder();
@@ -204,6 +224,10 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextLong(16));
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
         }
 
         return position;

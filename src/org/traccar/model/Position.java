@@ -54,6 +54,7 @@ public class Position extends Message {
     public static final String KEY_APPROXIMATE = "approximate";
     public static final String KEY_THROTTLE = "throttle";
     public static final String KEY_MOTION = "motion";
+    public static final String KEY_ARMED = "armed";
 
     public static final String KEY_OBD_SPEED = "obd-speed";
     public static final String KEY_OBD_ODOMETER = "obd-odometer";
@@ -65,15 +66,25 @@ public class Position extends Message {
     public static final String PREFIX_ADC = "adc";
     public static final String PREFIX_IO = "io";
     public static final String PREFIX_COUNT = "count";
+    public static final String PREFIX_BUTTON = "button";
 
+    public static final String ALARM_GENERAL = "general";
     public static final String ALARM_SOS = "sos";
     public static final String ALARM_VIBRATION = "vibration";
     public static final String ALARM_MOVEMENT = "movement";
+    public static final String ALARM_LOW_SPEED = "lowspeed";
     public static final String ALARM_OVERSPEED = "overspeed";
     public static final String ALARM_FALL_DOWN = "fallDown";
     public static final String ALARM_LOW_BATTERY = "lowBattery";
     public static final String ALARM_MOTION = "motion";
     public static final String ALARM_FAULT = "fault";
+    public static final String ALARM_POWER_OFF = "powerOff";
+    public static final String ALARM_GEOFENCE = "geofence";
+    public static final String ALARM_GEOFENCE_ENTER = "geofenceEnter";
+    public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
+    public static final String ALARM_GPS_ANTENNA_CUT = "gpsAntennaCut";
+    public static final String ALARM_ACCIDENT = "accident";
+
 
     private String protocol;
 

@@ -159,6 +159,23 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(Short value) {
+        switch (value) {
+        case 0x01:
+            return Position.ALARM_SOS;
+        case 0x10:
+            return Position.ALARM_LOW_BATTERY;
+        case 0x11:
+            return Position.ALARM_OVERSPEED;
+        case 0x42:
+            return Position.ALARM_GEOFENCE_EXIT;
+        case 0x43:
+            return Position.ALARM_GEOFENCE_ENTER;
+        default:
+            return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -193,9 +210,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (pattern == PATTERN1 || pattern == PATTERN2) {
-
-            position.set(Position.KEY_ALARM, parser.next());
-
+            if (parser.hasNext()) {
+                position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
+            }
             DateBuilder dateBuilder = new DateBuilder();
             int year = 0;
             if (pattern == PATTERN2) {
@@ -238,9 +255,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.next());
 
         } else if (pattern == PATTERN3) {
-
-            position.set(Position.KEY_ALARM, parser.next());
-
+            if (parser.hasNext()) {
+                position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
+            }
             DateBuilder dateBuilder = new DateBuilder()
                     .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
@@ -304,11 +321,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate());
 
         }
-
         if (channel != null) {
             channel.write("ACK OK\r\n");
         }
-
         return position;
     }
 

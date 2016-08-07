@@ -77,8 +77,8 @@ Ext.define('Traccar.view.Login', {
             inputAttrTpl: ['autocomplete="on"']
         }, {
             xtype: 'checkboxfield',
-            reference: 'rememberMeField',
-            fieldLabel: Strings.rememberMe
+            reference: 'rememberField',
+            fieldLabel: Strings.userRemember
         }, {
             xtype: 'component',
             html: '<iframe id="submitTarget" name="submitTarget" style="display:none"></iframe>'

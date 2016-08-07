@@ -25,6 +25,7 @@ import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
+import org.traccar.protocol.TeltonikaProtocolDecoder;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -78,7 +79,8 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
         closeChannel(e.getChannel());
 
-        if (ctx.getPipeline().get("httpDecoder") == null) {
+        if (ctx.getPipeline().get("httpDecoder") == null
+                && !(ctx.getPipeline().get("objectDecoder") instanceof TeltonikaProtocolDecoder)) {
             Context.getConnectionManager().removeActiveDevice(e.getChannel());
         }
     }

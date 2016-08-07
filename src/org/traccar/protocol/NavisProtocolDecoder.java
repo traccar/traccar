@@ -95,7 +95,11 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(6); // event time
 
-        position.set(Position.KEY_ALARM, buf.readUnsignedByte());
+        short armedStatus = buf.readUnsignedByte();
+        position.set(Position.KEY_ARMED, armedStatus & 0x7F);
+        if (BitUtil.check(armedStatus, 7)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        }
         position.set(Position.KEY_STATUS, buf.readUnsignedByte());
         position.set(Position.KEY_GSM, buf.readUnsignedByte());
 

@@ -115,6 +115,25 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(int alarm) {
+        if (BitUtil.check(alarm, 0)) {
+            return Position.ALARM_POWER_OFF;
+        }
+        if (BitUtil.check(alarm, 1)) {
+            return Position.ALARM_MOTION;
+        }
+        if (BitUtil.check(alarm, 2)) {
+            return Position.ALARM_OVERSPEED;
+        }
+        if (BitUtil.check(alarm, 4)) {
+            return Position.ALARM_GEOFENCE;
+        }
+        if (BitUtil.check(alarm, 10)) {
+            return Position.ALARM_SOS;
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -181,7 +200,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     int status = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
                     position.set(Position.KEY_STATUS, status);
-                    position.set(Position.KEY_ALARM, buf.readUnsignedShort());
+                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedShort()));
                     break;
 
                 case DATA_ODOMETER:

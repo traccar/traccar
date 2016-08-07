@@ -53,9 +53,9 @@ public final class NotificationFormatter {
             + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
-    public static final String TITLE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "%1$s: exeeds the speed";
+    public static final String TITLE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "%1$s: exceeds the speed";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "Device: %1$s%n"
-            + "Exeeds the speed: %5$f%n"
+            + "Exceeds the speed: %5$f%n"
             + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 

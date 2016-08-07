@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,130 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Object decodeSc(
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
+            int version, ChannelBuffer id, int type, DeviceSession deviceSession) {
+
+        if (type == MSG_SC_HEARTBEAT) {
+
+            sendResponse(channel, remoteAddress, version, id, MSG_SC_HEARTBEAT_RESPONSE, null);
+
+        } else if (type == MSG_SC_LOGIN || type == MSG_SC_LOGOUT || type == MSG_SC_GPS
+                || type == MSG_SC_ALARM || type == MSG_SC_CURRENT_LOCATION) {
+
+            if (type == MSG_SC_LOGIN) {
+                ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 10);
+                response.writeInt(0xFFFFFFFF);
+                response.writeShort(0);
+                response.writeInt((int) (System.currentTimeMillis() / 1000));
+                sendResponse(channel, remoteAddress, version, id, MSG_SC_LOGIN_RESPONSE, response);
+            }
+
+            if (type == MSG_SC_GPS) {
+                buf.readUnsignedByte(); // historical
+            } else if (type == MSG_SC_ALARM) {
+                buf.readUnsignedInt(); // alarm
+            } else if (type == MSG_SC_CURRENT_LOCATION) {
+                buf.readUnsignedShort();
+            }
+
+            buf.readUnsignedInt(); // ACC ON time
+            buf.readUnsignedInt(); // UTC time
+            long odometer = buf.readUnsignedInt();
+            buf.readUnsignedInt(); // trip odometer
+            buf.readUnsignedInt(); // total fuel consumption
+            buf.readUnsignedShort(); // current fuel consumption
+            long status = buf.readUnsignedInt();
+            buf.skipBytes(8);
+
+            int count = buf.readUnsignedByte();
+
+            List<Position> positions = new LinkedList<>();
+
+            for (int i = 0; i < count; i++) {
+                Position position = readPosition(deviceSession, buf);
+                position.set(Position.KEY_ODOMETER, odometer);
+                position.set(Position.KEY_STATUS, status);
+                positions.add(position);
+            }
+
+            if (!positions.isEmpty()) {
+                return positions;
+            }
+
+        } else if (type == MSG_SC_GPS_SLEEP) {
+
+            buf.readUnsignedInt(); // device time
+
+            return readPosition(deviceSession, buf);
+
+        } else if (type == MSG_SC_AGPS_REQUEST) {
+
+            return readPosition(deviceSession, buf);
+
+        }
+
+        return null;
+    }
+
+
+    private Object decodeCc(
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
+            int version, ChannelBuffer id, int type, DeviceSession deviceSession) {
+
+        if (type == MSG_CC_HEARTBEAT) {
+
+            sendResponse(channel, remoteAddress, version, id, MSG_CC_HEARTBEAT_RESPONSE, null);
+
+            buf.readUnsignedByte(); // 0x01 for history
+            int count = buf.readUnsignedByte();
+
+            List<Position> positions = new LinkedList<>();
+
+            for (int i = 0; i < count; i++) {
+                Position position = readPosition(deviceSession, buf);
+
+                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+                position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+
+                buf.readUnsignedByte(); // geo-fencing id
+                buf.readUnsignedByte(); // geo-fencing flags
+                buf.readUnsignedByte(); // additional flags
+
+                position.set(Position.KEY_LAC, buf.readUnsignedShort());
+                position.set(Position.KEY_CID, buf.readUnsignedShort());
+
+                positions.add(position);
+            }
+
+            return positions;
+
+        } else if (type == MSG_CC_LOGIN) {
+
+            sendResponse(channel, remoteAddress, version, id, MSG_CC_LOGIN_RESPONSE, null);
+
+            Position position = readPosition(deviceSession, buf);
+
+            position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+
+            buf.readUnsignedByte(); // geo-fencing id
+            buf.readUnsignedByte(); // geo-fencing flags
+            buf.readUnsignedByte(); // additional flags
+
+            // GSM_CELL_CODE
+            // STR_Z - firmware version
+            // STR_Z - hardware version
+
+            return position;
+
+        }
+
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -171,110 +295,11 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (version == 4) {
 
-            if (type == MSG_SC_HEARTBEAT) {
-
-                sendResponse(channel, remoteAddress, version, id, MSG_SC_HEARTBEAT_RESPONSE, null);
-
-            } else if (type == MSG_SC_LOGIN || type == MSG_SC_LOGOUT || type == MSG_SC_GPS
-                    || type == MSG_SC_ALARM || type == MSG_SC_CURRENT_LOCATION) {
-
-                if (type == MSG_SC_LOGIN) {
-                    ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 10);
-                    response.writeInt(0xFFFFFFFF);
-                    response.writeShort(0);
-                    response.writeInt((int) (System.currentTimeMillis() / 1000));
-                    sendResponse(channel, remoteAddress, version, id, MSG_SC_LOGIN_RESPONSE, response);
-                }
-
-                if (type == MSG_SC_GPS) {
-                    buf.readUnsignedByte(); // historical
-                } else if (type == MSG_SC_ALARM) {
-                    buf.readUnsignedInt(); // alarm
-                } else if (type == MSG_SC_CURRENT_LOCATION) {
-                    buf.readUnsignedShort();
-                }
-
-                buf.readUnsignedInt(); // ACC ON time
-                buf.readUnsignedInt(); // UTC time
-                long odometer = buf.readUnsignedInt();
-                buf.readUnsignedInt(); // trip odometer
-                buf.readUnsignedInt(); // total fuel consumption
-                buf.readUnsignedShort(); // current fuel consumption
-                long status = buf.readUnsignedInt();
-                buf.skipBytes(8);
-
-                int count = buf.readUnsignedByte();
-
-                List<Position> positions = new LinkedList<>();
-
-                for (int i = 0; i < count; i++) {
-                    Position position = readPosition(deviceSession, buf);
-                    position.set(Position.KEY_ODOMETER, odometer);
-                    position.set(Position.KEY_STATUS, status);
-                    positions.add(position);
-                }
-
-                if (!positions.isEmpty()) {
-                    return positions;
-                }
-
-            } else if (type == MSG_SC_GPS_SLEEP || type == MSG_SC_AGPS_REQUEST) {
-
-                return readPosition(deviceSession, buf);
-
-            }
+            return decodeSc(channel, remoteAddress, buf, version, id, type, deviceSession);
 
         } else {
 
-            if (type == MSG_CC_HEARTBEAT) {
-
-                sendResponse(channel, remoteAddress, version, id, MSG_CC_HEARTBEAT_RESPONSE, null);
-
-                buf.readUnsignedByte(); // 0x01 for history
-                int count = buf.readUnsignedByte();
-
-                List<Position> positions = new LinkedList<>();
-
-                for (int i = 0; i < count; i++) {
-                    Position position = readPosition(deviceSession, buf);
-
-                    position.set(Position.KEY_STATUS, buf.readUnsignedInt());
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-
-                    buf.readUnsignedByte(); // geo-fencing id
-                    buf.readUnsignedByte(); // geo-fencing flags
-                    buf.readUnsignedByte(); // additional flags
-
-                    position.set(Position.KEY_LAC, buf.readUnsignedShort());
-                    position.set(Position.KEY_CID, buf.readUnsignedShort());
-
-                    positions.add(position);
-                }
-
-                return positions;
-
-            } else if (type == MSG_CC_LOGIN) {
-
-                sendResponse(channel, remoteAddress, version, id, MSG_CC_LOGIN_RESPONSE, null);
-
-                Position position = readPosition(deviceSession, buf);
-
-                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
-                position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-
-                buf.readUnsignedByte(); // geo-fencing id
-                buf.readUnsignedByte(); // geo-fencing flags
-                buf.readUnsignedByte(); // additional flags
-
-                // GSM_CELL_CODE
-                // STR_Z - firmware version
-                // STR_Z - hardware version
-
-                return position;
-
-            }
+            return decodeCc(channel, remoteAddress, buf, version, id, type, deviceSession);
 
         }
 
