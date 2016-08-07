@@ -41,7 +41,7 @@ public class SessionResource extends BaseResource {
 
     public static final String USER_ID_KEY = "userId";
     public static final String USER_COOKIE_KEY = "user";
-    public static final String PASS_COOKIE_KEY = "pass";
+    public static final String PASS_COOKIE_KEY = "password";
 
     @javax.ws.rs.core.Context
     private HttpServletRequest request;
