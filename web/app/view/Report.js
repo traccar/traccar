@@ -24,7 +24,7 @@ Ext.define('Traccar.view.Report', {
     ],
 
     controller: 'report',
-    store: 'Positions',
+    store: 'ReportRoute',
 
     title: Strings.reportTitle,
 

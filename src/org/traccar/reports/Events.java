@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
 import org.traccar.model.Event;
@@ -19,12 +19,13 @@ public final class Events {
 
     public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws SQLException {
-        JsonObjectBuilder json = Json.createObjectBuilder();
+        JsonArrayBuilder json = Json.createArrayBuilder();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             for (String type : types) {
-                json.add(String.valueOf(deviceId), JsonConverter.arrayToJson(Context.getDataManager()
-                        .getEvents(deviceId, type, from, to)));
+                for (Event event : Context.getDataManager().getEvents(deviceId, type, from, to)) {
+                    json.add(JsonConverter.objectToJson(event));
+                }
             }
         }
         return json.build().toString();

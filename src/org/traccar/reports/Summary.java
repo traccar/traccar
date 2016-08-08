@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
 import org.traccar.helper.DistanceCalculator;
@@ -23,9 +23,10 @@ public final class Summary {
 
     private static SummaryReport calculateGeneralResult(long deviceId, Date from, Date to) throws SQLException {
         SummaryReport result = new SummaryReport();
+        result.setDeviceId(deviceId);
+        result.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
         Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
-            result.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
             Position previousPosition = null;
             double speedSum = 0;
             for (Position position : positions) {
@@ -45,10 +46,10 @@ public final class Summary {
 
     public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
-        JsonObjectBuilder json = Json.createObjectBuilder();
+        JsonArrayBuilder json = Json.createArrayBuilder();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            json.add(String.valueOf(deviceId), JsonConverter.objectToJson(calculateGeneralResult(deviceId, from, to)));
+            json.add(JsonConverter.objectToJson(calculateGeneralResult(deviceId, from, to)));
         }
         return json.build().toString();
     }

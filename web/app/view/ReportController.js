@@ -49,7 +49,7 @@ Ext.define('Traccar.view.ReportController', {
                 toDate.getFullYear(), toDate.getMonth(), toDate.getDate(),
                 toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
 
-            store = Ext.getStore('Positions');
+            store = Ext.getStore('ReportRoute');
             store.load({
                 params: {
                     deviceId: deviceId,
@@ -61,7 +61,7 @@ Ext.define('Traccar.view.ReportController', {
     },
 
     onClearClick: function () {
-        Ext.getStore('Positions').removeAll();
+        Ext.getStore('ReportRoute').removeAll();
     },
 
     onSelectionChange: function (selected) {
