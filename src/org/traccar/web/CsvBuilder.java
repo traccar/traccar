@@ -31,52 +31,6 @@ public class CsvBuilder {
     private void addSeparator() {
         builder.append(SEPARATOR);
     }
-    public void addLine(String value) {
-        if (value != null) {
-            builder.append(value);
-        }
-        addLineEnding();
-    }
-
-    public void addLine(long value) {
-        builder.append(value);
-        addLineEnding();
-    }
-
-    public void addLine(double value) {
-        builder.append(value);
-        addLineEnding();
-    }
-
-    public void addLine(boolean value) {
-        builder.append(value);
-        addLineEnding();
-    }
-
-    public void addField(String value) {
-        builder.append(value);
-        addSeparator();
-    }
-
-    public void addField(long value) {
-        builder.append(value);
-        addSeparator();
-    }
-
-    public void addField(int value) {
-        builder.append(value);
-        addSeparator();
-    }
-
-    public void addField(double value) {
-        builder.append(value);
-        addSeparator();
-    }
-
-    public void addField(boolean value) {
-        builder.append(value);
-        addSeparator();
-    }
 
     private SortedSet<Method> getSortedMethods(Object object) {
         Method[] methodArray = object.getClass().getMethods();
@@ -98,22 +52,29 @@ public class CsvBuilder {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
-                        addField((Boolean) method.invoke(object));
+                        builder.append((Boolean) method.invoke(object));
+                        addSeparator();
                     } else if (method.getReturnType().equals(int.class)) {
-                        addField((Integer) method.invoke(object));
+                        builder.append((Integer) method.invoke(object));
+                        addSeparator();
                     } else if (method.getReturnType().equals(long.class)) {
-                        addField((Long) method.invoke(object));
+                        builder.append((Long) method.invoke(object));
+                        addSeparator();
                     } else if (method.getReturnType().equals(double.class)) {
-                        addField((Double) method.invoke(object));
+                        builder.append((Double) method.invoke(object));
+                        addSeparator();
                     } else if (method.getReturnType().equals(String.class)) {
-                        addField((String) method.invoke(object));
+                        builder.append((String) method.invoke(object));
+                        addSeparator();
                     } else if (method.getReturnType().equals(Date.class)) {
                         Date value = (Date) method.invoke(object);
-                        addField(DATE_FORMAT.print(new DateTime(value)));
+                        builder.append(DATE_FORMAT.print(new DateTime(value)));
+                        addSeparator();
                     } else if (method.getReturnType().equals(Map.class)) {
                         Map value = (Map) method.invoke(object);
                         if (value != null) {
-                            addField(MiscFormatter.toJson(value).toString());
+                            builder.append(MiscFormatter.toJson(value).toString());
+                            addSeparator();
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
@@ -132,7 +93,8 @@ public class CsvBuilder {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = Introspector.decapitalize(method.getName().substring(3));
                 if (!name.equals("class")) {
-                    addField(name);
+                    builder.append(name);
+                    addSeparator();
                 }
             }
         }
@@ -143,16 +105,20 @@ public class CsvBuilder {
         for (Object object : array) {
             switch (object.getClass().getSimpleName().toLowerCase()) {
                 case "string":
-                    addLine(object.toString());
+                    builder.append(object.toString());
+                    addLineEnding();
                     break;
                 case "long":
-                    addLine((long) object);
+                    builder.append((long) object);
+                    addLineEnding();
                     break;
                 case "double":
-                    addLine((double) object);
+                    builder.append((double) object);
+                    addLineEnding();
                     break;
                 case "boolean":
-                    addLine((boolean) object);
+                    builder.append((boolean) object);
+                    addLineEnding();
                     break;
                 default:
                     addLine(object);
