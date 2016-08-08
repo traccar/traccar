@@ -41,6 +41,7 @@ public class PermissionsManager {
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
     private final Map<Long, Set<Long>> deviceUsers = new HashMap<>();
+    private final Map<Long, Set<Long>> groupDevices = new HashMap<>();
 
     public Set<Long> getGroupPermissions(long userId) {
         if (!groupPermissions.containsKey(userId)) {
@@ -61,6 +62,13 @@ public class PermissionsManager {
             deviceUsers.put(deviceId, new HashSet<Long>());
         }
         return deviceUsers.get(deviceId);
+    }
+
+    public Set<Long> getGroupDevices(long groupId) {
+        if (!groupDevices.containsKey(groupId)) {
+            groupDevices.put(groupId, new HashSet<Long>());
+        }
+        return groupDevices.get(groupId);
     }
 
     public PermissionsManager(DataManager dataManager) {
@@ -91,9 +99,15 @@ public class PermissionsManager {
                     userDevicePermissions.add(device.getId());
                 }
             }
-
             for (DevicePermission permission : dataManager.getDevicePermissions()) {
                 getDevicePermissions(permission.getUserId()).add(permission.getDeviceId());
+            }
+
+            groupDevices.clear();
+            for (Group group : Context.getDeviceManager().getAllGroups()) {
+                for (Device device : groupTree.getDevices(group.getId())) {
+                    getGroupDevices(group.getId()).add(device.getId());
+                }
             }
 
         } catch (SQLException error) {

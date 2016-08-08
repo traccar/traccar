@@ -29,5 +29,4 @@ public class BaseResource {
         }
         return 0;
     }
-
 }

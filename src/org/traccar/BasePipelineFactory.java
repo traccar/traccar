@@ -44,6 +44,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private int timeout;
 
     private FilterHandler filterHandler;
+    private CoordinatesHandler coordinatesHandler;
     private DistanceHandler distanceHandler;
     private ReverseGeocoderHandler reverseGeocoderHandler;
     private LocationProviderHandler locationProviderHandler;
@@ -113,6 +114,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (Context.getConfig().getBoolean("filter.enable")) {
             filterHandler = new FilterHandler();
+        }
+
+        if (Context.getConfig().getBoolean("coordinates.filter")) {
+            coordinatesHandler = new CoordinatesHandler();
         }
 
         if (Context.getReverseGeocoder() != null) {
@@ -186,6 +191,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (filterHandler != null) {
             pipeline.addLast("filter", filterHandler);
+        }
+
+        if (coordinatesHandler != null) {
+            pipeline.addLast("coordinatesHandler", coordinatesHandler);
         }
 
         if (Context.getDataManager() != null) {
