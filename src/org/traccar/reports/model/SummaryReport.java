@@ -1,6 +1,6 @@
 package org.traccar.reports.model;
 
-public class GeneralReport {
+public class SummaryReport {
 
     private String deviceName;
     public String getDeviceName() {
@@ -10,7 +10,7 @@ public class GeneralReport {
         this.deviceName = deviceName;
     }
 
-    private double distance = 0;
+    private double distance;
     public double getDistance() {
         return distance;
     }
@@ -22,7 +22,7 @@ public class GeneralReport {
         this.distance += distance;
     }
 
-    private double averageSpeed = 0;
+    private double averageSpeed;
     public double getAverageSpeed() {
         return averageSpeed;
     }
@@ -30,7 +30,7 @@ public class GeneralReport {
         this.averageSpeed = averageSpeed;
     }
 
-    private double maxSpeed = 0;
+    private double maxSpeed;
     public double getMaxSpeed() {
         return maxSpeed;
     }

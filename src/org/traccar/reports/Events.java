@@ -20,7 +20,7 @@ public final class Events {
     public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws SQLException {
         JsonObjectBuilder json = Json.createObjectBuilder();
-        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             for (String type : types) {
                 json.add(String.valueOf(deviceId), JsonConverter.arrayToJson(Context.getDataManager()
@@ -34,12 +34,12 @@ public final class Events {
             Collection<String> types, Date from, Date to) throws SQLException {
         CsvBuilder csv = new CsvBuilder();
         csv.addHeaderLine(new Event());
-        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             for (String type : types) {
                 csv.addArray(Context.getDataManager().getEvents(deviceId, type, from, to));
             }
         }
-        return csv.get();
+        return csv.build();
     }
 }

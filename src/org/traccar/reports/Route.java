@@ -20,7 +20,7 @@ public final class Route {
     public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
         JsonObjectBuilder json = Json.createObjectBuilder();
-        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             json.add(String.valueOf(deviceId), JsonConverter.arrayToJson(Context.getDataManager()
                     .getPositions(deviceId, from, to)));
@@ -32,10 +32,10 @@ public final class Route {
             Date from, Date to) throws SQLException {
         CsvBuilder csv = new CsvBuilder();
         csv.addHeaderLine(new Position());
-        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             csv.addArray(Context.getDataManager().getPositions(deviceId, from, to));
         }
-        return csv.get();
+        return csv.build();
     }
 }

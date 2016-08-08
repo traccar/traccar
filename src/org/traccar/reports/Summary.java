@@ -12,17 +12,17 @@ import javax.json.JsonObjectBuilder;
 import org.traccar.Context;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
-import org.traccar.reports.model.GeneralReport;
+import org.traccar.reports.model.SummaryReport;
 import org.traccar.web.CsvBuilder;
 import org.traccar.web.JsonConverter;
 
-public final class General {
+public final class Summary {
 
-    private General() {
+    private Summary() {
     }
 
-    private static GeneralReport calculateGeneralResult(long deviceId, Date from, Date to) throws SQLException {
-        GeneralReport result = new GeneralReport();
+    private static SummaryReport calculateGeneralResult(long deviceId, Date from, Date to) throws SQLException {
+        SummaryReport result = new SummaryReport();
         Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
             result.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
@@ -46,7 +46,7 @@ public final class General {
     public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
         JsonObjectBuilder json = Json.createObjectBuilder();
-        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             json.add(String.valueOf(deviceId), JsonConverter.objectToJson(calculateGeneralResult(deviceId, from, to)));
         }
@@ -56,11 +56,11 @@ public final class General {
     public static String getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
         CsvBuilder csv = new CsvBuilder();
-        csv.addHeaderLine(new GeneralReport());
-        for (long deviceId: ReportUtils.getReportedDevices(deviceIds, groupIds)) {
+        csv.addHeaderLine(new SummaryReport());
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             csv.addLine(calculateGeneralResult(deviceId, from, to));
         }
-        return csv.get();
+        return csv.build();
     }
 }

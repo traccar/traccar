@@ -161,7 +161,7 @@ public class CsvBuilder {
         }
     }
 
-    public String get() {
+    public String build() {
         return builder.toString();
     }
 }

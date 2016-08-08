@@ -10,7 +10,7 @@ public final class ReportUtils {
     private ReportUtils() {
     }
 
-    public static Collection<Long> getReportedDevices(Collection<Long> deviceIds, Collection<Long> groupIds) {
+    public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
         Collection<Long> result = new ArrayList<>();
         result.addAll(deviceIds);
         for (long groupId : groupIds) {
