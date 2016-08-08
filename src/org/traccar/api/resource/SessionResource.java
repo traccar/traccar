@@ -20,6 +20,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.model.User;
 
 import javax.annotation.security.PermitAll;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -39,6 +40,8 @@ import java.sql.SQLException;
 public class SessionResource extends BaseResource {
 
     public static final String USER_ID_KEY = "userId";
+    public static final String USER_COOKIE_KEY = "user";
+    public static final String PASS_COOKIE_KEY = "password";
 
     @javax.ws.rs.core.Context
     private HttpServletRequest request;
@@ -47,6 +50,28 @@ public class SessionResource extends BaseResource {
     @GET
     public User get() throws SQLException {
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
+        if (userId == null) {
+            Cookie[] cookies = request.getCookies();
+            String email = null, password = null;
+            if (cookies != null) {
+                for (int i = 0; i < cookies.length; i++) {
+                    if (cookies[i].getName().equals(USER_COOKIE_KEY)) {
+                        email = cookies[i].getValue();
+                    }
+                    if (cookies[i].getName().equals(PASS_COOKIE_KEY)) {
+                        password = cookies[i].getValue();
+                    }
+                }
+            }
+            if (email != null && password != null) {
+                User user = Context.getDataManager().login(email, password);
+                if (user != null) {
+                    userId = user.getId();
+                    request.getSession().setAttribute(USER_ID_KEY, userId);
+                }
+            }
+        }
+
         if (userId != null) {
             return Context.getDataManager().getUser(userId);
         } else {

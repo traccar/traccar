@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,6 @@ Ext.define('Traccar.view.LoginController', {
         this.lookupReference('registerButton').setDisabled(
             !Traccar.app.getServer().get('registration'));
         this.lookupReference('languageField').setValue(Locale.language);
-        var user = Ext.util.Cookies.get('user');
-        var password = Ext.util.Cookies.get('password');
-        if (user && password) {
-            this.lookupReference('userField').setValue(user);
-            this.lookupReference('passwordField').setValue(password);
-            this.login();
-        }
     },
 
     login: function () {
