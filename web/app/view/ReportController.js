@@ -90,7 +90,9 @@ Ext.define('Traccar.view.ReportController', {
     },
 
     selectReport: function (position, center) {
-        this.getView().getSelectionModel().select([position], false, true);
+        if (position instanceof Traccar.model.Position) {
+            this.getView().getSelectionModel().select([position], false, true);
+        }
     },
 
     doDownloadCsv: function (requestUrl, requestParams) {
