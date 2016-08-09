@@ -67,3 +67,9 @@
     from { transform: rotate(0deg); }
     to { transform: rotate(359deg); }
 }
+
+.popover-title{
+    white-space: nowrap;
+    min-width:100px;
+    /*height: 200px;*/
+}

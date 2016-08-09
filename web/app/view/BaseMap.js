@@ -28,6 +28,14 @@ Ext.define('Traccar.view.BaseMap', {
         return this.mapView;
     },
 
+    getPopupOverlay: function() {
+        return this.popupOverlay;
+    },
+    
+    getPopupElement: function() {
+        return this.popupElement;
+    },
+
     initMap: function () {
         var user, server, layer, type, bingKey, lat, lon, zoom, target;
 
@@ -98,10 +106,26 @@ Ext.define('Traccar.view.BaseMap', {
             }
         });
 
+        $('<div id="popup"></div>').appendTo(document.body);
+
+        this.popupElement = document.getElementById('popup');
+        this.popupOverlay = new ol.Overlay({
+            element: this.popupElement,
+            positioning: 'bottom-center',
+            stopEvent: true,
+            offset: [0, -15]
+        });
+        this.map.addOverlay(this.popupOverlay);
+
         this.map.on('click', function (e) {
-            this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+            var feature = this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
                 this.fireEvent('selectFeature', feature);
+                return feature;
             }, this);
+
+            if (!feature) {
+                this.fireEvent('clickMap');
+            }
         }, this);
     },
 

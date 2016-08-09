@@ -42,7 +42,8 @@ Ext.define('Traccar.view.MapController', {
             },
             component: {
                 '#': {
-                    selectFeature: 'selectFeature'
+                    selectFeature: 'selectFeature',
+                    clickMap: 'clickMap'
                 }
             }
         }
@@ -276,6 +277,7 @@ Ext.define('Traccar.view.MapController', {
     },
 
     selectDevice: function (device, center) {
+        this.hidePopover();
         this.selectMarker(this.latestMarkers[device.get('id')], center);
     },
 
@@ -288,9 +290,57 @@ Ext.define('Traccar.view.MapController', {
         if (record) {
             if (record instanceof Traccar.model.Device) {
                 this.fireEvent('selectDevice', record, false);
+                this.showPopover(feature);
             } else {
                 this.fireEvent('selectReport', record, false);
             }
         }
+    },
+
+    clickMap: function () {
+        this.hidePopover();
+    },
+
+    showPopover: function (feature) {
+        var record = feature.get('record');
+        if (record) {
+            if (record instanceof Traccar.model.Device) {
+                var coordinates = feature.getGeometry().getCoordinates();
+                var popupOverlay = this.getView().getPopupOverlay();
+                var popupElement = this.getView().getPopupElement();
+
+                var html = '';
+                var attributes = record.get('attributes');
+                if (attributes instanceof Object) {
+                    for (key in attributes) {
+                        if (attributes.hasOwnProperty(key)) {
+                            html += key + ': ' + attributes[key] + '<br>';
+                        }
+                    }
+                }
+
+                popupOverlay.setPosition(coordinates);
+                $(popupElement).popover({
+                    'placement': 'top',
+                    'html': true,
+                    //'title': record.get('name'),
+                    //'title': record.get('name'),
+                    //'title': '<span class="text-info"><strong>title</strong></span>'+
+                    //'<button type="button" id="close" class="close" onclick="$(element).popover(&quot;hide&quot;);">&times;</button>',
+                    //'title': 'User Info <a href="#" class="close" data-dismiss="alert">&times;</a>',
+                    //'title': '<span class="text-info"><strong>' + record.get('name') + '</strong></span>'+
+                    //         '<button type="button" class="close" onclick="Traccar.getApplication().getController(&quot;controller.map&quot;).hidePopover()">&times;</button>',
+                    'title': '<span class="text-info"><strong>' + record.get('name') + '</strong></span>'+
+                             '<button type="button" class="close" onclick="$(&quot;#' + popupElement.id + '&quot;).popover(&quot;destroy&quot;)">&times;</button>',
+                    'content': html
+                });
+                $(popupElement).popover('show');
+            }
+        }
+    },
+
+    hidePopover: function () {
+        var element = this.getView().getPopupElement();
+        $(element).popover('destroy');
     }
 });
