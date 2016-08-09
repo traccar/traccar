@@ -29,7 +29,7 @@ Ext.define('Traccar.view.CommandDialog', {
         items: [{
             xtype: 'combobox',
             name: 'type',
-            fieldLabel: Strings.commandType,
+            fieldLabel: Strings.sharedType,
             store: 'CommandTypes',
             displayField: 'name',
             valueField: 'type',

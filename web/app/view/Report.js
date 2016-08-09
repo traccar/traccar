@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,23 @@ Ext.define('Traccar.view.Report', {
     ],
 
     controller: 'report',
-    store: 'ReportRoute',
 
     title: Strings.reportTitle,
 
     tbar: [{
+        xtype: 'tbtext',
+        html: Strings.sharedType
+    }, {
+        xtype: 'combobox',
+        reference: 'reportTypeField',
+        store: 'ReportTypes',
+        displayField: 'name',
+        valueField: 'key',
+        typeAhead: true,
+        listeners: {
+            change: 'onTypeChange'
+        }
+    }, '-', {
         xtype: 'tbtext',
         html: Strings.reportDevice
     }, {
@@ -69,7 +81,12 @@ Ext.define('Traccar.view.Report', {
         value: new Date()
     }, '-', {
         text: Strings.reportShow,
-        handler: 'onShowClick'
+        reference: 'showButton',
+        handler: 'onReportClick'
+    }, {
+        text: Strings.reportCsv,
+        reference: 'csvButton',
+        handler: 'onReportClick'
     }, {
         text: Strings.reportClear,
         handler: 'onClearClick'
@@ -77,43 +94,5 @@ Ext.define('Traccar.view.Report', {
 
     listeners: {
         selectionchange: 'onSelectionChange'
-    },
-
-    columns: [{
-        text: Strings.positionValid,
-        dataIndex: 'valid',
-        flex: 1,
-        renderer: Traccar.AttributeFormatter.getFormatter('valid')
-    }, {
-        text: Strings.positionFixTime,
-        dataIndex: 'fixTime',
-        flex: 1,
-        xtype: 'datecolumn',
-        renderer: Traccar.AttributeFormatter.getFormatter('fixTime')
-    }, {
-        text: Strings.positionLatitude,
-        dataIndex: 'latitude',
-        flex: 1,
-        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
-    }, {
-        text: Strings.positionLongitude,
-        dataIndex: 'longitude',
-        flex: 1,
-        renderer: Traccar.AttributeFormatter.getFormatter('latitude')
-    }, {
-        text: Strings.positionAltitude,
-        dataIndex: 'altitude',
-        flex: 1,
-        renderer: Traccar.AttributeFormatter.getFormatter('altitude')
-    }, {
-        text: Strings.positionSpeed,
-        dataIndex: 'speed',
-        flex: 1,
-        renderer: Traccar.AttributeFormatter.getFormatter('speed')
-    }, {
-        text: Strings.positionAddress,
-        dataIndex: 'address',
-        flex: 1,
-        renderer: Traccar.AttributeFormatter.getFormatter('address')
-    }]
+    }
 });

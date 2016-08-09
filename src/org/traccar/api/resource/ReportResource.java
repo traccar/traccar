@@ -32,12 +32,14 @@ public class ReportResource extends BaseResource {
 
     @Path("route")
     @GET
-    @Produces("application/ms-excel")
+    @Produces("text/csv")
     public Response getRouteCsv(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Route.getCsv(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
+                .header("Content-Disposition", "attachment; filename=route.csv")
+                .build();
     }
 
     @Path("events")
@@ -53,13 +55,15 @@ public class ReportResource extends BaseResource {
 
     @Path("events")
     @GET
-    @Produces("application/ms-excel")
+    @Produces("text/csv")
     public Response getEventsCsv(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Events.getCsv(getUserId(), deviceIds, groupIds,
-                types, JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+                types, JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
+                .header("Content-Disposition", "attachment; filename=events.csv")
+                .build();
     }
 
     @Path("summary")
@@ -74,12 +78,14 @@ public class ReportResource extends BaseResource {
 
     @Path("summary")
     @GET
-    @Produces("application/ms-excel")
+    @Produces("text/csv")
     public Response getSummaryCsv(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Summary.getCsv(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
+                .header("Content-Disposition", "attachment; filename=summary.csv")
+                .build();
     }
 
 }

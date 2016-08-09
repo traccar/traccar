@@ -24,6 +24,8 @@
     "sharedAttribute": "Attribute",
     "sharedArea": "Area",
     "sharedMute": "Mute",
+    "sharedType": "Type",
+    "sharedDistance": "Distance",
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",
@@ -53,7 +55,6 @@
     "settingsGroups": "Groups",
     "settingsServer": "Server",
     "settingsUsers": "Users",
-    "settingsDistanceUnit": "Distance",
     "settingsSpeedUnit": "Speed",
     "settingsTwelveHourFormat": "12-hour Format",
     "reportTitle": "Reports",
@@ -89,7 +90,6 @@
     "stateValue": "Value",
     "commandTitle": "Command",
     "commandSend": "Send",
-    "commandType": "Type",
     "commandSent": "Command has been sent",
     "commandPositionPeriodic": "Periodic Reporting",
     "commandPositionStop": "Stop Reporting",
@@ -132,5 +132,12 @@
     "alarmFault": "Fault Alarm",
     "notificationType": "Type of Notification",
     "notificationWeb": "Send via Web",
-    "notificationMail": "Send via Mail"
+    "notificationMail": "Send via Mail",
+    "reportRoute": "Route",
+    "reportEvents": "Events",
+    "reportSummary": "Summary",
+    "reportCsv": "Csv",
+    "reportDeviceName": "Device Name",
+    "summaryAverageSpeed": "Average Speed",
+    "summaryMaximumSpeed": "Maximum Speed"
 }

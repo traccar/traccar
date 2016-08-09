@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.ReportRoute', {
+Ext.define('Traccar.store.ReportSummary', {
     extend: 'Ext.data.Store',
-    model: 'Traccar.model.Position',
+    model: 'Traccar.model.ReportSummary',
 
     proxy: {
         type: 'rest',
-        url: '/api/reports/route',
+        url: '/api/reports/summary',
         headers: {
             'Accept': 'application/json'
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.ReportRoute', {
-    extend: 'Ext.data.Store',
-    model: 'Traccar.model.Position',
+Ext.define('Traccar.model.ReportSummary', {
+    extend: 'Ext.data.Model',
+    identifier: 'negative',
 
-    proxy: {
-        type: 'rest',
-        url: '/api/reports/route',
-        headers: {
-            'Accept': 'application/json'
-        }
-    }
+    fields: [{
+        name: 'deviceId',
+        type: 'int'
+    }, {
+        name: 'deviceName',
+        type: 'string'
+    }, {
+        name: 'maxSpeed',
+        type: 'float'
+    }, {
+        name: 'averageSpeed',
+        type: 'float'
+    }, {
+        name: 'distance',
+        type: 'float'
+    }]
 });
