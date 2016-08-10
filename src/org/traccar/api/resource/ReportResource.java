@@ -19,7 +19,7 @@ import org.traccar.reports.Route;
 import org.traccar.web.JsonConverter;
 
 @Path("reports")
-@Consumes(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class ReportResource extends BaseResource {
 
     public static final String TEXT_CSV = "text/csv";
