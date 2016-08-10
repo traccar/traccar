@@ -8,6 +8,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.traccar.api.BaseResource;
@@ -25,7 +27,7 @@ public class ReportResource extends BaseResource {
 
     @Path("route")
     @GET
-    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getRouteJson(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
@@ -41,13 +43,13 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Route.getCsv(getUserId(), deviceIds, groupIds,
                 JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header(javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
                 .build();
     }
 
     @Path("events")
     @GET
-    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getEventsJson(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
@@ -65,13 +67,13 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Events.getCsv(getUserId(), deviceIds, groupIds,
                 types, JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header(javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
                 .build();
     }
 
     @Path("summary")
     @GET
-    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getSummaryJson(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
@@ -87,7 +89,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Summary.getCsv(getUserId(), deviceIds, groupIds,
                 JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header(javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
                 .build();
     }
 
