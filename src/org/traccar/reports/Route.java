@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
 import org.traccar.model.Position;
@@ -19,11 +19,12 @@ public final class Route {
 
     public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
-        JsonObjectBuilder json = Json.createObjectBuilder();
+        JsonArrayBuilder json = Json.createArrayBuilder();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            json.add(String.valueOf(deviceId), JsonConverter.arrayToJson(Context.getDataManager()
-                    .getPositions(deviceId, from, to)));
+            for (Position position : Context.getDataManager().getPositions(deviceId, from, to)) {
+                json.add(JsonConverter.objectToJson(position));
+            }
         }
         return json.build().toString();
     }

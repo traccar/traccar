@@ -35,7 +35,7 @@ Ext.define('Traccar.view.MapController', {
                     add: 'updateLatest',
                     update: 'updateLatest'
                 },
-                '#Positions': {
+                '#ReportRoute': {
                     load: 'loadReport',
                     clear: 'clearReport'
                 }

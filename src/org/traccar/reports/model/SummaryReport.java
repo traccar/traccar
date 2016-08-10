@@ -2,6 +2,14 @@ package org.traccar.reports.model;
 
 public class SummaryReport {
 
+    private long deviceId;
+    public long getDeviceId() {
+        return deviceId;
+    }
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
+    }
+
     private String deviceName;
     public String getDeviceName() {
         return deviceName;
