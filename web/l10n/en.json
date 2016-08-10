@@ -136,8 +136,8 @@
     "reportRoute": "Route",
     "reportEvents": "Events",
     "reportSummary": "Summary",
-    "reportCsv": "Csv",
+    "reportCsv": "CSV",
     "reportDeviceName": "Device Name",
-    "summaryAverageSpeed": "Average Speed",
-    "summaryMaximumSpeed": "Maximum Speed"
+    "reportAverageSpeed": "Average Speed",
+    "reportMaximumSpeed": "Maximum Speed"
 }

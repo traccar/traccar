@@ -63,7 +63,7 @@ Ext.define('Traccar.view.ReportController', {
                 });
             } else if (button.reference === "csvButton") {
                 url = this.getView().getStore().getProxy().url;
-                this.doDownloadCsv(url, {
+                this.downloadCsv(url, {
                     deviceId: deviceId,
                     type: '%',
                     from: from.toISOString(),
@@ -95,7 +95,7 @@ Ext.define('Traccar.view.ReportController', {
         }
     },
 
-    doDownloadCsv: function (requestUrl, requestParams) {
+    downloadCsv: function (requestUrl, requestParams) {
         Ext.Ajax.request({
             url: requestUrl,
             method: 'GET',
@@ -104,7 +104,7 @@ Ext.define('Traccar.view.ReportController', {
                 Accept: 'text/csv'
             },
             success: function (response) {
-                var disposition, filename, type, blob, url, downloadUrl, a;
+                var disposition, filename, type, blob, url, downloadUrl, elementA;
                 disposition = response.getResponseHeader('Content-Disposition');
                 filename = disposition.slice(disposition.indexOf("=") + 1, disposition.length);
                 type = response.getResponseHeader('Content-Type');
@@ -116,15 +116,15 @@ Ext.define('Traccar.view.ReportController', {
                     url = window.URL || window.webkitURL;
                     downloadUrl = URL.createObjectURL(blob);
                     if (filename) {
-                        a = document.createElement("a");
-                        a.href = downloadUrl;
-                        a.download = filename;
-                        document.body.appendChild(a);
-                        a.click();
+                        elementA = document.createElement("a");
+                        elementA.href = downloadUrl;
+                        elementA.download = filename;
+                        document.body.appendChild(elementA);
+                        elementA.click();
                     }
                     setTimeout(function () {
-                            url.revokeObjectURL(downloadUrl);
-                        }, 100);
+                        url.revokeObjectURL(downloadUrl);
+                    }, 100);
                 }
             }
         });
@@ -218,12 +218,12 @@ Ext.define('Traccar.view.ReportController', {
             flex: 1,
             renderer: Traccar.AttributeFormatter.getFormatter('distance')
         }, {
-            text: Strings.summaryAverageSpeed,
+            text: Strings.reportAverageSpeed,
             dataIndex: 'averageSpeed',
             flex: 1,
             renderer: Traccar.AttributeFormatter.getFormatter('speed')
         }, {
-            text: Strings.summaryMaximumSpeed,
+            text: Strings.reportMaximumSpeed,
             dataIndex: 'maxSpeed',
             flex: 1,
             renderer: Traccar.AttributeFormatter.getFormatter('speed')

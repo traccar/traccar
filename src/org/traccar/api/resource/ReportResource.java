@@ -17,12 +17,15 @@ import org.traccar.reports.Route;
 import org.traccar.web.JsonConverter;
 
 @Path("reports")
-@Consumes("application/json")
+@Consumes(javax.ws.rs.core.MediaType.APPLICATION_JSON)
 public class ReportResource extends BaseResource {
+
+    public static final String TEXT_CSV = "text/csv";
+    public static final String CONTENT_DISPOSITION_VALUE = "attachment; filename=report.csv";
 
     @Path("route")
     @GET
-    @Produces("application/json")
+    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getRouteJson(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
@@ -32,19 +35,19 @@ public class ReportResource extends BaseResource {
 
     @Path("route")
     @GET
-    @Produces("text/csv")
+    @Produces(TEXT_CSV)
     public Response getRouteCsv(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Route.getCsv(getUserId(), deviceIds, groupIds,
                 JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header("Content-Disposition", "attachment; filename=route.csv")
+                .header(javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
                 .build();
     }
 
     @Path("events")
     @GET
-    @Produces("application/json")
+    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getEventsJson(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
@@ -55,20 +58,20 @@ public class ReportResource extends BaseResource {
 
     @Path("events")
     @GET
-    @Produces("text/csv")
+    @Produces(TEXT_CSV)
     public Response getEventsCsv(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Events.getCsv(getUserId(), deviceIds, groupIds,
                 types, JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header("Content-Disposition", "attachment; filename=events.csv")
+                .header(javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
                 .build();
     }
 
     @Path("summary")
     @GET
-    @Produces("application/json")
+    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getSummaryJson(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
@@ -78,13 +81,13 @@ public class ReportResource extends BaseResource {
 
     @Path("summary")
     @GET
-    @Produces("text/csv")
+    @Produces(TEXT_CSV)
     public Response getSummaryCsv(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Summary.getCsv(getUserId(), deviceIds, groupIds,
                 JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header("Content-Disposition", "attachment; filename=summary.csv")
+                .header(javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
                 .build();
     }
 
