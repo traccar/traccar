@@ -94,16 +94,7 @@ Ext.define('Traccar.view.BaseMap', {
         Ext.create('Ext.Component', {
             id:'popupComponent',
             renderTo: Ext.getBody(),
-            html:'<div id="popup" class="popover fade top in" style="position:relative; top: 0px; left: 0px; display: block;">' +
-                 '  <div class="arrow" style="left: 50%;"></div>' +
-                 '  <h3 class="popover-title">' +
-                 '    <span class="text-info">' +
-                 '      <strong id="popup-title">Title</strong>' +
-                 '    </span>' +
-                 '    <button id="popup-closer" type="button" class="close">×</button>' +
-                 '  </h3>' +
-                 '  <div id="popup-content" class="popover-content">Content</div>' +
-                 '</div>'
+            html:'<div id="popup"></div>'
         });
 
         var popupElement = document.getElementById('popup');
@@ -114,18 +105,18 @@ Ext.define('Traccar.view.BaseMap', {
                 duration: 250
             },
             positioning: 'bottom-center',
-            stopEvent: true,
-            offset: [0, -25]
+            stopEvent: false,
+            offset: [0, -150]
         });
         this.map.addOverlay(this.popupOverlay);
 
-        var closer = document.getElementById('popup-closer');
+        /*var closer = document.getElementById('popup-closer');
         var that = this;
         closer.onclick = function() {
             that.popupOverlay.setPosition(undefined);
             closer.blur();
             return false;
-        };
+        };*/
 
         this.map.on('click', function (e) {
             var feature = this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {

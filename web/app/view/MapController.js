@@ -290,7 +290,7 @@ Ext.define('Traccar.view.MapController', {
         if (record) {
             if (record instanceof Traccar.model.Device) {
                 this.fireEvent('selectDevice', record, false);
-                this.showPopup(feature);
+                this.showAttributesView(feature);
             } else {
                 this.fireEvent('selectReport', record, false);
             }
@@ -301,31 +301,26 @@ Ext.define('Traccar.view.MapController', {
         this.hidePopup();
     },
 
-    showPopup: function (feature) {
+    showAttributesView: function (feature) {
+        var coordinates = feature.getGeometry().getCoordinates();
+        var popupOverlay = this.getView().getPopupOverlay();
         var record = feature.get('record');
-        if (record) {
-            if (record instanceof Traccar.model.Device) {
-                var coordinates = feature.getGeometry().getCoordinates();
-                var popupOverlay = this.getView().getPopupOverlay();
 
-                var html = '';
-                var attributes = record.get('attributes');
-                if (attributes instanceof Object) {
-                    for (key in attributes) {
-                        if (attributes.hasOwnProperty(key)) {
-                            html += key + ': ' + attributes[key] + '<br>';
-                        }
-                    }
-                }
+        popupOverlay.setPosition(coordinates);
 
-                var title = document.getElementById('popup-title');
-                title.innerHTML = record.get('name');
-                var content = document.getElementById('popup-content');
-                content.innerHTML = html;
-                popupOverlay.setPosition(coordinates);
-
+        Ext.create('Traccar.view.PopupWindow', {
+            title: Strings.sharedAttributes,
+            modal: false,
+            width: 250,
+            height: 250,
+            resizable: false,
+            draggable: false,
+            renderTo: Ext.get('popup'),
+            items: {
+                xtype: 'attributesView',
+                record: record
             }
-        }
+        }).show();
     },
 
     hidePopup: function () {
