@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,19 +49,23 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d+),")                 // speed
             .number("(d+),")                     // course
             .groupBegin()
-            .groupBegin()
             .number("(d+),")                     // altitude
             .number("(d+),")                     // satellites
-            .groupEnd("?")
             .number("(d+),")                     // odometer
-            .groupBegin()
-            .number("(d),")                      // ignition
-            .number("(d),")                      // input 1
-            .number("(d),")                      // input 2
-            .number("(d),")                      // immobilizer
-            .number("(d),")                      // external battery status
+            .number("([01]),")                   // ignition
+            .number("([01]),")                   // input 1
+            .number("([01]),")                   // input 2
+            .number("([01]),")                   // immobilizer
+            .number("([01]),")                   // external battery status
             .number("(d+),")                     // gsm
-            .groupEnd("?")
+            .or()
+            .number("(d+.d),")                   // hdop
+            .number("(d+),")                     // altitude
+            .number("(d+),")                     // odometer
+            .number("([01],[01],[01],[01]),")    // input
+            .number("([01],[01],[01],[01]),")    // output
+            .number("(d+.?d*),")                 // adc 1
+            .number("(d+.?d*),")                 // adc 2
             .groupEnd("?")
             .any()
             .expression("([AV])")                // validity
@@ -105,16 +109,28 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
                 parser.next().replace(".", "")) / 10));
 
         position.setCourse(parser.nextDouble());
-        position.setAltitude(parser.nextDouble());
 
-        position.set(Position.KEY_SATELLITES, parser.next());
-        position.set(Position.KEY_ODOMETER, parser.next());
-        position.set(Position.KEY_IGNITION, parser.next());
-        position.set(Position.PREFIX_IO + 1, parser.next());
-        position.set(Position.PREFIX_IO + 2, parser.next());
-        position.set("immobilizer", parser.next());
-        position.set(Position.KEY_POWER, parser.next());
-        position.set(Position.KEY_GSM, parser.next());
+        if (parser.hasNext(9)) {
+            position.setAltitude(parser.nextDouble());
+            position.set(Position.KEY_SATELLITES, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_IGNITION, parser.next().equals("1"));
+            position.set(Position.PREFIX_IO + 1, parser.next());
+            position.set(Position.PREFIX_IO + 2, parser.next());
+            position.set("immobilizer", parser.next());
+            position.set(Position.KEY_POWER, parser.next());
+            position.set(Position.KEY_GSM, parser.next());
+        }
+
+        if (parser.hasNext(7)) {
+            position.set(Position.KEY_HDOP, parser.next());
+            position.setAltitude(parser.nextDouble());
+            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_INPUT, parser.next());
+            position.set(Position.KEY_OUTPUT, parser.next());
+            position.set(Position.PREFIX_ADC + 1, parser.next());
+            position.set(Position.PREFIX_ADC + 2, parser.next());
+        }
 
         position.setValid(parser.next().equals("A"));
 
