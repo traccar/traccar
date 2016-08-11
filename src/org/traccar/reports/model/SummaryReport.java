@@ -47,4 +47,15 @@ public class SummaryReport {
             this.maxSpeed = maxSpeed;
         }
     }
+
+    private long motorHours;
+    public long getMotorHours() {
+        return motorHours;
+    }
+    public void setMotorHours(long motorHours) {
+        this.motorHours = motorHours;
+    }
+    public void addMotorHours(long motorHours) {
+        this.motorHours += motorHours;
+    }
 }

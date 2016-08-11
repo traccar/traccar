@@ -33,6 +33,14 @@ public final class Summary {
                 if (previousPosition != null) {
                     result.addDistance(DistanceCalculator.distance(previousPosition.getLatitude(),
                             previousPosition.getLongitude(), position.getLatitude(), position.getLongitude()));
+                    if (position.getAttributes().get(Position.KEY_IGNITION) != null
+                            && Boolean.parseBoolean(position.getAttributes().get(Position.KEY_IGNITION).toString())
+                            && previousPosition.getAttributes().get(Position.KEY_IGNITION) != null
+                            && Boolean.parseBoolean(previousPosition.getAttributes()
+                                    .get(Position.KEY_IGNITION).toString())) {
+                        result.addMotorHours(position.getFixTime().getTime()
+                                - previousPosition.getFixTime().getTime());
+                    }
                 }
                 previousPosition = position;
                 speedSum += position.getSpeed();
