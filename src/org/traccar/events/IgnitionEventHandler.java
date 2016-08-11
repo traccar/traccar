@@ -17,22 +17,14 @@ package org.traccar.events;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
-import org.traccar.database.GeofenceManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-public class GeofenceEventHandler extends BaseEventHandler {
-
-    private GeofenceManager geofenceManager;
-
-    public GeofenceEventHandler() {
-        geofenceManager = Context.getGeofenceManager();
-    }
+public class IgnitionEventHandler extends BaseEventHandler {
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
@@ -44,28 +36,32 @@ public class GeofenceEventHandler extends BaseEventHandler {
             return null;
         }
 
-        List<Long> currentGeofences = geofenceManager.getCurrentDeviceGeofences(position);
-        List<Long> oldGeofences = new ArrayList<>();
-        if (device.getGeofenceIds() != null) {
-            oldGeofences.addAll(device.getGeofenceIds());
-        }
-        List<Long> newGeofences = new ArrayList<>(currentGeofences);
-        newGeofences.removeAll(oldGeofences);
-        oldGeofences.removeAll(currentGeofences);
+        Collection<Event> result = null;
 
-        device.setGeofenceIds(currentGeofences);
+        boolean ignition = false;
+        Object ignitionObject = position.getAttributes().get(Position.KEY_IGNITION);
+        if (ignitionObject != null && Boolean.parseBoolean(ignitionObject.toString())) {
+            ignition = true;
+        }
 
-        Collection<Event> events = new ArrayList<>();
-        for (long geofenceId : newGeofences) {
-            Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
-            event.setGeofenceId(geofenceId);
-            events.add(event);
+        boolean oldIgnition = false;
+        Object oldIgnitionObject = null;
+        Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+        if (lastPosition != null) {
+            oldIgnitionObject = lastPosition.getAttributes().get(Position.KEY_IGNITION);
         }
-        for (long geofenceId : oldGeofences) {
-            Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
-            event.setGeofenceId(geofenceId);
-            events.add(event);
+        if (oldIgnitionObject != null && Boolean.parseBoolean(oldIgnitionObject.toString())) {
+            oldIgnition = true;
         }
-        return events;
+
+        if (ignition && !oldIgnition) {
+            result = new ArrayList<>();
+            result.add(new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()));
+        } else if (!ignition && oldIgnition) {
+            result = new ArrayList<>();
+            result.add(new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()));
+        }
+        return result;
     }
+
 }
