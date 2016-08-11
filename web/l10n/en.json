@@ -121,6 +121,8 @@
     "eventGeofenceEnter": "Device has entered geofence",
     "eventGeofenceExit": "Device has exited geofence",
     "eventAlarm": "Alarms",
+    "eventIgnitionOn": "Ignition is ON",
+    "eventIgnitionOff": "Ignition is OFF",
     "alarm": "Alarm",
     "alarmSos": "SOS Alarm",
     "alarmVibration": "Vibration Alarm",
