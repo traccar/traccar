@@ -109,7 +109,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_SATELLITES, parser.next());
         position.set(Position.KEY_ODOMETER, parser.next());
-        position.set(Position.KEY_IGNITION, parser.next());
+        position.set(Position.KEY_IGNITION, parser.next().equals("1"));
         position.set(Position.PREFIX_IO + 1, parser.next());
         position.set(Position.PREFIX_IO + 2, parser.next());
         position.set("immobilizer", parser.next());

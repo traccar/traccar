@@ -98,7 +98,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         // Old format
         if (parser.hasNext(5)) {
             position.set(Position.KEY_ODOMETER, parser.nextInt());
-            position.set(Position.KEY_IGNITION, parser.nextInt());
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
             position.set(Position.KEY_INPUT, parser.nextInt() + parser.nextInt() << 1);
             position.set(Position.KEY_FUEL, parser.nextInt());
         }
@@ -106,7 +106,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
         // New format
         if (parser.hasNext(10)) {
             position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
-            position.set(Position.KEY_IGNITION, parser.nextInt());
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
             position.set(Position.KEY_INPUT, parser.nextInt());
             position.set(Position.KEY_RFID, parser.next());
             position.set(Position.KEY_ODOMETER, parser.nextInt());
