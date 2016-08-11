@@ -33,5 +33,8 @@ Ext.define('Traccar.model.ReportSummary', {
     }, {
         name: 'distance',
         type: 'float'
+    }, {
+        name: 'motorHours',
+        type: 'int'
     }]
 });

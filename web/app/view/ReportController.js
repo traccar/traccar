@@ -227,6 +227,11 @@ Ext.define('Traccar.view.ReportController', {
             dataIndex: 'maxSpeed',
             flex: 1,
             renderer: Traccar.AttributeFormatter.getFormatter('speed')
+        }, {
+            text: Strings.reportMotorHours,
+            dataIndex: 'motorHours',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('interval')
         }];
 
         if (newValue === 'route') {

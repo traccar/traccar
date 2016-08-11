@@ -34,6 +34,19 @@ Ext.define('Traccar.AttributeFormatter', {
         return Ext.getStore('DistanceUnits').formatValue(value, Traccar.app.getPreference('distanceUnit'));
     },
 
+    intervalFormatter: function (value) {
+        var days, hours, minutes, seconds;
+        seconds = Math.floor(value / 1000);
+        days = Math.floor(seconds / 86400);
+        hours = ('0' + Math.floor(seconds / 3600) % 24).slice(-2);
+        minutes = ('0' + Math.floor(seconds / 60) % 60).slice(-2);
+        seconds = ('0' + seconds % 60).slice(-2);
+        return (days > 0 ? days + Strings.sharedDayAbbreviation + ' ' : '')
+            + (hours > 0 ? hours + Strings.sharedHourAbbreviation + ' ' : '')
+            + (minutes > 0 ? minutes + Strings.sharedMinuteAbbreviation + ' ' : '')
+            + (seconds > 60 ? seconds : seconds + Strings.sharedSecondAbbreviation);
+    },
+
     defaultFormatter: function (value) {
         if (typeof value === 'number') {
             return Number(value.toFixed(Traccar.Style.numberPrecision));
@@ -58,6 +71,8 @@ Ext.define('Traccar.AttributeFormatter', {
             return this.courseFormatter;
         } else if (key === 'distance' || key === 'odometer') {
             return this.distanceFormatter;
+        } else if (key === 'interval') {
+            return this.intervalFormatter;
         } else {
             return this.defaultFormatter;
         }
