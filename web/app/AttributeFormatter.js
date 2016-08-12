@@ -35,8 +35,8 @@ Ext.define('Traccar.AttributeFormatter', {
     },
 
     hoursFormatter: function (value) {
-        var hours = value / 3600000;
-        return (hours.toFixed(2) + ' ' + Strings.sharedHourAbbreviation);
+        var hours = Math.round(value / 3600000);
+        return (hours + ' ' + Strings.sharedHourAbbreviation);
     },
 
     defaultFormatter: function (value) {
