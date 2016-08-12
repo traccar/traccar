@@ -26,7 +26,6 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
-import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
 import org.traccar.web.CsvBuilder;
@@ -43,12 +42,14 @@ public final class Summary {
         result.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
         Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
+            Position firstPosition = null;
             Position previousPosition = null;
             double speedSum = 0;
             for (Position position : positions) {
+                if (firstPosition == null) {
+                    firstPosition = position;
+                }
                 if (previousPosition != null) {
-                    result.addDistance(DistanceCalculator.distance(previousPosition.getLatitude(),
-                            previousPosition.getLongitude(), position.getLatitude(), position.getLongitude()));
                     if (position.getAttributes().get(Position.KEY_IGNITION) != null
                             && Boolean.parseBoolean(position.getAttributes().get(Position.KEY_IGNITION).toString())
                             && previousPosition.getAttributes().get(Position.KEY_IGNITION) != null
@@ -62,6 +63,16 @@ public final class Summary {
                 speedSum += position.getSpeed();
                 result.setMaxSpeed(position.getSpeed());
             }
+            if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
+                    && previousPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
+                result.setDistance(((Double) previousPosition.getAttributes().get(Position.KEY_ODOMETER)
+                        - (Double) firstPosition.getAttributes().get(Position.KEY_ODOMETER)) * 1000);
+            } else if (firstPosition.getAttributes().containsKey(Position.KEY_DISTANCE)
+                    && previousPosition.getAttributes().containsKey(Position.KEY_DISTANCE)) {
+                result.setDistance((Double) previousPosition.getAttributes().get(Position.KEY_DISTANCE)
+                        - (Double) firstPosition.getAttributes().get(Position.KEY_DISTANCE));
+            }
+
             result.setAverageSpeed(speedSum / positions.size());
             result.setDistance(new BigDecimal(result.getDistance()).setScale(2, RoundingMode.HALF_UP).doubleValue());
         }
