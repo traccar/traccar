@@ -74,7 +74,6 @@ public final class Summary {
             }
 
             result.setAverageSpeed(speedSum / positions.size());
-            result.setDistance(new BigDecimal(result.getDistance()).setScale(2, RoundingMode.HALF_UP).doubleValue());
         }
         return result;
     }
