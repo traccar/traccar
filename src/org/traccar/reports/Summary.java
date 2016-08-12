@@ -16,8 +16,6 @@
  */
 package org.traccar.reports;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
