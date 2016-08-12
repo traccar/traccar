@@ -26,10 +26,7 @@
     "sharedMute": "Mute",
     "sharedType": "Type",
     "sharedDistance": "Distance",
-    "sharedDayAbbreviation": "d",
     "sharedHourAbbreviation": "h",
-    "sharedMinuteAbbreviation": "m",
-    "sharedSecondAbbreviation": "s",
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",
@@ -146,5 +143,5 @@
     "reportDeviceName": "Device Name",
     "reportAverageSpeed": "Average Speed",
     "reportMaximumSpeed": "Maximum Speed",
-    "reportMotorHours": "Motor Hours"
+    "reportEngineHours": "Engine Hours"
 }

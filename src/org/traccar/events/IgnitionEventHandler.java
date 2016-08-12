@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com), Andrey Kunitsyn (abyss@fox5.ru)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public class IgnitionEventHandler extends BaseEventHandler {
 
         boolean ignition = false;
         Object ignitionObject = position.getAttributes().get(Position.KEY_IGNITION);
-        if (ignitionObject != null && Boolean.parseBoolean(ignitionObject.toString())) {
-            ignition = true;
+        if (ignitionObject != null && ignitionObject instanceof Boolean) {
+            ignition = (Boolean) ignitionObject;
         }
 
         boolean oldIgnition = false;
@@ -50,8 +50,8 @@ public class IgnitionEventHandler extends BaseEventHandler {
         if (lastPosition != null) {
             oldIgnitionObject = lastPosition.getAttributes().get(Position.KEY_IGNITION);
         }
-        if (oldIgnitionObject != null && Boolean.parseBoolean(oldIgnitionObject.toString())) {
-            oldIgnition = true;
+        if (oldIgnitionObject != null && oldIgnitionObject instanceof Boolean) {
+            oldIgnition = (Boolean) oldIgnitionObject;
         }
 
         if (ignition && !oldIgnition) {
