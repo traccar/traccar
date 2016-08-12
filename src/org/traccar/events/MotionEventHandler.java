@@ -35,14 +35,14 @@ public class MotionEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (!Context.getDeviceManager().isLatestPosition(position) || !position.getValid()) {
+        if (!Context.getIdentityManager().isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 
         Collection<Event> result = null;
         double speed = position.getSpeed();
         double oldSpeed = 0;
-        Position lastPosition = Context.getDeviceManager().getLastPosition(position.getDeviceId());
+        Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         if (lastPosition != null) {
             oldSpeed = lastPosition.getSpeed();
         }

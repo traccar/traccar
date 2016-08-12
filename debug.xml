@@ -49,6 +49,7 @@
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
     <entry key='event.alertHandler'>true</entry>
+    <entry key='event.ignitionHandler'>true</entry>
 
     <!--<entry key='event.forward.enable'>true</entry>
     <entry key='event.forward.url'>http://localhost/</entry>
