@@ -179,9 +179,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (hemisphereHandler != null) {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
-        if (distanceHandler != null) {
-            pipeline.addLast("distance", distanceHandler);
-        }
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
         }
@@ -198,6 +195,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (coordinatesHandler != null) {
             pipeline.addLast("coordinatesHandler", coordinatesHandler);
+        }
+
+        if (distanceHandler != null) {
+            pipeline.addLast("distance", distanceHandler);
         }
 
         if (Context.getDataManager() != null) {

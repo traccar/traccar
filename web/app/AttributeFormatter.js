@@ -61,7 +61,7 @@ Ext.define('Traccar.AttributeFormatter', {
             return this.speedFormatter;
         } else if (key === 'course') {
             return this.courseFormatter;
-        } else if (key === 'distance' || key === 'odometer') {
+        } else if (key === 'distance' || key === 'odometer' || key === 'totalDistance') {
             return this.distanceFormatter;
         } else if (key === 'hours') {
             return this.hoursFormatter;

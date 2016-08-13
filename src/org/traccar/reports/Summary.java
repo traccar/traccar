@@ -47,15 +47,14 @@ public final class Summary {
                 if (firstPosition == null) {
                     firstPosition = position;
                 }
-                if (previousPosition != null) {
-                    if (position.getAttributes().get(Position.KEY_IGNITION) != null
-                            && Boolean.parseBoolean(position.getAttributes().get(Position.KEY_IGNITION).toString())
-                            && previousPosition.getAttributes().get(Position.KEY_IGNITION) != null
-                            && Boolean.parseBoolean(previousPosition.getAttributes()
-                                    .get(Position.KEY_IGNITION).toString())) {
-                        result.addEngineHours(position.getFixTime().getTime()
-                                - previousPosition.getFixTime().getTime());
-                    }
+                if (previousPosition != null
+                        && position.getAttributes().get(Position.KEY_IGNITION) != null
+                        && Boolean.parseBoolean(position.getAttributes().get(Position.KEY_IGNITION).toString())
+                        && previousPosition.getAttributes().get(Position.KEY_IGNITION) != null
+                        && Boolean.parseBoolean(previousPosition.getAttributes()
+                                .get(Position.KEY_IGNITION).toString())) {
+                    result.addEngineHours(position.getFixTime().getTime()
+                            - previousPosition.getFixTime().getTime());
                 }
                 previousPosition = position;
                 speedSum += position.getSpeed();
@@ -65,10 +64,10 @@ public final class Summary {
                     && previousPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
                 result.setDistance(((Double) previousPosition.getAttributes().get(Position.KEY_ODOMETER)
                         - (Double) firstPosition.getAttributes().get(Position.KEY_ODOMETER)) * 1000);
-            } else if (firstPosition.getAttributes().containsKey(Position.KEY_DISTANCE)
-                    && previousPosition.getAttributes().containsKey(Position.KEY_DISTANCE)) {
-                result.setDistance((Double) previousPosition.getAttributes().get(Position.KEY_DISTANCE)
-                        - (Double) firstPosition.getAttributes().get(Position.KEY_DISTANCE));
+            } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
+                    && previousPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
+                result.setDistance((Double) previousPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)
+                        - (Double) firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE));
             }
 
             result.setAverageSpeed(speedSum / positions.size());
