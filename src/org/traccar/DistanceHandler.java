@@ -56,6 +56,7 @@ public class DistanceHandler extends BaseDataHandler {
             position.set(Position.KEY_DISTANCE, distance);
         }
         totalDistance += distance;
+        totalDistance = BigDecimal.valueOf(totalDistance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
 
         return position;
