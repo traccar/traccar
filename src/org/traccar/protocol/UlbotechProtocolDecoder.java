@@ -90,28 +90,28 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         int value = buf.readUnsignedByte();
 
         if (BitUtil.check(value, 0)) {
-            position.set("rapid-acceleration", true);
+            position.set("rapidAcceleration", true);
         }
         if (BitUtil.check(value, 1)) {
-            position.set("rough-braking", true);
+            position.set("roughBraking", true);
         }
         if (BitUtil.check(value, 2)) {
-            position.set("harsh-course", true);
+            position.set("harshCourse", true);
         }
         if (BitUtil.check(value, 3)) {
-            position.set("no-warm-up", true);
+            position.set("noWarmUp", true);
         }
         if (BitUtil.check(value, 4)) {
-            position.set("long-idle", true);
+            position.set("longIdle", true);
         }
         if (BitUtil.check(value, 5)) {
-            position.set("fatigue-driving", true);
+            position.set("fatigueDriving", true);
         }
         if (BitUtil.check(value, 6)) {
-            position.set("rough-terrain", true);
+            position.set("roughTerrain", true);
         }
         if (BitUtil.check(value, 7)) {
-            position.set("high-rpm", true);
+            position.set("highRpm", true);
         }
     }
 
@@ -215,8 +215,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_GEOFENCE:
-                    position.set("geofence-in", buf.readUnsignedInt());
-                    position.set("geofence-alarm", buf.readUnsignedInt());
+                    position.set("geofenceIn", buf.readUnsignedInt());
+                    position.set("geofenceAlarm", buf.readUnsignedInt());
                     break;
 
                 case DATA_OBD2:
@@ -224,7 +224,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_FUEL:
-                    position.set("fuel-consumption", buf.readUnsignedInt() / 10000.0);
+                    position.set("fuelConsumption", buf.readUnsignedInt() / 10000.0);
                     break;
 
                 case DATA_OBD2_ALARM:
@@ -255,7 +255,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                 case DATA_EVENT:
                     position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                     if (length > 1) {
-                        position.set("event-mask", buf.readUnsignedInt());
+                        position.set("eventMask", buf.readUnsignedInt());
                     }
                     break;
 

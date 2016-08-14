@@ -117,7 +117,7 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, parser.nextInt(2));
             position.set(Position.KEY_ODOMETER, parser.nextInt());
 
-            position.set("status-data", parser.next());
+            position.set("statusData", parser.next());
 
             return position;
 

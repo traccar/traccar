@@ -19,7 +19,6 @@ import java.util.Date;
 
 public class Position extends Message {
 
-    // Words separated by dashes (word-second-third)
     public static final String KEY_ORIGINAL = "raw";
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
@@ -57,8 +56,8 @@ public class Position extends Message {
     public static final String KEY_MOTION = "motion";
     public static final String KEY_ARMED = "armed";
 
-    public static final String KEY_OBD_SPEED = "obd-speed";
-    public static final String KEY_OBD_ODOMETER = "obd-odometer";
+    public static final String KEY_OBD_SPEED = "obdSpeed";
+    public static final String KEY_OBD_ODOMETER = "obdOdometer";
 
     public static final String KEY_RESULT = "result";
 

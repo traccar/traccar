@@ -329,11 +329,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.next());
         position.set(Position.KEY_OBD_SPEED, parser.next());
         position.set(Position.PREFIX_TEMP + 1, parser.next());
-        position.set("fuel-consumption", parser.next());
-        position.set("dtcs-cleared-distance", parser.next());
-        position.set("odb-connect", parser.next());
-        position.set("dtcs-number", parser.next());
-        position.set("dtcs-codes", parser.next());
+        position.set("fuelConsumption", parser.next());
+        position.set("dtcsClearedDistance", parser.next());
+        position.set("odbConnect", parser.next());
+        position.set("dtcsNumber", parser.next());
+        position.set("dtcsCodes", parser.next());
         position.set(Position.KEY_THROTTLE, parser.next());
         position.set(Position.KEY_FUEL, parser.next());
         position.set(Position.KEY_OBD_ODOMETER, parser.next());

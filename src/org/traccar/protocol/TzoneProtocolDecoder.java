@@ -174,8 +174,8 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         if (blockLength > 0) {
 
-            position.set("passengers-on", buf.readUnsignedMedium());
-            position.set("passengers-off", buf.readUnsignedMedium());
+            position.set("passengersOn", buf.readUnsignedMedium());
+            position.set("passengersOff", buf.readUnsignedMedium());
 
         }
 
