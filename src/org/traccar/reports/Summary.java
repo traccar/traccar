@@ -16,6 +16,8 @@
  */
 package org.traccar.reports;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -34,7 +36,7 @@ public final class Summary {
     private Summary() {
     }
 
-    private static SummaryReport calculateGeneralResult(long deviceId, Date from, Date to) throws SQLException {
+    private static SummaryReport calculateSummaryResult(long deviceId, Date from, Date to) throws SQLException {
         SummaryReport result = new SummaryReport();
         result.setDeviceId(deviceId);
         result.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
@@ -62,15 +64,20 @@ public final class Summary {
             }
             if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
                     && previousPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-                result.setDistance(((Double) previousPosition.getAttributes().get(Position.KEY_ODOMETER)
-                        - (Double) firstPosition.getAttributes().get(Position.KEY_ODOMETER)) * 1000);
+                result.setDistance((Integer.parseInt(previousPosition.getAttributes().get(Position.KEY_ODOMETER)
+                        .toString())
+                        - Integer.parseInt(firstPosition.getAttributes().get(Position.KEY_ODOMETER).toString()))
+                        * 1000);
             } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                     && previousPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-                result.setDistance((Double) previousPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)
-                        - (Double) firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE));
+                result.setDistance(((Number) previousPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE))
+                        .doubleValue()
+                        - ((Number) firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue());
             }
-
-            result.setAverageSpeed(speedSum / positions.size());
+            result.setDistance(new BigDecimal(result.getDistance())
+                    .setScale(2, RoundingMode.HALF_EVEN).doubleValue());
+            result.setAverageSpeed(new BigDecimal(speedSum / positions.size())
+                    .setScale(3, RoundingMode.HALF_EVEN).doubleValue());
         }
         return result;
     }
@@ -80,7 +87,7 @@ public final class Summary {
         JsonArrayBuilder json = Json.createArrayBuilder();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            json.add(JsonConverter.objectToJson(calculateGeneralResult(deviceId, from, to)));
+            json.add(JsonConverter.objectToJson(calculateSummaryResult(deviceId, from, to)));
         }
         return json.build().toString();
     }
@@ -91,7 +98,7 @@ public final class Summary {
         csv.addHeaderLine(new SummaryReport());
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            csv.addLine(calculateGeneralResult(deviceId, from, to));
+            csv.addLine(calculateSummaryResult(deviceId, from, to));
         }
         return csv.build();
     }
