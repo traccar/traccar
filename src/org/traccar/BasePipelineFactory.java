@@ -132,9 +132,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
                     Context.getLocationProvider(), Context.getConfig().getBoolean("location.processInvalidPositions"));
         }
 
-        if (Context.getConfig().getBoolean("distance.enable")) {
-            distanceHandler = new DistanceHandler();
-        }
+        distanceHandler = new DistanceHandler();
 
         if (Context.getConfig().hasKey("location.latitudeHemisphere")
                 || Context.getConfig().hasKey("location.longitudeHemisphere")) {
@@ -181,9 +179,6 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (hemisphereHandler != null) {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
-        if (distanceHandler != null) {
-            pipeline.addLast("distance", distanceHandler);
-        }
         if (reverseGeocoderHandler != null) {
             pipeline.addLast("geocoder", reverseGeocoderHandler);
         }
@@ -200,6 +195,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (coordinatesHandler != null) {
             pipeline.addLast("coordinatesHandler", coordinatesHandler);
+        }
+
+        if (distanceHandler != null) {
+            pipeline.addLast("distance", distanceHandler);
         }
 
         if (Context.getDataManager() != null) {

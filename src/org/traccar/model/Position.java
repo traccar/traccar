@@ -49,6 +49,7 @@ public class Position extends Message {
     public static final String KEY_IP = "ip";
     public static final String KEY_ARCHIVE = "archive";
     public static final String KEY_DISTANCE = "distance";
+    public static final String KEY_TOTAL_DISTANCE = "totalDistance";
     public static final String KEY_RPM = "rpm";
     public static final String KEY_VIN = "vin";
     public static final String KEY_APPROXIMATE = "approximate";
