@@ -64,7 +64,7 @@ Ext.define('Traccar.view.NotificationsController', {
         var record = this.getView().getStore().getAt(rowIndex);
         Ext.Ajax.request({
             scope: this,
-            url: '/api/users/notifications',
+            url: 'api/users/notifications',
             jsonData: {
                 userId: this.userId,
                 type: record.getData().type,

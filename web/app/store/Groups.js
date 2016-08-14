@@ -20,7 +20,7 @@ Ext.define('Traccar.store.Groups', {
 
     proxy: {
         type: 'rest',
-        url: '/api/groups',
+        url: 'api/groups',
         writer: {
             writeAllFields: true
         }

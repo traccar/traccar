@@ -20,6 +20,6 @@ Ext.define('Traccar.store.Notifications', {
 
     proxy: {
         type: 'rest',
-        url: '/api/users/notifications'
+        url: 'api/users/notifications'
     }
 });

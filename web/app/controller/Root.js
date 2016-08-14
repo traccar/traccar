@@ -33,7 +33,7 @@ Ext.define('Traccar.controller.Root', {
     onLaunch: function () {
         Ext.Ajax.request({
             scope: this,
-            url: '/api/server',
+            url: 'api/server',
             callback: this.onServerReturn
         });
     },
@@ -44,7 +44,7 @@ Ext.define('Traccar.controller.Root', {
             Traccar.app.setServer(Ext.decode(response.responseText));
             Ext.Ajax.request({
                 scope: this,
-                url: '/api/session',
+                url: 'api/session',
                 callback: this.onSessionReturn
             });
         } else {
@@ -107,8 +107,8 @@ Ext.define('Traccar.controller.Root', {
 
     asyncUpdate: function (first) {
         var protocol, socket, self = this;
-        protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        socket = new WebSocket(protocol + '//' + window.location.host + '/api/socket');
+        protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        socket = new WebSocket(protocol + '//' + window.location.host + window.location.pathname + 'api/socket');
 
         socket.onclose = function (event) {
             self.asyncUpdate(false);

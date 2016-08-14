@@ -20,7 +20,7 @@ Ext.define('Traccar.store.ReportSummary', {
 
     proxy: {
         type: 'rest',
-        url: '/api/reports/summary',
+        url: 'api/reports/summary',
         headers: {
             'Accept': 'application/json'
         }

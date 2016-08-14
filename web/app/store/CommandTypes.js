@@ -22,7 +22,7 @@ Ext.define('Traccar.store.CommandTypes', {
         'beforeload' : function (store) {
             var proxy;
             proxy = store.getProxy();
-            proxy.setUrl('/api/commandtypes?deviceId' + proxy.extraParams.deviceId);
+            proxy.setUrl('api/commandtypes?deviceId' + proxy.extraParams.deviceId);
         }
     },
 
