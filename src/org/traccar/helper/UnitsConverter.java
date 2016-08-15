@@ -17,23 +17,36 @@ package org.traccar.helper;
 
 public final class UnitsConverter {
 
+    private static final double KNOTS_TO_KPH_RATIO = 0.539957;
+    private static final double KNOTS_TO_MPH_RATIO = 0.868976;
+    private static final double KNOTS_TO_MPS_RATIO = 1.94384;
+    private static final double KNOTS_TO_CPS_RATIO = 0.0194384449;
+
     private UnitsConverter() {
     }
 
     public static double knotsFromKph(double value) { // km/h
-        return value * 0.539957;
+        return value * KNOTS_TO_KPH_RATIO;
+    }
+
+    public static double kphFromKnots(double value) {
+        return value / KNOTS_TO_KPH_RATIO;
     }
 
     public static double knotsFromMph(double value) {
-        return value * 0.868976;
+        return value * KNOTS_TO_MPH_RATIO;
+    }
+
+    public static double mphFromKnots(double value) {
+        return value / KNOTS_TO_MPH_RATIO;
     }
 
     public static double knotsFromMps(double value) { // m/s
-        return value * 1.94384;
+        return value * KNOTS_TO_MPS_RATIO;
     }
 
     public static double knotsFromCps(double value) { // cm/s
-        return value * 0.0194384449;
+        return value * KNOTS_TO_CPS_RATIO;
     }
 
 }

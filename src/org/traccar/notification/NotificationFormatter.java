@@ -15,10 +15,14 @@
  */
 package org.traccar.notification;
 
+import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.Formatter;
 import java.util.Locale;
 
 import org.traccar.Context;
+import org.traccar.helper.Log;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -55,7 +59,7 @@ public final class NotificationFormatter {
 
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "%1$s: exceeds the speed";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "Device: %1$s%n"
-            + "Exceeds the speed: %5$f%n"
+            + "Exceeds the speed: %5$s%n"
             + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
@@ -161,7 +165,7 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_DEVICE_OVERSPEED:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED, device.getName(), position.getFixTime(),
-                        position.getLatitude(), position.getLongitude(), position.getSpeed());
+                        position.getLatitude(), position.getLongitude(), formatSpeed(userId, position.getSpeed()));
                 break;
             case Event.TYPE_GEOFENCE_ENTER:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_ENTER, device.getName(), position.getFixTime(),
@@ -192,6 +196,26 @@ public final class NotificationFormatter {
         }
         String result = formatter.toString();
         formatter.close();
+        return result;
+    }
+
+    private static String formatSpeed(long userId, double speed) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        String result = df.format(speed) + " kn";
+        try {
+            switch (Context.getDataManager().getUser(userId).getSpeedUnit()) {
+            case "kmh":
+                result = df.format(UnitsConverter.kphFromKnots(speed)) + " km/h";
+                break;
+            case "mph":
+                result = df.format(UnitsConverter.mphFromKnots(speed)) + " mph";
+                break;
+            default:
+                break;
+            }
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
         return result;
     }
 }
