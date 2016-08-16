@@ -156,7 +156,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             Parser parser = new Parser(PATTERN_SIMPLE, status);
             if (parser.matches()) {
 
-                position.set(Position.KEY_ALARM, parser.next());
+                position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
 
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next(), id);
                 if (deviceSession == null) {
@@ -217,7 +217,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + 1, parser.next());
                 position.set(Position.PREFIX_ADC + 2, parser.next());
                 position.set(Position.PREFIX_ADC + 3, parser.next());
-                position.set(Position.KEY_ALARM, parser.next());
+                position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
 
             }
         }
@@ -337,9 +337,40 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, Integer.parseInt(battery));
         }
 
-        position.set(Position.KEY_ALARM, parser.next());
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
 
         return position;
+    }
+
+    private String decodeAlarm(String value) {
+        switch (value) {
+        case "SOS":
+        case "Help":
+            return Position.ALARM_SOS;
+        case "Over Speed":
+        case "OverSpeed":
+            return Position.ALARM_OVERSPEED;
+        case "LowSpeed":
+            return Position.ALARM_LOW_SPEED;
+        case "Low Battery":
+        case "LowBattery":
+            return Position.ALARM_LOW_BATTERY;
+        case "VIB":
+            return Position.ALARM_VIBRATION;
+        case "Move in":
+        case "Geo in":
+        case "Geo1 in":
+        case "Geo2 in":
+            return Position.ALARM_GEOFENCE_ENTER;
+        case "Move out":
+        case "Geo out":
+        case "Geo1 out":
+        case "Geo2 out":
+            return Position.ALARM_GEOFENCE_EXIT;
+        default:
+            break;
+        }
+        return null;
     }
 
     @Override
