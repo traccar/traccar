@@ -231,7 +231,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(flags, 1)) {
-            new FloatReader().readFloat(buf); // fuel consumtion
+            position.set(Position.KEY_FUEL_CONSUMPTION, new FloatReader().readFloat(buf));
             position.set("hours", new FloatReader().readFloat(buf));
             position.set("tank", buf.readUnsignedByte() * 0.4);
         }

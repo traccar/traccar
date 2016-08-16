@@ -39,6 +39,8 @@ public class Position extends Message {
     public static final String KEY_LAC = "lac";
     public static final String KEY_CID = "cid";
     public static final String KEY_FUEL = "fuel";
+    public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption";
+    public static final String KEY_FUEL_INSTANT_CONSUMPTION = "fuelInstantConsumption";
     public static final String KEY_RFID = "rfid";
     public static final String KEY_VERSION = "version";
     public static final String KEY_TYPE = "type";
