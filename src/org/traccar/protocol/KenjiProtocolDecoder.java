@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -49,6 +50,23 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(int value) {
+        if (BitUtil.check(value, 2)) {
+            return Position.ALARM_SOS;
+        }
+        if (BitUtil.check(value, 4)) {
+            return Position.ALARM_LOW_BATTERY;
+        }
+        if (BitUtil.check(value, 6)) {
+            return Position.ALARM_MOVEMENT;
+        }
+        if (BitUtil.check(value, 1) || BitUtil.check(value, 10) || BitUtil.check(value, 11)) {
+            return Position.ALARM_VIBRATION;
+        }
+
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -67,7 +85,7 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, parser.nextInt(16));
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt(16)));
         position.set(Position.KEY_OUTPUT, parser.nextInt(16));
         position.set(Position.KEY_INPUT, parser.nextInt(16));
 

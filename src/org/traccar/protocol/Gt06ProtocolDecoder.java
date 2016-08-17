@@ -180,7 +180,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         case 0x0F:
             return Position.ALARM_LOW_BATTERY;
         case 0x11:
-            return Position.ALARM_LOW_BATTERY;
+            return Position.ALARM_POWER_OFF;
         default:
             break;
         }
