@@ -64,6 +64,23 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(String value) {
+        if (value != null) {
+            switch (value) {
+            case "help me!":
+                return Position.ALARM_SOS;
+            case "low battery":
+                return Position.ALARM_LOW_BATTERY;
+            case "move!":
+            case "moved!":
+                return Position.ALARM_MOVEMENT;
+            default:
+                break;
+            }
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -99,7 +116,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         position.set("signal", parser.next());
-        position.set(Position.KEY_ALARM, parser.next());
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
