@@ -109,7 +109,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.next());
         position.set("coolant", parser.next());
         position.set(Position.KEY_FUEL, parser.next());
-        position.set("consumption", parser.next());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         position.set(Position.PREFIX_TEMP + 1, parser.next());
         position.set(Position.KEY_CHARGE, parser.next());
         position.set("tpl", parser.next());

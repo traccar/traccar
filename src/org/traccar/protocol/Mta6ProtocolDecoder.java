@@ -159,7 +159,8 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(flags, 4)) {
-                    position.set(Position.KEY_FUEL, buf.readUnsignedInt() + "|" + buf.readUnsignedInt());
+                    position.set(Position.KEY_FUEL_CONSUMPTION + "Accumulator1", buf.readUnsignedInt());
+                    position.set(Position.KEY_FUEL_CONSUMPTION + "Accumulator2", buf.readUnsignedInt());
                     position.set("hours1", buf.readUnsignedShort());
                     position.set("hours2", buf.readUnsignedShort());
                 }
@@ -231,7 +232,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(flags, 1)) {
-            new FloatReader().readFloat(buf); // fuel consumtion
+            position.set(Position.KEY_FUEL_CONSUMPTION, new FloatReader().readFloat(buf));
             position.set("hours", new FloatReader().readFloat(buf));
             position.set("tank", buf.readUnsignedByte() * 0.4);
         }

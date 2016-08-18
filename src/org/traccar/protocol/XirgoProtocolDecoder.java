@@ -75,7 +75,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // satellites
             .number("(d+.?d*),")                 // hdop
             .number("(d+.?d*),")                 // odometer
-            .number("d+.?d*,")                   // fuel consumption
+            .number("(d+.?d*),")                 // fuel consumption
             .number("(d+.d+),")                  // battery
             .number("(d+),")                     // gsm
             .number("(d+),")                     // gps
@@ -134,6 +134,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
         if (newFormat) {
             position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         }
 
         position.set(Position.KEY_BATTERY, parser.next());
