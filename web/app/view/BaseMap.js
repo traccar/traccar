@@ -110,14 +110,6 @@ Ext.define('Traccar.view.BaseMap', {
         });
         this.map.addOverlay(this.popupOverlay);
 
-        /*var closer = document.getElementById('popup-closer');
-        var that = this;
-        closer.onclick = function() {
-            that.popupOverlay.setPosition(undefined);
-            closer.blur();
-            return false;
-        };*/
-
         this.map.on('click', function (e) {
             var feature = this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
                 this.fireEvent('selectFeature', feature);
