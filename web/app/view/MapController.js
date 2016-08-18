@@ -23,7 +23,8 @@ Ext.define('Traccar.view.MapController', {
             controller: {
                 '*': {
                     selectDevice: 'selectDevice',
-                    selectReport: 'selectReport'
+                    selectReport: 'selectReport',
+                    clickDevice: 'clickDevice'
                 }
             },
             store: {
@@ -285,12 +286,22 @@ Ext.define('Traccar.view.MapController', {
         this.selectMarker(this.reportMarkers[position.get('id')], center);
     },
 
+    clickDevice: function (feature) {
+        var record, attributes;
+
+        record = feature.get('record');
+        attributes = record.get('attributes');
+        if (Object.getOwnPropertyNames(attributes).length) {
+            this.showAttributesView(feature);
+        }
+    },
+
     selectFeature: function (feature) {
         var record = feature.get('record');
         if (record) {
             if (record instanceof Traccar.model.Device) {
                 this.fireEvent('selectDevice', record, false);
-                this.showAttributesView(feature);
+                this.fireEvent('clickDevice', feature);
             } else {
                 this.fireEvent('selectReport', record, false);
             }
@@ -302,19 +313,16 @@ Ext.define('Traccar.view.MapController', {
     },
 
     showAttributesView: function (feature) {
-        var coordinates = feature.getGeometry().getCoordinates();
-        var popupOverlay = this.getView().getPopupOverlay();
-        var record = feature.get('record');
+        var coordinates, popupOverlay, record;
+
+        coordinates = feature.getGeometry().getCoordinates();
+        popupOverlay = this.getView().getPopupOverlay();
+        record = feature.get('record');
 
         popupOverlay.setPosition(coordinates);
 
         Ext.create('Traccar.view.PopupWindow', {
-            title: Strings.sharedAttributes,
-            modal: false,
-            width: 250,
-            height: 250,
-            resizable: false,
-            draggable: false,
+            title: record.get('name') + ' ' + Strings.sharedAttributes,
             renderTo: Ext.get('popup'),
             items: {
                 xtype: 'attributesView',

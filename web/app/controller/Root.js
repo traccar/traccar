@@ -73,6 +73,7 @@ Ext.define('Traccar.controller.Root', {
     },
 
     loadApp: function () {
+        var attribution;
         Ext.getStore('Groups').load();
         Ext.getStore('Geofences').load();
         Ext.getStore('Devices').load({
@@ -81,7 +82,7 @@ Ext.define('Traccar.controller.Root', {
                 this.asyncUpdate(true);
             }
         });
-        var attribution = Ext.get('attribution');
+        attribution = Ext.get('attribution');
         if (attribution) {
             attribution.remove();
         }

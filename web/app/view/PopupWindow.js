@@ -16,35 +16,26 @@
 
 Ext.define('Traccar.view.PopupWindow', {
     extend: 'Ext.window.Window',
-    xtype: 'PopupWindowView',
+    xtype: 'popupWindowView',
     title: 'Window',
     closable: true,
-    width: 250,
-    height: 250,
-    cmpCls: 'x-window-default-resizable',
+    modal: false,
+    resizable: false,
+    draggable: false,
+    width: Traccar.Style.popupWindowWidth,
+    height: Traccar.Style.popupWindowHeight,
+    componentCls: 'x-window-default-resizable',
 
     initComponent: function () {
-        //get the original template
         var originalTpl = Ext.XTemplate.getTpl(this, 'renderTpl');
 
-        //add the triangle div (or img, span, etc.)
         this.renderTpl = new Ext.XTemplate([
-            originalTpl.html,         //the html from the original tpl
+            originalTpl.html,
             '<div class="popup-triangle"></div>',
-            originalTpl.initialConfig //the config options from the original tpl
+            originalTpl.initialConfig
         ]);
 
         this.callParent();
-    },
-
-    beforeSetPosition: function () {
-        //shift the menu down from its original position
-        var pos = this.callParent(arguments);
-
-        if (pos) {
-            //pos.y += 5; //the offset (should be the height of your triangle)
-        }
-
-        return pos;
     }
+
 });

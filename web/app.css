@@ -68,11 +68,6 @@
     to { transform: rotate(359deg); }
 }
 
-
-/***************************
-    Map Overlay Popup
-****************************/
-
 .popup-triangle {
     height: 0;
     width: 0;

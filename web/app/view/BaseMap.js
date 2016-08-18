@@ -28,12 +28,12 @@ Ext.define('Traccar.view.BaseMap', {
         return this.mapView;
     },
 
-    getPopupOverlay: function() {
+    getPopupOverlay: function () {
         return this.popupOverlay;
     },
-    
+
     initMap: function () {
-        var user, server, layer, type, bingKey, lat, lon, zoom, target;
+        var user, server, layer, type, bingKey, lat, lon, zoom, target, popupElement;
 
         user = Traccar.app.getUser();
         server = Traccar.app.getServer();
@@ -87,17 +87,17 @@ Ext.define('Traccar.view.BaseMap', {
         });
 
         target = this.map.getTargetElement();
-        this.map.on('pointermove', function(evt) {
+        this.map.on('pointermove', function (evt) {
             target.style.cursor = this.hasFeatureAtPixel(evt.pixel) ? 'pointer' : '';
         });
 
         Ext.create('Ext.Component', {
-            id:'popupComponent',
+            id: 'popupComponent',
             renderTo: Ext.getBody(),
-            html:'<div id="popup"></div>'
+            html: '<div id="popup"></div>'
         });
 
-        var popupElement = document.getElementById('popup');
+        popupElement = document.getElementById('popup');
         this.popupOverlay = new ol.Overlay({
             element: popupElement,
             autoPan: true,

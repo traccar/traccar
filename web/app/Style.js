@@ -22,6 +22,9 @@ Ext.define('Traccar.Style', {
     windowWidth: 640,
     windowHeight: 480,
 
+    popupWindowWidth: 250,
+    popupWindowHeight: 250,
+
     dateTimeFormat24: 'Y-m-d H:i:s',
     dateTimeFormat12: 'Y-m-d g:i:s a',
     timeFormat24: 'H:i',
