@@ -189,7 +189,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, dateBuilder.getDate());
 
             position.set(Position.KEY_ODOMETER, parser.nextInt());
-            parser.next();                                                          // instant fuel consumption
+            parser.next(); // instant fuel consumption
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
             position.set(Position.KEY_HOURS, parser.next());
             position.set(Position.KEY_OBD_SPEED, parser.next());
