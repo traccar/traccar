@@ -318,7 +318,8 @@ Ext.define('Traccar.view.MapController', {
             renderTo: Ext.get('popup'),
             items: {
                 xtype: 'attributesView',
-                record: record
+                record: record,
+                tbar: null
             }
         }).show();
     },

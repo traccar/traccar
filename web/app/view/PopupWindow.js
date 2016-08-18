@@ -17,10 +17,11 @@
 Ext.define('Traccar.view.PopupWindow', {
     extend: 'Ext.window.Window',
     xtype: 'PopupWindowView',
-    title: 'Windows',
+    title: 'Window',
     closable: true,
     width: 250,
     height: 250,
+    cmpCls: 'x-window-default-resizable',
 
     initComponent: function () {
         //get the original template
