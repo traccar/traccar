@@ -55,6 +55,39 @@ Ext.define('Traccar.view.CommandDialog', {
                 valueField: 'factor'
             }]
         }, {
+            xtype: 'fieldcontainer',
+            reference: 'paramOutputControl',
+            name: 'attributes',
+            hidden: true,
+
+            items: [{
+                xtype: 'numberfield',
+                fieldLabel: Strings.commandIndex,
+                name: 'index',
+                allowBlank: false
+            }, {
+                xtype: 'textfield',
+                fieldLabel: Strings.commandData,
+                name: 'data'
+            }]
+        }, {
+            xtype: 'fieldcontainer',
+            reference: 'paramSendSmsUssd',
+            name: 'attributes',
+            hidden: true,
+
+            items: [{
+                xtype: 'textfield',
+                fieldLabel: Strings.commandPhoneNumber,
+                name: 'phoneNumber'
+            }, {
+                xtype: 'textfield',
+                reference: 'paramSmsMessage',
+                fieldLabel: Strings.commandMessage,
+                name: 'message',
+                hidden: true
+            }]
+        }, {
             xtype: 'textfield',
             reference: 'paramCustom',
             fieldLabel: Strings.commandCustom,
