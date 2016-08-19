@@ -21,12 +21,18 @@ Ext.define('Traccar.view.CommandDialogController', {
     onSelect: function (selected) {
         this.lookupReference('paramPositionPeriodic').setHidden(
             selected.getValue() !== 'positionPeriodic');
+        this.lookupReference('paramOutputControl').setHidden(
+            selected.getValue() !== 'outputControl');
+        this.lookupReference('paramSendSmsUssd').setHidden(
+            selected.getValue() !== 'sendSms' && selected.getValue() !== 'sendUssd');
+        this.lookupReference('paramSmsMessage').setHidden(
+            selected.getValue() !== 'sendSms');
         this.lookupReference('paramCustom').setHidden(
             selected.getValue() !== 'custom');
     },
 
     onSendClick: function (button) {
-        var attributes, value, record, form;
+        var attributes, value, record, form, index, phoneNumber;
 
         form = button.up('window').down('form');
         form.updateRecord();
@@ -39,6 +45,35 @@ Ext.define('Traccar.view.CommandDialogController', {
 
             record.set('attributes', {
                 frequency: value
+            });
+        }
+
+        if (record.get('type') === 'outputControl') {
+            attributes = this.lookupReference('paramOutputControl');
+            index = attributes.down('numberfield[name="index"]').getValue();
+            value = attributes.down('textfield[name="data"]').getValue();
+
+            record.set('attributes', {
+                index: index,
+                data: value
+            });
+        }
+
+        if (record.get('type') === 'sendUssd') {
+            attributes = this.lookupReference('paramSendSmsUssd');
+            phoneNumber = attributes.down('textfield[name="phoneNumber"]').getValue();
+            record.set('attributes', {
+                phoneNumber: phoneNumber
+            });
+        }
+
+        if (record.get('type') === 'sendSms') {
+            attributes = this.lookupReference('paramSendSmsUssd');
+            phoneNumber = attributes.down('textfield[name="phoneNumber"]').getValue();
+            value = attributes.down('textfield[name="message"]').getValue();
+            record.set('attributes', {
+                phoneNumber: phoneNumber,
+                message: value
             });
         }
 

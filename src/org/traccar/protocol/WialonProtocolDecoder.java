@@ -24,6 +24,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -171,6 +172,18 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 return positions;
             }
 
+        } else if (sentence.startsWith("#M#")) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession != null) {
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                getLastLocation(position, new Date());
+                position.setValid(false);
+                position.set(Position.KEY_RESULT, sentence.substring(sentence.indexOf('#', 1) + 1));
+                sendResponse(channel, "#AM#", 1);
+                return position;
+            }
         }
 
         return null;
