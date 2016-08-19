@@ -16,8 +16,6 @@
  */
 package org.traccar.reports;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
@@ -62,22 +60,8 @@ public final class Summary {
                 speedSum += position.getSpeed();
                 result.setMaxSpeed(position.getSpeed());
             }
-            if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
-                    && previousPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-                result.setDistance((Integer.parseInt(previousPosition.getAttributes().get(Position.KEY_ODOMETER)
-                        .toString())
-                        - Integer.parseInt(firstPosition.getAttributes().get(Position.KEY_ODOMETER).toString()))
-                        * 1000);
-            } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
-                    && previousPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-                result.setDistance(((Number) previousPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE))
-                        .doubleValue()
-                        - ((Number) firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue());
-            }
-            result.setDistance(new BigDecimal(result.getDistance())
-                    .setScale(2, RoundingMode.HALF_EVEN).doubleValue());
-            result.setAverageSpeed(new BigDecimal(speedSum / positions.size())
-                    .setScale(3, RoundingMode.HALF_EVEN).doubleValue());
+            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition));
+            result.setAverageSpeed(speedSum / positions.size());
         }
         return result;
     }

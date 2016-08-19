@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import org.traccar.api.BaseResource;
 import org.traccar.reports.Events;
 import org.traccar.reports.Summary;
+import org.traccar.reports.Trips;
 import org.traccar.reports.Route;
 import org.traccar.web.JsonConverter;
 
@@ -88,6 +89,28 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         return Response.ok(Summary.getCsv(getUserId(), deviceIds, groupIds,
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
+                .build();
+    }
+
+    @Path("trips")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTripsJson(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+        return Response.ok(Trips.getJson(getUserId(), deviceIds, groupIds,
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+    }
+
+    @Path("trips")
+    @GET
+    @Produces(TEXT_CSV)
+    public Response getTripsCsv(
+            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+        return Response.ok(Trips.getCsv(getUserId(), deviceIds, groupIds,
                 JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
                 .build();

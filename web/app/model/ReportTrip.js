@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.model.ReportSummary', {
+Ext.define('Traccar.model.ReportTrip', {
     extend: 'Ext.data.Model',
     identifier: 'negative',
 
@@ -35,7 +35,21 @@ Ext.define('Traccar.model.ReportSummary', {
         name: 'distance',
         type: 'float'
     }, {
-        name: 'engineHours',
+        name: 'duration',
         type: 'int'
+    }, {
+        name: 'startTime',
+        type: 'date',
+        dateFormat: 'c'
+    }, {
+        name: 'startAddress',
+        type: 'string'
+    }, {
+        name: 'endTime',
+        type: 'date',
+        dateFormat: 'c'
+    }, {
+        name: 'endAddress',
+        type: 'string'
     }]
 });

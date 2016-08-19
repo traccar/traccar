@@ -39,6 +39,13 @@ Ext.define('Traccar.AttributeFormatter', {
         return (hours + ' ' + Strings.sharedHourAbbreviation);
     },
 
+    durationFormatter: function (value) {
+        var hours, minutes;
+        hours = Math.floor(value / 3600000);
+        minutes = Math.round((value % 3600000) / 60000);
+        return (hours + ' ' + Strings.sharedHourAbbreviation + ' ' + minutes + ' ' + Strings.sharedMinuteAbbreviation);
+    },
+
     defaultFormatter: function (value) {
         if (typeof value === 'number') {
             return Number(value.toFixed(Traccar.Style.numberPrecision));
@@ -65,6 +72,8 @@ Ext.define('Traccar.AttributeFormatter', {
             return this.distanceFormatter;
         } else if (key === 'hours') {
             return this.hoursFormatter;
+        } else if (key === 'duration') {
+            return this.durationFormatter;
         } else {
             return this.defaultFormatter;
         }
