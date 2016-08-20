@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Andrey Kunitsyn (abyss@fox5.ru)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +15,15 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.store.ReportTypes', {
+Ext.define('Traccar.store.ReportTrips', {
     extend: 'Ext.data.Store',
-    fields: ['key', 'name'],
+    model: 'Traccar.model.ReportTrip',
 
-    data: [{
-        key: 'route',
-        name: Strings.reportRoute
-    }, {
-        key: 'events',
-        name: Strings.reportEvents
-    }, {
-        key: 'trips',
-        name: Strings.reportTrips
-    }, {
-        key: 'summary',
-        name: Strings.reportSummary
-    }]
+    proxy: {
+        type: 'rest',
+        url: 'api/reports/trips',
+        headers: {
+            'Accept': 'application/json'
+        }
+    }
 });

@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Andrey Kunitsyn (abyss@fox5.ru)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +115,7 @@ Ext.define('Traccar.view.ReportController', {
                     window.navigator.msSaveBlob(blob, filename);
                 } else {
                     url = window.URL || window.webkitURL;
-                    downloadUrl = URL.createObjectURL(blob);
+                    downloadUrl = url.createObjectURL(blob);
                     if (filename) {
                         elementA = document.createElement("a");
                         elementA.href = downloadUrl;
@@ -131,7 +132,7 @@ Ext.define('Traccar.view.ReportController', {
     },
 
     onTypeChange: function (combobox, newValue, oldValue) {
-        var routeColumns, eventsColumns, summaryColumns;
+        var routeColumns, eventsColumns, summaryColumns, tripsColumns;
         if (oldValue !== null) {
             this.onClearClick();
         }
@@ -234,12 +235,70 @@ Ext.define('Traccar.view.ReportController', {
             renderer: Traccar.AttributeFormatter.getFormatter('hours')
         }];
 
+        tripsColumns = [{
+            text: Strings.reportDeviceName,
+            dataIndex: 'deviceId',
+            flex: 1,
+            renderer: function (value) {
+                return Ext.getStore('Devices').findRecord('id', value).get('name');
+            }
+        }, {
+            text: Strings.reportStartTime,
+            dataIndex: 'startTime',
+            flex: 1,
+            xtype: 'datecolumn',
+            renderer: Traccar.AttributeFormatter.getFormatter('startTime')
+        }, {
+            text: Strings.reportStartAddress,
+            dataIndex: 'startAddress',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('address')
+        }, {
+            text: Strings.reportEndTime,
+            dataIndex: 'endTime',
+            flex: 1,
+            xtype: 'datecolumn',
+            renderer: Traccar.AttributeFormatter.getFormatter('endTime')
+        }, {
+            text: Strings.reportEndAddress,
+            dataIndex: 'endAddress',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('address')
+        }, {
+            text: Strings.sharedDistance,
+            dataIndex: 'distance',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('distance')
+        }, {
+            text: Strings.reportAverageSpeed,
+            dataIndex: 'averageSpeed',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('speed')
+        }, {
+            text: Strings.reportMaximumSpeed,
+            dataIndex: 'maxSpeed',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('speed')
+        }, {
+            text: Strings.reportDuration,
+            dataIndex: 'duration',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('duration')
+        }, {
+            text: Strings.reportSpentFuel,
+            dataIndex: 'spentFuel',
+            flex: 1,
+            renderer: Traccar.AttributeFormatter.getFormatter('spentFuel')
+        }];
+
         if (newValue === 'route') {
             this.getView().reconfigure('ReportRoute', routeColumns);
         } else if (newValue === 'events') {
             this.getView().reconfigure('ReportEvents', eventsColumns);
         } else if (newValue === 'summary') {
             this.getView().reconfigure('ReportSummary', summaryColumns);
+        } else if (newValue === 'trips') {
+            this.getView().reconfigure('ReportTrips', tripsColumns);
         }
     }
 
