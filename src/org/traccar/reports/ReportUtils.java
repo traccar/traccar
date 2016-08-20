@@ -49,7 +49,7 @@ public final class ReportUtils {
                 && lastPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
             distance = new BigDecimal(lastPosition.getAttributes().get(Position.KEY_ODOMETER).toString())
                     .subtract(new BigDecimal(firstPosition.getAttributes().get(Position.KEY_ODOMETER).toString()))
-                    .multiply(new BigDecimal("1000"));
+                    .multiply(new BigDecimal(1000));
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
             distance = new BigDecimal(lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE).toString())
@@ -59,7 +59,7 @@ public final class ReportUtils {
         return distance.setScale(2, RoundingMode.HALF_EVEN).doubleValue();
     }
 
-    public static String calculateSpentFuel(Position firstPosition, Position lastPosition) {
+    public static String calculateFuel(Position firstPosition, Position lastPosition) {
 
         if (firstPosition.getAttributes().get(Position.KEY_FUEL) != null
                 && lastPosition.getAttributes().get(Position.KEY_FUEL) != null) {

@@ -65,7 +65,7 @@ public final class Trips {
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
-        trip.setSpentFuel(ReportUtils.calculateSpentFuel(startTrip, endTrip));
+        trip.setSpentFuel(ReportUtils.calculateFuel(startTrip, endTrip));
 
         return trip;
     }

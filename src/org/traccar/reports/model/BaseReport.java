@@ -57,7 +57,7 @@ public class BaseReport {
         this.averageSpeed = new BigDecimal(averageSpeed.toString()).setScale(3, RoundingMode.HALF_EVEN).doubleValue();
     }
 
-    private double maxSpeed; //knots
+    private double maxSpeed; // knots
     public double getMaxSpeed() {
         return maxSpeed;
     }
