@@ -16,9 +16,6 @@
  */
 package org.traccar.reports.model;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 public class BaseReport {
 
     private long deviceId;
@@ -54,7 +51,7 @@ public class BaseReport {
         return averageSpeed;
     }
     public void setAverageSpeed(Double averageSpeed) {
-        this.averageSpeed = new BigDecimal(averageSpeed.toString()).setScale(3, RoundingMode.HALF_EVEN).doubleValue();
+        this.averageSpeed = averageSpeed;
     }
 
     private double maxSpeed; // knots

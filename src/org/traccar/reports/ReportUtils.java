@@ -44,19 +44,18 @@ public final class ReportUtils {
     }
 
     public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer) {
-        BigDecimal distance = new BigDecimal("0.0");
+        double distance = 0.0;
         if (useOdometer && firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
                 && lastPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-            distance = new BigDecimal(lastPosition.getAttributes().get(Position.KEY_ODOMETER).toString())
-                    .subtract(new BigDecimal(firstPosition.getAttributes().get(Position.KEY_ODOMETER).toString()))
-                    .multiply(new BigDecimal(1000));
+            distance = (((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue()
+                    - ((Number) firstPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue())
+                    * 1000;
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-            distance = new BigDecimal(lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE).toString())
-                    .subtract(new BigDecimal(firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)
-                            .toString()));
+            distance = ((Number) lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue()
+                    - ((Number) firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue();
         }
-        return distance.setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+        return distance;
     }
 
     public static String calculateFuel(Position firstPosition, Position lastPosition) {
