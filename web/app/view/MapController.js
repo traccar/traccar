@@ -313,11 +313,12 @@ Ext.define('Traccar.view.MapController', {
     },
 
     showAttributesView: function (feature) {
-        var coordinates, popupOverlay, record;
+        var coordinates, popupOverlay, record, that;
 
         coordinates = feature.getGeometry().getCoordinates();
         popupOverlay = this.getView().getPopupOverlay();
         record = feature.get('record');
+        that = this;
 
         popupOverlay.setPosition(coordinates);
 
@@ -327,7 +328,20 @@ Ext.define('Traccar.view.MapController', {
             items: {
                 xtype: 'attributesView',
                 record: record,
-                tbar: null
+                tbar: {
+                    xtype: 'editToolbar',
+                    items: [{
+                        xtype: 'tbfill'
+                    }, {
+                        glyph: 'xf00e@FontAwesome',
+                        tooltip: Strings.deviceZoomIn,
+                        tooltipType: 'title',
+                        listeners: {
+                            click: 'onZoomInClick',
+                            scope: that
+                        }
+                    }]
+                }
             }
         }).show();
     },
@@ -335,5 +349,15 @@ Ext.define('Traccar.view.MapController', {
     hidePopup: function () {
         var popupOverlay = this.getView().getPopupOverlay();
         popupOverlay.setPosition(undefined);
+    },
+
+    onZoomInClick: function () {
+        var marker, mapView;
+        marker = this.selectedMarker;
+        if (marker) {
+            mapView = this.getView().getMapView();
+            mapView.setCenter(marker.getGeometry().getCoordinates());
+            mapView.setZoom(Traccar.Style.mapMaxZoom);
+        }
     }
 });
