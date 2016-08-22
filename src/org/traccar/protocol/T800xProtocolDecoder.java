@@ -60,6 +60,25 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(short value) {
+        switch (value) {
+        case 3:
+            return Position.ALARM_SOS;
+        case 4:
+            return Position.ALARM_OVERSPEED;
+        case 5:
+            return Position.ALARM_GEOFENCE_ENTER;
+        case 6:
+            return Position.ALARM_GEOFENCE_EXIT;
+        case 8:
+        case 10:
+            return Position.ALARM_VIBRATION;
+        default:
+            break;
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -111,7 +130,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
             position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
 
-            position.set(Position.KEY_ALARM, buf.readUnsignedByte());
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
             buf.readUnsignedByte(); // reserved
 

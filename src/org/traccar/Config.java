@@ -74,4 +74,16 @@ public class Config {
         }
     }
 
+    public double getDouble(String key) {
+        return getDouble(key, 0.0);
+    }
+
+    public double getDouble(String key, double defaultValue) {
+        if (properties.containsKey(key)) {
+            return Double.parseDouble(properties.getProperty(key));
+        } else {
+            return defaultValue;
+        }
+    }
+
 }

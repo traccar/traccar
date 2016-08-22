@@ -24,7 +24,7 @@ Ext.define('Traccar.view.RegisterController', {
             Ext.Ajax.request({
                 scope: this,
                 method: 'POST',
-                url: '/api/users',
+                url: 'api/users',
                 jsonData: form.getValues(),
                 callback: this.onCreateReturn
             });

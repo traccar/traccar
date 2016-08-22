@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,9 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
 
         for (int i = 0; i < accCount; i++) {
-            position.set("acc" + i, buf.readUnsignedInt());
+            if (buf.readableBytes() >= 4) {
+                position.set("acc" + i, buf.readUnsignedInt());
+            }
         }
 
         return position;

@@ -20,7 +20,7 @@ Ext.define('Traccar.store.AllGeofences', {
 
     proxy: {
         type: 'rest',
-        url: '/api/geofences',
+        url: 'api/geofences',
         extraParams: {
             all: true
         }

@@ -50,6 +50,9 @@ public class Event extends Message {
 
     public static final String TYPE_ALARM = "alarm";
 
+    public static final String TYPE_IGNITION_ON = "ignitionOn";
+    public static final String TYPE_IGNITION_OFF = "ignitionOff";
+
     private Date serverTime;
 
     public Date getServerTime() {

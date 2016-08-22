@@ -146,7 +146,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_RFID, eventData);
                     break;
                 default:
-                    position.set("event-data", eventData);
+                    position.set("eventData", eventData);
                     break;
             }
         }

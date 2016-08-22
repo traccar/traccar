@@ -70,6 +70,23 @@ public final class NotificationFormatter {
             + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
+    public static final String TITLE_TEMPLATE_TYPE_ALARM = "%1$s: alarm!";
+    public static final String MESSAGE_TEMPLATE_TYPE_ALARM = "Device: %1$s%n"
+            + "Alarm: %5$s%n"
+            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Time: %2$tc%n";
+
+    public static final String TITLE_TEMPLATE_TYPE_IGNITION_ON = "%1$s: ignition ON";
+    public static final String MESSAGE_TEMPLATE_TYPE_IGNITION_ON = "Device: %1$s%n"
+            + "Ignition ON%n"
+            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Time: %2$tc%n";
+    public static final String TITLE_TEMPLATE_TYPE_IGNITION_OFF = "%1$s: ignition OFF";
+    public static final String MESSAGE_TEMPLATE_TYPE_IGNITION_OFF = "Device: %1$s%n"
+            + "Ignition OFF%n"
+            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Time: %2$tc%n";
+
     public static String formatTitle(long userId, Event event, Position position) {
         Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
         StringBuilder stringBuilder = new StringBuilder();
@@ -100,6 +117,15 @@ public final class NotificationFormatter {
             case Event.TYPE_GEOFENCE_EXIT:
                 formatter.format(TITLE_TEMPLATE_TYPE_GEOFENCE_EXIT, device.getName());
                 break;
+            case Event.TYPE_ALARM:
+                formatter.format(TITLE_TEMPLATE_TYPE_ALARM, device.getName());
+                break;
+            case Event.TYPE_IGNITION_ON:
+                formatter.format(TITLE_TEMPLATE_TYPE_IGNITION_ON, device.getName());
+                break;
+            case Event.TYPE_IGNITION_OFF:
+                formatter.format(TITLE_TEMPLATE_TYPE_IGNITION_OFF, device.getName());
+                break;
             default:
                 formatter.format("Unknown type");
                 break;
@@ -117,7 +143,7 @@ public final class NotificationFormatter {
         switch (event.getType()) {
             case Event.TYPE_COMMAND_RESULT:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_COMMAND_RESULT, device.getName(), event.getServerTime(),
-                        position.getAttributes().get("result"));
+                        position.getAttributes().get(Position.KEY_RESULT));
                 break;
             case Event.TYPE_DEVICE_ONLINE:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName(), event.getServerTime());
@@ -146,6 +172,19 @@ public final class NotificationFormatter {
                 formatter.format(MESSAGE_TEMPLATE_TYPE_GEOFENCE_EXIT, device.getName(), position.getFixTime(),
                         position.getLatitude(), position.getLongitude(),
                         Context.getGeofenceManager().getGeofence(event.getGeofenceId()).getName());
+                break;
+            case Event.TYPE_ALARM:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_ALARM, device.getName(), event.getServerTime(),
+                        position.getLatitude(), position.getLongitude(),
+                        position.getAttributes().get(Position.KEY_ALARM));
+                break;
+            case Event.TYPE_IGNITION_ON:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_IGNITION_ON, device.getName(), position.getFixTime(),
+                        position.getLatitude(), position.getLongitude());
+                break;
+            case Event.TYPE_IGNITION_OFF:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_IGNITION_OFF, device.getName(), position.getFixTime(),
+                        position.getLatitude(), position.getLongitude());
                 break;
             default:
                 formatter.format("Unknown type");

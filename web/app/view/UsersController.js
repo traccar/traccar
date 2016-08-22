@@ -77,7 +77,7 @@ Ext.define('Traccar.view.UsersController', {
                 linkObjectName: 'deviceId',
                 storeName: 'AllDevices',
                 linkStoreName: 'Devices',
-                urlApi: '/api/permissions/devices',
+                urlApi: 'api/permissions/devices',
                 baseObject: user.getData().id
             }
         }).show();
@@ -93,7 +93,7 @@ Ext.define('Traccar.view.UsersController', {
                 linkObjectName: 'groupId',
                 storeName: 'AllGroups',
                 linkStoreName: 'Groups',
-                urlApi: '/api/permissions/groups',
+                urlApi: 'api/permissions/groups',
                 baseObject: user.getData().id
             }
         }).show();
@@ -109,7 +109,7 @@ Ext.define('Traccar.view.UsersController', {
                 linkObjectName: 'geofenceId',
                 storeName: 'AllGeofences',
                 linkStoreName: 'Geofences',
-                urlApi: '/api/permissions/geofences',
+                urlApi: 'api/permissions/geofences',
                 baseObject: user.getData().id
             }
         }).show();

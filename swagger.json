@@ -556,19 +556,20 @@
                     {
                         "name": "deviceId",
                         "in": "query",
-                        "required": true,
+                        "description": "deviceId is optional, but requires the from and to parameters when used",
+                        "required": false,
                         "type": "integer"
                     },
                     {
                         "name": "from",
                         "in": "query",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     },
                     {
                         "name": "to",
                         "in": "query",
-                        "required": true,
+                        "required": false,
                         "type": "string"
                     }
                 ],
@@ -1115,6 +1116,9 @@
                 "id": {
                     "type": "integer"
                 },
+                "deviceId": {
+                    "type": "integer"
+                },                
                 "protocol": {
                     "type": "string"
                 },

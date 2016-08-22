@@ -32,6 +32,23 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private String decodeAlarm(Short value) {
+        switch (value) {
+        case 0x01:
+            return Position.ALARM_SOS;
+        case 0x10:
+            return Position.ALARM_LOW_BATTERY;
+        case 0x11:
+            return Position.ALARM_OVERSPEED;
+        case 0x42:
+            return Position.ALARM_GEOFENCE_EXIT;
+        case 0x43:
+            return Position.ALARM_GEOFENCE_ENTER;
+        default:
+            return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -116,7 +133,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         if (blockLength > 0) {
 
-            position.set(Position.KEY_ALARM, buf.readUnsignedByte());
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             buf.readUnsignedByte(); // terminal info
             position.set(Position.PREFIX_IO + 1, buf.readUnsignedShort());
             position.set(Position.KEY_GSM, buf.readUnsignedByte());
@@ -174,8 +191,8 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         if (blockLength > 0) {
 
-            position.set("passengers-on", buf.readUnsignedMedium());
-            position.set("passengers-off", buf.readUnsignedMedium());
+            position.set("passengersOn", buf.readUnsignedMedium());
+            position.set("passengersOff", buf.readUnsignedMedium());
 
         }
 

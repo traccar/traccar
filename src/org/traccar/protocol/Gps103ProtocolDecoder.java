@@ -87,7 +87,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time
             .number("(d+),")                     // odometer
             .number("(d+.d+)?,")                 // fuel instant
-            .number("(?:d+.d+)?,")               // fuel average
+            .number("(d+.d+)?,")                 // fuel average
             .number("(d+),")                     // hours
             .number("(d+),")                     // speed
             .number("d+.?d*%,")                  // power load
@@ -189,7 +189,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, dateBuilder.getDate());
 
             position.set(Position.KEY_ODOMETER, parser.nextInt());
-            position.set(Position.KEY_FUEL, parser.next());
+            parser.next(); // instant fuel consumption
+            position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
             position.set(Position.KEY_HOURS, parser.next());
             position.set(Position.KEY_OBD_SPEED, parser.next());
             position.set(Position.PREFIX_TEMP + 1, parser.next());

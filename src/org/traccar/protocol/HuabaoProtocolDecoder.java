@@ -70,6 +70,32 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, remoteAddress, MSG_GENERAL_RESPONSE, id, response);
     }
 
+    private String decodeAlarm(long value) {
+        if (BitUtil.check(value, 0)) {
+            return Position.ALARM_SOS;
+        }
+        if (BitUtil.check(value, 1)) {
+            return Position.ALARM_OVERSPEED;
+        }
+        if (BitUtil.check(value, 5)) {
+            return Position.ALARM_GPS_ANTENNA_CUT;
+        }
+        if (BitUtil.check(value, 4) || BitUtil.check(value, 9)
+                || BitUtil.check(value, 10) || BitUtil.check(value, 11)) {
+            return Position.ALARM_FAULT;
+        }
+        if (BitUtil.check(value, 8)) {
+            return Position.ALARM_POWER_OFF;
+        }
+        if (BitUtil.check(value, 20)) {
+            return Position.ALARM_GEOFENCE;
+        }
+        if (BitUtil.check(value, 29)) {
+            return Position.ALARM_ACCIDENT;
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -105,7 +131,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_ALARM, buf.readUnsignedInt());
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
 
             int flags = buf.readInt();
 

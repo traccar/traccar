@@ -133,52 +133,52 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             switch (buf.readInt()) {
                 case 0x20D:
                     position.set(Position.KEY_RPM, ChannelBuffers.swapShort(value.readShort()));
-                    position.set("diesel-temperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("battery-voltage", ChannelBuffers.swapShort(value.readShort()) * 0.01);
-                    position.set("supply-air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("dieselTemperature", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("batteryVoltage", ChannelBuffers.swapShort(value.readShort()) * 0.01);
+                    position.set("supplyAirTempDep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     break;
                 case 0x30D:
-                    position.set("active-alarm", ChannelBuffers.hexDump(value));
+                    position.set("activeAlarm", ChannelBuffers.hexDump(value));
                     break;
                 case 0x40C:
-                    position.set("air-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("air-temp-dep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("airTempDep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("airTempDep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     break;
                 case 0x40D:
-                    position.set("cold-unit-state", ChannelBuffers.hexDump(value));
+                    position.set("coldUnitState", ChannelBuffers.hexDump(value));
                     break;
                 case 0x50C:
-                    position.set("defrost-temp-dep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("defrost-temp-dep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("defrostTempDep1", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("defrostTempDep2", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     break;
                 case 0x50D:
-                    position.set("condenser-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
-                    position.set("suction-pressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("condenserPressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
+                    position.set("suctionPressure", ChannelBuffers.swapShort(value.readShort()) * 0.1);
                     break;
                 case 0x58C:
                     value.readByte();
                     value.readShort(); // index
                     switch (value.readByte()) {
                         case 0x01:
-                            position.set("setpoint-zone1", ChannelBuffers.swapInt(value.readInt()) * 0.1);
+                            position.set("setpointZone1", ChannelBuffers.swapInt(value.readInt()) * 0.1);
                             break;
                         case 0x02:
-                            position.set("setpoint-zone2", ChannelBuffers.swapInt(value.readInt()) * 0.1);
+                            position.set("setpointZone2", ChannelBuffers.swapInt(value.readInt()) * 0.1);
                             break;
                         case 0x05:
-                            position.set("unit-type", ChannelBuffers.swapInt(value.readInt()));
+                            position.set("unitType", ChannelBuffers.swapInt(value.readInt()));
                             break;
                         case 0x13:
-                            position.set("diesel-hours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
+                            position.set("dieselHours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
                             break;
                         case 0x14:
-                            position.set("electric-hours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
+                            position.set("electricHours", ChannelBuffers.swapInt(value.readInt()) / 60 / 60);
                             break;
                         case 0x17:
-                            position.set("service-indicator", ChannelBuffers.swapInt(value.readInt()));
+                            position.set("serviceIndicator", ChannelBuffers.swapInt(value.readInt()));
                             break;
                         case 0x18:
-                            position.set("software-version", ChannelBuffers.swapInt(value.readInt()) * 0.01);
+                            position.set("softwareVersion", ChannelBuffers.swapInt(value.readInt()) * 0.01);
                             break;
                         default:
                             break;
@@ -223,7 +223,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         int event = buf.readUnsignedByte();
         position.set(Position.KEY_EVENT, event);
-        position.set("event-info", buf.readUnsignedByte());
+        position.set("eventInfo", buf.readUnsignedByte());
 
         if ((selector & 0x0008) != 0) {
             position.setValid((buf.readUnsignedByte() & 0x40) != 0);

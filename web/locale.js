@@ -69,7 +69,7 @@ if (!(Locale.language in Locale.languages)) {
 }
 
 Ext.Ajax.request({
-    url: '/l10n/' + Locale.language + '.json',
+    url: 'l10n/' + Locale.language + '.json',
     callback: function (options, success, response) {
         Strings = Ext.decode(response.responseText);
     }

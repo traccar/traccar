@@ -82,9 +82,9 @@ public final class ObdDecoder {
         int intValue = Integer.parseInt(value, 16);
         switch (pid) {
             case PID_ENGINE_LOAD:
-                return createEntry("engine-load", intValue * 100 / 255);
+                return createEntry("engineLoad", intValue * 100 / 255);
             case PID_COOLANT_TEMPERATURE:
-                return createEntry("coolant-temperature", intValue - 40);
+                return createEntry("coolantTemperature", intValue - 40);
             case PID_ENGINE_RPM:
                 return createEntry(Position.KEY_RPM, intValue / 4);
             case PID_VEHICLE_SPEED:
@@ -92,11 +92,11 @@ public final class ObdDecoder {
             case PID_THROTTLE_POSITION:
                 return createEntry("throttle", intValue * 100 / 255);
             case PID_MIL_DISTANCE:
-                return createEntry("mil-distance", intValue);
+                return createEntry("milDistance", intValue);
             case PID_FUEL_LEVEL:
                 return createEntry(Position.KEY_FUEL, intValue * 100 / 255);
             case PID_DISTANCE_CLEARED:
-                return createEntry("cleared-distance", intValue);
+                return createEntry("clearedDistance", intValue);
             default:
                 return null;
         }

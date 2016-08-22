@@ -26,4 +26,6 @@ public interface IdentityManager {
 
     Position getLastPosition(long deviceId);
 
+    boolean isLatestPosition(Position position);
+
 }

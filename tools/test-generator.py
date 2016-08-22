@@ -10,6 +10,7 @@ id = '123456789012345'
 server = 'localhost:5055'
 period = 1
 step = 0.001
+device_speed = 40
 
 waypoints = [
     (40.722412, -74.006288),
@@ -32,10 +33,13 @@ for i in range(0, len(waypoints)):
         lon = lon1 + (lon2 - lon1) * j / count
         points.append((lat, lon))
 
-def send(conn, lat, lon, course, alarm):
+def send(conn, lat, lon, course, alarm, ignition, speed):
     params = (('id', id), ('timestamp', int(time.time())), ('lat', lat), ('lon', lon), ('bearing', course))
     if alarm:
         params = params + (('alarm', 'sos'),)
+    if ignition:
+        params = params + (('ignition', 'true'),)
+    params = params + (('speed', speed),)
     conn.request('GET', '?' + urllib.urlencode(params))
     conn.getresponse().read()
 
@@ -56,6 +60,11 @@ while True:
     (lat1, lon1) = points[index % len(points)]
     (lat2, lon2) = points[(index + 1) % len(points)]
     alarm = ((index % 10) == 0)
-    send(conn, lat1, lon1, course(lat1, lon1, lat2, lon2), alarm)
+    ignition = ((index % len(points)) != 0)
+    if (index % len(points)) != 0:
+        speed = device_speed
+    else:
+        speed = 0
+    send(conn, lat1, lon1, course(lat1, lon1, lat2, lon2), alarm, ignition, speed)
     time.sleep(period)
     index += 1

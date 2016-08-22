@@ -26,7 +26,11 @@ import org.traccar.model.Position;
 
 public class MotionEventHandler extends BaseEventHandler {
 
-    private static final double SPEED_THRESHOLD = 0.01;
+    private double speedThreshold;
+
+    public MotionEventHandler() {
+        speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
+    }
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
@@ -35,21 +39,21 @@ public class MotionEventHandler extends BaseEventHandler {
         if (device == null) {
             return null;
         }
-        if (!Context.getDeviceManager().isLatestPosition(position) || !position.getValid()) {
+        if (!Context.getIdentityManager().isLatestPosition(position) || !position.getValid()) {
             return null;
         }
 
         Collection<Event> result = null;
         double speed = position.getSpeed();
         double oldSpeed = 0;
-        Position lastPosition = Context.getDeviceManager().getLastPosition(position.getDeviceId());
+        Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         if (lastPosition != null) {
             oldSpeed = lastPosition.getSpeed();
         }
-        if (speed > SPEED_THRESHOLD && oldSpeed <= SPEED_THRESHOLD) {
+        if (speed > speedThreshold && oldSpeed <= speedThreshold) {
             result = new ArrayList<>();
             result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
-        } else if (speed <= SPEED_THRESHOLD && oldSpeed > SPEED_THRESHOLD) {
+        } else if (speed <= speedThreshold && oldSpeed > speedThreshold) {
             result = new ArrayList<>();
             result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
         }

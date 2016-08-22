@@ -49,6 +49,11 @@ public class ProtocolTest {
             public Position getLastPosition(long deviceId) {
                 return null;
             }
+            
+            @Override
+            public boolean isLatestPosition(Position position) {
+                return true;
+            }
 
         });
     }

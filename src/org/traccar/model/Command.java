@@ -33,6 +33,7 @@ public class Command extends Message {
     public static final String TYPE_REQUEST_PHOTO = "requestPhoto";
     public static final String TYPE_REBOOT_DEVICE = "rebootDevice";
     public static final String TYPE_SEND_SMS = "sendSms";
+    public static final String TYPE_SEND_USSD = "sendUssd";
     public static final String TYPE_SOS_NUMBER = "sosNumber";
     public static final String TYPE_SILENCE_TIME = "silenceTime";
     public static final String TYPE_SET_PHONEBOOK = "setPhonebook";
