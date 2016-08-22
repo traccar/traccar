@@ -110,7 +110,7 @@ Ext.define('Traccar.view.BaseMap', {
         });
         this.map.addOverlay(this.popupOverlay);
 
-        that = this
+        that = this;
         popupElement.onclick = function(evt) {
             if (that.map.isMapClick) {
                 that.map.isPopupOverlayClick = true;

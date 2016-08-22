@@ -17,7 +17,6 @@
 Ext.define('Traccar.view.PopupWindow', {
     extend: 'Ext.window.Window',
     xtype: 'popupWindowView',
-    title: 'Window',
     closable: true,
     modal: false,
     resizable: false,
