@@ -92,7 +92,6 @@ Ext.define('Traccar.view.BaseMap', {
         });
 
         Ext.create('Ext.Component', {
-            id: 'popupComponent',
             renderTo: Ext.getBody(),
             html: '<div id="popup"></div>'
         });
