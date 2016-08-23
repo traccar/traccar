@@ -114,7 +114,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, parser.next());
         position.set("tpl", parser.next());
         position.set("axle", parser.next());
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_OBD_ODOMETER, parser.next());
 
         return position;
     }

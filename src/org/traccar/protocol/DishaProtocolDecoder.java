@@ -97,7 +97,7 @@ public class DishaProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
         position.set(Position.PREFIX_ADC + 2, parser.nextInt());
 
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_INPUT, parser.next());
 
         return position;

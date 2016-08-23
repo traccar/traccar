@@ -305,7 +305,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_MCC, parser.nextInt());
         position.set(Position.KEY_MNC, parser.nextInt());
         position.set(Position.KEY_LAC, parser.nextInt(16));

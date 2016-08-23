@@ -48,8 +48,7 @@ public final class ReportUtils {
         if (useOdometer && firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
                 && lastPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
             distance = (((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue()
-                    - ((Number) firstPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue())
-                    * 1000;
+                    - ((Number) firstPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue());
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
             distance = ((Number) lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue()
