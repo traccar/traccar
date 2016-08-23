@@ -91,12 +91,10 @@ Ext.define('Traccar.view.BaseMap', {
             target.style.cursor = this.hasFeatureAtPixel(evt.pixel) ? 'pointer' : '';
         });
 
-        Ext.create('Ext.Component', {
-            renderTo: Ext.getBody(),
-            html: '<div id="popup"></div>'
-        });
+        popupElement = document.createElement("div");
+        popupElement.id = "popup";
+        document.body.appendChild(popupElement);
 
-        popupElement = document.getElementById('popup');
         this.popupOverlay = new ol.Overlay({
             element: popupElement,
             autoPan: true,

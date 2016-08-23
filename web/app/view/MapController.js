@@ -348,7 +348,7 @@ Ext.define('Traccar.view.MapController', {
 
     hidePopup: function () {
         var popupOverlay = this.getView().getPopupOverlay();
-        popupOverlay.setPosition(undefined);
+        popupOverlay.setPosition();
     },
 
     onZoomInClick: function () {
