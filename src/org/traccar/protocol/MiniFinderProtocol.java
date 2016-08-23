@@ -22,12 +22,23 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
+
 import java.util.List;
 
 public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
         super("minifinder");
+        setSupportedCommands(
+                Command.TYPE_SET_TIMEZONE,
+                Command.TYPE_VOICE_MONITORING,
+                Command.TYPE_ALARM_SPEED,
+                Command.TYPE_ALARM_GEOFENCE,
+                Command.TYPE_SET_AGPS,
+                Command.TYPE_ALARM_FALL,
+                Command.TYPE_MODE_POWER_SAVING,
+                Command.TYPE_MODE_DEEP_SLEEP);
     }
 
     @Override
@@ -38,6 +49,7 @@ public class MiniFinderProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
+                pipeline.addLast("objectEncoder", new MiniFinderProtocolEncoder());
                 pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
             }
         });

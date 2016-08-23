@@ -39,6 +39,11 @@ public class Command extends Message {
     public static final String TYPE_SET_PHONEBOOK = "setPhonebook";
     public static final String TYPE_VOICE_MESSAGE = "voiceMessage";
     public static final String TYPE_OUTPUT_CONTROL = "outputControl";
+    public static final String TYPE_VOICE_MONITORING = "voiceMonitoring";
+    public static final String TYPE_SET_AGPS = "setAgps";
+
+    public static final String TYPE_MODE_POWER_SAVING = "modePowerSaving";
+    public static final String TYPE_MODE_DEEP_SLEEP = "modeDeepSleep";
 
     public static final String TYPE_ALARM_GEOFENCE = "movementAlarm";
     public static final String TYPE_ALARM_BATTERY = "alarmBattery";
@@ -46,6 +51,7 @@ public class Command extends Message {
     public static final String TYPE_ALARM_REMOVE = "alarmRemove";
     public static final String TYPE_ALARM_CLOCK = "alarmClock";
     public static final String TYPE_ALARM_SPEED = "alarmSpeed";
+    public static final String TYPE_ALARM_FALL = "alarmFall";
 
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
