@@ -73,8 +73,8 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort();
         buf.readUnsignedShort();
 
-        position.set("distance", buf.readUnsignedInt());
-        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+        position.set(Position.KEY_DISTANCE, buf.readUnsignedInt());
+        position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt());
 
         // Parse GPRMC
         int end = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');

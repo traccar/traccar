@@ -147,9 +147,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(buf.readFloat());
             position.setCourse(buf.readUnsignedShort());
 
-            position.set(Position.KEY_ODOMETER, buf.readFloat());
-
-            position.set("segment", buf.readFloat()); // last segment
+            position.set(Position.KEY_ODOMETER, buf.readFloat() * 1000);
+            position.set(Position.KEY_DISTANCE, buf.readFloat());
 
             // Segment times
             buf.readUnsignedShort();

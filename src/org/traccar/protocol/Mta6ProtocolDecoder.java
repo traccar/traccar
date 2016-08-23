@@ -155,7 +155,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(flags, 3)) {
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedShort());
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedShort() * 1000);
                 }
 
                 if (BitUtil.check(flags, 4)) {

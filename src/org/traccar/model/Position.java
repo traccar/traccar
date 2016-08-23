@@ -28,7 +28,8 @@ public class Position extends Message {
     public static final String KEY_EVENT = "event";
     public static final String KEY_ALARM = "alarm";
     public static final String KEY_STATUS = "status";
-    public static final String KEY_ODOMETER = "odometer";
+    public static final String KEY_ODOMETER = "odometer"; // meters
+    public static final String KEY_TRIP_ODOMETER = "tripOdometer";
     public static final String KEY_HOURS = "hours";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
@@ -48,7 +49,7 @@ public class Position extends Message {
     public static final String KEY_CHARGE = "charge";
     public static final String KEY_IP = "ip";
     public static final String KEY_ARCHIVE = "archive";
-    public static final String KEY_DISTANCE = "distance";
+    public static final String KEY_DISTANCE = "distance"; // meters
     public static final String KEY_TOTAL_DISTANCE = "totalDistance";
     public static final String KEY_RPM = "rpm";
     public static final String KEY_VIN = "vin";

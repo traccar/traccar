@@ -49,7 +49,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
 
             switch (type) {
                 case 2:
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
+                    position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedMedium());
                     break;
                 case 5:
                     position.set(Position.KEY_INPUT, buf.readUnsignedByte());

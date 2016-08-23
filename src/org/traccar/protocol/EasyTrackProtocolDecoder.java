@@ -105,7 +105,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set("signal", parser.next());
         position.set(Position.KEY_POWER, parser.nextDouble());
         position.set("oil", parser.nextInt(16));
-        position.set(Position.KEY_ODOMETER, parser.nextInt(16));
+        position.set(Position.KEY_ODOMETER, parser.nextInt(16) * 100);
 
         position.setAltitude(parser.nextDouble());
 

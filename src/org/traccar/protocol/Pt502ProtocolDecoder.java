@@ -106,7 +106,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextInt());
         position.set(Position.KEY_RFID, parser.next());
 
         if (parser.hasNext()) {

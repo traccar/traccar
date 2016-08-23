@@ -115,7 +115,7 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_EVENT, parser.next());
             position.set(Position.KEY_BATTERY, parser.next());
-            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
             position.set(Position.KEY_INPUT, parser.next());
             position.set(Position.PREFIX_ADC + 1, parser.next());
             position.set(Position.PREFIX_ADC + 2, parser.next());

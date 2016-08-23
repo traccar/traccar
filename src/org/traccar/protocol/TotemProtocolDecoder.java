@@ -252,7 +252,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.set(Position.PREFIX_TEMP + 1, parser.next());
-            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
         } else if (pattern == PATTERN3) {
             if (parser.hasNext()) {
@@ -314,7 +314,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
             position.set(Position.KEY_HDOP, parser.nextDouble());
-            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_ODOMETER, parser.nextInt() * 1000);
 
             position.setValid(true);
             position.setLatitude(parser.nextCoordinate());

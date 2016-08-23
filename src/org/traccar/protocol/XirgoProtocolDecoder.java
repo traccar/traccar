@@ -133,7 +133,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.next());
 
         if (newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         }
 
@@ -141,7 +141,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_GSM, parser.next());
 
         if (!newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);
         }
 
         position.setValid(parser.nextInt() == 1);
