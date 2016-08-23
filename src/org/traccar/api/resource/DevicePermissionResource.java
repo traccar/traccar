@@ -37,7 +37,7 @@ public class DevicePermissionResource extends BaseResource {
     public Response add(DevicePermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
@@ -48,7 +48,7 @@ public class DevicePermissionResource extends BaseResource {
     public Response remove(DevicePermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getDataManager().unlinkDevice(entity.getUserId(), entity.getDeviceId());
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }

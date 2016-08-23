@@ -41,7 +41,7 @@ public class UserResource extends BaseResource {
     @GET
     public Collection<User> get() throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        return Context.getDataManager().getUsers();
+        return Context.getPermissionsManager().getUsers();
     }
 
     @PermitAll
@@ -50,8 +50,7 @@ public class UserResource extends BaseResource {
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
             Context.getPermissionsManager().checkRegistration(getUserId());
         }
-        Context.getDataManager().addUser(entity);
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().addUser(entity);
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
@@ -66,8 +65,7 @@ public class UserResource extends BaseResource {
         } else {
             Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
         }
-        Context.getDataManager().updateUser(entity);
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().updateUser(entity);
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
         }
@@ -78,8 +76,7 @@ public class UserResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkUser(getUserId(), id);
-        Context.getDataManager().removeUser(id);
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().removeUser(id);
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refreshUserGeofences();
         }
