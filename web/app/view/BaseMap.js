@@ -91,24 +91,24 @@ Ext.define('Traccar.view.BaseMap', {
             target.style.cursor = this.hasFeatureAtPixel(evt.pixel) ? 'pointer' : '';
         });
 
-        popupElement = document.createElement("div");
-        popupElement.id = "popup";
+        popupElement = document.createElement('div');
+        popupElement.id = 'popup';
         document.body.appendChild(popupElement);
 
         this.popupOverlay = new ol.Overlay({
             element: popupElement,
             autoPan: true,
             autoPanAnimation: {
-                duration: 250
+                duration: Traccar.Style.autoPanAnimationDuration
             },
             positioning: 'bottom-center',
             stopEvent: false,
-            offset: [0, -150]
+            offset: [Traccar.Style.popupOverlayOffsetX, Traccar.Style.popupOverlayOffsetY]
         });
         this.map.addOverlay(this.popupOverlay);
 
         that = this;
-        popupElement.onclick = function(evt) {
+        popupElement.onclick = function (evt) {
             if (that.map.isMapClick) {
                 that.map.isPopupOverlayClick = true;
             }

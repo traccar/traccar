@@ -66,5 +66,9 @@ Ext.define('Traccar.Style', {
     mapDelay: 500,
 
     coordinatePrecision: 6,
-    numberPrecision: 2
+    numberPrecision: 2,
+
+    autoPanAnimationDuration: 250,
+    popupOverlayOffsetX: 0,
+    popupOverlayOffsetY: -150
 });

@@ -23,8 +23,7 @@ Ext.define('Traccar.view.MapController', {
             controller: {
                 '*': {
                     selectDevice: 'selectDevice',
-                    selectReport: 'selectReport',
-                    clickDevice: 'clickDevice'
+                    selectReport: 'selectReport'
                 }
             },
             store: {
@@ -277,9 +276,12 @@ Ext.define('Traccar.view.MapController', {
         this.selectedMarker = marker;
     },
 
-    selectDevice: function (device, center) {
+    selectDevice: function (device, center, featureSelected) {
         this.hidePopup();
         this.selectMarker(this.latestMarkers[device.get('id')], center);
+        if (featureSelected) {
+            this.clickDevice(this.selectedMarker);
+        }
     },
 
     selectReport: function (position, center) {
@@ -300,8 +302,7 @@ Ext.define('Traccar.view.MapController', {
         var record = feature.get('record');
         if (record) {
             if (record instanceof Traccar.model.Device) {
-                this.fireEvent('selectDevice', record, false);
-                this.fireEvent('clickDevice', feature);
+                this.fireEvent('selectDevice', record, false, true);
             } else {
                 this.fireEvent('selectReport', record, false);
             }
