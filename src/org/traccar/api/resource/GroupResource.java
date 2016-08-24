@@ -58,7 +58,7 @@ public class GroupResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDeviceManager().addGroup(entity);
         Context.getDataManager().linkGroup(getUserId(), entity.getId());
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
@@ -83,7 +83,7 @@ public class GroupResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkGroup(getUserId(), id);
         Context.getDeviceManager().removeGroup(id);
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }

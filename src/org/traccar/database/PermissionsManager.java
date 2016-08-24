@@ -25,10 +25,12 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PermissionsManager {
 
@@ -36,7 +38,7 @@ public class PermissionsManager {
 
     private volatile Server server;
 
-    private final Map<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users = new ConcurrentHashMap<>();
 
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
@@ -73,19 +75,26 @@ public class PermissionsManager {
 
     public PermissionsManager(DataManager dataManager) {
         this.dataManager = dataManager;
-        refresh();
+        refreshUsers();
+        refreshPermissions();
     }
 
-    public final void refresh() {
+    public final void refreshUsers() {
         users.clear();
-        groupPermissions.clear();
-        devicePermissions.clear();
         try {
             server = dataManager.getServer();
             for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
             }
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
+    }
 
+    public final void refreshPermissions() {
+        groupPermissions.clear();
+        devicePermissions.clear();
+        try {
             GroupTree groupTree = new GroupTree(Context.getDeviceManager().getAllGroups(),
                     Context.getDeviceManager().getAllDevices());
             for (GroupPermission permission : dataManager.getGroupPermissions()) {
@@ -174,6 +183,41 @@ public class PermissionsManager {
     public void updateServer(Server server) throws SQLException {
         dataManager.updateServer(server);
         this.server = server;
+    }
+
+    public Collection<User> getUsers() {
+        return users.values();
+    }
+
+    public User getUser(long userId) {
+        return users.get(userId);
+    }
+
+    public void addUser(User user) throws SQLException {
+        dataManager.addUser(user);
+        users.put(user.getId(), user);
+        refreshPermissions();
+    }
+
+    public void updateUser(User user) throws SQLException {
+        dataManager.updateUser(user);
+        users.put(user.getId(), user);
+        refreshPermissions();
+    }
+
+    public void removeUser(long userId) throws SQLException {
+        dataManager.removeUser(userId);
+        users.remove(userId);
+        refreshPermissions();
+    }
+
+    public User login(String email, String password) throws SQLException {
+        User user = dataManager.login(email, password);
+        if (user != null && users.get(user.getId()) != null) {
+            return users.get(user.getId());
+        } else {
+            return null;
+        }
     }
 
 }

@@ -59,7 +59,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getDeviceManager().addDevice(entity);
         Context.getDataManager().linkDevice(getUserId(), entity.getId());
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
@@ -84,7 +84,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), id);
         Context.getDeviceManager().removeDevice(id);
-        Context.getPermissionsManager().refresh();
+        Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
