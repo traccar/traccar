@@ -137,7 +137,6 @@
     "alarmOverspeed": "Overspeed Alarm",
     "alarmFallDown": "FallDown Alarm",
     "alarmLowBattery": "LowBattery Alarm",
-    "alarmMotion": "Motion Alarm",
     "alarmFault": "Fault Alarm",
     "notificationType": "Type of Notification",
     "notificationWeb": "Send via Web",

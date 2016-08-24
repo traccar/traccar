@@ -114,10 +114,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.check(flags, 12)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                 }
-                if (BitUtil.check(flags, 14)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_MOTION);
-                }
-                if (BitUtil.check(flags, 15)) {
+                if (BitUtil.check(flags, 15) || BitUtil.check(flags, 14)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
                 }
 
