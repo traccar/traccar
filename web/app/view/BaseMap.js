@@ -33,7 +33,7 @@ Ext.define('Traccar.view.BaseMap', {
     },
 
     initMap: function () {
-        var user, server, layer, type, bingKey, lat, lon, zoom, target, popupElement, that;
+        var user, server, layer, type, bingKey, lat, lon, zoom, target, popupElement;
 
         user = Traccar.app.getUser();
         server = Traccar.app.getServer();
@@ -108,14 +108,16 @@ Ext.define('Traccar.view.BaseMap', {
         this.map.addOverlay(this.popupOverlay);
 
         this.map.on('click', function (e) {
-            var target = e.originalEvent.target || e.originalEvent.srcElement;
+            var target, feature;
 
-            var feature = this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+            target = e.originalEvent.target || e.originalEvent.srcElement;
+
+            feature = this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
                 this.fireEvent('selectFeature', feature);
                 return feature;
             }, this);
 
-            if (!feature && target.tagName == 'CANVAS') {
+            if (!feature && target.tagName === 'CANVAS') {
                 this.fireEvent('clickMap');
             }
         }, this);
