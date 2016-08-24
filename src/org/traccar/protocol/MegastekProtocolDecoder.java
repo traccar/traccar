@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,26 +244,27 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // speed
             .number("(d+.d+),")                  // course
             .number("(d+.d+),")                  // altitude
-            .number("(d+.d+),")                  // odometer
+            .number("(d+.d+)?,")                 // odometer
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(xxxx),")                   // lac
             .number("(xxxx),")                   // cid
             .number("(d+)?,")                    // gsm
-            .expression("([01]+),")              // input
-            .expression("([01]+),")              // output
-            .number("(d+),")                     // adc1
-            .number("(d+),")                     // adc2
-            .number("(d+),")                     // adc3
+            .expression("([01]+)?,")             // input
+            .expression("([01]+)?,")             // output
+            .number("(d+)?,")                    // adc1
+            .number("(d+)?,")                    // adc2
+            .number("(d+)?,")                    // adc3
             .groupBegin()
             .number("(-?d+.?d*)")                // temperature 1
             .or().text(" ")
-            .groupEnd().text(",")
+            .groupEnd("?").text(",")
             .groupBegin()
             .number("(-?d+.?d*)")                // temperature 2
             .or().text(" ")
-            .groupEnd().text(",")
-            .number("(d+)?,,")                   // rfid
+            .groupEnd("?").text(",")
+            .number("(d+)?,")                    // rfid
+            .number("d*,")
             .number("(d+)?,")                    // battery
             .expression("([^,]*);")              // alert
             .any()
@@ -305,17 +306,15 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        }
+
         position.set(Position.KEY_MCC, parser.nextInt());
         position.set(Position.KEY_MNC, parser.nextInt());
         position.set(Position.KEY_LAC, parser.nextInt(16));
         position.set(Position.KEY_CID, parser.nextInt(16));
-
-        String gsm = parser.next();
-        if (gsm != null) {
-            position.set(Position.KEY_GSM, Integer.parseInt(gsm));
-        }
-
+        position.set(Position.KEY_GSM, parser.nextInt());
         position.set(Position.KEY_INPUT, parser.nextInt(2));
         position.set(Position.KEY_OUTPUT, parser.nextInt(2));
 
@@ -368,9 +367,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         case "Geo2 out":
             return Position.ALARM_GEOFENCE_EXIT;
         default:
-            break;
+            return null;
         }
-        return null;
     }
 
     @Override

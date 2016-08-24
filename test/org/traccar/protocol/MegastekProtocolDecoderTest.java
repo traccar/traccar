@@ -11,6 +11,9 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
         MegastekProtocolDecoder decoder = new MegastekProtocolDecoder(new MegastekProtocol());
 
         verifyPosition(decoder, text(
+                "$MGV002,869152024446923,869152024446923,S,240816,151631,A,5053.83335,N,00424.05702,E,00,10,00,0.88,2.645,76.09,22.7,,206,01,07D1,6600,28,,,,,,,,,01,100,Timer;!"));
+
+        verifyPosition(decoder, text(
                 "STX,013950007137061,$GPRMC,191959.000,A,5203.09602,N,00830.77057,E,5.73,255.27,240716,,,A*62,L,Belt Up,imei:013950007137061,0/5,,Battery=52%,,1,262,03,0084,B20E;FD"));
 
         verifyPosition(decoder, text(
