@@ -15,13 +15,11 @@
  */
 package org.traccar.notification;
 
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Formatter;
 import java.util.Locale;
 
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -202,19 +200,15 @@ public final class NotificationFormatter {
     private static String formatSpeed(long userId, double speed) {
         DecimalFormat df = new DecimalFormat("#.##");
         String result = df.format(speed) + " kn";
-        try {
-            switch (Context.getDataManager().getUser(userId).getSpeedUnit()) {
-            case "kmh":
-                result = df.format(UnitsConverter.kphFromKnots(speed)) + " km/h";
-                break;
-            case "mph":
-                result = df.format(UnitsConverter.mphFromKnots(speed)) + " mph";
-                break;
-            default:
-                break;
-            }
-        } catch (SQLException error) {
-            Log.warning(error);
+        switch (Context.getPermissionsManager().getUser(userId).getSpeedUnit()) {
+        case "kmh":
+            result = df.format(UnitsConverter.kphFromKnots(speed)) + " km/h";
+            break;
+        case "mph":
+            result = df.format(UnitsConverter.mphFromKnots(speed)) + " mph";
+            break;
+        default:
+            break;
         }
         return result;
     }
