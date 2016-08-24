@@ -45,10 +45,16 @@ public final class ReportUtils {
 
     public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer) {
         double distance = 0.0;
-        if (useOdometer && firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
-                && lastPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-            distance = (((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue()
-                    - ((Number) firstPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue());
+        double firstOdometer = 0.0;
+        double lastOdometer = 0.0;
+        if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
+            firstOdometer = ((Number) firstPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
+        }
+        if (lastPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
+            lastOdometer = ((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
+        }
+        if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
+            distance = lastOdometer - firstOdometer;
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
             distance = ((Number) lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue()
