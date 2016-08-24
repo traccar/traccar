@@ -107,27 +107,17 @@ Ext.define('Traccar.view.BaseMap', {
         });
         this.map.addOverlay(this.popupOverlay);
 
-        that = this;
-        popupElement.onclick = function (evt) {
-            if (that.map.isMapClick) {
-                that.map.isPopupOverlayClick = true;
-            }
-        };
-
         this.map.on('click', function (e) {
+            var target = e.originalEvent.target || e.originalEvent.srcElement;
+
             var feature = this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
                 this.fireEvent('selectFeature', feature);
                 return feature;
             }, this);
 
-            that.map.isMapClick = true;
-            window.setTimeout(function () {
-                if (!feature && !that.map.isPopupOverlayClick) {
-                    that.fireEvent('clickMap');
-                }
-                that.map.isPopupOverlayClick = false;
-                that.map.isMapClick = false;
-            }, 250);
+            if (!feature && target.tagName == 'CANVAS') {
+                this.fireEvent('clickMap');
+            }
         }, this);
     },
 
