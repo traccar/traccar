@@ -119,7 +119,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
             position.setAltitude(buf.readUnsignedShort());
 
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedShort());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedShort() * 1000);
 
             while (buf.readableBytes() > 4) {
                 buf.readUnsignedShort(); // subtype

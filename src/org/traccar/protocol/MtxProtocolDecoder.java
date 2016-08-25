@@ -89,7 +89,7 @@ public class MtxProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
 
-        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
         position.set(Position.PREFIX_ADC + 1, parser.next());
