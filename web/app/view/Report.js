@@ -44,12 +44,11 @@ Ext.define('Traccar.view.Report', {
         xtype: 'tbtext',
         html: Strings.reportDevice
     }, {
-        xtype: 'combobox',
+        xtype: 'tagfield',
         reference: 'deviceField',
         store: 'Devices',
         valueField: 'id',
         displayField: 'name',
-        typeAhead: true,
         queryMode: 'local'
     }, '-', {
         xtype: 'tbtext',
