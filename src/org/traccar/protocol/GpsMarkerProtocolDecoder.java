@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)(dd)(dddd)")           // longitude
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
-            .number("(d)")                       // satellites
+            .number("(x)")                       // satellites
             .number("(dd)")                      // battery
             .number("(d)")                       // input
             .number("(d)")                       // output
@@ -82,7 +82,7 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
 
-        position.set(Position.KEY_SATELLITES, parser.next());
+        position.set(Position.KEY_SATELLITES, parser.nextInt(16));
         position.set(Position.KEY_BATTERY, parser.next());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
