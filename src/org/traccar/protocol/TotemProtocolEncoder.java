@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 Irving Gonzalez
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,19 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.Context;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 public class TotemProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
 
-        command.set(Command.KEY_DEVICE_PASSWORD, "000000");
-        Device device = Context.getIdentityManager().getDeviceById(command.getDeviceId());
-        if (device.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-            command.set(Command.KEY_DEVICE_PASSWORD, (String) device.getAttributes()
-                    .get(Command.KEY_DEVICE_PASSWORD));
-        }
+        initDevicePassword(command, "000000");
 
         switch (command.getType()) {
-            //Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
+            // Assuming PIN 8 (Output C) is the power wire, like manual says but it can be PIN 5,7,8
             case Command.TYPE_ENGINE_STOP:
                 return formatCommand(command, "*{%s},025,C,1#", Command.KEY_DEVICE_PASSWORD);
             case Command.TYPE_ENGINE_RESUME:
@@ -47,4 +40,5 @@ public class TotemProtocolEncoder extends StringProtocolEncoder {
 
         return null;
     }
+
 }
