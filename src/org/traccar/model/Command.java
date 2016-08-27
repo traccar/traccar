@@ -58,7 +58,6 @@ public class Command extends Message {
     public static final String KEY_TIMEZONE = "timezone";
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";
     public static final String KEY_RADIUS = "radius";
-    public static final String KEY_PHONE_NUMBER = "phoneNumber";
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_ENABLE = "enable";
     public static final String KEY_DATA = "data";

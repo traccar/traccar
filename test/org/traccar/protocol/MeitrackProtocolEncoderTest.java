@@ -20,7 +20,7 @@ public class MeitrackProtocolEncoderTest extends ProtocolTest {
 
         command.setDeviceId(1);
         command.setType(Command.TYPE_SEND_SMS);
-        command.set(Command.KEY_PHONE_NUMBER, "15360853789");
+        command.set(Command.KEY_PHONE, "15360853789");
         command.set(Command.KEY_MESSAGE, "Meitrack");
 
         Assert.assertEquals("@@f48,123456789012345,C02,0,15360853789,Meitrack*B0\r\n", encoder.encodeCommand(command));

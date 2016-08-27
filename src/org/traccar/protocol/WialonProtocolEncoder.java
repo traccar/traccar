@@ -28,7 +28,7 @@ public class WialonProtocolEncoder extends StringProtocolEncoder {
         case Command.TYPE_REBOOT_DEVICE:
             return formatCommand(command, "reboot\r\n");
         case Command.TYPE_SEND_USSD:
-            return formatCommand(command, "USSD:{%s}\r\n", Command.KEY_PHONE_NUMBER);
+            return formatCommand(command, "USSD:{%s}\r\n", Command.KEY_PHONE);
         case Command.TYPE_IDENTIFICATION:
             return formatCommand(command, "VER?\r\n");
         case Command.TYPE_OUTPUT_CONTROL:

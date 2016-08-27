@@ -19,6 +19,14 @@ public class MiniFinderProtocolEncoderTest extends ProtocolTest {
         
         Assert.assertEquals("123456L+01", encoder.encodeCommand(command));
 
+        command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_SOS_NUMBER);
+        command.set(Command.KEY_INDEX, 2);
+        command.set(Command.KEY_PHONE, "1111111111");
+
+        Assert.assertEquals("123456C1,1111111111", encoder.encodeCommand(command));
+
     }
 
 }
