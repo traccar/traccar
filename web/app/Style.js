@@ -69,5 +69,8 @@ Ext.define('Traccar.Style', {
     mapDelay: 500,
 
     coordinatePrecision: 6,
-    numberPrecision: 2
+    numberPrecision: 2,
+
+    maxTagfieldWidth: 200,
+    maxTagfieldGrow: 1
 });

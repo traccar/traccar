@@ -45,6 +45,8 @@ Ext.define('Traccar.view.Report', {
         html: Strings.reportDevice
     }, {
         xtype: 'tagfield',
+        maxWidth: Traccar.Style.maxTagfieldWidth,
+        growMax: Traccar.Style.maxTagfieldGrow,
         reference: 'deviceField',
         store: 'Devices',
         valueField: 'id',
