@@ -1118,7 +1118,7 @@
                 },
                 "deviceId": {
                     "type": "integer"
-                },                
+                },
                 "protocol": {
                     "type": "string"
                 },
@@ -1404,6 +1404,62 @@
                     "type": "integer"
                 },
                 "attributes": {}
+            }
+        },
+        "ReportSummary": {
+            "properties": {
+                "deviceId": {
+                    "type": "integer"
+                },
+                "deviceName": {
+                    "type": "string"
+                },
+                "maxSpeed": {
+                    "type": "number"
+                },
+                "averageSpeed": {
+                    "type": "number"
+                },
+                "distance": {
+                    "type": "number"
+                },
+                "engineHours": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ReportTrips": {
+            "properties": {
+                "deviceId": {
+                    "type": "integer"
+                },
+                "deviceName": {
+                    "type": "string"
+                },
+                "maxSpeed": {
+                    "type": "number"
+                },
+                "averageSpeed": {
+                    "type": "number"
+                },
+                "distance": {
+                    "type": "number"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "startAddress": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "endAddress": {
+                    "type": "string"
+                }
             }
         }
     }
