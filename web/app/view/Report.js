@@ -41,45 +41,8 @@ Ext.define('Traccar.view.Report', {
             change: 'onTypeChange'
         }
     }, '-', {
-        xtype: 'tbtext',
-        html: Strings.reportDevice
-    }, {
-        xtype: 'tagfield',
-        maxWidth: Traccar.Style.maxTagfieldWidth,
-        growMax: Traccar.Style.maxTagfieldGrow,
-        reference: 'deviceField',
-        store: 'Devices',
-        valueField: 'id',
-        displayField: 'name',
-        queryMode: 'local'
-    }, '-', {
-        xtype: 'tbtext',
-        html: Strings.reportFrom
-    }, {
-        xtype: 'datefield',
-        reference: 'fromDateField',
-        startDay: Traccar.Style.weekStartDay,
-        format: Traccar.Style.dateFormat,
-        value: new Date(new Date().getTime() - 30 * 60 * 1000)
-    }, {
-        xtype: 'customTimeField',
-        reference: 'fromTimeField',
-        maxWidth: Traccar.Style.reportTime,
-        value: new Date(new Date().getTime() - 30 * 60 * 1000)
-    }, '-', {
-        xtype: 'tbtext',
-        html: Strings.reportTo
-    }, {
-        xtype: 'datefield',
-        reference: 'toDateField',
-        startDay: Traccar.Style.weekStartDay,
-        format: Traccar.Style.dateFormat,
-        value: new Date()
-    }, {
-        xtype: 'customTimeField',
-        reference: 'toTimeField',
-        maxWidth: Traccar.Style.reportTime,
-        value: new Date()
+        text: Strings.reportConfigure,
+        handler: 'onConfigureClick'
     }, '-', {
         text: Strings.reportShow,
         reference: 'showButton',

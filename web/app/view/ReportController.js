@@ -19,6 +19,10 @@ Ext.define('Traccar.view.ReportController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.report',
 
+    requires: [
+               'Traccar.view.ReportConfigDialog'
+    ],
+
     config: {
         listen: {
             controller: {
@@ -30,34 +34,53 @@ Ext.define('Traccar.view.ReportController', {
         }
     },
 
+    onConfigureClick: function () {
+        var dialog = Ext.create('Traccar.view.ReportConfigDialog');
+        dialog.lookupReference('eventTypeField').setHidden(this.lookupReference('reportTypeField').getValue() !== 'events');
+        dialog.callingPanel = this;
+        dialog.lookupReference('deviceField').setValue(this.deviceId);
+        dialog.lookupReference('groupField').setValue(this.groupId);
+        if (this.eventType !== undefined) {
+            dialog.lookupReference('eventTypeField').setValue(this.eventType);
+        } else {
+            dialog.lookupReference('eventTypeField').setValue(['%']);
+        }
+        if (this.fromDate !== undefined) {
+            dialog.lookupReference('fromDateField').setValue(this.fromDate);
+        }
+        if (this.fromTime !== undefined) {
+            dialog.lookupReference('fromTimeField').setValue(this.fromTime);
+        }
+        if (this.toDate !== undefined) {
+            dialog.lookupReference('toDateField').setValue(this.toDate);
+        }
+        if (this.toTime !== undefined) {
+            dialog.lookupReference('toTimeField').setValue(this.toTime);
+        }
+        dialog.show();
+    },
+
     onReportClick: function (button) {
-        var reportType, deviceId, fromDate, fromTime, from, toDate, toTime, to, store, url;
+        var reportType, from, to, store, url;
 
         reportType = this.lookupReference('reportTypeField').getValue();
 
-        deviceId = this.lookupReference('deviceField').getValue();
-
-        fromDate = this.lookupReference('fromDateField').getValue();
-        fromTime = this.lookupReference('fromTimeField').getValue();
-
-        if (reportType && deviceId) {
+        if (reportType && (this.deviceId || this.groupId)) {
             from = new Date(
-                fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(),
-                fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
-
-            toDate = this.lookupReference('toDateField').getValue();
-            toTime = this.lookupReference('toTimeField').getValue();
+                this.fromDate.getFullYear(), this.fromDate.getMonth(), this.fromDate.getDate(),
+                this.fromTime.getHours(), this.fromTime.getMinutes(), this.fromTime.getSeconds(), this.fromTime.getMilliseconds());
 
             to = new Date(
-                toDate.getFullYear(), toDate.getMonth(), toDate.getDate(),
-                toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
+                this.toDate.getFullYear(), this.toDate.getMonth(), this.toDate.getDate(),
+                this.toTime.getHours(), this.toTime.getMinutes(), this.toTime.getSeconds(), this.toTime.getMilliseconds());
 
             if (button.reference === "showButton") {
                 store = this.getView().getStore();
                 store.load({
                     params: {
-                        deviceId: deviceId,
-                        type: '%',
+                        deviceId: this.deviceId,
+                        groupId: this.groupId,
+                        type: this.eventType,
                         from: from.toISOString(),
                         to: to.toISOString()
                     }
@@ -65,8 +88,9 @@ Ext.define('Traccar.view.ReportController', {
             } else if (button.reference === "csvButton") {
                 url = this.getView().getStore().getProxy().url;
                 this.downloadCsv(url, {
-                    deviceId: deviceId,
-                    type: '%',
+                    deviceId: this.deviceId,
+                    groupId: this.groupId,
+                    type: this.eventType,
                     from: from.toISOString(),
                     to: to.toISOString()
                 });
