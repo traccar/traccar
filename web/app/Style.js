@@ -22,9 +22,6 @@ Ext.define('Traccar.Style', {
     windowWidth: 640,
     windowHeight: 480,
 
-    popupWindowWidth: 250,
-    popupWindowHeight: 250,
-
     dateTimeFormat24: 'Y-m-d H:i:s',
     dateTimeFormat12: 'Y-m-d g:i:s a',
     timeFormat24: 'H:i',
@@ -41,7 +38,14 @@ Ext.define('Traccar.Style', {
     mapDefaultLon: -0.1275,
     mapDefaultZoom: 6,
 
-    mapRouteColor: 'rgba(21, 127, 204, 1.0)',
+    mapRouteColor: [
+        'rgba(21, 127, 204, 1.0)',
+        'rgba(109, 46, 204, 1.0)',
+        'rgba(204, 46, 162, 1.0)',
+        'rgba(204, 46, 38, 1.0)',
+        'rgba(128, 204, 46, 1.0)',
+        'rgba(46, 204, 155, 1.0)'
+    ],
     mapRouteWidth: 5,
 
     mapArrowStrokeColor: 'rgba(50, 50, 50, 1.0)',
@@ -56,7 +60,6 @@ Ext.define('Traccar.Style', {
     mapColorOnline: 'rgba(77, 250, 144, 1.0)',
     mapColorUnknown: 'rgba(250, 190, 77, 1.0)',
     mapColorOffline: 'rgba(255, 84, 104, 1.0)',
-    mapColorReport: 'rgba(21, 127, 204, 1.0)',
     mapColorOverlay: 'rgba(21, 127, 204, 0.2)',
 
     mapRadiusNormal: 9,
@@ -68,7 +71,6 @@ Ext.define('Traccar.Style', {
     coordinatePrecision: 6,
     numberPrecision: 2,
 
-    autoPanAnimationDuration: 250,
-    popupOverlayOffsetX: 0,
-    popupOverlayOffsetY: -150
+    maxTagfieldWidth: 200,
+    maxTagfieldGrow: 1
 });
