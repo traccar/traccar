@@ -41,9 +41,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("d*")                        // imei?
             .number("(dd)(dd)(dd),?")            // date
             .expression("([AV]),?")              // validity
-            .number("(dd)(dd.d+)")               // latitude
+            .number("(d+)(dd.d+)")               // latitude
             .expression("([NS]),?")
-            .number("(ddd)(dd.d+)")              // longitude
+            .number("(d+)(dd.d+)")               // longitude
             .expression("([EW]),?")
             .number("(d+.d)(?:d*,)?")            // speed
             .number("(dd)(dd)(dd),?")            // time
@@ -211,7 +211,6 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setCourse(parser.nextDouble());
 
-        // Status
         String status = parser.next();
         if (status != null) {
             position.set(Position.KEY_STATUS, status); // binary status
