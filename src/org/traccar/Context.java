@@ -130,7 +130,7 @@ public final class Context {
 
     private static EventForwarder eventForwarder;
 
-    public static EventForwarder getEventForvarder() {
+    public static EventForwarder getEventForwarder() {
         return eventForwarder;
     }
 
