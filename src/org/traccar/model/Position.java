@@ -85,7 +85,10 @@ public class Position extends Message {
     public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
     public static final String ALARM_GPS_ANTENNA_CUT = "gpsAntennaCut";
     public static final String ALARM_ACCIDENT = "accident";
-
+    public static final String ALARM_TOW = "tow";
+    public static final String ALARM_ACCELETATION = "hardAcceleration";
+    public static final String ALARM_BREAKING = "hardBreaking";
+    public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
 
     private String protocol;
 

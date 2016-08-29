@@ -9,6 +9,12 @@ public class Pt502ProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         Pt502ProtocolDecoder decoder = new Pt502ProtocolDecoder(new Pt502Protocol());
+
+        verifyPosition(decoder, text(
+                "$DFR,40456789,083125.000,A,2232.0971,N,11400.9504,E,0.0,5.00,090714,,,A/00000,00/0,0/200076//FE7/"));
+
+        verifyPosition(decoder, text(
+                "$FDA,40456789,083125.000,A,2232.0971,N,11400.9504,E,0.0,5.00,090714,,,A/00000,00/0,0/200076//FE7/"));
         
         verifyPosition(decoder, text(
                 "$POS,216769295715,163237.000,A,3258.1738,S,02755.4350,E,0.00,215.88,100915,,,A/0000,0//232300//5b3/"),
