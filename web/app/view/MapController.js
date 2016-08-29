@@ -280,22 +280,14 @@ Ext.define('Traccar.view.MapController', {
         this.hidePopup();
         this.selectMarker(this.latestMarkers[device.get('id')], center);
         if (featureSelected) {
-            this.clickDevice(this.selectedMarker);
+            if (Object.getOwnPropertyNames(this.selectedMarker.get('record').get('attributes')).length) {
+                this.showAttributesView(this.selectedMarker);
+            }
         }
     },
 
     selectReport: function (position, center) {
         this.selectMarker(this.reportMarkers[position.get('id')], center);
-    },
-
-    clickDevice: function (feature) {
-        var record, attributes;
-
-        record = feature.get('record');
-        attributes = record.get('attributes');
-        if (Object.getOwnPropertyNames(attributes).length) {
-            this.showAttributesView(feature);
-        }
     },
 
     selectFeature: function (feature) {
@@ -314,13 +306,11 @@ Ext.define('Traccar.view.MapController', {
     },
 
     showAttributesView: function (feature) {
-        var coordinates, popupOverlay, record, that;
+        var coordinates, popupOverlay, record;
 
         coordinates = feature.getGeometry().getCoordinates();
         popupOverlay = this.getView().getPopupOverlay();
         record = feature.get('record');
-        that = this;
-
         popupOverlay.setPosition(coordinates);
 
         Ext.create('Traccar.view.PopupWindow', {
@@ -339,7 +329,7 @@ Ext.define('Traccar.view.MapController', {
                         tooltipType: 'title',
                         listeners: {
                             click: 'onZoomInClick',
-                            scope: that
+                            scope: this
                         }
                     }]
                 }
