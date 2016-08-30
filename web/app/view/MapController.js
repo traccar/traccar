@@ -42,7 +42,8 @@ Ext.define('Traccar.view.MapController', {
             },
             component: {
                 '#': {
-                    selectFeature: 'selectFeature'
+                    selectFeature: 'selectFeature',
+                    clickMap: 'clickMap'
                 }
             }
         }
@@ -148,15 +149,13 @@ Ext.define('Traccar.view.MapController', {
         this.clearReport(store);
 
         if (data.length > 0) {
-            this.reportRoute = [];
+            this.reportRoute = new ol.Feature({
+                geometry: new ol.geom.LineString([])
+            });
+            this.reportRoute.setStyle(this.getRouteStyle());
+            this.getView().getRouteSource().addFeature(this.reportRoute);
+
             for (i = 0; i < data.length; i++) {
-                if (i === 0 || data[i].get('deviceId') !== data[i - 1].get('deviceId')) {
-                    this.reportRoute.push(new ol.Feature({
-                        geometry: new ol.geom.LineString([])
-                    }));
-                    this.reportRoute[this.reportRoute.length - 1].setStyle(this.getRouteStyle(data[i].get('deviceId')));
-                    this.getView().getRouteSource().addFeature(this.reportRoute[this.reportRoute.length - 1]);
-                }
                 position = data[i];
 
                 point = ol.proj.fromLonLat([
@@ -170,27 +169,25 @@ Ext.define('Traccar.view.MapController', {
                 this.reportMarkers[position.get('id')] = marker;
                 this.getView().getReportSource().addFeature(marker);
 
-                style = this.getReportMarker(position.get('deviceId'));
+                style = this.getReportMarker();
                 style.getImage().setRotation(position.get('course') * Math.PI / 180);
                 /*style.getText().setText(
                     Ext.Date.format(position.get('fixTime'), Traccar.Style.dateTimeFormat24));*/
 
                 marker.setStyle(style);
 
-                this.reportRoute[this.reportRoute.length - 1].getGeometry().appendCoordinate(point);
+                this.reportRoute.getGeometry().appendCoordinate(point);
             }
 
-            this.getView().getMapView().fit(this.reportRoute[0].getGeometry(), this.getView().getMap().getSize());
+            this.getView().getMapView().fit(this.reportRoute.getGeometry(), this.getView().getMap().getSize());
         }
     },
 
     clearReport: function (store) {
-        var key, i;
+        var key;
 
         if (this.reportRoute) {
-            for (i = 0; i < this.reportRoute.length; i++) {
-                this.getView().getRouteSource().removeFeature(this.reportRoute[i]);
-            }
+            this.getView().getRouteSource().removeFeature(this.reportRoute);
             this.reportRoute = null;
         }
 
@@ -204,14 +201,10 @@ Ext.define('Traccar.view.MapController', {
         }
     },
 
-    getRouteStyle: function (deviceId) {
-        var index = 0;
-        if (deviceId !== undefined) {
-            index = deviceId % Traccar.Style.mapRouteColor.length;
-        }
+    getRouteStyle: function () {
         return new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: Traccar.Style.mapRouteColor[index],
+                color: Traccar.Style.mapRouteColor,
                 width: Traccar.Style.mapRouteWidth
             })
         });
@@ -249,13 +242,9 @@ Ext.define('Traccar.view.MapController', {
             Traccar.Style.mapRadiusNormal, color);
     },
 
-    getReportMarker: function (deviceId) {
-        var index = 0;
-        if (deviceId !== undefined) {
-            index = deviceId % Traccar.Style.mapRouteColor.length;
-        }
+    getReportMarker: function () {
         return this.getMarkerStyle(
-            Traccar.Style.mapRadiusNormal, Traccar.Style.mapRouteColor[index]);
+            Traccar.Style.mapRadiusNormal, Traccar.Style.mapColorReport);
     },
 
     resizeMarker: function (style, radius) {
@@ -287,8 +276,14 @@ Ext.define('Traccar.view.MapController', {
         this.selectedMarker = marker;
     },
 
-    selectDevice: function (device, center) {
+    selectDevice: function (device, center, featureSelected) {
+        this.hidePopup();
         this.selectMarker(this.latestMarkers[device.get('id')], center);
+        if (featureSelected) {
+            if (Object.getOwnPropertyNames(this.selectedMarker.get('record').get('attributes')).length) {
+                this.showAttributesView(this.selectedMarker);
+            }
+        }
     },
 
     selectReport: function (position, center) {
@@ -299,10 +294,61 @@ Ext.define('Traccar.view.MapController', {
         var record = feature.get('record');
         if (record) {
             if (record instanceof Traccar.model.Device) {
-                this.fireEvent('selectDevice', record, false);
+                this.fireEvent('selectDevice', record, false, true);
             } else {
                 this.fireEvent('selectReport', record, false);
             }
+        }
+    },
+
+    clickMap: function () {
+        this.hidePopup();
+    },
+
+    showAttributesView: function (feature) {
+        var coordinates, popupOverlay, record;
+
+        coordinates = feature.getGeometry().getCoordinates();
+        popupOverlay = this.getView().getPopupOverlay();
+        record = feature.get('record');
+        popupOverlay.setPosition(coordinates);
+
+        Ext.create('Traccar.view.PopupWindow', {
+            title: record.get('name') + ' ' + Strings.sharedAttributes,
+            renderTo: Ext.get('popup'),
+            items: {
+                xtype: 'attributesView',
+                record: record,
+                tbar: {
+                    xtype: 'editToolbar',
+                    items: [{
+                        xtype: 'tbfill'
+                    }, {
+                        glyph: 'xf00e@FontAwesome',
+                        tooltip: Strings.deviceZoomIn,
+                        tooltipType: 'title',
+                        listeners: {
+                            click: 'onZoomInClick',
+                            scope: this
+                        }
+                    }]
+                }
+            }
+        }).show();
+    },
+
+    hidePopup: function () {
+        var popupOverlay = this.getView().getPopupOverlay();
+        popupOverlay.setPosition();
+    },
+
+    onZoomInClick: function () {
+        var marker, mapView;
+        marker = this.selectedMarker;
+        if (marker) {
+            mapView = this.getView().getMapView();
+            mapView.setCenter(marker.getGeometry().getCoordinates());
+            mapView.setZoom(Traccar.Style.mapMaxZoom);
         }
     }
 });

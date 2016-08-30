@@ -28,8 +28,12 @@ Ext.define('Traccar.view.BaseMap', {
         return this.mapView;
     },
 
+    getPopupOverlay: function () {
+        return this.popupOverlay;
+    },
+
     initMap: function () {
-        var user, server, layer, type, bingKey, lat, lon, zoom, target;
+        var user, server, layer, type, bingKey, lat, lon, zoom, target, popupElement;
 
         user = Traccar.app.getUser();
         server = Traccar.app.getServer();
@@ -82,26 +86,40 @@ Ext.define('Traccar.view.BaseMap', {
             view: this.mapView
         });
 
-        target = this.map.getTarget();
-        if (typeof target === 'string') {
-            target = Ext.get(target).dom;
-        }
-
-        this.map.on('pointermove', function (e) {
-            var hit = this.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
-                return true;
-            });
-            if (hit) {
-                target.style.cursor = 'pointer';
-            } else {
-                target.style.cursor = '';
-            }
+        target = this.map.getTargetElement();
+        this.map.on('pointermove', function (evt) {
+            target.style.cursor = this.hasFeatureAtPixel(evt.pixel) ? 'pointer' : '';
         });
 
+        popupElement = document.createElement('div');
+        popupElement.id = 'popup';
+        document.body.appendChild(popupElement);
+
+        this.popupOverlay = new ol.Overlay({
+            element: popupElement,
+            autoPan: true,
+            autoPanAnimation: {
+                duration: Traccar.Style.autoPanAnimationDuration
+            },
+            positioning: 'bottom-center',
+            stopEvent: false,
+            offset: [Traccar.Style.popupOverlayOffsetX, Traccar.Style.popupOverlayOffsetY]
+        });
+        this.map.addOverlay(this.popupOverlay);
+
         this.map.on('click', function (e) {
-            this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+            var target, feature;
+
+            target = e.originalEvent.target || e.originalEvent.srcElement;
+
+            feature = this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
                 this.fireEvent('selectFeature', feature);
+                return feature;
             }, this);
+
+            if (!feature && target.tagName === 'CANVAS') {
+                this.fireEvent('clickMap');
+            }
         }, this);
     },
 
