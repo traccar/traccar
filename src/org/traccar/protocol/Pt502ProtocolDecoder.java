@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  * Copyright 2012 Luis Parada (luis.parada@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,8 +35,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .any().text("$")
-            .expression("[A-Z]{3}")
-            .number("d?,")                       // type
+            .expression("([^,]+),")              // type
             .number("(d+),")                     // id
             .number("(dd)(dd)(dd).(ddd),")       // time
             .expression("([AV]),")               // validity
@@ -56,6 +55,25 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxx)").optional(2)         // state
             .any()
             .compile();
+
+    private String decodeAlarm(String value) {
+        switch (value) {
+            case "TOW":
+                return Position.ALARM_TOW;
+            case "HDA":
+                return Position.ALARM_ACCELETATION;
+            case "HDB":
+                return Position.ALARM_BREAKING;
+            case "FDA":
+                return Position.ALARM_FATIGUE_DRIVING;
+            case "SKA":
+                return Position.ALARM_VIBRATION;
+            case "PMA":
+                return Position.ALARM_MOVEMENT;
+            default:
+                return null;
+        }
+    }
 
     @Override
     protected Object decode(
@@ -77,6 +95,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
+
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
