@@ -52,9 +52,9 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .expression("[^,]*,")                // command
             .expression("[^,]*,")
-            .number("(dd)(dd.d+),")              // latitude
+            .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
-            .number("(ddd)(dd.d+),")             // longitude
+            .number("(d+)(dd.d+),")              // longitude
             .expression("([EW]),")
             .number("(d+.?d*),")                 // altitude
             .number("(d+.?d*),")                 // speed

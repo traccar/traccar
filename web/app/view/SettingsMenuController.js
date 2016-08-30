@@ -30,9 +30,17 @@ Ext.define('Traccar.view.SettingsMenuController', {
     ],
 
     init: function () {
-        if (Traccar.app.getUser().get('admin')) {
+        var admin, readonly;
+        admin = Traccar.app.getUser().get('admin');
+        readonly = Traccar.app.getServer().get('readonly');
+        if (admin) {
             this.lookupReference('settingsServerButton').setHidden(false);
             this.lookupReference('settingsUsersButton').setHidden(false);
+        }
+        if (admin || !readonly) {
+            this.lookupReference('settingsGroupsButton').setHidden(false);
+            this.lookupReference('settingsGeofencesButton').setHidden(false);
+            this.lookupReference('settingsNotificationsButton').setHidden(false);
         }
     },
 

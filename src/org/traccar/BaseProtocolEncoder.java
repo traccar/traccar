@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,24 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
+import org.traccar.model.Device;
 
 public abstract class BaseProtocolEncoder extends OneToOneEncoder {
 
     protected String getUniqueId(long deviceId) {
         return Context.getIdentityManager().getDeviceById(deviceId).getUniqueId();
+    }
+
+    protected void initDevicePassword(Command command, String defaultPassword) {
+        if (!command.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
+            Device device = Context.getIdentityManager().getDeviceById(command.getDeviceId());
+            if (device.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
+                String password = (String) device.getAttributes().get(Command.KEY_DEVICE_PASSWORD);
+                command.set(Command.KEY_DEVICE_PASSWORD, password);
+            } else {
+                command.set(Command.KEY_DEVICE_PASSWORD, defaultPassword);
+            }
+        }
     }
 
     @Override

@@ -15,7 +15,6 @@
  */
 package org.traccar.notification;
 
-import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -27,7 +26,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.traccar.Config;
 import org.traccar.Context;
-import org.traccar.database.DataManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Extensible;
@@ -106,14 +104,13 @@ public final class NotificationMail {
     }
 
     public static void sendMailSync(long userId, Event event, Position position) {
-        DataManager dataManager = Context.getDataManager();
 
         Properties mailServerProperties;
         Session mailSession;
         MimeMessage mailMessage;
 
         try {
-            User user = dataManager.getUser(userId);
+            User user = Context.getPermissionsManager().getUser(userId);
 
             mailServerProperties = getConfigProperies();
             if (!mailServerProperties.containsKey("mail.smtp.host")) {
@@ -130,8 +127,7 @@ public final class NotificationMail {
                 mailMessage.setFrom(new InternetAddress(mailServerProperties.getProperty("mail.smtp.from")));
             }
 
-            mailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(
-                    Context.getDataManager().getUser(userId).getEmail()));
+            mailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
             mailMessage.setSubject(NotificationFormatter.formatTitle(userId, event, position));
             mailMessage.setText(NotificationFormatter.formatMessage(userId, event, position));
 
@@ -142,7 +138,7 @@ public final class NotificationMail {
             transport.sendMessage(mailMessage, mailMessage.getAllRecipients());
             transport.close();
 
-        } catch (MessagingException | SQLException error) {
+        } catch (MessagingException error) {
             Log.warning(error);
         }
     }

@@ -154,7 +154,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                             break;
 
                         case "vo":
-                            position.set(Position.KEY_ODOMETER, value);
+                            position.set(Position.KEY_ODOMETER, Long.parseLong(value));
                             break;
 
                         default:

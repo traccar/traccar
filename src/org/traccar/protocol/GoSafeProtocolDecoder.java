@@ -156,8 +156,9 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_LAC, parser.nextInt(16));
             position.set(Position.KEY_CID, parser.nextInt(16));
         }
-
-        position.set(Position.KEY_ODOMETER, parser.next());
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+        }
         position.set(Position.KEY_POWER, parser.next());
         position.set(Position.KEY_BATTERY, parser.next());
 

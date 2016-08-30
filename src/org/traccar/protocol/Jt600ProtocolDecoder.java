@@ -110,7 +110,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             int fuel = buf.readUnsignedByte() << 8;
 
             position.set(Position.KEY_STATUS, buf.readUnsignedInt());
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
 
             fuel += buf.readUnsignedByte();
             position.set(Position.KEY_FUEL, fuel);

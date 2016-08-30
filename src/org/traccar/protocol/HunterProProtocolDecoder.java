@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.traccar.protocol;
 
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -25,16 +24,16 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
-public class RitiProtocolDecoder extends BaseProtocolDecoder {
+public class HunterProProtocolDecoder extends BaseProtocolDecoder {
 
-    public RitiProtocolDecoder(RitiProtocol protocol) {
+    public HunterProProtocolDecoder(HunterProProtocol protocol) {
         super(protocol);
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
+            .number(">(d+)<")                    // identifier
             .text("$GPRMC,")
             .number("(dd)(dd)(dd).?d*,")         // time
             .expression("([AV]),")               // validity
@@ -52,40 +51,22 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        ChannelBuffer buf = (ChannelBuffer) msg;
-
-        buf.skipBytes(2); // header
+        Parser parser = new Parser(PATTERN, (String) msg);
+        if (!parser.matches()) {
+            return null;
+        }
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedShort()));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set("mode", buf.readUnsignedByte());
-        position.set("command", buf.readUnsignedByte());
-        position.set(Position.KEY_POWER, buf.readUnsignedShort());
-
-        buf.skipBytes(5);
-        buf.readUnsignedShort();
-        buf.readUnsignedShort();
-
-        position.set(Position.KEY_DISTANCE, buf.readUnsignedInt());
-        position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt());
-
-        // Parse GPRMC
-        int end = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');
-        String gprmc = buf.toString(buf.readerIndex(), end - buf.readerIndex(), StandardCharsets.US_ASCII);
-        Parser parser = new Parser(PATTERN, gprmc);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        DateBuilder dateBuilder = new DateBuilder();
+        dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());

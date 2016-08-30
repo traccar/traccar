@@ -227,7 +227,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort());
 
             position.set(Position.KEY_TYPE, buf.readUnsignedByte());
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 0.1);
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
             position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
             position.set(Position.KEY_INPUT, buf.readUnsignedByte());
 

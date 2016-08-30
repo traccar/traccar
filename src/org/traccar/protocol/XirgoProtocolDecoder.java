@@ -25,7 +25,6 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class XirgoProtocolDecoder extends BaseProtocolDecoder {
@@ -34,9 +33,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private boolean newFormat;
-
-    private static final Pattern FIRMWARE = Pattern.compile("\\w{4}-([0-9A-F]{7})");
+    private Boolean newFormat;
 
     private static final Pattern PATTERN_OLD = new PatternBuilder()
             .text("$$")
@@ -88,23 +85,28 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        Matcher matcher = FIRMWARE.matcher(sentence);
-        if (matcher.find()) {
-            String type = matcher.group(1);
-            if (type.equals("1137CD1") || type.equals("1137CC1") || type.equals("1137CA3")) {
-                newFormat = true;
-            }
-        }
-
         Parser parser;
-        if (newFormat) {
+        if (newFormat == null) {
             parser = new Parser(PATTERN_NEW, sentence);
+            if (parser.matches()) {
+                newFormat = true;
+            } else {
+                parser = new Parser(PATTERN_OLD, sentence);
+                if (parser.matches()) {
+                    newFormat = false;
+                } else {
+                    return null;
+                }
+            }
         } else {
-            parser = new Parser(PATTERN_OLD, sentence);
-        }
-
-        if (!parser.matches()) {
-            return null;
+            if (newFormat) {
+                parser = new Parser(PATTERN_NEW, sentence);
+            } else {
+                parser = new Parser(PATTERN_OLD, sentence);
+            }
+            if (!parser.matches()) {
+                return null;
+            }
         }
 
         Position position = new Position();
@@ -133,7 +135,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.next());
 
         if (newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);
             position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
         }
 
@@ -141,7 +143,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_GSM, parser.next());
 
         if (!newFormat) {
-            position.set(Position.KEY_ODOMETER, parser.next());
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);
         }
 
         position.setValid(parser.nextInt() == 1);

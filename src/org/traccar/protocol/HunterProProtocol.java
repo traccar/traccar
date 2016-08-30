@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,24 +22,13 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.TrackerServer;
-import org.traccar.model.Command;
 
 import java.util.List;
 
-public class MiniFinderProtocol extends BaseProtocol {
+public class HunterProProtocol extends BaseProtocol {
 
-    public MiniFinderProtocol() {
-        super("minifinder");
-        setSupportedCommands(
-                Command.TYPE_SET_TIMEZONE,
-                Command.TYPE_VOICE_MONITORING,
-                Command.TYPE_ALARM_SPEED,
-                Command.TYPE_ALARM_GEOFENCE,
-                Command.TYPE_SET_AGPS,
-                Command.TYPE_ALARM_FALL,
-                Command.TYPE_MODE_POWER_SAVING,
-                Command.TYPE_MODE_DEEP_SLEEP,
-                Command.TYPE_SOS_NUMBER);
+    public HunterProProtocol() {
+        super("hunterpro");
     }
 
     @Override
@@ -47,11 +36,10 @@ public class MiniFinderProtocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, ';'));
+                pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "\r"));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("stringDecoder", new StringDecoder());
-                pipeline.addLast("objectEncoder", new MiniFinderProtocolEncoder());
-                pipeline.addLast("objectDecoder", new MiniFinderProtocolDecoder(MiniFinderProtocol.this));
+                pipeline.addLast("objectDecoder", new HunterProProtocolDecoder(HunterProProtocol.this));
             }
         });
     }
