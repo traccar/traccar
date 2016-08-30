@@ -68,8 +68,8 @@ public class NotificationManager {
                 }
             }
         }
-        if (Context.getEventForvarder() != null) {
-            Context.getEventForvarder().forwardEvent(event, position);
+        if (Context.getEventForwarder() != null) {
+            Context.getEventForwarder().forwardEvent(event, position);
         }
     }
 
