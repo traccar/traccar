@@ -19,6 +19,11 @@ Ext.define('Traccar.view.ReportConfigController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.reportConfigDialog',
 
+    requires: [
+        'Traccar.store.ReportEventTypes',
+        'Traccar.store.AllNotifications'
+    ],
+
     init: function () {
         var store = this.lookupReference('eventTypeField').getStore();
         if (store.getCount() === 0) {
