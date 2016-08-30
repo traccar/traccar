@@ -20,7 +20,7 @@ Ext.define('Traccar.view.ReportController', {
     alias: 'controller.report',
 
     requires: [
-               'Traccar.view.ReportConfigDialog'
+        'Traccar.view.ReportConfigDialog'
     ],
 
     config: {
@@ -63,7 +63,7 @@ Ext.define('Traccar.view.ReportController', {
     updateButtons: function () {
         var reportType, disabled, devices, time;
         reportType = this.lookupReference('reportTypeField').getValue();
-        devices = this.deviceId && this.deviceId.length !== 0 || this.groupId && this.groupId.length !== 0;
+        devices = (this.deviceId && this.deviceId.length !== 0) || (this.groupId && this.groupId.length !== 0);
         time = this.fromDate && this.fromTime && this.toDate && this.toTime;
         disabled = !reportType || !devices || !time;
         this.lookupReference('showButton').setDisabled(disabled);
@@ -84,7 +84,7 @@ Ext.define('Traccar.view.ReportController', {
                 this.toDate.getFullYear(), this.toDate.getMonth(), this.toDate.getDate(),
                 this.toTime.getHours(), this.toTime.getMinutes(), this.toTime.getSeconds(), this.toTime.getMilliseconds());
 
-            if (button.reference === "showButton") {
+            if (button.reference === 'showButton') {
                 store = this.getView().getStore();
                 store.load({
                     params: {
@@ -95,7 +95,7 @@ Ext.define('Traccar.view.ReportController', {
                         to: to.toISOString()
                     }
                 });
-            } else if (button.reference === "csvButton") {
+            } else if (button.reference === 'csvButton') {
                 url = this.getView().getStore().getProxy().url;
                 this.downloadCsv(url, {
                     deviceId: this.deviceId,
@@ -141,7 +141,7 @@ Ext.define('Traccar.view.ReportController', {
             success: function (response) {
                 var disposition, filename, type, blob, url, downloadUrl, elementA;
                 disposition = response.getResponseHeader('Content-Disposition');
-                filename = disposition.slice(disposition.indexOf("=") + 1, disposition.length);
+                filename = disposition.slice(disposition.indexOf('=') + 1, disposition.length);
                 type = response.getResponseHeader('Content-Type');
                 blob = new Blob([response.responseText], {type: type});
                 if (typeof window.navigator.msSaveBlob !== 'undefined') {
@@ -151,7 +151,7 @@ Ext.define('Traccar.view.ReportController', {
                     url = window.URL || window.webkitURL;
                     downloadUrl = url.createObjectURL(blob);
                     if (filename) {
-                        elementA = document.createElement("a");
+                        elementA = document.createElement('a');
                         elementA.href = downloadUrl;
                         elementA.download = filename;
                         document.body.appendChild(elementA);
