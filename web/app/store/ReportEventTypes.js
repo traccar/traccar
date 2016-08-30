@@ -19,10 +19,7 @@ Ext.define('Traccar.store.ReportEventTypes', {
     extend: 'Ext.data.Store',
     fields: ['type', 'name'],
 
-    allEvents: '%',
-
-    data: [{
-        type: '%',
-        name: Strings.eventAll
-    }]
+    statics: {
+        allEvents: '%'
+    }
 });

@@ -43,7 +43,7 @@ Ext.define('Traccar.view.ReportController', {
         if (this.eventType !== undefined) {
             dialog.lookupReference('eventTypeField').setValue(this.eventType);
         } else {
-            dialog.lookupReference('eventTypeField').setValue([Ext.getStore('ReportEventTypes').allEvents]);
+            dialog.lookupReference('eventTypeField').setValue([Traccar.store.ReportEventTypes.allEvents]);
         }
         if (this.fromDate !== undefined) {
             dialog.lookupReference('fromDateField').setValue(this.fromDate);
