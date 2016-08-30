@@ -60,6 +60,15 @@ Ext.define('Traccar.view.ReportController', {
         dialog.show();
     },
 
+    updateButtons: function () {
+        var reportType, disabled, devices;
+        reportType = this.lookupReference('reportTypeField').getValue();
+        devices = this.deviceId && this.deviceId.length !== 0 || this.groupId && this.groupId.length !== 0;
+        disabled = !reportType || !devices;
+        this.lookupReference('showButton').setDisabled(disabled);
+        this.lookupReference('csvButton').setDisabled(disabled);
+    },
+
     onReportClick: function (button) {
         var reportType, from, to, store, url;
 
@@ -324,6 +333,8 @@ Ext.define('Traccar.view.ReportController', {
         } else if (newValue === 'trips') {
             this.getView().reconfigure('ReportTrips', tripsColumns);
         }
+
+        this.updateButtons();
     }
 
 });

@@ -54,6 +54,7 @@ Ext.define('Traccar.view.ReportConfigController', {
         this.getView().callingPanel.fromTime = this.lookupReference('fromTimeField').getValue();
         this.getView().callingPanel.toDate = this.lookupReference('toDateField').getValue();
         this.getView().callingPanel.toTime = this.lookupReference('toTimeField').getValue();
+        this.getView().callingPanel.updateButtons();
         button.up('window').close();
     }
 });
