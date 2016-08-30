@@ -44,10 +44,10 @@ Ext.define('Traccar.view.ReportConfigController', {
         this.getView().callingPanel.deviceId = this.lookupReference('deviceField').getValue();
         this.getView().callingPanel.groupId = this.lookupReference('groupField').getValue();
         eventType = this.lookupReference('eventTypeField').getValue();
-        if (eventType.indexOf('%') > -1) {
-            eventType = ['%'];
+        if (eventType.indexOf(Ext.getStore('ReportEventTypes').allEvents) > -1) {
+            eventType = [Ext.getStore('ReportEventTypes').allEvents];
         } else if (eventType.length === this.lookupReference('eventTypeField').getStore().getCount() - 1) {
-            eventType = ['%'];
+            eventType = [Ext.getStore('ReportEventTypes').allEvents];
         }
         this.getView().callingPanel.eventType = eventType;
         this.getView().callingPanel.fromDate = this.lookupReference('fromDateField').getValue();

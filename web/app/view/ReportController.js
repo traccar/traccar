@@ -43,7 +43,7 @@ Ext.define('Traccar.view.ReportController', {
         if (this.eventType !== undefined) {
             dialog.lookupReference('eventTypeField').setValue(this.eventType);
         } else {
-            dialog.lookupReference('eventTypeField').setValue(['%']);
+            dialog.lookupReference('eventTypeField').setValue([Ext.getStore('ReportEventTypes').allEvents]);
         }
         if (this.fromDate !== undefined) {
             dialog.lookupReference('fromDateField').setValue(this.fromDate);
@@ -143,7 +143,7 @@ Ext.define('Traccar.view.ReportController', {
                 disposition = response.getResponseHeader('Content-Disposition');
                 filename = disposition.slice(disposition.indexOf("=") + 1, disposition.length);
                 type = response.getResponseHeader('Content-Type');
-                blob = new Blob([response.responseText], { type: type });
+                blob = new Blob([response.responseText], {type: type});
                 if (typeof window.navigator.msSaveBlob !== 'undefined') {
                     // IE workaround
                     window.navigator.msSaveBlob(blob, filename);
