@@ -19,7 +19,8 @@ Ext.define('Traccar.view.ReportConfigDialog', {
     extend: 'Traccar.view.BaseDialog',
 
     requires: [
-        'Traccar.view.ReportConfigController'
+        'Traccar.view.ReportConfigController',
+        'Traccar.view.CustomTimeField'
     ],
 
     controller: 'reportConfigDialog',

@@ -19,8 +19,7 @@ Ext.define('Traccar.view.Report', {
     xtype: 'reportView',
 
     requires: [
-        'Traccar.view.ReportController',
-        'Traccar.view.CustomTimeField'
+        'Traccar.view.ReportController'
     ],
 
     controller: 'report',
