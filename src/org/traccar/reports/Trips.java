@@ -75,6 +75,7 @@ public final class Trips {
         long minimalTripDuration = Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000;
         double minimalTripDistance = Context.getConfig().getLong("report.trip.minimalTripDistance", 500);
         long minimalParkingDuration = Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000;
+        boolean greedyParking = Context.getConfig().getBoolean("report.trip.greedyParking");
         Collection<TripReport> result = new ArrayList<>();
 
         ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
@@ -100,20 +101,28 @@ public final class Trips {
                     endParkingIndex = i;
                 }
                 if (!isMoving && startParkingIndex == -1) {
-                    long tripDuration = positions.get(i).getFixTime().getTime()
-                            - positions.get(endParkingIndex).getFixTime().getTime();
-                    double tripDistance = ReportUtils.calculateDistance(positions.get(endParkingIndex),
-                            positions.get(i), false);
-                    tripFiltered = tripDuration < minimalTripDuration && tripDistance < minimalTripDistance;
-                    if (tripFiltered) {
-                        startParkingIndex = previousStartParkingIndex;
-                        endParkingIndex = previousEndParkingIndex;
-                        tripFiltered = false;
+                    if (greedyParking) {
+                        long tripDuration = positions.get(i).getFixTime().getTime()
+                                - positions.get(endParkingIndex).getFixTime().getTime();
+                        double tripDistance = ReportUtils.calculateDistance(positions.get(endParkingIndex),
+                                positions.get(i), false);
+                        tripFiltered = tripDuration < minimalTripDuration && tripDistance < minimalTripDistance;
+                        if (tripFiltered) {
+                            startParkingIndex = previousStartParkingIndex;
+                            endParkingIndex = previousEndParkingIndex;
+                            tripFiltered = false;
+                        } else {
+                            previousStartParkingIndex = i;
+                            startParkingIndex = i;
+                        }
                     } else {
-                        previousStartParkingIndex = i;
+                        long tripDuration = positions.get(i).getFixTime().getTime()
+                                - positions.get(previousEndParkingIndex).getFixTime().getTime();
+                        double tripDistance = ReportUtils.calculateDistance(positions.get(previousEndParkingIndex),
+                                positions.get(i), false);
+                        tripFiltered = tripDuration < minimalTripDuration && tripDistance < minimalTripDistance;
                         startParkingIndex = i;
                     }
-
                 }
                 if (startParkingIndex != -1 && (endParkingIndex > startParkingIndex || isLast)) {
                     long parkingDuration = positions.get(endParkingIndex).getFixTime().getTime()
