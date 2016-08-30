@@ -61,10 +61,11 @@ Ext.define('Traccar.view.ReportController', {
     },
 
     updateButtons: function () {
-        var reportType, disabled, devices;
+        var reportType, disabled, devices, time;
         reportType = this.lookupReference('reportTypeField').getValue();
         devices = this.deviceId && this.deviceId.length !== 0 || this.groupId && this.groupId.length !== 0;
-        disabled = !reportType || !devices;
+        time = this.fromDate && this.fromTime && this.toDate && this.toTime;
+        disabled = !reportType || !devices || !time;
         this.lookupReference('showButton').setDisabled(disabled);
         this.lookupReference('csvButton').setDisabled(disabled);
     },
