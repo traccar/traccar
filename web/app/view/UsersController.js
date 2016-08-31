@@ -24,7 +24,8 @@ Ext.define('Traccar.view.UsersController', {
         'Traccar.view.UserGroups',
         'Traccar.view.UserGeofences',
         'Traccar.view.Notifications',
-        'Traccar.view.BaseWindow'
+        'Traccar.view.BaseWindow',
+        'Traccar.model.User'
     ],
 
     init: function () {

@@ -20,6 +20,7 @@ Ext.define('Traccar.view.ReportController', {
     alias: 'controller.report',
 
     requires: [
+        'Traccar.AttributeFormatter',
         'Traccar.view.ReportConfigDialog',
         'Traccar.store.ReportEventTypes'
     ],
