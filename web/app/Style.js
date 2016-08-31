@@ -60,13 +60,17 @@ Ext.define('Traccar.Style', {
     mapColorOnline: 'rgba(77, 250, 144, 1.0)',
     mapColorUnknown: 'rgba(250, 190, 77, 1.0)',
     mapColorOffline: 'rgba(255, 84, 104, 1.0)',
-    mapColorOverlay: 'rgba(21, 127, 204, 0.2)',
 
     mapRadiusNormal: 9,
     mapRadiusSelected: 14,
 
     mapMaxZoom: 19,
     mapDelay: 500,
+
+    mapGeofenceColor: 'rgba(21, 127, 204, 1.0)',
+    mapGeofenceOverlay: 'rgba(21, 127, 204, 0.2)',
+    mapGeofenceWidth: 5,
+    mapGeofenceRadius: 9,
 
     coordinatePrecision: 6,
     numberPrecision: 2,
