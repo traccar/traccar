@@ -75,6 +75,5 @@ Ext.define('Traccar.Style', {
     coordinatePrecision: 6,
     numberPrecision: 2,
 
-    maxTagfieldWidth: 200,
-    maxTagfieldGrow: 1
+    reportTagfieldWidth: 375
 });

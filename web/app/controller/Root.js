@@ -20,7 +20,8 @@ Ext.define('Traccar.controller.Root', {
     requires: [
         'Traccar.view.Login',
         'Traccar.view.Main',
-        'Traccar.view.MainMobile'
+        'Traccar.view.MainMobile',
+        'Traccar.model.Position'
     ],
 
     init: function () {

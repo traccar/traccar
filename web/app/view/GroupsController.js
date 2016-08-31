@@ -20,7 +20,9 @@ Ext.define('Traccar.view.GroupsController', {
 
     requires: [
         'Traccar.view.GroupDialog',
-        'Traccar.view.GroupGeofences'
+        'Traccar.view.GroupGeofences',
+        'Traccar.view.BaseWindow',
+        'Traccar.model.Group'
     ],
 
     onAddClick: function () {

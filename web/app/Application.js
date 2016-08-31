@@ -63,7 +63,8 @@ Ext.define('Traccar.Application', {
         'ReportEvents',
         'ReportTrips',
         'ReportSummary',
-        'ReportTypes'
+        'ReportTypes',
+        'ReportEventTypes'
     ],
 
     controllers: [

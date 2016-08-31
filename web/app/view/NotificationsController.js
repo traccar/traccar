@@ -18,6 +18,10 @@ Ext.define('Traccar.view.NotificationsController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.notificationsController',
 
+    requires: [
+        'Traccar.store.Notifications'
+    ],
+
     init: function () {
         this.userId = this.getView().user.getData().id;
         this.getView().getStore().load({
