@@ -81,13 +81,6 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        if (sentence.startsWith("$PHO")) {
-            if (channel != null) {
-                channel.write("#PHD0," + sentence.substring(4));
-            }
-            return null;
-        }
-
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
@@ -96,7 +89,15 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        String type = parser.next();
+
+        if (type.startsWith("PHO")) {
+            if (channel != null) {
+                channel.write("#PHD0," + type.substring(3) + "\r\n");
+            }
+        }
+
+        position.set(Position.KEY_ALARM, decodeAlarm(type));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

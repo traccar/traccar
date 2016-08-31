@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,16 @@ public class MegastekFrameDecoder extends FrameDecoder {
                 return buf.readBytes(length);
             }
         } else {
+            while (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n') {
+                buf.skipBytes(1);
+            }
             int delimiter = buf.indexOf(buf.readerIndex(), buf.writerIndex(), new StringFinder("\r\n"));
+            if (delimiter == -1) {
+                delimiter = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '!');
+            }
             if (delimiter != -1) {
                 ChannelBuffer result = buf.readBytes(delimiter - buf.readerIndex());
-                buf.skipBytes(2);
+                buf.skipBytes(1);
                 return result;
             }
         }
