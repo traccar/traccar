@@ -17,7 +17,7 @@
 Ext.define('Traccar.view.StateController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.state',
-    
+
     requires: [
        'Traccar.AttributeFormatter',
        'Traccar.model.Attribute'
