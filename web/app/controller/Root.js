@@ -190,7 +190,7 @@ Ext.define('Traccar.controller.Root', {
                     if (array[i].geofenceId !== 0) {
                         geofence = Ext.getStore('Geofences').getById(array[i].geofenceId);
                         if (typeof geofence !== 'undefined') {
-                            text += ' \"' + geofence.getData().name + '"';
+                            text += ' \"' + geofence.get('name') + '"';
                         }
                     }
                     device = Ext.getStore('Devices').getById(array[i].deviceId);

@@ -99,7 +99,7 @@ Ext.define('Traccar.view.DevicesController', {
                 linkObjectName: 'geofenceId',
                 storeName: 'Geofences',
                 urlApi: 'api/devices/geofences',
-                baseObject: device.getData().id
+                baseObject: device.getId()
             }
         }).show();
     },
