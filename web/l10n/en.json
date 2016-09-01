@@ -118,7 +118,7 @@
     "commandDeviceIdentification": "Device Identification",
     "commandIndex": "Index",
     "commandData": "Data",
-    "commandPhone": "Phone",
+    "commandPhone": "Phone Number",
     "commandMessage": "Message",
     "eventAll": "All Events",
     "eventDeviceOnline": "Device is online",
