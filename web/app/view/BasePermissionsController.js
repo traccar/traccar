@@ -36,7 +36,7 @@ Ext.define('Traccar.view.BasePermissionsController', {
                         var i, index;
                         if (success) {
                             for (i = 0; i < records.length; i++) {
-                                index = this.getView().getStore().find('id', records[i].getData().id);
+                                index = this.getView().getStore().findExact('id', records[i].getData().id);
                                 this.getView().getSelectionModel().select(index, true, true);
                             }
                         }
