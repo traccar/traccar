@@ -78,8 +78,8 @@ Ext.define('Traccar.view.CommandDialog', {
 
             items: [{
                 xtype: 'textfield',
-                fieldLabel: Strings.commandPhoneNumber,
-                name: 'phoneNumber'
+                fieldLabel: Strings.commandPhone,
+                name: 'phone'
             }, {
                 xtype: 'textfield',
                 reference: 'paramSmsMessage',
