@@ -32,7 +32,7 @@ Ext.define('Traccar.view.CommandDialogController', {
     },
 
     onSendClick: function (button) {
-        var attributes, value, record, form, index, phoneNumber;
+        var attributes, value, record, form, index, phone;
 
         form = button.up('window').down('form');
         form.updateRecord();
@@ -61,18 +61,18 @@ Ext.define('Traccar.view.CommandDialogController', {
 
         if (record.get('type') === 'sendUssd') {
             attributes = this.lookupReference('paramSendSmsUssd');
-            phoneNumber = attributes.down('textfield[name="phoneNumber"]').getValue();
+            phone = attributes.down('textfield[name="phone"]').getValue();
             record.set('attributes', {
-                phoneNumber: phoneNumber
+                phone: phone
             });
         }
 
         if (record.get('type') === 'sendSms') {
             attributes = this.lookupReference('paramSendSmsUssd');
-            phoneNumber = attributes.down('textfield[name="phoneNumber"]').getValue();
+            phone = attributes.down('textfield[name="phone"]').getValue();
             value = attributes.down('textfield[name="message"]').getValue();
             record.set('attributes', {
-                phoneNumber: phoneNumber,
+                phone: phone,
                 message: value
             });
         }
