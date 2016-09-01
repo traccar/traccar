@@ -34,7 +34,8 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final int COMMAND_RECORDS = 0x01;
+    public static final int MSG_RECORDS = 1;
+    public static final int MSG_SMS_VIA_GPRS = 108;
 
     @Override
     protected Object decode(
@@ -52,7 +53,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        if (type == COMMAND_RECORDS) {
+        if (type == MSG_RECORDS) {
             List<Position> positions = new LinkedList<>();
 
             buf.readUnsignedByte(); // records left
