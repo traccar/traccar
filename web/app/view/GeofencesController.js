@@ -20,7 +20,7 @@ Ext.define('Traccar.view.GeofencesController', {
 
     requires: [
         'Traccar.view.GeofenceDialog',
-        'Traccar.view.BaseWindow'
+        'Traccar.model.Geofence'
     ],
 
     init: function () {

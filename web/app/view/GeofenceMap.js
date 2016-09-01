@@ -72,16 +72,16 @@ Ext.define('Traccar.view.GeofenceMap', {
             }),
             style: new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: Traccar.Style.mapColorOverlay
+                    color: Traccar.Style.mapGeofenceOverlay
                 }),
                 stroke: new ol.style.Stroke({
-                    color: Traccar.Style.mapColorReport,
-                    width: Traccar.Style.mapRouteWidth
+                    color: Traccar.Style.mapGeofenceColor,
+                    width: Traccar.Style.mapGeofenceWidth
                 }),
                 image: new ol.style.Circle({
-                    radius: Traccar.Style.mapRadiusNormal,
+                    radius: Traccar.Style.mapGeofenceRadius,
                     fill: new ol.style.Fill({
-                        color: Traccar.Style.mapColorReport
+                        color: Traccar.Style.mapGeofenceColor
                     })
                 })
             })

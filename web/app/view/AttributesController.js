@@ -20,7 +20,8 @@ Ext.define('Traccar.view.AttributesController', {
 
     requires: [
         'Traccar.view.AttributeDialog',
-        'Traccar.store.Attributes'
+        'Traccar.store.Attributes',
+        'Traccar.model.Attribute'
     ],
 
     init: function () {
