@@ -36,7 +36,7 @@ Ext.define('Traccar.view.BasePermissionsController', {
                         var i, index;
                         if (success) {
                             for (i = 0; i < records.length; i++) {
-                                index = this.getView().getStore().find('id', records[i].getData().id);
+                                index = this.getView().getStore().getById(records[i].getId());
                                 this.getView().getSelectionModel().select(index, true, true);
                             }
                         }
@@ -49,7 +49,7 @@ Ext.define('Traccar.view.BasePermissionsController', {
     onBeforeSelect: function (object, record, index) {
         var data = {};
         data[this.getView().baseObjectName] = this.getView().baseObject;
-        data[this.getView().linkObjectName] = record.getData().id;
+        data[this.getView().linkObjectName] = record.getId();
         Ext.Ajax.request({
             scope: this,
             url: this.getView().urlApi,
@@ -65,7 +65,7 @@ Ext.define('Traccar.view.BasePermissionsController', {
     onBeforeDeselect: function (object, record, index) {
         var data = {};
         data[this.getView().baseObjectName] = this.getView().baseObject;
-        data[this.getView().linkObjectName] = record.getData().id;
+        data[this.getView().linkObjectName] = record.getId();
         Ext.Ajax.request({
             scope: this,
             method: 'DELETE',
