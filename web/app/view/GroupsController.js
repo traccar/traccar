@@ -74,7 +74,7 @@ Ext.define('Traccar.view.GroupsController', {
                 linkObjectName: 'geofenceId',
                 storeName: admin ? 'AllGeofences' : 'Geofences',
                 urlApi: 'api/groups/geofences',
-                baseObject: group.getData().id
+                baseObject: group.getId()
             }
         }).show();
     },
