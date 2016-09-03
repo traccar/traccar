@@ -32,6 +32,7 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,11 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "lon":
                     position.setLongitude(Double.parseDouble(value));
+                    break;
+                case "location":
+                    List<String> location = Arrays.asList(value.split(","));
+                    position.setLatitude(Double.parseDouble(location.get(0)));
+                    position.setLongitude(Double.parseDouble(location.get(1)));
                     break;
                 case "speed":
                     position.setSpeed(Double.parseDouble(value));
