@@ -50,8 +50,8 @@ public abstract class BaseProtocolEncoder extends OneToOneEncoder {
             // Log command
             StringBuilder s = new StringBuilder();
             s.append(String.format("[%08X] ", channel.getId()));
-            s.append("command type: ").append(command.getType()).append(", ");
-            s.append("id : ").append(command.getDeviceId()).append(" ");
+            s.append("id: ").append(getUniqueId(command.getDeviceId())).append(", ");
+            s.append("command type: ").append(command.getType()).append(" ");
             if (encodedCommand != null) {
                 s.append("sent");
             } else {
