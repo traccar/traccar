@@ -36,7 +36,7 @@ Ext.define('Traccar.view.State', {
         dataIndex: 'value',
         flex: 1,
         renderer: function (value, metaData, record) {
-            if (record.get('name') === 'Alarm') {
+            if (record.get('name') === 'Alarm' && value === Ext.Msg.buttonText.yes) {
                 metaData.tdCls = 'view-color-red';
             }
             return value;
