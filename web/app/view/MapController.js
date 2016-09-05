@@ -42,7 +42,8 @@ Ext.define('Traccar.view.MapController', {
             },
             component: {
                 '#': {
-                    selectFeature: 'selectFeature'
+                    selectFeature: 'selectFeature',
+                    clickMap: 'clickMap'
                 }
             }
         }
@@ -287,8 +288,14 @@ Ext.define('Traccar.view.MapController', {
         this.selectedMarker = marker;
     },
 
-    selectDevice: function (device, center) {
+    selectDevice: function (device, center, featureSelected) {
+        this.hidePopup();
         this.selectMarker(this.latestMarkers[device.get('id')], center);
+        if (featureSelected) {
+            if (Object.getOwnPropertyNames(this.selectedMarker.get('record').get('attributes')).length) {
+                this.showAttributesView(this.selectedMarker);
+            }
+        }
     },
 
     selectReport: function (position, center) {
@@ -299,10 +306,62 @@ Ext.define('Traccar.view.MapController', {
         var record = feature.get('record');
         if (record) {
             if (record instanceof Traccar.model.Device) {
-                this.fireEvent('selectDevice', record, false);
+                this.fireEvent('selectDevice', record, false, true);
             } else {
                 this.fireEvent('selectReport', record, false);
             }
         }
+    },
+
+    clickMap: function () {
+        this.hidePopup();
+    },
+
+    showAttributesView: function (feature) {
+        var coordinates, popupOverlay, record;
+
+        coordinates = feature.getGeometry().getCoordinates();
+        popupOverlay = this.getView().getPopupOverlay();
+        record = feature.get('record');
+        popupOverlay.setPosition(coordinates);
+
+        Ext.create('Traccar.view.PopupWindow', {
+            title: record.get('name') + ' ' + Strings.sharedAttributes,
+            renderTo: Ext.get('popup'),
+            items: {
+                xtype: 'attributesView',
+                record: record,
+                tbar: {
+                    xtype: 'editToolbar',
+                    items: [{
+                        xtype: 'tbfill'
+                    }, {
+                        glyph: 'xf00e@FontAwesome',
+                        tooltip: Strings.deviceZoomIn,
+                        tooltipType: 'title',
+                        listeners: {
+                            click: 'onZoomInClick',
+                            scope: this
+                        }
+                    }]
+                }
+            }
+        }).show();
+    },
+
+    hidePopup: function () {
+        var popupOverlay = this.getView().getPopupOverlay();
+        popupOverlay.setPosition();
+    },
+
+    onZoomInClick: function () {
+        var marker, mapView;
+        marker = this.selectedMarker;
+        if (marker) {
+            mapView = this.getView().getMapView();
+            mapView.setCenter(marker.getGeometry().getCoordinates());
+            mapView.setZoom(Traccar.Style.mapMaxZoom);
+        }
     }
+
 });

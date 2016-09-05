@@ -21,6 +21,8 @@ Ext.define('Traccar.Style', {
 
     windowWidth: 640,
     windowHeight: 480,
+    popupWindowWidth: 250,
+    popupWindowHeight: 250,
 
     dateTimeFormat24: 'Y-m-d H:i:s',
     dateTimeFormat12: 'Y-m-d g:i:s a',
@@ -75,5 +77,13 @@ Ext.define('Traccar.Style', {
     coordinatePrecision: 6,
     numberPrecision: 2,
 
+    maxTagfieldWidth: 200,
+    maxTagfieldGrow: 1,
+
+    autoPanAnimationDuration: 250,
+    popupOverlayOffsetX: 0,
+    popupOverlayOffsetY: -150,
+
     reportTagfieldWidth: 375
+
 });
