@@ -23,7 +23,8 @@ Ext.define('Traccar.view.MapController', {
             controller: {
                 '*': {
                     selectDevice: 'selectDevice',
-                    selectReport: 'selectReport'
+                    selectReport: 'selectReport',
+                    getMapCenter: 'getMapCenter'
                 }
             },
             store: {
@@ -304,5 +305,13 @@ Ext.define('Traccar.view.MapController', {
                 this.fireEvent('selectReport', record, false);
             }
         }
+    },
+
+    getMapCenter: function () {
+        var zoom, center, projection;
+        projection = this.getView().getMapView().getProjection();
+        center = ol.proj.transform(this.getView().getMapView().getCenter(), projection, 'EPSG:4326');
+        zoom = this.getView().getMapView().getZoom();
+        this.fireEvent('setCenterFromMap', center[1], center[0], zoom);
     }
 });

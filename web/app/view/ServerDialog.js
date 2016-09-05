@@ -18,10 +18,10 @@ Ext.define('Traccar.view.ServerDialog', {
     extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.BaseEditDialogController'
+        'Traccar.view.ServerDialogController'
     ],
 
-    controller: 'baseEditDialog',
+    controller: 'serverEditDialog',
     title: Strings.serverTitle,
 
     items: {
@@ -66,19 +66,28 @@ Ext.define('Traccar.view.ServerDialog', {
             displayField: 'name',
             valueField: 'key'
         }, {
-            xtype: 'numberfield',
-            name: 'latitude',
-            fieldLabel: Strings.positionLatitude,
-            decimalPrecision: Traccar.Style.coordinatePrecision
-        }, {
-            xtype: 'numberfield',
-            name: 'longitude',
-            fieldLabel: Strings.positionLongitude,
-            decimalPrecision: Traccar.Style.coordinatePrecision
-        }, {
-            xtype: 'numberfield',
-            name: 'zoom',
-            fieldLabel: Strings.serverZoom
+            xtype: 'fieldset',
+            reference: 'mapCenter',
+            title: Strings.sharedMapCenter,
+            defaultType: 'numberfield',
+            items: [{
+                name: 'latitude',
+                fieldLabel: Strings.positionLatitude,
+                decimalPrecision: Traccar.Style.coordinatePrecision
+            }, {
+                name: 'longitude',
+                fieldLabel: Strings.positionLongitude,
+                decimalPrecision: Traccar.Style.coordinatePrecision
+            }, {
+                name: 'zoom',
+                fieldLabel: Strings.serverZoom
+            }, {
+                xtype: 'button',
+                margin: Traccar.Style.inFormButtonMargin,
+                enableToggle: false,
+                text: Strings.sharedGetFromMap,
+                handler: 'getFromMap'
+            }]
         }, {
             xtype: 'checkboxfield',
             name: 'twelveHourFormat',
