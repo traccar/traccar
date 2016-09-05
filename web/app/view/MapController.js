@@ -136,7 +136,9 @@ Ext.define('Traccar.view.MapController', {
                 marker.getStyle().getImage().setRotation(position.get('course') * Math.PI / 180);
 
                 if (marker === this.selectedMarker && this.followSelected()) {
-                    this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+                    mapView = this.getView().getMapView();
+                    mapView.setZoom(16);
+                    mapView.setCenter(marker.getGeometry().getCoordinates());
                 }
             }
         }
@@ -280,7 +282,9 @@ Ext.define('Traccar.view.MapController', {
             marker.setStyle(
                 this.resizeMarker(marker.getStyle(), Traccar.Style.mapRadiusSelected));
             if (center) {
-                this.getView().getMapView().setCenter(marker.getGeometry().getCoordinates());
+                mapView = this.getView().getMapView();
+                mapView.setZoom(16);
+                mapView.setCenter(marker.getGeometry().getCoordinates());
             }
         }
 
