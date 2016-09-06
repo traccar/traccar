@@ -24,7 +24,7 @@ Ext.define('Traccar.view.MapController', {
                 '*': {
                     selectDevice: 'selectDevice',
                     selectReport: 'selectReport',
-                    getMapCenter: 'getMapCenter'
+                    mapstaterequest: 'getMapState'
                 }
             },
             store: {
@@ -307,11 +307,11 @@ Ext.define('Traccar.view.MapController', {
         }
     },
 
-    getMapCenter: function () {
+    getMapState: function () {
         var zoom, center, projection;
         projection = this.getView().getMapView().getProjection();
         center = ol.proj.transform(this.getView().getMapView().getCenter(), projection, 'EPSG:4326');
         zoom = this.getView().getMapView().getZoom();
-        this.fireEvent('setCenterFromMap', center[1], center[0], zoom);
+        this.fireEvent('mapstate', center[1], center[0], zoom);
     }
 });

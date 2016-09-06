@@ -66,21 +66,22 @@ Ext.define('Traccar.view.ServerDialog', {
             displayField: 'name',
             valueField: 'key'
         }, {
-            xtype: 'fieldcontainer',
-            reference: 'mapCenter',
-            defaultType: 'numberfield',
-            items: [{
-                name: 'latitude',
-                fieldLabel: Strings.positionLatitude,
-                decimalPrecision: Traccar.Style.coordinatePrecision
-            }, {
-                name: 'longitude',
-                fieldLabel: Strings.positionLongitude,
-                decimalPrecision: Traccar.Style.coordinatePrecision
-            }, {
-                name: 'zoom',
-                fieldLabel: Strings.serverZoom
-            }]
+            xtype: 'numberfield',
+            reference: 'latitude',
+            name: 'latitude',
+            fieldLabel: Strings.positionLatitude,
+            decimalPrecision: Traccar.Style.coordinatePrecision
+        }, {
+            xtype: 'numberfield',
+            reference: 'longitude',
+            name: 'longitude',
+            fieldLabel: Strings.positionLongitude,
+            decimalPrecision: Traccar.Style.coordinatePrecision
+        }, {
+            xtype: 'numberfield',
+            reference: 'zoom',
+            name: 'zoom',
+            fieldLabel: Strings.serverZoom
         }, {
             xtype: 'checkboxfield',
             name: 'twelveHourFormat',
@@ -93,10 +94,10 @@ Ext.define('Traccar.view.ServerDialog', {
         text: Strings.sharedAttributes,
         handler: 'showAttributesView'
     }, {
-        glyph: 'xf276@FontAwesome',
+        glyph: 'xf041@FontAwesome',
         minWidth: 0,
-        handler: 'getFromMap',
-        tooltip: Strings.sharedGetFromMap,
+        handler: 'getMapState',
+        tooltip: Strings.sharedGetMapState,
         tooltipType: 'title'
     }, {
         xtype: 'tbfill'

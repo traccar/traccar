@@ -23,20 +23,19 @@ Ext.define('Traccar.view.ServerDialogController', {
         listen: {
             controller: {
                 '*': {
-                    setCenterFromMap: 'setCenterFromMap'
+                    mapstate: 'setMapState'
                 }
             }
         }
     },
 
-    getFromMap: function (button) {
-        this.fireEvent('getMapCenter');
+    getMapState: function (button) {
+        this.fireEvent('mapstaterequest');
     },
 
-    setCenterFromMap: function (lat, lon, zoom) {
-        var mapCenter = this.lookupReference('mapCenter');
-        mapCenter.down('numberfield[name="latitude"]').setValue(lat);
-        mapCenter.down('numberfield[name="longitude"]').setValue(lon);
-        mapCenter.down('numberfield[name="zoom"]').setValue(zoom);
+    setMapState: function (lat, lon, zoom) {
+        this.getView().lookupReference('latitude').setValue(lat);
+        this.getView().lookupReference('longitude').setValue(lon);
+        this.getView().lookupReference('zoom').setValue(zoom);
     }
 });
