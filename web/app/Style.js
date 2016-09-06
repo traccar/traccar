@@ -75,7 +75,5 @@ Ext.define('Traccar.Style', {
     coordinatePrecision: 6,
     numberPrecision: 2,
 
-    reportTagfieldWidth: 375,
-
-    inFormButtonMargin: '0 0 9 0'
+    reportTagfieldWidth: 375
 });

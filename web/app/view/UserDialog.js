@@ -24,7 +24,7 @@ Ext.define('Traccar.view.UserDialog', {
     controller: 'userDialog',
     title: Strings.settingsUser,
 
-    items: [{
+    items: {
         xtype: 'form',
         items: [{
             xtype: 'textfield',
@@ -70,9 +70,8 @@ Ext.define('Traccar.view.UserDialog', {
             displayField: 'name',
             valueField: 'key'
         }, {
-            xtype: 'fieldset',
+            xtype: 'fieldcontainer',
             reference: 'mapCenter',
-            title: Strings.sharedMapCenter,
             defaultType: 'numberfield',
             items: [{
                 name: 'latitude',
@@ -85,12 +84,6 @@ Ext.define('Traccar.view.UserDialog', {
             }, {
                 name: 'zoom',
                 fieldLabel: Strings.serverZoom
-            }, {
-                xtype: 'button',
-                margin: Traccar.Style.inFormButtonMargin,
-                enableToggle: false,
-                text: Strings.sharedGetFromMap,
-                handler: 'getFromMap'
             }]
         }, {
             xtype: 'checkboxfield',
@@ -98,5 +91,24 @@ Ext.define('Traccar.view.UserDialog', {
             fieldLabel: Strings.settingsTwelveHourFormat,
             allowBlank: false
         }]
+    },
+
+    buttons: [{
+        text: Strings.sharedAttributes,
+        handler: 'showAttributesView'
+    }, {
+        glyph: 'xf276@FontAwesome',
+        minWidth: 0,
+        handler: 'getFromMap',
+        tooltip: Strings.sharedGetFromMap,
+        tooltipType: 'title'
+    }, {
+        xtype: 'tbfill'
+    }, {
+        text: Strings.sharedSave,
+        handler: 'onSaveClick'
+    }, {
+        text: Strings.sharedCancel,
+        handler: 'closeView'
     }]
 });
