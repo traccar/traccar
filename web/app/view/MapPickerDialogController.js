@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.ServerDialogController', {
+Ext.define('Traccar.view.MapPickerDialogController', {
     extend: 'Traccar.view.BaseEditDialogController',
-    alias: 'controller.serverEditDialog',
+    alias: 'controller.mapPickerDialog',
 
     config: {
         listen: {
@@ -34,8 +34,8 @@ Ext.define('Traccar.view.ServerDialogController', {
     },
 
     setMapState: function (lat, lon, zoom) {
-        this.getView().lookupReference('latitude').setValue(lat);
-        this.getView().lookupReference('longitude').setValue(lon);
-        this.getView().lookupReference('zoom').setValue(zoom);
+        this.lookupReference('latitude').setValue(lat);
+        this.lookupReference('longitude').setValue(lon);
+        this.lookupReference('zoom').setValue(zoom);
     }
 });

@@ -18,10 +18,10 @@ Ext.define('Traccar.view.ServerDialog', {
     extend: 'Traccar.view.BaseEditDialog',
 
     requires: [
-        'Traccar.view.ServerDialogController'
+        'Traccar.view.MapPickerDialogController'
     ],
 
-    controller: 'serverEditDialog',
+    controller: 'mapPickerDialog',
     title: Strings.serverTitle,
 
     items: {

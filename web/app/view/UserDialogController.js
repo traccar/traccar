@@ -15,7 +15,7 @@
  */
 
 Ext.define('Traccar.view.UserDialogController', {
-    extend: 'Traccar.view.ServerDialogController',
+    extend: 'Traccar.view.MapPickerDialogController',
     alias: 'controller.userDialog',
 
     init: function () {
