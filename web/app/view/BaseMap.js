@@ -100,7 +100,7 @@ Ext.define('Traccar.view.BaseMap', {
 
         this.map.on('click', function (e) {
             this.map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
-                this.fireEvent('selectFeature', feature);
+                this.fireEvent('selectfeature', feature);
             }, this);
         }, this);
     },

@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Andrey Kunitsyn (abyss@fox5.ru)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +15,27 @@
  * limitations under the License.
  */
 
-Ext.define('Traccar.view.GeofenceDialogController', {
+Ext.define('Traccar.view.MapPickerDialogController', {
     extend: 'Traccar.view.BaseEditDialogController',
-    alias: 'controller.geofenceDialog',
-
-    requires: [
-        'Traccar.view.GeofenceMap'
-    ],
+    alias: 'controller.mapPickerDialog',
 
     config: {
         listen: {
             controller: {
                 '*': {
-                    savearea: 'saveArea'
+                    mapstate: 'setMapState'
                 }
             }
         }
     },
 
-    saveArea: function (value) {
-        this.lookupReference('areaField').setValue(value);
+    getMapState: function (button) {
+        this.fireEvent('mapstaterequest');
     },
 
-    onAreaClick: function (button) {
-        var dialog, record;
-        dialog = button.up('window').down('form');
-        record = dialog.getRecord();
-        Ext.create('Traccar.view.BaseWindow', {
-            title: Strings.sharedArea,
-            items: {
-                xtype: 'geofenceMapView',
-                area: record.get('area')
-            }
-        }).show();
+    setMapState: function (lat, lon, zoom) {
+        this.lookupReference('latitude').setValue(lat);
+        this.lookupReference('longitude').setValue(lon);
+        this.lookupReference('zoom').setValue(zoom);
     }
 });

@@ -31,8 +31,8 @@ Ext.define('Traccar.view.DevicesController', {
         listen: {
             controller: {
                 '*': {
-                    selectDevice: 'selectDevice',
-                    selectReport: 'selectReport'
+                    selectdevice: 'selectDevice',
+                    selectreport: 'selectReport'
                 }
             },
             store: {
@@ -121,7 +121,7 @@ Ext.define('Traccar.view.DevicesController', {
         var device;
         if (pressed) {
             device = this.getView().getSelectionModel().getSelection()[0];
-            this.fireEvent('selectDevice', device, true);
+            this.fireEvent('selectdevice', device, true);
         }
     },
 
@@ -136,7 +136,7 @@ Ext.define('Traccar.view.DevicesController', {
     onSelectionChange: function (selected) {
         this.updateButtons(selected);
         if (selected.getCount() > 0) {
-            this.fireEvent('selectDevice', selected.getLastSelected(), true);
+            this.fireEvent('selectdevice', selected.getLastSelected(), true);
         }
     },
 

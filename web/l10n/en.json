@@ -28,6 +28,7 @@
     "sharedDistance": "Distance",
     "sharedHourAbbreviation": "h",
     "sharedMinuteAbbreviation": "m",
+    "sharedGetMapState": "Get Map State",
     "errorTitle": "Error",
     "errorUnknown": "Unknown error",
     "errorConnection": "Connection error",
