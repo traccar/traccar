@@ -27,7 +27,7 @@ Ext.define('Traccar.view.GeofenceMapController', {
         if (this.getView().getFeatures().getLength() > 0) {
             geometry = this.getView().getFeatures().pop().getGeometry();
             projection = this.getView().getMapView().getProjection();
-            this.fireEvent('saveArea', Traccar.GeofenceConverter.geometryToWkt(projection, geometry));
+            this.fireEvent('savearea', Traccar.GeofenceConverter.geometryToWkt(projection, geometry));
             button.up('window').close();
         }
     },

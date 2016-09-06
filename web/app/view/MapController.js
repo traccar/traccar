@@ -22,8 +22,8 @@ Ext.define('Traccar.view.MapController', {
         listen: {
             controller: {
                 '*': {
-                    selectDevice: 'selectDevice',
-                    selectReport: 'selectReport',
+                    selectdevice: 'selectDevice',
+                    selectreport: 'selectReport',
                     mapstaterequest: 'getMapState'
                 }
             },
@@ -43,7 +43,7 @@ Ext.define('Traccar.view.MapController', {
             },
             component: {
                 '#': {
-                    selectFeature: 'selectFeature'
+                    selectfeature: 'selectFeature'
                 }
             }
         }
@@ -300,9 +300,9 @@ Ext.define('Traccar.view.MapController', {
         var record = feature.get('record');
         if (record) {
             if (record instanceof Traccar.model.Device) {
-                this.fireEvent('selectDevice', record, false);
+                this.fireEvent('selectdevice', record, false);
             } else {
-                this.fireEvent('selectReport', record, false);
+                this.fireEvent('selectreport', record, false);
             }
         }
     },

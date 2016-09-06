@@ -26,7 +26,7 @@ Ext.define('Traccar.view.GeofenceDialogController', {
         listen: {
             controller: {
                 '*': {
-                    saveArea: 'saveArea'
+                    savearea: 'saveArea'
                 }
             }
         }
