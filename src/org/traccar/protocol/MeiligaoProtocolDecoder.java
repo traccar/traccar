@@ -303,12 +303,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             if (command == MSG_LOGIN) {
                 response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
                 sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
+                return null;
             } else if (command == MSG_HEARTBEAT) {
                 response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
                 sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
+                return null;
             } else if (command == MSG_SERVER) {
                 response = ChannelBuffers.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
                 sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
+                return null;
             }
         }
 
