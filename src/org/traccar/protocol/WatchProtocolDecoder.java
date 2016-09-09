@@ -25,6 +25,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class WatchProtocolDecoder extends BaseProtocolDecoder {
@@ -145,6 +146,18 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         } else if (type.equals("TKQ")) {
 
             sendResponse(channel, manufacturer, id, "TKQ");
+
+        } else if (type.equals("PULSE")) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, new Date());
+            position.setValid(false);
+            String pulse = content.substring(1);
+            position.set("pulse", pulse);
+            position.set(Position.KEY_RESULT, pulse);
+            return position;
 
         }
 
