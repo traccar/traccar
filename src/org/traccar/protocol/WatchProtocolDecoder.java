@@ -154,7 +154,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, new Date());
             position.setValid(false);
-            position.set("pulse", content.split(",")[1]);
+            String pulse = content.substring(1);
+            position.set("pulse", pulse);
+            position.set(Position.KEY_RESULT, pulse);
             return position;
 
         }
