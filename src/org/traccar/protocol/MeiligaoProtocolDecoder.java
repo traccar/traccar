@@ -85,14 +85,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // rpm
             .number("(d+),")                     // speed
             .number("(d+.d+),")                  // throttle
-            .number("d+.d+,")                    // engine load
+            .number("(d+.d+),")                  // engine load
             .number("(-?d+),")                   // coolant temp
             .number("d+.d+,")                    // instantaneous fuel
             .number("(d+.d+),")                  // average fuel
-            .number("d+.d+,")                    // driving range
+            .number("(d+.d+),")                  // driving range
             .number("(d+.?d*),")                 // odometer
-            .number("d+.d+,")
-            .number("d+.d+,")
+            .number("(d+.d+),")
+            .number("(d+.d+),")
             .number("(d+),")                     // error code count
             .number("d+,")                       // harsh acceleration count
             .number("d+")                        // harsh break count
@@ -281,9 +281,13 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.nextInt());
         position.set(Position.KEY_OBD_SPEED, parser.nextInt());
         position.set(Position.KEY_THROTTLE, parser.nextDouble());
+        position.set("engineLoad", parser.nextDouble());
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
-        position.set(Position.KEY_ODOMETER, parser.nextDouble());
+        position.set("drivingRange", parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set("singleFuelConsumption", parser.nextDouble());
+        position.set("totalFuelConsumption", parser.nextDouble());
 
         return position;
     }
