@@ -397,9 +397,6 @@
     <entry key='carcell.port'>5114</entry>
     <entry key='obddongle.port'>5115</entry>
     <entry key='hunterpro.port'>5116</entry>
-    <entry key='carcell.port'>5114</entry>
-    <entry key='obddongle.port'>5115</entry>
-    <entry key='hunterpro.port'>5116</entry>
     <entry key='raveon.port'>5117</entry>
     <entry key='cradlepoint.port'>5118</entry>
 
