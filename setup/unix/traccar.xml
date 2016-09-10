@@ -18,11 +18,12 @@
     <entry key='logger.file'>/opt/traccar/logs/tracker-server.log</entry>
 
     <entry key='event.enable'>true</entry>
-    <entry key='event.suppressRepeated'>60</entry>
     <entry key='event.overspeedHandler'>true</entry>
-    <entry key='event.globalSpeedLimit'>90</entry>
+    <entry key='event.overspeed.notRepeat'>true</entry>
     <entry key='event.motionHandler'>true</entry>
     <entry key='event.geofenceHandler'>true</entry>
+    <entry key='event.alertHandler'>true</entry>
+    <entry key='event.ignitionHandler'>true</entry>
 
     <!-- DATABASE CONFIG -->
 
@@ -273,6 +274,10 @@
         DELETE FROM notifications WHERE id = :id;
     </entry>
 
+    <entry key='database.deletePositions'>
+        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices);
+    </entry>
+
     <!-- PROTOCOL CONFIG -->
 
     <entry key='gps103.port'>5001</entry>
@@ -392,5 +397,10 @@
     <entry key='carcell.port'>5114</entry>
     <entry key='obddongle.port'>5115</entry>
     <entry key='hunterpro.port'>5116</entry>
+    <entry key='carcell.port'>5114</entry>
+    <entry key='obddongle.port'>5115</entry>
+    <entry key='hunterpro.port'>5116</entry>
+    <entry key='raveon.port'>5117</entry>
+    <entry key='cradlepoint.port'>5118</entry>
 
 </properties>
