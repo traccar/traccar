@@ -125,7 +125,7 @@
     "eventDeviceOnline": "Device is online",
     "eventDeviceOffline": "Device is offline",
     "eventDeviceMoving": "Device is moving",
-    "eventDeviceStopped": "Device is stopped",
+    "eventDeviceStopped": "Device has stopped",
     "eventDeviceOverspeed": "Device exceeds the speed",
     "eventCommandResult": "Command result",
     "eventGeofenceEnter": "Device has entered geofence",
