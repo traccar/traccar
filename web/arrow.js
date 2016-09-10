@@ -1,16 +1,12 @@
 goog.provide('ol.style.Arrow');
 
-goog.require('goog.asserts');
 goog.require('ol');
 goog.require('ol.color');
 goog.require('ol.dom');
 goog.require('ol.has');
 goog.require('ol.render.canvas');
-goog.require('ol.style.AtlasManager');
-goog.require('ol.style.Fill');
 goog.require('ol.style.Image');
 goog.require('ol.style.ImageState');
-goog.require('ol.style.Stroke');
 
 
 
@@ -25,7 +21,7 @@ goog.require('ol.style.Stroke');
  */
 ol.style.Arrow = function(options) {
 
-  goog.asserts.assert(options.radius !== undefined,
+  goog.DEBUG && console.assert(options.radius !== undefined,
       'must provide "radius"');
 
   /**
@@ -363,7 +359,7 @@ ol.style.Arrow.prototype.render_ = function(atlasManager) {
     var info = atlasManager.add(
         id, size, size, this.draw_.bind(this, renderOptions),
         renderHitDetectionCallback);
-    goog.asserts.assert(info, 'arrow size is too large');
+    goog.DEBUG && console.assert(info, 'arrow size is too large');
 
     this.canvas_ = info.image;
     this.origin_ = [info.offsetX, info.offsetY];
