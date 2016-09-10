@@ -126,7 +126,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int type, int index) {
+    private Position decodeNew(DeviceSession deviceSession, ChannelBuffer buf, int index) {
 
         Position position = new Position();
         position.setDeviceId(deviceSession.getDeviceId());
@@ -206,7 +206,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_GPS || type == MSG_ALARM || type == MSG_STATE || type == MSG_SMS) {
                 return decodeOld(deviceSession, buf, type, index);
             } else if (type >= MSG_NORMAL && type <= MSG_OBD_CODE) {
-                return decodeNew(deviceSession, buf, type, index);
+                return decodeNew(deviceSession, buf, index);
             }
         }
 

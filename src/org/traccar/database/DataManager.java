@@ -305,7 +305,7 @@ public class DataManager {
     }
 
     public void clearPositionsHistory() throws SQLException {
-        int historyDays = config.getInteger("database.positionsHistoryDays");
+        long historyDays = config.getInteger("database.positionsHistoryDays");
         if (historyDays != 0) {
             QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
                     .setDate("serverTime", new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000))
