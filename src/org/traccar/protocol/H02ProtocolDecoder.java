@@ -129,7 +129,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("*")
             .expression("..,")                   // manufacturer
             .number("(d+),")                     // imei
-            .number("Vd,")                       // version?
+            .expression("[^,]+,")
             .any()
             .number("(?:(dd)(dd)(dd))?,")        // time
             .expression("([AV])?,")              // validity
@@ -148,6 +148,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:(dd)(dd)(dd))?,")        // date (ddmmyy)
+            .any()
             .number("(x{8})")                    // status
             .any()
             .compile();
