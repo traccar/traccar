@@ -34,6 +34,13 @@ public class H02FrameDecoder extends FrameDecoder {
 
         char marker = (char) buf.getByte(buf.readerIndex());
 
+        while (marker != '*' && marker != '$' && buf.readableBytes() > 0) {
+            buf.skipBytes(1);
+            if (buf.readableBytes() > 0) {
+                marker = (char) buf.getByte(buf.readerIndex());
+            }
+        }
+
         if (marker == '*') {
 
             // Return text message
