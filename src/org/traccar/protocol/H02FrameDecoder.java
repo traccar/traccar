@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,17 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class H02FrameDecoder extends FrameDecoder {
 
-    private static final int MESSAGE_LENGTH = 32;
+    private int messageLength;
+
+    public H02FrameDecoder(int messageLength) {
+        this.messageLength = messageLength;
+    }
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf) throws Exception {
 
         char marker = (char) buf.getByte(buf.readerIndex());
-
-        while (marker != '*' && marker != '$' && buf.readableBytes() > 0) {
-            buf.skipBytes(1);
-            if (buf.readableBytes() > 0) {
-                marker = (char) buf.getByte(buf.readerIndex());
-            }
-        }
 
         if (marker == '*') {
 
@@ -45,10 +42,10 @@ public class H02FrameDecoder extends FrameDecoder {
                 return buf.readBytes(index + 1 - buf.readerIndex());
             }
 
-        } else if (marker == '$' && buf.readableBytes() >= MESSAGE_LENGTH) {
+        } else if (marker == '$' && buf.readableBytes() >= messageLength) {
 
             // Return binary message
-            return buf.readBytes(MESSAGE_LENGTH);
+            return buf.readBytes(messageLength);
 
         }
 
