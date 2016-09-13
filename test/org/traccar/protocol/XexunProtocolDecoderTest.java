@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
@@ -10,6 +9,9 @@ public class XexunProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         XexunProtocolDecoder decoder = new XexunProtocolDecoder(new XexunProtocol(), false);
+
+        verifyAttributes(decoder, text(
+                "GPRMC,.000,A,0.000000,S,0.0000,W,0.00,0.00,,00,0000.0,A*55,L,,imei:353579010727036,"));
 
         verifyPosition(decoder, text(
                 "GPRMC,113518.000,A,5303.4150,N,10.2368,E,60.73,207.42,260216,00,0000.0,A*74,F,,imei:351525018007873,"));
