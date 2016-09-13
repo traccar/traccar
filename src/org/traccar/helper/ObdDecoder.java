@@ -25,9 +25,9 @@ public final class ObdDecoder {
     private ObdDecoder() {
     }
 
-    public static final int MODE_CURRENT = 0x01;
-    public static final int MODE_FREEZE_FRAME = 0x02;
-    public static final int MODE_CODES = 0x03;
+    private static final int MODE_CURRENT = 0x01;
+    private static final int MODE_FREEZE_FRAME = 0x02;
+    private static final int MODE_CODES = 0x03;
 
     private static final int PID_ENGINE_LOAD = 0x04;
     private static final int PID_COOLANT_TEMPERATURE = 0x05;
@@ -54,7 +54,7 @@ public final class ObdDecoder {
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
-    private static Map.Entry<String, Object> decodeCodes(String value) {
+    public static Map.Entry<String, Object> decodeCodes(String value) {
         StringBuilder codes = new StringBuilder();
         for (int i = 0; i < value.length() / 4; i++) {
             int numValue = Integer.parseInt(value.substring(i * 4, (i + 1) * 4), 16);
@@ -75,7 +75,11 @@ public final class ObdDecoder {
             }
             codes.append(String.format("%04X", numValue & 0x3FFF));
         }
-        return createEntry("dtcs", codes.toString().replaceFirst(",", ""));
+        if (codes.length() > 0) {
+            return createEntry("dtcs", codes.toString().replaceFirst(",", ""));
+        } else {
+            return null;
+        }
     }
 
     private static Map.Entry<String, Object> decodeData(int pid, String value) {

@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -43,7 +44,13 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     private static final short MSG_SC_HEARTBEAT = 0x1003;
     private static final short MSG_SC_HEARTBEAT_RESPONSE = (short) 0x9003;
     private static final short MSG_SC_GPS = 0x4001;
+    private static final short MSG_SC_PID_DATA = 0x4002;
+    private static final short MSG_SC_SUPPORTED_PID = 0x4004;
+    private static final short MSG_SC_OBD_DATA = 0x4005;
+    private static final short MSG_SC_DTCS_PASSENGER = 0x4006;
+    private static final short MSG_SC_DTCS_COMMERCIAL = 0x400B;
     private static final short MSG_SC_ALARM = 0x4007;
+    private static final short MSG_SC_CELL = 0x4008;
     private static final short MSG_SC_GPS_SLEEP = 0x4009;
     private static final short MSG_SC_AGPS_REQUEST = 0x5101;
     private static final short MSG_SC_CURRENT_LOCATION = (short) 0xB001;
@@ -192,6 +199,50 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_SC_AGPS_REQUEST) {
 
             return readPosition(deviceSession, buf);
+
+        } else if (type == MSG_SC_DTCS_PASSENGER) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.skipBytes(6 * 4 + 2 + 8);
+
+            buf.readUnsignedByte(); // flag
+            position.add(ObdDecoder.decodeCodes(ChannelBuffers.hexDump(buf.readBytes(buf.readUnsignedByte()))));
+
+            return position;
+
+        } else if (type == MSG_SC_OBD_DATA) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.skipBytes(6 * 4 + 2 + 8);
+
+            // decode data
+
+            return position;
+
+        } else if (type == MSG_SC_CELL) {
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.skipBytes(6 * 4 + 2 + 8);
+
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_CID, buf.readUnsignedShort());
+
+            return position;
 
         }
 
