@@ -453,5 +453,6 @@
     <entry key='hunterpro.port'>5116</entry>
     <entry key='raveon.port'>5117</entry>
     <entry key='cradlepoint.port'>5118</entry>
+    <entry key='arknavx8.port'>5119</entry>
 
 </properties>
