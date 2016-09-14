@@ -32,7 +32,7 @@ public class GpsmtaProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());

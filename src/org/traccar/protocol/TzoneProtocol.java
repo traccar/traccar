@@ -31,7 +31,7 @@ public class TzoneProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(256, 2, 2, 2, 0));

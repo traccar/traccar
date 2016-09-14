@@ -34,7 +34,7 @@ public class V680Protocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "##"));
@@ -43,7 +43,7 @@ public class V680Protocol extends BaseProtocol {
                 pipeline.addLast("objectDecoder", new V680ProtocolDecoder(V680Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringDecoder", new StringDecoder());

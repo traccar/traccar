@@ -31,7 +31,7 @@ public class CellocatorProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        TrackerServer server = new TrackerServer(new ServerBootstrap(), this.getName()) {
+        TrackerServer server = new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());

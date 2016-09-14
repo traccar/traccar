@@ -44,7 +44,7 @@ public class Gps103Protocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, "\r\n", "\n", ";"));
@@ -54,7 +54,7 @@ public class Gps103Protocol extends BaseProtocol {
                 pipeline.addLast("objectDecoder", new Gps103ProtocolDecoder(Gps103Protocol.this));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());
