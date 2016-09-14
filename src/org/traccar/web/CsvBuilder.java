@@ -80,7 +80,7 @@ public class CsvBuilder {
                         Map value = (Map) method.invoke(object);
                         if (value != null) {
                             String map = MiscFormatter.toJson(value).toString();
-                            map = map.replaceAll("[\\{|\\}|\"]", "");
+                            map = map.replaceAll("[\\{\\}\"]", "");
                             map = map.replaceAll(",", " ");
                             builder.append(map);
                             addSeparator();
