@@ -89,6 +89,7 @@ public class Position extends Message {
     public static final String ALARM_ACCELETATION = "hardAcceleration";
     public static final String ALARM_BREAKING = "hardBreaking";
     public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
+    public static final String ALARM_POWER_CUT = "powerCut";
 
     private String protocol;
 

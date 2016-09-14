@@ -167,6 +167,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         switch (value) {
         case 0x01:
             return Position.ALARM_SOS;
+        case 0x02:
+            return Position.ALARM_POWER_CUT;
         case 0x03:
         case 0x09:
             return Position.ALARM_VIBRATION;
