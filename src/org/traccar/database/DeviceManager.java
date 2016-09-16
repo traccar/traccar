@@ -194,7 +194,7 @@ public class DeviceManager implements IdentityManager {
 
     public boolean isLatestPosition(Position position) {
         Position lastPosition = getLastPosition(position.getDeviceId());
-        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0;
+        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
     }
 
     public void updateLatestPosition(Position position) throws SQLException {
