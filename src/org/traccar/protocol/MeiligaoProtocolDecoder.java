@@ -173,22 +173,22 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(short value) {
         switch (value) {
-        case 0x01:
-            return Position.ALARM_SOS;
-        case 0x10:
-            return Position.ALARM_LOW_BATTERY;
-        case 0x11:
-            return Position.ALARM_OVERSPEED;
-        case 0x12:
-            return Position.ALARM_MOVEMENT;
-        case 0x13:
-            return Position.ALARM_GEOFENCE_ENTER;
-        case 0x50:
-            return Position.ALARM_POWER_OFF;
-        case 0x53:
-            return Position.ALARM_GPS_ANTENNA_CUT;
-        default:
-            return null;
+            case 0x01:
+                return Position.ALARM_SOS;
+            case 0x10:
+                return Position.ALARM_LOW_BATTERY;
+            case 0x11:
+                return Position.ALARM_OVERSPEED;
+            case 0x12:
+                return Position.ALARM_MOVEMENT;
+            case 0x13:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 0x50:
+                return Position.ALARM_POWER_OFF;
+            case 0x53:
+                return Position.ALARM_GPS_ANTENNA_CUT;
+            default:
+                return null;
         }
     }
 

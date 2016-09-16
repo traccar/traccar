@@ -343,31 +343,31 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(String value) {
         switch (value) {
-        case "SOS":
-        case "Help":
-            return Position.ALARM_SOS;
-        case "Over Speed":
-        case "OverSpeed":
-            return Position.ALARM_OVERSPEED;
-        case "LowSpeed":
-            return Position.ALARM_LOW_SPEED;
-        case "Low Battery":
-        case "LowBattery":
-            return Position.ALARM_LOW_BATTERY;
-        case "VIB":
-            return Position.ALARM_VIBRATION;
-        case "Move in":
-        case "Geo in":
-        case "Geo1 in":
-        case "Geo2 in":
-            return Position.ALARM_GEOFENCE_ENTER;
-        case "Move out":
-        case "Geo out":
-        case "Geo1 out":
-        case "Geo2 out":
-            return Position.ALARM_GEOFENCE_EXIT;
-        default:
-            return null;
+            case "SOS":
+            case "Help":
+                return Position.ALARM_SOS;
+            case "Over Speed":
+            case "OverSpeed":
+                return Position.ALARM_OVERSPEED;
+            case "LowSpeed":
+                return Position.ALARM_LOW_SPEED;
+            case "Low Battery":
+            case "LowBattery":
+                return Position.ALARM_LOW_BATTERY;
+            case "VIB":
+                return Position.ALARM_VIBRATION;
+            case "Move in":
+            case "Geo in":
+            case "Geo1 in":
+            case "Geo2 in":
+                return Position.ALARM_GEOFENCE_ENTER;
+            case "Move out":
+            case "Geo out":
+            case "Geo1 out":
+            case "Geo2 out":
+                return Position.ALARM_GEOFENCE_EXIT;
+            default:
+                return null;
         }
     }
 

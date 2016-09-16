@@ -104,20 +104,20 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(String value) {
         switch (value) {
-        case "tracker":
-            return null;
-        case "help me":
-            return Position.ALARM_SOS;
-        case "low battery":
-            return Position.ALARM_LOW_BATTERY;
-        case "stockade":
-            return Position.ALARM_GEOFENCE;
-        case "move":
-            return Position.ALARM_MOVEMENT;
-        case "speed":
-            return Position.ALARM_OVERSPEED;
-        default:
-            return null;
+            case "tracker":
+                return null;
+            case "help me":
+                return Position.ALARM_SOS;
+            case "low battery":
+                return Position.ALARM_LOW_BATTERY;
+            case "stockade":
+                return Position.ALARM_GEOFENCE;
+            case "move":
+                return Position.ALARM_MOVEMENT;
+            case "speed":
+                return Position.ALARM_OVERSPEED;
+            default:
+                return null;
         }
     }
 

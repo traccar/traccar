@@ -67,15 +67,15 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
     private String decodeAlarm(String value) {
         if (value != null) {
             switch (value) {
-            case "help me!":
-                return Position.ALARM_SOS;
-            case "low battery":
-                return Position.ALARM_LOW_BATTERY;
-            case "move!":
-            case "moved!":
-                return Position.ALARM_MOVEMENT;
-            default:
-                break;
+                case "help me!":
+                    return Position.ALARM_SOS;
+                case "low battery":
+                    return Position.ALARM_LOW_BATTERY;
+                case "move!":
+                case "moved!":
+                    return Position.ALARM_MOVEMENT;
+                default:
+                    break;
             }
         }
         return null;

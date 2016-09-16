@@ -66,31 +66,31 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(Short value) {
         switch (value) {
-        case 0x01:
-            return Position.ALARM_POWER_OFF;
-        case 0x02:
-            return Position.ALARM_SOS;
-        case 0x03:
-            return Position.ALARM_LOW_BATTERY;
-        case 0x04:
-            return Position.ALARM_VIBRATION;
-        case 0x08:
-        case 0x09:
-            return Position.ALARM_GPS_ANTENNA_CUT;
-        case 0x81:
-            return Position.ALARM_LOW_SPEED;
-        case 0x82:
-            return Position.ALARM_OVERSPEED;
-        case 0x83:
-            return Position.ALARM_GEOFENCE_ENTER;
-        case 0x84:
-            return Position.ALARM_GEOFENCE_EXIT;
-        case 0x85:
-            return Position.ALARM_ACCIDENT;
-        case 0x86:
-            return Position.ALARM_FALL_DOWN;
-        default:
-            return null;
+            case 0x01:
+                return Position.ALARM_POWER_OFF;
+            case 0x02:
+                return Position.ALARM_SOS;
+            case 0x03:
+                return Position.ALARM_LOW_BATTERY;
+            case 0x04:
+                return Position.ALARM_VIBRATION;
+            case 0x08:
+            case 0x09:
+                return Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x81:
+                return Position.ALARM_LOW_SPEED;
+            case 0x82:
+                return Position.ALARM_OVERSPEED;
+            case 0x83:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 0x84:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 0x85:
+                return Position.ALARM_ACCIDENT;
+            case 0x86:
+                return Position.ALARM_FALL_DOWN;
+            default:
+                return null;
         }
     }
 
