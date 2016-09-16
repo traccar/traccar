@@ -42,7 +42,9 @@ public final class ObdDecoder {
         switch (mode) {
             case MODE_CURRENT:
             case MODE_FREEZE_FRAME:
-                return decodeData(Integer.parseInt(value.substring(0, 2), 16), value.substring(2));
+                return decodeData(
+                        Integer.parseInt(value.substring(0, 2), 16),
+                        Integer.parseInt(value.substring(2), 16));
             case MODE_CODES:
                 return decodeCodes(value);
             default:
@@ -82,25 +84,24 @@ public final class ObdDecoder {
         }
     }
 
-    private static Map.Entry<String, Object> decodeData(int pid, String value) {
-        int intValue = Integer.parseInt(value, 16);
+    public static Map.Entry<String, Object> decodeData(int pid, int value) {
         switch (pid) {
             case PID_ENGINE_LOAD:
-                return createEntry("engineLoad", intValue * 100 / 255);
+                return createEntry("engineLoad", value * 100 / 255);
             case PID_COOLANT_TEMPERATURE:
-                return createEntry("coolantTemperature", intValue - 40);
+                return createEntry("coolantTemperature", value - 40);
             case PID_ENGINE_RPM:
-                return createEntry(Position.KEY_RPM, intValue / 4);
+                return createEntry(Position.KEY_RPM, value / 4);
             case PID_VEHICLE_SPEED:
-                return createEntry(Position.KEY_OBD_SPEED, intValue);
+                return createEntry(Position.KEY_OBD_SPEED, value);
             case PID_THROTTLE_POSITION:
-                return createEntry("throttle", intValue * 100 / 255);
+                return createEntry("throttle", value * 100 / 255);
             case PID_MIL_DISTANCE:
-                return createEntry("milDistance", intValue);
+                return createEntry("milDistance", value);
             case PID_FUEL_LEVEL:
-                return createEntry(Position.KEY_FUEL, intValue * 100 / 255);
+                return createEntry(Position.KEY_FUEL, value * 100 / 255);
             case PID_DISTANCE_CLEARED:
-                return createEntry("clearedDistance", intValue);
+                return createEntry("clearedDistance", value);
             default:
                 return null;
         }
