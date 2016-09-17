@@ -49,26 +49,27 @@ cleanup () {
 }
 
 copy_wrapper () {
-  cp yajsw/$1/setenv* out/bin
-  cp yajsw/$1/wrapper* out/bin
-  cp yajsw/$1/install* out/bin
-  cp yajsw/$1/start* out/bin
-  cp yajsw/$1/stop* out/bin
-  cp yajsw/$1/uninstall* out/bin
+  cp yajsw/$1/setenv* out/$1
+  cp yajsw/$1/wrapper* out/$1
+  cp yajsw/$1/install* out/$1
+  cp yajsw/$1/start* out/$1
+  cp yajsw/$1/stop* out/$1
+  cp yajsw/$1/uninstall* out/$1
 
-  chmod +x out/bin/*
+  chmod +x out/$1/*
 
   cp yajsw/conf/wrapper.conf.default out/conf
 
   touch out/conf/wrapper.conf
+  echo "wrapper.java.command=java" >> out/conf/wrapper.conf
   echo "wrapper.java.app.jar=tracker-server.jar" >> out/conf/wrapper.conf
   echo "wrapper.app.parameter.1=./conf/traccar.xml" >> out/conf/wrapper.conf
   echo "wrapper.java.additional.1=-Dfile.encoding=UTF-8" >> out/conf/wrapper.conf
   echo "wrapper.logfile=logs/wrapper.log.YYYYMMDD" >> out/conf/wrapper.conf
   echo "wrapper.logfile.rollmode=DATE" >> out/conf/wrapper.conf
-  echo "wrapper.ntservice.name=traccar" >> out/conf/wrapper.conf
-  echo "wrapper.ntservice.displayname=traccar" >> out/conf/wrapper.conf
-  echo "wrapper.ntservice.description=traccar" >> out/conf/wrapper.conf
+  echo "wrapper.ntservice.name=Traccar" >> out/conf/wrapper.conf
+  echo "wrapper.ntservice.displayname=Traccar" >> out/conf/wrapper.conf
+  echo "wrapper.ntservice.description=Traccar" >> out/conf/wrapper.conf
 
   cp -r yajsw/lib/core out/lib
   rm out/lib/core/ReadMe.txt
@@ -86,20 +87,20 @@ copy_files () {
   cp ../target/lib/* out/lib
   cp ../schema/* out/schema
   cp -r ../web/* out/web
-  cp unix/traccar.xml out/conf
+  cp traccar.xml out/conf
 }
 
 package_windows () {
-  mkdir -p out/{bin,conf,data,lib,logs,web,schema,templates}
+  mkdir -p out/{bat,conf,data,lib,logs,web,schema,templates}
 
   copy_wrapper "bat"
   copy_files
 
-  wine app/ISCC.exe windows/traccar.iss
+  wine app/ISCC.exe traccar.iss
 
-  zip -j traccar-windows-$VERSION.zip windows/Output/traccar-setup.exe README.txt
+  zip -j traccar-windows-$VERSION.zip Output/traccar-setup.exe README.txt
 
-  rm -r windows/Output
+  rm -r Output
   rm -r tmp
   rm -r out
 }
@@ -113,9 +114,9 @@ package_unix () {
   makeself out traccar.run "traccar" "\
 if which java &>/dev/null ; \
 then \
-if [ $(java -version 2>&1 | grep -i version | sed 's/.*version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q') -lt 17 ] ; \
+if [ \$(java -version 2>&1 | grep -i version | sed 's/.*version \"\(.*\)\.\(.*\)\..*\"/\1\2/; 1q') -lt 17 ] ; \
 then \
-echo "Java 7 or higher required" ; \
+echo 'Java 7 or higher required' ; \
 else \
 mkdir -p /opt/traccar ; \
 cp -r * /opt/traccar ; \
@@ -123,7 +124,7 @@ chmod -R go+rX /opt/traccar ; \
 /opt/traccar/bin/installDaemon.sh ; \
 fi ; \
 else \
-echo "Java runtime is required" ; \
+echo 'Java runtime is required' ; \
 fi"
 
   zip -j traccar-linux-$VERSION.zip traccar.run README.txt
