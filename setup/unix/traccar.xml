@@ -15,7 +15,7 @@
 
     <entry key='logger.enable'>true</entry>
     <entry key='logger.level'>all</entry>
-    <entry key='logger.file'>/opt/traccar/logs/tracker-server.log</entry>
+    <entry key='logger.file'>./logs/tracker-server.log</entry>
 
     <entry key='event.enable'>true</entry>
     <entry key='event.overspeedHandler'>true</entry>
@@ -28,13 +28,13 @@
     <!-- DATABASE CONFIG -->
 
     <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:/opt/traccar/data/database</entry>
+    <entry key='database.url'>jdbc:h2:./data/database</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
 
-    <entry key='database.changelog'>/opt/traccar/schema/changelog-master.xml</entry>
+    <entry key='database.changelog'>./schema/changelog-master.xml</entry>
 
     <entry key='database.selectServers'>
         SELECT * FROM server;
