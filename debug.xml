@@ -455,5 +455,6 @@
     <entry key='cradlepoint.port'>5118</entry>
     <entry key='arknavx8.port'>5119</entry>
     <entry key='autograde.port'>5120</entry>
+    <entry key='oigo.port'>5121</entry>
 
 </properties>
