@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 nyashh (nyashh@gmail.com)
+ * Copyright 2016 Nyash (nyashh@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +20,12 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.regex.Pattern;
 
 public class JpKorjarProtocolDecoder extends BaseProtocolDecoder {
 
@@ -29,74 +33,61 @@ public class JpKorjarProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("KORJAR.PL,")
+            .number("(d+),")                     // imei
+            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(d+.d+)([NS]),")            // latitude
+            .number("(d+.d+)([EW]),")            // longitude
+            .number("(d+.d+),")                  // speed
+            .number("(d+),")                     // course
+            .number("[FL]:(d+.d+)V,")            // battery
+            .number("([01]) ")                   // valid
+            .number("(d+) ")                     // mcc
+            .number("(d+) ")                     // mnc
+            .number("(x+) ")                     // lac
+            .number("(x+),")                     // cid
+            .compile();
+
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String line = (String) msg;
-
-        String[] parts = line.split(",");
-
-        if (parts.length == 0) {
-            return null;
-        }
-
-        if (!parts[0].equals("KORJAR.PL")) {
-            return null;
-        }
-
-        int year    = Integer.parseInt(parts[2].substring(0, 2));
-        int month   = Integer.parseInt(parts[2].substring(2, 4));
-        int day     = Integer.parseInt(parts[2].substring(4, 6));
-        int hour    = Integer.parseInt(parts[2].substring(6, 8));
-        int minute  = Integer.parseInt(parts[2].substring(8, 10));
-        int second  = Integer.parseInt(parts[2].substring(10, 12));
-
-        double latitude  = Double.parseDouble(parts[3].substring(0,
-                Math.max(0, parts[3].length() - 1)));
-
-        double longitude = Double.parseDouble(parts[4].substring(0,
-                Math.max(0, parts[4].length() - 1)));
-
-        double speed     = Double.parseDouble(parts[5]);
-        double course    = Double.parseDouble(parts[6]);
-
-        String[] batteryParts = parts[7].split(":");
-
-        double batteryVoltage = Double.parseDouble(batteryParts[1].substring(0,
-                Math.max(0, batteryParts[1].length() - 1)));
-
-        String[] codeParts    = parts[8].split(" ");
-
-        int gpsSignal         = Integer.parseInt(codeParts[0]); //0 - low, 1 - high
-        int mcc               = Integer.parseInt(codeParts[1]);
-        int mnc               = Integer.parseInt(codeParts[2]);
-        int lac               = Integer.parseInt(codeParts[3], 16);
-        int cid               = Integer.parseInt(codeParts[4], 16);
-
-        DateBuilder builder = new DateBuilder().setDate(year, month, day)
-                                               .setTime(hour, minute, second);
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parts[1]);
-        if (deviceSession == null) {
+        Parser parser = new Parser(PATTERN, (String) msg);
+        if (!parser.matches()) {
             return null;
         }
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setLatitude(latitude);
-        position.setLongitude(longitude);
-        position.setSpeed(speed);
-        position.setCourse(course);
-        position.set("signal", gpsSignal);
-        position.set(Position.KEY_POWER, batteryVoltage);
-        position.set(Position.KEY_MNC, mnc);
-        position.set(Position.KEY_MCC, mcc);
-        position.set(Position.KEY_LAC, lac);
-        position.set(Position.KEY_CID, cid);
-        position.setTime(builder.getDate());
-        position.setValid(true);
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
+
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+
+        position.setValid(parser.nextInt() == 1);
+
+        position.set(Position.KEY_MCC, parser.nextInt());
+        position.set(Position.KEY_MNC, parser.nextInt());
+        position.set(Position.KEY_LAC, parser.nextInt(16));
+        position.set(Position.KEY_CID, parser.nextInt(16));
 
         return position;
     }
+
 }
