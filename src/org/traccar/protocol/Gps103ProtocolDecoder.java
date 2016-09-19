@@ -216,8 +216,14 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
         String alarm = parser.next();
         position.set(Position.KEY_ALARM, decodeAlarm(alarm));
-        if (channel != null && alarm.equals("help me")) {
-            channel.write("**,imei:" + imei + ",E;", remoteAddress);
+        if (alarm.equals("help me")) {
+            if (channel != null) {
+                channel.write("**,imei:" + imei + ",E;", remoteAddress);
+            }
+        } else if (alarm.equals("acc on")) {
+            position.set(Position.KEY_IGNITION, true);
+        } else if (alarm.equals("acc off")) {
+            position.set(Position.KEY_IGNITION, false);
         }
 
         DateBuilder dateBuilder = new DateBuilder()
