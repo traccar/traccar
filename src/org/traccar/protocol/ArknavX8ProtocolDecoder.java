@@ -21,7 +21,6 @@ import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -56,8 +55,6 @@ public class ArknavX8ProtocolDecoder extends BaseProtocolDecoder {
             getDeviceSession(channel, remoteAddress, sentence.substring(0, 15));
             return null;
         }
-
-        PatternUtil.MatchResult r = PatternUtil.checkPattern(PATTERN.pattern(), sentence);
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
