@@ -44,8 +44,6 @@ public class JpKorjarProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Long imei   = Long.parseLong(parts[1]);
-
         int year    = Integer.parseInt(parts[2].substring(0, 2));
         int month   = Integer.parseInt(parts[2].substring(2, 4));
         int day     = Integer.parseInt(parts[2].substring(4, 6));
@@ -53,19 +51,18 @@ public class JpKorjarProtocolDecoder extends BaseProtocolDecoder {
         int minute  = Integer.parseInt(parts[2].substring(8, 10));
         int second  = Integer.parseInt(parts[2].substring(10, 12));
 
-        Double latitude  = Double.parseDouble(parts[3].substring(0,
+        double latitude  = Double.parseDouble(parts[3].substring(0,
                 Math.max(0, parts[3].length() - 1)));
 
-        Double longitude = Double.parseDouble(parts[4].substring(0,
+        double longitude = Double.parseDouble(parts[4].substring(0,
                 Math.max(0, parts[4].length() - 1)));
 
-        Double speed     = Double.parseDouble(parts[5]);
-        Double course    = Double.parseDouble(parts[6]);
+        double speed     = Double.parseDouble(parts[5]);
+        double course    = Double.parseDouble(parts[6]);
 
         String[] batteryParts = parts[7].split(":");
 
-        String batteryLevel   = batteryParts[0];
-        Double batteryVoltage = Double.parseDouble(batteryParts[1].substring(0,
+        double batteryVoltage = Double.parseDouble(batteryParts[1].substring(0,
                 Math.max(0, batteryParts[1].length() - 1)));
 
         String[] codeParts    = parts[8].split(" ");
