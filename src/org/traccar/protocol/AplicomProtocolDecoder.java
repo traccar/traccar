@@ -76,7 +76,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         return unitId;
     }
 
-    private static final int DEFAULT_SELECTOR_D = 0x0002FC;
+    private static final int DEFAULT_SELECTOR_D = 0x0002fC;
     private static final int DEFAULT_SELECTOR_E = 0x007ffc;
 
     private static final int EVENT_DATA = 119;
@@ -305,10 +305,9 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0010) != 0) {
-            String time =
-                    buf.readUnsignedByte() + "s " + buf.readUnsignedByte() + "m " + buf.readUnsignedByte() + "h " +
-                    buf.readUnsignedByte() + "M " + buf.readUnsignedByte() + "D " + buf.readUnsignedByte() + "Y " +
-                    buf.readByte() + "m " + buf.readByte() + "h";
+            String time = buf.readUnsignedByte() + "s " + buf.readUnsignedByte() + "m " + buf.readUnsignedByte() + "h "
+                    + buf.readUnsignedByte() + "M " + buf.readUnsignedByte() + "D " + buf.readUnsignedByte() + "Y "
+                    + buf.readByte() + "m " + buf.readByte() + "h";
             position.set("tachographTime", time);
         }
 
