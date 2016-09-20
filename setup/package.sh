@@ -34,7 +34,7 @@ prepare () {
   unzip yajsw-*.zip
   mv yajsw-*/ yajsw/
 
-  ../tools/minify.sh
+  ../web/../tools/minify.sh
 
   innoextract innosetup-*.exe
   echo "If you got any errors here try isetup version 5.5.5 (or check supported versions using 'innoextract -v')"
