@@ -44,7 +44,7 @@ public final class ObdDecoder {
             case MODE_FREEZE_FRAME:
                 return decodeData(
                         Integer.parseInt(value.substring(0, 2), 16),
-                        Integer.parseInt(value.substring(2), 16));
+                        Integer.parseInt(value.substring(2), 16), true);
             case MODE_CODES:
                 return decodeCodes(value);
             default:
@@ -84,22 +84,22 @@ public final class ObdDecoder {
         }
     }
 
-    public static Map.Entry<String, Object> decodeData(int pid, int value) {
+    public static Map.Entry<String, Object> decodeData(int pid, int value, boolean convert) {
         switch (pid) {
             case PID_ENGINE_LOAD:
-                return createEntry("engineLoad", value * 100 / 255);
+                return createEntry("engineLoad", convert ? value * 100 / 255 : value);
             case PID_COOLANT_TEMPERATURE:
-                return createEntry("coolantTemperature", value - 40);
+                return createEntry("coolantTemperature", convert ? value - 40 : value);
             case PID_ENGINE_RPM:
-                return createEntry(Position.KEY_RPM, value / 4);
+                return createEntry(Position.KEY_RPM, convert ? value / 4 : value);
             case PID_VEHICLE_SPEED:
                 return createEntry(Position.KEY_OBD_SPEED, value);
             case PID_THROTTLE_POSITION:
-                return createEntry("throttle", value * 100 / 255);
+                return createEntry("throttle", convert ? value * 100 / 255 : value);
             case PID_MIL_DISTANCE:
                 return createEntry("milDistance", value);
             case PID_FUEL_LEVEL:
-                return createEntry(Position.KEY_FUEL, value * 100 / 255);
+                return createEntry(Position.KEY_FUEL, convert ? value * 100 / 255 : value);
             case PID_DISTANCE_CLEARED:
                 return createEntry("clearedDistance", value);
             default:

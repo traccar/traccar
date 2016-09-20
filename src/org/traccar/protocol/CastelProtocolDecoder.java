@@ -167,7 +167,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     value = 0;
                     break;
             }
-            position.add(ObdDecoder.decodeData(pids[i], value));
+            position.add(ObdDecoder.decodeData(pids[i], value, false));
         }
     }
 
