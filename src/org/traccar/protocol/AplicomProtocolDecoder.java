@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -75,7 +76,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         return unitId;
     }
 
-    private static final int DEFAULT_SELECTOR = 0x0002FC;
+    private static final int DEFAULT_SELECTOR_D = 0x0002FC;
+    private static final int DEFAULT_SELECTOR_E = 0x007ffc;
 
     private static final int EVENT_DATA = 119;
 
@@ -191,44 +193,12 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        ChannelBuffer buf = (ChannelBuffer) msg;
-
-        buf.readUnsignedByte(); // marker
-        int version = buf.readUnsignedByte();
-
-        String imei;
-        if ((version & 0x80) != 0) {
-            imei = String.valueOf((buf.readUnsignedInt() << (3 * 8)) | buf.readUnsignedMedium());
-        } else {
-            imei = String.valueOf(imeiFromUnitId(buf.readUnsignedMedium()));
-        }
-
-        buf.readUnsignedShort(); // length
-
-        int selector = DEFAULT_SELECTOR;
-        if ((version & 0x40) != 0) {
-            selector = buf.readUnsignedMedium();
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-        if (deviceSession == null) {
-            return null;
-        }
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        int event = buf.readUnsignedByte();
-        position.set(Position.KEY_EVENT, event);
-        position.set("eventInfo", buf.readUnsignedByte());
+    private void decodeD(Position position, ChannelBuffer buf, int selector, int event) {
 
         if ((selector & 0x0008) != 0) {
             position.setValid((buf.readUnsignedByte() & 0x40) != 0);
         } else {
-            return null; // no location data
+            getLastLocation(position, null);
         }
 
         if ((selector & 0x0004) != 0) {
@@ -318,8 +288,110 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".can")
                 && buf.readable() && (selector & 0x1000) != 0 && event == EVENT_DATA) {
-
             decodeCanData(buf, position);
+        }
+    }
+
+    private void decodeE(Position position, ChannelBuffer buf, int selector) {
+
+        if ((selector & 0x0008) != 0) {
+            position.set("tachographEvent", buf.readUnsignedShort());
+        }
+
+        if ((selector & 0x0004) != 0) {
+            getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
+        } else {
+            getLastLocation(position, null);
+        }
+
+        if ((selector & 0x0010) != 0) {
+            String time =
+                    buf.readUnsignedByte() + "s " + buf.readUnsignedByte() + "m " + buf.readUnsignedByte() + "h " +
+                    buf.readUnsignedByte() + "M " + buf.readUnsignedByte() + "D " + buf.readUnsignedByte() + "Y " +
+                    buf.readByte() + "m " + buf.readByte() + "h";
+            position.set("tachographTime", time);
+        }
+
+        position.set("workState", buf.readUnsignedByte());
+        position.set("driver1State", buf.readUnsignedByte());
+        position.set("driver2State", buf.readUnsignedByte());
+
+        if ((selector & 0x0020) != 0) {
+            position.set("tachographStatus", buf.readUnsignedByte());
+        }
+
+        if ((selector & 0x0040) != 0) {
+            position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 256.0);
+        }
+
+        if ((selector & 0x0080) != 0) {
+            position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
+        }
+
+        if ((selector & 0x0100) != 0) {
+            position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt() * 5);
+        }
+
+        if ((selector & 0x8000) != 0) {
+            position.set("kFactor", buf.readUnsignedShort() * 0.001 + " pulses/m");
+        }
+
+        if ((selector & 0x0200) != 0) {
+            position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
+        }
+
+        if ((selector & 0x0400) != 0) {
+            position.set("extraInfo", buf.readUnsignedShort());
+        }
+
+        if ((selector & 0x0800) != 0) {
+            position.set(Position.KEY_VIN, buf.readBytes(18).toString(StandardCharsets.US_ASCII).trim());
+        }
+    }
+
+    @Override
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        ChannelBuffer buf = (ChannelBuffer) msg;
+
+        char protocol = (char) buf.readByte();
+        int version = buf.readUnsignedByte();
+
+        String imei;
+        if ((version & 0x80) != 0) {
+            imei = String.valueOf((buf.readUnsignedInt() << (3 * 8)) | buf.readUnsignedMedium());
+        } else {
+            imei = String.valueOf(imeiFromUnitId(buf.readUnsignedMedium()));
+        }
+
+        buf.readUnsignedShort(); // length
+
+        int selector = DEFAULT_SELECTOR_D;
+        if (protocol == 'E') {
+            selector = DEFAULT_SELECTOR_E;
+        }
+        if ((version & 0x40) != 0) {
+            selector = buf.readUnsignedMedium();
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
+        }
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        int event = buf.readUnsignedByte();
+        position.set(Position.KEY_EVENT, event);
+        position.set("eventInfo", buf.readUnsignedByte());
+
+        if (protocol == 'D') {
+            decodeD(position, buf, selector, event);
+        } else if (protocol == 'E') {
+            decodeE(position, buf, selector);
+        } else {
+            return null;
         }
 
         return position;
