@@ -80,6 +80,11 @@ copy_wrapper () {
   cp yajsw/templates/* out/templates
 
   cp yajsw/wrapper*.jar out
+
+  if which xattr &>/dev/null
+  then
+    xattr -dr com.apple.quarantine out
+  fi
 }
 
 copy_files () {
