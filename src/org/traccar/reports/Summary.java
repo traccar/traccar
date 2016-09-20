@@ -24,6 +24,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
 import org.traccar.web.CsvBuilder;
@@ -35,9 +36,11 @@ public final class Summary {
     }
 
     private static SummaryReport calculateSummaryResult(long deviceId, Date from, Date to) throws SQLException {
+        boolean ignoreOdometerConfig = Context.getConfig().getBoolean(ReportUtils.IGNORE_ODOMETER);
         SummaryReport result = new SummaryReport();
+        Device device = Context.getDeviceManager().getDeviceById(deviceId);
         result.setDeviceId(deviceId);
-        result.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
+        result.setDeviceName(device.getName());
         Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
@@ -60,7 +63,14 @@ public final class Summary {
                 speedSum += position.getSpeed();
                 result.setMaxSpeed(position.getSpeed());
             }
-            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition));
+            boolean ignoreOdometer = false;
+            if (device.getAttributes().containsKey(ReportUtils.IGNORE_ODOMETER)) {
+                ignoreOdometer = Boolean.parseBoolean(device.getAttributes()
+                        .get(ReportUtils.IGNORE_ODOMETER).toString());
+            } else {
+                ignoreOdometer = ignoreOdometerConfig;
+            }
+            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setAverageSpeed(speedSum / positions.size());
         }
         return result;

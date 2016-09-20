@@ -25,6 +25,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.model.TripReport;
 import org.traccar.web.CsvBuilder;
@@ -36,6 +37,7 @@ public final class Trips {
     }
 
     private static TripReport calculateTrip(ArrayList<Position> positions, int startIndex, int endIndex) {
+        boolean ignoreOdometerConfig = Context.getConfig().getBoolean(ReportUtils.IGNORE_ODOMETER);
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
@@ -53,15 +55,22 @@ public final class Trips {
         long tripDuration = endTrip.getFixTime().getTime() - positions.get(startIndex).getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        String deviceName = Context.getDeviceManager().getDeviceById(deviceId).getName();
-        trip.setDeviceName(deviceName);
+        Device device = Context.getDeviceManager().getDeviceById(deviceId);
+        trip.setDeviceName(device.getName());
         trip.setStartPositionId(startTrip.getId());
         trip.setStartTime(startTrip.getFixTime());
         trip.setStartAddress(startTrip.getAddress());
         trip.setEndPositionId(endTrip.getId());
         trip.setEndTime(endTrip.getFixTime());
         trip.setEndAddress(endTrip.getAddress());
-        trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip));
+        boolean ignoreOdometer = false;
+        if (device.getAttributes().containsKey(ReportUtils.IGNORE_ODOMETER)) {
+            ignoreOdometer = Boolean.parseBoolean(device.getAttributes()
+                    .get(ReportUtils.IGNORE_ODOMETER).toString());
+        } else {
+            ignoreOdometer = ignoreOdometerConfig;
+        }
+        trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
