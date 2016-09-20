@@ -37,13 +37,13 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .expression("G[PN]RMC,")
-            .number("(dd)(dd)(dd).(d+),")        // time
+            .number("(?:(dd)(dd)(dd))?.(d+),")   // time
             .expression("([AV]),")               // validity
             .number("(d*?)(d?d.d+),([NS]),")     // latitude
             .number("(d*?)(d?d.d+),([EW])?,")    // longitude
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd),")             // date
+            .number("(?:(dd)(dd)(dd))?,")        // date
             .expression("[^*]*").text("*")
             .number("xx")                        // checksum
             .expression("\\r\\n").optional()
@@ -67,15 +67,15 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
     private String decodeAlarm(String value) {
         if (value != null) {
             switch (value) {
-            case "help me!":
-                return Position.ALARM_SOS;
-            case "low battery":
-                return Position.ALARM_LOW_BATTERY;
-            case "move!":
-            case "moved!":
-                return Position.ALARM_MOVEMENT;
-            default:
-                break;
+                case "help me!":
+                    return Position.ALARM_SOS;
+                case "low battery":
+                    return Position.ALARM_LOW_BATTERY;
+                case "move!":
+                case "moved!":
+                    return Position.ALARM_MOVEMENT;
+                default:
+                    break;
             }
         }
         return null;

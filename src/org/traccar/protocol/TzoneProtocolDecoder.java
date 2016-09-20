@@ -34,18 +34,18 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(Short value) {
         switch (value) {
-        case 0x01:
-            return Position.ALARM_SOS;
-        case 0x10:
-            return Position.ALARM_LOW_BATTERY;
-        case 0x11:
-            return Position.ALARM_OVERSPEED;
-        case 0x42:
-            return Position.ALARM_GEOFENCE_EXIT;
-        case 0x43:
-            return Position.ALARM_GEOFENCE_ENTER;
-        default:
-            return null;
+            case 0x01:
+                return Position.ALARM_SOS;
+            case 0x10:
+                return Position.ALARM_LOW_BATTERY;
+            case 0x11:
+                return Position.ALARM_OVERSPEED;
+            case 0x42:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 0x43:
+                return Position.ALARM_GEOFENCE_ENTER;
+            default:
+                return null;
         }
     }
 

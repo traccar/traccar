@@ -78,20 +78,20 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(int value) {
         switch (value) {
-        case 1:
-            return Position.ALARM_ACCIDENT;
-        case 2:
-            return Position.ALARM_SOS;
-        case 3:
-            return Position.ALARM_VIBRATION;
-        case 4:
-            return Position.ALARM_LOW_SPEED;
-        case 5:
-            return Position.ALARM_OVERSPEED;
-        case 6:
-            return Position.ALARM_GEOFENCE_EXIT;
-        default:
-            return null;
+            case 1:
+                return Position.ALARM_ACCIDENT;
+            case 2:
+                return Position.ALARM_SOS;
+            case 3:
+                return Position.ALARM_VIBRATION;
+            case 4:
+                return Position.ALARM_LOW_SPEED;
+            case 5:
+                return Position.ALARM_OVERSPEED;
+            case 6:
+                return Position.ALARM_GEOFENCE_EXIT;
+            default:
+                return null;
         }
     }
 
@@ -111,11 +111,15 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             String id = sentence.substring(0, 12);
             String type = sentence.substring(12, 16);
-            if (type.equals("BP00")) {
-                String content = sentence.substring(sentence.length() - 3);
-                channel.write("(" + id + "AP01" + content + ")");
-            } else if (type.equals("BP05")) {
-                channel.write("(" + id + "AP05)");
+            if (type.equals("BP00") || type.equals("BP05")) {
+                String content = sentence.substring(16);
+                getDeviceSession(channel, remoteAddress, content.substring(0, 15));
+                if (type.equals("BP00")) {
+                    channel.write("(" + id + "AP01" + content.substring(15) + ")");
+                    return null;
+                } else if (type.equals("BP05")) {
+                    channel.write("(" + id + "AP05)");
+                }
             }
         }
 

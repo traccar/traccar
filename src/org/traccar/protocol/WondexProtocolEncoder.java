@@ -26,15 +26,15 @@ public class WondexProtocolEncoder extends StringProtocolEncoder {
         initDevicePassword(command, "0000");
 
         switch (command.getType()) {
-        case Command.TYPE_REBOOT_DEVICE:
-            return formatCommand(command, "$WP+REBOOT={%s}", Command.KEY_DEVICE_PASSWORD);
-        case Command.TYPE_POSITION_SINGLE:
-            return formatCommand(command, "$WP+GETLOCATION={%s}", Command.KEY_DEVICE_PASSWORD);
-        case Command.TYPE_IDENTIFICATION:
-            return formatCommand(command, "$WP+VER={%s}", Command.KEY_DEVICE_PASSWORD);
-        default:
-            Log.warning(new UnsupportedOperationException(command.getType()));
-            break;
+            case Command.TYPE_REBOOT_DEVICE:
+                return formatCommand(command, "$WP+REBOOT={%s}", Command.KEY_DEVICE_PASSWORD);
+            case Command.TYPE_POSITION_SINGLE:
+                return formatCommand(command, "$WP+GETLOCATION={%s}", Command.KEY_DEVICE_PASSWORD);
+            case Command.TYPE_IDENTIFICATION:
+                return formatCommand(command, "$WP+VER={%s}", Command.KEY_DEVICE_PASSWORD);
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                break;
         }
 
         return null;

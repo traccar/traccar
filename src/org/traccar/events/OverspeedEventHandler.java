@@ -23,7 +23,6 @@ import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.helper.UnitsConverter;
 
 public class OverspeedEventHandler extends BaseEventHandler {
 
@@ -63,7 +62,6 @@ public class OverspeedEventHandler extends BaseEventHandler {
                 oldSpeed = lastPosition.getSpeed();
             }
         }
-        speedLimit = UnitsConverter.knotsFromKph(speedLimit);
         if (speed > speedLimit && oldSpeed <= speedLimit) {
             events.add(new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
         }

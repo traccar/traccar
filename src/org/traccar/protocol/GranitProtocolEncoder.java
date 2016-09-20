@@ -30,18 +30,18 @@ public class GranitProtocolEncoder extends BaseProtocolEncoder {
         String commandString = "";
 
         switch (command.getType()) {
-        case Command.TYPE_IDENTIFICATION:
-            commandString = "BB+IDNT";
-            break;
-        case Command.TYPE_REBOOT_DEVICE:
-            commandString = "BB+RESET";
-            break;
-        case Command.TYPE_POSITION_SINGLE:
-            commandString = "BB+RRCD";
-            break;
-        default:
-            Log.warning(new UnsupportedOperationException(command.getType()));
-            return null;
+            case Command.TYPE_IDENTIFICATION:
+                commandString = "BB+IDNT";
+                break;
+            case Command.TYPE_REBOOT_DEVICE:
+                commandString = "BB+RESET";
+                break;
+            case Command.TYPE_POSITION_SINGLE:
+                commandString = "BB+RRCD";
+                break;
+            default:
+                Log.warning(new UnsupportedOperationException(command.getType()));
+                return null;
         }
         if (!commandString.isEmpty()) {
             ChannelBuffer commandBuf = ChannelBuffers.dynamicBuffer();

@@ -42,7 +42,7 @@ public class MeitrackProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        TrackerServer server = new TrackerServer(new ServerBootstrap(), this.getName()) {
+        TrackerServer server = new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new MeitrackFrameDecoder());
@@ -53,7 +53,7 @@ public class MeitrackProtocol extends BaseProtocol {
         };
         server.setEndianness(ByteOrder.LITTLE_ENDIAN);
         serverList.add(server);
-        server = new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+        server = new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringEncoder", new StringEncoder());

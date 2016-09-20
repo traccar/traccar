@@ -91,10 +91,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
 
-        if (type.startsWith("PHO")) {
-            if (channel != null) {
-                channel.write("#PHD0," + type.substring(3) + "\r\n");
-            }
+        if (type.startsWith("PHO") && channel != null) {
+            channel.write("#PHD0," + type.substring(3) + "\r\n");
         }
 
         position.set(Position.KEY_ALARM, decodeAlarm(type));
