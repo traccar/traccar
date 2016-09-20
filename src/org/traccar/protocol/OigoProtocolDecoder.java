@@ -54,7 +54,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession;
         switch (BitUtil.to(tag, 3)) {
             case 0:
-                String imei = ChannelBuffers.hexDump(buf.readBytes(9)).substring(1, 1 + 15);
+                String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
                 deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 break;
             case 1:
@@ -74,6 +74,8 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_EVENT, buf.readUnsignedByte());
 
         int mask = buf.readInt();
 
