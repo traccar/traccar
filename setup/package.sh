@@ -67,7 +67,7 @@ copy_wrapper () {
   echo "wrapper.java.additional.1=-Dfile.encoding=UTF-8" >> out/conf/wrapper.conf
   echo "wrapper.logfile=logs/wrapper.log.YYYYMMDD" >> out/conf/wrapper.conf
   echo "wrapper.logfile.rollmode=DATE" >> out/conf/wrapper.conf
-  echo "wrapper.ntservice.name=Traccar" >> out/conf/wrapper.conf
+  echo "wrapper.ntservice.name=traccar" >> out/conf/wrapper.conf
   echo "wrapper.ntservice.displayname=Traccar" >> out/conf/wrapper.conf
   echo "wrapper.ntservice.description=Traccar" >> out/conf/wrapper.conf
 
