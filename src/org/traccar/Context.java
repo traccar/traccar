@@ -137,9 +137,11 @@ public final class Context {
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
-        if (arguments.length > 0) {
-            config.load(arguments[0]);
+        if (arguments.length <= 0) {
+            throw new RuntimeException("Configuration file is not provided");
         }
+
+        config.load(arguments[0]);
 
         loggerEnabled = config.getBoolean("logger.enable");
         if (loggerEnabled) {
