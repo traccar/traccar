@@ -82,6 +82,9 @@
     <entry key='database.password'></entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
+    
+    <!-- Automatically registers unknown devices. -->
+    <entry key='database.registerUnknown'>false</entry>
 
     <entry key='database.xml'>false</entry>
     <entry key='database.saveOriginal'>true</entry>
