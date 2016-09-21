@@ -16,6 +16,8 @@
 package org.traccar;
 
 import com.ning.http.client.AsyncHttpClient;
+
+import org.traccar.database.AliasesManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -134,6 +136,12 @@ public final class Context {
         return eventForwarder;
     }
 
+    private static AliasesManager aliasesManager;
+
+    public static AliasesManager getAliasesManager() {
+        return aliasesManager;
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -232,6 +240,8 @@ public final class Context {
         if (config.getBoolean("event.forward.enable")) {
             eventForwarder = new EventForwarder();
         }
+
+        aliasesManager = new AliasesManager(dataManager);
 
     }
 

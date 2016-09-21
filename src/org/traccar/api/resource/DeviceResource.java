@@ -88,6 +88,7 @@ public class DeviceResource extends BaseResource {
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
+        Context.getAliasesManager().removeDevice(id);
         return Response.noContent().build();
     }
 

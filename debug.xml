@@ -331,6 +331,27 @@
     <entry key='database.deletePositions'>
         DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices);
     </entry>
+    
+    <entry key='database.selectAttributeAliases'>
+        SELECT * FROM device_aliases;
+    </entry>
+
+    <entry key='database.insertAttributeAlias'>
+        INSERT INTO device_aliases (deviceId, attribute, alias)
+        VALUES (:deviceId, :attribute, :alias);
+    </entry>
+
+    <entry key='database.updateAttributeAlias'>
+        UPDATE device_aliases SET
+        deviceId = :deviceId,
+        attribute = :attribute,
+        alias = :alias
+        WHERE id = :id;
+    </entry>
+
+    <entry key='database.deleteAttributeAlias'>
+        DELETE FROM device_aliases WHERE id = :id;
+    </entry>
 
     <!-- PROTOCOL CONFIG -->
 
