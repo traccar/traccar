@@ -57,6 +57,7 @@ public class Position extends Message {
     public static final String KEY_THROTTLE = "throttle";
     public static final String KEY_MOTION = "motion";
     public static final String KEY_ARMED = "armed";
+    public static final String KEY_ACCURACY = "accuracy";
 
     public static final String KEY_OBD_SPEED = "obdSpeed";
     public static final String KEY_OBD_ODOMETER = "obdOdometer";
