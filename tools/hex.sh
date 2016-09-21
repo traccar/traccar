@@ -10,26 +10,34 @@
 
 if [ $# -lt 2 ]
 then
-  echo "USAGE: $0 <port> <hex>"
+  echo "USAGE: $0 <host> <port> <hex>"
+  echo "If only <port> and <hex> are present, <host> defaults to localhost."
   exit 1
 fi
 
+host="$1"; port="$2"; hex="$3";
+
+if [ $# -eq 2 ]
+then
+    host="localhost"; port="$1"; hex="$2";
+fi
+
 send_hex_udp () {
-  echo $2 | xxd -r -p | nc -u -w 0 localhost $1
+  echo "$hex" | xxd -r -p | nc -u -w 0 "$host" "$port"
 }
 
 send_hex_tcp () {
-  echo $2 | xxd -r -p | nc localhost $1
+  echo "$hex" | xxd -r -p | nc "$host" "$port"
 }
 
 send_text_udp () {
-  echo -n -e $2 | nc -u -w 0 localhost $1
+  echo -n -e "$hex" | nc -u -w 0 "$host" "$port"
 }
 
 send_text_tcp () {
-  echo -n -e $2 | nc localhost $1
+  echo -n -e "$hex" | nc "$host" "$port"
 }
 
-send_hex_tcp $1 $2
+send_hex_tcp "$host" "$port" "$hex"
 
 exit $?
