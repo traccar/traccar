@@ -53,19 +53,15 @@ public final class Trips {
         long tripDuration = endTrip.getFixTime().getTime() - positions.get(startIndex).getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        trip.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
+        trip.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
         trip.setStartPositionId(startTrip.getId());
         trip.setStartTime(startTrip.getFixTime());
         trip.setStartAddress(startTrip.getAddress());
         trip.setEndPositionId(endTrip.getId());
         trip.setEndTime(endTrip.getFixTime());
         trip.setEndAddress(endTrip.getAddress());
-        boolean ignoreOdometer = false;
-        String ignoreOdometerAttribute = Context.getDeviceManager()
-                .lookupConfigAttribute(deviceId, "report.ignoreOdometer");
-        if (ignoreOdometerAttribute != null) {
-            ignoreOdometer = Boolean.parseBoolean(ignoreOdometerAttribute);
-        }
+        boolean ignoreOdometer = Context.getDeviceManager()
+                .lookupConfigBoolean(deviceId, "report.ignoreOdometer", false);
         trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));

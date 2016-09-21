@@ -316,14 +316,85 @@ public class DeviceManager implements IdentityManager {
         groupsById.remove(groupId);
     }
 
-    public String lookupServerAttribute(long deviceId, String attributeName) {
-        return lookupAttribute(deviceId, attributeName, true);
+    public boolean lookupServerBoolean(long deviceId, String attributeName, boolean defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Boolean.parseBoolean(result);
+        }
+        return defaultValue;
     }
 
-    public String lookupConfigAttribute(long deviceId, String attributeName) {
-        return lookupAttribute(deviceId, attributeName, false);
+    public String lookupServerString(long deviceId, String attributeName, String defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return result;
+        }
+        return defaultValue;
     }
 
+    public int lookupServerInteger(long deviceId, String attributeName, int defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Integer.parseInt(result);
+        }
+        return defaultValue;
+    }
+
+    public long lookupServerLong(long deviceId, String attributeName, long defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Long.parseLong(result);
+        }
+        return defaultValue;
+    }
+
+    public double lookupServerDouble(long deviceId, String attributeName, double defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Double.parseDouble(result);
+        }
+        return defaultValue;
+    }
+
+    public boolean lookupConfigBoolean(long deviceId, String attributeName, boolean defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Boolean.parseBoolean(result);
+        }
+        return defaultValue;
+    }
+
+    public String lookupConfigString(long deviceId, String attributeName, String defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return result;
+        }
+        return defaultValue;
+    }
+
+    public int lookupConfigInteger(long deviceId, String attributeName, int defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Integer.parseInt(result);
+        }
+        return defaultValue;
+    }
+
+    public long lookupConfigLong(long deviceId, String attributeName, long defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Long.parseLong(result);
+        }
+        return defaultValue;
+    }
+
+    public double lookupConfigDouble(long deviceId, String attributeName, double defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Double.parseDouble(result);
+        }
+        return defaultValue;
+    }
 
     private String lookupAttribute(long deviceId, String attributeName, boolean lookupServer) {
         String result = null;
