@@ -24,7 +24,6 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
 import org.traccar.web.CsvBuilder;
@@ -36,11 +35,9 @@ public final class Summary {
     }
 
     private static SummaryReport calculateSummaryResult(long deviceId, Date from, Date to) throws SQLException {
-        boolean ignoreOdometerConfig = Context.getConfig().getBoolean(ReportUtils.IGNORE_ODOMETER);
         SummaryReport result = new SummaryReport();
-        Device device = Context.getDeviceManager().getDeviceById(deviceId);
         result.setDeviceId(deviceId);
-        result.setDeviceName(device.getName());
+        result.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
         Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
@@ -64,11 +61,10 @@ public final class Summary {
                 result.setMaxSpeed(position.getSpeed());
             }
             boolean ignoreOdometer = false;
-            if (device.getAttributes().containsKey(ReportUtils.IGNORE_ODOMETER)) {
-                ignoreOdometer = Boolean.parseBoolean(device.getAttributes()
-                        .get(ReportUtils.IGNORE_ODOMETER).toString());
-            } else {
-                ignoreOdometer = ignoreOdometerConfig;
+            String ignoreOdometerAttribute = Context.getDeviceManager()
+                    .lookupConfigAttribute(deviceId, "report.ignoreOdometer");
+            if (ignoreOdometerAttribute != null) {
+                ignoreOdometer = Boolean.parseBoolean(ignoreOdometerAttribute);
             }
             result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setAverageSpeed(speedSum / positions.size());

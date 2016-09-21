@@ -30,8 +30,6 @@ public final class ReportUtils {
     private ReportUtils() {
     }
 
-    public static final String IGNORE_ODOMETER = "report.ignoreOdometer";
-
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
         Collection<Long> result = new ArrayList<>();
         result.addAll(deviceIds);

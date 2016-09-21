@@ -316,7 +316,16 @@ public class DeviceManager implements IdentityManager {
         groupsById.remove(groupId);
     }
 
-    public String lookupAttribute(long deviceId, String attributeName) {
+    public String lookupServerAttribute(long deviceId, String attributeName) {
+        return lookupAttribute(deviceId, attributeName, true);
+    }
+
+    public String lookupConfigAttribute(long deviceId, String attributeName) {
+        return lookupAttribute(deviceId, attributeName, false);
+    }
+
+
+    private String lookupAttribute(long deviceId, String attributeName, boolean lookupServer) {
         String result = null;
         Device device = getDeviceById(deviceId);
         if (device != null) {
@@ -338,8 +347,12 @@ public class DeviceManager implements IdentityManager {
                 }
             }
             if (result == null) {
-                Server server = Context.getPermissionsManager().getServer();
-                result = (String) server.getAttributes().get(attributeName);
+                if (lookupServer) {
+                    Server server = Context.getPermissionsManager().getServer();
+                    result = (String) server.getAttributes().get(attributeName);
+                } else {
+                    result = Context.getConfig().getString(attributeName);
+                }
             }
         }
         return result;

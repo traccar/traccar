@@ -25,7 +25,6 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
 import org.traccar.Context;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.model.TripReport;
 import org.traccar.web.CsvBuilder;
@@ -37,7 +36,6 @@ public final class Trips {
     }
 
     private static TripReport calculateTrip(ArrayList<Position> positions, int startIndex, int endIndex) {
-        boolean ignoreOdometerConfig = Context.getConfig().getBoolean(ReportUtils.IGNORE_ODOMETER);
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
@@ -55,8 +53,7 @@ public final class Trips {
         long tripDuration = endTrip.getFixTime().getTime() - positions.get(startIndex).getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        Device device = Context.getDeviceManager().getDeviceById(deviceId);
-        trip.setDeviceName(device.getName());
+        trip.setDeviceName(Context.getDeviceManager().getDeviceById(deviceId).getName());
         trip.setStartPositionId(startTrip.getId());
         trip.setStartTime(startTrip.getFixTime());
         trip.setStartAddress(startTrip.getAddress());
@@ -64,11 +61,10 @@ public final class Trips {
         trip.setEndTime(endTrip.getFixTime());
         trip.setEndAddress(endTrip.getAddress());
         boolean ignoreOdometer = false;
-        if (device.getAttributes().containsKey(ReportUtils.IGNORE_ODOMETER)) {
-            ignoreOdometer = Boolean.parseBoolean(device.getAttributes()
-                    .get(ReportUtils.IGNORE_ODOMETER).toString());
-        } else {
-            ignoreOdometer = ignoreOdometerConfig;
+        String ignoreOdometerAttribute = Context.getDeviceManager()
+                .lookupConfigAttribute(deviceId, "report.ignoreOdometer");
+        if (ignoreOdometerAttribute != null) {
+            ignoreOdometer = Boolean.parseBoolean(ignoreOdometerAttribute);
         }
         trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
