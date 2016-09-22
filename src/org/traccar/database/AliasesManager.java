@@ -35,25 +35,12 @@ public class AliasesManager {
     private final Map<Long, Set<AttributeAlias>> deviceAliases = new ConcurrentHashMap<>();
     private final Map<Long, AttributeAlias> aliasesById = new ConcurrentHashMap<>();
 
-
     public AliasesManager(DataManager dataManager) {
         this.dataManager = dataManager;
-        refresh();
-    }
-
-    public Set<AttributeAlias> getDeviceAttributeAliases(long deviceId) {
-        if (!deviceAliases.containsKey(deviceId)) {
-            deviceAliases.put(deviceId, new HashSet<AttributeAlias>());
-        }
-        return deviceAliases.get(deviceId);
-    }
-
-    public final void refresh() {
         if (dataManager != null) {
             try {
-                deviceAliases.clear();
                 for (AttributeAlias attributeAlias : dataManager.getAttributeAliases()) {
-                    getDeviceAttributeAliases(attributeAlias.getDeviceId())
+                    getAttributeAliases(attributeAlias.getDeviceId())
                             .add(attributeAlias);
                     aliasesById.put(attributeAlias.getId(), attributeAlias);
                 }
@@ -63,8 +50,15 @@ public class AliasesManager {
         }
     }
 
+    public Set<AttributeAlias> getAttributeAliases(long deviceId) {
+        if (!deviceAliases.containsKey(deviceId)) {
+            deviceAliases.put(deviceId, new HashSet<AttributeAlias>());
+        }
+        return deviceAliases.get(deviceId);
+    }
+
     public void removeDevice(long deviceId) {
-        for (AttributeAlias attributeAlias : getDeviceAttributeAliases(deviceId)) {
+        for (AttributeAlias attributeAlias : getAttributeAliases(deviceId)) {
             aliasesById.remove(attributeAlias.getId());
         }
         deviceAliases.remove(deviceId);
@@ -73,16 +67,16 @@ public class AliasesManager {
     public void addAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
         dataManager.addAttributeAlias(attributeAlias);
         aliasesById.put(attributeAlias.getId(), attributeAlias);
-        getDeviceAttributeAliases(attributeAlias.getDeviceId()).add(attributeAlias);
+        getAttributeAliases(attributeAlias.getDeviceId()).add(attributeAlias);
     }
 
     public void updateAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
         dataManager.updateAttributeAlias(attributeAlias);
         AttributeAlias cachedAlias = aliasesById.get(attributeAlias.getId());
         if (cachedAlias.getDeviceId() != attributeAlias.getDeviceId()) {
-            getDeviceAttributeAliases(cachedAlias.getDeviceId()).remove(cachedAlias);
+            getAttributeAliases(cachedAlias.getDeviceId()).remove(cachedAlias);
             cachedAlias.setDeviceId(attributeAlias.getDeviceId());
-            getDeviceAttributeAliases(cachedAlias.getDeviceId()).add(cachedAlias);
+            getAttributeAliases(cachedAlias.getDeviceId()).add(cachedAlias);
         }
         cachedAlias.setAttribute(attributeAlias.getAttribute());
         cachedAlias.setAlias(attributeAlias.getAlias());
@@ -91,12 +85,12 @@ public class AliasesManager {
     public void removeArrtibuteAlias(long attributeAliasId) throws SQLException {
         dataManager.removeAttributeAlias(attributeAliasId);
         AttributeAlias cachedAlias = aliasesById.get(attributeAliasId);
-        getDeviceAttributeAliases(cachedAlias.getDeviceId()).remove(cachedAlias);
+        getAttributeAliases(cachedAlias.getDeviceId()).remove(cachedAlias);
         aliasesById.remove(attributeAliasId);
     }
 
-    public AttributeAlias getDeviceAliasByAttribute(long deviceId, String attribute) {
-        for (AttributeAlias alias : getDeviceAttributeAliases(deviceId)) {
+    public AttributeAlias getAttributeAlias(long deviceId, String attribute) {
+        for (AttributeAlias alias : getAttributeAliases(deviceId)) {
             if (alias.getAttribute().equals(attribute)) {
                 return alias;
             }
@@ -104,15 +98,15 @@ public class AliasesManager {
         return null;
     }
 
-    public Collection<AttributeAlias> getUserDevicesAttributeAliases(long userId) {
+    public Collection<AttributeAlias> getAllAttributeAliases(long userId) {
         Collection<AttributeAlias> userDevicesAliases = new ArrayList<>();
         for (long deviceId : Context.getPermissionsManager().getDevicePermissions(userId)) {
-            userDevicesAliases.addAll(getDeviceAttributeAliases(deviceId));
+            userDevicesAliases.addAll(getAttributeAliases(deviceId));
         }
         return userDevicesAliases;
     }
 
-    public AttributeAlias getAttributeAliasById(long id) {
+    public AttributeAlias getAttributeAlias(long id) {
         return aliasesById.get(id);
     }
 

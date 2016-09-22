@@ -46,9 +46,9 @@ public class AttributeAliasResource extends BaseResource {
             if (!Context.getPermissionsManager().isAdmin(getUserId())) {
                 Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             }
-            return Context.getAliasesManager().getDeviceAttributeAliases(deviceId);
+            return Context.getAliasesManager().getAttributeAliases(deviceId);
         } else {
-            return Context.getAliasesManager().getUserDevicesAttributeAliases(getUserId());
+            return Context.getAliasesManager().getAllAttributeAliases(getUserId());
         }
     }
 
@@ -67,10 +67,8 @@ public class AttributeAliasResource extends BaseResource {
     public Response update(@PathParam("id") long id, AttributeAlias entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
-            AttributeAlias oldAttrbuteAlias = Context.getAliasesManager().getAttributeAliasById(entity.getId());
-            if (oldAttrbuteAlias != null && oldAttrbuteAlias.getDeviceId() != entity.getDeviceId()) {
-                Context.getPermissionsManager().checkDevice(getUserId(), oldAttrbuteAlias.getDeviceId());
-            }
+            AttributeAlias oldEntity = Context.getAliasesManager().getAttributeAlias(entity.getId());
+            Context.getPermissionsManager().checkDevice(getUserId(), oldEntity.getDeviceId());
             Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         }
         Context.getAliasesManager().updateAttributeAlias(entity);
@@ -82,9 +80,8 @@ public class AttributeAliasResource extends BaseResource {
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
-            AttributeAlias attrbuteAlias = Context.getAliasesManager().getAttributeAliasById(id);
-            Context.getPermissionsManager().checkDevice(getUserId(),
-                    attrbuteAlias != null ? attrbuteAlias.getDeviceId() : 0);
+            AttributeAlias entity = Context.getAliasesManager().getAttributeAlias(id);
+            Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         }
         Context.getAliasesManager().removeArrtibuteAlias(id);
         return Response.noContent().build();

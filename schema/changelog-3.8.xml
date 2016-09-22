@@ -8,7 +8,7 @@
 
   <changeSet author="author" id="changelog-3.8">
 
-    <createTable tableName="device_aliases">
+    <createTable tableName="attribute_aliases">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
       </column>
@@ -23,8 +23,8 @@
       </column>
     </createTable>
     
-    <addForeignKeyConstraint baseTableName="device_aliases" baseColumnNames="deviceid" constraintName="fk_device_aliases_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
-    <addUniqueConstraint tableName="device_aliases" columnNames="deviceid, attribute" constraintName="un_deviceid_attribute" />
+    <addForeignKeyConstraint baseTableName="attribute_aliases" baseColumnNames="deviceid" constraintName="fk_attribute_aliases_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addUniqueConstraint tableName="attribute_aliases" columnNames="deviceid, attribute" constraintName="uk_deviceid_attribute" />
 
     <update tableName="users">
       <column name="map" type="VARCHAR(128)"/>
