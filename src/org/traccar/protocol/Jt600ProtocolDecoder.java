@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return degrees + minutes / 60;
     }
 
-    private Position decodeNormalMessage(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
+    private Position decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -120,7 +120,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
+    private static final Pattern PATTERN_W01 = new PatternBuilder()
             .text("(")
             .number("(d+),")                     // id
             .text("W01,")                        // type
@@ -138,25 +138,22 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // gsm signal
             .number("(d+),")                     // alert type
             .any()
-            .text(")")
             .compile();
 
-    private Position decodeAlertMessage(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
+    private Position decodeW01(String sentence, Channel channel, SocketAddress remoteAddress) {
 
-        Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
+        Parser parser = new Parser(PATTERN_W01, sentence);
         if (!parser.matches()) {
             return null;
         }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
-        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setLongitude(parser.nextCoordinate());
@@ -176,6 +173,68 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_U01 = new PatternBuilder()
+            .text("(")
+            .number("(d+),")                     // id
+            .number("Udd,")                      // type
+            .number("d+,").optional()            // alarm
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time
+            .expression("([TF]),")               // validity
+            .number("(d+.d+),([NS]),")           // latitude
+            .number("(d+.d+),([EW]),")           // longitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+),")                     // course
+            .number("(d+),")                     // satellites
+            .number("(d+%),")                    // battery
+            .expression("([01]+),")              // status
+            .number("(d+),")                     // cid
+            .number("(d+),")                     // lac
+            .number("(d+),")                     // gsm signal
+            .number("(d+),")                     // odometer
+            .number("(d+)")                      // index
+            .any()
+            .compile();
+
+    private Position decodeU01(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_U01, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
+
+        position.setValid(parser.next().equals("T"));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_BATTERY, parser.next());
+        position.set(Position.KEY_STATUS, parser.nextInt(2));
+        position.set(Position.KEY_CID, parser.nextInt());
+        position.set(Position.KEY_LAC, parser.nextInt());
+        position.set(Position.KEY_GSM, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
+        position.set(Position.KEY_INDEX, parser.nextInt());
+
+        return position;
+    }
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -184,9 +243,14 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         char first = (char) buf.getByte(0);
 
         if (first == '$') {
-            return decodeNormalMessage(buf, channel, remoteAddress);
+            return decodeBinary(buf, channel, remoteAddress);
         } else if (first == '(') {
-            return decodeAlertMessage(buf, channel, remoteAddress);
+            String sentence = buf.toString(StandardCharsets.US_ASCII);
+            if (sentence.contains("W01")) {
+                return decodeW01(sentence, channel, remoteAddress);
+            } else {
+                return decodeU01(sentence, channel, remoteAddress);
+            }
         }
 
         return null;
