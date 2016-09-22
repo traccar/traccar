@@ -34,6 +34,7 @@ import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.SecurityRequestFilter;
+import org.traccar.api.resource.AttributeAliasResource;
 import org.traccar.api.resource.CommandResource;
 import org.traccar.api.resource.GroupPermissionResource;
 import org.traccar.api.resource.ServerResource;
@@ -161,7 +162,7 @@ public class WebServer {
                 GroupResource.class, DeviceResource.class, PositionResource.class,
                 CommandTypeResource.class, EventResource.class, GeofenceResource.class,
                 DeviceGeofenceResource.class, GeofencePermissionResource.class, GroupGeofenceResource.class,
-                NotificationResource.class, ReportResource.class);
+                NotificationResource.class, ReportResource.class, AttributeAliasResource.class);
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/*");
 
         handlers.addHandler(servletHandler);
