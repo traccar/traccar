@@ -15,8 +15,11 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.handler.codec.string.StringDecoder;
+import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
 
@@ -35,6 +38,15 @@ public class CellocatorProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
+                pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
+            }
+        };
+        server.setEndianness(ByteOrder.LITTLE_ENDIAN);
+        serverList.add(server);
+
+        server = new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         };
