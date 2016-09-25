@@ -81,7 +81,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int EVENT_DATA = 119;
 
-    private void decodeEventData(int event, ChannelBuffer buf) {
+    private void decodeEventData(Position position, ChannelBuffer buf, int event) {
         switch (event) {
             case 2:
             case 40:
@@ -107,6 +107,9 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 130:
                 buf.readUnsignedInt(); // incorrect
+                break;
+            case 188:
+                decodeEB(position, buf);
                 break;
             default:
                 break;
@@ -283,7 +286,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x1000) != 0) {
-            decodeEventData(event, buf);
+            decodeEventData(position, buf, event);
         }
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".can")
@@ -423,6 +426,72 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             }
 
             index += 1;
+        }
+    }
+
+    private void decodeEB(Position position, ChannelBuffer buf) {
+
+        if (buf.readByte() != (byte) 'E' || buf.readByte() != (byte) 'B') {
+            return;
+        }
+
+        buf.readUnsignedByte(); // version
+        buf.readUnsignedShort(); // event
+        buf.readUnsignedByte(); // data validity
+        buf.readUnsignedByte(); // towed
+        buf.readUnsignedShort(); // length
+
+        while (buf.readableBytes() > 0) {
+            buf.readUnsignedByte(); // towed position
+            int type = buf.readUnsignedByte();
+            int length = buf.readUnsignedByte();
+
+            if (type == 0x01) {
+                position.set("brakeFlags", ChannelBuffers.hexDump(buf.readBytes(length)));
+            } else if (type == 0x02) {
+                position.set("wheelSpeed", buf.readUnsignedShort() / 256.0);
+                position.set("wheelSpeedDifference", buf.readUnsignedShort() / 256.0 - 125.0);
+                position.set("lateralAcceleration", buf.readUnsignedByte() / 10.0 - 12.5);
+                position.set("vehicleSpeed", buf.readUnsignedShort() / 256.0);
+            } else if (type == 0x03) {
+                position.set("axleLoadSum", buf.readUnsignedShort() * 2);
+            } else if (type == 0x04) {
+                position.set("tyrePressure", buf.readUnsignedByte() * 10);
+                position.set("pneumaticPressure", buf.readUnsignedByte() * 5);
+            } else if (type == 0x05) {
+                position.set("brakeLining", buf.readUnsignedByte() * 0.4);
+                position.set("brakeTemperature", buf.readUnsignedByte() * 10);
+            } else if (type == 0x06) {
+                position.set("totalDistance", buf.readUnsignedInt() * 5);
+                position.set("tripDistance", buf.readUnsignedInt() * 5);
+                position.set("serviceDistance", (buf.readUnsignedInt() - 2105540607) * 5);
+            } else if (type == 0x0A) {
+                position.set("brakeData", ChannelBuffers.hexDump(buf.readBytes(length)));
+            } else if (type == 0x0B) {
+                position.set("brakeMinMaxData", ChannelBuffers.hexDump(buf.readBytes(length)));
+            } else if (type == 0x0C) {
+                position.set("missingPgn", ChannelBuffers.hexDump(buf.readBytes(length)));
+            } else if (type == 0x0D) {
+                switch (buf.readUnsignedByte()) {
+                    case 1:
+                        position.set("brakeManufacturer", "Wabco");
+                        break;
+                    case 2:
+                        position.set("brakeManufacturer", "Knorr");
+                        break;
+                    case 3:
+                        position.set("brakeManufacturer", "Haldex");
+                        break;
+                    default:
+                        position.set("brakeManufacturer", "Unknown");
+                        break;
+                }
+                buf.readUnsignedByte();
+                buf.readBytes(17); // vin
+                position.set("towedDetectionStatus", buf.readUnsignedByte());
+            } else if (type == 0x0E) {
+                buf.skipBytes(length);
+            }
         }
     }
 
