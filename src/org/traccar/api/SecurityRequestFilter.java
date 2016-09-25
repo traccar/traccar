@@ -55,6 +55,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
+        Context.getStatisticsManager().registerRequest();
 
         if (requestContext.getMethod().equals("OPTIONS")) {
             return;

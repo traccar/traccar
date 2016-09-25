@@ -73,6 +73,7 @@ public class SessionResource extends BaseResource {
         }
 
         if (userId != null) {
+            Context.getStatisticsManager().registerUser(userId);
             return Context.getPermissionsManager().getUser(userId);
         } else {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
@@ -85,6 +86,7 @@ public class SessionResource extends BaseResource {
             @FormParam("email") String email, @FormParam("password") String password) throws SQLException {
         User user = Context.getPermissionsManager().login(email, password);
         if (user != null) {
+            Context.getStatisticsManager().registerUser(user.getId());
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
             return user;
         } else {

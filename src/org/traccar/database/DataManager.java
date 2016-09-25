@@ -48,6 +48,7 @@ import org.traccar.model.GroupPermission;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
+import org.traccar.model.Statistics;
 import org.traccar.model.User;
 import org.traccar.model.DeviceGeofence;
 import org.traccar.model.GeofencePermission;
@@ -484,4 +485,16 @@ public class DataManager {
                 .setLong("id", attributeAliasId)
                 .executeUpdate();
     }
+
+    public Collection<Statistics> getStatistics() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectStatistics"))
+                .executeQuery(Statistics.class);
+    }
+
+    public void addStatistics(Statistics statistics) throws SQLException {
+        statistics.setId(QueryBuilder.create(dataSource, getQuery("database.insertStatistics"), true)
+                .setObject(statistics)
+                .executeUpdate());
+    }
+
 }

@@ -25,6 +25,7 @@ import org.traccar.database.IdentityManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
+import org.traccar.database.StatisticsManager;
 import org.traccar.geocode.BingMapsReverseGeocoder;
 import org.traccar.geocode.FactualReverseGeocoder;
 import org.traccar.geocode.GeocodeFarmReverseGeocoder;
@@ -142,6 +143,12 @@ public final class Context {
         return aliasesManager;
     }
 
+    private static StatisticsManager statisticsManager;
+
+    public static StatisticsManager getStatisticsManager() {
+        return statisticsManager;
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -244,6 +251,8 @@ public final class Context {
         }
 
         aliasesManager = new AliasesManager(dataManager);
+
+        statisticsManager = new StatisticsManager();
 
     }
 

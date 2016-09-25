@@ -353,6 +353,15 @@
         DELETE FROM attribute_aliases WHERE id = :id;
     </entry>
 
+    <entry key='database.selectStatistics'>
+        SELECT * FROM statistics;
+    </entry>
+
+    <entry key='database.insertStatistics'>
+        INSERT INTO statistics (captureTime, activeUsers, activeDevices, requests, messagesReceived, messagesStored, attributes)
+        VALUES (:captureTime, :activeUsers, :activeDevices, :requests, :messagesReceived, :messagesStored, :attributes);
+    </entry>
+
     <!-- PROTOCOL CONFIG -->
 
     <entry key='gps103.port'>5001</entry>
