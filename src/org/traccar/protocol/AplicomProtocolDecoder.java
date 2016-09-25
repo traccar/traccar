@@ -348,6 +348,84 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeH(Position position, ChannelBuffer buf, int selector) {
+
+        if ((selector & 0x0004) != 0) {
+            getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
+        } else {
+            getLastLocation(position, null);
+        }
+
+        if ((selector & 0x0040) != 0) {
+            buf.readUnsignedInt(); // reset time
+        }
+
+        if ((selector & 0x2000) != 0) {
+            buf.readUnsignedShort(); // snapshot counter
+        }
+
+        int index = 1;
+        while (buf.readableBytes() > 0) {
+
+            position.set("h" + index + "Index", buf.readUnsignedByte());
+
+            buf.readUnsignedShort(); // length
+
+            int n = buf.readUnsignedByte();
+            int m = buf.readUnsignedByte();
+
+            position.set("h" + index + "XLength", n);
+            position.set("h" + index + "YLength", m);
+
+            if ((selector & 0x0008) != 0) {
+                position.set("h" + index + "XType", buf.readUnsignedByte());
+                position.set("h" + index + "YType", buf.readUnsignedByte());
+                position.set("h" + index + "Parameters", buf.readUnsignedByte());
+            }
+
+            boolean percentageFormat = (selector & 0x0020) != 0;
+
+            StringBuilder data = new StringBuilder();
+            for (int i = 0; i < n * m; i++) {
+                if (percentageFormat) {
+                    data.append(buf.readUnsignedByte() * 0.5).append("%").append(" ");
+                } else {
+                    data.append(buf.readUnsignedShort()).append(" ");
+                }
+            }
+
+            position.set("h" + index + "Data", data.toString().trim());
+
+            position.set("h" + index + "Total", buf.readUnsignedInt());
+
+            if ((selector & 0x0010) != 0) {
+                int k = buf.readUnsignedByte();
+
+                data = new StringBuilder();
+                for (int i = 1; i < n; i++) {
+                    if (k == 1) {
+                        data.append(buf.readByte()).append(" ");
+                    } else if (k == 2) {
+                        data.append(buf.readShort()).append(" ");
+                    }
+                }
+                position.set("h" + index + "XLimits", data.toString().trim());
+
+                data = new StringBuilder();
+                for (int i = 1; i < m; i++) {
+                    if (k == 1) {
+                        data.append(buf.readByte()).append(" ");
+                    } else if (k == 2) {
+                        data.append(buf.readShort()).append(" ");
+                    }
+                }
+                position.set("h" + index + "YLimits", data.toString().trim());
+            }
+
+            index += 1;
+        }
+    }
+
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
@@ -389,6 +467,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             decodeD(position, buf, selector, event);
         } else if (protocol == 'E') {
             decodeE(position, buf, selector);
+        } else if (protocol == 'H') {
+            decodeH(position, buf, selector);
         } else {
             return null;
         }
