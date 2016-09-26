@@ -39,5 +39,32 @@
       <where>speedunit = 'kmh'</where>
     </update>
 
+    <createTable tableName="statistics">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="capturetime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="activeusers" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="activedevices" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="requests" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="messagesreceived" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="messagesstored" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
   </changeSet>
 </databaseChangeLog>

@@ -62,6 +62,7 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             }
             Log.info(s.toString());
 
+            Context.getStatisticsManager().registerMessageStored(position.getDeviceId());
         }
     }
 

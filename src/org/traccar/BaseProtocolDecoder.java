@@ -129,6 +129,9 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     @Override
     protected void onMessageEvent(Channel channel, SocketAddress remoteAddress, Object msg) {
+        if (Context.getStatisticsManager() != null) {
+            Context.getStatisticsManager().registerMessageReceived();
+        }
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession != null) {
             Context.getConnectionManager().updateDevice(deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
