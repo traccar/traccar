@@ -27,7 +27,7 @@ import java.util.Set;
 
 public class StatisticsManager {
 
-    private static final int SPLIT_MODE = Calendar.MINUTE;
+    private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
     private int lastUpdate = Calendar.getInstance().get(SPLIT_MODE);
 
@@ -64,19 +64,12 @@ public class StatisticsManager {
         }
     }
 
-    public synchronized void registerUser(long userId) {
-        checkSplit();
-        users.add(userId);
-    }
-
-    public synchronized void registerDevice(long deviceId) {
-        checkSplit();
-        devices.add(deviceId);
-    }
-
-    public synchronized void registerRequest() {
+    public synchronized void registerRequest(long userId) {
         checkSplit();
         requests += 1;
+        if (userId != 0) {
+            users.add(userId);
+        }
     }
 
     public synchronized void registerMessageReceived() {
@@ -84,9 +77,12 @@ public class StatisticsManager {
         messagesReceived += 1;
     }
 
-    public synchronized void registerMessageStored() {
+    public synchronized void registerMessageStored(long deviceId) {
         checkSplit();
         messagesStored += 1;
+        if (deviceId != 0) {
+            devices.add(deviceId);
+        }
     }
 
 }

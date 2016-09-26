@@ -55,7 +55,6 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        Context.getStatisticsManager().registerRequest();
 
         if (requestContext.getMethod().equals("OPTIONS")) {
             return;
@@ -70,6 +69,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                 String[] auth = decodeBasicAuth(authHeader);
                 User user = Context.getDataManager().login(auth[0], auth[1]);
                 if (user != null) {
+                    Context.getStatisticsManager().registerRequest(user.getId());
                     securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
                 }
             } catch (SQLException e) {
@@ -80,6 +80,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
             Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
             if (userId != null) {
+                Context.getStatisticsManager().registerRequest(userId);
                 securityContext = new UserSecurityContext(new UserPrincipal(userId));
             }
 

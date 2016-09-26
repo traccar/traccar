@@ -21,9 +21,6 @@ public class DeviceSession {
 
     public DeviceSession(long deviceId) {
         this.deviceId = deviceId;
-        if (Context.getStatisticsManager() != null) {
-            Context.getStatisticsManager().registerDevice(deviceId);
-        }
     }
 
     public long getDeviceId() {
