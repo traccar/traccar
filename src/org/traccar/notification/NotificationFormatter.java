@@ -201,14 +201,14 @@ public final class NotificationFormatter {
         DecimalFormat df = new DecimalFormat("#.##");
         String result = df.format(speed) + " kn";
         switch (Context.getPermissionsManager().getUser(userId).getSpeedUnit()) {
-        case "kmh":
-            result = df.format(UnitsConverter.kphFromKnots(speed)) + " km/h";
-            break;
-        case "mph":
-            result = df.format(UnitsConverter.mphFromKnots(speed)) + " mph";
-            break;
-        default:
-            break;
+            case "kmh":
+                result = df.format(UnitsConverter.kphFromKnots(speed)) + " km/h";
+                break;
+            case "mph":
+                result = df.format(UnitsConverter.mphFromKnots(speed)) + " mph";
+                break;
+            default:
+                break;
         }
         return result;
     }

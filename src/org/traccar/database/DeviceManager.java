@@ -194,7 +194,7 @@ public class DeviceManager implements IdentityManager {
 
     public boolean isLatestPosition(Position position) {
         Position lastPosition = getLastPosition(position.getDeviceId());
-        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) > 0;
+        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
     }
 
     public void updateLatestPosition(Position position) throws SQLException {
@@ -316,7 +316,87 @@ public class DeviceManager implements IdentityManager {
         groupsById.remove(groupId);
     }
 
-    public String lookupAttribute(long deviceId, String attributeName) {
+    public boolean lookupServerBoolean(long deviceId, String attributeName, boolean defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Boolean.parseBoolean(result);
+        }
+        return defaultValue;
+    }
+
+    public String lookupServerString(long deviceId, String attributeName, String defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return result;
+        }
+        return defaultValue;
+    }
+
+    public int lookupServerInteger(long deviceId, String attributeName, int defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Integer.parseInt(result);
+        }
+        return defaultValue;
+    }
+
+    public long lookupServerLong(long deviceId, String attributeName, long defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Long.parseLong(result);
+        }
+        return defaultValue;
+    }
+
+    public double lookupServerDouble(long deviceId, String attributeName, double defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, true);
+        if (result != null) {
+            return Double.parseDouble(result);
+        }
+        return defaultValue;
+    }
+
+    public boolean lookupConfigBoolean(long deviceId, String attributeName, boolean defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Boolean.parseBoolean(result);
+        }
+        return defaultValue;
+    }
+
+    public String lookupConfigString(long deviceId, String attributeName, String defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return result;
+        }
+        return defaultValue;
+    }
+
+    public int lookupConfigInteger(long deviceId, String attributeName, int defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Integer.parseInt(result);
+        }
+        return defaultValue;
+    }
+
+    public long lookupConfigLong(long deviceId, String attributeName, long defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Long.parseLong(result);
+        }
+        return defaultValue;
+    }
+
+    public double lookupConfigDouble(long deviceId, String attributeName, double defaultValue) {
+        String result = lookupAttribute(deviceId, attributeName, false);
+        if (result != null) {
+            return Double.parseDouble(result);
+        }
+        return defaultValue;
+    }
+
+    private String lookupAttribute(long deviceId, String attributeName, boolean lookupServer) {
         String result = null;
         Device device = getDeviceById(deviceId);
         if (device != null) {
@@ -338,8 +418,12 @@ public class DeviceManager implements IdentityManager {
                 }
             }
             if (result == null) {
-                Server server = Context.getPermissionsManager().getServer();
-                result = (String) server.getAttributes().get(attributeName);
+                if (lookupServer) {
+                    Server server = Context.getPermissionsManager().getServer();
+                    result = (String) server.getAttributes().get(attributeName);
+                } else {
+                    result = Context.getConfig().getString(attributeName);
+                }
             }
         }
         return result;

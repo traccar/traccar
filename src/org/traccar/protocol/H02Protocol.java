@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
+import org.traccar.Context;
 import org.traccar.TrackerServer;
 import org.traccar.model.Command;
 
@@ -39,10 +40,11 @@ public class H02Protocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                pipeline.addLast("frameDecoder", new H02FrameDecoder());
+                int messageLength = Context.getConfig().getInteger(getName() + ".messageLength", 32);
+                pipeline.addLast("frameDecoder", new H02FrameDecoder(messageLength));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectEncoder", new H02ProtocolEncoder());
                 pipeline.addLast("objectDecoder", new H02ProtocolDecoder(H02Protocol.this));

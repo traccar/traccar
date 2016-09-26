@@ -37,6 +37,7 @@ import liquibase.resource.ResourceAccessor;
 
 import org.traccar.Config;
 import org.traccar.helper.Log;
+import org.traccar.model.AttributeAlias;
 import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Event;
@@ -305,7 +306,7 @@ public class DataManager {
     }
 
     public void clearPositionsHistory() throws SQLException {
-        int historyDays = config.getInteger("database.positionsHistoryDays");
+        long historyDays = config.getInteger("database.positionsHistoryDays");
         if (historyDays != 0) {
             QueryBuilder.create(dataSource, getQuery("database.deletePositions"))
                     .setDate("serverTime", new Date(System.currentTimeMillis() - historyDays * 24 * 3600 * 1000))
@@ -458,6 +459,29 @@ public class DataManager {
     public void removeNotification(Notification notification) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.deleteNotification"))
                 .setLong("id", notification.getId())
+                .executeUpdate();
+    }
+
+    public Collection<AttributeAlias> getAttributeAliases() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectAttributeAliases"))
+                .executeQuery(AttributeAlias.class);
+    }
+
+    public void addAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
+        attributeAlias.setId(QueryBuilder.create(dataSource, getQuery("database.insertAttributeAlias"), true)
+                .setObject(attributeAlias)
+                .executeUpdate());
+    }
+
+    public void updateAttributeAlias(AttributeAlias attributeAlias) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateAttributeAlias"))
+                .setObject(attributeAlias)
+                .executeUpdate();
+    }
+
+    public void removeAttributeAlias(long attributeAliasId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteAttributeAlias"))
+                .setLong("id", attributeAliasId)
                 .executeUpdate();
     }
 }

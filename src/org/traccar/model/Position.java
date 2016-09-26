@@ -57,6 +57,7 @@ public class Position extends Message {
     public static final String KEY_THROTTLE = "throttle";
     public static final String KEY_MOTION = "motion";
     public static final String KEY_ARMED = "armed";
+    public static final String KEY_ACCURACY = "accuracy";
 
     public static final String KEY_OBD_SPEED = "obdSpeed";
     public static final String KEY_OBD_ODOMETER = "obdOdometer";
@@ -89,6 +90,7 @@ public class Position extends Message {
     public static final String ALARM_ACCELETATION = "hardAcceleration";
     public static final String ALARM_BREAKING = "hardBreaking";
     public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
+    public static final String ALARM_POWER_CUT = "powerCut";
 
     private String protocol;
 

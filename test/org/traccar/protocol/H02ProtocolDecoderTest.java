@@ -11,6 +11,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
 
         verifyPosition(decoder, buffer(
+                "*HQ,4209917484,V19,093043,V,5052.9749,N,00426.4322,E,000.00,000,130916,,0032475874141,8944538530000543700F,FFFFFBFF#"));
+
+        verifyPosition(decoder, buffer(
                 "*HQ,353505220873067,V1,,V,4605.75732,N,01430.73863,E,0.00,0,,FFFFFFEF,125,194,  64,d3#"));
 
         verifyPosition(decoder, buffer(

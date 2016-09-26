@@ -25,9 +25,9 @@ public final class ObdDecoder {
     private ObdDecoder() {
     }
 
-    public static final int MODE_CURRENT = 0x01;
-    public static final int MODE_FREEZE_FRAME = 0x02;
-    public static final int MODE_CODES = 0x03;
+    private static final int MODE_CURRENT = 0x01;
+    private static final int MODE_FREEZE_FRAME = 0x02;
+    private static final int MODE_CODES = 0x03;
 
     private static final int PID_ENGINE_LOAD = 0x04;
     private static final int PID_COOLANT_TEMPERATURE = 0x05;
@@ -42,7 +42,9 @@ public final class ObdDecoder {
         switch (mode) {
             case MODE_CURRENT:
             case MODE_FREEZE_FRAME:
-                return decodeData(Integer.parseInt(value.substring(0, 2), 16), value.substring(2));
+                return decodeData(
+                        Integer.parseInt(value.substring(0, 2), 16),
+                        Integer.parseInt(value.substring(2), 16), true);
             case MODE_CODES:
                 return decodeCodes(value);
             default:
@@ -54,7 +56,7 @@ public final class ObdDecoder {
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
-    private static Map.Entry<String, Object> decodeCodes(String value) {
+    public static Map.Entry<String, Object> decodeCodes(String value) {
         StringBuilder codes = new StringBuilder();
         for (int i = 0; i < value.length() / 4; i++) {
             int numValue = Integer.parseInt(value.substring(i * 4, (i + 1) * 4), 16);
@@ -75,28 +77,31 @@ public final class ObdDecoder {
             }
             codes.append(String.format("%04X", numValue & 0x3FFF));
         }
-        return createEntry("dtcs", codes.toString().replaceFirst(",", ""));
+        if (codes.length() > 0) {
+            return createEntry("dtcs", codes.toString().replaceFirst(",", ""));
+        } else {
+            return null;
+        }
     }
 
-    private static Map.Entry<String, Object> decodeData(int pid, String value) {
-        int intValue = Integer.parseInt(value, 16);
+    public static Map.Entry<String, Object> decodeData(int pid, int value, boolean convert) {
         switch (pid) {
             case PID_ENGINE_LOAD:
-                return createEntry("engineLoad", intValue * 100 / 255);
+                return createEntry("engineLoad", convert ? value * 100 / 255 : value);
             case PID_COOLANT_TEMPERATURE:
-                return createEntry("coolantTemperature", intValue - 40);
+                return createEntry("coolantTemperature", convert ? value - 40 : value);
             case PID_ENGINE_RPM:
-                return createEntry(Position.KEY_RPM, intValue / 4);
+                return createEntry(Position.KEY_RPM, convert ? value / 4 : value);
             case PID_VEHICLE_SPEED:
-                return createEntry(Position.KEY_OBD_SPEED, intValue);
+                return createEntry(Position.KEY_OBD_SPEED, value);
             case PID_THROTTLE_POSITION:
-                return createEntry("throttle", intValue * 100 / 255);
+                return createEntry("throttle", convert ? value * 100 / 255 : value);
             case PID_MIL_DISTANCE:
-                return createEntry("milDistance", intValue);
+                return createEntry("milDistance", value);
             case PID_FUEL_LEVEL:
-                return createEntry(Position.KEY_FUEL, intValue * 100 / 255);
+                return createEntry(Position.KEY_FUEL, convert ? value * 100 / 255 : value);
             case PID_DISTANCE_CLEARED:
-                return createEntry("clearedDistance", intValue);
+                return createEntry("clearedDistance", value);
             default:
                 return null;
         }

@@ -69,14 +69,14 @@ public final class ReportUtils {
                 && lastPosition.getAttributes().get(Position.KEY_FUEL) != null) {
             try {
                 switch (firstPosition.getProtocol()) {
-                case "meitrack":
-                case "galileo":
-                case "noran":
-                    return new BigDecimal(firstPosition.getAttributes().get(Position.KEY_FUEL).toString())
-                            .subtract(new BigDecimal(lastPosition.getAttributes().get(Position.KEY_FUEL).toString()))
-                            .setScale(2, RoundingMode.HALF_EVEN).toString() + " %";
-                default:
-                    break;
+                    case "meitrack":
+                    case "galileo":
+                    case "noran":
+                        BigDecimal v = new BigDecimal(firstPosition.getAttributes().get(Position.KEY_FUEL).toString());
+                        v = v.subtract(new BigDecimal(lastPosition.getAttributes().get(Position.KEY_FUEL).toString()));
+                        return v.setScale(2, RoundingMode.HALF_EVEN).toString() + " %";
+                    default:
+                        break;
                 }
             } catch (Exception error) {
                 Log.warning(error);

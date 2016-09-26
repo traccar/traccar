@@ -62,19 +62,19 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(short value) {
         switch (value) {
-        case 3:
-            return Position.ALARM_SOS;
-        case 4:
-            return Position.ALARM_OVERSPEED;
-        case 5:
-            return Position.ALARM_GEOFENCE_ENTER;
-        case 6:
-            return Position.ALARM_GEOFENCE_EXIT;
-        case 8:
-        case 10:
-            return Position.ALARM_VIBRATION;
-        default:
-            break;
+            case 3:
+                return Position.ALARM_SOS;
+            case 4:
+                return Position.ALARM_OVERSPEED;
+            case 5:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 6:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 8:
+            case 10:
+                return Position.ALARM_VIBRATION;
+            default:
+                break;
         }
         return null;
     }

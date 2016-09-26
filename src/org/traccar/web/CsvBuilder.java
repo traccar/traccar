@@ -37,6 +37,12 @@ public class CsvBuilder {
         SortedSet<Method> methods = new TreeSet<Method>(new Comparator<Method>() {
             @Override
             public int compare(Method m1, Method m2) {
+                if (m1.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
+                    return 1;
+                }
+                if (m2.getName().equals("getAttributes") && !m1.getName().equals(m2.getName())) {
+                    return -1;
+                }
                 return m1.getName().compareTo(m2.getName());
             }
         });
@@ -73,7 +79,10 @@ public class CsvBuilder {
                     } else if (method.getReturnType().equals(Map.class)) {
                         Map value = (Map) method.invoke(object);
                         if (value != null) {
-                            builder.append(MiscFormatter.toJson(value).toString());
+                            String map = MiscFormatter.toJson(value).toString();
+                            map = map.replaceAll("[\\{\\}\"]", "");
+                            map = map.replaceAll(",", " ");
+                            builder.append(map);
                             addSeparator();
                         }
                     }

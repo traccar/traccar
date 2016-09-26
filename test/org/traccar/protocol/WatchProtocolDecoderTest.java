@@ -54,6 +54,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "[SG*8800000015*0087*AL,220414,134652,A,22.571707,N,113.8613968,E,0.1,0.0,100,7,60,90,1000,50,0001,4,1,460,0,9360,4082,131,9360,4092,148,9360,4091,143,9360,4153,141"));
 
+        verifyAttributes(decoder, text(
+                "[CS*8800000015*0008*PULSE,72"));
+
     }
 
 }

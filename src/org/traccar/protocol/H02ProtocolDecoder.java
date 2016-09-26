@@ -79,6 +79,23 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
     }
 
+    private String decodeBattery(int value) {
+        switch (value) {
+            case 6:
+                return "100%";
+            case 5:
+                return "80%";
+            case 4:
+                return "60%";
+            case 3:
+                return "20%";
+            case 2:
+                return "10%";
+            default:
+                return null;
+        }
+    }
+
     private Position decodeBinary(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
 
         Position position = new Position();
@@ -103,7 +120,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         double latitude = readCoordinate(buf, false);
-        position.set(Position.KEY_POWER, buf.readByte());
+        position.set(Position.KEY_BATTERY, decodeBattery(buf.readUnsignedByte()));
         double longitude = readCoordinate(buf, true);
 
         int flags = buf.readUnsignedByte() & 0x0f;
@@ -129,7 +146,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .text("*")
             .expression("..,")                   // manufacturer
             .number("(d+),")                     // imei
-            .number("Vd,")                       // version?
+            .expression("[^,]+,")
             .any()
             .number("(?:(dd)(dd)(dd))?,")        // time
             .expression("([AV])?,")              // validity
@@ -148,6 +165,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:(dd)(dd)(dd))?,")        // date (ddmmyy)
+            .any()
             .number("(x{8})")                    // status
             .any()
             .compile();

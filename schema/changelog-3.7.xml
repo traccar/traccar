@@ -17,7 +17,7 @@
 
     <update tableName="groups">
       <column name="groupid"/>
-      <where>groupid NOT IN (SELECT id FROM (SELECT id FROM groups) AS groups_ids)</where>
+      <where>groupid NOT IN (SELECT id FROM (SELECT DISTINCT id FROM groups) AS groups_ids)</where>
     </update>
 
     <addColumn tableName="devices">

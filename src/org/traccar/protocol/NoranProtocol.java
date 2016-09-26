@@ -38,7 +38,7 @@ public class NoranProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        TrackerServer server = new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+        TrackerServer server = new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("objectEncoder", new NoranProtocolEncoder());

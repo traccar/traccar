@@ -34,7 +34,7 @@ public class TeltonikaProtocol extends BaseProtocol {
 
     @Override
     public void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(new ServerBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new TeltonikaFrameDecoder());
@@ -42,7 +42,7 @@ public class TeltonikaProtocol extends BaseProtocol {
                 pipeline.addLast("objectDecoder", new TeltonikaProtocolDecoder(TeltonikaProtocol.this));
             }
         });
-        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), this.getName()) {
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("objectEncoder", new TeltonikaProtocolEncoder());

@@ -229,7 +229,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             pipeline.addLast("AlertEventHandler", alertEventHandler);
         }
 
-        if (alertEventHandler != null) {
+        if (ignitionEventHandler != null) {
             pipeline.addLast("IgnitionEventHandler", ignitionEventHandler);
         }
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.8">
+
+  <changeSet author="author" id="changelog-3.8">
+
+    <createTable tableName="attribute_aliases">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attribute" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="alias" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    
+    <addForeignKeyConstraint baseTableName="attribute_aliases" baseColumnNames="deviceid" constraintName="fk_attribute_aliases_deviceid" referencedTableName="devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addUniqueConstraint tableName="attribute_aliases" columnNames="deviceid, attribute" constraintName="uk_deviceid_attribute" />
+
+    <update tableName="users">
+      <column name="map" type="VARCHAR(128)"/>
+      <where>map = 'osm'</where>
+    </update>
+    <update tableName="users">
+      <column name="distanceunit" type="VARCHAR(128)"/>
+      <where>distanceunit = 'km'</where>
+    </update>
+    <update tableName="users">
+      <column name="speedunit" type="VARCHAR(128)"/>
+      <where>speedunit = 'kmh'</where>
+    </update>
+
+  </changeSet>
+</databaseChangeLog>

@@ -80,6 +80,24 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW])")
             .compile();
 
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .number("(d+.d+),")                  // battery
+            .number("(d+),")                     // rpm
+            .number("(d+),")                     // speed
+            .number("(d+.d+),")                  // throttle
+            .number("(d+.d+),")                  // engine load
+            .number("(-?d+),")                   // coolant temp
+            .number("d+.d+,")                    // instantaneous fuel
+            .number("(d+.d+),")                  // average fuel
+            .number("(d+.d+),")                  // driving range
+            .number("(d+.?d*),")                 // odometer
+            .number("(d+.d+),")
+            .number("(d+.d+),")
+            .number("(d+),")                     // error code count
+            .number("d+,")                       // harsh acceleration count
+            .number("d+")                        // harsh break count
+            .compile();
+
     public static final int MSG_HEARTBEAT = 0x0001;
     public static final int MSG_SERVER = 0x0002;
     public static final int MSG_LOGIN = 0x5000;
@@ -90,6 +108,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_ALARM = 0x9999;
 
     public static final int MSG_RFID = 0x9966;
+
+    public static final int MSG_OBD_RT = 0x9901;
 
     private DeviceSession identify(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
         StringBuilder builder = new StringBuilder();
@@ -142,7 +162,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String getMeiligaoServer(Channel channel) {
+    private String getServer(Channel channel) {
         String server = Context.getConfig().getString(getProtocolName() + ".server");
         if (server == null) {
             InetSocketAddress address = (InetSocketAddress) channel.getLocalAddress();
@@ -153,23 +173,123 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(short value) {
         switch (value) {
-        case 0x01:
-            return Position.ALARM_SOS;
-        case 0x10:
-            return Position.ALARM_LOW_BATTERY;
-        case 0x11:
-            return Position.ALARM_OVERSPEED;
-        case 0x12:
-            return Position.ALARM_MOVEMENT;
-        case 0x13:
-            return Position.ALARM_GEOFENCE_ENTER;
-        case 0x50:
-            return Position.ALARM_POWER_OFF;
-        case 0x53:
-            return Position.ALARM_GPS_ANTENNA_CUT;
-        default:
+            case 0x01:
+                return Position.ALARM_SOS;
+            case 0x10:
+                return Position.ALARM_LOW_BATTERY;
+            case 0x11:
+                return Position.ALARM_OVERSPEED;
+            case 0x12:
+                return Position.ALARM_MOVEMENT;
+            case 0x13:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 0x50:
+                return Position.ALARM_POWER_OFF;
+            case 0x53:
+                return Position.ALARM_GPS_ANTENNA_CUT;
+            default:
+                return null;
+        }
+    }
+
+    private Position decodeRegular(Position position, String sentence) {
+        Parser parser = new Parser(PATTERN, sentence);
+        if (!parser.matches()) {
             return null;
         }
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        if (parser.hasNext()) {
+            dateBuilder.setMillis(parser.nextInt());
+        }
+
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+
+        if (parser.hasNext()) {
+            position.setSpeed(parser.nextDouble());
+        }
+
+        if (parser.hasNext()) {
+            position.setCourse(parser.nextDouble());
+        }
+
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
+
+        position.set(Position.KEY_HDOP, parser.next());
+
+        if (parser.hasNext()) {
+            position.setAltitude(parser.nextDouble());
+        }
+
+        position.set(Position.KEY_STATUS, parser.next());
+
+        for (int i = 1; i <= 8; i++) {
+            if (parser.hasNext()) {
+                position.set(Position.PREFIX_ADC + i, parser.nextInt(16));
+            }
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_GSM, parser.nextInt(16));
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextLong(16));
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextLong(16));
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_RFID, parser.nextInt(16));
+        }
+
+        return position;
+    }
+
+    private Position decodeRfid(Position position, String sentence) {
+        Parser parser = new Parser(PATTERN_RFID, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
+
+        position.setValid(true);
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+
+        return position;
+    }
+
+    private Position decodeObd(Position position, String sentence) {
+        Parser parser = new Parser(PATTERN_OBD, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        position.set(Position.KEY_THROTTLE, parser.nextDouble());
+        position.set("engineLoad", parser.nextDouble());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
+        position.set("drivingRange", parser.nextDouble() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set("singleFuelConsumption", parser.nextDouble());
+        position.set("totalFuelConsumption", parser.nextDouble());
+
+        return position;
     }
 
     @Override
@@ -183,39 +303,25 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         int command = buf.readUnsignedShort();
         ChannelBuffer response;
 
-        switch (command) {
-            case MSG_LOGIN:
-                if (channel != null) {
-                    response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
-                    sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
-                }
+        if (channel != null) {
+            if (command == MSG_LOGIN) {
+                response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
+                sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
                 return null;
-            case MSG_HEARTBEAT:
-                if (channel != null) {
-                    response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
-                    sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
-                }
+            } else if (command == MSG_HEARTBEAT) {
+                response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
+                sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
                 return null;
-            case MSG_SERVER:
-                if (channel != null) {
-                    response = ChannelBuffers.copiedBuffer(
-                            getMeiligaoServer(channel), StandardCharsets.US_ASCII);
-                    sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
-                }
+            } else if (command == MSG_SERVER) {
+                response = ChannelBuffers.copiedBuffer(getServer(channel), StandardCharsets.US_ASCII);
+                sendResponse(channel, remoteAddress, id, MSG_SERVER, response);
                 return null;
-            case MSG_POSITION:
-            case MSG_POSITION_LOGGED:
-            case MSG_ALARM:
-            case MSG_RFID:
-                break;
-            default:
-                return null;
+            }
         }
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        // Custom data
         if (command == MSG_ALARM) {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
         } else if (command == MSG_POSITION_LOGGED) {
@@ -239,85 +345,17 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Pattern pattern;
-        if (command == MSG_RFID) {
-            pattern = PATTERN_RFID;
-        } else {
-            pattern = PATTERN;
+        String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII);
+
+        if (command == MSG_POSITION || command == MSG_POSITION_LOGGED || command == MSG_ALARM) {
+            return decodeRegular(position, sentence);
+        } else if (command == MSG_RFID) {
+            return decodeRfid(position, sentence);
+        } else if (command == MSG_OBD_RT) {
+            return decodeObd(position, sentence);
         }
 
-        Parser parser = new Parser(
-                pattern, buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII));
-        if (!parser.matches()) {
-            return null;
-        }
-
-        if (command == MSG_RFID) {
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
-
-            position.setValid(true);
-            position.setLatitude(parser.nextCoordinate());
-            position.setLongitude(parser.nextCoordinate());
-
-        } else {
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            if (parser.hasNext()) {
-                dateBuilder.setMillis(parser.nextInt());
-            }
-
-            position.setValid(parser.next().equals("A"));
-            position.setLatitude(parser.nextCoordinate());
-            position.setLongitude(parser.nextCoordinate());
-
-            if (parser.hasNext()) {
-                position.setSpeed(parser.nextDouble());
-            }
-
-            if (parser.hasNext()) {
-                position.setCourse(parser.nextDouble());
-            }
-
-            dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
-
-            position.set(Position.KEY_HDOP, parser.next());
-
-            if (parser.hasNext()) {
-                position.setAltitude(parser.nextDouble());
-            }
-
-            position.set(Position.KEY_STATUS, parser.next());
-
-            for (int i = 1; i <= 8; i++) {
-                if (parser.hasNext()) {
-                    position.set(Position.PREFIX_ADC + i, parser.nextInt(16));
-                }
-            }
-
-            if (parser.hasNext()) {
-                position.set(Position.KEY_GSM, parser.nextInt(16));
-            }
-
-            if (parser.hasNext()) {
-                position.set(Position.KEY_ODOMETER, parser.nextLong(16));
-            }
-            if (parser.hasNext()) {
-                position.set(Position.KEY_ODOMETER, parser.nextLong(16));
-            }
-
-            if (parser.hasNext()) {
-                position.set(Position.KEY_RFID, parser.nextInt(16));
-            }
-
-        }
-
-        return position;
+        return null;
     }
 
 }

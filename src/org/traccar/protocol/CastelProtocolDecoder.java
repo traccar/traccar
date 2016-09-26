@@ -22,16 +22,52 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class CastelProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Map<Integer, Integer> PID_LENGTH_MAP = new HashMap<>();
+
+    static {
+        int[] l1 = {
+            0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0b, 0x0d,
+            0x0e, 0x0f, 0x11, 0x12, 0x13, 0x1c, 0x1d, 0x1e, 0x2c,
+            0x2d, 0x2e, 0x2f, 0x30, 0x33, 0x43, 0x45, 0x46,
+            0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x51, 0x52,
+            0x5a
+        };
+        int[] l2 = {
+            0x02, 0x03, 0x0a, 0x0c, 0x10, 0x14, 0x15, 0x16,
+            0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1f, 0x21, 0x22,
+            0x23, 0x31, 0x32, 0x3c, 0x3d, 0x3e, 0x3f, 0x42,
+            0x44, 0x4d, 0x4e, 0x50, 0x53, 0x54, 0x55, 0x56,
+            0x57, 0x58, 0x59
+        };
+        int[] l4 = {
+            0x00, 0x01, 0x20, 0x24, 0x25, 0x26, 0x27, 0x28,
+            0x29, 0x2a, 0x2b, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x39, 0x3a, 0x3b, 0x40, 0x41, 0x4f
+        };
+        for (int i : l1) {
+            PID_LENGTH_MAP.put(i, 1);
+        }
+        for (int i : l2) {
+            PID_LENGTH_MAP.put(i, 2);
+        }
+        for (int i : l4) {
+            PID_LENGTH_MAP.put(i, 4);
+        }
+    }
 
     public CastelProtocolDecoder(CastelProtocol protocol) {
         super(protocol);
@@ -43,7 +79,13 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     private static final short MSG_SC_HEARTBEAT = 0x1003;
     private static final short MSG_SC_HEARTBEAT_RESPONSE = (short) 0x9003;
     private static final short MSG_SC_GPS = 0x4001;
+    private static final short MSG_SC_PID_DATA = 0x4002;
+    private static final short MSG_SC_SUPPORTED_PID = 0x4004;
+    private static final short MSG_SC_OBD_DATA = 0x4005;
+    private static final short MSG_SC_DTCS_PASSENGER = 0x4006;
+    private static final short MSG_SC_DTCS_COMMERCIAL = 0x400B;
     private static final short MSG_SC_ALARM = 0x4007;
+    private static final short MSG_SC_CELL = 0x4008;
     private static final short MSG_SC_GPS_SLEEP = 0x4009;
     private static final short MSG_SC_AGPS_REQUEST = 0x5101;
     private static final short MSG_SC_CURRENT_LOCATION = (short) 0xB001;
@@ -82,6 +124,63 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, flags >> 4);
 
         return position;
+    }
+
+    private Position createPosition(DeviceSession deviceSession) {
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        return position;
+    }
+
+    private void decodeObd(Position position, ChannelBuffer buf, boolean groups) {
+
+        int count = buf.readUnsignedByte();
+
+        int[] pids = new int[count];
+        for (int i = 0; i < count; i++) {
+            pids[i] = buf.readUnsignedShort() & 0xff;
+        }
+
+        if (groups) {
+            buf.readUnsignedByte(); // group count
+            buf.readUnsignedByte(); // group size
+        }
+
+        for (int i = 0; i < count; i++) {
+            int value;
+            switch (PID_LENGTH_MAP.get(pids[i])) {
+                case 1:
+                    value = buf.readUnsignedByte();
+                    break;
+                case 2:
+                    value = buf.readUnsignedShort();
+                    break;
+                case 4:
+                    value = buf.readInt();
+                    break;
+                default:
+                    value = 0;
+                    break;
+            }
+            position.add(ObdDecoder.decodeData(pids[i], value, false));
+        }
+    }
+
+    private void decodeStat(Position position, ChannelBuffer buf) {
+
+        buf.readUnsignedInt(); // ACC ON time
+        buf.readUnsignedInt(); // UTC time
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+        buf.readUnsignedInt(); // trip odometer
+        buf.readUnsignedInt(); // total fuel consumption
+        buf.readUnsignedShort(); // current fuel consumption
+        position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+        buf.skipBytes(8);
     }
 
     private void sendResponse(
@@ -192,6 +291,50 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_SC_AGPS_REQUEST) {
 
             return readPosition(deviceSession, buf);
+
+        } else if (type == MSG_SC_PID_DATA) {
+
+            Position position = createPosition(deviceSession);
+
+            decodeStat(position, buf);
+
+            buf.readUnsignedShort(); // sample rate
+            decodeObd(position, buf, true);
+
+            return position;
+
+        } else if (type == MSG_SC_DTCS_PASSENGER) {
+
+            Position position = createPosition(deviceSession);
+
+            decodeStat(position, buf);
+
+            buf.readUnsignedByte(); // flag
+            position.add(ObdDecoder.decodeCodes(ChannelBuffers.hexDump(buf.readBytes(buf.readUnsignedByte()))));
+
+            return position;
+
+        } else if (type == MSG_SC_OBD_DATA) {
+
+            Position position = createPosition(deviceSession);
+
+            decodeStat(position, buf);
+
+            buf.readUnsignedByte(); // flag
+            decodeObd(position, buf, false);
+
+            return position;
+
+        } else if (type == MSG_SC_CELL) {
+
+            Position position = createPosition(deviceSession);
+
+            decodeStat(position, buf);
+
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_CID, buf.readUnsignedShort());
+
+            return position;
 
         }
 

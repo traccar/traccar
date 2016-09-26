@@ -12,6 +12,12 @@ public class NoranProtocolDecoderTest extends ProtocolTest {
 
         NoranProtocolDecoder decoder = new NoranProtocolDecoder(new NoranProtocol());
 
+        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "0d0a2a4b57000d000080010d0a"));
+
+        verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "34000800010b0000000000003f43bb8da6c2ebe229424e523039423233343439000031362d30392d31352030373a30303a303700"));
+
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "28003200c380000000469458408c4ad340ad381e3f4e52303947313336303900000001ff00002041"));
 
