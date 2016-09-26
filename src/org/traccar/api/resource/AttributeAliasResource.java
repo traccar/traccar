@@ -35,7 +35,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.AttributeAlias;
 
-@Path("devices/aliases")
+@Path("attributes/aliases")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AttributeAliasResource extends BaseResource {
