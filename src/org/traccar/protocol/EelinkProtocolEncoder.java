@@ -18,11 +18,8 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.Context;
-import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 import java.nio.charset.StandardCharsets;
 
