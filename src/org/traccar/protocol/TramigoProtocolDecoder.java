@@ -43,7 +43,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_COMPACT = 0x0100;
     public static final int MSG_FULL = 0x00FE;
 
-    private static final String[] DIRECTIONS = new String[] { "N", "NE", "E", "SE", "S", "SW", "W", "NW" };
+    private static final String[] DIRECTIONS = new String[] {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
     @Override
     protected Object decode(
