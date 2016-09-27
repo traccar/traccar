@@ -40,7 +40,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_STATE = 0x05;
     public static final int MSG_SMS = 0x06;
     public static final int MSG_OBD = 0x07;
-    public static final int MSG_INTERACTIVE = 0x80;
+    public static final int MSG_DOWNLINK = 0x80;
     public static final int MSG_DATA = 0x81;
 
     public static final int MSG_NORMAL = 0x12;
