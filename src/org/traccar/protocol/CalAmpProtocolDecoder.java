@@ -121,7 +121,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         int accCount = BitUtil.to(buf.readUnsignedByte(), 6);
 
         if (type != MSG_MINI_EVENT_REPORT) {
-            buf.readUnsignedByte(); // reserved
+            position.set("append", buf.readUnsignedByte());
         }
 
         if (accType == 1) {
