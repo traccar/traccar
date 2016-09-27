@@ -67,6 +67,9 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
         verifyNothing(decoder, buffer(
                 "(6221107674,2,U09,129,2,A,280513113036,E,02711.0500,S,1721.0876,A,030613171243,E,02756.7618,S,2300.0325,3491,538200,14400,1)"));
 
+        verifyPosition(decoder, buffer(
+                "(3551001012,U01,010100,000032,F,0.000000,N,0.000000,E,0.00,0,0,10%,00000000010000,15748,7923,23,0,0,3E)"));
+
     }
 
 }
