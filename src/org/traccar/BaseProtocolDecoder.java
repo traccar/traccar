@@ -26,10 +26,26 @@ import java.net.SocketAddress;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.sql.SQLException;
 
 public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private final Protocol protocol;
+
+    public long addUnknownDevice(String uniqueId) {
+        Device device = new Device();
+        device.setName(uniqueId);
+        device.setUniqueId(uniqueId);
+
+        try {
+            Context.getDeviceManager().addDevice(device);
+            Log.info("Automatically registered device " + uniqueId);
+            return device.getId();
+        } catch (SQLException e) {
+            Log.warning(e);
+            return 0;
+        }
+    }
 
     public String getProtocolName() {
         return protocol.getName();
@@ -55,6 +71,10 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 Log.warning(e);
             }
             if (deviceId == 0) {
+                if (Context.getConfig().getBoolean("database.registerUnknown")) {
+                    return addUnknownDevice(uniqueIds[0]);
+                }
+
                 StringBuilder message = new StringBuilder("Unknown device -");
                 for (String uniqueId : uniqueIds) {
                     message.append(" ").append(uniqueId);
