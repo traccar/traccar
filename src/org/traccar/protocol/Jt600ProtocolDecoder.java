@@ -50,6 +50,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readByte(); // header
 
+        boolean longFormat = buf.getUnsignedByte(buf.readerIndex()) == 0x75;
+
         String id = String.valueOf(Long.parseLong(ChannelBuffers.hexDump(buf.readBytes(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
@@ -57,9 +59,12 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int version = BcdUtil.readInteger(buf, 1);
-        buf.readUnsignedByte(); // type
-        buf.readBytes(2); // length
+        if (longFormat) {
+            buf.readUnsignedByte(); // protocol
+        }
+
+        int version = buf.readUnsignedByte() >> 4;
+        buf.readUnsignedShort(); // length
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDay(BcdUtil.readInteger(buf, 2))
@@ -87,7 +92,28 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(BcdUtil.readInteger(buf, 2));
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
-        if (version == 1) {
+        if (longFormat) {
+
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+
+            buf.readUnsignedInt(); // vehicle id combined
+
+            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+
+            int battery = buf.readUnsignedByte();
+            if (battery == 0xff) {
+                position.set(Position.KEY_CHARGE, true);
+            } else {
+                position.set(Position.KEY_BATTERY, battery + "%");
+            }
+
+            position.set(Position.KEY_CID, buf.readUnsignedShort());
+            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_INDEX, buf.readUnsignedByte());
+
+        } else if (version == 1) {
 
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
             position.set(Position.KEY_POWER, buf.readUnsignedByte());
