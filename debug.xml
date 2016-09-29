@@ -491,5 +491,6 @@
     <entry key='oigo.port'>5121</entry>
     <entry key='jpkorjar.port'>5122</entry>
     <entry key='cguard.port'>5123</entry>
+    <entry key='fifotrack.port'>5124</entry>
 
 </properties>
