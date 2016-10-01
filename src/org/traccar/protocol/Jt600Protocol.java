@@ -28,10 +28,11 @@ public class Jt600Protocol extends BaseProtocol {
 
     public Jt600Protocol() {
         super("jt600");
-        setSupportedCommands(Command.TYPE_ENGINE_RESUME,
-                             Command.TYPE_ENGINE_STOP,
-                             Command.TYPE_SET_TIMEZONE,
-                             Command.TYPE_REBOOT_DEVICE);
+        setSupportedCommands(
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_SET_TIMEZONE,
+                Command.TYPE_REBOOT_DEVICE);
     }
 
     @Override
