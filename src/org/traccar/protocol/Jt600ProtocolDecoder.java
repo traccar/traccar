@@ -201,24 +201,25 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_U01 = new PatternBuilder()
             .text("(")
-            .number("(d+),")                     // id
-            .number("Udd,")                      // type
-            .number("d+,").optional()            // alarm
-            .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .number("(dd)(dd)(dd),")             // time
-            .expression("([TF]),")               // validity
-            .number("(d+.d+),([NS]),")           // latitude
-            .number("(d+.d+),([EW]),")           // longitude
-            .number("(d+.?d*),")                 // speed
-            .number("(d+),")                     // course
-            .number("(d+),")                     // satellites
-            .number("(d+%),")                    // battery
-            .expression("([01]+),")              // status
-            .number("(d+),")                     // cid
-            .number("(d+),")                     // lac
-            .number("(d+),")                     // gsm signal
-            .number("(d+),")                     // odometer
-            .number("(d+)")                      // index
+            .number("(d+),")                                // id
+            .number("(Udd),")                               // type
+            .number("d+,").optional()                       // alarm
+            .number("(dd)(dd)(dd),")                        // date (ddmmyy)
+            .number("(dd)(dd)(dd),")                        // time
+            .expression("([TF]),")                          // validity
+            .number("(d+.d+),([NS]),")                      // latitude
+            .number("(d+.d+),([EW]),")                      // longitude
+            .number("(d+.?d*),")                            // speed
+            .number("(d+),")                                // course
+            .number("(d+),")                                // satellites
+            .number("(d+%),")                               // battery
+            .expression("([01]+),")                         // status
+            .number("(d+),")                                // cid
+            .number("(d+),")                                // lac
+            .number("(d+),")                                // gsm signal
+            .number("(d+),")                                // odometer
+            .number("(d+),")                                // serial number
+            .expression("([0-9A-F][0-9A-F])").optional()    // checksum
             .any()
             .compile();
 
@@ -233,6 +234,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
+
+        String messageType = parser.next();
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -256,11 +259,29 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CID, parser.nextInt());
         position.set(Position.KEY_LAC, parser.nextInt());
         position.set(Position.KEY_GSM, parser.nextInt());
-        position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
+        position.set(Position.KEY_ODOMETER, parser.nextLong() * 100);
         position.set(Position.KEY_INDEX, parser.nextInt());
 
-        return position;
+        switch (messageType) {
+            case "U01":
+            case "U02":
+            case "U03":
+                String checkSum = parser.next();
+                int calculatedCheckSum = checkSum(sentence.substring(1, sentence.length() - checkSum.length() - 1));
+                if (Integer.parseInt(checkSum, 16) == calculatedCheckSum) {
+                    sendResponse(channel, "(S39)");
+                    return position;
+                } else {
+                    return null;
+                }
+            case "U06":
+                sendResponse(channel, "(S20)");
+                return position;
+            default:
+                return null;
+        }
     }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -282,4 +303,18 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private byte checkSum(String sentence) {
+        byte[] bytes = sentence.getBytes(StandardCharsets.US_ASCII);
+        byte sum = 0;
+        for (byte b : bytes) {
+            sum ^= b;
+        }
+        return sum;
+    }
+
+    private void sendResponse(Channel channel, String response) {
+        if (channel != null) {
+            channel.write(ChannelBuffers.copiedBuffer(response, StandardCharsets.US_ASCII));
+        }
+    }
 }
