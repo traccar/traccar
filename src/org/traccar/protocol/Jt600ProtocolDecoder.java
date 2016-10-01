@@ -201,25 +201,25 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_U01 = new PatternBuilder()
             .text("(")
-            .number("(d+),")                                // id
-            .number("(Udd),")                               // type
-            .number("d+,").optional()                       // alarm
-            .number("(dd)(dd)(dd),")                        // date (ddmmyy)
-            .number("(dd)(dd)(dd),")                        // time
-            .expression("([TF]),")                          // validity
-            .number("(d+.d+),([NS]),")                      // latitude
-            .number("(d+.d+),([EW]),")                      // longitude
-            .number("(d+.?d*),")                            // speed
-            .number("(d+),")                                // course
-            .number("(d+),")                                // satellites
-            .number("(d+%),")                               // battery
-            .expression("([01]+),")                         // status
-            .number("(d+),")                                // cid
-            .number("(d+),")                                // lac
-            .number("(d+),")                                // gsm signal
-            .number("(d+),")                                // odometer
-            .number("(d+),")                                // serial number
-            .expression("([0-9A-F][0-9A-F])").optional()    // checksum
+            .number("(d+),")                       // id
+            .number("(Udd),")                      // type
+            .number("d+,").optional()              // alarm
+            .number("(dd)(dd)(dd),")               // date (ddmmyy)
+            .number("(dd)(dd)(dd),")               // time
+            .expression("([TF]),")                 // validity
+            .number("(d+.d+),([NS]),")             // latitude
+            .number("(d+.d+),([EW]),")             // longitude
+            .number("(d+.?d*),")                   // speed
+            .number("(d+),")                       // course
+            .number("(d+),")                       // satellites
+            .number("(d+%),")                      // battery
+            .expression("([01]+),")                // status
+            .number("(d+),")                       // cid
+            .number("(d+),")                       // lac
+            .number("(d+),")                       // gsm signal
+            .number("(d+),")                       // odometer
+            .number("(d+),")                       // serial number
+            .number("(xx)").optional()             // checksum
             .any()
             .compile();
 
@@ -266,9 +266,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             case "U01":
             case "U02":
             case "U03":
-                String checkSum = parser.next();
-                int calculatedCheckSum = checkSum(sentence.substring(1, sentence.length() - checkSum.length() - 1));
-                if (Integer.parseInt(checkSum, 16) == calculatedCheckSum) {
+                int checkSum = parser.nextInt(16);
+                int calculatedCheckSum = checkSum(sentence.substring(1, sentence.length() - 3));
+                if (checkSum == calculatedCheckSum) {
                     sendResponse(channel, "(S39)");
                     return position;
                 } else {
