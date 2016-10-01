@@ -160,12 +160,6 @@ public class DataManager {
                 .executeQuery(User.class);
     }
 
-    public User getUser(long userId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectUser"))
-                .setLong("id", userId)
-                .executeQuerySingle(User.class);
-    }
-
     public void addUser(User user) throws SQLException {
         user.setId(QueryBuilder.create(dataSource, getQuery("database.insertUser"), true)
                 .setObject(user)
@@ -357,12 +351,6 @@ public class DataManager {
     public Collection<Geofence> getGeofences() throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectGeofencesAll"))
                 .executeQuery(Geofence.class);
-    }
-
-    public Geofence getGeofence(long geofenceId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectGeofences"))
-                .setLong("id", geofenceId)
-                .executeQuerySingle(Geofence.class);
     }
 
     public void addGeofence(Geofence geofence) throws SQLException {

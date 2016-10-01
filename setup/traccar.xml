@@ -62,11 +62,6 @@
         WHERE email = :email;
     </entry>
 
-    <entry key='database.selectUser'>
-        SELECT * FROM users
-        WHERE id = :id;
-    </entry>
-
     <entry key='database.selectUsersAll'>
         SELECT * FROM users;
     </entry>
@@ -188,11 +183,6 @@
 
     <entry key='database.selectEvents'>
         SELECT * FROM events WHERE deviceId = :deviceId AND type LIKE :type AND serverTime BETWEEN :from AND :to ORDER BY serverTime DESC;
-    </entry>
-
-    <entry key='database.selectGeofence'>
-        SELECT * FROM geofences
-        WHERE id = :id;
     </entry>
 
     <entry key='database.selectGeofencesAll'>
