@@ -195,12 +195,11 @@ public final class Checksum {
     }
 
     public static int xor(String string) {
-        byte[] bytes = string.getBytes(StandardCharsets.US_ASCII);
-        byte sum = 0;
-        for (byte b : bytes) {
-            sum ^= b;
+        byte checksum = 0;
+        for (byte b : string.getBytes(StandardCharsets.US_ASCII)) {
+            checksum ^= b;
         }
-        return sum;
+        return checksum;
     }
 
     public static String nmea(String msg) {

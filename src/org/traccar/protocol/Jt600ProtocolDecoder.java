@@ -21,7 +21,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BcdUtil;
-import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -219,8 +218,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // lac
             .number("(d+),")                     // gsm signal
             .number("(d+),")                     // odometer
-            .number("(d+),?")                     // serial number
-            .number("(xx)").optional()           // checksum
+            .number("(d+)")                      // serial number
+            .number(",(xx)").optional()          // checksum
             .any()
             .compile();
 
@@ -236,7 +235,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String messageType = parser.next();
+        String type = parser.next();
 
         Position position = new Position();
         position.setProtocol(getProtocolName());
@@ -263,30 +262,15 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
         position.set(Position.KEY_INDEX, parser.nextInt());
 
-        switch (messageType) {
-            case "U01":
-            case "U02":
-            case "U03":
-                // support protocol with check sum
-                if (parser.hasNext(2)) {
-                    int checkSum = parser.nextInt(16);
-                    int calculatedCheckSum = Checksum.xor(sentence.substring(1, sentence.length() - 3));
-                    if (checkSum == calculatedCheckSum) {
-                        sendResponse(channel, "(S39)");
-                        return position;
-                    } else {
-                        return null;
-                    }
-                // support protocol without check sum
-                } else {
-                    return position;
-                }
-            case "U06":
-                sendResponse(channel, "(S20)");
-                return position;
-            default:
-                return null;
+        if (channel != null) {
+            if (type.equals("U01") || type.equals("U02") || type.equals("U03")) {
+                channel.write("(S39)");
+            } else if (type.equals("U06")) {
+                channel.write("(S20)");
+            }
         }
+
+        return position;
     }
 
     @Override
@@ -310,9 +294,4 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private void sendResponse(Channel channel, String response) {
-        if (channel != null) {
-            channel.write(ChannelBuffers.copiedBuffer(response, StandardCharsets.US_ASCII));
-        }
-    }
 }
