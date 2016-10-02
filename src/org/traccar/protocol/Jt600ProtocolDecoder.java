@@ -260,7 +260,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CID, parser.nextInt());
         position.set(Position.KEY_LAC, parser.nextInt());
         position.set(Position.KEY_GSM, parser.nextInt());
-        position.set(Position.KEY_ODOMETER, parser.nextLong() * 100);
+        position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
         position.set(Position.KEY_INDEX, parser.nextInt());
 
         switch (messageType) {
