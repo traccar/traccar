@@ -50,9 +50,9 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == 0) {
 
-            if (channel != null) {
+            /*if (channel != null) {
                 // TODO send ack
-            }
+            }*/
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
