@@ -219,7 +219,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // lac
             .number("(d+),")                     // gsm signal
             .number("(d+),")                     // odometer
-            .number("(d+),")                     // serial number
+            .number("(d+),?")                     // serial number
             .number("(xx)").optional()           // checksum
             .any()
             .compile();
@@ -267,13 +267,19 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             case "U01":
             case "U02":
             case "U03":
-                int checkSum = parser.nextInt(16);
-                int calculatedCheckSum = Checksum.xor(sentence.substring(1, sentence.length() - 3));
-                if (checkSum == calculatedCheckSum) {
-                    sendResponse(channel, "(S39)");
-                    return position;
+                // support protocol with check sum
+                if (parser.hasNext(2)) {
+                    int checkSum = parser.nextInt(16);
+                    int calculatedCheckSum = Checksum.xor(sentence.substring(1, sentence.length() - 3));
+                    if (checkSum == calculatedCheckSum) {
+                        sendResponse(channel, "(S39)");
+                        return position;
+                    } else {
+                        return null;
+                    }
+                // support protocol without check sum
                 } else {
-                    return null;
+                    return position;
                 }
             case "U06":
                 sendResponse(channel, "(S20)");
