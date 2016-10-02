@@ -201,25 +201,25 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_U01 = new PatternBuilder()
             .text("(")
-            .number("(d+),")                       // id
-            .number("(Udd),")                      // type
-            .number("d+,").optional()              // alarm
-            .number("(dd)(dd)(dd),")               // date (ddmmyy)
-            .number("(dd)(dd)(dd),")               // time
-            .expression("([TF]),")                 // validity
-            .number("(d+.d+),([NS]),")             // latitude
-            .number("(d+.d+),([EW]),")             // longitude
-            .number("(d+.?d*),")                   // speed
-            .number("(d+),")                       // course
-            .number("(d+),")                       // satellites
-            .number("(d+%),")                      // battery
-            .expression("([01]+),")                // status
-            .number("(d+),")                       // cid
-            .number("(d+),")                       // lac
-            .number("(d+),")                       // gsm signal
-            .number("(d+),")                       // odometer
-            .number("(d+),")                       // serial number
-            .number("(xx)").optional()             // checksum
+            .number("(d+),")                     // id
+            .number("(Udd),")                    // type
+            .number("d+,").optional()            // alarm
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time
+            .expression("([TF]),")               // validity
+            .number("(d+.d+),([NS]),")           // latitude
+            .number("(d+.d+),([EW]),")           // longitude
+            .number("(d+.?d*),")                 // speed
+            .number("(d+),")                     // course
+            .number("(d+),")                     // satellites
+            .number("(d+%),")                    // battery
+            .expression("([01]+),")              // status
+            .number("(d+),")                     // cid
+            .number("(d+),")                     // lac
+            .number("(d+),")                     // gsm signal
+            .number("(d+),")                     // odometer
+            .number("(d+),")                     // serial number
+            .number("(xx)").optional()           // checksum
             .any()
             .compile();
 
