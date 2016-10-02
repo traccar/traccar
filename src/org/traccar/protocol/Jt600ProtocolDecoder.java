@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BcdUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -267,7 +268,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             case "U02":
             case "U03":
                 int checkSum = parser.nextInt(16);
-                int calculatedCheckSum = checkSum(sentence.substring(1, sentence.length() - 3));
+                int calculatedCheckSum = Checksum.xor(sentence.substring(1, sentence.length() - 3));
                 if (checkSum == calculatedCheckSum) {
                     sendResponse(channel, "(S39)");
                     return position;
@@ -301,15 +302,6 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return null;
-    }
-
-    private byte checkSum(String sentence) {
-        byte[] bytes = sentence.getBytes(StandardCharsets.US_ASCII);
-        byte sum = 0;
-        for (byte b : bytes) {
-            sum ^= b;
-        }
-        return sum;
     }
 
     private void sendResponse(Channel channel, String response) {
