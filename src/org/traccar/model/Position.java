@@ -35,6 +35,7 @@ public class Position extends Message {
     public static final String KEY_OUTPUT = "output";
     public static final String KEY_POWER = "power";
     public static final String KEY_BATTERY = "battery";
+    public static final String KEY_CELL_TOWERS = "cellTowers";
     public static final String KEY_MCC = "mcc";
     public static final String KEY_MNC = "mnc";
     public static final String KEY_LAC = "lac";

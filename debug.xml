@@ -482,5 +482,6 @@
     <entry key='jpkorjar.port'>5122</entry>
     <entry key='cguard.port'>5123</entry>
     <entry key='fifotrack.port'>5124</entry>
+    <entry key='smokey.port'>5125</entry>
 
 </properties>

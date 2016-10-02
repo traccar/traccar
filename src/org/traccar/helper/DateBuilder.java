@@ -92,6 +92,11 @@ public class DateBuilder {
         return this;
     }
 
+    public DateBuilder addSeconds(long seconds) {
+        calendar.setTimeInMillis(calendar.getTimeInMillis() + seconds * 1000);
+        return this;
+    }
+
     public DateBuilder setMillis(int millis) {
         calendar.set(Calendar.MILLISECOND, millis);
         return this;
