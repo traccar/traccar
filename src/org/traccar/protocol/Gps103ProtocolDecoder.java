@@ -95,10 +95,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*%),")                // throttle
             .number("(d+),")                     // rpm
             .number("(d+.d+),")                  // battery
-            .number("[^,]*,")                    // dtc 1
-            .number("[^,]*,")                    // dtc 2
-            .number("[^,]*,")                    // dtc 3
-            .number("[^,]*")                     // dtc 4
+            .number("([^;]*)")                   // dtcs
             .any()
             .compile();
 
@@ -197,6 +194,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_THROTTLE, parser.next());
             position.set(Position.KEY_RPM, parser.next());
             position.set(Position.KEY_BATTERY, parser.next());
+            position.set(Position.KEY_DTCS, parser.next().replace(',', ' ').trim());
 
             return position;
 

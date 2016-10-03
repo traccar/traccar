@@ -60,7 +60,7 @@ public final class ObdDecoder {
         StringBuilder codes = new StringBuilder();
         for (int i = 0; i < value.length() / 4; i++) {
             int numValue = Integer.parseInt(value.substring(i * 4, (i + 1) * 4), 16);
-            codes.append(',');
+            codes.append(' ');
             switch (numValue >> 14) {
                 case 1:
                     codes.append('C');
@@ -78,7 +78,7 @@ public final class ObdDecoder {
             codes.append(String.format("%04X", numValue & 0x3FFF));
         }
         if (codes.length() > 0) {
-            return createEntry("dtcs", codes.toString().replaceFirst(",", ""));
+            return createEntry(Position.KEY_DTCS, codes.toString().trim());
         } else {
             return null;
         }
