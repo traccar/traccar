@@ -50,11 +50,11 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == 0) {
 
-            buf.readUnsignedShort(); // firmware version
-
             /*if (channel != null) {
                 // TODO send ack
             }*/
+
+            buf.readUnsignedShort(); // firmware version
 
             Position position = new Position();
             position.setProtocol(getProtocolName());
