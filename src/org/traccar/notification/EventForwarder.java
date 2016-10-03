@@ -50,7 +50,7 @@ public final class EventForwarder {
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
 
-        requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
+        requestBuilder.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         requestBuilder.addHeader("User-Agent", USER_AGENT);
         if (!header.equals("")) {
             String[] headerLines = header.split("\\r?\\n");
