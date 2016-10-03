@@ -40,15 +40,17 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(2); // header
         buf.readUnsignedByte(); // protocol version
 
+        int type = buf.readUnsignedByte();
+
         String id = ChannelBuffers.hexDump(buf.readBytes(8));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
 
-        int type = buf.readUnsignedByte();
-
         if (type == 0) {
+
+            buf.readUnsignedShort(); // firmware version
 
             /*if (channel != null) {
                 // TODO send ack
