@@ -40,7 +40,7 @@ public class ConnectionManager {
     private static final long DEFAULT_TIMEOUT = 600;
 
     private final long deviceTimeout;
-    private final boolean statusHandler;
+    private final boolean enableStatusEvents;
 
     private final Map<Long, ActiveDevice> activeDevices = new HashMap<>();
     private final Map<Long, Set<UpdateListener>> listeners = new HashMap<>();
@@ -48,7 +48,7 @@ public class ConnectionManager {
 
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
-        statusHandler = Context.getConfig().getBoolean("event.statusHandler");
+        enableStatusEvents = Context.getConfig().getBoolean("event.statusHandler");
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
@@ -75,7 +75,7 @@ public class ConnectionManager {
             return;
         }
 
-        if (statusHandler && !status.equals(device.getStatus())) {
+        if (enableStatusEvents && !status.equals(device.getStatus())) {
             Event event = new Event(Event.TYPE_DEVICE_OFFLINE, deviceId);
             if (status.equals(Device.STATUS_ONLINE)) {
                 event.setType(Event.TYPE_DEVICE_ONLINE);
