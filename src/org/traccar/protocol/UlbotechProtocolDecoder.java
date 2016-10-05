@@ -55,7 +55,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
     private static final short DATA_RFID = 0x0E;
     private static final short DATA_EVENT = 0x10;
 
-    private void decodeObd(Position position, ChannelBuffer buf, short length) {
+    private void decodeObd(Position position, ChannelBuffer buf, int length) {
 
         int end = buf.readerIndex() + length;
 
@@ -66,7 +66,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeJ1708(Position position, ChannelBuffer buf, short length) {
+    private void decodeJ1708(Position position, ChannelBuffer buf, int length) {
 
         int end = buf.readerIndex() + length;
 
@@ -166,8 +166,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 3) {
 
-            short type = buf.readUnsignedByte();
-            short length = buf.readUnsignedByte();
+            int type = buf.readUnsignedByte();
+            int length = type == DATA_CANBUS ? buf.readUnsignedShort() : buf.readUnsignedByte();
 
             switch (type) {
 
