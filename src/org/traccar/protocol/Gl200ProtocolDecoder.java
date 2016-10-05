@@ -39,7 +39,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_HBD = new PatternBuilder()
             .text("+ACK:GTHBD,")
-            .number("([0-9A-Z]{2}xxxx),")          // protocol version
+            .number("([0-9A-Z]{2}xxxx),")        // protocol version
             .number("(d{15}),")                  // imei
             .any().text(",")
             .number("(xxxx)")
