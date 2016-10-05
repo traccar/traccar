@@ -23,6 +23,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -50,23 +51,35 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("+RESP:GTINF,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
             .number("(d{15}),")                  // imei
-            .expression("[0-9A-Z]{17},")         // vin
-            .expression("[^,]{0,20},")           // device name
+            .expression("(?:[0-9A-Z]{17},)?")    // vin
+            .expression("(?:[^,]+)?,")           // device name
             .number("(xx),")                     // state
             .expression("[0-9F]{20},")           // iccid
             .number("d{1,2},")
             .number("d{1,2},")
-            .expression("[01],")
-            .number("(d{1,5}),")                 // power
-            .text(",")
+            .expression("[01],")                 // external power
+            .number("([d.]+)?,")                 // odometer or external power
+            .number("[01]?,")                    // backup battery
             .number("(d+.d+),")                  // battery
             .expression("([01]),")               // charging
-            .expression("[01],")
-            .text(",,")
+            .number("(?:d),")                    // led
+            .number("(?:d)?,")                   // gps on need
+            .number("(?:d)?,")                   // gps antenna type
+            .number("(?:d),").optional()         // gps antenna state
             .number("d{14},")                    // last fix time
-            .text(",,,,,")
+            .groupBegin()
+            .number("(d+),")                     // battery percentage
+            .expression("(?:[01]),")             // flash type
+            .number("(-?[d.]+)?,,,")             // temperature
+            .or()
+            .expression("(?:[01])?,").optional() // pin15 mode
+            .number("(d+)?,")                    // adc1
+            .number("(d+)?,").optional()         // adc2
+            .number("(xx)?,")                    // digital input
+            .number("(xx)?,")                    // digital output
             .number("[-+]dddd,")                 // timezone
             .expression("[01],")                 // daylight saving
+            .groupEnd()
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd),")             // time
             .number("(xxxx)")                    // counter
@@ -256,6 +269,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        PatternUtil.MatchResult r = PatternUtil.checkPattern(PATTERN_INF.pattern(), sentence);
+
         Parser parser = new Parser(PATTERN_INF, sentence);
         if (!parser.matches()) {
             return null;
@@ -271,9 +287,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_STATUS, parser.next());
-        position.set(Position.KEY_POWER, parser.next());
-        position.set(Position.KEY_BATTERY, parser.next());
-        position.set(Position.KEY_CHARGE, parser.next());
+
+        parser.next(); // odometer or external power
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
+
+        parser.next(); // battery percentage
+
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
+
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
+
+        position.set(Position.KEY_INPUT, parser.next());
+        position.set(Position.KEY_OUTPUT, parser.next());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -281,7 +309,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, dateBuilder.getDate());
 
-        position.set(Position.KEY_INDEX, parser.next());
+        position.set(Position.KEY_INDEX, parser.nextInt(16));
 
         return position;
     }
