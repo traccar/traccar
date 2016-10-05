@@ -39,7 +39,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_HBD = new PatternBuilder()
             .text("+ACK:GTHBD,")
-            .number("([0-9A-Z]{2}xxxx),")
+            .number("([0-9A-Z]{2}xxxx),")        // protocol version
+            .number("(d{15}),")                  // imei
             .any().text(",")
             .number("(xxxx)")
             .text("$").optional()
@@ -245,7 +246,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeHbd(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_HBD, sentence);
         if (parser.matches() && channel != null) {
-            channel.write("+SACK:GTHBD," + parser.next() + "," + parser.next() + "$", remoteAddress);
+            String protocolVersion = parser.next();
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession != null) {
+                channel.write("+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress);
+            }
         }
         return null;
     }
