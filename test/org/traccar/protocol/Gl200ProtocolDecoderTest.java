@@ -163,6 +163,15 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyNothing(decoder, text(
                 "+ACK:GTHBD,1A0401,135790246811220,,20100214093254,11F0"));
 
+        verifyAttributes(decoder, text(
+                "+ACK:GTRTO,1A0800,860599000773978,GL300,VER,FFFF,20161006053520,0C19"));
+
+        verifyAttributes(decoder, text(
+                "+ACK:GTJDC,0A0102,135790246811220,,0016,20090214093254,11F0"));
+
+        verifyAttributes(decoder, text(
+                "+ACK:GTGEO,1A0102,135790246811220,,0,0008,20100310172830,11F0"));
+
     }
 
 }
