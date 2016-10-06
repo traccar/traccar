@@ -51,15 +51,15 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // odometer
             .number("d+,")                       // runtime
             .number("(xxxx),")                   // status
-            .number("(x+),")                     // input
-            .number("(x+),")                     // output
+            .number("(x+)?,")                    // input
+            .number("(x+)?,")                    // output
             .number("(d+)|")                     // mcc
             .number("(d+)|")                     // mnc
             .number("(x+)|")                     // lac
             .number("(x+),")                     // cid
-            .number("([x|]+),")                  // adc
-            .expression("([^,]+),")              // rfid
-            .expression("([^*]+)")               // sensors
+            .number("([x|]+)")                   // adc
+            .expression(",([^,]+)")              // rfid
+            .expression(",([^*]+)").optional(2)  // sensors
             .any()
             .compile();
 
@@ -97,8 +97,12 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ODOMETER, parser.nextLong());
         position.set(Position.KEY_STATUS, parser.nextInt(16));
-        position.set(Position.KEY_INPUT, parser.nextInt(16));
-        position.set(Position.KEY_OUTPUT, parser.nextInt(16));
+        if (parser.hasNext()) {
+            position.set(Position.KEY_INPUT, parser.nextInt(16));
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_OUTPUT, parser.nextInt(16));
+        }
 
         position.set(Position.KEY_MCC, parser.nextInt());
         position.set(Position.KEY_MNC, parser.nextInt());
@@ -112,9 +116,11 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_RFID, parser.next());
 
-        String[] sensors = parser.next().split("\\|");
-        for (int i = 0; i < sensors.length; i++) {
-            position.set(Position.PREFIX_IO + (i + 1), sensors[i]);
+        if (parser.hasNext()) {
+            String[] sensors = parser.next().split("\\|");
+            for (int i = 0; i < sensors.length; i++) {
+                position.set(Position.PREFIX_IO + (i + 1), sensors[i]);
+            }
         }
 
         return position;
