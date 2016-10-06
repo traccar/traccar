@@ -23,7 +23,6 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -269,8 +268,6 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
-
-        PatternUtil.MatchResult r = PatternUtil.checkPattern(PATTERN_INF.pattern(), sentence);
 
         Parser parser = new Parser(PATTERN_INF, sentence);
         if (!parser.matches()) {
