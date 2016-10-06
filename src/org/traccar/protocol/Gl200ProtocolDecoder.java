@@ -38,7 +38,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_ACK = new PatternBuilder()
-            .text("+ACK:GT").expression("...,")
+            .text("+ACK:GT")
+            .expression("...,")                  // type
             .number("([0-9A-Z]{2}xxxx),")        // protocol version
             .number("(d{15}),")                  // imei
             .any().text(",")
@@ -639,7 +640,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         Object result;
         String type = sentence.substring(typeIndex + 3, typeIndex + 6);
-        if (typeIndex >= 4 && sentence.startsWith("+ACK", typeIndex - 4)) {
+        if (sentence.startsWith("+ACK")) {
             result = decodeAck(channel, remoteAddress, sentence, type);
         } else {
             switch (type) {
