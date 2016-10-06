@@ -50,7 +50,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_INF = new PatternBuilder()
-            .text("+RESP:GTINF,")
+            .text("+").expression("(?:RESP|BUFF):GTINF,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
             .number("(d{15}),")                  // imei
             .expression("(?:[0-9A-Z]{17},)?")    // vin
