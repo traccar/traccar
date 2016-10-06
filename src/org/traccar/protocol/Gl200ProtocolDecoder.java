@@ -37,12 +37,14 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_HBD = new PatternBuilder()
-            .text("+ACK:GTHBD,")
+    private static final Pattern PATTERN_ACK = new PatternBuilder()
+            .text("+ACK:GT").expression("...,")
             .number("([0-9A-Z]{2}xxxx),")        // protocol version
             .number("(d{15}),")                  // imei
             .any().text(",")
-            .number("(xxxx)")
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(xxxx)")                    // counter
             .text("$").optional()
             .compile();
 
@@ -255,13 +257,30 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    private Object decodeHbd(Channel channel, SocketAddress remoteAddress, String sentence) {
-        Parser parser = new Parser(PATTERN_HBD, sentence);
-        if (parser.matches() && channel != null) {
+    private Object decodeAck(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
+        Parser parser = new Parser(PATTERN_ACK, sentence);
+        if (parser.matches()) {
             String protocolVersion = parser.next();
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession != null) {
-                channel.write("+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+            if (type.equals("HBD")) {
+                if (channel != null) {
+                    parser.skip(6);
+                    channel.write("+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress);
+                }
+            } else {
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                DateBuilder dateBuilder = new DateBuilder()
+                        .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                getLastLocation(position, dateBuilder.getDate());
+                position.setValid(false);
+                position.set(Position.KEY_RESULT, "Command " + type + " accepted");
+                return position;
             }
         }
         return null;
@@ -620,41 +639,42 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         Object result;
         String type = sentence.substring(typeIndex + 3, typeIndex + 6);
-        switch (type) {
-            case "HBD":
-                result = decodeHbd(channel, remoteAddress, sentence);
-                break;
-            case "INF":
-                result = decodeInf(channel, remoteAddress, sentence);
-                break;
-            case "OBD":
-                result = decodeObd(channel, remoteAddress, sentence);
-                break;
-            case "FRI":
-                result = decodeFri(channel, remoteAddress, sentence);
-                break;
-            case "IGN":
-            case "IGF":
-                result = decodeIgn(channel, remoteAddress, sentence);
-                break;
-            case "IDA":
-                result = decodeIda(channel, remoteAddress, sentence);
-                break;
-            default:
-                result = decodeOther(channel, remoteAddress, sentence, type);
-                break;
-        }
+        if (typeIndex >= 4 && sentence.startsWith("+ACK", typeIndex - 4)) {
+            result = decodeAck(channel, remoteAddress, sentence, type);
+        } else {
+            switch (type) {
+                case "INF":
+                    result = decodeInf(channel, remoteAddress, sentence);
+                    break;
+                case "OBD":
+                    result = decodeObd(channel, remoteAddress, sentence);
+                    break;
+                case "FRI":
+                    result = decodeFri(channel, remoteAddress, sentence);
+                    break;
+                case "IGN":
+                case "IGF":
+                    result = decodeIgn(channel, remoteAddress, sentence);
+                    break;
+                case "IDA":
+                    result = decodeIda(channel, remoteAddress, sentence);
+                    break;
+                default:
+                    result = decodeOther(channel, remoteAddress, sentence, type);
+                    break;
+            }
 
-        if (result == null) {
-            result = decodeBasic(channel, remoteAddress, sentence);
-        }
+            if (result == null) {
+                result = decodeBasic(channel, remoteAddress, sentence);
+            }
 
-        if (result != null) {
-            if (result instanceof Position) {
-                ((Position) result).set(Position.KEY_TYPE, type);
-            } else {
-                for (Position p : (List<Position>) result) {
-                    p.set(Position.KEY_TYPE, type);
+            if (result != null) {
+                if (result instanceof Position) {
+                    ((Position) result).set(Position.KEY_TYPE, type);
+                } else {
+                    for (Position p : (List<Position>) result) {
+                        p.set(Position.KEY_TYPE, type);
+                    }
                 }
             }
         }
