@@ -45,9 +45,13 @@ public class GeofenceResource extends BaseResource {
     @GET
     public Collection<Geofence> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId, @QueryParam("groupId") long groupId,
-            @QueryParam("deviceId") long deviceId) throws SQLException {
+            @QueryParam("deviceId") long deviceId, @QueryParam("refresh") boolean refresh) throws SQLException {
 
         GeofenceManager geofenceManager = Context.getGeofenceManager();
+        if (refresh) {
+            geofenceManager.refreshGeofences();
+        }
+
         Set<Long> result;
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
@@ -57,7 +61,7 @@ public class GeofenceResource extends BaseResource {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result = new HashSet<Long>(geofenceManager.getUserGeofencesIds(userId));
+            result = new HashSet<>(geofenceManager.getUserGeofencesIds(userId));
         }
 
         if (groupId != 0) {
