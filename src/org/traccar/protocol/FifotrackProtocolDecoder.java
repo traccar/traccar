@@ -37,7 +37,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .text("$$")
             .number("d+,")                       // length
             .number("(d+),")                     // imei
-            .number("d+,")                       // index
+            .number("x+,")                       // index
             .expression("[^,]+,")                // type
             .number("(d+)?,")                    // alarm
             .number("(dd)(dd)(dd)")              // date
