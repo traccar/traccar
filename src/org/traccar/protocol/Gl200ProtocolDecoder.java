@@ -88,6 +88,20 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private static final Pattern PATTERN_VER = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTVER,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}),")                  // imei
+            .expression("[^,]*,")                // device name
+            .expression("([^,]*),")              // device type
+            .number("(xxxx),")                   // firmware version
+            .number("(xxxx),")                   // hardware version
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(xxxx)")                    // counter
+            .text("$").optional()
+            .compile();
+
     private static final Pattern PATTERN_LOCATION = new PatternBuilder()
             .number("(?:d{1,2})?,")              // gps accuracy
             .number("(d{1,3}.d)?,")              // speed
@@ -327,6 +341,34 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         getLastLocation(position, dateBuilder.getDate());
 
         position.set(Position.KEY_INDEX, parser.nextInt(16));
+
+        return position;
+    }
+
+    private Object decodeVer(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_VER, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set("deviceType", parser.next());
+        position.set("firmwareVersion", parser.nextInt(16));
+        position.set("hardwareVersion", parser.nextInt(16));
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+        getLastLocation(position, dateBuilder.getDate());
 
         return position;
     }
@@ -587,7 +629,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN_BASIC, sentence);
         if (!parser.matches()) {
             return null;
@@ -622,6 +664,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
                 position.setTime(dateBuilder.getDate());
             }
+        }
+
+        switch (type) {
+            case "BPL":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            case "TEM":
+                position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+                break;
+            case "JDR":
+            case "JDS":
+                position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                break;
+            default:
+                break;
         }
 
         return position;
@@ -660,13 +717,16 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                 case "IDA":
                     result = decodeIda(channel, remoteAddress, sentence);
                     break;
+                case "VER":
+                    result = decodeVer(channel, remoteAddress, sentence);
+                    break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);
                     break;
             }
 
             if (result == null) {
-                result = decodeBasic(channel, remoteAddress, sentence);
+                result = decodeBasic(channel, remoteAddress, sentence, type);
             }
 
             if (result != null) {
