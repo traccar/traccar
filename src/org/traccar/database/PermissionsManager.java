@@ -140,6 +140,16 @@ public class PermissionsManager {
         }
     }
 
+    public boolean isReadonly(long userId) {
+        return users.containsKey(userId) && users.get(userId).getReadonly();
+    }
+
+    public void checkReadonly(long userId) throws SecurityException {
+        if (isReadonly(userId)) {
+            throw new SecurityException("User is readonly");
+        }
+    }
+
     public void checkUser(long userId, long otherUserId) throws SecurityException {
         if (userId != otherUserId) {
             checkAdmin(userId);
@@ -161,12 +171,6 @@ public class PermissionsManager {
     public void checkRegistration(long userId) {
         if (!server.getRegistration() && !isAdmin(userId)) {
             throw new SecurityException("Registration disabled");
-        }
-    }
-
-    public void checkReadonly(long userId) {
-        if (server.getReadonly() && !isAdmin(userId)) {
-            throw new SecurityException("Readonly user");
         }
     }
 

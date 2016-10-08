@@ -64,6 +64,9 @@ public class UserResource extends BaseResource {
             Context.getPermissionsManager().checkAdmin(getUserId());
         } else {
             Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
+            if (!entity.getReadonly()) {
+                Context.getPermissionsManager().checkReadonly(entity.getId());
+            }
         }
         Context.getPermissionsManager().updateUser(entity);
         if (Context.getNotificationManager() != null) {
