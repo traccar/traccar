@@ -66,5 +66,7 @@
       </column>
     </createTable>
 
+    <modifyDataType tableName="server" columnName="mapurl" newDataType="VARCHAR(512)" />
+
   </changeSet>
 </databaseChangeLog>
