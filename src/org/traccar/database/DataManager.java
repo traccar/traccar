@@ -474,8 +474,10 @@ public class DataManager {
                 .executeUpdate();
     }
 
-    public Collection<Statistics> getStatistics() throws SQLException {
+    public Collection<Statistics> getStatistics(Date from, Date to) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectStatistics"))
+                .setDate("from", from)
+                .setDate("to", to)
                 .executeQuery(Statistics.class);
     }
 
