@@ -35,7 +35,8 @@ import java.util.Collection;
 public class StatisticsResource extends BaseResource {
 
     @GET
-    public Collection<Statistics> get(@QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
+    public Collection<Statistics> get(
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         return Context.getDataManager().getStatistics(JsonConverter.parseDate(from), JsonConverter.parseDate(to));
     }
