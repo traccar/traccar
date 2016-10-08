@@ -68,5 +68,11 @@
 
     <modifyDataType tableName="server" columnName="mapurl" newDataType="VARCHAR(512)" />
 
+    <addColumn tableName="server">
+      <column name="forcesettings" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>

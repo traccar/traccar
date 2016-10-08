@@ -127,4 +127,14 @@ public class Server extends Extensible {
         this.twelveHourFormat = twelveHourFormat;
     }
 
+    private boolean forceSettings;
+
+    public boolean getForceSettings() {
+        return forceSettings;
+    }
+
+    public void setForceSettings(boolean forceSettings) {
+        this.forceSettings = forceSettings;
+    }
+
 }
