@@ -137,14 +137,14 @@ public class Server extends Extensible {
         this.forceSettings = forceSettings;
     }
 
-    private String coordinatesFormat;
+    private String coordinateFormat;
 
-    public String getCoordinatesFormat() {
-        return coordinatesFormat;
+    public String getCoordinateFormat() {
+        return coordinateFormat;
     }
 
-    public void setCoordinatesFormat(String coordinatesFormat) {
-        this.coordinatesFormat = coordinatesFormat;
+    public void setCoordinateFormat(String coordinateFormat) {
+        this.coordinateFormat = coordinateFormat;
     }
 
 }

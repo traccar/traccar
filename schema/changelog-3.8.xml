@@ -75,10 +75,10 @@
     </addColumn>
 
     <addColumn tableName="users">
-      <column name="coordinatesformat" type="VARCHAR(128)" />
+      <column name="coordinateformat" type="VARCHAR(128)" />
     </addColumn>
     <addColumn tableName="server">
-      <column name="coordinatesformat" type="VARCHAR(128)" />
+      <column name="coordinateformat" type="VARCHAR(128)" />
     </addColumn>
 
   </changeSet>

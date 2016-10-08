@@ -130,14 +130,14 @@ public class User extends Extensible {
         this.twelveHourFormat = twelveHourFormat;
     }
 
-    private String coordinatesFormat;
+    private String coordinateFormat;
 
-    public String getCoordinatesFormat() {
-        return coordinatesFormat;
+    public String getCoordinateFormat() {
+        return coordinateFormat;
     }
 
-    public void setCoordinatesFormat(String coordinatesFormat) {
-        this.coordinatesFormat = coordinatesFormat;
+    public void setCoordinateFormat(String coordinateFormat) {
+        this.coordinateFormat = coordinateFormat;
     }
 
     private String password;
