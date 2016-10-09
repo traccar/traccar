@@ -145,7 +145,7 @@ public class PermissionsManager {
     }
 
     public void checkReadonly(long userId) throws SecurityException {
-        if (server.getReadonly() || isReadonly(userId)) {
+        if (!isAdmin(userId) && (server.getReadonly() || isReadonly(userId))) {
             throw new SecurityException("User is readonly");
         }
     }
