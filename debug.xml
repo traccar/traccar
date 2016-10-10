@@ -484,5 +484,6 @@
     <entry key='cguard.port'>5123</entry>
     <entry key='fifotrack.port'>5124</entry>
     <entry key='smokey.port'>5125</entry>
+    <entry key='extremtrac.port'>5126</entry>
 
 </properties>
