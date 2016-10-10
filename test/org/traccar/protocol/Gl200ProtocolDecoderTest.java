@@ -176,6 +176,9 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
                 "+RESP:GTJDS,0A0102,135790246811220,,2,0,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,20090214093254,11F0$"));
         
         verifyAttributes(decoder, text(
+                "+RESP:GTSOS,020102,135790246811220,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,,20090214093254,11F0$"));
+        
+        verifyAttributes(decoder, text(
                 "+RESP:GTVER,1A0800,860599000773978,GL300,GL300,0A03,0103,20161007041531,10F8$"));
 
         verifyNothing(decoder, text(
