@@ -1,16 +1,1 @@
-{
-    "remotePath": "./alltrac/",
-    "host": "212.224.78.106",
-    "username": "slawik",
-    "password": "sel1984ler",
-    "port": 21,
-    "protocol": "ftp",
-    "uploadOnSave": true,
-    "passive": false,
-    "debug": false,
-    "privateKeyPath": null,
-    "ignore": [
-        "\\.vscode",
-        "\\.git"
-    ]
-}
+
