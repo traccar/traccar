@@ -1,8 +1,6 @@
 package org.traccar.notification;
 
-import org.junit.Assert;
 import org.junit.Test;
-import org.traccar.location.CellInfo;
 
 import javax.mail.Message;
 import javax.mail.Session;
@@ -26,7 +24,7 @@ public class NotificiationMailTest {
 
     private static final int PORT = 25;
 
-    @Test
+    //@Test
     public void test() throws Exception {
 
         Properties props = System.getProperties();
@@ -43,7 +41,7 @@ public class NotificiationMailTest {
         msg.setFrom(new InternetAddress(FROM));
         msg.setRecipient(Message.RecipientType.TO, new InternetAddress(TO));
         msg.setSubject(SUBJECT);
-        msg.setContent(BODY,"text/plain");
+        msg.setContent(BODY, "text/plain");
 
         Transport transport = session.getTransport();
 
