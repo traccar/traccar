@@ -56,7 +56,7 @@ public final class NotificationMail {
 
             String username = config.getString("mail.smtp.username");
             if (username != null) {
-                result.put("mail.smtp.user", username);
+                result.put("mail.smtp.username", username);
             }
             String password = config.getString("mail.smtp.password");
             if (password != null) {
@@ -119,7 +119,7 @@ public final class NotificationMail {
                     return;
                 }
             }
-            mailSession = Session.getInstance(mailServerProperties, null);
+            mailSession = Session.getDefaultInstance(mailServerProperties);
 
             mailMessage = new MimeMessage(mailSession);
 
