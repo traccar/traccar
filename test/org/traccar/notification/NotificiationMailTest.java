@@ -47,8 +47,7 @@ public class NotificiationMailTest {
 
         Transport transport = session.getTransport();
 
-        try
-        {
+        try {
             transport.connect(HOST, SMTP_USERNAME, SMTP_PASSWORD);
             transport.sendMessage(msg, msg.getAllRecipients());
         } finally {
