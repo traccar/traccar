@@ -18,9 +18,11 @@ package org.traccar.database;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -28,6 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
@@ -54,6 +57,15 @@ public class NotificationManager {
         }
 
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(event.getDeviceId());
+        Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
+        if (device != null && device.getAttributes().containsKey("notifyOnly")) {
+            List<String> notifyOnly = Arrays.asList(device.getAttributes().get("notifyOnly").toString().split(" "));
+            for (long userId : users) {
+                if (!notifyOnly.contains(Context.getPermissionsManager().getUser(userId).getEmail())) {
+                    users.remove(userId);
+                }
+            }
+        }
         for (long userId : users) {
             if (event.getGeofenceId() == 0 || Context.getGeofenceManager() != null
                     && Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId())) {
