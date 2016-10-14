@@ -55,7 +55,7 @@ public class NotificationManager {
             Log.warning(error);
         }
 
-        Set<Long> users = Context.getPermissionsManager().getDeviceUsers(event.getDeviceId());
+        Set<Long> users = new HashSet<Long>(Context.getPermissionsManager().getDeviceUsers(event.getDeviceId()));
         String notifyOnly = Context.getDeviceManager().lookupConfigString(event.getDeviceId(),
                 "event.notifyOnly", null);
         if (notifyOnly != null) {
