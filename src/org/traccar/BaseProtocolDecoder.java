@@ -89,6 +89,17 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
+        if (Context.getConfig().getBoolean("decoder.ignoreSessionCache")) {
+            long deviceId = findDeviceId(remoteAddress, uniqueIds);
+            if (deviceId != 0) {
+                if (Context.getConnectionManager() != null) {
+                    Context.getConnectionManager().addActiveDevice(deviceId, protocol, channel, remoteAddress);
+                }
+                return new DeviceSession(deviceId);
+            } else {
+                return null;
+            }
+        }
         if (channel instanceof DatagramChannel) {
             long deviceId = findDeviceId(remoteAddress, uniqueIds);
             DeviceSession deviceSession = addressDeviceSessions.get(remoteAddress);
