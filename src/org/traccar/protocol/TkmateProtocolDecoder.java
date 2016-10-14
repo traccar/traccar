@@ -20,10 +20,7 @@ public class TkmateProtocolDecoder extends BaseProtocolDecoder {
 
     public TkmateProtocolDecoder(TkmateProtocol protocol) {
         super(protocol);
-
-        if (Context.getConfig().hasKey(getProtocolName() + ".timezone")) {
-            timeZone.setRawOffset(Context.getConfig().getInteger(getProtocolName() + ".timezone") * 1000);
-        }
+        timeZone.setRawOffset(Context.getConfig().getInteger(getProtocolName() + ".timezone") * 1000);
     }
 
     private static final Pattern PATTERN_SRT = new PatternBuilder()
