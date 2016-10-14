@@ -30,7 +30,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
@@ -57,11 +56,12 @@ public class NotificationManager {
         }
 
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(event.getDeviceId());
-        Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
-        if (device != null && device.getAttributes().containsKey("notifyOnly")) {
-            List<String> notifyOnly = Arrays.asList(device.getAttributes().get("notifyOnly").toString().split(" "));
+        String notifyOnly = Context.getDeviceManager().lookupConfigString(event.getDeviceId(),
+                "event.notifyOnly", null);
+        if (notifyOnly != null) {
+            List<String> notifyOnlyList = Arrays.asList(notifyOnly.split(" "));
             for (long userId : users) {
-                if (!notifyOnly.contains(Context.getPermissionsManager().getUser(userId).getEmail())) {
+                if (!notifyOnlyList.contains(Context.getPermissionsManager().getUser(userId).getEmail())) {
                     users.remove(userId);
                 }
             }
