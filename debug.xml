@@ -487,5 +487,6 @@
     <entry key='fifotrack.port'>5124</entry>
     <entry key='smokey.port'>5125</entry>
     <entry key='extremtrac.port'>5126</entry>
+    <entry key='trakmate.port'>5127</entry>
 
 </properties>
