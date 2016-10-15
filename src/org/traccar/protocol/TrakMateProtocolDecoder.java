@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
@@ -13,12 +28,11 @@ import java.net.SocketAddress;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
-
-public class TkmateProtocolDecoder extends BaseProtocolDecoder {
+public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
 
     private final TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
-    public TkmateProtocolDecoder(TkmateProtocol protocol) {
+    public TrakMateProtocolDecoder(TrakMateProtocol protocol) {
         super(protocol);
         timeZone.setRawOffset(Context.getConfig().getInteger(getProtocolName() + ".timezone") * 1000);
     }
@@ -28,13 +42,12 @@ public class TkmateProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^ ]+)|")              // uid
             .number("(d+.d+)|")                  // latitude
             .number("(d+.d+)|")                  // longitude
-            .number("(dd)(dd)(dd)|")              // time
-            .number("(dd)(dd)(dd)|")              // date
+            .number("(dd)(dd)(dd)|")             // time
+            .number("(dd)(dd)(dd)|")             // date
             .number("(d+.d+)|")                  // software ver
             .number("(d+.d+)|")                  // Hardware ver
             .any()
             .compile();
-
 
     private static final Pattern PATTERN_PER = new PatternBuilder()
             .text("^TMPER|")
@@ -42,8 +55,8 @@ public class TkmateProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // seq
             .number("(d+.d+)|")                  // latitude
             .number("(d+.d+)|")                  // longitude
-            .number("(dd)(dd)(dd)|")              // time
-            .number("(dd)(dd)(dd)|")              // date
+            .number("(dd)(dd)(dd)|")             // time
+            .number("(dd)(dd)(dd)|")             // date
             .number("(d+.d+)|")                  // speed
             .number("(d+.d+)|")                  // heading
             .number("(d+)|")                     // ignition
@@ -60,7 +73,6 @@ public class TkmateProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-
     private static final Pattern PATTERN_ALT = new PatternBuilder()
             .text("^TMALT|")
             .expression("([^ ]+)|")              // uid
@@ -69,13 +81,12 @@ public class TkmateProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // Alert status
             .number("(d+.d+)|")                  // latitude
             .number("(d+.d+)|")                  // longitude
-            .number("(dd)(dd)(dd)|")              // time
-            .number("(dd)(dd)(dd)|")              // date
+            .number("(dd)(dd)(dd)|")             // time
+            .number("(dd)(dd)(dd)|")             // date
             .number("(d+.d+)|")                  // speed
-            .number("(d+.d+)|")                     // heading
+            .number("(d+.d+)|")                  // heading
             .any()
             .compile();
-
 
     private String decodeAlarm(int value) {
         switch (value) {
@@ -91,117 +102,135 @@ public class TkmateProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeSrt(Channel channel, SocketAddress remoteAddress, String sentence) {
+
         Parser parser = new Parser(PATTERN_SRT, sentence);
         if (!parser.matches()) {
             return null;
         }
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
+
         DateBuilder dateBuilder = new DateBuilder(timeZone)
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
+
         position.set(Position.KEY_VERSION, parser.next());
-        parser.next(); //hardware version
+        parser.next(); // hardware version
+
         return position;
     }
 
-
     private Object decodeAlt(Channel channel, SocketAddress remoteAddress, String sentence) {
+
         Parser parser = new Parser(PATTERN_ALT, sentence);
         if (!parser.matches()) {
             return null;
         }
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        parser.next();  // seq
-        int alarm = parser.nextInt();
-        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
-        parser.next();  //alert status or data
+
+        parser.next(); // seq
+        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        parser.next(); // alert status or data
+
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
+
         DateBuilder dateBuilder = new DateBuilder(timeZone)
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
+
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
+
         return position;
     }
 
+    private Object decodePer(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-    protected Object decodePer(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         Parser parser = new Parser(PATTERN_PER, (String) msg);
         if (!parser.matches()) {
             return null;
         }
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        parser.next();  //seq
+
+        parser.next(); // seq
+
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
+
         DateBuilder dateBuilder = new DateBuilder(timeZone)
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
+
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
+
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-        parser.next(); //dop1
-        parser.next(); //dop2
-        parser.next(); //analog input
-        position.set(Position.KEY_BATTERY, parser.nextDouble()); //device battery voltage
-        parser.next();  //vehicle internal voltage
-        position.set(Position.KEY_ODOMETER, parser.nextDouble()); //GPS odometer
-        parser.next();  //pulse odometer
+        parser.next(); // dop1
+        parser.next(); // dop2
+        parser.next(); // analog input
+        position.set(Position.KEY_BATTERY, parser.nextDouble()); // device battery voltage
+        parser.next(); // vehicle internal voltage
+        position.set(Position.KEY_ODOMETER, parser.nextDouble()); // gps odometer
+        parser.next(); // pulse odometer
         position.set(Position.KEY_STATUS, parser.nextInt());
+
         position.setValid(parser.nextInt() != 0);
+
         position.set(Position.KEY_ARCHIVE, parser.nextInt() == 1);
+
         return position;
     }
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
         String sentence = (String) msg;
         int typeIndex = sentence.indexOf("^TM");
         if (typeIndex < 0) {
             return null;
         }
 
-        Object result;
         String type = sentence.substring(typeIndex + 3, typeIndex + 6);
         switch (type) {
             case "ALT":
-                result = decodeAlt(channel, remoteAddress, sentence);
-                break;
+                return decodeAlt(channel, remoteAddress, sentence);
             case "SRT":
-                result = decodeSrt(channel, remoteAddress, sentence);
-                break;
+                return decodeSrt(channel, remoteAddress, sentence);
             case "PER":
-                result = decodePer(channel, remoteAddress, sentence);
-                break;
+                return decodePer(channel, remoteAddress, sentence);
             default:
                 return null;
         }
-        return result;
-
     }
-}
 
+}
