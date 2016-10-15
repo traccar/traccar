@@ -135,8 +135,7 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (deviceSession != null) {
+        if (position.getDeviceId() != 0) {
             sendResponse(channel, HttpResponseStatus.OK);
             return position;
         } else {
