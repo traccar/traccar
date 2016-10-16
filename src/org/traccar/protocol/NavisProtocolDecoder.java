@@ -139,7 +139,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte() + 1, buf.readUnsignedByte());
             position.setTime(dateBuilder.getDate());
 
             position.setLatitude(buf.readFloat() / Math.PI * 180);
