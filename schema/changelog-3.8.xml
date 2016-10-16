@@ -61,7 +61,7 @@
       <column name="messagesstored" type="INT" defaultValueNumeric="0">
         <constraints nullable="false" />
       </column>
-      <column name="attributes" type="VARCHAR(4096)">
+      <column name="attributes" type="VARCHAR(4000)">
         <constraints nullable="false" />
       </column>
     </createTable>
@@ -80,6 +80,19 @@
     <addColumn tableName="server">
       <column name="coordinateformat" type="VARCHAR(128)" />
     </addColumn>
+
+    <dropNotNullConstraint tableName="positions" columnName="attributes" columnDataType="VARCHAR(4096)" />
+    <modifyDataType tableName="positions" columnName="attributes" newDataType="VARCHAR(4000)" />
+    <dropNotNullConstraint tableName="events" columnName="attributes" columnDataType="VARCHAR(4096)" />
+    <modifyDataType tableName="events" columnName="attributes" newDataType="VARCHAR(4000)" />
+    <dropNotNullConstraint tableName="geofences" columnName="attributes" columnDataType="VARCHAR(4096)" />
+    <modifyDataType tableName="geofences" columnName="attributes" newDataType="VARCHAR(4000)" />
+    <dropNotNullConstraint tableName="notifications" columnName="attributes" columnDataType="VARCHAR(4096)" />
+    <modifyDataType tableName="notifications" columnName="attributes" newDataType="VARCHAR(4000)" />
+    <modifyDataType tableName="users" columnName="attributes" newDataType="VARCHAR(4000)" />
+    <modifyDataType tableName="devices" columnName="attributes" newDataType="VARCHAR(4000)" />
+    <modifyDataType tableName="groups" columnName="attributes" newDataType="VARCHAR(4000)" />
+    <modifyDataType tableName="server" columnName="attributes" newDataType="VARCHAR(4000)" />
 
   </changeSet>
 </databaseChangeLog>
