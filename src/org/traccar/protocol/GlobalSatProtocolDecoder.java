@@ -37,7 +37,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
 
         format0 = Context.getConfig().getString(getProtocolName() + ".format0", "TSPRXAB27GHKLMnaicz*U!");
-        format1 = Context.getConfig().getString(getProtocolName() + ".format1", "SARY*U!");
+        format1 = Context.getConfig().getString(getProtocolName() + ".format1", "TSARY*U!");
     }
 
     public void setFormat0(String format) {
@@ -79,7 +79,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        for (int formatIndex = 0, valueIndex = 1; formatIndex < format.length()
+        for (int formatIndex = 0, valueIndex = 0; formatIndex < format.length()
                 && valueIndex < values.length; formatIndex++) {
             String value = values[valueIndex];
 
