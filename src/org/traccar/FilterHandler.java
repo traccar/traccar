@@ -148,30 +148,30 @@ public class FilterHandler extends BaseDataHandler {
         }
     }
 
-    private boolean filter(Position p) {
+    private boolean filter(Position position) {
 
         boolean result = false;
         StringBuilder filterType = new StringBuilder(8 + 5 + 10 + 7 + 12 + 7 + 9);
 
-        if (filterInvalid(p)) {
+        if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
-        if (filterZero(p)) {
+        if (filterZero(position)) {
             filterType.append("Zero ");
         }
-        if (filterDuplicate(p)) {
+        if (filterDuplicate(position)) {
             filterType.append("Duplicate ");
         }
-        if (filterFuture(p)) {
+        if (filterFuture(position)) {
             filterType.append("Future ");
         }
-        if (filterApproximate(p)) {
+        if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterStatic(p)) {
+        if (filterStatic(position)) {
             filterType.append("Static ");
         }
-        if (filterDistance(p)) {
+        if (filterDistance(position)) {
             filterType.append("Distance ");
         }
 
@@ -179,12 +179,12 @@ public class FilterHandler extends BaseDataHandler {
             result = true;
         }
 
-       if (filterLimit(p)) {
+       if (filterLimit(position)) {
             result = false;
        }
 
         if (result) {
-            Log.info("Position filtered by " + filterType.toString() + "filters from " + p.getDeviceId());
+            Log.info("Position filtered by " + filterType.toString() + "filters from " + position.getDeviceId());
         }
 
         return result;
