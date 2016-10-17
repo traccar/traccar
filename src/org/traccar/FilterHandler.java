@@ -151,36 +151,36 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filter(Position p) {
 
         boolean result = false;
-        String filterType = "";
+        StringBuilder filterType = new StringBuilder(8 + 5 + 10 + 7 + 12 + 7 + 9);
 
         if (filterInvalid(p)) {
-            filterType = filterType + "Invalid ";
+            filterType.append("Invalid ");
         }
         if (filterZero(p)) {
-            filterType = filterType + "Zero ";
+            filterType.append("Zero ");
         }
         if (filterDuplicate(p)) {
-            filterType = filterType + "Duplicate ";
+            filterType.append("Duplicate ");
         }
         if (filterFuture(p)) {
-            filterType = filterType + "Future ";
+            filterType.append("Future ");
         }
         if (filterApproximate(p)) {
-            filterType = filterType + "Approximate ";
+            filterType.append("Approximate ");
         }
         if (filterStatic(p)) {
-            filterType = filterType + "Static ";
+            filterType.append("Static ");
         }
         if (filterDistance(p)) {
-            filterType = filterType + "Distance ";
+            filterType.append("Distance ");
         }
 
-        if (!"".equals(filterType) && !filterLimit(p)) {
+        if (!"".equals(filterType.toString()) && !filterLimit(p)) {
             result = true;
         }
 
         if (result) {
-            Log.info("Position filtered by " + filterType + "filters from " + p.getDeviceId());
+            Log.info("Position filtered by " + filterType.toString() + "filters from " + p.getDeviceId());
         }
 
         return result;
