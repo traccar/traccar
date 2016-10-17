@@ -175,9 +175,13 @@ public class FilterHandler extends BaseDataHandler {
             filterType.append("Distance ");
         }
 
-        if (!"".equals(filterType.toString()) && !filterLimit(p)) {
+        if (filterType.length() > 0) {
             result = true;
         }
+
+       if (filterLimit(p)) {
+            result = false;
+       }
 
         if (result) {
             Log.info("Position filtered by " + filterType.toString() + "filters from " + p.getDeviceId());
