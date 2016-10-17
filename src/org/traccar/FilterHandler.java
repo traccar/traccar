@@ -28,12 +28,13 @@ public class FilterHandler extends BaseDataHandler {
     private final boolean filterDuplicate;
     private final boolean filterFuture;
     private final boolean filterApproximate;
+    private final boolean filterStatic;
     private final int filterDistance;
     private final long filterLimit;
 
     public FilterHandler(
             boolean filterInvalid, boolean filterZero, boolean filterDuplicate, boolean filterFuture,
-            boolean filterApproximate, int filterDistance, long filterLimit) {
+            boolean filterApproximate, boolean filterStatic, int filterDistance, long filterLimit) {
 
         this.filterInvalid = filterInvalid;
         this.filterZero = filterZero;
@@ -41,6 +42,7 @@ public class FilterHandler extends BaseDataHandler {
         this.filterDistance = filterDistance;
         this.filterFuture = filterFuture;
         this.filterApproximate = filterApproximate;
+        this.filterStatic = filterStatic;
         this.filterLimit = filterLimit;
     }
 
@@ -52,6 +54,7 @@ public class FilterHandler extends BaseDataHandler {
         filterDuplicate = config.getBoolean("filter.duplicate");
         filterFuture = config.getBoolean("filter.future");
         filterApproximate = config.getBoolean("filter.approximate");
+        filterStatic = config.getBoolean("filter.static");
         filterDistance = config.getInteger("filter.distance");
         filterLimit = config.getLong("filter.limit") * 1000;
     }
@@ -93,6 +96,10 @@ public class FilterHandler extends BaseDataHandler {
         return filterApproximate && approximate != null && approximate;
     }
 
+    private boolean filterStatic(Position position) {
+        return filterStatic && position.getSpeed() == 0.0;
+    }
+
     private boolean filterDistance(Position position) {
         if (filterDistance != 0) {
             Position last = getLastPosition(position.getDeviceId());
@@ -125,7 +132,8 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filter(Position p) {
 
         boolean result = filterInvalid(p) || filterZero(p) || filterDuplicate(p)
-                || filterFuture(p) || filterApproximate(p) || filterDistance(p);
+                || filterFuture(p) || filterApproximate(p) || filterStatic(p)
+                || filterDistance(p);
 
         if (filterLimit(p)) {
             result = false;
