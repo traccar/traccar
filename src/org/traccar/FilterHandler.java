@@ -150,36 +150,33 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filter(Position p) {
 
+        boolean result = false;
         String filterType = "";
 
-        boolean result = filterInvalid(p) || filterZero(p) || filterDuplicate(p)
-                || filterFuture(p) || filterApproximate(p) || filterStatic(p)
-                || filterDistance(p);
-
         if (filterInvalid(p)) {
-            filterType = "Invalid ";
+            filterType = filterType + "Invalid ";
         }
         if (filterZero(p)) {
-            filterType = (filterType + "Zero ");
+            filterType = filterType + "Zero ";
         }
         if (filterDuplicate(p)) {
-            filterType = (filterType + "Duplicate ");
+            filterType = filterType + "Duplicate ";
         }
         if (filterFuture(p)) {
-            filterType = (filterType + "Future ");
+            filterType = filterType + "Future ";
         }
         if (filterApproximate(p)) {
-            filterType = (filterType + "Approximate ");
+            filterType = filterType + "Approximate ";
         }
         if (filterStatic(p)) {
-            filterType = (filterType + "Static ");
+            filterType = filterType + "Static ";
         }
         if (filterDistance(p)) {
-            filterType = (filterType + "Distance ");
+            filterType = filterType + "Distance ";
         }
 
-        if (filterLimit(p)) {
-            result = false;
+        if (!"".equals(filterType) && !filterLimit(p)) {
+            result = true;
         }
 
         if (result) {
