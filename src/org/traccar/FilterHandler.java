@@ -150,8 +150,7 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filter(Position position) {
 
-        boolean result = false;
-        StringBuilder filterType = new StringBuilder(8 + 5 + 10 + 7 + 12 + 7 + 9);
+        StringBuilder filterType = new StringBuilder();
 
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
@@ -175,19 +174,12 @@ public class FilterHandler extends BaseDataHandler {
             filterType.append("Distance ");
         }
 
-        if (filterType.length() > 0) {
-            result = true;
-        }
-
-       if (filterLimit(position)) {
-            result = false;
-       }
-
-        if (result) {
+        if (filterType.length() > 0 && !filterLimit(position)) {
             Log.info("Position filtered by " + filterType.toString() + "filters from " + position.getDeviceId());
+            return true;
         }
 
-        return result;
+        return false;
     }
 
     @Override
