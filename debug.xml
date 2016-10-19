@@ -97,7 +97,7 @@
     <entry key='database.positionsHistoryDays'>7</entry>
 
     <entry key='database.selectServers'>
-        SELECT * FROM server;
+        SELECT * FROM server
     </entry>
 
     <entry key='database.updateServer'>
@@ -114,21 +114,21 @@
         zoom = :zoom,
         twelveHourFormat = :twelveHourFormat,
         attributes = :attributes
-        WHERE id = :id;
+        WHERE id = :id
     </entry>
 
     <entry key='database.loginUser'>
         SELECT * FROM users
-        WHERE email = :email;
+        WHERE email = :email
     </entry>
 
     <entry key='database.selectUsersAll'>
-        SELECT * FROM users;
+        SELECT * FROM users
     </entry>
 
     <entry key='database.insertUser'>
         INSERT INTO users (name, email, hashedPassword, salt, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, attributes)
-        VALUES (:name, :email, :hashedPassword, :salt, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :attributes);
+        VALUES (:name, :email, :hashedPassword, :salt, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :attributes)
     </entry>
 
     <entry key='database.updateUser'>
@@ -144,101 +144,101 @@
         zoom = :zoom,
         twelveHourFormat = :twelveHourFormat,
         attributes = :attributes
-        WHERE id = :id;
+        WHERE id = :id
     </entry>
 
     <entry key='database.updateUserPassword'>
-        UPDATE users SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id;
+        UPDATE users SET hashedPassword = :hashedPassword, salt = :salt WHERE id = :id
     </entry>
 
     <entry key='database.deleteUser'>
-        DELETE FROM users WHERE id = :id;
+        DELETE FROM users WHERE id = :id
     </entry>
 
     <entry key='database.selectDevicePermissions'>
-        SELECT userId, deviceId FROM user_device;
+        SELECT userId, deviceId FROM user_device
     </entry>
 
     <entry key='database.selectGroupPermissions'>
-        SELECT userId, groupId FROM user_group;
+        SELECT userId, groupId FROM user_group
     </entry>
 
     <entry key='database.selectDevicesAll'>
-        SELECT * FROM devices;
+        SELECT * FROM devices
     </entry>
 
     <entry key='database.insertDevice'>
-        INSERT INTO devices (name, uniqueId, groupId, attributes) VALUES (:name, :uniqueId, :groupId, :attributes);
+        INSERT INTO devices (name, uniqueId, groupId, attributes) VALUES (:name, :uniqueId, :groupId, :attributes)
     </entry>
 
     <entry key='database.updateDevice'>
-        UPDATE devices SET name = :name, uniqueId = :uniqueId, groupId = :groupId, attributes = :attributes WHERE id = :id;
+        UPDATE devices SET name = :name, uniqueId = :uniqueId, groupId = :groupId, attributes = :attributes WHERE id = :id
     </entry>
 
     <entry key='database.updateDeviceStatus'>
-        UPDATE devices SET lastUpdate = :lastUpdate WHERE id = :id;
+        UPDATE devices SET lastUpdate = :lastUpdate WHERE id = :id
     </entry>
 
     <entry key='database.deleteDevice'>
-        DELETE FROM devices WHERE id = :id;
+        DELETE FROM devices WHERE id = :id
     </entry>
 
     <entry key='database.linkDevice'>
-        INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
+        INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId)
     </entry>
 
     <entry key='database.unlinkDevice'>
-        DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId;
+        DELETE FROM user_device WHERE userId = :userId AND deviceId = :deviceId
     </entry>
 
     <entry key='database.selectGroupsAll'>
-        SELECT * FROM groups;
+        SELECT * FROM groups
     </entry>
 
     <entry key='database.insertGroup'>
-        INSERT INTO groups (name, groupId, attributes) VALUES (:name, :groupId, :attributes);
+        INSERT INTO groups (name, groupId, attributes) VALUES (:name, :groupId, :attributes)
     </entry>
 
     <entry key='database.updateGroup'>
-        UPDATE groups SET name = :name, groupId = :groupId, attributes = :attributes WHERE id = :id;
+        UPDATE groups SET name = :name, groupId = :groupId, attributes = :attributes WHERE id = :id
     </entry>
 
     <entry key='database.deleteGroup'>
-        DELETE FROM groups WHERE id = :id;
+        DELETE FROM groups WHERE id = :id
     </entry>
 
     <entry key='database.linkGroup'>
-        INSERT INTO user_group (userId, groupId) VALUES (:userId, :groupId);
+        INSERT INTO user_group (userId, groupId) VALUES (:userId, :groupId)
     </entry>
 
     <entry key='database.unlinkGroup'>
-        DELETE FROM user_group WHERE userId = :userId AND groupId = :groupId;
+        DELETE FROM user_group WHERE userId = :userId AND groupId = :groupId
     </entry>
 
     <entry key='database.selectPositions'>
-        SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime;
+        SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
     </entry>
 
     <entry key='database.insertPosition'>
         INSERT INTO positions (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
-        VALUES (:deviceId, :protocol, :now, :deviceTime, :fixTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
+        VALUES (:deviceId, :protocol, :now, :deviceTime, :fixTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes)
     </entry>
 
     <entry key='database.selectLatestPositions'>
-        SELECT * FROM positions WHERE id IN (SELECT positionId FROM devices);
+        SELECT * FROM positions WHERE id IN (SELECT positionId FROM devices)
     </entry>
 
     <entry key='database.updateLatestPosition'>
-        UPDATE devices SET positionId = :id WHERE id = :deviceId;
+        UPDATE devices SET positionId = :id WHERE id = :deviceId
     </entry>
 
     <entry key='database.selectEvent'>
-        SELECT * FROM events WHERE id = :id;
+        SELECT * FROM events WHERE id = :id
     </entry>
 
     <entry key='database.insertEvent'>
         INSERT INTO events (type, serverTime, deviceId, positionId, geofenceId, attributes)
-        VALUES (:type, :serverTime, :deviceId, :positionId, :geofenceId, :attributes);
+        VALUES (:type, :serverTime, :deviceId, :positionId, :geofenceId, :attributes)
     </entry>
 
     <entry key='database.selectEvents'>
@@ -246,12 +246,12 @@
     </entry>
 
     <entry key='database.selectGeofencesAll'>
-        SELECT * FROM geofences;
+        SELECT * FROM geofences
     </entry>
 
     <entry key='database.insertGeofence'>
         INSERT INTO geofences (name, description, area, attributes)
-        VALUES (:name, :description, :area, :attributes);
+        VALUES (:name, :description, :area, :attributes)
     </entry>
 
     <entry key='database.updateGeofence'>
@@ -260,56 +260,56 @@
         description = :description,
         area = :area,
         attributes = :attributes
-        WHERE id = :id;
+        WHERE id = :id
     </entry>
 
     <entry key='database.deleteGeofence'>
-        DELETE FROM geofences WHERE id = :id;
+        DELETE FROM geofences WHERE id = :id
     </entry>
 
     <entry key='database.selectGeofencePermissions'>
-        SELECT userId, geofenceId FROM user_geofence;
+        SELECT userId, geofenceId FROM user_geofence
     </entry>
 
     <entry key='database.linkGeofence'>
-        INSERT INTO user_geofence (userId, geofenceId) VALUES (:userId, :geofenceId);
+        INSERT INTO user_geofence (userId, geofenceId) VALUES (:userId, :geofenceId)
     </entry>
 
     <entry key='database.unlinkGeofence'>
-        DELETE FROM user_geofence WHERE userId = :userId AND geofenceId = :geofenceId;
+        DELETE FROM user_geofence WHERE userId = :userId AND geofenceId = :geofenceId
     </entry>
 
     <entry key='database.selectGroupGeofences'>
-        SELECT groupId, geofenceId FROM group_geofence;
+        SELECT groupId, geofenceId FROM group_geofence
     </entry>
 
     <entry key='database.linkGroupGeofence'>
-        INSERT INTO group_geofence (groupId, geofenceId) VALUES (:groupId, :geofenceId);
+        INSERT INTO group_geofence (groupId, geofenceId) VALUES (:groupId, :geofenceId)
     </entry>
 
     <entry key='database.unlinkGroupGeofence'>
-        DELETE FROM group_geofence WHERE groupId = :groupId AND geofenceId = :geofenceId;
+        DELETE FROM group_geofence WHERE groupId = :groupId AND geofenceId = :geofenceId
     </entry>
 
     <entry key='database.selectDeviceGeofences'>
-        SELECT deviceId, geofenceId FROM device_geofence;
+        SELECT deviceId, geofenceId FROM device_geofence
     </entry>
 
     <entry key='database.linkDeviceGeofence'>
-        INSERT INTO device_geofence (deviceId, geofenceId) VALUES (:deviceId, :geofenceId);
+        INSERT INTO device_geofence (deviceId, geofenceId) VALUES (:deviceId, :geofenceId)
     </entry>
 
     <entry key='database.unlinkDeviceGeofence'>
-        DELETE FROM device_geofence WHERE deviceId = :deviceId AND geofenceId = :geofenceId;
+        DELETE FROM device_geofence WHERE deviceId = :deviceId AND geofenceId = :geofenceId
     </entry>
 
     <entry key='database.selectNotifications'>
-        SELECT * FROM notifications;
+        SELECT * FROM notifications
     </entry>
 
     <entry key='database.insertNotification'>
         INSERT INTO notifications (userId, type, attributes)
-        VALUES (:userId, :type, :attributes);
+        VALUES (:userId, :type, :attributes)
     </entry>
 
     <entry key='database.updateNotification'>
@@ -317,24 +317,24 @@
         userId = :userId,
         type = :type,
         attributes = :attributes
-        WHERE id = :id;
+        WHERE id = :id
     </entry>
 
     <entry key='database.deleteNotification'>
-        DELETE FROM notifications WHERE id = :id;
+        DELETE FROM notifications WHERE id = :id
     </entry>
 
     <entry key='database.deletePositions'>
-        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices);
+        DELETE FROM positions WHERE serverTime &lt; :serverTime AND id NOT IN (SELECT positionId FROM devices)
     </entry>
     
     <entry key='database.selectAttributeAliases'>
-        SELECT * FROM attribute_aliases;
+        SELECT * FROM attribute_aliases
     </entry>
 
     <entry key='database.insertAttributeAlias'>
         INSERT INTO attribute_aliases (deviceId, attribute, alias)
-        VALUES (:deviceId, :attribute, :alias);
+        VALUES (:deviceId, :attribute, :alias)
     </entry>
 
     <entry key='database.updateAttributeAlias'>
@@ -342,20 +342,20 @@
         deviceId = :deviceId,
         attribute = :attribute,
         alias = :alias
-        WHERE id = :id;
+        WHERE id = :id
     </entry>
 
     <entry key='database.deleteAttributeAlias'>
-        DELETE FROM attribute_aliases WHERE id = :id;
+        DELETE FROM attribute_aliases WHERE id = :id
     </entry>
 
     <entry key='database.selectStatistics'>
-        SELECT * FROM statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime;
+        SELECT * FROM statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
     </entry>
 
     <entry key='database.insertStatistics'>
         INSERT INTO statistics (captureTime, activeUsers, activeDevices, requests, messagesReceived, messagesStored, attributes)
-        VALUES (:captureTime, :activeUsers, :activeDevices, :requests, :messagesReceived, :messagesStored, :attributes);
+        VALUES (:captureTime, :activeUsers, :activeDevices, :requests, :messagesReceived, :messagesStored, :attributes)
     </entry>
 
     <!-- PROTOCOL CONFIG -->

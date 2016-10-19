@@ -15,8 +15,16 @@ public class FilterHandlerTest {
 
     @Before
     public void setUp() {
-        filtingHandler = new FilterHandler(true, true, true, true, true, 10, 10);
-        passingHandler = new FilterHandler(false, false, false, false, false, 0, 0);
+        passingHandler = new FilterHandler();
+        filtingHandler = new FilterHandler();
+        filtingHandler.setFilterInvalid(true);
+        filtingHandler.setFilterZero(true);
+        filtingHandler.setFilterDuplicate(true);
+        filtingHandler.setFilterFuture(true);
+        filtingHandler.setFilterApproximate(true);
+        filtingHandler.setFilterStatic(true);
+        filtingHandler.setFilterDistance(10);
+        filtingHandler.setFilterLimit(10);
     }
 
     @After

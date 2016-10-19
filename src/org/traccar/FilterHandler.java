@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,37 +23,59 @@ public class FilterHandler extends BaseDataHandler {
 
     private static final long FILTER_FUTURE_LIMIT = 5 * 60 * 1000;
 
-    private final boolean filterInvalid;
-    private final boolean filterZero;
-    private final boolean filterDuplicate;
-    private final boolean filterFuture;
-    private final boolean filterApproximate;
-    private final int filterDistance;
-    private final long filterLimit;
+    private boolean filterInvalid;
+    private boolean filterZero;
+    private boolean filterDuplicate;
+    private boolean filterFuture;
+    private boolean filterApproximate;
+    private boolean filterStatic;
+    private int filterDistance;
+    private long filterLimit;
 
-    public FilterHandler(
-            boolean filterInvalid, boolean filterZero, boolean filterDuplicate, boolean filterFuture,
-            boolean filterApproximate, int filterDistance, long filterLimit) {
-
+    public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
+    }
+
+    public void setFilterZero(boolean filterZero) {
         this.filterZero = filterZero;
+    }
+
+    public void setFilterDuplicate(boolean filterDuplicate) {
         this.filterDuplicate = filterDuplicate;
-        this.filterDistance = filterDistance;
+    }
+
+    public void setFilterFuture(boolean filterFuture) {
         this.filterFuture = filterFuture;
+    }
+
+    public void setFilterApproximate(boolean filterApproximate) {
         this.filterApproximate = filterApproximate;
+    }
+
+    public void setFilterStatic(boolean filterStatic) {
+        this.filterStatic = filterStatic;
+    }
+
+    public void setFilterDistance(int filterDistance) {
+        this.filterDistance = filterDistance;
+    }
+
+    public void setFilterLimit(long filterLimit) {
         this.filterLimit = filterLimit;
     }
 
     public FilterHandler() {
         Config config = Context.getConfig();
-
-        filterInvalid = config.getBoolean("filter.invalid");
-        filterZero = config.getBoolean("filter.zero");
-        filterDuplicate = config.getBoolean("filter.duplicate");
-        filterFuture = config.getBoolean("filter.future");
-        filterApproximate = config.getBoolean("filter.approximate");
-        filterDistance = config.getInteger("filter.distance");
-        filterLimit = config.getLong("filter.limit") * 1000;
+        if (config != null) {
+            filterInvalid = config.getBoolean("filter.invalid");
+            filterZero = config.getBoolean("filter.zero");
+            filterDuplicate = config.getBoolean("filter.duplicate");
+            filterFuture = config.getBoolean("filter.future");
+            filterApproximate = config.getBoolean("filter.approximate");
+            filterStatic = config.getBoolean("filter.static");
+            filterDistance = config.getInteger("filter.distance");
+            filterLimit = config.getLong("filter.limit") * 1000;
+        }
     }
 
     private Position getLastPosition(long deviceId) {
@@ -93,6 +115,10 @@ public class FilterHandler extends BaseDataHandler {
         return filterApproximate && approximate != null && approximate;
     }
 
+    private boolean filterStatic(Position position) {
+        return filterStatic && position.getSpeed() == 0.0;
+    }
+
     private boolean filterDistance(Position position) {
         if (filterDistance != 0) {
             Position last = getLastPosition(position.getDeviceId());
@@ -122,20 +148,38 @@ public class FilterHandler extends BaseDataHandler {
         }
     }
 
-    private boolean filter(Position p) {
+    private boolean filter(Position position) {
 
-        boolean result = filterInvalid(p) || filterZero(p) || filterDuplicate(p)
-                || filterFuture(p) || filterApproximate(p) || filterDistance(p);
+        StringBuilder filterType = new StringBuilder();
 
-        if (filterLimit(p)) {
-            result = false;
+        if (filterInvalid(position)) {
+            filterType.append("Invalid ");
+        }
+        if (filterZero(position)) {
+            filterType.append("Zero ");
+        }
+        if (filterDuplicate(position)) {
+            filterType.append("Duplicate ");
+        }
+        if (filterFuture(position)) {
+            filterType.append("Future ");
+        }
+        if (filterApproximate(position)) {
+            filterType.append("Approximate ");
+        }
+        if (filterStatic(position)) {
+            filterType.append("Static ");
+        }
+        if (filterDistance(position)) {
+            filterType.append("Distance ");
         }
 
-        if (result) {
-            Log.info("Position filtered from " + p.getDeviceId());
+        if (filterType.length() > 0 && !filterLimit(position)) {
+            Log.info("Position filtered by " + filterType.toString() + "filters from " + position.getDeviceId());
+            return true;
         }
 
-        return result;
+        return false;
     }
 
     @Override
