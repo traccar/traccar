@@ -6,9 +6,45 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
+import org.traccar.model.Device;
 
 public class FilterHandlerTest {
+
+    static {
+        Context.init(new IdentityManager() {
+
+            private Device createDevice() {
+                Device device = new Device();
+                device.setId(1);
+                device.setName("test");
+                device.setUniqueId("123456789012345");
+                return device;
+            }
+
+            @Override
+            public Device getDeviceById(long id) {
+                return createDevice();
+            }
+
+            @Override
+            public Device getDeviceByUniqueId(String uniqueId) {
+                return createDevice();
+            }
+
+            @Override
+            public Position getLastPosition(long deviceId) {
+                return null;
+            }
+
+            @Override
+            public boolean isLatestPosition(Position position) {
+                return true;
+            }
+
+        });
+    }
 
     private FilterHandler filtingHandler;
     private FilterHandler passingHandler;
@@ -32,7 +68,7 @@ public class FilterHandlerTest {
         filtingHandler = null;
         passingHandler = null;
     }
-    
+
     private Position createPosition(
             long deviceId,
             Date time,

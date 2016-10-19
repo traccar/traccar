@@ -175,7 +175,16 @@ public class FilterHandler extends BaseDataHandler {
         }
 
         if (filterType.length() > 0 && !filterLimit(position)) {
-            Log.info("Position filtered by " + filterType.toString() + "filters from " + position.getDeviceId());
+
+            StringBuilder logmsg = new StringBuilder();
+            logmsg.append("Position filtered by ");
+            logmsg.append(filterType.toString());
+            logmsg.append("filters from device: ");
+            logmsg.append(Context.getIdentityManager().getDeviceById(position.getDeviceId()).getUniqueId());
+            logmsg.append(" with id: ");
+            logmsg.append(position.getDeviceId());
+
+            Log.info(logmsg.toString());
             return true;
         }
 
