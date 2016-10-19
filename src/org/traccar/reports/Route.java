@@ -83,9 +83,9 @@ public final class Route {
                 devicesRoutes.add(deviceRoutes);
             }
         }
-        String templatePath = Context.getConfig().getString("report.route.template.excel",
-                "templates/export/route.xlsx");
-        try (InputStream inputStream = new FileInputStream(templatePath)) {
+        String templatePath = Context.getConfig().getString("report.templatesPath",
+                "templates/export/");
+        try (InputStream inputStream = new FileInputStream(templatePath + "/route.xlsx")) {
             org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
             jxlsContext.putVar("devices", devicesRoutes);
             jxlsContext.putVar("sheetNames", sheetNames);

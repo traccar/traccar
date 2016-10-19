@@ -23,12 +23,10 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -58,9 +56,14 @@ public final class Events {
         JsonArrayBuilder json = Json.createArrayBuilder();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            for (String type : types) {
-                for (Event event : Context.getDataManager().getEvents(deviceId, type, from, to)) {
-                    json.add(JsonConverter.objectToJson(event));
+            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
+            boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
+            for (Event event : events) {
+                if (all || types.contains(event.getType())) {
+                    long geofenceId = event.getGeofenceId();
+                    if (geofenceId == 0 || Context.getGeofenceManager().checkGeofence(userId, geofenceId)) {
+                       json.add(JsonConverter.objectToJson(event));
+                    }
                 }
             }
         }
@@ -75,28 +78,27 @@ public final class Events {
         HashMap<Long, String> geofenceNames = new HashMap<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            SortedSet<Event> eventReports = new TreeSet<Event>(new Comparator<Event>() {
-                @Override
-                public int compare(Event e1, Event e2) {
-                    return e1.getServerTime().compareTo(e2.getServerTime());
-                }
-            });
-            for (String type : types) {
-                Collection<Event> events = Context.getDataManager().getEvents(deviceId, type, from, to);
-                for (Event event : events) {
+            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
+            boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
+            for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+                Event event = iterator.next();
+                if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
                     if (geofenceId != 0) {
-                        Geofence geofence = Context.getGeofenceManager().getGeofence(geofenceId);
-                        if (geofence != null) {
-                            geofenceNames.put(geofenceId, geofence.getName());
+                        if (Context.getGeofenceManager().checkGeofence(userId, geofenceId)) {
+                            Geofence geofence = Context.getGeofenceManager().getGeofence(geofenceId);
+                            if (geofence != null) {
+                                geofenceNames.put(geofenceId, geofence.getName());
+                            }
                         } else {
-                            geofenceNames.put(geofenceId, Long.toString(geofenceId));
+                            iterator.remove();
                         }
                     }
-                    eventReports.add(event);
+                } else {
+                    iterator.remove();
                 }
             }
-            if (!eventReports.isEmpty()) {
+            if (!events.isEmpty()) {
                 DeviceReport deviceEvents = new DeviceReport();
                 Device device = Context.getIdentityManager().getDeviceById(deviceId);
                 deviceEvents.setDeviceName(device.getName());
@@ -107,13 +109,13 @@ public final class Events {
                         deviceEvents.setGroupName(group.getName());
                     }
                 }
-                deviceEvents.setObjects(eventReports);
+                deviceEvents.setObjects(events);
                 devicesEvents.add(deviceEvents);
             }
         }
-        String templatePath = Context.getConfig().getString("report.events.template.excel",
-                "templates/export/events.xlsx");
-        try (InputStream inputStream = new FileInputStream(templatePath)) {
+        String templatePath = Context.getConfig().getString("report.templatesPath",
+                "templates/export/");
+        try (InputStream inputStream = new FileInputStream(templatePath + "/events.xlsx")) {
             org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
             jxlsContext.putVar("devices", devicesEvents);
             jxlsContext.putVar("sheetNames", sheetNames);

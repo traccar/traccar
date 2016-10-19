@@ -92,9 +92,9 @@ public final class Summary {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             summaries.add(calculateSummaryResult(deviceId, from, to));
         }
-        String templatePath = Context.getConfig().getString("report.summary.template.excel",
-                "templates/export/summary.xlsx");
-        try (InputStream inputStream = new FileInputStream(templatePath)) {
+        String templatePath = Context.getConfig().getString("report.templatesPath",
+                "templates/export/");
+        try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
             org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
             jxlsContext.putVar("summaries", summaries);
             jxlsContext.putVar("from", from);

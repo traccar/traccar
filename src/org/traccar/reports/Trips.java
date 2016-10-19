@@ -202,9 +202,9 @@ public final class Trips {
                 devicesTrips.add(deviceTrips);
             }
         }
-        String templatePath = Context.getConfig().getString("report.trips.template.excel",
-                "templates/export/trips.xlsx");
-        try (InputStream inputStream = new FileInputStream(templatePath)) {
+        String templatePath = Context.getConfig().getString("report.templatesPath",
+                "templates/export/");
+        try (InputStream inputStream = new FileInputStream(templatePath + "/trips.xlsx")) {
             org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
             jxlsContext.putVar("devices", devicesTrips);
             jxlsContext.putVar("sheetNames", sheetNames);
