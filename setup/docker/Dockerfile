@@ -2,6 +2,8 @@ FROM java:8-alpine
 
 MAINTAINER Danilo Recchia <danilo.recchia@vortus.solutions>
 
+USER root
+
 RUN apk upgrade --update && \
     apk add --update curl bash && \
     rm -rf /var/cache/apk/* && \
