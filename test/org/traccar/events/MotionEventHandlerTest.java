@@ -6,11 +6,11 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Collection;
 
 import org.junit.Test;
-import org.traccar.EventHandlerTest;
+import org.traccar.BaseTest;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-public class MotionEventHandlerTest extends EventHandlerTest {
+public class MotionEventHandlerTest extends BaseTest {
     
     @Test
     public void testMotionEventHandler() throws Exception {

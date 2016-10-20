@@ -6,9 +6,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
+import org.traccar.model.Device;
 
-public class FilterHandlerTest {
+public class FilterHandlerTest extends BaseTest {
 
     private FilterHandler filtingHandler;
     private FilterHandler passingHandler;
@@ -32,7 +34,7 @@ public class FilterHandlerTest {
         filtingHandler = null;
         passingHandler = null;
     }
-    
+
     private Position createPosition(
             long deviceId,
             Date time,
