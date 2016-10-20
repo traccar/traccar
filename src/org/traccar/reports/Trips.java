@@ -187,20 +187,18 @@ public final class Trips {
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<TripReport> trips = detectTrips(deviceId, from, to);
-            if (!trips.isEmpty()) {
-                DeviceReport deviceTrips = new DeviceReport();
-                Device device = Context.getIdentityManager().getDeviceById(deviceId);
-                deviceTrips.setDeviceName(device.getName());
-                sheetNames.add(deviceTrips.getDeviceName());
-                if (device.getGroupId() != 0) {
-                    Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
-                    if (group != null) {
-                        deviceTrips.setGroupName(group.getName());
-                    }
+            DeviceReport deviceTrips = new DeviceReport();
+            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            deviceTrips.setDeviceName(device.getName());
+            sheetNames.add(deviceTrips.getDeviceName());
+            if (device.getGroupId() != 0) {
+                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                if (group != null) {
+                    deviceTrips.setGroupName(group.getName());
                 }
-                deviceTrips.setObjects(detectTrips(deviceId, from, to));
-                devicesTrips.add(deviceTrips);
             }
+            deviceTrips.setObjects(trips);
+            devicesTrips.add(deviceTrips);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");

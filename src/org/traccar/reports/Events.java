@@ -98,20 +98,18 @@ public final class Events {
                     iterator.remove();
                 }
             }
-            if (!events.isEmpty()) {
-                DeviceReport deviceEvents = new DeviceReport();
-                Device device = Context.getIdentityManager().getDeviceById(deviceId);
-                deviceEvents.setDeviceName(device.getName());
-                sheetNames.add(deviceEvents.getDeviceName());
-                if (device.getGroupId() != 0) {
-                    Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
-                    if (group != null) {
-                        deviceEvents.setGroupName(group.getName());
-                    }
+            DeviceReport deviceEvents = new DeviceReport();
+            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            deviceEvents.setDeviceName(device.getName());
+            sheetNames.add(deviceEvents.getDeviceName());
+            if (device.getGroupId() != 0) {
+                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                if (group != null) {
+                    deviceEvents.setGroupName(group.getName());
                 }
-                deviceEvents.setObjects(events);
-                devicesEvents.add(deviceEvents);
             }
+            deviceEvents.setObjects(events);
+            devicesEvents.add(deviceEvents);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
