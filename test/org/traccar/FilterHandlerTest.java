@@ -10,15 +10,13 @@ import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
 import org.traccar.model.Device;
 
-public class FilterHandlerTest {
+public class FilterHandlerTest extends BaseTest {
 
-    private EventHandlerTest deviceHandler;
     private FilterHandler filtingHandler;
     private FilterHandler passingHandler;
 
     @Before
     public void setUp() {
-        deviceHandler = new EventHandlerTest();
         passingHandler = new FilterHandler();
         filtingHandler = new FilterHandler();
         filtingHandler.setFilterInvalid(true);
