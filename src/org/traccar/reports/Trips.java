@@ -16,18 +16,32 @@
  */
 package org.traccar.reports;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
+import org.jxls.area.Area;
+import org.jxls.builder.xls.XlsCommentAreaBuilder;
+import org.jxls.common.CellRef;
+import org.jxls.formula.StandardFormulaProcessor;
+import org.jxls.transform.Transformer;
+import org.jxls.transform.poi.PoiTransformer;
+import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
+import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.web.CsvBuilder;
 import org.traccar.web.JsonConverter;
 
 public final class Trips {
@@ -50,16 +64,24 @@ public final class Trips {
         }
 
         TripReport trip = new TripReport();
+
         long tripDuration = endTrip.getFixTime().getTime() - positions.get(startIndex).getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
         trip.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+
         trip.setStartPositionId(startTrip.getId());
+        trip.setStartLat(startTrip.getLatitude());
+        trip.setStartLon(startTrip.getLongitude());
         trip.setStartTime(startTrip.getFixTime());
         trip.setStartAddress(startTrip.getAddress());
+
         trip.setEndPositionId(endTrip.getId());
+        trip.setEndLat(endTrip.getLatitude());
+        trip.setEndLon(endTrip.getLongitude());
         trip.setEndTime(endTrip.getFixTime());
         trip.setEndAddress(endTrip.getAddress());
+
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupConfigBoolean(deviceId, "report.ignoreOdometer", false);
         trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
@@ -157,14 +179,46 @@ public final class Trips {
         return json.build().toString();
     }
 
-    public static String getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException {
-        CsvBuilder csv = new CsvBuilder();
-        csv.addHeaderLine(new TripReport());
+    public static void getExcel(OutputStream outputStream,
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            Date from, Date to) throws SQLException, IOException {
+        ArrayList<DeviceReport> devicesTrips = new ArrayList<>();
+        ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            csv.addArray(detectTrips(deviceId, from, to));
+            Collection<TripReport> trips = detectTrips(deviceId, from, to);
+            if (!trips.isEmpty()) {
+                DeviceReport deviceTrips = new DeviceReport();
+                Device device = Context.getIdentityManager().getDeviceById(deviceId);
+                deviceTrips.setDeviceName(device.getName());
+                sheetNames.add(deviceTrips.getDeviceName());
+                if (device.getGroupId() != 0) {
+                    Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                    if (group != null) {
+                        deviceTrips.setGroupName(group.getName());
+                    }
+                }
+                deviceTrips.setObjects(detectTrips(deviceId, from, to));
+                devicesTrips.add(deviceTrips);
+            }
         }
-        return csv.build();
+        String templatePath = Context.getConfig().getString("report.templatesPath",
+                "templates/export/");
+        try (InputStream inputStream = new FileInputStream(templatePath + "/trips.xlsx")) {
+            org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
+            jxlsContext.putVar("devices", devicesTrips);
+            jxlsContext.putVar("sheetNames", sheetNames);
+            jxlsContext.putVar("from", from);
+            jxlsContext.putVar("to", to);
+            Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
+            List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
+            for (Area xlsArea : xlsAreas) {
+                xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), jxlsContext);
+                xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
+                xlsArea.processFormulas();
+            }
+            transformer.deleteSheet(xlsAreas.get(0).getStartCellRef().getSheetName());
+            transformer.write();
+        }
     }
 }

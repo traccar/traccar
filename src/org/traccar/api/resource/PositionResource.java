@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Position;
+import org.traccar.web.CsvBuilder;
 import org.traccar.web.JsonConverter;
 
 import javax.ws.rs.Consumes;
@@ -25,17 +26,23 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import java.sql.SQLException;
 import java.util.Collection;
 
 @Path("positions")
-@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PositionResource extends BaseResource {
 
+    public static final String TEXT_CSV = "text/csv";
+    public static final String CONTENT_DISPOSITION_VALUE_CSV = "attachment; filename=positions.csv";
+
     @GET
-    public Collection<Position> get(
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<Position> getJson(
             @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
         if (deviceId == 0) {
@@ -45,6 +52,19 @@ public class PositionResource extends BaseResource {
             return Context.getDataManager().getPositions(
                     deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to));
         }
+    }
+
+    @GET
+    @Produces(TEXT_CSV)
+    public Response getCsv(
+            @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
+            throws SQLException {
+        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+        CsvBuilder csv = new CsvBuilder();
+        csv.addHeaderLine(new Position());
+        csv.addArray(Context.getDataManager().getPositions(
+                deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
+        return Response.ok(csv.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_CSV).build();
     }
 
 }
