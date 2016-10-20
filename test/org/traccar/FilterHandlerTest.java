@@ -12,45 +12,13 @@ import org.traccar.model.Device;
 
 public class FilterHandlerTest {
 
-    static {
-        Context.init(new IdentityManager() {
-
-            private Device createDevice() {
-                Device device = new Device();
-                device.setId(1);
-                device.setName("test");
-                device.setUniqueId("123456789012345");
-                return device;
-            }
-
-            @Override
-            public Device getDeviceById(long id) {
-                return createDevice();
-            }
-
-            @Override
-            public Device getDeviceByUniqueId(String uniqueId) {
-                return createDevice();
-            }
-
-            @Override
-            public Position getLastPosition(long deviceId) {
-                return null;
-            }
-
-            @Override
-            public boolean isLatestPosition(Position position) {
-                return true;
-            }
-
-        });
-    }
-
+    private EventHandlerTest deviceHandler;
     private FilterHandler filtingHandler;
     private FilterHandler passingHandler;
 
     @Before
     public void setUp() {
+        deviceHandler = new EventHandlerTest();
         passingHandler = new FilterHandler();
         filtingHandler = new FilterHandler();
         filtingHandler.setFilterInvalid(true);
