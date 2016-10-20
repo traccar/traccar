@@ -43,7 +43,7 @@ public class H02Protocol extends BaseProtocol {
         serverList.add(new TrackerServer(new ServerBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
-                int messageLength = Context.getConfig().getInteger(getName() + ".messageLength", 32);
+                int messageLength = Context.getConfig().getInteger(getName() + ".messageLength");
                 pipeline.addLast("frameDecoder", new H02FrameDecoder(messageLength));
                 pipeline.addLast("stringEncoder", new StringEncoder());
                 pipeline.addLast("objectEncoder", new H02ProtocolEncoder());

@@ -1040,48 +1040,6 @@
                 }
             }
         },
-        "/events": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "name": "deviceId",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "type",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "interval",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "headers": {},
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Event"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/events/{id}": {
             "get": {
                 "consumes": [

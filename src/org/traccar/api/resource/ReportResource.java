@@ -1,5 +1,7 @@
 package org.traccar.api.resource;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -23,8 +25,8 @@ import org.traccar.web.JsonConverter;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ReportResource extends BaseResource {
 
-    public static final String TEXT_CSV = "text/csv";
-    public static final String CONTENT_DISPOSITION_VALUE = "attachment; filename=report.csv";
+    private static final String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    private static final String CONTENT_DISPOSITION_VALUE_XLSX = "attachment; filename=report.xlsx";
 
     @Path("route")
     @GET
@@ -38,14 +40,16 @@ public class ReportResource extends BaseResource {
 
     @Path("route")
     @GET
-    @Produces(TEXT_CSV)
-    public Response getRouteCsv(
+    @Produces(XLSX)
+    public Response getRouteExcel(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Route.getCsv(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
-                .build();
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Route.getExcel(stream, getUserId(), deviceIds, groupIds,
+                    JsonConverter.parseDate(from), JsonConverter.parseDate(to));
+
+        return Response.ok(stream.toByteArray())
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
     }
 
     @Path("events")
@@ -61,15 +65,17 @@ public class ReportResource extends BaseResource {
 
     @Path("events")
     @GET
-    @Produces(TEXT_CSV)
-    public Response getEventsCsv(
+    @Produces(XLSX)
+    public Response getEventsExcel(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
-            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Events.getCsv(getUserId(), deviceIds, groupIds,
-                types, JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
-                .build();
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Events.getExcel(stream, getUserId(), deviceIds, groupIds, types,
+                    JsonConverter.parseDate(from), JsonConverter.parseDate(to));
+
+        return Response.ok(stream.toByteArray())
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
     }
 
     @Path("summary")
@@ -84,14 +90,16 @@ public class ReportResource extends BaseResource {
 
     @Path("summary")
     @GET
-    @Produces(TEXT_CSV)
-    public Response getSummaryCsv(
+    @Produces(XLSX)
+    public Response getSummaryExcel(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Summary.getCsv(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
-                .build();
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Summary.getExcel(stream, getUserId(), deviceIds, groupIds,
+                    JsonConverter.parseDate(from), JsonConverter.parseDate(to));
+
+        return Response.ok(stream.toByteArray())
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
     }
 
     @Path("trips")
@@ -106,14 +114,16 @@ public class ReportResource extends BaseResource {
 
     @Path("trips")
     @GET
-    @Produces(TEXT_CSV)
-    public Response getTripsCsv(
+    @Produces(XLSX)
+    public Response getTripsExcel(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Trips.getCsv(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to)))
-                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE)
-                .build();
+            @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Trips.getExcel(stream, getUserId(), deviceIds, groupIds,
+                    JsonConverter.parseDate(from), JsonConverter.parseDate(to));
+
+        return Response.ok(stream.toByteArray())
+                .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
     }
 
 }

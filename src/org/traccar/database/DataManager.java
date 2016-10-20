@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
@@ -332,20 +331,12 @@ public class DataManager {
                 .executeUpdate());
     }
 
-    public Collection<Event> getEvents(long deviceId, String type, Date from, Date to) throws SQLException {
+    public Collection<Event> getEvents(long deviceId, Date from, Date to) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery("database.selectEvents"))
                 .setLong("deviceId", deviceId)
-                .setString("type", type)
                 .setDate("from", from)
                 .setDate("to", to)
                 .executeQuery(Event.class);
-    }
-
-    public Collection<Event> getLastEvents(long deviceId, String type, int interval) throws SQLException {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, -interval);
-        Date from = calendar.getTime();
-        return getEvents(deviceId, type, from, new Date());
     }
 
     public Collection<Geofence> getGeofences() throws SQLException {

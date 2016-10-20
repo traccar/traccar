@@ -140,14 +140,11 @@ public class User extends Extensible {
         this.coordinateFormat = coordinateFormat;
     }
 
-    private String password;
-
     public String getPassword() {
-        return password;
+        return null;
     }
 
     public void setPassword(String password) {
-        this.password = password;
         if (password != null && !password.isEmpty()) {
             Hashing.HashingResult hashingResult = Hashing.createHash(password);
             hashedPassword = hashingResult.getHash();
