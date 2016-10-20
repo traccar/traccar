@@ -22,6 +22,9 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class H02FrameDecoder extends FrameDecoder {
 
+    private static final int MESSAGE_SHORT = 32;
+    private static final int MESSAGE_LONG = 45;
+
     private int messageLength;
 
     public H02FrameDecoder(int messageLength) {
@@ -49,10 +52,17 @@ public class H02FrameDecoder extends FrameDecoder {
                 return buf.readBytes(index + 1 - buf.readerIndex());
             }
 
-        } else if (marker == '$' && buf.readableBytes() >= messageLength) {
+        } else if (marker == '$') {
 
-            // Return binary message
-            return buf.readBytes(messageLength);
+            if (messageLength > 0 && buf.readableBytes() >= messageLength) {
+                return buf.readBytes(messageLength);
+            } else if (buf.readableBytes() >= MESSAGE_SHORT) {
+                if (buf.getUnsignedByte(buf.readerIndex() + MESSAGE_SHORT - 1) == 0) {
+                    return buf.readBytes(MESSAGE_SHORT);
+                } else if (buf.readableBytes() >= MESSAGE_LONG) {
+                    return buf.readBytes(MESSAGE_LONG);
+                }
+            }
 
         }
 
