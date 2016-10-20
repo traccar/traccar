@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -98,7 +99,12 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+            int status = buf.readUnsignedShort();
+
+            position.setValid(BitUtil.check(status, 15));
+
+            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_IGNITION, BitUtil.check(status, 14));
             position.set(Position.KEY_EVENT, buf.readUnsignedShort());
 
             String time = buf.readBytes(12).toString(StandardCharsets.US_ASCII);
