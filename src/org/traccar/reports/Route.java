@@ -68,20 +68,18 @@ public final class Route {
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<Position> positions = Context.getDataManager().getPositions(deviceId, from, to);
-            if (positions != null && !positions.isEmpty()) {
-                DeviceReport deviceRoutes = new DeviceReport();
-                Device device = Context.getIdentityManager().getDeviceById(deviceId);
-                deviceRoutes.setDeviceName(device.getName());
-                sheetNames.add(deviceRoutes.getDeviceName());
-                if (device.getGroupId() != 0) {
-                    Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
-                    if (group != null) {
-                        deviceRoutes.setGroupName(group.getName());
-                    }
+            DeviceReport deviceRoutes = new DeviceReport();
+            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            deviceRoutes.setDeviceName(device.getName());
+            sheetNames.add(deviceRoutes.getDeviceName());
+            if (device.getGroupId() != 0) {
+                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                if (group != null) {
+                    deviceRoutes.setGroupName(group.getName());
                 }
-                deviceRoutes.setObjects(positions);
-                devicesRoutes.add(deviceRoutes);
             }
+            deviceRoutes.setObjects(positions);
+            devicesRoutes.add(deviceRoutes);
         }
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
