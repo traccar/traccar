@@ -50,6 +50,7 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private ReverseGeocoderHandler reverseGeocoderHandler;
     private LocationProviderHandler locationProviderHandler;
     private HemisphereHandler hemisphereHandler;
+    private CopyAttributesHandler copyAttributesHandler;
 
     private CommandResultEventHandler commandResultEventHandler;
     private OverspeedEventHandler overspeedEventHandler;
@@ -139,6 +140,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             hemisphereHandler = new HemisphereHandler();
         }
 
+        if (Context.getConfig().getBoolean("processing.copyAttributes.enable")) {
+            copyAttributesHandler = new CopyAttributesHandler();
+        }
+
         if (Context.getConfig().getBoolean("event.enable")) {
             commandResultEventHandler = new CommandResultEventHandler();
 
@@ -199,6 +204,10 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         if (distanceHandler != null) {
             pipeline.addLast("distance", distanceHandler);
+        }
+
+        if (copyAttributesHandler != null) {
+            pipeline.addLast("copyAttributes", copyAttributesHandler);
         }
 
         if (Context.getDataManager() != null) {
