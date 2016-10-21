@@ -45,6 +45,9 @@
 
     <entry key='decoder.ignoreSessionCache'>false</entry>
 
+    <entry key='processing.copyAttributes.enable'>false</entry>
+    <entry key='processing.copyAttributes'>power ignition battery</entry>
+
     <entry key='event.enable'>true</entry>
     <entry key='event.overspeedHandler'>true</entry>
     <entry key='event.overspeed.notRepeat'>true</entry>
