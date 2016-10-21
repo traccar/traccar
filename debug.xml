@@ -168,8 +168,8 @@
     </entry>
 
     <entry key='database.insertDevice'>
-        INSERT INTO devices (name, uniqueId, groupId, attributes, phone, model, contact, type)
-        VALUES (:name, :uniqueId, :groupId, :attributes, :phone, :model, :contact, :type)
+        INSERT INTO devices (name, uniqueId, groupId, attributes, phone, model, contact, category)
+        VALUES (:name, :uniqueId, :groupId, :attributes, :phone, :model, :contact, :category)
     </entry>
 
     <entry key='database.updateDevice'>
@@ -181,7 +181,7 @@
         phone = :phone,
         model = :model,
         contact = :contact,
-        type = :type
+        category = :category
         WHERE id = :id
     </entry>
 

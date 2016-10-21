@@ -104,7 +104,7 @@
       <column name="contact" type="VARCHAR(512)" />
     </addColumn>
     <addColumn tableName="devices">
-      <column name="type" type="VARCHAR(128)" />
+      <column name="category" type="VARCHAR(128)" />
     </addColumn>
 
   </changeSet>

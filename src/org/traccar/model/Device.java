@@ -132,13 +132,13 @@ public class Device extends Extensible {
         this.contact = contact;
     }
 
-    private String type;
+    private String category;
 
-    public String getType() {
-        return type;
+    public String getCategory() {
+        return category;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
