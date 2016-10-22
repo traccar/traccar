@@ -12,6 +12,7 @@ Please read [build from source documentation](https://www.traccar.org/build/) on
 ## Team
 
 - Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))
+- Andrey Kunitsyn ([andrey@traccar.org](mailto:andrey@traccar.org))
 
 ## License
 
