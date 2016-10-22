@@ -30,6 +30,7 @@ import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -427,5 +428,16 @@ public class DeviceManager implements IdentityManager {
             }
         }
         return result;
+    }
+
+    public void resetTotalDistance(DeviceTotalDistance deviceTotalDistance)  throws SQLException {
+        Position last = positions.get(deviceTotalDistance.getDeviceId());
+        if (last != null) {
+            last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceTotalDistance.getTotalDistance());
+            dataManager.addPosition(last);
+            updateLatestPosition(last);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 }
