@@ -93,7 +93,7 @@ public class DeviceResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    @Path("{id}/totaldistance")
+    @Path("{id}/distance")
     @PUT
     public Response updateTotalDistance(@PathParam("id") long id, DeviceTotalDistance entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());

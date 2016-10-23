@@ -430,7 +430,7 @@ public class DeviceManager implements IdentityManager {
         return result;
     }
 
-    public void resetTotalDistance(DeviceTotalDistance deviceTotalDistance)  throws SQLException {
+    public void resetTotalDistance(DeviceTotalDistance deviceTotalDistance) throws SQLException {
         Position last = positions.get(deviceTotalDistance.getDeviceId());
         if (last != null) {
             last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceTotalDistance.getTotalDistance());
