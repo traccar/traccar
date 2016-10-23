@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceTotalDistance;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -89,6 +90,14 @@ public class DeviceResource extends BaseResource {
             Context.getGeofenceManager().refresh();
         }
         Context.getAliasesManager().removeDevice(id);
+        return Response.noContent().build();
+    }
+
+    @Path("{id}/distance")
+    @PUT
+    public Response updateTotalDistance(@PathParam("id") long id, DeviceTotalDistance entity) throws SQLException {
+        Context.getPermissionsManager().checkAdmin(getUserId());
+        Context.getDeviceManager().resetTotalDistance(entity);
         return Response.noContent().build();
     }
 
