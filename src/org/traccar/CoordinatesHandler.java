@@ -42,7 +42,7 @@ public class CoordinatesHandler extends BaseDataHandler {
         if (last != null) {
             double distance = DistanceCalculator.distance(
                     position.getLatitude(), position.getLongitude(), last.getLatitude(), last.getLongitude());
-            if (distance < coordinatesMinError || distance > coordinatesMaxError) {
+            if (distance < coordinatesMinError || distance > coordinatesMaxError && !position.getValid()) {
                 position.setLatitude(last.getLatitude());
                 position.setLongitude(last.getLongitude());
             }
