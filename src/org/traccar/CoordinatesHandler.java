@@ -20,11 +20,13 @@ import org.traccar.model.Position;
 
 public class CoordinatesHandler extends BaseDataHandler {
 
-    private final int coordinatesError;
+    private final int coordinatesMinError;
+    private final int coordinatesMaxError;
 
     public CoordinatesHandler() {
         Config config = Context.getConfig();
-        coordinatesError = config.getInteger("coordinates.error", 50);
+        coordinatesMinError = config.getInteger("coordinates.minError", 50);
+        coordinatesMaxError = config.getInteger("coordinates.maxError", 1000000);
     }
 
     private Position getLastPosition(long deviceId) {
@@ -40,7 +42,7 @@ public class CoordinatesHandler extends BaseDataHandler {
         if (last != null) {
             double distance = DistanceCalculator.distance(
                     position.getLatitude(), position.getLongitude(), last.getLatitude(), last.getLongitude());
-            if (distance < coordinatesError) {
+            if (distance < coordinatesMinError || distance > coordinatesMaxError) {
                 position.setLatitude(last.getLatitude());
                 position.setLongitude(last.getLongitude());
             }
