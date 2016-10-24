@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.PatternUtil;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -34,8 +35,9 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("*AI20")
+            .expression("[01]")                  // ack
             .number("(d+),")                     // device id
-            .expression("A.+&A")
+            .expression(".+&A")
             .number("(dd)(dd)(dd)")              // time
             .number("(dd)(dd)(dddd)")            // latitude
             .number("(ddd)(dd)(dddd)")           // longitude
@@ -48,6 +50,8 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        PatternUtil.MatchResult r = PatternUtil.checkPattern(PATTERN.pattern(), (String) msg);
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
