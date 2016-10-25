@@ -44,7 +44,7 @@ public class CoordinatesHandler extends BaseDataHandler {
                     position.getLatitude(), position.getLongitude(), last.getLatitude(), last.getLongitude());
             boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
             boolean satisfiesMax = coordinatesMaxError == 0 || distance < coordinatesMaxError || position.getValid();
-            if (!(satisfiesMin && satisfiesMax)) {
+            if (!satisfiesMin || !satisfiesMax) {
                 position.setLatitude(last.getLatitude());
                 position.setLongitude(last.getLongitude());
             }
