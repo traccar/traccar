@@ -25,8 +25,8 @@ public class CoordinatesHandler extends BaseDataHandler {
 
     public CoordinatesHandler() {
         Config config = Context.getConfig();
-        coordinatesMinError = config.getInteger("coordinates.minError", 50);
-        coordinatesMaxError = config.getInteger("coordinates.maxError", 1000000);
+        coordinatesMinError = config.getInteger("coordinates.minError");
+        coordinatesMaxError = config.getInteger("coordinates.maxError");
     }
 
     private Position getLastPosition(long deviceId) {
@@ -39,10 +39,12 @@ public class CoordinatesHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
         Position last = getLastPosition(position.getDeviceId());
-        if (last != null) {
+        if (last != null && last.getValid() && last.getLatitude() != 0 && last.getLongitude() != 0) {
             double distance = DistanceCalculator.distance(
                     position.getLatitude(), position.getLongitude(), last.getLatitude(), last.getLongitude());
-            if (distance < coordinatesMinError || distance > coordinatesMaxError) {
+            boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
+            boolean satisfiesMax = coordinatesMaxError == 0 || distance < coordinatesMaxError || position.getValid();
+            if (!satisfiesMin || !satisfiesMax) {
                 position.setLatitude(last.getLatitude());
                 position.setLongitude(last.getLongitude());
             }
