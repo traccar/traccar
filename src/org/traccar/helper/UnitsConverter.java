@@ -45,6 +45,10 @@ public final class UnitsConverter {
         return value * KNOTS_TO_MPS_RATIO;
     }
 
+    public static double mpsFromKnots(double value) {
+        return value / KNOTS_TO_MPS_RATIO;
+    }
+
     public static double knotsFromCps(double value) { // cm/s
         return value * KNOTS_TO_CPS_RATIO;
     }
