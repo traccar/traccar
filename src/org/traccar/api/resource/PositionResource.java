@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Position;
 import org.traccar.web.CsvBuilder;
+import org.traccar.web.GpxBuilder;
 import org.traccar.web.JsonConverter;
 
 import javax.ws.rs.Consumes;
@@ -39,6 +40,8 @@ public class PositionResource extends BaseResource {
 
     public static final String TEXT_CSV = "text/csv";
     public static final String CONTENT_DISPOSITION_VALUE_CSV = "attachment; filename=positions.csv";
+    public static final String GPX = "application/gpx+xml";
+    public static final String CONTENT_DISPOSITION_VALUE_GPX = "attachment; filename=positions.gpx";
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -65,6 +68,18 @@ public class PositionResource extends BaseResource {
         csv.addArray(Context.getDataManager().getPositions(
                 deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
         return Response.ok(csv.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_CSV).build();
+    }
+
+    @GET
+    @Produces(GPX)
+    public Response getGpx(
+            @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
+            throws SQLException {
+        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+        GpxBuilder gpx = new GpxBuilder(Context.getIdentityManager().getDeviceById(deviceId).getName());
+        gpx.addPositions(Context.getDataManager().getPositions(
+                deviceId, JsonConverter.parseDate(from), JsonConverter.parseDate(to)));
+        return Response.ok(gpx.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_GPX).build();
     }
 
 }
