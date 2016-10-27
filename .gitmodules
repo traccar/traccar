@@ -1,4 +1,3 @@
 [submodule "traccar-web"]
 	path = traccar-web
 	url = ../traccar-web.git
-	branch = master
