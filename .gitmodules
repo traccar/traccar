@@ -1,0 +1,3 @@
+[submodule "traccar-web"]
+	path = traccar-web
+	url = git@github.com:tananaev/traccar-web.git
