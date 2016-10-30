@@ -6,86 +6,18 @@
 
     <entry key="config.default">./setup/default.xml</entry>
 
-    <!-- SERVER CONFIG -->
-
-    <entry key='web.enable'>true</entry>
-    <entry key='web.port'>8082</entry>
     <entry key='web.path'>./traccar-web/web</entry>
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
-    <!--<entry key='web.address'></entry>
-    <entry key='web.application'>../traccar-web/traccar-web.war</entry>
-    <entry key='web.old'>true</entry>
-    <entry key='web.timeout'>30000</entry>-->
-
     <entry key='geocoder.enable'>false</entry>
-    <entry key='geocoder.type'>nominatim</entry>
-    <entry key='geocoder.url'>http://nominatim.openstreetmap.org/reverse</entry>
 
-    <entry key='location.enable'>false</entry>
-    <entry key='location.key'>fake</entry>
-    <entry key='location.mcc'>260</entry>
-    <entry key='location.mnc'>2</entry>
-
-    <!--<entry key='filter.enable'>true</entry>
-    <entry key='filter.limit'>3600</entry>
-    <entry key='filter.invalid'>true</entry>
-    <entry key='filter.zero'>true</entry>
-    <entry key='filter.duplicate'>true</entry>
-    <entry key='filter.distance'>50</entry>-->
-
-    <!--<entry key='forward.enable'>true</entry>
-    <entry key='forward.url'>http://example.com:8080/gprmc/Data?id={uniqueId}&amp;code=0x0000&amp;gprmc={gprmc}</entry>-->
-
-    <entry key='logger.enable'>true</entry>
-    <entry key='logger.level'>all</entry>
     <entry key='logger.file'>target/tracker-server.log</entry>
-
-    <!--<entry key='deviceManager.lookupGroupsAttribute'>true</entry>-->
-
-    <!--<entry key='decoder.ignoreSessionCache'>false</entry>-->
-
-    <!--<entry key='processing.copyAttributes.enable'>false</entry>
-    <entry key='processing.copyAttributes'>power ignition battery</entry>-->
-
-    <!--<entry key='event.forward.enable'>true</entry>
-    <entry key='event.forward.url'>http://localhost/</entry>
-    <entry key='event.forward.header'>Authorization: Basic QWxhZGRpbjpPcGVuU2VzYW1l</entry>-->
-
-    <!--<entry key='mail.smtp.host'>smtp.example.com</entry>
-    <entry key='mail.smtp.from'>traccar@example.com</entry>
-    <entry key='mail.smtp.auth'>true</entry>
-    <entry key='mail.smtp.username'>traccar@example.com</entry>
-    <entry key='mail.smtp.password'>password</entry>-->
-
-    <!--<entry key='mail.smtp.port'>587</entry>
-    <entry key='mail.smtp.starttls.enable'>true</entry>-->
-
-    <!--<entry key='mail.smtp.port'>465</entry>
-    <entry key='mail.smtp.ssl.enable'>true</entry>-->
-
-    <!--<entry key='mail.smtp.ssl.trust'>smtp.example.com</entry>-->
-
-    <!-- DATABASE CONFIG -->
-
-    <!--<entry key='database.driverFile'>hsqldb.jar</entry>-->
 
     <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./target/database</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
-
-    <entry key='database.ignoreUnknown'>true</entry>
-
-    <entry key='database.changelog'>./schema/changelog-master.xml</entry>
-
-    <!--<entry key='database.registerUnknown'>false</entry>
-    <entry key='database.xml'>false</entry>
-    <entry key='database.saveOriginal'>true</entry>
-    <entry key='database.positionsHistoryDays'>7</entry>-->
-
-    <!-- PROTOCOL CONFIG -->
 
     <entry key='intellitrac.port'>6037</entry>
 
