@@ -159,6 +159,38 @@
                 }
             }
         },
+        "/devices/{id}/distance": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeviceTotalDistance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        },
         "/devices/geofences": {
             "post": {
                 "consumes": [
@@ -940,6 +972,12 @@
                         "in": "query",
                         "required": true,
                         "type": "integer"
+                    },
+                    {
+                        "name": "refresh",
+                        "in": "query",
+                        "required": false,
+                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -1300,6 +1338,156 @@
                     }
                 }
             }
+        },
+        "/statistics": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Statistics"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/attributes/aliases": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/AttributeAlias"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                }
+            }
+        },
+        "/attributes/aliases/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1468,6 +1656,18 @@
                 },
                 "groupId": {
                     "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "contact": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
                 },
                 "geofenceIds": {},
                 "attributes": {}
@@ -1646,11 +1846,71 @@
                 "startAddress": {
                     "type": "string"
                 },
+                "startLat": {
+                    "type": "number"
+                },
+                "startLon": {
+                    "type": "number"
+                },
                 "endTime": {
                     "type": "string"
                 },
                 "endAddress": {
                     "type": "string"
+                },
+                "endLat": {
+                    "type": "number"
+                },
+                "endLon": {
+                    "type": "number"
+                }
+            }
+        },
+        "Statistics": {
+            "properties": {
+                "captureTime": {
+                    "type": "string"
+                },
+                "activeUsers": {
+                    "type": "integer"
+                },
+                "activeDevices": {
+                    "type": "integer"
+                },
+                "requests": {
+                    "type": "integer"
+                },
+                "messagesReceived": {
+                    "type": "integer"
+                },
+                "messagesStored": {
+                    "type": "integer"
+                }
+            }
+        },
+        "AttributeAlias": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "deviceId": {
+                    "type": "integer"
+                },
+                "attribute": {
+                    "type": "string"
+                },
+                "alias": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeviceTotalDistance": {
+            "properties": {
+                "deviceId": {
+                    "type": "integer"
+                },
+                "totalDistance": {
+                    "type": "number"
                 }
             }
         }
