@@ -171,7 +171,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "required": false,
+                        "required": true,
                         "type": "integer"
                     },
                     {
