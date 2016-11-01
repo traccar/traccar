@@ -62,7 +62,7 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected ChannelBuffer buffer(String... data) {
-        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.US_ASCII);
+        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
     }
 
     protected DefaultHttpRequest request(String url) {
