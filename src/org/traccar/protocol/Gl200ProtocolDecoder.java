@@ -41,7 +41,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("+ACK:GT")
             .expression("...,")                  // type
             .number("([0-9A-Z]{2}xxxx),")        // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .any().text(",")
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd),")             // time
@@ -52,16 +52,16 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_INF = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTINF,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("(?:[0-9A-Z]{17},)?")    // vin
             .expression("(?:[^,]+)?,")           // device name
             .number("(xx),")                     // state
-            .expression("[0-9F]{20},")           // iccid
+            .expression("(?:[0-9F]{20})?,")      // iccid
             .number("d{1,2},")
             .number("d{1,2},")
             .expression("[01],")                 // external power
             .number("([d.]+)?,")                 // odometer or external power
-            .number("[01]?,")                    // backup battery
+            .number("d*,")                       // backup battery or lightness
             .number("(d+.d+),")                  // battery
             .expression("([01]),")               // charging
             .number("(?:d),")                    // led
@@ -71,7 +71,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("d{14},")                    // last fix time
             .groupBegin()
             .number("(d+),")                     // battery percentage
-            .expression("(?:[01]),")             // flash type
+            .expression("[01]?,")                // flash type
             .number("(-?[d.]+)?,,,")             // temperature
             .or()
             .expression("(?:[01])?,").optional() // pin15 mode
@@ -91,7 +91,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_VER = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTVER,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .expression("([^,]*),")              // device type
             .number("(xxxx),")                   // firmware version
@@ -129,7 +129,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_OBD = new PatternBuilder()
             .text("+RESP:GTOBD,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("(?:[0-9A-Z]{17})?,")    // vin
             .expression("[^,]{0,20},")           // device name
             .expression("[01],")                 // report type
@@ -197,7 +197,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_IGN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d+,")                       // ignition off duration
             .expression(PATTERN_LOCATION.pattern())
@@ -213,7 +213,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_IDA = new PatternBuilder()
             .text("+RESP:GTIDA,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,,")               // device name
             .number("([^,]+),")                  // rfid
             .expression("[01],")                 // report type
