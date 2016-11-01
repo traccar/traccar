@@ -26,9 +26,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-
 import org.jxls.area.Area;
 import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.common.CellRef;
@@ -42,7 +39,6 @@ import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.web.JsonConverter;
 
 public final class Trips {
 
@@ -167,16 +163,14 @@ public final class Trips {
         return result;
     }
 
-    public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
-        JsonArrayBuilder json = Json.createArrayBuilder();
+        ArrayList<TripReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            for (TripReport tripReport : detectTrips(deviceId, from, to)) {
-                json.add(JsonConverter.objectToJson(tripReport));
-            }
+            result.addAll(detectTrips(deviceId, from, to));
         }
-        return json.build().toString();
+        return result;
     }
 
     public static void getExcel(OutputStream outputStream,

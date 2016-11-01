@@ -18,7 +18,12 @@ package org.traccar.helper;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
 public final class DateUtil {
+
+    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
 
     private DateUtil() {
     }
@@ -53,6 +58,10 @@ public final class DateUtil {
         calendar.setTime(guess);
         calendar.add(field, amount);
         return calendar.getTime();
+    }
+
+    public static Date parseDate(String value) {
+        return DATE_FORMAT.parseDateTime(value).toDate();
     }
 
 }

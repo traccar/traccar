@@ -28,9 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-
 import org.jxls.area.Area;
 import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.common.CellRef;
@@ -44,16 +41,15 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.reports.model.DeviceReport;
-import org.traccar.web.JsonConverter;
 
 public final class Events {
 
     private Events() {
     }
 
-    public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static Collection<Event> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws SQLException {
-        JsonArrayBuilder json = Json.createArrayBuilder();
+        ArrayList<Event> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
@@ -62,12 +58,12 @@ public final class Events {
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
                     if (geofenceId == 0 || Context.getGeofenceManager().checkGeofence(userId, geofenceId)) {
-                       json.add(JsonConverter.objectToJson(event));
+                       result.add(event);
                     }
                 }
             }
         }
-        return json.build().toString();
+        return result;
     }
 
     public static void getExcel(OutputStream outputStream,

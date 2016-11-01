@@ -17,8 +17,8 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
-import org.traccar.web.JsonConverter;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -38,7 +38,7 @@ public class StatisticsResource extends BaseResource {
     public Collection<Statistics> get(
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        return Context.getDataManager().getStatistics(JsonConverter.parseDate(from), JsonConverter.parseDate(to));
+        return Context.getDataManager().getStatistics(DateUtil.parseDate(from), DateUtil.parseDate(to));
     }
 
 }
