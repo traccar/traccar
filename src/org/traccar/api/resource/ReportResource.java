@@ -3,6 +3,7 @@ package org.traccar.api.resource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -15,9 +16,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.traccar.api.BaseResource;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 import org.traccar.reports.Events;
 import org.traccar.reports.Summary;
 import org.traccar.reports.Trips;
+import org.traccar.reports.model.SummaryReport;
+import org.traccar.reports.model.TripReport;
 import org.traccar.reports.Route;
 import org.traccar.web.JsonConverter;
 
@@ -31,11 +36,11 @@ public class ReportResource extends BaseResource {
     @Path("route")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRouteJson(
+    public Collection<Position> getRoute(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Route.getJson(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+        return Route.getObjects(getUserId(), deviceIds, groupIds,
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to));
     }
 
     @Path("route")
@@ -55,12 +60,12 @@ public class ReportResource extends BaseResource {
     @Path("events")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEventsJson(
+    public Collection<Event> getEvents(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Events.getJson(getUserId(), deviceIds, groupIds, types,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+        return Events.getObjects(getUserId(), deviceIds, groupIds, types,
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to));
     }
 
     @Path("events")
@@ -81,11 +86,11 @@ public class ReportResource extends BaseResource {
     @Path("summary")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getSummaryJson(
+    public Collection<SummaryReport> getSummary(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Summary.getJson(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+        return Summary.getObjects(getUserId(), deviceIds, groupIds,
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to));
     }
 
     @Path("summary")
@@ -105,11 +110,11 @@ public class ReportResource extends BaseResource {
     @Path("trips")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTripsJson(
+    public Collection<TripReport> getTrips(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
-        return Response.ok(Trips.getJson(getUserId(), deviceIds, groupIds,
-                JsonConverter.parseDate(from), JsonConverter.parseDate(to))).build();
+        return Trips.getObjects(getUserId(), deviceIds, groupIds,
+                JsonConverter.parseDate(from), JsonConverter.parseDate(to));
     }
 
     @Path("trips")

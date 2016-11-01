@@ -25,15 +25,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
-import org.traccar.web.JsonConverter;
 
 public final class Summary {
 
@@ -74,24 +70,20 @@ public final class Summary {
         return result;
     }
 
-    public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException {
-        JsonArrayBuilder json = Json.createArrayBuilder();
+    public static Collection<SummaryReport> getObjects(long userId, Collection<Long> deviceIds,
+            Collection<Long> groupIds, Date from, Date to) throws SQLException {
+        ArrayList<SummaryReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            json.add(JsonConverter.objectToJson(calculateSummaryResult(deviceId, from, to)));
+            result.add(calculateSummaryResult(deviceId, from, to));
         }
-        return json.build().toString();
+        return result;
     }
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException, IOException {
-        ArrayList<SummaryReport> summaries = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
-            summaries.add(calculateSummaryResult(deviceId, from, to));
-        }
+        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to);
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
