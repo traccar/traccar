@@ -83,6 +83,8 @@ public final class Route {
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);
+            jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
+            jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
             jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
             Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
             List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();

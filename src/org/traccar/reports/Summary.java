@@ -91,6 +91,8 @@ public final class Summary {
             jxlsContext.putVar("summaries", summaries);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);
+            jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
+            jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
             JxlsHelper.getInstance().setUseFastFormulaProcessor(false)
                     .processTemplate(inputStream, outputStream, jxlsContext);
         }

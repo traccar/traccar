@@ -16,18 +16,34 @@
  */
 package org.traccar.reports;
 
+import org.traccar.Context;
+import org.traccar.helper.Log;
+import org.traccar.model.Position;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.traccar.Context;
-import org.traccar.helper.Log;
-import org.traccar.model.Position;
-
 public final class ReportUtils {
 
     private ReportUtils() {
+    }
+
+    public static String getDistanceUnit(long userId) {
+        String unit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
+        if (unit == null) {
+            unit  = Context.getPermissionsManager().getServer().getDistanceUnit();
+        }
+        return unit != null ? unit : "km";
+    }
+
+    public static String getSpeedUnit(long userId) {
+        String unit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
+        if (unit == null) {
+            unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
+        }
+        return unit != null ? unit : "kn";
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
