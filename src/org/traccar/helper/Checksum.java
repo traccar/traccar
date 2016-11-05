@@ -204,8 +204,9 @@ public final class Checksum {
 
     public static String nmea(String msg) {
         int checksum = 0;
-        for (byte b : msg.getBytes(StandardCharsets.US_ASCII)) {
-            checksum ^= b;
+        byte[] bytes = msg.getBytes(StandardCharsets.US_ASCII);
+        for (int i = 1; i < bytes.length; i++) {
+            checksum ^= bytes[i];
         }
         return String.format("*%02x", checksum).toUpperCase();
     }
