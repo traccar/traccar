@@ -138,9 +138,11 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)")                      // external power
             .number("(dddd)")                    // adc 1
             .groupBegin()
+            .groupBegin()
             .number("(dddd)")                    // adc 2
             .number("(dddd)")                    // adc 3
             .number("(dddd)")                    // adc 4
+            .groupEnd("?")
             .number("(dddd)")                    // temperature 1
             .number("(dddd)")                    // temperature 2
             .groupEnd("?")
