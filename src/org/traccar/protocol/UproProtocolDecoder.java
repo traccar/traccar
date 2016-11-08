@@ -18,10 +18,10 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.PatternUtil;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -34,50 +34,101 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("*AI20")
+            .text("*")
+            .expression("..20")
             .expression("[01]")                  // ack
             .number("(d+),")                     // device id
-            .expression(".+&A")
+            .expression(".")                     // type
+            .expression(".")                     // subtype
+            .expression("(.*)")                  // content
+            .expression("#?")                    // delimiter
+            .compile();
+
+    private static final Pattern PATTERN_LOCATION = new PatternBuilder()
+            .text("A")
             .number("(dd)(dd)(dd)")              // time
             .number("(dd)(dd)(dddd)")            // latitude
             .number("(ddd)(dd)(dddd)")           // longitude
-            .number("d{5}")
+            .number("(d)")                       // flags
+            .number("(dd)")                      // speed
+            .number("(dd)")                      // course
             .number("(dd)(dd)(dd)")              // date
-            .expression("&B")
-            .any()
             .compile();
+
+    private void decodeLocation(Position position, String data) {
+        Parser parser = new Parser(PATTERN_LOCATION, data);
+        if (parser.matches()) {
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+            position.setValid(true);
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
+
+            int flags = parser.nextInt();
+            position.setValid(BitUtil.check(flags, 0));
+            if (!BitUtil.check(flags, 1)) {
+                position.setLatitude(-position.getLatitude());
+            }
+            if (!BitUtil.check(flags, 2)) {
+                position.setLatitude(-position.getLatitude());
+            }
+
+            position.setSpeed(parser.nextInt() * 2);
+            position.setCourse(parser.nextInt() * 10);
+
+            dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+
+        }
+    }
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        PatternUtil.MatchResult r = PatternUtil.checkPattern(PATTERN.pattern(), (String) msg);
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        String[] data = parser.next().split("&");
+        for (int i = 0; i < data.length; i++) {
+            if (i != 0) {
+                switch (data[i].charAt(0)) {
+                    case 'A':
+                        decodeLocation(position, data[i]);
+                        break;
+                    case 'B':
+                        position.set(Position.KEY_STATUS, data[i].substring(1));
+                        break;
+                    case 'P':
+                        position.set(Position.KEY_MCC, Integer.parseInt(data[i].substring(1, 5)));
+                        position.set(Position.KEY_MNC, Integer.parseInt(data[i].substring(5, 9)));
+                        position.set(Position.KEY_LAC, Integer.parseInt(data[i].substring(9, 13), 16));
+                        position.set(Position.KEY_CID, Integer.parseInt(data[i].substring(13, 17), 16));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
 
-        position.setValid(true);
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
+        if (position.getLatitude() != 0 && position.getLongitude() != 0) {
+            return position;
+        }
 
-        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
-
-        return position;
+        return null;
     }
 
 }
