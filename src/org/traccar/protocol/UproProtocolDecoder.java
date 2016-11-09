@@ -72,7 +72,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 position.setLatitude(-position.getLatitude());
             }
             if (!BitUtil.check(flags, 2)) {
-                position.setLatitude(-position.getLatitude());
+                position.setLongitude(-position.getLongitude());
             }
 
             position.setSpeed(parser.nextInt() * 2);
