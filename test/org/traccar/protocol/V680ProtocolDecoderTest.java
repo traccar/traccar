@@ -11,6 +11,10 @@ public class V680ProtocolDecoderTest extends ProtocolTest {
         V680ProtocolDecoder decoder = new V680ProtocolDecoder(new V680Protocol());
 
         verifyPosition(decoder, text(
+                "#867967020910610#01234567890#1#0000#AUT#1#0500000000120000#114.036291,E,22.665795,N,111.00,000.00#111116#193333##"),
+                position("2016-11-11 19:33:33.000", true, 22.66579, 114.03629));
+
+        verifyPosition(decoder, text(
                 "#355488020168617##1#0000#AUT#01#260001a412966f#1834.790700,E,5302.748800,N,0.00,0.00#310316#174538.000##"));
 
         verifyPosition(decoder, text(
@@ -23,7 +27,8 @@ public class V680ProtocolDecoderTest extends ProtocolTest {
                 "#135790246811222#13486119277#1#0000#SOS#1#27bc10af#11407.4182,E,2232.7632,N,0.00,79.50#070709#134147.000##"));
 
         verifyPosition(decoder, text(
-                "#356823031193431##0#0000#SF#1#72403#V#04702.3025,W,2252.18380,S,008.18,0#090413#134938"));
+                "#356823031193431##0#0000#SF#1#72403#V#04702.3025,W,2252.18380,S,008.18,0#090413#134938"),
+                position("2013-04-09 13:49:38.000", false, -22.86973, -47.038375));
 
         verifyPosition(decoder, text(
                 "#356823033219838#1000#0#1478#AUT#1#66830FFB#03855.6628,E,4716.6821,N,001.41,259#130812#143905"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,8 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)#")                     // packet number
             .expression("([^#]+)?#?")            // gsm base station
             .expression("(?:[^#]+#)?")
-            .number("(d+)?(dd.d+),")             // longitude
-            .expression("([EW]),")
-            .number("(d+)?(dd.d+),")             // latitude
-            .expression("([NS]),")
+            .number("(d+.d+),([EW]),")           // longitude
+            .number("(d+.d+),([NS]),")           // latitude
             .number("(d+.d+),")                  // speed
             .number("(d+.?d*)?#")                // course
             .number("(dd)(dd)(dd)#")             // date
@@ -93,8 +91,24 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.set("packet", parser.next());
             position.set(Position.KEY_GSM, parser.next());
 
-            position.setLongitude(parser.nextCoordinate());
-            position.setLatitude(parser.nextCoordinate());
+            double lon = parser.nextDouble();
+            boolean west = parser.next().equals("W");
+            double lat = parser.nextDouble();
+            boolean south = parser.next().equals("S");
+
+            if (lat > 90 || lon > 180) {
+                int lonDegrees = (int) (lon * 0.01);
+                lon = (lon - lonDegrees * 100) / 60.0;
+                lon += lonDegrees;
+
+                int latDegrees = (int) (lat * 0.01);
+                lat = (lat - latDegrees * 100) / 60.0;
+                lat += latDegrees;
+            }
+
+            position.setLongitude(west ? -lon : lon);
+            position.setLatitude(south ? -lat : lat);
+
             position.setSpeed(parser.nextDouble());
             position.setCourse(parser.nextDouble());
 
