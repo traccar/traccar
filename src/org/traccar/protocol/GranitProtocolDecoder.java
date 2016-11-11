@@ -37,10 +37,10 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int HEADER_LENGTH = 6;
 
-    private static double adc1Ratio;
-    private static double adc2Ratio;
-    private static double adc3Ratio;
-    private static double adc4Ratio;
+    private double adc1Ratio;
+    private double adc2Ratio;
+    private double adc3Ratio;
+    private double adc4Ratio;
 
     public GranitProtocolDecoder(GranitProtocol protocol) {
         super(protocol);
@@ -78,7 +78,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         channel.write(response);
     }
 
-    private static void decodeStructure(ChannelBuffer buf, Position position) {
+    private void decodeStructure(ChannelBuffer buf, Position position) {
         short flags = buf.readUnsignedByte();
         position.setValid(BitUtil.check(flags, 7));
         if (BitUtil.check(flags, 1)) {
