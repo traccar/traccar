@@ -23,18 +23,19 @@ check_requirement () {
 }
 
 check_requirement "ls ../../ext-6.0.1" "Missing ../../ext-6.0.1 (https://www.sencha.com/legal/GPL/)"
-check_requirement "ls yajsw-*.zip" "Missing yajsw-*.zip (http://yajsw.sourceforge.net/)"
+check_requirement "ls yajsw-*.zip" "Missing yajsw-*.zip (https://sourceforge.net/projects/yajsw/files/)"
 check_requirement "ls innosetup-*.exe" "Missing isetup-*.exe (http://www.jrsoftware.org/isdl.php)"
 check_requirement "which sencha" "Missing sencha cmd package (https://www.sencha.com/products/extjs/cmd-download/)"
 check_requirement "which wine" "Missing wine package"
 check_requirement "which innoextract" "Missing innoextract package"
 check_requirement "which makeself" "Missing makeself package"
+check_requirement "which dos2unix" "Missing dos2unix package"
 
 prepare () {
   unzip yajsw-*.zip
   mv yajsw-*/ yajsw/
 
-  ../web/../tools/minify.sh
+  ../traccar-web/tools/minify.sh
 
   innoextract innosetup-*.exe
   echo "If you got any errors here try isetup version 5.5.5 (or check supported versions using 'innoextract -v')"
@@ -43,7 +44,7 @@ prepare () {
 cleanup () {
   rm -r yajsw/
 
-  rm ../web/app.min.js
+  rm ../traccar-web/web/app.min.js
 
   rm -r app/
 }
@@ -91,7 +92,9 @@ copy_files () {
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
   cp ../schema/* out/schema
-  cp -r ../web/* out/web
+  cp -r ../templates/* out/templates
+  cp -r ../traccar-web/web/* out/web
+  cp default.xml out/conf
   cp traccar.xml out/conf
 }
 
@@ -114,6 +117,7 @@ package_unix () {
   mkdir -p out/{bin,conf,data,lib,logs,web,schema,templates}
 
   copy_wrapper "bin"
+  find out/bin -type f -print0 | xargs -0 dos2unix
   copy_files
 
   makeself out traccar.run "traccar" "\
