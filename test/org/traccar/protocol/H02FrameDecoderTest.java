@@ -7,13 +7,17 @@ import org.traccar.ProtocolTest;
 public class H02FrameDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecodeShort() throws Exception {
 
         H02FrameDecoder decoder = new H02FrameDecoder(0);
 
         Assert.assertEquals(
-                binary("24410600082621532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f"),
-                decoder.decode(null, null, binary("24410600082621532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f")));
+                binary("2441060116601245431311165035313006004318210e000000fffffbffff0024"),
+                decoder.decode(null, null, binary("2441060116601245431311165035313006004318210e000000fffffbffff0024")));
+
+        Assert.assertEquals(
+                binary("2441060116601245431311165035313006004318210e000000fffffbffff0024"),
+                decoder.decode(null, null, binary("2441060116601245431311165035313006004318210e000000fffffbffff00242a48512c343130363031313636302c56312c3132343535322c412c353033352e333132392c4e2c30303433312e383231312c452c3030302e32302c3030302c3133313131362c464646464642464623")));
 
         Assert.assertEquals(
                 binary("2a48512c3335333538383036303031353536382c56312c3139333530352c412c3830392e303031302c532c333435342e383939372c572c302e30302c302e30302c3239313031332c65666666666266662c3030303264342c3030303030622c3030353338352c3030353261612c323523"),
@@ -22,6 +26,17 @@ public class H02FrameDecoderTest extends ProtocolTest {
         Assert.assertEquals(
                 binary("24430025645511183817091319355128000465632432000100ffe7fbffff0000"),
                 decoder.decode(null, null, binary("24430025645511183817091319355128000465632432000100ffe7fbffff0000")));
+
+    }
+
+    @Test
+    public void testDecodeLong() throws Exception {
+
+        H02FrameDecoder decoder = new H02FrameDecoder(0);
+
+        Assert.assertEquals(
+                binary("24410600082621532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f"),
+                decoder.decode(null, null, binary("24410600082621532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f")));
 
     }
 

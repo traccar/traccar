@@ -116,6 +116,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
                 "*HQ,8401016597,BASE,152609,0,0,0,0,211014,FFFFFFFF#"));
 
         verifyPosition(decoder, binary(
+                "2441060116601245431311165035313006004318210e000000fffffbffff0024"));
+
+        verifyPosition(decoder, binary(
                 "24410600082621532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f"),
                 position("2015-08-31 21:53:21.000", true, 4.69898, -74.06971));
 

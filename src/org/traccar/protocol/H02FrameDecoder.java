@@ -54,14 +54,16 @@ public class H02FrameDecoder extends FrameDecoder {
 
         } else if (marker == '$') {
 
-            if (messageLength > 0 && buf.readableBytes() >= messageLength) {
-                return buf.readBytes(messageLength);
-            } else if (buf.readableBytes() >= MESSAGE_SHORT) {
-                if (buf.getUnsignedByte(buf.readerIndex() + MESSAGE_SHORT - 1) == 0) {
-                    return buf.readBytes(MESSAGE_SHORT);
-                } else if (buf.readableBytes() >= MESSAGE_LONG) {
-                    return buf.readBytes(MESSAGE_LONG);
+            if (messageLength == 0) {
+                if (buf.readableBytes() == MESSAGE_LONG) {
+                    messageLength = MESSAGE_LONG;
+                } else {
+                    messageLength = MESSAGE_SHORT;
                 }
+            }
+
+            if (buf.readableBytes() >= messageLength) {
+                return buf.readBytes(messageLength);
             }
 
         }
