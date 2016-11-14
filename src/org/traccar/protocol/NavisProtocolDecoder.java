@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -144,7 +145,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(buf.readFloat() / Math.PI * 180);
             position.setLongitude(buf.readFloat() / Math.PI * 180);
-            position.setSpeed(buf.readFloat());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloat()));
             position.setCourse(buf.readUnsignedShort());
 
             position.set(Position.KEY_ODOMETER, buf.readFloat() * 1000);
