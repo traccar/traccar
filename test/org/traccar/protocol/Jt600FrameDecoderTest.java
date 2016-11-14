@@ -12,6 +12,10 @@ public class Jt600FrameDecoderTest extends ProtocolTest {
         Jt600FrameDecoder decoder = new Jt600FrameDecoder();
 
         Assert.assertEquals(
+                binary("2475604055531611002311111600311326144436028210791d016c0000001f070000000020c03c4f6d07d80ccf"),
+                decoder.decode(null, null, binary("2475604055531611002311111600311326144436028210791d016c0000001f070000000020c03c4f6d07d80ccf")));
+
+        Assert.assertEquals(
                 binary("2475605035891613002328091601152806086750106533350c00000000000a000000000000e1ff4f97007f1607"),
                 decoder.decode(null, null, binary("2475605035891613002328091601152806086750106533350c00000000000a000000000000e1ff4f97007f1607")));
 
@@ -22,6 +26,10 @@ public class Jt600FrameDecoderTest extends ProtocolTest {
         Assert.assertEquals(
                 binary("24312082002911001B171012053405243809970255335555000406140003EE2B91044D1F02"),
                 decoder.decode(null, null, binary("24312082002911001B171012053405243809970255335555000406140003EE2B91044D1F02")));
+
+        Assert.assertEquals(
+                binary("28373536303430353535332c404a5429"),
+                decoder.decode(null, null, binary("28373536303430353535332c404a5429")));
 
     }
 
