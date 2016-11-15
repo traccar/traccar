@@ -117,7 +117,7 @@ package_unix () {
   mkdir -p out/{bin,conf,data,lib,logs,web,schema,templates}
 
   copy_wrapper "bin"
-  find out -type f -name \*.sh -print0 | xargs -0 dos2unix
+  find out -type f -name \*.sh -o -name \*.vm -print0 | xargs -0 dos2unix
   copy_files
 
   makeself out traccar.run "traccar" "\
