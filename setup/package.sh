@@ -149,7 +149,7 @@ package_universal () {
   copy_files
 
   cp README.txt out
-  cp traccar.sh out
+  cp other/traccar.sh out
   
   cd out
   zip -r ../traccar-other-$VERSION.zip *
