@@ -36,10 +36,10 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("*")
             .expression("..20")
-            .expression("[01]")                  // ack
+            .expression("([01])")                // ack
             .number("(d+),")                     // device id
-            .expression(".")                     // type
-            .expression(".")                     // subtype
+            .expression("(.)")                   // type
+            .expression("(.)")                   // subtype
             .expression("(.*)")                  // content
             .expression("#?")                    // delimiter
             .compile();
@@ -93,6 +93,8 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        boolean reply = parser.next().equals("1");
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
@@ -101,6 +103,13 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        String type = parser.next();
+        String subtype = parser.next();
+
+        if (reply && channel != null) {
+            channel.write("*MG20Y" + type + subtype + "#");
+        }
 
         String[] data = parser.next().split("&");
         for (int i = 0; i < data.length; i++) {
