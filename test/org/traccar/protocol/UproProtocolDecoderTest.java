@@ -11,6 +11,9 @@ public class UproProtocolDecoderTest extends ProtocolTest {
         UproProtocolDecoder decoder = new UproProtocolDecoder(new UproProtocol());
 
         verifyPosition(decoder, text(
+                "*MG201693502000035441,BA&A1213073325458307036690710000151116&P0730000032ce4fb3&D1&B0000000000&C005799?7&S3,20161115120025,07035.54659E,3324.87721N,3000,0,0,0,0,847,599,8,40,0,19,20&U_P\0\0\0\0\0\0\0\0\0\0\0\0\0\0&T0107#"));
+
+        verifyPosition(decoder, text(
                 "*MG201693502000034964,AB&A0800253335360507036975710000091116&P0730000032d2a94d&B0000000000&N13&Z12&U_P\0\0\0\u0004\0\0\0\0\0\0\0\0\0\0#"),
                 position("2016-11-09 08:00:25.000", true, -33.58934, -70.61626));
 

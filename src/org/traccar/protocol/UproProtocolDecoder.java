@@ -121,11 +121,22 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     case 'B':
                         position.set(Position.KEY_STATUS, data[i].substring(1));
                         break;
+                    case 'C':
+                        long odometer = 0;
+                        for (int j = 1; j < data[i].length(); j++) {
+                            odometer <<= 4;
+                            odometer += data[i].charAt(j) - '0';
+                        }
+                        position.set(Position.KEY_ODOMETER, odometer);
+                        break;
                     case 'P':
                         position.set(Position.KEY_MCC, Integer.parseInt(data[i].substring(1, 5)));
                         position.set(Position.KEY_MNC, Integer.parseInt(data[i].substring(5, 9)));
                         position.set(Position.KEY_LAC, Integer.parseInt(data[i].substring(9, 13), 16));
                         position.set(Position.KEY_CID, Integer.parseInt(data[i].substring(13, 17), 16));
+                        break;
+                    case 'S':
+                        position.set("obd", data[i]);
                         break;
                     default:
                         break;
