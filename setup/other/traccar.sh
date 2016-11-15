@@ -1,8 +1,8 @@
 #!/bin/sh
 #service traccar server for universal version
-#eg. ./traccar.sh start
-#eg. ./traccar.sh stop
-#eg. ./traccar.sh restart
+#e.g. ./traccar.sh start
+#e.g. ./traccar.sh stop
+#e.g. ./traccar.sh restart
 
 SERVICE_NAME=traccar
 PATH_TO_JAR=tracker-server.jar
