@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Log;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -82,7 +83,9 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             int reason = buf.readUnsignedMedium();
             position.set(Position.KEY_EVENT, reason);
 
-            position.set(Position.KEY_STATUS, buf.readUnsignedShort());
+            int status = buf.readUnsignedShort();
+            position.set(Position.KEY_STATUS, status);
+
             position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedByte());
             position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
@@ -101,7 +104,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // geofence events
 
-            if (BitUtil.check(reason, 6) || BitUtil.check(reason, 7)) {
+            if (BitUtil.check(status, 8)) {
 
                 position.set(Position.KEY_RFID, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium() * 1000);
@@ -110,7 +113,10 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
-            // extra data
+            if (BitUtil.check(status, 6)) {
+                Log.warning("Extension data is not supported");
+                return position;
+            }
 
             positions.add(position);
 
