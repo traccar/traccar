@@ -37,7 +37,7 @@ prepare () {
   mv yajsw-*/ yajsw/
   
   tar -zxvf sqljdbc_*_enu.tar.gz
-  mv sqljdbc_*/ sqljdbc
+  mv sqljdbc_*/ sqljdbc/
   
   ../traccar-web/tools/minify.sh
 
