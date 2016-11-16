@@ -97,7 +97,7 @@ copy_wrapper () {
 copy_files () {
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
-  cp ../sqljdbc/enu/sqljdbc*.jar out/lib
+  cp ../sqljdbc/sqljdbc*.jar out/lib
   cp ../schema/* out/schema
   cp -r ../templates/* out/templates
   cp -r ../traccar-web/web/* out/web
