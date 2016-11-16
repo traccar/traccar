@@ -25,7 +25,7 @@ check_requirement () {
 check_requirement "ls ../../ext-6.0.1" "Missing ../../ext-6.0.1 (https://www.sencha.com/legal/GPL/)"
 check_requirement "ls yajsw-*.zip" "Missing yajsw-*.zip (https://sourceforge.net/projects/yajsw/files/)"
 check_requirement "ls innosetup-*.exe" "Missing isetup-*.exe (http://www.jrsoftware.org/isdl.php)"
-check_requirement "ls sqljdbc_*_enu.tar.gz" "Microsoft JDBC Drivers (https://www.microsoft.com/en-us/download/details.aspx?id=11774 or http://www.cvs.in.th/cvs/java_lib/sqljdbc_6.0.7728.100_enu.tar.gz)"
+check_requirement "ls sqljdbc_*_enu.tar.gz" "Microsoft JDBC Drivers (https://www.microsoft.com/en-us/download/details.aspx?id=11774)"
 check_requirement "which sencha" "Missing sencha cmd package (https://www.sencha.com/products/extjs/cmd-download/)"
 check_requirement "which wine" "Missing wine package"
 check_requirement "which innoextract" "Missing innoextract package"
