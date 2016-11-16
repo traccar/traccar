@@ -130,7 +130,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>6.1.0.jre8</version> <!-- Newer versions require Java 8 -->
+            <version>6.1.0.jre7</version> <!-- edit to 6.1.0.jre8 if you used jre8 -->
         </dependency>
 
     </dependencies>
