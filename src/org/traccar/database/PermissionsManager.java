@@ -217,11 +217,11 @@ public class PermissionsManager {
 
     public User login(String email, String password) throws SQLException {
         User user = dataManager.login(email, password);
-        if (user != null && users.get(user.getId()) != null) {
+        if (user != null && !user.getDisabled() && (user.getExpirationTime() == null
+                || user.getExpirationTime().getTime() > System.currentTimeMillis())) {
             return users.get(user.getId());
-        } else {
-            return null;
         }
+        return null;
     }
 
 }

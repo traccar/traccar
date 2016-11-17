@@ -67,7 +67,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
             try {
                 String[] auth = decodeBasicAuth(authHeader);
-                User user = Context.getDataManager().login(auth[0], auth[1]);
+                User user = Context.getPermissionsManager().login(auth[0], auth[1]);
                 if (user != null) {
                     Context.getStatisticsManager().registerRequest(user.getId());
                     securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));

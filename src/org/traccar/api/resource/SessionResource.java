@@ -64,7 +64,7 @@ public class SessionResource extends BaseResource {
                 }
             }
             if (email != null && password != null) {
-                User user = Context.getDataManager().login(email, password);
+                User user = Context.getPermissionsManager().login(email, password);
                 if (user != null) {
                     userId = user.getId();
                     request.getSession().setAttribute(USER_ID_KEY, userId);

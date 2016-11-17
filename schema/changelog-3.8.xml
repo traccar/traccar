@@ -107,5 +107,15 @@
       <column name="category" type="VARCHAR(128)" />
     </addColumn>
 
+    <addColumn tableName="users">
+      <column name="disabled" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+    <addColumn tableName="users">
+      <column name="expirationtime" type="TIMESTAMP" />
+    </addColumn>
+    <addColumn tableName="users">
+      <column name="devicelimit" type="INT" defaultValueNumeric="0" />
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>
