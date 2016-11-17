@@ -127,7 +127,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             odometer <<= 4;
                             odometer += data[i].charAt(j) - '0';
                         }
-                        position.set(Position.KEY_ODOMETER, odometer);
+                        position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
                         break;
                     case 'P':
                         position.set(Position.KEY_MCC, Integer.parseInt(data[i].substring(1, 5)));
