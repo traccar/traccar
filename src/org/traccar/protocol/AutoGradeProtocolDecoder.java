@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -43,7 +44,7 @@ public class AutoGradeProtocolDecoder extends BaseProtocolDecoder {
             .number("([d.]{5})")                 // speed
             .number("(dd)(dd)(dd)")              // time
             .number("([d.]{6})")                 // course
-            .expression(".")                     // status
+            .expression("(.)")                   // status
             .number("A(xxxx)")
             .number("B(xxxx)")
             .number("C(xxxx)")
@@ -87,6 +88,10 @@ public class AutoGradeProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         position.setCourse(parser.nextDouble());
+
+        int status = (byte) parser.next().charAt(0);
+        position.set(Position.KEY_STATUS, status);
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
 
         for (int i = 1; i <= 5; i++) {
             position.set(Position.PREFIX_ADC + i, parser.next());
