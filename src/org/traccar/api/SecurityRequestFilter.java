@@ -17,6 +17,7 @@ package org.traccar.api;
 
 import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.helper.Log;
 import org.traccar.model.User;
 
 import javax.annotation.security.PermitAll;
@@ -62,29 +63,35 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
         SecurityContext securityContext = null;
 
-        String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
-        if (authHeader != null) {
+        try {
 
-            try {
-                String[] auth = decodeBasicAuth(authHeader);
-                User user = Context.getPermissionsManager().login(auth[0], auth[1]);
-                if (user != null) {
-                    Context.getStatisticsManager().registerRequest(user.getId());
-                    securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
+            String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
+            if (authHeader != null) {
+
+                try {
+                    String[] auth = decodeBasicAuth(authHeader);
+                    User user = Context.getPermissionsManager().login(auth[0], auth[1]);
+                    if (user != null) {
+                        Context.getStatisticsManager().registerRequest(user.getId());
+                        securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
+                    }
+                } catch (SQLException e) {
+                    throw new WebApplicationException(e);
                 }
-            } catch (SQLException e) {
-                throw new WebApplicationException(e);
+
+            } else if (request.getSession() != null) {
+
+                Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
+                if (userId != null) {
+                    Context.getPermissionsManager().checkUser(userId);
+                    Context.getStatisticsManager().registerRequest(userId);
+                    securityContext = new UserSecurityContext(new UserPrincipal(userId));
+                }
+
             }
 
-        } else if (request.getSession() != null) {
-
-            Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
-            if (userId != null) {
-                Context.getPermissionsManager().checkUser(userId);
-                Context.getStatisticsManager().registerRequest(userId);
-                securityContext = new UserSecurityContext(new UserPrincipal(userId));
-            }
-
+        } catch (SecurityException e) {
+            Log.warning(e);
         }
 
         if (securityContext != null) {
