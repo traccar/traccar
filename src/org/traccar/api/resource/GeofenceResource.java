@@ -88,9 +88,9 @@ public class GeofenceResource extends BaseResource {
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, Geofence entity) throws SQLException {
+    public Response update(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), id);
+        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getId());
         Context.getGeofenceManager().updateGeofence(entity);
         return Response.ok(entity).build();
     }

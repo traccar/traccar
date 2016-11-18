@@ -64,7 +64,7 @@ public class AttributeAliasResource extends BaseResource {
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, AttributeAlias entity) throws SQLException {
+    public Response update(AttributeAlias entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
             AttributeAlias oldEntity = Context.getAliasesManager().getAttributeAlias(entity.getId());

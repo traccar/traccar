@@ -76,9 +76,9 @@ public class DeviceResource extends BaseResource {
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, Device entity) throws SQLException {
+    public Response update(Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkDevice(getUserId(), id);
+        Context.getPermissionsManager().checkDevice(getUserId(), entity.getId());
         Context.getDeviceManager().updateDevice(entity);
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
@@ -102,7 +102,7 @@ public class DeviceResource extends BaseResource {
 
     @Path("{id}/distance")
     @PUT
-    public Response updateTotalDistance(@PathParam("id") long id, DeviceTotalDistance entity) throws SQLException {
+    public Response updateTotalDistance(DeviceTotalDistance entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getDeviceManager().resetTotalDistance(entity);
         return Response.noContent().build();

@@ -59,7 +59,7 @@ public class UserResource extends BaseResource {
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, User entity) throws SQLException {
+    public Response update(User entity) throws SQLException {
         User old = Context.getPermissionsManager().getUser(entity.getId());
         if (old.getExpirationTime() == null && entity.getExpirationTime() != null
                 || old.getExpirationTime() != null && !old.getExpirationTime().equals(entity.getExpirationTime())
