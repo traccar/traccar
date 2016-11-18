@@ -58,6 +58,13 @@ public class DeviceResource extends BaseResource {
     @POST
     public Response add(Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        int deviceLimit = Context.getPermissionsManager().getUser(getUserId()).getDeviceLimit();
+        if (deviceLimit != 0) {
+            int deviceCount = Context.getPermissionsManager().getDevicePermissions(getUserId()).size();
+            if (deviceCount >= deviceLimit) {
+                throw new SecurityException("User device limit reached");
+            }
+        }
         Context.getDeviceManager().addDevice(entity);
         Context.getDataManager().linkDevice(getUserId(), entity.getId());
         Context.getPermissionsManager().refreshPermissions();

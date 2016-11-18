@@ -60,13 +60,16 @@ public class UserResource extends BaseResource {
     @Path("{id}")
     @PUT
     public Response update(@PathParam("id") long id, User entity) throws SQLException {
-        if (entity.getAdmin()) {
+        User old = Context.getPermissionsManager().getUser(entity.getId());
+        if (old.getExpirationTime() == null && entity.getExpirationTime() != null
+                || old.getExpirationTime() != null && !old.getExpirationTime().equals(entity.getExpirationTime())
+                || old.getAdmin() != entity.getAdmin()
+                || old.getReadonly() != entity.getReadonly()
+                || old.getDisabled() != entity.getDisabled()
+                || old.getDeviceLimit() != entity.getDeviceLimit()) {
             Context.getPermissionsManager().checkAdmin(getUserId());
         } else {
             Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
-            if (!entity.getReadonly()) {
-                Context.getPermissionsManager().checkReadonly(entity.getId());
-            }
         }
         Context.getPermissionsManager().updateUser(entity);
         if (Context.getNotificationManager() != null) {

@@ -18,6 +18,8 @@ package org.traccar.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.helper.Hashing;
 
+import java.util.Date;
+
 public class User extends Extensible {
 
     private String name;
@@ -138,6 +140,44 @@ public class User extends Extensible {
 
     public void setCoordinateFormat(String coordinateFormat) {
         this.coordinateFormat = coordinateFormat;
+    }
+
+    private boolean disabled;
+
+    public boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    private Date expirationTime;
+
+    public Date getExpirationTime() {
+        if (expirationTime != null) {
+            return new Date(expirationTime.getTime());
+        } else {
+            return null;
+        }
+    }
+
+    public void setExpirationTime(Date expirationTime) {
+        if (expirationTime != null) {
+            this.expirationTime = new Date(expirationTime.getTime());
+        } else {
+            this.expirationTime = null;
+        }
+    }
+
+    private int deviceLimit;
+
+    public int getDeviceLimit() {
+        return deviceLimit;
+    }
+
+    public void setDeviceLimit(int deviceLimit) {
+        this.deviceLimit = deviceLimit;
     }
 
     public String getPassword() {

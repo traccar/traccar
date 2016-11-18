@@ -62,8 +62,8 @@
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO users (name, email, hashedPassword, salt, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, attributes)
-        VALUES (:name, :email, :hashedPassword, :salt, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :attributes)
+        INSERT INTO users (name, email, hashedPassword, salt, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, attributes)
+        VALUES (:name, :email, :hashedPassword, :salt, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :attributes)
     </entry>
 
     <entry key='database.updateUser'>
@@ -78,6 +78,10 @@
         longitude = :longitude,
         zoom = :zoom,
         twelveHourFormat = :twelveHourFormat,
+        coordinateFormat = :coordinateFormat,
+        disabled = :disabled,
+        expirationTime = :expirationTime,
+        deviceLimit = :deviceLimit,
         attributes = :attributes
         WHERE id = :id
     </entry>

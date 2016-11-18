@@ -146,7 +146,17 @@ public class PermissionsManager {
 
     public void checkReadonly(long userId) throws SecurityException {
         if (!isAdmin(userId) && (server.getReadonly() || isReadonly(userId))) {
-            throw new SecurityException("User is readonly");
+            throw new SecurityException("Account is readonly");
+        }
+    }
+
+    public void checkUser(long userId) throws SecurityException {
+        User user = getUser(userId);
+        if (user.getDisabled()) {
+            throw new SecurityException("Account is disabled");
+        }
+        if (user.getExpirationTime() != null && System.currentTimeMillis() > user.getExpirationTime().getTime()) {
+            throw new SecurityException("Account has expired");
         }
     }
 
@@ -217,11 +227,11 @@ public class PermissionsManager {
 
     public User login(String email, String password) throws SQLException {
         User user = dataManager.login(email, password);
-        if (user != null && users.get(user.getId()) != null) {
+        if (user != null) {
+            checkUser(user.getId());
             return users.get(user.getId());
-        } else {
-            return null;
         }
+        return null;
     }
 
 }
