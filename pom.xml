@@ -127,6 +127,11 @@
             <artifactId>jxls-poi</artifactId>
             <version>1.0.11</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>6.1.0.jre7</version> <!-- edit to 6.1.0.jre8 if you used jre8 -->
+        </dependency>
 
     </dependencies>
 
