@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.traccar</groupId>
     <artifactId>traccar</artifactId>
-    <version>3.7-SNAPSHOT</version>
+    <version>3.8-SNAPSHOT</version>
 
     <name>traccar</name>
     <url>https://www.traccar.org</url>
@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty.version>9.2.19.v20160908</jetty.version> <!-- Jetty 9.3+ requires Java 8 -->
-        <jersey.version>2.23.2</jersey.version>
+        <jersey.version>2.24</jersey.version>
     </properties>
 
     <dependencies>
@@ -30,27 +30,38 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.6</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.192</version>
+            <version>1.4.193</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.39</version>
+            <version>5.1.40</version> <!-- Version 6 required Java 8 -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.4.1210.jre7</version>
+            <version>9.4.1212.jre7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>6.1.0.jre7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.microsoft.azure</groupId>
+                    <artifactId>azure-keyvault</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP-java7</artifactId>
-            <version>2.4.8</version> <!-- Newer versions require Java 8 -->
+            <version>2.4.9</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -60,7 +71,7 @@
         <dependency>
             <groupId>com.ning</groupId> <!-- org.asynchttpclient starting from version 2.0 -->
             <artifactId>async-http-client</artifactId>
-            <version>1.9.39</version>
+            <version>1.9.40</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -110,7 +121,7 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.3</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
@@ -126,11 +137,6 @@
             <groupId>org.jxls</groupId>
             <artifactId>jxls-poi</artifactId>
             <version>1.0.11</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>6.1.0.jre7</version> <!-- edit to 6.1.0.jre8 if you used jre8 -->
         </dependency>
 
     </dependencies>
@@ -199,7 +205,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.0</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -208,7 +214,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.0.0</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -252,7 +258,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.6</version>
+                <version>3.7</version>
             </plugin>
         </plugins>
     </reporting>
