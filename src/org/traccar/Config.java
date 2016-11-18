@@ -40,7 +40,7 @@ public class Config {
     }
 
     public boolean hasKey(String key) {
-        return properties.containsKey(key) || (defaultProperties != null && defaultProperties.containsKey(key));
+        return properties.containsKey(key) || defaultProperties != null && defaultProperties.containsKey(key);
     }
 
     public String getString(String key) {

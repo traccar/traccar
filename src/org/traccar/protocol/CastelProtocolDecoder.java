@@ -73,27 +73,27 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final short MSG_SC_LOGIN = 0x1001;
-    private static final short MSG_SC_LOGIN_RESPONSE = (short) 0x9001;
-    private static final short MSG_SC_LOGOUT = 0x1002;
-    private static final short MSG_SC_HEARTBEAT = 0x1003;
-    private static final short MSG_SC_HEARTBEAT_RESPONSE = (short) 0x9003;
-    private static final short MSG_SC_GPS = 0x4001;
-    private static final short MSG_SC_PID_DATA = 0x4002;
-    private static final short MSG_SC_SUPPORTED_PID = 0x4004;
-    private static final short MSG_SC_OBD_DATA = 0x4005;
-    private static final short MSG_SC_DTCS_PASSENGER = 0x4006;
-    private static final short MSG_SC_DTCS_COMMERCIAL = 0x400B;
-    private static final short MSG_SC_ALARM = 0x4007;
-    private static final short MSG_SC_CELL = 0x4008;
-    private static final short MSG_SC_GPS_SLEEP = 0x4009;
-    private static final short MSG_SC_AGPS_REQUEST = 0x5101;
-    private static final short MSG_SC_CURRENT_LOCATION = (short) 0xB001;
+    public static final short MSG_SC_LOGIN = 0x1001;
+    public static final short MSG_SC_LOGIN_RESPONSE = (short) 0x9001;
+    public static final short MSG_SC_LOGOUT = 0x1002;
+    public static final short MSG_SC_HEARTBEAT = 0x1003;
+    public static final short MSG_SC_HEARTBEAT_RESPONSE = (short) 0x9003;
+    public static final short MSG_SC_GPS = 0x4001;
+    public static final short MSG_SC_PID_DATA = 0x4002;
+    public static final short MSG_SC_SUPPORTED_PID = 0x4004;
+    public static final short MSG_SC_OBD_DATA = 0x4005;
+    public static final short MSG_SC_DTCS_PASSENGER = 0x4006;
+    public static final short MSG_SC_DTCS_COMMERCIAL = 0x400B;
+    public static final short MSG_SC_ALARM = 0x4007;
+    public static final short MSG_SC_CELL = 0x4008;
+    public static final short MSG_SC_GPS_SLEEP = 0x4009;
+    public static final short MSG_SC_AGPS_REQUEST = 0x5101;
+    public static final short MSG_SC_CURRENT_LOCATION = (short) 0xB001;
 
-    private static final short MSG_CC_LOGIN = 0x4001;
-    private static final short MSG_CC_LOGIN_RESPONSE = (short) 0x8001;
-    private static final short MSG_CC_HEARTBEAT = 0x4206;
-    private static final short MSG_CC_HEARTBEAT_RESPONSE = (short) 0x8206;
+    public static final short MSG_CC_LOGIN = 0x4001;
+    public static final short MSG_CC_LOGIN_RESPONSE = (short) 0x8001;
+    public static final short MSG_CC_HEARTBEAT = 0x4206;
+    public static final short MSG_CC_HEARTBEAT_RESPONSE = (short) 0x8206;
 
     private Position readPosition(DeviceSession deviceSession, ChannelBuffer buf) {
 

@@ -33,6 +33,18 @@ public final class PatternUtil {
         public String getPatternMatch() {
             return patternMatch;
         }
+
+        public String getPatternTail() {
+            return patternTail;
+        }
+
+        public String getStringMatch() {
+            return stringMatch;
+        }
+
+        public String getStringTail() {
+            return stringTail;
+        }
     }
 
     public static MatchResult checkPattern(String pattern, String input) {
