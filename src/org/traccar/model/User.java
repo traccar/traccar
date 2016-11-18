@@ -180,6 +180,31 @@ public class User extends Extensible {
         this.deviceLimit = deviceLimit;
     }
 
+    private String token;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        if (token != null && !token.isEmpty()) {
+            if (validateToken(token)) {
+                this.token = token;
+            } else {
+                throw new IllegalArgumentException("Bad token");
+            }
+        } else {
+            this.token = null;
+        }
+    }
+
+    public static boolean validateToken(String token) {
+        if (token.length() < 16 || !token.matches("^[a-zA-Z0-9]+$")) {
+            return false;
+        }
+        return true;
+    }
+
     public String getPassword() {
         return null;
     }

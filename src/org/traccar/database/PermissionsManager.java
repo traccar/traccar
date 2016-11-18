@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +40,7 @@ public class PermissionsManager {
     private volatile Server server;
 
     private final Map<Long, User> users = new ConcurrentHashMap<>();
+    private final Map<Long, String> usersTokens = new HashMap<>();
 
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
@@ -81,10 +83,14 @@ public class PermissionsManager {
 
     public final void refreshUsers() {
         users.clear();
+        usersTokens.clear();
         try {
             server = dataManager.getServer();
             for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
+                if (user.getToken() != null) {
+                    usersTokens.put(user.getId(), user.getToken());
+                }
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -210,18 +216,27 @@ public class PermissionsManager {
     public void addUser(User user) throws SQLException {
         dataManager.addUser(user);
         users.put(user.getId(), user);
+        if (user.getToken() != null) {
+            usersTokens.put(user.getId(), user.getToken());
+        }
         refreshPermissions();
     }
 
     public void updateUser(User user) throws SQLException {
         dataManager.updateUser(user);
         users.put(user.getId(), user);
+        if (user.getToken() != null) {
+            usersTokens.put(user.getId(), user.getToken());
+        } else if (usersTokens.containsKey(user.getId())) {
+            usersTokens.remove(user.getId());
+        }
         refreshPermissions();
     }
 
     public void removeUser(long userId) throws SQLException {
         dataManager.removeUser(userId);
         users.remove(userId);
+        usersTokens.remove(userId);
         refreshPermissions();
     }
 
@@ -230,6 +245,17 @@ public class PermissionsManager {
         if (user != null) {
             checkUser(user.getId());
             return users.get(user.getId());
+        }
+        return null;
+    }
+
+    public User getUserByToken(String token) {
+        if (usersTokens.containsValue(token)) {
+            for (Entry<Long, String> entry : usersTokens.entrySet()) {
+                if (entry.getValue().equals(token)) {
+                    return users.get(entry.getKey());
+                }
+            }
         }
         return null;
     }

@@ -69,6 +69,12 @@ public class SessionResource extends BaseResource {
                     userId = user.getId();
                     request.getSession().setAttribute(USER_ID_KEY, userId);
                 }
+            } else if (request.getParameter("token") != null) {
+                User user = Context.getPermissionsManager().getUserByToken(request.getParameter("token"));
+                if (user != null) {
+                    userId = user.getId();
+                    request.getSession().setAttribute(USER_ID_KEY, userId);
+                }
             }
         }
 
