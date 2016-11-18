@@ -192,8 +192,6 @@ public class User extends Extensible {
                 throw new IllegalArgumentException("Illegal token");
             }
             this.token = token;
-        } else {
-            this.token = null;
         }
     }
 
