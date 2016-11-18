@@ -67,7 +67,8 @@ public class UserResource extends BaseResource {
                 || old.getReadonly() != entity.getReadonly()
                 || old.getDisabled() != entity.getDisabled()
                 || old.getDeviceLimit() != entity.getDeviceLimit()
-                || !old.getToken().equals(entity.getToken())) {
+                || old.getToken() == null && entity.getToken() != null
+                || old.getToken() != null && !old.getToken().equals(entity.getToken())) {
             Context.getPermissionsManager().checkAdmin(getUserId());
         } else {
             Context.getPermissionsManager().checkUser(getUserId(), entity.getId());

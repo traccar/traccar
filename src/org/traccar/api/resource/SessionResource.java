@@ -29,6 +29,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -48,7 +49,7 @@ public class SessionResource extends BaseResource {
 
     @PermitAll
     @GET
-    public User get() throws SQLException {
+    public User get(@QueryParam("token") String token) throws SQLException {
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
         if (userId == null) {
             Cookie[] cookies = request.getCookies();
@@ -69,7 +70,7 @@ public class SessionResource extends BaseResource {
                     userId = user.getId();
                     request.getSession().setAttribute(USER_ID_KEY, userId);
                 }
-            } else if (request.getParameter("token") != null) {
+            } else if (token != null) {
                 User user = Context.getPermissionsManager().getUserByToken(request.getParameter("token"));
                 if (user != null) {
                     userId = user.getId();

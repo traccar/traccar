@@ -188,21 +188,13 @@ public class User extends Extensible {
 
     public void setToken(String token) {
         if (token != null && !token.isEmpty()) {
-            if (validateToken(token)) {
-                this.token = token;
-            } else {
-                throw new IllegalArgumentException("Bad token");
+            if (!token.matches("^[a-zA-Z0-9]{16,}$")) {
+                throw new IllegalArgumentException("Illegal token");
             }
+            this.token = token;
         } else {
             this.token = null;
         }
-    }
-
-    public static boolean validateToken(String token) {
-        if (token.length() < 16 || !token.matches("^[a-zA-Z0-9]+$")) {
-            return false;
-        }
-        return true;
     }
 
     public String getPassword() {
