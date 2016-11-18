@@ -39,6 +39,7 @@ public class PermissionsManager {
     private volatile Server server;
 
     private final Map<Long, User> users = new ConcurrentHashMap<>();
+    private final Map<String, Long> usersTokens = new HashMap<>();
 
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
@@ -81,10 +82,14 @@ public class PermissionsManager {
 
     public final void refreshUsers() {
         users.clear();
+        usersTokens.clear();
         try {
             server = dataManager.getServer();
             for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
+                if (user.getToken() != null) {
+                    usersTokens.put(user.getToken(), user.getId());
+                }
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -210,17 +215,28 @@ public class PermissionsManager {
     public void addUser(User user) throws SQLException {
         dataManager.addUser(user);
         users.put(user.getId(), user);
+        if (user.getToken() != null) {
+            usersTokens.put(user.getToken(), user.getId());
+        }
         refreshPermissions();
     }
 
     public void updateUser(User user) throws SQLException {
         dataManager.updateUser(user);
+        User old = users.get(user.getId());
         users.put(user.getId(), user);
+        if (user.getToken() != null) {
+            usersTokens.put(user.getToken(), user.getId());
+        }
+        if (old.getToken() != null && !old.getToken().equals(user.getToken())) {
+            usersTokens.remove(old.getToken());
+        }
         refreshPermissions();
     }
 
     public void removeUser(long userId) throws SQLException {
         dataManager.removeUser(userId);
+        usersTokens.remove(users.get(userId).getToken());
         users.remove(userId);
         refreshPermissions();
     }
@@ -232,6 +248,10 @@ public class PermissionsManager {
             return users.get(user.getId());
         }
         return null;
+    }
+
+    public User getUserByToken(String token) {
+        return users.get(usersTokens.get(token));
     }
 
 }

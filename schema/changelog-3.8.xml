@@ -116,6 +116,11 @@
     <addColumn tableName="users">
       <column name="devicelimit" type="INT" defaultValueNumeric="0" />
     </addColumn>
+    <addColumn tableName="users">
+      <column name="token" type="VARCHAR(128)" />
+    </addColumn>
+    
+    <addUniqueConstraint tableName="users" columnNames="token" constraintName="uk_user_token" />
 
   </changeSet>
 </databaseChangeLog>
