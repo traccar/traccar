@@ -119,8 +119,12 @@
     <addColumn tableName="users">
       <column name="token" type="VARCHAR(128)" />
     </addColumn>
-    
-    <addUniqueConstraint tableName="users" columnNames="token" constraintName="uk_user_token" />
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-3.8-dropuniquetoken" failOnError="false">
+
+    <dropUniqueConstraint tableName="users" uniqueColumns="token" constraintName="uk_user_token" />
 
   </changeSet>
 </databaseChangeLog>
