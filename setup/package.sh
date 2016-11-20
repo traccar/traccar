@@ -71,13 +71,9 @@ copy_wrapper () {
   echo "wrapper.ntservice.name=traccar" >> out/conf/wrapper.conf
   echo "wrapper.ntservice.displayname=Traccar" >> out/conf/wrapper.conf
   echo "wrapper.ntservice.description=Traccar" >> out/conf/wrapper.conf
-  echo "wrapper.daemon.run_level_dir=/etc/rcX.d" >> out/conf/wrapper.conf
 
-  cp -r yajsw/lib/core out/lib
-  rm out/lib/core/ReadMe.txt
-
-  cp -r yajsw/lib/extended out/lib
-  rm out/lib/extended/ReadMe.txt
+  cp -r yajsw/lib/* out/lib
+  find out/lib -type f -name ReadMe.txt -exec rm -f {} \;
 
   cp yajsw/templates/* out/templates
 
