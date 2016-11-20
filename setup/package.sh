@@ -71,6 +71,7 @@ copy_wrapper () {
   echo "wrapper.ntservice.name=traccar" >> out/conf/wrapper.conf
   echo "wrapper.ntservice.displayname=Traccar" >> out/conf/wrapper.conf
   echo "wrapper.ntservice.description=Traccar" >> out/conf/wrapper.conf
+  echo "wrapper.daemon.run_level_dir=\${if (new File('/etc/rc0.d').exists()) return '/etc/rcX.d' else return '/etc/init.d/rcX.d'}" >> out/conf/wrapper.conf
 
   cp -r yajsw/lib/* out/lib
   find out/lib -type f -name ReadMe.txt -exec rm -f {} \;
