@@ -9,6 +9,25 @@ Traccar is open source server for various GPS tracking devices. Project is writt
 
 Please read [build from source documentation](https://www.traccar.org/build/) on the official website.
 
+To build the Docker images first clone:
+
+$ git clone git@github.com:tananaev/traccar.git
+$ cd traccar
+
+Now init submodules:
+
+$ git submodule init
+$ git submodule update  
+
+Now you are able to build docker images:
+
+$ chmod 755 ./setup/docker/build.sh
+$ ./setup/docker/build.sh
+
+Running docker container based on this images:
+
+$ docker run --name traccar -ti tananaev/traccar:<TAG>
+
 ## Team
 
 - Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))
