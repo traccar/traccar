@@ -56,4 +56,5 @@ public class NotificationResource extends BaseResource {
         Context.getNotificationManager().updateNotification(entity);
         return Response.ok(entity).build();
     }
+
 }

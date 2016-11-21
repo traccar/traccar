@@ -76,10 +76,19 @@ public class ConnectionManager {
         }
 
         if (enableStatusEvents && !status.equals(device.getStatus())) {
-            Event event = new Event(Event.TYPE_DEVICE_OFFLINE, deviceId);
-            if (status.equals(Device.STATUS_ONLINE)) {
-                event.setType(Event.TYPE_DEVICE_ONLINE);
+            String eventType;
+            switch (status) {
+                case Device.STATUS_ONLINE:
+                    eventType = Event.TYPE_DEVICE_ONLINE;
+                    break;
+                case Device.STATUS_UNKNOWN:
+                    eventType = Event.TYPE_DEVICE_UNKNOWN;
+                    break;
+                default:
+                    eventType = Event.TYPE_DEVICE_OFFLINE;
+                    break;
             }
+            Event event = new Event(eventType, deviceId);
             if (Context.getNotificationManager() != null) {
                 Context.getNotificationManager().updateEvent(event, null);
             }
@@ -90,7 +99,6 @@ public class ConnectionManager {
         if (timeout != null) {
             timeout.cancel();
         }
-
 
         if (time != null) {
             device.setLastUpdate(time);
