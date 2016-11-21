@@ -26,7 +26,7 @@ $ ./setup/docker/build.sh
 
 Running docker container based on this images:
 
-$ docker run --name traccar -ti tananaev/traccar:<TAG>
+$ docker run --name traccar -ti -p 8082:8082 -p 5000-5150:5000-5150 tananaev/traccar:<TAG>
 
 ## Team
 
