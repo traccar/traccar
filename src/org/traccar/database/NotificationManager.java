@@ -74,7 +74,6 @@ public class NotificationManager {
     }
 
     public void updateEvents(Collection<Event> events, Position position) {
-
         for (Event event : events) {
             updateEvent(event, position);
         }
@@ -176,9 +175,8 @@ public class NotificationManager {
     }
 
     public Set<Notification> getAllNotifications() {
-
         Set<Notification> notifications = new HashSet<>();
-        long id = 0;
+        long id = 1;
         Field[] fields = Event.class.getDeclaredFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
@@ -194,4 +192,5 @@ public class NotificationManager {
         }
         return notifications;
     }
+
 }
