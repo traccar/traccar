@@ -80,7 +80,7 @@ public class SessionResource extends BaseResource {
         }
 
         if (userId != null) {
-            Context.getPermissionsManager().checkUser(userId);
+            Context.getPermissionsManager().checkUserEnabled(userId);
             return Context.getPermissionsManager().getUser(userId);
         } else {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());

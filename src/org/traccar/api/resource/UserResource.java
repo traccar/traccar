@@ -49,6 +49,7 @@ public class UserResource extends BaseResource {
     public Response add(User entity) throws SQLException {
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
             Context.getPermissionsManager().checkRegistration(getUserId());
+            Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
         }
         Context.getPermissionsManager().addUser(entity);
         if (Context.getNotificationManager() != null) {
@@ -60,19 +61,9 @@ public class UserResource extends BaseResource {
     @Path("{id}")
     @PUT
     public Response update(User entity) throws SQLException {
-        User old = Context.getPermissionsManager().getUser(entity.getId());
-        if (old.getExpirationTime() == null && entity.getExpirationTime() != null
-                || old.getExpirationTime() != null && !old.getExpirationTime().equals(entity.getExpirationTime())
-                || old.getAdmin() != entity.getAdmin()
-                || old.getReadonly() != entity.getReadonly()
-                || old.getDisabled() != entity.getDisabled()
-                || old.getDeviceLimit() != entity.getDeviceLimit()
-                || old.getToken() == null && entity.getToken() != null
-                || old.getToken() != null && !old.getToken().equals(entity.getToken())) {
-            Context.getPermissionsManager().checkAdmin(getUserId());
-        } else {
-            Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
-        }
+        User before = Context.getPermissionsManager().getUser(entity.getId());
+        Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
+        Context.getPermissionsManager().checkUserUpdate(getUserId(), before, entity);
         Context.getPermissionsManager().updateUser(entity);
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();
