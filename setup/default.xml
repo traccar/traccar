@@ -24,6 +24,8 @@
     <entry key='event.geofenceHandler'>true</entry>
     <entry key='event.alertHandler'>true</entry>
     <entry key='event.ignitionHandler'>true</entry>
+    <entry key='event.statusHandler'>true</entry>
+    <entry key='event.maintenanceHandler'>true</entry>
 
     <!-- DATABASE CONFIG -->
 
