@@ -39,6 +39,10 @@ public final class NotificationFormatter {
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_ONLINE = "Device: %1$s%n"
             + "Online%n"
             + "Time: %2$tc%n";
+    public static final String TITLE_TEMPLATE_TYPE_DEVICE_UNKNOWN = "%1$s: status is unknown";
+    public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_UNKNOWN = "Device: %1$s%n"
+            + "Status is unknown%n"
+            + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_OFFLINE = "%1$s: offline";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_OFFLINE = "Device: %1$s%n"
             + "Offline%n"
@@ -88,6 +92,11 @@ public final class NotificationFormatter {
             + "Ignition OFF%n"
             + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
+    public static final String TITLE_TEMPLATE_TYPE_MAINTENANCE_NEED = "%1$s: maintenance is needed";
+    public static final String MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEED = "Device: %1$s%n"
+            + "Maintenance is needed%n"
+            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Time: %2$tc%n";
 
     public static String formatTitle(long userId, Event event, Position position) {
         Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
@@ -100,6 +109,9 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_DEVICE_ONLINE:
                 formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName());
+                break;
+            case Event.TYPE_DEVICE_UNKNOWN:
+                formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_UNKNOWN, device.getName());
                 break;
             case Event.TYPE_DEVICE_OFFLINE:
                 formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_OFFLINE, device.getName());
@@ -128,6 +140,9 @@ public final class NotificationFormatter {
             case Event.TYPE_IGNITION_OFF:
                 formatter.format(TITLE_TEMPLATE_TYPE_IGNITION_OFF, device.getName());
                 break;
+            case Event.TYPE_MAINTENANCE_NEED:
+                formatter.format(TITLE_TEMPLATE_TYPE_MAINTENANCE_NEED, device.getName());
+                break;
             default:
                 formatter.format("Unknown type");
                 break;
@@ -149,6 +164,9 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_DEVICE_ONLINE:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName(), event.getServerTime());
+                break;
+            case Event.TYPE_DEVICE_UNKNOWN:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_UNKNOWN, device.getName(), event.getServerTime());
                 break;
             case Event.TYPE_DEVICE_OFFLINE:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OFFLINE, device.getName(), event.getServerTime());
@@ -186,6 +204,10 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_IGNITION_OFF:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_IGNITION_OFF, device.getName(), position.getFixTime(),
+                        position.getLatitude(), position.getLongitude());
+                break;
+            case Event.TYPE_MAINTENANCE_NEED:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEED, device.getName(), position.getFixTime(),
                         position.getLatitude(), position.getLongitude());
                 break;
             default:
