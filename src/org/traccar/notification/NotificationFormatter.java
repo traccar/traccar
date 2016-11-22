@@ -47,46 +47,46 @@ public final class NotificationFormatter {
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_MOVING = "%1$s: moving";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_MOVING = "Device: %1$s%n"
             + "Moving%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_STOPPED = "%1$s: stopped";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_STOPPED = "Device: %1$s%n"
             + "Stopped%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "%1$s: exceeds the speed";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "Device: %1$s%n"
             + "Exceeds the speed: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_GEOFENCE_ENTER = "%1$s: has entered geofence";
     public static final String MESSAGE_TEMPLATE_TYPE_GEOFENCE_ENTER = "Device: %1$s%n"
             + "Has entered geofence: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_GEOFENCE_EXIT = "%1$s: has exited geofence";
     public static final String MESSAGE_TEMPLATE_TYPE_GEOFENCE_EXIT = "Device: %1$s%n"
             + "Has exited geofence: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_ALARM = "%1$s: alarm!";
     public static final String MESSAGE_TEMPLATE_TYPE_ALARM = "Device: %1$s%n"
             + "Alarm: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_IGNITION_ON = "%1$s: ignition ON";
     public static final String MESSAGE_TEMPLATE_TYPE_IGNITION_ON = "Device: %1$s%n"
             + "Ignition ON%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_IGNITION_OFF = "%1$s: ignition OFF";
     public static final String MESSAGE_TEMPLATE_TYPE_IGNITION_OFF = "Device: %1$s%n"
             + "Ignition OFF%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static String formatTitle(long userId, Event event, Position position) {
