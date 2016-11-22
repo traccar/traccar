@@ -158,7 +158,6 @@ public class NotificationManager {
                 }
             } else {
                 notification.setId(cachedNotification.getId());
-                notification.setId(cachedNotification.getId());
             }
         } else if (!notification.getAttributes().isEmpty()) {
             try {
