@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -155,13 +156,24 @@ public class PermissionsManager {
         }
     }
 
-    public void checkUser(long userId) throws SecurityException {
+    public void checkUserEnabled(long userId) throws SecurityException {
         User user = getUser(userId);
         if (user.getDisabled()) {
             throw new SecurityException("Account is disabled");
         }
         if (user.getExpirationTime() != null && System.currentTimeMillis() > user.getExpirationTime().getTime()) {
             throw new SecurityException("Account has expired");
+        }
+    }
+
+    public void checkUserUpdate(long userId, User before, User after) throws SecurityException {
+        if (before.getAdmin() != after.getAdmin()
+                || before.getReadonly() != after.getReadonly()
+                || before.getDisabled() != after.getDisabled()
+                || before.getDeviceLimit() != after.getDeviceLimit()
+                || !Objects.equals(before.getExpirationTime(), after.getExpirationTime())
+                || !Objects.equals(before.getToken(), after.getToken())) {
+            checkAdmin(userId);
         }
     }
 
@@ -244,7 +256,7 @@ public class PermissionsManager {
     public User login(String email, String password) throws SQLException {
         User user = dataManager.login(email, password);
         if (user != null) {
-            checkUser(user.getId());
+            checkUserEnabled(user.getId());
             return users.get(user.getId());
         }
         return null;
