@@ -401,9 +401,7 @@ public class DeviceManager implements IdentityManager {
         String result = null;
         Device device = getDeviceById(deviceId);
         if (device != null) {
-            if (device.getAttributes().containsKey(attributeName)) {
-                result = (String) device.getAttributes().get(attributeName);
-            }
+            result = device.getString(attributeName);
             if (result == null && lookupGroupsAttribute) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
@@ -421,7 +419,7 @@ public class DeviceManager implements IdentityManager {
             if (result == null) {
                 if (lookupServer) {
                     Server server = Context.getPermissionsManager().getServer();
-                    result = (String) server.getAttributes().get(attributeName);
+                    result = server.getString(attributeName);
                 } else {
                     result = Context.getConfig().getString(attributeName);
                 }
