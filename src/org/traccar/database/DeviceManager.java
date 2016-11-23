@@ -408,7 +408,7 @@ public class DeviceManager implements IdentityManager {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
                     if (getGroupById(groupId) != null) {
-                        result = (String)  getGroupById(groupId).getAttributes().get(attributeName);
+                        result = getGroupById(groupId).getString(attributeName);
                         if (result != null) {
                             break;
                         }
