@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import org.joda.time.DateTime;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
 
@@ -82,8 +84,10 @@ public final class Summary {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException, IOException {
-        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to);
+            String fromString, String toString) throws SQLException, IOException {
+        DateTime from = DateUtil.parseDateTime(fromString);
+        DateTime to = DateUtil.parseDateTime(toString);
+        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from.toDate(), to.toDate());
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
@@ -93,6 +97,7 @@ public final class Summary {
             jxlsContext.putVar("to", to);
             jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
             jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
+            jxlsContext.putVar("timezone", from.getZone());
             JxlsHelper.getInstance().setUseFastFormulaProcessor(false)
                     .processTemplate(inputStream, outputStream, jxlsContext);
         }

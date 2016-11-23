@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.joda.time.DateTime;
 import org.jxls.area.Area;
 import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.common.CellRef;
@@ -36,6 +37,7 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -68,13 +70,15 @@ public final class Events {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Collection<String> types, Date from, Date to) throws SQLException, IOException {
+            Collection<String> types, String fromString, String toString) throws SQLException, IOException {
         ArrayList<DeviceReport> devicesEvents = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
+        DateTime from = DateUtil.parseDateTime(fromString);
+        DateTime to = DateUtil.parseDateTime(toString);
         HashMap<Long, String> geofenceNames = new HashMap<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
+            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from.toDate(), to.toDate());
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
                 Event event = iterator.next();
@@ -118,6 +122,7 @@ public final class Events {
             jxlsContext.putVar("to", to);
             jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
             jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
+            jxlsContext.putVar("timezone", from.getZone());
             jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
             Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
             List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();

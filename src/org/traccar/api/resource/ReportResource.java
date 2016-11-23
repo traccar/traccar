@@ -50,8 +50,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Route.getExcel(stream, getUserId(), deviceIds, groupIds,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+        Route.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
@@ -76,8 +75,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("type") final List<String> types,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Events.getExcel(stream, getUserId(), deviceIds, groupIds, types,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+        Events.getExcel(stream, getUserId(), deviceIds, groupIds, types, from, to);
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
@@ -100,8 +98,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Summary.getExcel(stream, getUserId(), deviceIds, groupIds,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+        Summary.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
@@ -124,8 +121,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Trips.getExcel(stream, getUserId(), deviceIds, groupIds,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+        Trips.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
