@@ -50,7 +50,7 @@ public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return encodeContent((String) command.getAttributes().get(Command.KEY_DATA));
+                return encodeContent(command.getString(Command.KEY_DATA));
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

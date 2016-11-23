@@ -50,13 +50,10 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         double newTotalDistance = 0.0;
 
         Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
-        if (lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-            oldTotalDistance = ((Number) lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue();
+        if (lastPosition != null) {
+            oldTotalDistance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
         }
-
-        if (position.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-            newTotalDistance = ((Number) position.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue();
-        }
+        newTotalDistance = position.getDouble(Position.KEY_TOTAL_DISTANCE);
 
         oldTotalDistance -= maintenanceStart;
         newTotalDistance -= maintenanceStart;

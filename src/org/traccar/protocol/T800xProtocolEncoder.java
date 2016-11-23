@@ -51,7 +51,7 @@ public class T800xProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return encodeContent(command, (String) command.getAttributes().get(Command.KEY_DATA));
+                return encodeContent(command, command.getString(Command.KEY_DATA));
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

@@ -39,20 +39,12 @@ public class IgnitionEventHandler extends BaseEventHandler {
 
         Collection<Event> result = null;
 
-        boolean ignition = false;
-        Object ignitionObject = position.getAttributes().get(Position.KEY_IGNITION);
-        if (ignitionObject != null && ignitionObject instanceof Boolean) {
-            ignition = (Boolean) ignitionObject;
-        }
+        boolean ignition = position.getBoolean(Position.KEY_IGNITION);
 
         boolean oldIgnition = false;
-        Object oldIgnitionObject = null;
         Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
         if (lastPosition != null) {
-            oldIgnitionObject = lastPosition.getAttributes().get(Position.KEY_IGNITION);
-        }
-        if (oldIgnitionObject != null && oldIgnitionObject instanceof Boolean) {
-            oldIgnition = (Boolean) oldIgnitionObject;
+            oldIgnition = lastPosition.getBoolean(Position.KEY_IGNITION);
         }
 
         if (ignition && !oldIgnition) {

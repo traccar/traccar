@@ -33,7 +33,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder {
     }
 
     private int getEnableFlag(Command command) {
-        if ((Boolean) command.getAttributes().get(Command.KEY_ENABLE)) {
+        if (command.getBoolean(Command.KEY_ENABLE)) {
             return 1;
         } else {
             return 0;
@@ -51,7 +51,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder {
     }
 
     private String getBinaryData(Command command) {
-        byte[] data = DatatypeConverter.parseHexBinary((String) command.getAttributes().get(Command.KEY_DATA));
+        byte[] data = DatatypeConverter.parseHexBinary(command.getString(Command.KEY_DATA));
 
         int encodedLength = data.length;
         for (byte b : data) {

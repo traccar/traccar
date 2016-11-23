@@ -56,7 +56,7 @@ public abstract class BaseProtocol implements Protocol {
         if (supportedCommands.contains(command.getType())) {
             activeDevice.write(command);
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-            String data = (String) command.getAttributes().get(Command.KEY_DATA);
+            String data = command.getString(Command.KEY_DATA);
             if (activeDevice.getChannel().getPipeline().get(StringEncoder.class) != null) {
                 activeDevice.write(data);
             } else {

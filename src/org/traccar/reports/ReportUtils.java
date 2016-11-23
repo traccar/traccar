@@ -63,18 +63,17 @@ public final class ReportUtils {
         double distance = 0.0;
         double firstOdometer = 0.0;
         double lastOdometer = 0.0;
-        if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-            firstOdometer = ((Number) firstPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
-        }
-        if (lastPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-            lastOdometer = ((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
-        }
+        firstOdometer = firstPosition.getDouble(Position.KEY_ODOMETER);
+
+
+        lastOdometer = lastPosition.getDouble(Position.KEY_ODOMETER);
+
         if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
             distance = lastOdometer - firstOdometer;
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-            distance = ((Number) lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue()
-                    - ((Number) firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue();
+            distance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE)
+                    - firstPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
         }
         return distance;
     }
