@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.Context;
+import org.traccar.Config;
 import org.traccar.api.BaseResource;
 import org.traccar.model.User;
 
@@ -32,6 +33,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Calendar;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -50,6 +53,18 @@ public class UserResource extends BaseResource {
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
             Context.getPermissionsManager().checkRegistration(getUserId());
             Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
+            Config config = Context.getConfig();
+            int deviceLimit = config.getInteger("default.deviceLimit");
+            int expirationDuration = config.getInteger("default.expirationDuration");
+            if (deviceLimit > 0) {
+              entity.setDeviceLimit(deviceLimit);
+            }
+            if (expirationDuration > 0) {
+              Calendar cal = Calendar.getInstance();
+              cal.add(Calendar.DATE, expirationDuration);
+              Date expirationTime = cal.getTime();
+              entity.setExpirationTime(expirationTime);
+            }
         }
         Context.getPermissionsManager().addUser(entity);
         if (Context.getNotificationManager() != null) {
