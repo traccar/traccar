@@ -27,8 +27,8 @@ import org.traccar.model.Position;
 
 public class MaintenanceEventHandler extends BaseEventHandler {
 
-    public static final String ATTRIBUTE_MAINTENANCE_START = "device.maintenanceStart";
-    public static final String ATTRIBUTE_MAINTENANCE_INTERVAL = "device.maintenanceInterval";
+    public static final String ATTRIBUTE_MAINTENANCE_START = "maintenance.start";
+    public static final String ATTRIBUTE_MAINTENANCE_INTERVAL = "maintenance.interval";
 
     @Override
     protected Collection<Event> analyzePosition(Position position) {
@@ -61,7 +61,7 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         oldTotalDistance -= maintenanceStart;
         newTotalDistance -= maintenanceStart;
         if ((long) (oldTotalDistance / maintenanceInterval) < (long) (newTotalDistance / maintenanceInterval)) {
-            events.add(new Event(Event.TYPE_MAINTENANCE_NEED, position.getDeviceId(), position.getId()));
+            events.add(new Event(Event.TYPE_MAINTENANCE_NEEDED, position.getDeviceId(), position.getId()));
         }
 
         return events;

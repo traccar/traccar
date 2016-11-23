@@ -92,10 +92,10 @@ public final class NotificationFormatter {
             + "Ignition OFF%n"
             + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
-    public static final String TITLE_TEMPLATE_TYPE_MAINTENANCE_NEED = "%1$s: maintenance is needed";
-    public static final String MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEED = "Device: %1$s%n"
+    public static final String TITLE_TEMPLATE_TYPE_MAINTENANCE_NEEDED = "%1$s: maintenance is needed";
+    public static final String MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEEDED = "Device: %1$s%n"
             + "Maintenance is needed%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static String formatTitle(long userId, Event event, Position position) {
@@ -140,8 +140,8 @@ public final class NotificationFormatter {
             case Event.TYPE_IGNITION_OFF:
                 formatter.format(TITLE_TEMPLATE_TYPE_IGNITION_OFF, device.getName());
                 break;
-            case Event.TYPE_MAINTENANCE_NEED:
-                formatter.format(TITLE_TEMPLATE_TYPE_MAINTENANCE_NEED, device.getName());
+            case Event.TYPE_MAINTENANCE_NEEDED:
+                formatter.format(TITLE_TEMPLATE_TYPE_MAINTENANCE_NEEDED, device.getName());
                 break;
             default:
                 formatter.format("Unknown type");
@@ -206,8 +206,8 @@ public final class NotificationFormatter {
                 formatter.format(MESSAGE_TEMPLATE_TYPE_IGNITION_OFF, device.getName(), position.getFixTime(),
                         position.getLatitude(), position.getLongitude());
                 break;
-            case Event.TYPE_MAINTENANCE_NEED:
-                formatter.format(MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEED, device.getName(), position.getFixTime(),
+            case Event.TYPE_MAINTENANCE_NEEDED:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEEDED, device.getName(), position.getFixTime(),
                         position.getLatitude(), position.getLongitude());
                 break;
             default:
