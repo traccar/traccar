@@ -15,6 +15,7 @@ ENV JAVA_OPTS -Xms256m -Xmx1024m
 COPY ./tmp/traccar.xml /opt/traccar/traccar.xml
 COPY ./tmp/default.xml /opt/traccar/conf/default.xml
 COPY ./tmp/schema /opt/traccar/schema
+COPY ./tmp/templates /opt/traccar/templates
 COPY ./tmp/web /opt/traccar/web
 COPY ./tmp/lib /opt/traccar/lib
 COPY ./tmp/traccar-server.jar /opt/traccar/traccar-server.jar
