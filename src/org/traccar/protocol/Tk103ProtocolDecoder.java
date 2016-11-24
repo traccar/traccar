@@ -113,9 +113,11 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             String type = sentence.substring(12, 16);
             if (type.equals("BP00") || type.equals("BP05")) {
                 String content = sentence.substring(16);
-                getDeviceSession(channel, remoteAddress, content.substring(0, 15));
+                if (content.length() >= 15) {
+                    getDeviceSession(channel, remoteAddress, content.substring(0, 15));
+                }
                 if (type.equals("BP00")) {
-                    channel.write("(" + id + "AP01" + content.substring(15) + ")");
+                    channel.write("(" + id + "AP01HSO)");
                     return null;
                 } else if (type.equals("BP05")) {
                     channel.write("(" + id + "AP05)");

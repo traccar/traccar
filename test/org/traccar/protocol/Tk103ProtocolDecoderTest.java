@@ -11,6 +11,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
         verifyNothing(decoder, text(
+                "(087073005534BP00HSO"));
+
+        verifyNothing(decoder, text(
                 "(027028258309BQ86,0,05550c21b10d1d0f431008bd114c0ea5078400010007a100423932,161117005322,01000001)"));
 
         verifyNothing(decoder, text(
