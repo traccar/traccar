@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -50,6 +51,12 @@ public class UserResource extends BaseResource {
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
             Context.getPermissionsManager().checkRegistration(getUserId());
             Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
+            entity.setDeviceLimit(Context.getConfig().getInteger("users.defaultDeviceLimit"));
+            int expirationDays = Context.getConfig().getInteger("users.defaultExpirationDays");
+            if (expirationDays > 0) {
+                entity.setExpirationTime(
+                    new Date(System.currentTimeMillis() + (long) expirationDays * 24 * 3600 * 1000));
+            }
         }
         Context.getPermissionsManager().addUser(entity);
         if (Context.getNotificationManager() != null) {
