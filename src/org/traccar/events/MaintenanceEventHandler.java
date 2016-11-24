@@ -38,12 +38,12 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         }
 
         double maintenanceInterval = Context.getDeviceManager()
-                .lookupAttributeDouble(device.getId(), ATTRIBUTE_MAINTENANCE_INTERVAL, 0, true);
+                .lookupAttributeDouble(device.getId(), ATTRIBUTE_MAINTENANCE_INTERVAL, 0, false);
         if (maintenanceInterval == 0) {
             return null;
         }
         double maintenanceStart = Context.getDeviceManager()
-                .lookupAttributeDouble(device.getId(), ATTRIBUTE_MAINTENANCE_START, 0, true);
+                .lookupAttributeDouble(device.getId(), ATTRIBUTE_MAINTENANCE_START, 0, false);
 
         Collection<Event> events = new ArrayList<>();
         double oldTotalDistance = 0.0;
