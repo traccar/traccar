@@ -18,7 +18,11 @@ cp -rf ./setup/default.xml ${tmp}
 cp -rf ./schema ${tmp}/schema
 cp -rf ./target/tracker-server.jar ${tmp}/traccar-server.jar
 cp -rf ./target/lib ${tmp}/lib
-cp -rf ./traccar-web/web ${tmp}/web
+if [ -d ./traccar-web/web ]; then
+  cp -rf ./traccar-web/web ${tmp}/web
+else
+  mkdir ${tmp}/web
+fi
 
 docker build -t ${company}/${software}:${version} ./setup/docker/
 
