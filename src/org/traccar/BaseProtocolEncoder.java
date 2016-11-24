@@ -31,8 +31,8 @@ public abstract class BaseProtocolEncoder extends OneToOneEncoder {
     protected void initDevicePassword(Command command, String defaultPassword) {
         if (!command.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
             Device device = Context.getIdentityManager().getDeviceById(command.getDeviceId());
-            if (device.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-                String password = (String) device.getAttributes().get(Command.KEY_DEVICE_PASSWORD);
+            String password = device.getString(Command.KEY_DEVICE_PASSWORD);
+            if (password != null) {
                 command.set(Command.KEY_DEVICE_PASSWORD, password);
             } else {
                 command.set(Command.KEY_DEVICE_PASSWORD, defaultPassword);

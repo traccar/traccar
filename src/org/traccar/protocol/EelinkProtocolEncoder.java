@@ -47,7 +47,7 @@ public class EelinkProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return encodeContent((String) command.getAttributes().get(Command.KEY_DATA));
+                return encodeContent(command.getString(Command.KEY_DATA));
             case Command.TYPE_ENGINE_STOP:
                 return encodeContent("RELAY,1#");
             case Command.TYPE_ENGINE_RESUME:

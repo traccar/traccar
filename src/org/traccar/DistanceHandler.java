@@ -38,9 +38,7 @@ public class DistanceHandler extends BaseDataHandler {
 
         Position last = getLastPosition(position.getDeviceId());
         if (last != null) {
-            if (last.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-                totalDistance = ((Number) last.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue();
-            }
+            totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
 
             if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {
                 distance = DistanceCalculator.distance(
@@ -49,7 +47,7 @@ public class DistanceHandler extends BaseDataHandler {
 
                 distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             } else {
-                distance = ((Number) position.getAttributes().get(Position.KEY_DISTANCE)).doubleValue();
+                distance = position.getDouble(Position.KEY_DISTANCE);
             }
         }
         if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {

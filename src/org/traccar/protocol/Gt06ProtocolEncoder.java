@@ -59,7 +59,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         boolean alternative;
         Device device = Context.getIdentityManager().getDeviceById(command.getDeviceId());
         if (device.getAttributes().containsKey("gt06.alternative")) {
-            alternative = Boolean.parseBoolean((String) device.getAttributes().get("gt06.alternative"));
+            alternative = device.getBoolean("gt06.alternative");
         } else {
             alternative = Context.getConfig().getBoolean("gt06.alternative");
         }

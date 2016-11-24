@@ -49,12 +49,8 @@ public final class Summary {
                 if (firstPosition == null) {
                     firstPosition = position;
                 }
-                if (previousPosition != null
-                        && position.getAttributes().get(Position.KEY_IGNITION) != null
-                        && Boolean.parseBoolean(position.getAttributes().get(Position.KEY_IGNITION).toString())
-                        && previousPosition.getAttributes().get(Position.KEY_IGNITION) != null
-                        && Boolean.parseBoolean(previousPosition.getAttributes()
-                                .get(Position.KEY_IGNITION).toString())) {
+                if (previousPosition != null && position.getBoolean(Position.KEY_IGNITION)
+                        && previousPosition.getBoolean(Position.KEY_IGNITION)) {
                     result.addEngineHours(position.getFixTime().getTime()
                             - previousPosition.getFixTime().getTime());
                 }

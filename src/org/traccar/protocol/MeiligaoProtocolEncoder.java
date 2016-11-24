@@ -24,7 +24,6 @@ import org.traccar.model.Command;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
 
@@ -62,13 +61,12 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         ChannelBuffer content = ChannelBuffers.dynamicBuffer();
-        Map<String, Object> attributes = command.getAttributes();
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:
                 return encodeContent(command.getDeviceId(), MSG_TRACK_ON_DEMAND, content);
             case Command.TYPE_POSITION_PERIODIC:
-                content.writeShort(((Number) attributes.get(Command.KEY_FREQUENCY)).intValue() / 10);
+                content.writeShort(command.getInteger(Command.KEY_FREQUENCY) / 10);
                 return encodeContent(command.getDeviceId(), MSG_TRACK_BY_INTERVAL, content);
             case Command.TYPE_ENGINE_STOP:
                 content.writeByte(0x01);
@@ -77,10 +75,10 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
                 content.writeByte(0x00);
                 return encodeContent(command.getDeviceId(), MSG_OUTPUT_CONTROL, content);
             case Command.TYPE_ALARM_GEOFENCE:
-                content.writeShort(((Number) attributes.get(Command.KEY_RADIUS)).intValue());
+                content.writeShort(command.getInteger(Command.KEY_RADIUS));
                 return encodeContent(command.getDeviceId(), MSG_MOVEMENT_ALARM, content);
             case Command.TYPE_SET_TIMEZONE:
-                int offset = ((Number) attributes.get(Command.KEY_TIMEZONE)).intValue() / 60;
+                int offset = command.getInteger(Command.KEY_TIMEZONE) / 60;
                 content.writeBytes(String.valueOf(offset).getBytes(StandardCharsets.US_ASCII));
                 return encodeContent(command.getDeviceId(), MSG_TIME_ZONE, content);
             case Command.TYPE_REBOOT_DEVICE:

@@ -29,7 +29,7 @@ public class Jt600ProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_ENGINE_RESUME:
                 return "(S07,1)";
             case Command.TYPE_SET_TIMEZONE:
-                int offset = ((Number) command.getAttributes().get(Command.KEY_TIMEZONE)).intValue() / 60;
+                int offset = command.getInteger(Command.KEY_TIMEZONE) / 60;
                 return "(S09,1," + offset + ")";
             case Command.TYPE_REBOOT_DEVICE:
                 return "(S17)";

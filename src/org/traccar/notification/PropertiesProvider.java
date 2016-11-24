@@ -36,7 +36,7 @@ public class PropertiesProvider {
         if (config != null) {
             return config.getString(key);
         } else {
-            return (String) extensible.getAttributes().get(key);
+            return extensible.getString(key);
         }
     }
 

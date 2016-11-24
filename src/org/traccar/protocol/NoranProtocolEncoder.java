@@ -52,7 +52,7 @@ public class NoranProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_POSITION_SINGLE:
                 return encodeContent("*KW,000,000,000000#");
             case Command.TYPE_POSITION_PERIODIC:
-                int interval = ((Number) command.getAttributes().get(Command.KEY_FREQUENCY)).intValue();
+                int interval = command.getInteger(Command.KEY_FREQUENCY);
                 return encodeContent("*KW,000,002,000000," + interval + "#");
             case Command.TYPE_POSITION_STOP:
                 return encodeContent("*KW,000,002,000000,0#");
