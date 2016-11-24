@@ -64,8 +64,6 @@ public final class ReportUtils {
         double firstOdometer = 0.0;
         double lastOdometer = 0.0;
         firstOdometer = firstPosition.getDouble(Position.KEY_ODOMETER);
-
-
         lastOdometer = lastPosition.getDouble(Position.KEY_ODOMETER);
 
         if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
