@@ -51,9 +51,8 @@ public class UserResource extends BaseResource {
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
             Context.getPermissionsManager().checkRegistration(getUserId());
             Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
-            int deviceLimit = Context.getConfig().getInteger("users.defaultDeviceLimit");
+            entity.setDeviceLimit(Context.getConfig().getInteger("users.defaultDeviceLimit"));
             int expirationDays = Context.getConfig().getInteger("users.defaultExpirationDays");
-            entity.setDeviceLimit(deviceLimit);
             if (expirationDays > 0) {
                 entity.setExpirationTime(
                     new Date(System.currentTimeMillis() + (long) expirationDays * 24 * 3600 * 1000));
