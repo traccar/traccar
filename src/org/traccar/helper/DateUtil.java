@@ -24,8 +24,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 public final class DateUtil {
 
-    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTime();
-    private static final DateTimeFormatter DATE_FORMAT_NOMILLIS = ISODateTimeFormat.dateTimeNoMillis();
+    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTimeParser();
 
     private DateUtil() {
     }
@@ -67,7 +66,7 @@ public final class DateUtil {
     }
 
     public static DateTime parseDateTime(String value) {
-        return DATE_FORMAT_NOMILLIS.withOffsetParsed().parseDateTime(value);
+        return DATE_FORMAT.withOffsetParsed().parseDateTime(value);
     }
 
 }

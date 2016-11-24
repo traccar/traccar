@@ -29,7 +29,6 @@ import org.joda.time.DateTime;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
-import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 import org.traccar.reports.model.SummaryReport;
 
@@ -84,9 +83,7 @@ public final class Summary {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            String fromString, String toString) throws SQLException, IOException {
-        DateTime from = DateUtil.parseDateTime(fromString);
-        DateTime to = DateUtil.parseDateTime(toString);
+            DateTime from, DateTime to) throws SQLException, IOException {
         Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from.toDate(), to.toDate());
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");

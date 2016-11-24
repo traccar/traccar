@@ -35,7 +35,6 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
-import org.traccar.helper.DateUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
@@ -58,11 +57,9 @@ public final class Route {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            String fromString, String toString) throws SQLException, IOException {
+            DateTime from, DateTime to) throws SQLException, IOException {
         ArrayList<DeviceReport> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        DateTime from = DateUtil.parseDateTime(fromString);
-        DateTime to = DateUtil.parseDateTime(toString);
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<Position> positions = Context.getDataManager()
