@@ -56,7 +56,7 @@ public class Event extends Message {
     public static final String TYPE_IGNITION_ON = "ignitionOn";
     public static final String TYPE_IGNITION_OFF = "ignitionOff";
 
-    public static final String TYPE_MAINTENANCE_NEEDED = "maintenanceNeeded";
+    public static final String TYPE_MAINTENANCE = "maintenance";
 
     private Date serverTime;
 

@@ -92,9 +92,9 @@ public final class NotificationFormatter {
             + "Ignition OFF%n"
             + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
-    public static final String TITLE_TEMPLATE_TYPE_MAINTENANCE_NEEDED = "%1$s: maintenance is needed";
-    public static final String MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEEDED = "Device: %1$s%n"
-            + "Maintenance is needed%n"
+    public static final String TITLE_TEMPLATE_TYPE_MAINTENANCE = "%1$s: maintenance is required";
+    public static final String MESSAGE_TEMPLATE_TYPE_MAINTENANCE = "Device: %1$s%n"
+            + "Maintenance is required%n"
             + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
@@ -140,8 +140,8 @@ public final class NotificationFormatter {
             case Event.TYPE_IGNITION_OFF:
                 formatter.format(TITLE_TEMPLATE_TYPE_IGNITION_OFF, device.getName());
                 break;
-            case Event.TYPE_MAINTENANCE_NEEDED:
-                formatter.format(TITLE_TEMPLATE_TYPE_MAINTENANCE_NEEDED, device.getName());
+            case Event.TYPE_MAINTENANCE:
+                formatter.format(TITLE_TEMPLATE_TYPE_MAINTENANCE, device.getName());
                 break;
             default:
                 formatter.format("Unknown type");
@@ -206,8 +206,8 @@ public final class NotificationFormatter {
                 formatter.format(MESSAGE_TEMPLATE_TYPE_IGNITION_OFF, device.getName(), position.getFixTime(),
                         position.getLatitude(), position.getLongitude());
                 break;
-            case Event.TYPE_MAINTENANCE_NEEDED:
-                formatter.format(MESSAGE_TEMPLATE_TYPE_MAINTENANCE_NEEDED, device.getName(), position.getFixTime(),
+            case Event.TYPE_MAINTENANCE:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_MAINTENANCE, device.getName(), position.getFixTime(),
                         position.getLatitude(), position.getLongitude());
                 break;
             default:
