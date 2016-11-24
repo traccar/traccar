@@ -51,7 +51,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Route.getExcel(stream, getUserId(), deviceIds, groupIds,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+                DateUtil.parseDateTime(from), DateUtil.parseDateTime(to));
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
@@ -77,7 +77,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Events.getExcel(stream, getUserId(), deviceIds, groupIds, types,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+                DateUtil.parseDateTime(from), DateUtil.parseDateTime(to));
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
@@ -101,7 +101,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Summary.getExcel(stream, getUserId(), deviceIds, groupIds,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+                DateUtil.parseDateTime(from), DateUtil.parseDateTime(to));
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
@@ -125,7 +125,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException, IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Trips.getExcel(stream, getUserId(), deviceIds, groupIds,
-                    DateUtil.parseDate(from), DateUtil.parseDate(to));
+                DateUtil.parseDateTime(from), DateUtil.parseDateTime(to));
 
         return Response.ok(stream.toByteArray())
                 .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
