@@ -29,8 +29,8 @@ public class CopyAttributesHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        String attributesString = Context.getDeviceManager().lookupConfigString(position.getDeviceId(),
-                "processing.copyAttributes", null);
+        String attributesString = Context.getDeviceManager().lookupAttributeString(position.getDeviceId(),
+                "processing.copyAttributes", null, false);
         Position last = getLastPosition(position.getDeviceId());
         if (attributesString != null && last != null) {
             for (String attribute : attributesString.split(" ")) {

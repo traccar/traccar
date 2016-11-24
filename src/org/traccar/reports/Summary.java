@@ -60,7 +60,7 @@ public final class Summary {
                 result.setMaxSpeed(position.getSpeed());
             }
             boolean ignoreOdometer = Context.getDeviceManager()
-                    .lookupConfigBoolean(deviceId, "report.ignoreOdometer", false);
+                    .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false);
             result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setAverageSpeed(speedSum / positions.size());
         }

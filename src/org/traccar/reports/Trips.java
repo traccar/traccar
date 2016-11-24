@@ -80,7 +80,7 @@ public final class Trips {
         trip.setEndAddress(endTrip.getAddress());
 
         boolean ignoreOdometer = Context.getDeviceManager()
-                .lookupConfigBoolean(deviceId, "report.ignoreOdometer", false);
+                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false);
         trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));

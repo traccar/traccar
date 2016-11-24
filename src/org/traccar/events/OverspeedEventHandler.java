@@ -48,7 +48,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         Collection<Event> events = new ArrayList<>();
         double speed = position.getSpeed();
         double speedLimit = Context.getDeviceManager()
-                .lookupServerDouble(device.getId(), ATTRIBUTE_SPEED_LIMIT, 0);
+                .lookupAttributeDouble(device.getId(), ATTRIBUTE_SPEED_LIMIT, 0, true);
         if (speedLimit == 0) {
             return null;
         }
