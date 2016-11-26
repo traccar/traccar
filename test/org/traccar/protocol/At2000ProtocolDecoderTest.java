@@ -3,10 +3,14 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 
+import static org.junit.Assume.assumeTrue;
+
 public class At2000ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
+
+        assumeTrue(Boolean.parseBoolean(System.getenv("CI")));
 
         At2000ProtocolDecoder decoder = new At2000ProtocolDecoder(new At2000Protocol());
 
