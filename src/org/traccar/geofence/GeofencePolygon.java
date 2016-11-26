@@ -27,35 +27,6 @@ public class GeofencePolygon extends GeofenceGeometry {
         fromWkt(wkt);
     }
 
-    private static class Coordinate {
-
-        public static final double DEGREE360 = 360;
-
-        private double lat;
-        private double lon;
-
-        public double getLat() {
-            return lat;
-        }
-
-        public void setLat(double lat) {
-            this.lat = lat;
-        }
-
-        public double getLon() {
-            return lon;
-        }
-
-        // Need not to confuse algorithm by the abrupt reset of longitude
-        public double getLon360() {
-            return lon + DEGREE360;
-        }
-
-        public void setLon(double lon) {
-            this.lon = lon;
-        }
-    }
-
     private ArrayList<Coordinate> coordinates;
 
     private double[] constant;

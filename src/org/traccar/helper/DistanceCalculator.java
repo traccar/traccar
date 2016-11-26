@@ -33,4 +33,20 @@ public final class DistanceCalculator {
         return d * 1000;
     }
 
+    public static double distanceToInterval(
+            double pointLat, double pointLon, double lat1, double lon1, double lat2, double lon2) {
+        double d0 = distance(pointLat, pointLon, lat1, lon1);
+        double d1 = distance(lat1, lon1, lat2, lon2);
+        double d2 = distance(lat2, lon2, pointLat, pointLon);
+        if (Math.pow(d0, 2) > Math.pow(d1, 2) + Math.pow(d2, 2)) {
+            return d2;
+        }
+        if (Math.pow(d2, 2) > Math.pow(d1, 2) + Math.pow(d0, 2)) {
+            return d0;
+        }
+        double halfP = (d0 + d1 + d2) * 0.5;
+        double area = Math.sqrt(halfP * (halfP - d0) * (halfP - d1) * (halfP - d2));
+        return 2 * area / d1;
+    }
+
 }
