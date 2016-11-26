@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -25,6 +27,8 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.regex.Pattern;
 
 public class UproProtocolDecoder extends BaseProtocolDecoder {
@@ -33,19 +37,17 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
+    private static final Pattern PATTERN_HEADER = new PatternBuilder()
             .text("*")
             .expression("..20")
             .expression("([01])")                // ack
             .number("(d+),")                     // device id
             .expression("(.)")                   // type
             .expression("(.)")                   // subtype
-            .expression("(.*)")                  // content
-            .expression("#?")                    // delimiter
+            .any()
             .compile();
 
     private static final Pattern PATTERN_LOCATION = new PatternBuilder()
-            .text("A")
             .number("(dd)(dd)(dd)")              // time
             .number("(dd)(dd)(dddd)")            // latitude
             .number("(ddd)(dd)(dddd)")           // longitude
@@ -88,7 +90,19 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        ChannelBuffer buf = (ChannelBuffer) msg;
+
+        if (buf.getByte(buf.readerIndex()) != '*') {
+            throw new ParseException(null, 0);
+        }
+
+        int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
+        if (headerIndex < 0) {
+            headerIndex = buf.writerIndex();
+        }
+        String header = buf.readBytes(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+
+        Parser parser = new Parser(PATTERN_HEADER, header);
         if (!parser.matches()) {
             return null;
         }
@@ -111,37 +125,57 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             channel.write("*MG20Y" + type + subtype + "#");
         }
 
-        String[] data = parser.next().split("&");
-        for (int i = 0; i < data.length; i++) {
-            if (i != 0) {
-                switch (data[i].charAt(0)) {
-                    case 'A':
-                        decodeLocation(position, data[i]);
-                        break;
-                    case 'B':
-                        position.set(Position.KEY_STATUS, data[i].substring(1));
-                        break;
-                    case 'C':
-                        long odometer = 0;
-                        for (int j = 1; j < data[i].length(); j++) {
-                            odometer <<= 4;
-                            odometer += data[i].charAt(j) - '0';
-                        }
-                        position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
-                        break;
-                    case 'P':
-                        position.set(Position.KEY_MCC, Integer.parseInt(data[i].substring(1, 5)));
-                        position.set(Position.KEY_MNC, Integer.parseInt(data[i].substring(5, 9)));
-                        position.set(Position.KEY_LAC, Integer.parseInt(data[i].substring(9, 13), 16));
-                        position.set(Position.KEY_CID, Integer.parseInt(data[i].substring(13, 17), 16));
-                        break;
-                    case 'S':
-                        position.set("obd", data[i]);
-                        break;
-                    default:
-                        break;
-                }
+        while (buf.readable()) {
+
+            buf.readByte(); // skip delimiter
+
+            byte dataType = buf.readByte();
+
+            int delimiterIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
+            if (delimiterIndex < 0) {
+                delimiterIndex = buf.writerIndex();
             }
+
+            ChannelBuffer data = buf.readBytes(delimiterIndex - buf.readerIndex());
+
+            switch (dataType) {
+                case 'A':
+                    decodeLocation(position, data.toString(StandardCharsets.US_ASCII));
+                    break;
+                case 'B':
+                    position.set(Position.KEY_STATUS, data.toString(StandardCharsets.US_ASCII));
+                    break;
+                case 'C':
+                    long odometer = 0;
+                    while (data.readable()) {
+                        odometer <<= 4;
+                        odometer += data.readByte() - (byte) '0';
+                    }
+                    position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
+                    break;
+                case 'P':
+                    position.set(Position.KEY_MCC,
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)));
+                    position.set(Position.KEY_MNC,
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)));
+                    position.set(Position.KEY_LAC,
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16));
+                    position.set(Position.KEY_CID,
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16));
+                    break;
+                case 'Q':
+                    position.set("obd-pid", ChannelBuffers.hexDump(data));
+                    break;
+                case 'R':
+                    position.set("odb-travel", ChannelBuffers.hexDump(data));
+                    break;
+                case 'S':
+                    position.set("obd-traffic", ChannelBuffers.hexDump(data));
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         if (position.getLatitude() != 0 && position.getLongitude() != 0) {
