@@ -441,5 +441,6 @@
     <entry key='extremtrac.port'>5126</entry>
     <entry key='trakmate.port'>5127</entry>
     <entry key='at2000.port'>5128</entry>
+    <entry key='maestro.port'>5129</entry>
 
 </properties>
