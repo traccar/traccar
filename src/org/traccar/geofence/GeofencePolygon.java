@@ -32,10 +32,13 @@ public class GeofencePolygon extends GeofenceGeometry {
     private double[] constant;
     private double[] multiple;
 
+    private boolean needNormalize = false;
+
     private void precalc() {
         if (coordinates == null) {
             return;
         }
+
         int polyCorners = coordinates.size();
         int i;
         int j = polyCorners - 1;
@@ -50,21 +53,38 @@ public class GeofencePolygon extends GeofenceGeometry {
         constant = new double[polyCorners];
         multiple = new double[polyCorners];
 
+        boolean hasNegative = false;
+        boolean hasPositive = false;
+        for (i = 0; i < polyCorners; i++) {
+            if (coordinates.get(i).getLon() > 90) {
+                hasPositive = true;
+            } else if (coordinates.get(i).getLon() < -90) {
+                hasNegative = true;
+            }
+        }
+        needNormalize = hasPositive && hasNegative;
 
         for (i = 0; i < polyCorners; j = i++) {
-            if (coordinates.get(j).getLon360() == coordinates.get(i).getLon360()) {
+            if (normalizeLon(coordinates.get(j).getLon()) == normalizeLon(coordinates.get(i).getLon())) {
                 constant[i] = coordinates.get(i).getLat();
                 multiple[i] = 0;
             } else {
                 constant[i] = coordinates.get(i).getLat()
-                        - (coordinates.get(i).getLon360() * coordinates.get(j).getLat())
-                        / (coordinates.get(j).getLon360() - coordinates.get(i).getLon360())
-                        + (coordinates.get(i).getLon360() * coordinates.get(i).getLat())
-                        / (coordinates.get(j).getLon360() - coordinates.get(i).getLon360());
+                        - (normalizeLon(coordinates.get(i).getLon()) * coordinates.get(j).getLat())
+                        / (normalizeLon(coordinates.get(j).getLon()) - normalizeLon(coordinates.get(i).getLon()))
+                        + (normalizeLon(coordinates.get(i).getLon()) * coordinates.get(i).getLat())
+                        / (normalizeLon(coordinates.get(j).getLon()) - normalizeLon(coordinates.get(i).getLon()));
                 multiple[i] = (coordinates.get(j).getLat() - coordinates.get(i).getLat())
-                        / (coordinates.get(j).getLon360() - coordinates.get(i).getLon360());
+                        / (normalizeLon(coordinates.get(j).getLon()) - normalizeLon(coordinates.get(i).getLon()));
             }
         }
+    }
+
+    private double normalizeLon(double lon) {
+        if (needNormalize && lon < -90) {
+            return lon + 360;
+        }
+        return lon;
     }
 
     @Override
@@ -73,15 +93,15 @@ public class GeofencePolygon extends GeofenceGeometry {
         int polyCorners = coordinates.size();
         int i;
         int j = polyCorners - 1;
-        double longitude360 = longitude + Coordinate.DEGREE360;
+        double longitudeNorm = normalizeLon(longitude);
         boolean oddNodes = false;
 
         for (i = 0; i < polyCorners; j = i++) {
-            if (coordinates.get(i).getLon360() < longitude360
-                    && coordinates.get(j).getLon360() >= longitude360
-                    || coordinates.get(j).getLon360() < longitude360
-                    && coordinates.get(i).getLon360() >= longitude360) {
-                oddNodes ^= longitude360 * multiple[i] + constant[i] < latitude;
+            if (normalizeLon(coordinates.get(i).getLon()) < longitudeNorm
+                    && normalizeLon(coordinates.get(j).getLon()) >= longitudeNorm
+                    || normalizeLon(coordinates.get(j).getLon()) < longitudeNorm
+                    && normalizeLon(coordinates.get(i).getLon()) >= longitudeNorm) {
+                oddNodes ^= longitudeNorm * multiple[i] + constant[i] < latitude;
             }
         }
         return oddNodes;

@@ -27,8 +27,6 @@ public abstract class GeofenceGeometry {
 
     public static class Coordinate {
 
-        public static final double DEGREE360 = 360;
-
         private double lat;
         private double lon;
 
@@ -42,11 +40,6 @@ public abstract class GeofenceGeometry {
 
         public double getLon() {
             return lon;
-        }
-
-        // Need not to confuse algorithm by the abrupt reset of longitude
-        public double getLon360() {
-            return lon + DEGREE360;
         }
 
         public void setLon(double lon) {

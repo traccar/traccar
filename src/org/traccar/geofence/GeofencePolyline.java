@@ -36,11 +36,10 @@ public class GeofencePolyline extends GeofenceGeometry {
 
     @Override
     public boolean containsPoint(double latitude, double longitude) {
-        double longitude360 = longitude + Coordinate.DEGREE360;
         for (int i = 1; i < coordinates.size(); i++) {
             if (DistanceCalculator.distanceToLine(
-                    latitude, longitude360, coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon360(),
-                    coordinates.get(i).getLat(), coordinates.get(i).getLon360()) <= distance) {
+                    latitude, longitude, coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
+                    coordinates.get(i).getLat(), coordinates.get(i).getLon()) <= distance) {
                 return true;
             }
         }
