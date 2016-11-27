@@ -34,7 +34,7 @@ public final class DistanceCalculator {
         return d * 1000;
     }
 
-    public static double distanceToInterval(
+    public static double distanceToLine(
             double pointLat, double pointLon, double lat1, double lon1, double lat2, double lon2) {
         double d0 = distance(pointLat, pointLon, lat1, lon1);
         double d1 = distance(lat1, lon1, lat2, lon2);
