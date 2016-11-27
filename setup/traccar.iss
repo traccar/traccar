@@ -4,6 +4,7 @@ AppVersion=3.8
 DefaultDirName={pf}\Traccar
 AlwaysRestart=yes
 OutputBaseFilename=traccar-setup
+ArchitecturesInstallIn64BitMode=x64
 
 [Dirs]
 Name: "{app}\bat"
@@ -19,10 +20,10 @@ Name: "{app}\templates"
 Source: "out\*"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Run]
-Filename: "{app}\bat\installService.bat"
+Filename: "{app}\bat\installService.bat"; Parameters: ">%TEMP%\installService.log 2>&1"; Flags: runhidden
 
 [UninstallRun]
-Filename: "{app}\bat\uninstallService.bat"
+Filename: "{app}\bat\uninstallService.bat"; Parameters: ">%TEMP%\uninstallService.log 2>&1"; Flags: runhidden
 
 [Code]
 function GetLocalMachine(): Integer;
