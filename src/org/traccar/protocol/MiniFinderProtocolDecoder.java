@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -86,7 +87,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
-            position.setSpeed(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
             position.setCourse(parser.nextDouble());
             if (position.getCourse() > 360) {
