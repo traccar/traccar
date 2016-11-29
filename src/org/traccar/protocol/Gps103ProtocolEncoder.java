@@ -42,6 +42,8 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
+            case Command.TYPE_CUSTOM:
+                return formatCommand(command, "**,imei:{%s},{%s}", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
             case Command.TYPE_POSITION_STOP:
                 return formatCommand(command, "**,imei:{%s},A", Command.KEY_UNIQUE_ID);
             case Command.TYPE_POSITION_SINGLE:
