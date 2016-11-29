@@ -112,6 +112,9 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.check(flags, 8)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
                 }
+                if (BitUtil.check(flags, 9) || BitUtil.check(flags, 10) || BitUtil.check(flags, 11)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+                }
                 if (BitUtil.check(flags, 12)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                 }
@@ -120,6 +123,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 position.set(Position.KEY_GSM, BitUtil.between(flags, 16, 20));
+                position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
 
                 position.setAltitude(parser.nextDouble());
 
