@@ -60,10 +60,10 @@ public class NotificationResource extends BaseResource {
         return Response.ok(entity).build();
     }
 
-    @Path("testmail")
-    @GET
+    @Path("test")
+    @POST
     public Response testMail() throws MessagingException {
-        NotificationMail.sendMailSync(getUserId(), new Event("unknown", 0), null);
+        NotificationMail.sendMailSync(getUserId(), new Event("test", 0), null);
         return Response.noContent().build();
     }
 
