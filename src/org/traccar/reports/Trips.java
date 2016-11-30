@@ -46,7 +46,8 @@ public final class Trips {
     private Trips() {
     }
 
-    private static TripReport calculateTrip(ArrayList<Position> positions, int startIndex, int endIndex) {
+    private static TripReport calculateTrip(
+            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
@@ -79,8 +80,6 @@ public final class Trips {
         trip.setEndTime(endTrip.getFixTime());
         trip.setEndAddress(endTrip.getAddress());
 
-        boolean ignoreOdometer = Context.getDeviceManager()
-                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
         trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
@@ -90,15 +89,14 @@ public final class Trips {
         return trip;
     }
 
-    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
-        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-        long minimalTripDuration = Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000;
-        double minimalTripDistance = Context.getConfig().getLong("report.trip.minimalTripDistance", 500);
-        long minimalParkingDuration = Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000;
-        boolean greedyParking = Context.getConfig().getBoolean("report.trip.greedyParking");
+    protected static Collection<TripReport> detectTrips(
+            double speedThreshold, double minimalTripDistance,
+            long minimalTripDuration, long minimalParkingDuration, boolean greedyParking, boolean ignoreOdometer,
+            Collection<Position> positionCollection) {
+
         Collection<TripReport> result = new ArrayList<>();
 
-        ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
+        ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (positions != null && !positions.isEmpty()) {
             int previousStartParkingIndex = 0;
             int startParkingIndex = -1;
@@ -150,7 +148,8 @@ public final class Trips {
                     if ((parkingDuration >= minimalParkingDuration || isLast)
                             && previousEndParkingIndex < startParkingIndex) {
                         if (!tripFiltered) {
-                            result.add(calculateTrip(positions, previousEndParkingIndex, startParkingIndex));
+                            result.add(calculateTrip(
+                                    positions, previousEndParkingIndex, startParkingIndex, ignoreOdometer));
                         }
                         previousEndParkingIndex = endParkingIndex;
                         skipped = false;
@@ -161,7 +160,24 @@ public final class Trips {
                 }
             }
         }
+
         return result;
+    }
+
+    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
+        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
+        long minimalTripDuration = Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000;
+        double minimalTripDistance = Context.getConfig().getLong("report.trip.minimalTripDistance", 500);
+        long minimalParkingDuration = Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000;
+        boolean greedyParking = Context.getConfig().getBoolean("report.trip.greedyParking");
+
+        boolean ignoreOdometer = Context.getDeviceManager()
+                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
+
+        return detectTrips(
+                speedThreshold, minimalTripDistance, minimalTripDuration,
+                minimalParkingDuration, greedyParking, ignoreOdometer,
+                Context.getDataManager().getPositions(deviceId, from, to));
     }
 
     public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
@@ -217,4 +233,5 @@ public final class Trips {
             transformer.write();
         }
     }
+
 }
