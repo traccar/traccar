@@ -171,6 +171,10 @@
         SELECT * FROM positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
     </entry>
 
+    <entry key='database.selectPosition'>
+        SELECT * FROM positions WHERE id = :id
+    </entry>
+
     <entry key='database.insertPosition'>
         INSERT INTO positions (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
         VALUES (:deviceId, :protocol, :now, :deviceTime, :fixTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes)

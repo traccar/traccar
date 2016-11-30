@@ -280,6 +280,12 @@ public class DataManager {
                 .executeQuery(Position.class);
     }
 
+    public Position getPosition(long positionId) throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectPosition"))
+                .setLong("id", positionId)
+                .executeQuerySingle(Position.class);
+    }
+
     public void addPosition(Position position) throws SQLException {
         position.setId(QueryBuilder.create(dataSource, getQuery("database.insertPosition"), true)
                 .setDate("now", new Date())
