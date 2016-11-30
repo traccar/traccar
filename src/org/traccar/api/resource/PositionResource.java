@@ -32,7 +32,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Path("positions")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,9 +48,18 @@ public class PositionResource extends BaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Collection<Position> getJson(
-            @QueryParam("deviceId") long deviceId, @QueryParam("from") String from, @QueryParam("to") String to)
+            @QueryParam("deviceId") long deviceId, @QueryParam("positionId") List<Long> positionIds,
+            @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
-        if (deviceId == 0) {
+        if (!positionIds.isEmpty()) {
+            ArrayList<Position> positions = new ArrayList<>();
+            for (Long positionId : positionIds) {
+                Position position = Context.getDataManager().getPosition(positionId);
+                Context.getPermissionsManager().checkDevice(getUserId(), position.getDeviceId());
+                positions.add(position);
+            }
+            return positions;
+        } else if (deviceId == 0) {
             return Context.getDeviceManager().getInitialState(getUserId());
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
@@ -81,5 +92,4 @@ public class PositionResource extends BaseResource {
                 deviceId, DateUtil.parseDate(from), DateUtil.parseDate(to)));
         return Response.ok(gpx.build()).header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_GPX).build();
     }
-
 }
