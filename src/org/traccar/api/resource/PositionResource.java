@@ -48,7 +48,7 @@ public class PositionResource extends BaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Collection<Position> getJson(
-            @QueryParam("deviceId") long deviceId, @QueryParam("positionId") List<Long> positionIds,
+            @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
             @QueryParam("from") String from, @QueryParam("to") String to)
             throws SQLException {
         if (!positionIds.isEmpty()) {
