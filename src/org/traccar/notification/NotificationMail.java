@@ -79,52 +79,51 @@ public final class NotificationMail {
         return properties;
     }
 
-    private static void sendMailSync(long userId, Event event, Position position) {
-        try {
-            User user = Context.getPermissionsManager().getUser(userId);
+    public static void sendMailSync(long userId, Event event, Position position) throws MessagingException {
+        User user = Context.getPermissionsManager().getUser(userId);
 
-            Properties properties = getProperties(new PropertiesProvider(Context.getConfig()));
+        Properties properties = getProperties(new PropertiesProvider(Context.getConfig()));
+        if (!properties.containsKey("mail.smtp.host")) {
+            properties = getProperties(new PropertiesProvider(user));
             if (!properties.containsKey("mail.smtp.host")) {
-                properties = getProperties(new PropertiesProvider(user));
-                if (!properties.containsKey("mail.smtp.host")) {
-                    Log.warning("No SMTP configuration found");
-                    return;
-                }
+                Log.warning("No SMTP configuration found");
+                return;
             }
+        }
 
-            Session session = Session.getInstance(properties);
+        Session session = Session.getInstance(properties);
 
-            MimeMessage message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
 
-            String from = properties.getProperty("mail.smtp.from");
-            if (from != null) {
-                message.setFrom(new InternetAddress(from));
-            }
+        String from = properties.getProperty("mail.smtp.from");
+        if (from != null) {
+            message.setFrom(new InternetAddress(from));
+        }
 
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-            message.setSubject(NotificationFormatter.formatTitle(userId, event, position));
-            message.setText(NotificationFormatter.formatMessage(userId, event, position));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+        message.setSubject(NotificationFormatter.formatTitle(userId, event, position));
+        message.setText(NotificationFormatter.formatMessage(userId, event, position));
 
-            Transport transport = session.getTransport();
-            try {
-                transport.connect(
-                        properties.getProperty("mail.smtp.host"),
-                        properties.getProperty("mail.smtp.username"),
-                        properties.getProperty("mail.smtp.password"));
-                transport.sendMessage(message, message.getAllRecipients());
-            } finally {
-                transport.close();
-            }
-
-        } catch (MessagingException error) {
-            Log.warning(error);
+        Transport transport = session.getTransport();
+        try {
+            transport.connect(
+                    properties.getProperty("mail.smtp.host"),
+                    properties.getProperty("mail.smtp.username"),
+                    properties.getProperty("mail.smtp.password"));
+            transport.sendMessage(message, message.getAllRecipients());
+        } finally {
+            transport.close();
         }
     }
 
     public static void sendMailAsync(final long userId, final Event event, final Position position) {
         new Thread(new Runnable() {
             public void run() {
-                sendMailSync(userId, event, position);
+                try {
+                    sendMailSync(userId, event, position);
+                } catch (MessagingException error) {
+                    Log.warning(error);
+                }
             }
         }).start();
     }

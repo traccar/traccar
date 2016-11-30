@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,7 +30,9 @@ import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.model.Event;
 import org.traccar.model.Notification;
+import org.traccar.notification.NotificationMail;
 
 @Path("users/notifications")
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,6 +58,13 @@ public class NotificationResource extends BaseResource {
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
         Context.getNotificationManager().updateNotification(entity);
         return Response.ok(entity).build();
+    }
+
+    @Path("testmail")
+    @GET
+    public Response testMail() throws MessagingException {
+        NotificationMail.sendMailSync(getUserId(), new Event("unknown", 0), null);
+        return Response.noContent().build();
     }
 
 }
