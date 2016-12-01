@@ -5,8 +5,8 @@ import java.sql.SQLException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.traccar.Context;
@@ -19,9 +19,8 @@ import org.traccar.model.Event;
 
 public class EventResource extends BaseResource {
 
-    @Path("{id}")
     @GET
-    public Event get(@PathParam("id") long id) throws SQLException {
+    public Event get(@QueryParam("id") long id) throws SQLException {
         Event event = Context.getDataManager().getEvent(id);
         Context.getPermissionsManager().checkDevice(getUserId(), event.getDeviceId());
         if (event.getGeofenceId() != 0) {
