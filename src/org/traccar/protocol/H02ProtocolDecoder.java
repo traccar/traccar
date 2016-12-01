@@ -167,6 +167,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:(dd)(dd)(dd))?,")        // date (ddmmyy)
             .any()
             .number("(x{8})")                    // status
+            .groupBegin()
+            .number(", *(x+),")                  // mcc
+            .number(" *(x+),")                   // mnc
+            .number(" *(x+),")                   // lac
+            .number(" *(x+)")                    // cid
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -236,6 +242,19 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         processStatus(position, parser.nextLong(16));
+
+        if (parser.hasNext(4)) {
+            int mcc = parser.nextInt(16);
+            int mnc = parser.nextInt(16);
+            int lac = parser.nextInt(16);
+            int cid = parser.nextInt(16);
+            if (mcc != 0 && mnc != 0 && lac != 0 && cid != 0) {
+                position.set(Position.KEY_MCC, mcc);
+                position.set(Position.KEY_MNC, mnc);
+                position.set(Position.KEY_LAC, lac);
+                position.set(Position.KEY_CID, cid);
+            }
+        }
 
         return position;
     }
