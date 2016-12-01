@@ -119,6 +119,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_OFF;
             case "door alarm":
                 return Position.ALARM_DOOR;
+            case "ac alarm":
+                return Position.ALARM_POWER_CUT;
             default:
                 return null;
         }
