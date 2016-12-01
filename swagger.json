@@ -1555,9 +1555,6 @@
                 "map": {
                     "type": "string"
                 },
-                "language": {
-                    "type": "string"
-                },
                 "distanceUnit": {
                     "type": "string"
                 },
@@ -1578,6 +1575,21 @@
                 },
                 "twelveHourFormat": {
                     "type": "boolean"
+                },
+                "coordinateFormat": {
+                    "type": "string"
+                },
+                "disabled": {
+                    "type": "boolean"
+                },
+                "expirationTime": {
+                    "type": "string"
+                },
+                "deviceLimit": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
                 },
                 "attributes": {}
             }
@@ -1619,6 +1631,15 @@
                 },
                 "twelveHourFormat": {
                     "type": "boolean"
+                },
+                "version": {
+                    "type": "string"
+                },
+                "forceSettings": {
+                    "type": "boolean"
+                },
+                "coordinateFormat": {
+                    "type": "string"
                 },
                 "attributes": {}
             }
