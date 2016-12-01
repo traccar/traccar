@@ -75,7 +75,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
             }
         }
-        position.set(Position.KEY_IGNITION, BitUtil.check(status, 10));
+        position.set(Position.KEY_IGNITION, !BitUtil.check(status, 10));
         position.set(Position.KEY_STATUS, status);
     }
 
