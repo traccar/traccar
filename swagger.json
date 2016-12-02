@@ -766,7 +766,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Position"
+                                "$ref": "#/definitions/User"
                             }
                         }
                     }
@@ -921,7 +921,7 @@
             }
         },
         "/commandtypes": {
-            "post": {
+            "get": {
                 "consumes": [
                     "application/json"
                 ],
