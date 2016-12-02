@@ -578,6 +578,8 @@
         },
         "/positions": {
             "get": {
+                "summary" : "Fetches a list of Positions",
+                "description" : "Without any params, it returns a list of last known positions for all the user's devices",
                 "consumes": [
                     "application/json"
                 ],
@@ -588,25 +590,27 @@
                     {
                         "name": "deviceId",
                         "in": "query",
-                        "description": "deviceId is optional, but requires the from and to parameters when used",
+                        "description": "_deviceId_ is optional, but requires the _from_ and _to_ parameters when used",
                         "required": false,
                         "type": "integer"
                     },
                     {
                         "name": "from",
                         "in": "query",
+                        "description": "Not required with _id_",
                         "required": false,
                         "type": "string"
                     },
                     {
                         "name": "to",
                         "in": "query",
+                        "description": "Not required with _id_",
                         "required": false,
                         "type": "string"
                     }, {
                         "name" : "id",
                         "in" : "query",
-                        "description" : "To fetch one or more Positions. Multiple params can be passed like `id=31&id=42`",
+                        "description" : "To fetch one or more positions. Multiple params can be passed like `id=31&id=42`",
                         "required" : false,
                         "type" : "integer",
                         "collectionFormat" : "multi"
@@ -615,7 +619,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
