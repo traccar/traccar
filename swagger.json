@@ -603,6 +603,13 @@
                         "in": "query",
                         "required": false,
                         "type": "string"
+                    }, {
+                        "name" : "id",
+                        "in" : "query",
+                        "description" : "To fetch one or more Positions. Multiple params can be passed like `id=31&id=42`",
+                        "required" : false,
+                        "type" : "integer",
+                        "collectionFormat" : "multi"
                     }
                 ],
                 "responses": {
