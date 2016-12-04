@@ -229,9 +229,9 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0x7e) {
-            return decodeArMessage(channel, remoteAddress,buf);
+            return decodeArMessage(channel, remoteAddress, buf);
         } else {
-            return decodeMgMessage(channel, remoteAddress,buf);
+            return decodeMgMessage(channel, remoteAddress, buf);
         }
     }
 
