@@ -12,6 +12,9 @@ public class GranitProtocolDecoderTest extends ProtocolTest {
 
         GranitProtocolDecoder decoder = new GranitProtocolDecoder(new GranitProtocol());
 
+        verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "2b444441547e84003b6d0401b10e9217445800b051398f35d34a313b000072000000010b000080b051398f35d34a313b000072000000010b0000f0b051390f33314c303b900371000000010b0000f0b05139cd31e54c2f3cd0016f000000010b0000f0b051396831204d303d950071000000010b0000f0b051397530aa4d323c610171000000010b00000a002a30420d0a"));
+
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "2b525243427e1a003e2934757c57b8b03c38d279b4e61e9bd7006b000000001c00002a4533"));
 
@@ -28,6 +31,7 @@ public class GranitProtocolDecoderTest extends ProtocolTest {
         //ERROR WRONG CHECKSUM_1
         verifyAttributes(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "4552524f522057524f4e4720434845434b53554d5f31"));
+
     }
 
 }
