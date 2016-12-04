@@ -59,10 +59,10 @@ public class NotificationManager {
                     && Context.getGeofenceManager().checkGeofence(userId, event.getGeofenceId())) {
                 Notification notification = getUserNotificationByType(userId, event.getType());
                 if (notification != null) {
-                    if (notification.getAttributes().containsKey("web")) {
+                    if (notification.getWeb()) {
                         Context.getConnectionManager().updateEvent(userId, event, position);
                     }
-                    if (notification.getAttributes().containsKey("mail")) {
+                    if (notification.getMail()) {
                         NotificationMail.sendMailAsync(userId, event, position);
                     }
                 }
@@ -130,8 +130,11 @@ public class NotificationManager {
     public void updateNotification(Notification notification) {
         Notification cachedNotification = getUserNotificationByType(notification.getUserId(), notification.getType());
         if (cachedNotification != null) {
-            if (!cachedNotification.getAttributes().equals(notification.getAttributes())) {
-                if (notification.getAttributes().isEmpty()) {
+            if (cachedNotification.getWeb() != notification.getWeb()
+                    || cachedNotification.getMail() != notification.getMail()
+                    || !cachedNotification.getAttributes().equals(notification.getAttributes())) {
+                if (!notification.getWeb() && !notification.getMail()
+                        && notification.getAttributes().isEmpty()) {
                     try {
                         dataManager.removeNotification(cachedNotification);
                     } catch (SQLException error) {
@@ -146,6 +149,8 @@ public class NotificationManager {
                 } else {
                     notificationsLock.writeLock().lock();
                     try {
+                        cachedNotification.setWeb(notification.getWeb());
+                        cachedNotification.setMail(notification.getMail());
                         cachedNotification.setAttributes(notification.getAttributes());
                     } finally {
                         notificationsLock.writeLock().unlock();
@@ -159,7 +164,7 @@ public class NotificationManager {
             } else {
                 notification.setId(cachedNotification.getId());
             }
-        } else if (!notification.getAttributes().isEmpty()) {
+        } else if (notification.getWeb() || notification.getMail() || !notification.getAttributes().isEmpty()) {
             try {
                 dataManager.addNotification(notification);
             } catch (SQLException error) {
@@ -191,6 +196,18 @@ public class NotificationManager {
             }
         }
         return notifications;
+    }
+
+    public Collection<Notification> getAllUserNotifications(long userId) {
+        Map<String, Notification> notifications = new HashMap<>();
+        for (Notification notification : getAllNotifications()) {
+            notification.setUserId(userId);
+            notifications.put(notification.getType(), notification);
+        }
+        for (Notification notification : getUserNotifications(userId)) {
+            notifications.put(notification.getType(), notification);
+        }
+        return notifications.values();
     }
 
 }

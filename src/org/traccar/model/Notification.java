@@ -37,4 +37,25 @@ public class Notification extends Extensible {
         this.type = type;
     }
 
+    private boolean web;
+
+    public boolean getWeb() {
+        return web;
+    }
+
+    public void setWeb(boolean web) {
+        this.web = web;
+    }
+
+    private boolean mail;
+
+    public boolean getMail() {
+        return mail;
+    }
+
+    public void setMail(boolean mail) {
+        this.mail = mail;
+    }
+
+
 }

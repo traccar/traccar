@@ -49,7 +49,7 @@ public class NotificationResource extends BaseResource {
             userId = getUserId();
         }
         Context.getPermissionsManager().checkUser(getUserId(), userId);
-        return Context.getNotificationManager().getUserNotifications(userId);
+        return Context.getNotificationManager().getAllUserNotifications(userId);
     }
 
     @POST
