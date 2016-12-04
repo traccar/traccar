@@ -21,6 +21,7 @@ public final class UnitsConverter {
     private static final double KNOTS_TO_MPH_RATIO = 0.868976;
     private static final double KNOTS_TO_MPS_RATIO = 1.94384;
     private static final double KNOTS_TO_CPS_RATIO = 0.0194384449;
+    private static final double METERS_TO_FEET_RATIO = 0.3048;
 
     private UnitsConverter() {
     }
@@ -51,6 +52,14 @@ public final class UnitsConverter {
 
     public static double knotsFromCps(double value) { // cm/s
         return value * KNOTS_TO_CPS_RATIO;
+    }
+
+    public static double feetFromMeters(double value) {
+        return value / METERS_TO_FEET_RATIO;
+    }
+
+    public static double metersFromFeet(double value) {
+        return value * METERS_TO_FEET_RATIO;
     }
 
 }

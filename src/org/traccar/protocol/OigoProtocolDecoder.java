@@ -34,15 +34,12 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    public static final int MSG_LOCATION = 0x00;
-    public static final int MSG_REMOTE_START = 0x10;
+    public static final int MSG_AR_LOCATION = 0x00;
+    public static final int MSG_AR_REMOTE_START = 0x10;
+
     public static final int MSG_ACKNOWLEDGEMENT = 0xE0;
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        ChannelBuffer buf = (ChannelBuffer) msg;
+    private Position decodeArMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         buf.skipBytes(1); // header
         buf.readUnsignedShort(); // length
@@ -67,7 +64,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
-        if (deviceSession == null || type != MSG_LOCATION) {
+        if (deviceSession == null || type != MSG_AR_LOCATION) {
             return null;
         }
 
@@ -152,6 +149,90 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
+    }
+
+    private double convertCoordinate(long value) {
+        boolean negative = value < 0;
+        value = Math.abs(value);
+        double minutes = (value % 100000) * 0.001;
+        double degrees = value / 100000 + minutes / 60;
+        return negative ? -degrees : degrees;
+    }
+
+    private Position decodeMgMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+
+        buf.readUnsignedByte(); // tag
+        int flags = buf.getUnsignedByte(buf.readerIndex());
+
+        DeviceSession deviceSession;
+        if (BitUtil.check(flags, 6)) {
+            buf.readUnsignedByte(); // flags
+            deviceSession = getDeviceSession(channel, remoteAddress);
+        } else {
+            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        }
+
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        buf.skipBytes(8); // imsi
+
+        int date = buf.readUnsignedShort();
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(2010 + BitUtil.from(date, 12), BitUtil.between(date, 8, 12), BitUtil.to(date, 8))
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), 0);
+
+        position.setValid(true);
+        position.setLatitude(convertCoordinate(buf.readInt()));
+        position.setLongitude(convertCoordinate(buf.readInt()));
+
+        position.setAltitude(UnitsConverter.metersFromFeet(buf.readShort()));
+        position.setCourse(buf.readUnsignedShort());
+        position.setSpeed(UnitsConverter.knotsFromMph(buf.readUnsignedByte()));
+
+        position.set(Position.KEY_POWER, buf.readUnsignedByte() * 100 + "mV");
+        position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
+
+        dateBuilder.setSecond(buf.readUnsignedByte());
+        position.setTime(dateBuilder.getDate());
+
+        position.set(Position.KEY_GSM, buf.readUnsignedByte());
+
+        int index = buf.readUnsignedByte();
+
+        position.set(Position.KEY_VERSION, buf.readUnsignedByte());
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+        position.set(Position.KEY_ODOMETER, (long) (buf.readUnsignedInt() * 1609.34));
+
+        if (channel != null && BitUtil.check(flags, 7)) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeByte(MSG_ACKNOWLEDGEMENT);
+            response.writeByte(index);
+            response.writeByte(0x00);
+            channel.write(response, remoteAddress);
+        }
+
+        return position;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        ChannelBuffer buf = (ChannelBuffer) msg;
+
+        if (buf.getUnsignedByte(buf.readerIndex()) == 0x7e) {
+            return decodeArMessage(channel, remoteAddress,buf);
+        } else {
+            return decodeMgMessage(channel, remoteAddress,buf);
+        }
     }
 
 }
