@@ -744,35 +744,25 @@
         },
         "/geofences": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of Geofences",
+                "description": "Without params, it returns a list of Geofences the user has access to",
                 "parameters": [
                     {
-                        "name": "all",
-                        "in": "query",
-                        "required": true,
-                        "type": "boolean"
+                        "$ref": "#/parameters/all"
                     },
                     {
                         "name": "userId",
                         "in": "query",
-                        "required": true,
                         "type": "integer"
                     },
                     {
                         "name": "groupId",
                         "in": "query",
-                        "required": true,
                         "type": "integer"
                     },
                     {
                         "name": "deviceId",
                         "in": "query",
-                        "required": true,
                         "type": "integer"
                     },
                     {
@@ -785,7 +775,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -796,12 +785,7 @@
                 }
             },
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Create a Geofence",
                 "parameters": [
                     {
                         "name": "body",
@@ -815,7 +799,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Geofence"
                         }
@@ -825,18 +808,10 @@
         },
         "/geofences/{id}": {
             "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update a Geofence",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     },
                     {
                         "name": "body",
@@ -850,7 +825,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Geofence"
                         }
@@ -858,48 +832,29 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Delete a Geofence",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
         },
         "/events/{id}": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Event"
                         }
