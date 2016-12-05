@@ -48,16 +48,10 @@
                 "description": "Without any params, returns a list of the user's devices",
                 "parameters": [
                     {
-                        "name": "all",
-                        "in": "query",
-                        "description": "Can only be used by admin users to fetch all entities",
-                        "type": "boolean"
+                        "$ref": "#/parameters/all"
                     },
                     {
-                        "name": "userId",
-                        "in": "query",
-                        "description": "Standard users can use this with their only with their own _userId_",
-                        "type": "integer"
+                        "$ref": "#/parameters/userId"
                     }
                 ],
                 "responses": {
@@ -202,30 +196,19 @@
         },
         "/groups": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of Groups",
+                "description": "Without any params, returns a list of the Groups the user belongs to",
                 "parameters": [
                     {
-                        "name": "all",
-                        "in": "query",
-                        "required": true,
-                        "type": "boolean"
+                        "$ref": "#/parameters/all"
                     },
                     {
-                        "name": "userId",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/userId"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -236,12 +219,7 @@
                 }
             },
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Create a Group",
                 "parameters": [
                     {
                         "name": "body",
@@ -255,28 +233,22 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Group"
                         }
+                    },
+                    "400": {
+                      "description": "No permission"
                     }
                 }
             }
         },
         "/groups/{id}": {
             "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update a Group",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     },
                     {
                         "name": "body",
@@ -290,7 +262,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Group"
                         }
@@ -298,36 +269,22 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Delete a Group",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
         },
         "/groups/geofences": {
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Link a Geofence to a Group",
                 "parameters": [
                     {
                         "name": "body",
@@ -341,7 +298,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/GroupGeofence"
                         }
@@ -349,12 +305,7 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Remove a Geofence from a Group",
                 "parameters": [
                     {
                         "name": "body",
@@ -367,8 +318,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
@@ -1907,6 +1857,18 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "type": "integer"
+        },
+        "all": {
+            "name": "all",
+            "in": "query",
+            "description": "Can only be used by admin users to fetch all entities",
+            "type": "boolean"
+        },
+        "userId": {
+            "name": "userId",
+            "in": "query",
+            "description": "Standard users can use this with their only with their own _userId_",
             "type": "integer"
         }
     }
