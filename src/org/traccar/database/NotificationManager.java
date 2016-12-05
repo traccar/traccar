@@ -131,10 +131,8 @@ public class NotificationManager {
         Notification cachedNotification = getUserNotificationByType(notification.getUserId(), notification.getType());
         if (cachedNotification != null) {
             if (cachedNotification.getWeb() != notification.getWeb()
-                    || cachedNotification.getMail() != notification.getMail()
-                    || !cachedNotification.getAttributes().equals(notification.getAttributes())) {
-                if (!notification.getWeb() && !notification.getMail()
-                        && notification.getAttributes().isEmpty()) {
+                    || cachedNotification.getMail() != notification.getMail()) {
+                if (!notification.getWeb() && !notification.getMail()) {
                     try {
                         dataManager.removeNotification(cachedNotification);
                     } catch (SQLException error) {
@@ -164,7 +162,7 @@ public class NotificationManager {
             } else {
                 notification.setId(cachedNotification.getId());
             }
-        } else if (notification.getWeb() || notification.getMail() || !notification.getAttributes().isEmpty()) {
+        } else if (notification.getWeb() || notification.getMail()) {
             try {
                 dataManager.addNotification(notification);
             } catch (SQLException error) {

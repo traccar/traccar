@@ -56,6 +56,4 @@ public class Notification extends Extensible {
     public void setMail(boolean mail) {
         this.mail = mail;
     }
-
-
 }
