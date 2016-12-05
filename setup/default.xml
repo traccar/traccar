@@ -264,14 +264,16 @@
     </entry>
 
     <entry key='database.insertNotification'>
-        INSERT INTO notifications (userId, type, attributes)
-        VALUES (:userId, :type, :attributes)
+        INSERT INTO notifications (userId, type, web, mail, attributes)
+        VALUES (:userId, :type, :web, :mail, :attributes)
     </entry>
 
     <entry key='database.updateNotification'>
         UPDATE notifications SET
         userId = :userId,
         type = :type,
+        web = :web,
+        mail = :mail,
         attributes = :attributes
         WHERE id = :id
     </entry>
