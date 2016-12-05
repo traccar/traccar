@@ -44,36 +44,34 @@
         },
         "/devices": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of Devices",
+                "description": "Without any params, returns a list of the user's devices",
                 "parameters": [
                     {
                         "name": "all",
                         "in": "query",
-                        "required": true,
+                        "description": "Can only be used by admin users to fetch all entities",
                         "type": "boolean"
                     },
                     {
                         "name": "userId",
                         "in": "query",
-                        "required": true,
+                        "description": "Standard users can use this with their only with their own _userId_",
                         "type": "integer"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/Device"
                             }
                         }
+                    },
+                    "400": {
+                      "description": "No permission"
                     }
                 }
             },
