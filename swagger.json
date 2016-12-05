@@ -9,6 +9,12 @@
     "schemes": [
         "http"
     ],
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
     "paths": {
         "/commands": {
             "post": {
