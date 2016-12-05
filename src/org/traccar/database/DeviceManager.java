@@ -253,7 +253,6 @@ public class DeviceManager implements IdentityManager {
             Set<String> databaseGroupsNames = new HashSet<>();
             for (Group group : databaseGroups) {
                 databaseGroupsIds.add(group.getId());
-                databaseGroupsNames.add(group.getName());
                 if (groupsById.containsKey(group.getId())) {
                     Group cachedGroup = groupsById.get(group.getId());
                     cachedGroup.setName(group.getName());
