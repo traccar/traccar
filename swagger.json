@@ -17,13 +17,8 @@
     ],
     "paths": {
         "/commands": {
+            "summary": "Dispatch commands to device",
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
                 "parameters": [
                     {
                         "name": "body",
@@ -37,10 +32,12 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Command"
                         }
+                    },
+                    "400": {
+                        "description": "Could happen when dispatching to the device is offline, the user doesn't have permission or an incorrect command _type_."
                     }
                 }
             }
