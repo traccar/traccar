@@ -76,12 +76,7 @@
                 }
             },
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Create a Device",
                 "parameters": [
                     {
                         "name": "body",
@@ -95,7 +90,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Device"
                         }
@@ -105,18 +99,10 @@
         },
         "/devices/{id}": {
             "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update a Device",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     },
                     {
                         "name": "body",
@@ -130,7 +116,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Device"
                         }
@@ -138,42 +123,25 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update a Device",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
         },
         "/devices/{id}/distance": {
             "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update the distance counter of the Device",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     },
                     {
                         "name": "body",
@@ -186,20 +154,14 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
         },
         "/devices/geofences": {
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Link a Geofence to a Device",
                 "parameters": [
                     {
                         "name": "body",
@@ -213,7 +175,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/DeviceGeofence"
                         }
@@ -221,12 +182,7 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Remove a Geofence from a Device",
                 "parameters": [
                     {
                         "name": "body",
@@ -239,8 +195,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
@@ -1945,6 +1900,14 @@
                     "type": "number"
                 }
             }
+        }
+    },
+    "parameters": {
+        "entityId": {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer"
         }
     }
 }
