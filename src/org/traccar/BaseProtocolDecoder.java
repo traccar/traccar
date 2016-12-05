@@ -41,12 +41,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         device.setCategory(Context.getConfig().getString("database.registerUnknown.defaultCategory", "default"));
 
         if(!defaultGroupName.equals("NOTDEFINED")){
-//            for (Group g:Context.getDeviceManager().getAllGroups()) {
-//                if(g.getName().equalsIgnoreCase(defaultGroupName)){
-//                    device.setGroupId(g.getGroupId());
-//                    break;
-//                }
-//            }
             Group defaultGroup = Context.getDeviceManager().getGroupByName(defaultGroupName);
             if(defaultGroup != null)
                 device.setGroupId(defaultGroup.getId());
