@@ -452,13 +452,7 @@
         "/positions": {
             "get": {
                 "summary" : "Fetches a list of Positions",
-                "description" : "Without any params, it returns a list of last known positions for all the user's devices",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "description" : "Without any params, it returns a list of last known positions for all the user's Devices. _from_ and _to_ fields are not required with _id_",
                 "parameters": [
                     {
                         "name": "deviceId",
@@ -468,19 +462,12 @@
                         "type": "integer"
                     },
                     {
-                        "name": "from",
-                        "in": "query",
-                        "description": "Not required with _id_",
-                        "required": false,
-                        "type": "string"
+                        "$ref": "#/parameters/fromTime"
                     },
                     {
-                        "name": "to",
-                        "in": "query",
-                        "description": "Not required with _id_",
-                        "required": false,
-                        "type": "string"
-                    }, {
+                        "$ref": "#/parameters/toTime"
+                    },
+                    {
                         "name" : "id",
                         "in" : "query",
                         "description" : "To fetch one or more positions. Multiple params can be passed like `id=31&id=42`",
@@ -504,17 +491,10 @@
         },
         "/server": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [],
+                "summary": "Fetch Server information",
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Server"
                         }
@@ -522,12 +502,7 @@
                 }
             },
             "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update Server information",
                 "parameters": [
                     {
                         "name": "body",
@@ -541,7 +516,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Server"
                         }
@@ -551,33 +525,26 @@
         },
         "/session": {
             "get": {
+                "summary": "Fetch Session information",
                 "consumes": [
                     "application/x-www-form-urlencoded"
                 ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/User"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
-                        "headers": {}
+                        "description": "Not Found"
                     }
                 }
             },
             "post": {
+                "summary": "Create a new Session",
                 "consumes": [
                     "application/x-www-form-urlencoded"
-                ],
-                "produces": [
-                    "application/json"
                 ],
                 "parameters": [
                     {
@@ -590,35 +557,31 @@
                         "name": "password",
                         "in": "formData",
                         "required": true,
-                        "type": "string"
+                        "type": "string",
+                        "format": "password"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/User"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
-                        "headers": {}
+                        "description": "Unauthorized"
                     }
                 }
             },
             "delete": {
+                "summary": "Close the Session",
                 "consumes": [
                     "application/x-www-form-urlencoded"
-                ],
-                "produces": [
-                    "application/json"
                 ],
                 "parameters": [],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
@@ -1837,6 +1800,20 @@
             "in": "query",
             "description": "Standard users can use this with their only with their own _userId_",
             "type": "integer"
+        },
+        "fromTime": {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+        },
+        "toTime": {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
         }
     }
 }
