@@ -250,7 +250,6 @@ public class DeviceManager implements IdentityManager {
                 groupsByName = new ConcurrentHashMap<>(databaseGroups.size());
             }
             Set<Long> databaseGroupsIds = new HashSet<>();
-            Set<String> databaseGroupsNames = new HashSet<>();
             for (Group group : databaseGroups) {
                 databaseGroupsIds.add(group.getId());
                 if (groupsById.containsKey(group.getId())) {
