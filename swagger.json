@@ -588,33 +588,24 @@
         },
         "/users": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [],
+                "summary": "Fetch a list of Users",
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/User"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "No Permission"
                     }
                 }
             },
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Create a User",
                 "parameters": [
                     {
                         "name": "body",
@@ -628,7 +619,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/User"
                         }
@@ -638,18 +628,10 @@
         },
         "/users/{id}": {
             "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update a User",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     },
                     {
                         "name": "body",
@@ -663,7 +645,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/User"
                         }
@@ -671,54 +652,38 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Delete a User",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
         },
         "/users/notifications": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of Notification types",
+                "description": "Without params, it returns a list of the user's enabled Notifications",
                 "parameters": [
                     {
                         "name": "all",
                         "in": "query",
+                        "description": "To fetch a list of all available Notifications",
                         "required": true,
                         "type": "boolean"
                     },
                     {
-                        "name": "userId",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/userId"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -729,12 +694,7 @@
                 }
             },
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Set or unset a Notification",
                 "parameters": [
                     {
                         "name": "body",
@@ -748,7 +708,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/Notification"
                         }
@@ -758,12 +717,7 @@
         },
         "/commandtypes": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of available Commands for the Device",
                 "parameters": [
                     {
                         "name": "deviceId",
@@ -775,13 +729,15 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/CommandType"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Could happen when trying to fetch from an pffline device or the user does not have permission"
                     }
                 }
             }
