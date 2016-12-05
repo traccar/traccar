@@ -29,6 +29,10 @@ import java.util.regex.Pattern;
 
 public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final int MAX_CHUNK_SIZE = 960;
+
+    private byte[] photo;
+
     public Pt502ProtocolDecoder(Pt502Protocol protocol) {
         super(protocol);
     }
@@ -92,7 +96,8 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         String type = parser.next();
 
         if (type.startsWith("PHO") && channel != null) {
-            channel.write("#PHD0," + type.substring(3) + "\r\n");
+            photo = new byte[Integer.parseInt(type.substring(3))];
+            channel.write("#PHD0," + Math.min(photo.length, MAX_CHUNK_SIZE) + "\r\n");
         }
 
         position.set(Position.KEY_ALARM, decodeAlarm(type));
