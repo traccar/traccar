@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,15 @@ public class ConsoleServlet extends WebServlet {
                     + Context.getConfig().getString("database.url") + "|"
                     + Context.getConfig().getString("database.user"));
 
-            Method method = org.h2.server.web.WebServer.class.getDeclaredMethod("updateSetting", ConnectionInfo.class);
+            Method method;
+
+            method = org.h2.server.web.WebServer.class.getDeclaredMethod("updateSetting", ConnectionInfo.class);
             method.setAccessible(true);
             method.invoke(server, connectionInfo);
+
+            method = org.h2.server.web.WebServer.class.getDeclaredMethod("setAllowOthers", boolean.class);
+            method.setAccessible(true);
+            method.invoke(server, true);
 
         } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             Log.warning(e);

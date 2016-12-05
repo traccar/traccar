@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class T800xProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
-                return encodeContent(command, (String) command.getAttributes().get(Command.KEY_DATA));
+                return encodeContent(command, command.getString(Command.KEY_DATA));
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

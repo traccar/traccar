@@ -71,7 +71,7 @@ debug = '-v' in sys.argv
 def load_ports():
     ports = {}
     dir = os.path.dirname(os.path.abspath(__file__))
-    root = xml.etree.ElementTree.parse(dir + '/../debug.xml').getroot()
+    root = xml.etree.ElementTree.parse(dir + '/../setup/default.xml').getroot()
     for entry in root.findall('entry'):
         key = entry.attrib['key']
         if key.endswith('.port'):

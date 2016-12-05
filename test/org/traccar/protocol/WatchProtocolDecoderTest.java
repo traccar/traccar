@@ -11,6 +11,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         WatchProtocolDecoder decoder = new WatchProtocolDecoder(new WatchProtocol());
 
         verifyPosition(decoder, text(
+                "[3G*6430073509*00E7*UD2,241016,081622,V,09.951861,N,-84.1422119,W,0.00,0.0,0.0,0,39,94,0,0,00000000,1,0,712,3,2007,18961,123,4,Luz,00:23:6a:34:ee:76,-70,familia,b0:c5:54:b9:90:ef,-78,fam salas delgado,fc:b4:e6:5d:50:ea,-81,QWERTY,c8:3a:35:43:0f:e8,-93"));
+
+        verifyPosition(decoder, text(
                 "[3G*6105117105*008D*UD2,210716,231601,V,-33.480366,N,-70.7630692,E,0.00,0.0,0.0,0,100,34,0,0,00000000,3,255,730,2,29731,54315,167,29731,54316,162,29731,54317,145"),
                 position("2016-07-21 23:16:01.000", false, -33.48037, -70.76307));
 

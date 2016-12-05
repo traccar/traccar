@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,46 @@ public class Extensible {
     public void add(Map.Entry<String, Object> entry) {
         if (entry != null && entry.getValue() != null) {
             attributes.put(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public String getString(String key) {
+        if (attributes.containsKey(key)) {
+            return (String) attributes.get(key);
+        } else {
+            return null;
+        }
+    }
+
+    public double getDouble(String key) {
+        if (attributes.containsKey(key)) {
+            return ((Number) attributes.get(key)).doubleValue();
+        } else {
+            return 0.0;
+        }
+    }
+
+    public boolean getBoolean(String key) {
+        if (attributes.containsKey(key)) {
+            return Boolean.parseBoolean(attributes.get(key).toString());
+        } else {
+            return false;
+        }
+    }
+
+    public int getInteger(String key) {
+        if (attributes.containsKey(key)) {
+            return ((Number) attributes.get(key)).intValue();
+        } else {
+            return 0;
+        }
+    }
+
+    public long getLong(String key) {
+        if (attributes.containsKey(key)) {
+            return ((Number) attributes.get(key)).longValue();
+        } else {
+            return 0;
         }
     }
 

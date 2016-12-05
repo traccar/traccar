@@ -1,14 +1,12 @@
 package org.traccar.api.resource;
 
 import java.sql.SQLException;
-import java.util.Collection;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.traccar.Context;
@@ -26,14 +24,9 @@ public class EventResource extends BaseResource {
     public Event get(@PathParam("id") long id) throws SQLException {
         Event event = Context.getDataManager().getEvent(id);
         Context.getPermissionsManager().checkDevice(getUserId(), event.getDeviceId());
+        if (event.getGeofenceId() != 0) {
+            Context.getPermissionsManager().checkGeofence(getUserId(), event.getGeofenceId());
+        }
         return event;
-    }
-
-    @GET
-    public Collection<Event> get(
-            @QueryParam("deviceId") long deviceId, @QueryParam("type") String type,
-            @QueryParam("interval") int interval) throws SQLException {
-        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        return Context.getDataManager().getLastEvents(deviceId, type, interval);
     }
 }

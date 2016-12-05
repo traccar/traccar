@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,12 @@ public class Event extends Message {
     public Event() {
     }
 
+    public static final String ALL_EVENTS = "allEvents";
+
     public static final String TYPE_COMMAND_RESULT = "commandResult";
 
     public static final String TYPE_DEVICE_ONLINE = "deviceOnline";
+    public static final String TYPE_DEVICE_UNKNOWN = "deviceUnknown";
     public static final String TYPE_DEVICE_OFFLINE = "deviceOffline";
 
     public static final String TYPE_DEVICE_MOVING = "deviceMoving";
@@ -52,6 +55,8 @@ public class Event extends Message {
 
     public static final String TYPE_IGNITION_ON = "ignitionOn";
     public static final String TYPE_IGNITION_OFF = "ignitionOff";
+
+    public static final String TYPE_MAINTENANCE = "maintenance";
 
     private Date serverTime;
 

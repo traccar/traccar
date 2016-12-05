@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,13 @@ package org.traccar.helper;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
 public final class DateUtil {
+
+    private static final DateTimeFormatter DATE_FORMAT = ISODateTimeFormat.dateTimeParser();
 
     private DateUtil() {
     }
@@ -53,6 +59,14 @@ public final class DateUtil {
         calendar.setTime(guess);
         calendar.add(field, amount);
         return calendar.getTime();
+    }
+
+    public static Date parseDate(String value) {
+        return DATE_FORMAT.parseDateTime(value).toDate();
+    }
+
+    public static DateTime parseDateTime(String value) {
+        return DATE_FORMAT.withOffsetParsed().parseDateTime(value);
     }
 
 }

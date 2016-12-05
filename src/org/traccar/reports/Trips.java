@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
- * Copyright 2016 Andrey Kunitsyn (abyss@fox5.ru)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,38 @@
  */
 package org.traccar.reports;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-
+import org.joda.time.DateTime;
+import org.jxls.area.Area;
+import org.jxls.builder.xls.XlsCommentAreaBuilder;
+import org.jxls.common.CellRef;
+import org.jxls.formula.StandardFormulaProcessor;
+import org.jxls.transform.Transformer;
+import org.jxls.transform.poi.PoiTransformer;
+import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
+import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.web.CsvBuilder;
-import org.traccar.web.JsonConverter;
 
 public final class Trips {
 
     private Trips() {
     }
 
-    private static TripReport calculateTrip(ArrayList<Position> positions, int startIndex, int endIndex) {
+    private static TripReport calculateTrip(
+            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
@@ -50,18 +62,24 @@ public final class Trips {
         }
 
         TripReport trip = new TripReport();
+
         long tripDuration = endTrip.getFixTime().getTime() - positions.get(startIndex).getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
         trip.setDeviceName(Context.getIdentityManager().getDeviceById(deviceId).getName());
+
         trip.setStartPositionId(startTrip.getId());
+        trip.setStartLat(startTrip.getLatitude());
+        trip.setStartLon(startTrip.getLongitude());
         trip.setStartTime(startTrip.getFixTime());
         trip.setStartAddress(startTrip.getAddress());
+
         trip.setEndPositionId(endTrip.getId());
+        trip.setEndLat(endTrip.getLatitude());
+        trip.setEndLon(endTrip.getLongitude());
         trip.setEndTime(endTrip.getFixTime());
         trip.setEndAddress(endTrip.getAddress());
-        boolean ignoreOdometer = Context.getDeviceManager()
-                .lookupConfigBoolean(deviceId, "report.ignoreOdometer", false);
+
         trip.setDistance(ReportUtils.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
@@ -71,15 +89,14 @@ public final class Trips {
         return trip;
     }
 
-    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
-        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-        long minimalTripDuration = Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000;
-        double minimalTripDistance = Context.getConfig().getLong("report.trip.minimalTripDistance", 500);
-        long minimalParkingDuration = Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000;
-        boolean greedyParking = Context.getConfig().getBoolean("report.trip.greedyParking");
+    protected static Collection<TripReport> detectTrips(
+            double speedThreshold, double minimalTripDistance,
+            long minimalTripDuration, long minimalParkingDuration, boolean greedyParking, boolean ignoreOdometer,
+            Collection<Position> positionCollection) {
+
         Collection<TripReport> result = new ArrayList<>();
 
-        ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
+        ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (positions != null && !positions.isEmpty()) {
             int previousStartParkingIndex = 0;
             int startParkingIndex = -1;
@@ -131,7 +148,8 @@ public final class Trips {
                     if ((parkingDuration >= minimalParkingDuration || isLast)
                             && previousEndParkingIndex < startParkingIndex) {
                         if (!tripFiltered) {
-                            result.add(calculateTrip(positions, previousEndParkingIndex, startParkingIndex));
+                            result.add(calculateTrip(
+                                    positions, previousEndParkingIndex, startParkingIndex, ignoreOdometer));
                         }
                         previousEndParkingIndex = endParkingIndex;
                         skipped = false;
@@ -142,29 +160,78 @@ public final class Trips {
                 }
             }
         }
+
         return result;
     }
 
-    public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException {
-        JsonArrayBuilder json = Json.createArrayBuilder();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
-            for (TripReport tripReport : detectTrips(deviceId, from, to)) {
-                json.add(JsonConverter.objectToJson(tripReport));
-            }
-        }
-        return json.build().toString();
+    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
+        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
+        long minimalTripDuration = Context.getConfig().getLong("report.trip.minimalTripDuration", 300) * 1000;
+        double minimalTripDistance = Context.getConfig().getLong("report.trip.minimalTripDistance", 500);
+        long minimalParkingDuration = Context.getConfig().getLong("report.trip.minimalParkingDuration", 300) * 1000;
+        boolean greedyParking = Context.getConfig().getBoolean("report.trip.greedyParking");
+
+        boolean ignoreOdometer = Context.getDeviceManager()
+                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, true);
+
+        return detectTrips(
+                speedThreshold, minimalTripDistance, minimalTripDuration,
+                minimalParkingDuration, greedyParking, ignoreOdometer,
+                Context.getDataManager().getPositions(deviceId, from, to));
     }
 
-    public static String getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
-        CsvBuilder csv = new CsvBuilder();
-        csv.addHeaderLine(new TripReport());
+        ArrayList<TripReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            csv.addArray(detectTrips(deviceId, from, to));
+            result.addAll(detectTrips(deviceId, from, to));
         }
-        return csv.build();
+        return result;
     }
+
+    public static void getExcel(OutputStream outputStream,
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            DateTime from, DateTime to) throws SQLException, IOException {
+        ArrayList<DeviceReport> devicesTrips = new ArrayList<>();
+        ArrayList<String> sheetNames = new ArrayList<>();
+        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+            Context.getPermissionsManager().checkDevice(userId, deviceId);
+            Collection<TripReport> trips = detectTrips(deviceId, from.toDate(), to.toDate());
+            DeviceReport deviceTrips = new DeviceReport();
+            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            deviceTrips.setDeviceName(device.getName());
+            sheetNames.add(deviceTrips.getDeviceName());
+            if (device.getGroupId() != 0) {
+                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                if (group != null) {
+                    deviceTrips.setGroupName(group.getName());
+                }
+            }
+            deviceTrips.setObjects(trips);
+            devicesTrips.add(deviceTrips);
+        }
+        String templatePath = Context.getConfig().getString("report.templatesPath",
+                "templates/export/");
+        try (InputStream inputStream = new FileInputStream(templatePath + "/trips.xlsx")) {
+            org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
+            jxlsContext.putVar("devices", devicesTrips);
+            jxlsContext.putVar("sheetNames", sheetNames);
+            jxlsContext.putVar("from", from);
+            jxlsContext.putVar("to", to);
+            jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
+            jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
+            jxlsContext.putVar("timezone", from.getZone());
+            Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
+            List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
+            for (Area xlsArea : xlsAreas) {
+                xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), jxlsContext);
+                xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
+                xlsArea.processFormulas();
+            }
+            transformer.deleteSheet(xlsAreas.get(0).getStartCellRef().getSheetName());
+            transformer.write();
+        }
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,13 +90,14 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .text("DTT:")
             .number("(x+);")                     // status
-            .expression("[^;]*;")
-            .number("x+;")                       // geo-fence 0-119
-            .number("x+;")                       // geo-fence 120-155
-            .number("x+,?")                      // event status
+            .number("(x+)?;")                    // io
+            .number("(x+);")                     // geo-fence 0-119
+            .number("(x+);")                     // geo-fence 120-155
+            .number("(x+)")                      // event status
+            .number("(?:;(x+))?,?")              // packet type
             .groupEnd("?")
             .groupBegin()
-            .text("ETD:").expression("[^,]*,?")
+            .text("ETD:").expression("([^,]+),?")
             .groupEnd("?")
             .groupBegin()
             .text("OBD:")
@@ -107,6 +108,9 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .groupBegin()
             .text("TRU:").expression("[^,]*,?")
+            .groupEnd("?")
+            .groupBegin()
+            .text("TAG:").expression("([^,]+),?")
             .groupEnd("?")
             .compile();
 
@@ -122,7 +126,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .number("([EW])(d+.d+);")            // longitude
             .number("(d+)?;")                    // speed
             .number("(d+);")                     // course
-            .number("(d+.?d*)").optional()        // hdop
+            .number("(d+.?d*)").optional()       // hdop
             .number("(dd)(dd)(dd)")              // date
             .any()
             .compile();
@@ -162,14 +166,26 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.next());
         position.set(Position.KEY_BATTERY, parser.next());
 
-        String status = parser.next();
-        if (status != null) {
-            position.set(Position.KEY_IGNITION, BitUtil.check(Integer.parseInt(status, 16), 13));
+        if (parser.hasNext(6)) {
+            long status = parser.nextLong(16);
+            position.set(Position.KEY_IGNITION, BitUtil.check(status, 13));
             position.set(Position.KEY_STATUS, status);
+            position.set("ioStatus", parser.next());
+            position.set(Position.KEY_GEOFENCE, parser.next() + parser.next());
+            position.set("eventStatus", parser.next());
+            position.set("packetType", parser.next());
+        }
+
+        if (parser.hasNext()) {
+            position.set("eventData", parser.next());
         }
 
         if (parser.hasNext()) {
             position.set("obd", parser.next());
+        }
+
+        if (parser.hasNext()) {
+            position.set("tagData", parser.next());
         }
 
         return position;
@@ -211,7 +227,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(parser.next().equals("A"));
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
-            position.setSpeed(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
 
             position.set(Position.KEY_HDOP, parser.next());

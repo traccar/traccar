@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public final class EventForwarder {
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
 
-        requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
+        requestBuilder.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         requestBuilder.addHeader("User-Agent", USER_AGENT);
         if (!header.equals("")) {
             String[] headerLines = header.split("\\r?\\n");

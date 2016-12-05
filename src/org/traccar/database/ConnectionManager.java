@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public class ConnectionManager {
     private static final long DEFAULT_TIMEOUT = 600;
 
     private final long deviceTimeout;
+    private final boolean enableStatusEvents;
 
     private final Map<Long, ActiveDevice> activeDevices = new HashMap<>();
     private final Map<Long, Set<UpdateListener>> listeners = new HashMap<>();
@@ -47,6 +48,7 @@ public class ConnectionManager {
 
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
+        enableStatusEvents = Context.getConfig().getBoolean("event.statusHandler");
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
@@ -73,11 +75,20 @@ public class ConnectionManager {
             return;
         }
 
-        if (!status.equals(device.getStatus())) {
-            Event event = new Event(Event.TYPE_DEVICE_OFFLINE, deviceId);
-            if (status.equals(Device.STATUS_ONLINE)) {
-                event.setType(Event.TYPE_DEVICE_ONLINE);
+        if (enableStatusEvents && !status.equals(device.getStatus())) {
+            String eventType;
+            switch (status) {
+                case Device.STATUS_ONLINE:
+                    eventType = Event.TYPE_DEVICE_ONLINE;
+                    break;
+                case Device.STATUS_UNKNOWN:
+                    eventType = Event.TYPE_DEVICE_UNKNOWN;
+                    break;
+                default:
+                    eventType = Event.TYPE_DEVICE_OFFLINE;
+                    break;
             }
+            Event event = new Event(eventType, deviceId);
             if (Context.getNotificationManager() != null) {
                 Context.getNotificationManager().updateEvent(event, null);
             }
@@ -88,7 +99,6 @@ public class ConnectionManager {
         if (timeout != null) {
             timeout.cancel();
         }
-
 
         if (time != null) {
             device.setLastUpdate(time);

@@ -11,6 +11,15 @@ public class Pt502ProtocolDecoderTest extends ProtocolTest {
         Pt502ProtocolDecoder decoder = new Pt502ProtocolDecoder(new Pt502Protocol());
 
         verifyPosition(decoder, text(
+                "$HDA,20007,134657.000,A,0626.1607,N,00330.2245,E,33.38,81.79,041016,,,A/00010,00000/270,0,0,0/19948900//fa4//"));
+
+        verifyPosition(decoder, text(
+                "$HDB,20007,134708.000,A,0626.1759,N,00330.3192,E,26.55,80.37,041016,,,A/00010,00000/23b,0,0,0/19949100//fa4//"));
+
+        verifyPosition(decoder, text(
+                "$POS,20007,134704.000,A,0626.1698,N,00330.2870,E,31.23,79.58,041016,,,A/00010,00000/26c,0,0,0/19949100//fa4//#"));
+
+        verifyPosition(decoder, text(
                 "$PHO6608,115099,133140.000,A,1307.1238,N,05936.4194,W,0.00,21.50,290816,,,A/00010,00000/0,0,0,0/185100//f59/"));
 
         verifyPosition(decoder, text(

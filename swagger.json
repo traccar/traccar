@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.7",
+        "version": "3.8",
         "title": "traccar"
     },
     "host": "traccar.org",
@@ -149,6 +149,38 @@
                         "in": "path",
                         "required": true,
                         "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
+        },
+        "/devices/{id}/distance": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DeviceTotalDistance"
+                        }
                     }
                 ],
                 "responses": {
@@ -546,6 +578,8 @@
         },
         "/positions": {
             "get": {
+                "summary" : "Fetches a list of Positions",
+                "description" : "Without any params, it returns a list of last known positions for all the user's devices",
                 "consumes": [
                     "application/json"
                 ],
@@ -556,27 +590,35 @@
                     {
                         "name": "deviceId",
                         "in": "query",
-                        "description": "deviceId is optional, but requires the from and to parameters when used",
+                        "description": "_deviceId_ is optional, but requires the _from_ and _to_ parameters when used",
                         "required": false,
                         "type": "integer"
                     },
                     {
                         "name": "from",
                         "in": "query",
+                        "description": "Not required with _id_",
                         "required": false,
                         "type": "string"
                     },
                     {
                         "name": "to",
                         "in": "query",
+                        "description": "Not required with _id_",
                         "required": false,
                         "type": "string"
+                    }, {
+                        "name" : "id",
+                        "in" : "query",
+                        "description" : "To fetch one or more positions. Multiple params can be passed like `id=31&id=42`",
+                        "required" : false,
+                        "type" : "integer",
+                        "collectionFormat" : "multi"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -724,7 +766,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Position"
+                                "$ref": "#/definitions/User"
                             }
                         }
                     }
@@ -879,7 +921,7 @@
             }
         },
         "/commandtypes": {
-            "post": {
+            "get": {
                 "consumes": [
                     "application/json"
                 ],
@@ -940,6 +982,12 @@
                         "in": "query",
                         "required": true,
                         "type": "integer"
+                    },
+                    {
+                        "name": "refresh",
+                        "in": "query",
+                        "required": false,
+                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -1036,48 +1084,6 @@
                     "204": {
                         "description": "No Content",
                         "headers": {}
-                    }
-                }
-            }
-        },
-        "/events": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "name": "deviceId",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
-                    },
-                    {
-                        "name": "type",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "name": "interval",
-                        "in": "query",
-                        "required": true,
-                        "type": "integer"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "headers": {},
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Event"
-                            }
-                        }
                     }
                 }
             }
@@ -1342,6 +1348,156 @@
                     }
                 }
             }
+        },
+        "/statistics": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Statistics"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/attributes/aliases": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/AttributeAlias"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                }
+            }
+        },
+        "/attributes/aliases/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {},
+                        "schema": {
+                            "$ref": "#/definitions/AttributeAlias"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "headers": {}
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1409,9 +1565,6 @@
                 "map": {
                     "type": "string"
                 },
-                "language": {
-                    "type": "string"
-                },
                 "distanceUnit": {
                     "type": "string"
                 },
@@ -1432,6 +1585,21 @@
                 },
                 "twelveHourFormat": {
                     "type": "boolean"
+                },
+                "coordinateFormat": {
+                    "type": "string"
+                },
+                "disabled": {
+                    "type": "boolean"
+                },
+                "expirationTime": {
+                    "type": "string"
+                },
+                "deviceLimit": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
                 },
                 "attributes": {}
             }
@@ -1474,6 +1642,15 @@
                 "twelveHourFormat": {
                     "type": "boolean"
                 },
+                "version": {
+                    "type": "string"
+                },
+                "forceSettings": {
+                    "type": "boolean"
+                },
+                "coordinateFormat": {
+                    "type": "string"
+                },
                 "attributes": {}
             }
         },
@@ -1510,6 +1687,18 @@
                 },
                 "groupId": {
                     "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "contact": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
                 },
                 "geofenceIds": {},
                 "attributes": {}
@@ -1688,11 +1877,71 @@
                 "startAddress": {
                     "type": "string"
                 },
+                "startLat": {
+                    "type": "number"
+                },
+                "startLon": {
+                    "type": "number"
+                },
                 "endTime": {
                     "type": "string"
                 },
                 "endAddress": {
                     "type": "string"
+                },
+                "endLat": {
+                    "type": "number"
+                },
+                "endLon": {
+                    "type": "number"
+                }
+            }
+        },
+        "Statistics": {
+            "properties": {
+                "captureTime": {
+                    "type": "string"
+                },
+                "activeUsers": {
+                    "type": "integer"
+                },
+                "activeDevices": {
+                    "type": "integer"
+                },
+                "requests": {
+                    "type": "integer"
+                },
+                "messagesReceived": {
+                    "type": "integer"
+                },
+                "messagesStored": {
+                    "type": "integer"
+                }
+            }
+        },
+        "AttributeAlias": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "deviceId": {
+                    "type": "integer"
+                },
+                "attribute": {
+                    "type": "string"
+                },
+                "alias": {
+                    "type": "string"
+                }
+            }
+        },
+        "DeviceTotalDistance": {
+            "properties": {
+                "deviceId": {
+                    "type": "integer"
+                },
+                "totalDistance": {
+                    "type": "number"
                 }
             }
         }

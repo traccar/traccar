@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
- * Copyright 2016 Andrey Kunitsyn (abyss@fox5.ru)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,88 @@
  */
 package org.traccar.reports;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-
+import org.joda.time.DateTime;
+import org.jxls.area.Area;
+import org.jxls.builder.xls.XlsCommentAreaBuilder;
+import org.jxls.common.CellRef;
+import org.jxls.formula.StandardFormulaProcessor;
+import org.jxls.transform.Transformer;
+import org.jxls.transform.poi.PoiTransformer;
+import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
-import org.traccar.web.CsvBuilder;
-import org.traccar.web.JsonConverter;
+import org.traccar.reports.model.DeviceReport;
 
 public final class Route {
 
     private Route() {
     }
 
-    public static String getJson(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws SQLException {
-        JsonArrayBuilder json = Json.createArrayBuilder();
+        ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            for (Position position : Context.getDataManager().getPositions(deviceId, from, to)) {
-                json.add(JsonConverter.objectToJson(position));
-            }
+            result.addAll(Context.getDataManager().getPositions(deviceId, from, to));
         }
-        return json.build().toString();
+        return result;
     }
 
-    public static String getCsv(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException {
-        CsvBuilder csv = new CsvBuilder();
-        csv.addHeaderLine(new Position());
+    public static void getExcel(OutputStream outputStream,
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            DateTime from, DateTime to) throws SQLException, IOException {
+        ArrayList<DeviceReport> devicesRoutes = new ArrayList<>();
+        ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            csv.addArray(Context.getDataManager().getPositions(deviceId, from, to));
+            Collection<Position> positions = Context.getDataManager()
+                    .getPositions(deviceId, from.toDate(), to.toDate());
+            DeviceReport deviceRoutes = new DeviceReport();
+            Device device = Context.getIdentityManager().getDeviceById(deviceId);
+            deviceRoutes.setDeviceName(device.getName());
+            sheetNames.add(deviceRoutes.getDeviceName());
+            if (device.getGroupId() != 0) {
+                Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
+                if (group != null) {
+                    deviceRoutes.setGroupName(group.getName());
+                }
+            }
+            deviceRoutes.setObjects(positions);
+            devicesRoutes.add(deviceRoutes);
         }
-        return csv.build();
+        String templatePath = Context.getConfig().getString("report.templatesPath",
+                "templates/export/");
+        try (InputStream inputStream = new FileInputStream(templatePath + "/route.xlsx")) {
+            org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
+            jxlsContext.putVar("devices", devicesRoutes);
+            jxlsContext.putVar("sheetNames", sheetNames);
+            jxlsContext.putVar("from", from);
+            jxlsContext.putVar("to", to);
+            jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
+            jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
+            jxlsContext.putVar("timezone", from.getZone());
+            jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
+            Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
+            List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
+            for (Area xlsArea : xlsAreas) {
+                xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), jxlsContext);
+                xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
+                xlsArea.processFormulas();
+            }
+            transformer.deleteSheet(xlsAreas.get(0).getStartCellRef().getSheetName());
+            transformer.write();
+        }
     }
 }

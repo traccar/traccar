@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.helper.Hashing;
+
+import java.util.Date;
 
 public class User extends Extensible {
 
@@ -130,14 +132,76 @@ public class User extends Extensible {
         this.twelveHourFormat = twelveHourFormat;
     }
 
-    private String password;
+    private String coordinateFormat;
+
+    public String getCoordinateFormat() {
+        return coordinateFormat;
+    }
+
+    public void setCoordinateFormat(String coordinateFormat) {
+        this.coordinateFormat = coordinateFormat;
+    }
+
+    private boolean disabled;
+
+    public boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    private Date expirationTime;
+
+    public Date getExpirationTime() {
+        if (expirationTime != null) {
+            return new Date(expirationTime.getTime());
+        } else {
+            return null;
+        }
+    }
+
+    public void setExpirationTime(Date expirationTime) {
+        if (expirationTime != null) {
+            this.expirationTime = new Date(expirationTime.getTime());
+        } else {
+            this.expirationTime = null;
+        }
+    }
+
+    private int deviceLimit;
+
+    public int getDeviceLimit() {
+        return deviceLimit;
+    }
+
+    public void setDeviceLimit(int deviceLimit) {
+        this.deviceLimit = deviceLimit;
+    }
+
+    private String token;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        if (token != null && !token.isEmpty()) {
+            if (!token.matches("^[a-zA-Z0-9]{16,}$")) {
+                throw new IllegalArgumentException("Illegal token");
+            }
+            this.token = token;
+        } else {
+            this.token = null;
+        }
+    }
 
     public String getPassword() {
-        return password;
+        return null;
     }
 
     public void setPassword(String password) {
-        this.password = password;
         if (password != null && !password.isEmpty()) {
             Hashing.HashingResult hashingResult = Hashing.createHash(password);
             hashedPassword = hashingResult.getHash();

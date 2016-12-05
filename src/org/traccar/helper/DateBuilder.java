@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,11 @@ public class DateBuilder {
 
     public DateBuilder setSecond(int second) {
         calendar.set(Calendar.SECOND, second);
+        return this;
+    }
+
+    public DateBuilder addSeconds(long seconds) {
+        calendar.setTimeInMillis(calendar.getTimeInMillis() + seconds * 1000);
         return this;
     }
 

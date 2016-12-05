@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2014 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .text("$AVRMC,")
             .expression("([^,]+),")              // identifier
             .number("(dd)(dd)(dd),")             // time
-            .expression("([AVRavr]),")           // validity
+            .expression("([AVRPavrp]),")         // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(ddd)(dd.d+),")             // longitude
@@ -66,13 +66,13 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()

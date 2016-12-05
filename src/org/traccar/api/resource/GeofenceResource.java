@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,13 @@ public class GeofenceResource extends BaseResource {
     @GET
     public Collection<Geofence> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId, @QueryParam("groupId") long groupId,
-            @QueryParam("deviceId") long deviceId) throws SQLException {
+            @QueryParam("deviceId") long deviceId, @QueryParam("refresh") boolean refresh) throws SQLException {
 
         GeofenceManager geofenceManager = Context.getGeofenceManager();
+        if (refresh) {
+            geofenceManager.refreshGeofences();
+        }
+
         Set<Long> result;
         if (all) {
             Context.getPermissionsManager().checkAdmin(getUserId());
@@ -57,7 +61,7 @@ public class GeofenceResource extends BaseResource {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result = new HashSet<Long>(geofenceManager.getUserGeofencesIds(userId));
+            result = new HashSet<>(geofenceManager.getUserGeofencesIds(userId));
         }
 
         if (groupId != 0) {
@@ -84,9 +88,9 @@ public class GeofenceResource extends BaseResource {
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, Geofence entity) throws SQLException {
+    public Response update(Geofence entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkGeofence(getUserId(), id);
+        Context.getPermissionsManager().checkGeofence(getUserId(), entity.getId());
         Context.getGeofenceManager().updateGeofence(entity);
         return Response.ok(entity).build();
     }

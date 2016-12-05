@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,22 @@ import org.traccar.helper.Log;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ResourceErrorHandler implements ExceptionMapper<Exception> {
 
-    private static final String KEY_MESSAGE = "message";
-    private static final String KEY_DETAILS = "details";
-
     @Override
     public Response toResponse(Exception e) {
-        Map<String, String> error = new HashMap<>();
         if (e instanceof WebApplicationException) {
-            WebApplicationException webApplicationException = (WebApplicationException) e;
-            return Response.status(webApplicationException.getResponse().getStatus()).entity(error).build();
+            WebApplicationException exception = (WebApplicationException) e;
+            String message;
+            if (exception.getCause() != null) {
+                message = Log.exceptionStack(exception.getCause());
+            } else {
+                message = Log.exceptionStack(exception);
+            }
+            return Response.fromResponse(exception.getResponse()).entity(message).build();
         } else {
-            error.put(KEY_MESSAGE, e.getMessage());
-            error.put(KEY_DETAILS, Log.exceptionStack(e));
-            return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(Log.exceptionStack(e)).build();
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -139,12 +140,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte() + 1, buf.readUnsignedByte());
             position.setTime(dateBuilder.getDate());
 
             position.setLatitude(buf.readFloat() / Math.PI * 180);
             position.setLongitude(buf.readFloat() / Math.PI * 180);
-            position.setSpeed(buf.readFloat());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloat()));
             position.setCourse(buf.readUnsignedShort());
 
             position.set(Position.KEY_ODOMETER, buf.readFloat() * 1000);

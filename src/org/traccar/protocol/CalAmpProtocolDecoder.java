@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         int accCount = BitUtil.to(buf.readUnsignedByte(), 6);
 
         if (type != MSG_MINI_EVENT_REPORT) {
-            buf.readUnsignedByte(); // reserved
+            position.set("append", buf.readUnsignedByte());
         }
 
         if (accType == 1) {
@@ -149,19 +149,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             int content = buf.readUnsignedByte();
 
             if (BitUtil.check(content, 0)) {
-
-                int length = buf.readUnsignedByte();
-                long id = 0;
-                for (int i = 0; i < length; i++) {
-                    int b = buf.readUnsignedByte();
-                    id = id * 10 + (b >> 4);
-                    if ((b & 0xf) != 0xf) {
-                        id = id * 10 + (b & 0xf);
-                    }
-                }
-
-                getDeviceSession(channel, remoteAddress, String.valueOf(id));
-
+                String id = ChannelBuffers.hexDump(buf.readBytes(buf.readUnsignedByte()));
+                getDeviceSession(channel, remoteAddress, id);
             }
 
             if (BitUtil.check(content, 1)) {

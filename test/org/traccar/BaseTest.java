@@ -4,7 +4,7 @@ import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
-public class EventHandlerTest {
+public class BaseTest {
     
     static {
         Context.init(new IdentityManager() {

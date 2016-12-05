@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package org.traccar.model;
 
 import java.text.ParseException;
 
+import org.traccar.Context;
 import org.traccar.geofence.GeofenceCircle;
 import org.traccar.geofence.GeofenceGeometry;
 import org.traccar.geofence.GeofencePolygon;
+import org.traccar.geofence.GeofencePolyline;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,6 +29,7 @@ public class Geofence extends Extensible {
 
     public static final String TYPE_GEOFENCE_CILCLE = "geofenceCircle";
     public static final String TYPE_GEOFENCE_POLYGON = "geofencePolygon";
+    public static final String TYPE_GEOFENCE_POLYLINE = "geofencePolyline";
 
     private String name;
 
@@ -60,6 +63,8 @@ public class Geofence extends Extensible {
             geometry = new GeofenceCircle(area);
         } else if (area.startsWith("POLYGON")) {
             geometry = new GeofencePolygon(area);
+        } else if (area.startsWith("LINESTRING")) {
+            geometry = new GeofencePolyline(area, Context.getConfig().getDouble("geofence.polylineDistance", 25));
         } else {
             throw new ParseException("Unknown geometry type", 0);
         }

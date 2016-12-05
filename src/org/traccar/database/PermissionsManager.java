@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,6 +40,7 @@ public class PermissionsManager {
     private volatile Server server;
 
     private final Map<Long, User> users = new ConcurrentHashMap<>();
+    private final Map<String, Long> usersTokens = new HashMap<>();
 
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
@@ -81,10 +83,14 @@ public class PermissionsManager {
 
     public final void refreshUsers() {
         users.clear();
+        usersTokens.clear();
         try {
             server = dataManager.getServer();
             for (User user : dataManager.getUsers()) {
                 users.put(user.getId(), user);
+                if (user.getToken() != null) {
+                    usersTokens.put(user.getToken(), user.getId());
+                }
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -140,6 +146,37 @@ public class PermissionsManager {
         }
     }
 
+    public boolean isReadonly(long userId) {
+        return users.containsKey(userId) && users.get(userId).getReadonly();
+    }
+
+    public void checkReadonly(long userId) throws SecurityException {
+        if (!isAdmin(userId) && (server.getReadonly() || isReadonly(userId))) {
+            throw new SecurityException("Account is readonly");
+        }
+    }
+
+    public void checkUserEnabled(long userId) throws SecurityException {
+        User user = getUser(userId);
+        if (user.getDisabled()) {
+            throw new SecurityException("Account is disabled");
+        }
+        if (user.getExpirationTime() != null && System.currentTimeMillis() > user.getExpirationTime().getTime()) {
+            throw new SecurityException("Account has expired");
+        }
+    }
+
+    public void checkUserUpdate(long userId, User before, User after) throws SecurityException {
+        if (before.getAdmin() != after.getAdmin()
+                || before.getReadonly() != after.getReadonly()
+                || before.getDisabled() != after.getDisabled()
+                || before.getDeviceLimit() != after.getDeviceLimit()
+                || !Objects.equals(before.getExpirationTime(), after.getExpirationTime())
+                || !Objects.equals(before.getToken(), after.getToken())) {
+            checkAdmin(userId);
+        }
+    }
+
     public void checkUser(long userId, long otherUserId) throws SecurityException {
         if (userId != otherUserId) {
             checkAdmin(userId);
@@ -161,12 +198,6 @@ public class PermissionsManager {
     public void checkRegistration(long userId) {
         if (!server.getRegistration() && !isAdmin(userId)) {
             throw new SecurityException("Registration disabled");
-        }
-    }
-
-    public void checkReadonly(long userId) {
-        if (server.getReadonly() && !isAdmin(userId)) {
-            throw new SecurityException("Readonly user");
         }
     }
 
@@ -196,28 +227,43 @@ public class PermissionsManager {
     public void addUser(User user) throws SQLException {
         dataManager.addUser(user);
         users.put(user.getId(), user);
+        if (user.getToken() != null) {
+            usersTokens.put(user.getToken(), user.getId());
+        }
         refreshPermissions();
     }
 
     public void updateUser(User user) throws SQLException {
         dataManager.updateUser(user);
+        User old = users.get(user.getId());
         users.put(user.getId(), user);
+        if (user.getToken() != null) {
+            usersTokens.put(user.getToken(), user.getId());
+        }
+        if (old.getToken() != null && !old.getToken().equals(user.getToken())) {
+            usersTokens.remove(old.getToken());
+        }
         refreshPermissions();
     }
 
     public void removeUser(long userId) throws SQLException {
         dataManager.removeUser(userId);
+        usersTokens.remove(users.get(userId).getToken());
         users.remove(userId);
         refreshPermissions();
     }
 
     public User login(String email, String password) throws SQLException {
         User user = dataManager.login(email, password);
-        if (user != null && users.get(user.getId()) != null) {
+        if (user != null) {
+            checkUserEnabled(user.getId());
             return users.get(user.getId());
-        } else {
-            return null;
         }
+        return null;
+    }
+
+    public User getUserByToken(String token) {
+        return users.get(usersTokens.get(token));
     }
 
 }

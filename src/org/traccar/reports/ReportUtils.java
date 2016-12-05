@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
- * Copyright 2016 Andrey Kunitsyn (abyss@fox5.ru)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,34 @@
  */
 package org.traccar.reports;
 
+import org.traccar.Context;
+import org.traccar.helper.Log;
+import org.traccar.model.Position;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.traccar.Context;
-import org.traccar.helper.Log;
-import org.traccar.model.Position;
-
 public final class ReportUtils {
 
     private ReportUtils() {
+    }
+
+    public static String getDistanceUnit(long userId) {
+        String unit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
+        if (unit == null) {
+            unit  = Context.getPermissionsManager().getServer().getDistanceUnit();
+        }
+        return unit != null ? unit : "km";
+    }
+
+    public static String getSpeedUnit(long userId) {
+        String unit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
+        if (unit == null) {
+            unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
+        }
+        return unit != null ? unit : "kn";
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
@@ -47,18 +63,15 @@ public final class ReportUtils {
         double distance = 0.0;
         double firstOdometer = 0.0;
         double lastOdometer = 0.0;
-        if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-            firstOdometer = ((Number) firstPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
-        }
-        if (lastPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
-            lastOdometer = ((Number) lastPosition.getAttributes().get(Position.KEY_ODOMETER)).doubleValue();
-        }
+        firstOdometer = firstPosition.getDouble(Position.KEY_ODOMETER);
+        lastOdometer = lastPosition.getDouble(Position.KEY_ODOMETER);
+
         if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
             distance = lastOdometer - firstOdometer;
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-            distance = ((Number) lastPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue()
-                    - ((Number) firstPosition.getAttributes().get(Position.KEY_TOTAL_DISTANCE)).doubleValue();
+            distance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE)
+                    - firstPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
         }
         return distance;
     }

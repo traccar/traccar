@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,44 @@ import java.util.Properties;
 public class Config {
 
     private final Properties properties = new Properties();
+    private Properties defaultProperties;
 
     public void load(String file) throws IOException {
         try (InputStream inputStream = new FileInputStream(file)) {
             properties.loadFromXML(inputStream);
         }
+
+        String defaultConfigFile = properties.getProperty("config.default");
+        if (defaultConfigFile != null) {
+            try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
+                defaultProperties = new Properties();
+                defaultProperties.loadFromXML(inputStream);
+            }
+        }
     }
 
     public boolean hasKey(String key) {
-        return properties.containsKey(key);
+        return properties.containsKey(key) || defaultProperties != null && defaultProperties.containsKey(key);
+    }
+
+    public String getString(String key) {
+        if (properties.containsKey(key) || defaultProperties == null) {
+            return properties.getProperty(key);
+        } else {
+            return defaultProperties.getProperty(key);
+        }
+    }
+
+    public String getString(String key, String defaultValue) {
+        if (hasKey(key)) {
+            return getString(key);
+        } else {
+            return defaultValue;
+        }
     }
 
     public boolean getBoolean(String key) {
-        return Boolean.parseBoolean(properties.getProperty(key));
+        return Boolean.parseBoolean(getString(key));
     }
 
     public int getInteger(String key) {
@@ -43,8 +68,8 @@ public class Config {
     }
 
     public int getInteger(String key, int defaultValue) {
-        if (properties.containsKey(key)) {
-            return Integer.parseInt(properties.getProperty(key));
+        if (hasKey(key)) {
+            return Integer.parseInt(getString(key));
         } else {
             return defaultValue;
         }
@@ -55,20 +80,8 @@ public class Config {
     }
 
     public long getLong(String key, long defaultValue) {
-        if (properties.containsKey(key)) {
-            return Long.parseLong(properties.getProperty(key));
-        } else {
-            return defaultValue;
-        }
-    }
-
-    public String getString(String key) {
-        return properties.getProperty(key);
-    }
-
-    public String getString(String key, String defaultValue) {
-        if (properties.containsKey(key)) {
-            return properties.getProperty(key);
+        if (hasKey(key)) {
+            return Long.parseLong(getString(key));
         } else {
             return defaultValue;
         }
@@ -79,8 +92,8 @@ public class Config {
     }
 
     public double getDouble(String key, double defaultValue) {
-        if (properties.containsKey(key)) {
-            return Double.parseDouble(properties.getProperty(key));
+        if (hasKey(key)) {
+            return Double.parseDouble(getString(key));
         } else {
             return defaultValue;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,35 +37,65 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_HBD = new PatternBuilder()
-            .text("+ACK:GTHBD,")
-            .number("([0-9A-Z]{2}xxxx),")
+    private static final Pattern PATTERN_ACK = new PatternBuilder()
+            .text("+ACK:GT")
+            .expression("...,")                  // type
+            .number("([0-9A-Z]{2}xxxx),")        // protocol version
+            .number("(d{15}|x{14}),")            // imei
             .any().text(",")
-            .number("(xxxx)")
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(xxxx)")                    // counter
             .text("$").optional()
             .compile();
 
     private static final Pattern PATTERN_INF = new PatternBuilder()
-            .text("+RESP:GTINF,")
+            .text("+").expression("(?:RESP|BUFF):GTINF,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}),")                  // imei
-            .expression("[0-9A-Z]{17},")         // vin
-            .expression("[^,]{0,20},")           // device name
+            .number("(d{15}|x{14}),")            // imei
+            .expression("(?:[0-9A-Z]{17},)?")    // vin
+            .expression("(?:[^,]+)?,")           // device name
             .number("(xx),")                     // state
-            .expression("[0-9F]{20},")           // iccid
+            .expression("(?:[0-9F]{20})?,")      // iccid
             .number("d{1,2},")
             .number("d{1,2},")
-            .expression("[01],")
-            .number("(d{1,5}),")                 // power
-            .text(",")
+            .expression("[01],")                 // external power
+            .number("([d.]+)?,")                 // odometer or external power
+            .number("d*,")                       // backup battery or lightness
             .number("(d+.d+),")                  // battery
             .expression("([01]),")               // charging
-            .expression("[01],")
-            .text(",,")
+            .number("(?:d),")                    // led
+            .number("(?:d)?,")                   // gps on need
+            .number("(?:d)?,")                   // gps antenna type
+            .number("(?:d),").optional()         // gps antenna state
             .number("d{14},")                    // last fix time
-            .text(",,,,,")
+            .groupBegin()
+            .number("(d+),")                     // battery percentage
+            .expression("[01]?,")                // flash type
+            .number("(-?[d.]+)?,,,")             // temperature
+            .or()
+            .expression("(?:[01])?,").optional() // pin15 mode
+            .number("(d+)?,")                    // adc1
+            .number("(d+)?,").optional()         // adc2
+            .number("(xx)?,")                    // digital input
+            .number("(xx)?,")                    // digital output
             .number("[-+]dddd,")                 // timezone
             .expression("[01],")                 // daylight saving
+            .groupEnd()
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd),")             // time
+            .number("(xxxx)")                    // counter
+            .text("$").optional()
+            .compile();
+
+    private static final Pattern PATTERN_VER = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTVER,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .expression("([^,]*),")              // device type
+            .number("(xxxx),")                   // firmware version
+            .number("(xxxx),")                   // hardware version
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd),")             // time
             .number("(xxxx)")                    // counter
@@ -99,7 +129,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_OBD = new PatternBuilder()
             .text("+RESP:GTOBD,")
             .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("(?:[0-9A-Z]{17})?,")    // vin
             .expression("[^,]{0,20},")           // device name
             .expression("[01],")                 // report type
@@ -167,7 +197,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_IGN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d+,")                       // ignition off duration
             .expression(PATTERN_LOCATION.pattern())
@@ -183,7 +213,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_IDA = new PatternBuilder()
             .text("+RESP:GTIDA,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}),")                  // imei
+            .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,,")               // device name
             .number("([^,]+),")                  // rfid
             .expression("[01],")                 // report type
@@ -242,15 +272,37 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    private Object decodeHbd(Channel channel, SocketAddress remoteAddress, String sentence) {
-        Parser parser = new Parser(PATTERN_HBD, sentence);
-        if (parser.matches() && channel != null) {
-            channel.write("+SACK:GTHBD," + parser.next() + "," + parser.next() + "$", remoteAddress);
+    private Object decodeAck(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
+        Parser parser = new Parser(PATTERN_ACK, sentence);
+        if (parser.matches()) {
+            String protocolVersion = parser.next();
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession == null) {
+                return null;
+            }
+            if (type.equals("HBD")) {
+                if (channel != null) {
+                    parser.skip(6);
+                    channel.write("+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress);
+                }
+            } else {
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                DateBuilder dateBuilder = new DateBuilder()
+                        .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                getLastLocation(position, dateBuilder.getDate());
+                position.setValid(false);
+                position.set(Position.KEY_RESULT, "Command " + type + " accepted");
+                return position;
+            }
         }
         return null;
     }
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
+
         Parser parser = new Parser(PATTERN_INF, sentence);
         if (!parser.matches()) {
             return null;
@@ -266,9 +318,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_STATUS, parser.next());
-        position.set(Position.KEY_POWER, parser.next());
-        position.set(Position.KEY_BATTERY, parser.next());
-        position.set(Position.KEY_CHARGE, parser.next());
+
+        parser.next(); // odometer or external power
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
+
+        parser.next(); // battery percentage
+
+        position.set(Position.PREFIX_TEMP + 1, parser.next());
+
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
+
+        position.set(Position.KEY_INPUT, parser.next());
+        position.set(Position.KEY_OUTPUT, parser.next());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -276,7 +340,35 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, dateBuilder.getDate());
 
-        position.set(Position.KEY_INDEX, parser.next());
+        position.set(Position.KEY_INDEX, parser.nextInt(16));
+
+        return position;
+    }
+
+    private Object decodeVer(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_VER, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set("deviceType", parser.next());
+        position.set("firmwareVersion", parser.nextInt(16));
+        position.set("hardwareVersion", parser.nextInt(16));
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+        getLastLocation(position, dateBuilder.getDate());
 
         return position;
     }
@@ -511,6 +603,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         int reportType = parser.nextInt();
         if (type.equals("NMR")) {
             position.set(Position.KEY_MOTION, reportType);
+        } else if (type.equals("SOS")) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
         }
 
         decodeLocation(position, parser);
@@ -537,7 +631,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN_BASIC, sentence);
         if (!parser.matches()) {
             return null;
@@ -574,6 +668,21 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        switch (type) {
+            case "BPL":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            case "TEM":
+                position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+                break;
+            case "JDR":
+            case "JDS":
+                position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                break;
+            default:
+                break;
+        }
+
         return position;
     }
 
@@ -590,41 +699,45 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         Object result;
         String type = sentence.substring(typeIndex + 3, typeIndex + 6);
-        switch (type) {
-            case "HBD":
-                result = decodeHbd(channel, remoteAddress, sentence);
-                break;
-            case "INF":
-                result = decodeInf(channel, remoteAddress, sentence);
-                break;
-            case "OBD":
-                result = decodeObd(channel, remoteAddress, sentence);
-                break;
-            case "FRI":
-                result = decodeFri(channel, remoteAddress, sentence);
-                break;
-            case "IGN":
-            case "IGF":
-                result = decodeIgn(channel, remoteAddress, sentence);
-                break;
-            case "IDA":
-                result = decodeIda(channel, remoteAddress, sentence);
-                break;
-            default:
-                result = decodeOther(channel, remoteAddress, sentence, type);
-                break;
-        }
+        if (sentence.startsWith("+ACK")) {
+            result = decodeAck(channel, remoteAddress, sentence, type);
+        } else {
+            switch (type) {
+                case "INF":
+                    result = decodeInf(channel, remoteAddress, sentence);
+                    break;
+                case "OBD":
+                    result = decodeObd(channel, remoteAddress, sentence);
+                    break;
+                case "FRI":
+                    result = decodeFri(channel, remoteAddress, sentence);
+                    break;
+                case "IGN":
+                case "IGF":
+                    result = decodeIgn(channel, remoteAddress, sentence);
+                    break;
+                case "IDA":
+                    result = decodeIda(channel, remoteAddress, sentence);
+                    break;
+                case "VER":
+                    result = decodeVer(channel, remoteAddress, sentence);
+                    break;
+                default:
+                    result = decodeOther(channel, remoteAddress, sentence, type);
+                    break;
+            }
 
-        if (result == null) {
-            result = decodeBasic(channel, remoteAddress, sentence);
-        }
+            if (result == null) {
+                result = decodeBasic(channel, remoteAddress, sentence, type);
+            }
 
-        if (result != null) {
-            if (result instanceof Position) {
-                ((Position) result).set(Position.KEY_TYPE, type);
-            } else {
-                for (Position p : (List<Position>) result) {
-                    p.set(Position.KEY_TYPE, type);
+            if (result != null) {
+                if (result instanceof Position) {
+                    ((Position) result).set(Position.KEY_TYPE, type);
+                } else {
+                    for (Position p : (List<Position>) result) {
+                        p.set(Position.KEY_TYPE, type);
+                    }
                 }
             }
         }

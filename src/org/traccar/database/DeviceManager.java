@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -316,98 +317,60 @@ public class DeviceManager implements IdentityManager {
         groupsById.remove(groupId);
     }
 
-    public boolean lookupServerBoolean(long deviceId, String attributeName, boolean defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, true);
+    public boolean lookupAttributeBoolean(
+            long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
+        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
             return Boolean.parseBoolean(result);
         }
         return defaultValue;
     }
 
-    public String lookupServerString(long deviceId, String attributeName, String defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, true);
+    public String lookupAttributeString(
+            long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
+        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
             return result;
         }
         return defaultValue;
     }
 
-    public int lookupServerInteger(long deviceId, String attributeName, int defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, true);
+    public int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
+        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
             return Integer.parseInt(result);
         }
         return defaultValue;
     }
 
-    public long lookupServerLong(long deviceId, String attributeName, long defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, true);
+    public long lookupAttributeLong(
+            long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
+        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
             return Long.parseLong(result);
         }
         return defaultValue;
     }
 
-    public double lookupServerDouble(long deviceId, String attributeName, double defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, true);
+    public double lookupAttributeDouble(
+            long deviceId, String attributeName, double defaultValue, boolean lookupConfig) {
+        String result = lookupAttribute(deviceId, attributeName, lookupConfig);
         if (result != null) {
             return Double.parseDouble(result);
         }
         return defaultValue;
     }
 
-    public boolean lookupConfigBoolean(long deviceId, String attributeName, boolean defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, false);
-        if (result != null) {
-            return Boolean.parseBoolean(result);
-        }
-        return defaultValue;
-    }
-
-    public String lookupConfigString(long deviceId, String attributeName, String defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, false);
-        if (result != null) {
-            return result;
-        }
-        return defaultValue;
-    }
-
-    public int lookupConfigInteger(long deviceId, String attributeName, int defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, false);
-        if (result != null) {
-            return Integer.parseInt(result);
-        }
-        return defaultValue;
-    }
-
-    public long lookupConfigLong(long deviceId, String attributeName, long defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, false);
-        if (result != null) {
-            return Long.parseLong(result);
-        }
-        return defaultValue;
-    }
-
-    public double lookupConfigDouble(long deviceId, String attributeName, double defaultValue) {
-        String result = lookupAttribute(deviceId, attributeName, false);
-        if (result != null) {
-            return Double.parseDouble(result);
-        }
-        return defaultValue;
-    }
-
-    private String lookupAttribute(long deviceId, String attributeName, boolean lookupServer) {
+    private String lookupAttribute(long deviceId, String attributeName, boolean lookupConfig) {
         String result = null;
         Device device = getDeviceById(deviceId);
         if (device != null) {
-            if (device.getAttributes().containsKey(attributeName)) {
-                result = (String) device.getAttributes().get(attributeName);
-            }
+            result = device.getString(attributeName);
             if (result == null && lookupGroupsAttribute) {
                 long groupId = device.getGroupId();
                 while (groupId != 0) {
                     if (getGroupById(groupId) != null) {
-                        result = (String)  getGroupById(groupId).getAttributes().get(attributeName);
+                        result = getGroupById(groupId).getString(attributeName);
                         if (result != null) {
                             break;
                         }
@@ -418,14 +381,25 @@ public class DeviceManager implements IdentityManager {
                 }
             }
             if (result == null) {
-                if (lookupServer) {
-                    Server server = Context.getPermissionsManager().getServer();
-                    result = (String) server.getAttributes().get(attributeName);
-                } else {
+                if (lookupConfig) {
                     result = Context.getConfig().getString(attributeName);
+                } else {
+                    Server server = Context.getPermissionsManager().getServer();
+                    result = server.getString(attributeName);
                 }
             }
         }
         return result;
+    }
+
+    public void resetTotalDistance(DeviceTotalDistance deviceTotalDistance) throws SQLException {
+        Position last = positions.get(deviceTotalDistance.getDeviceId());
+        if (last != null) {
+            last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceTotalDistance.getTotalDistance());
+            dataManager.addPosition(last);
+            updateLatestPosition(last);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,4 +37,23 @@ public class Notification extends Extensible {
         this.type = type;
     }
 
+    private boolean web;
+
+    public boolean getWeb() {
+        return web;
+    }
+
+    public void setWeb(boolean web) {
+        this.web = web;
+    }
+
+    private boolean mail;
+
+    public boolean getMail() {
+        return mail;
+    }
+
+    public void setMail(boolean mail) {
+        this.mail = mail;
+    }
 }

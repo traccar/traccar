@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -49,6 +50,13 @@ public class UserResource extends BaseResource {
     public Response add(User entity) throws SQLException {
         if (!Context.getPermissionsManager().isAdmin(getUserId())) {
             Context.getPermissionsManager().checkRegistration(getUserId());
+            Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
+            entity.setDeviceLimit(Context.getConfig().getInteger("users.defaultDeviceLimit"));
+            int expirationDays = Context.getConfig().getInteger("users.defaultExpirationDays");
+            if (expirationDays > 0) {
+                entity.setExpirationTime(
+                    new Date(System.currentTimeMillis() + (long) expirationDays * 24 * 3600 * 1000));
+            }
         }
         Context.getPermissionsManager().addUser(entity);
         if (Context.getNotificationManager() != null) {
@@ -59,12 +67,10 @@ public class UserResource extends BaseResource {
 
     @Path("{id}")
     @PUT
-    public Response update(@PathParam("id") long id, User entity) throws SQLException {
-        if (entity.getAdmin()) {
-            Context.getPermissionsManager().checkAdmin(getUserId());
-        } else {
-            Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
-        }
+    public Response update(User entity) throws SQLException {
+        User before = Context.getPermissionsManager().getUser(entity.getId());
+        Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
+        Context.getPermissionsManager().checkUserUpdate(getUserId(), before, entity);
         Context.getPermissionsManager().updateUser(entity);
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refresh();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -86,7 +87,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
-            position.setSpeed(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
             position.setCourse(parser.nextDouble());
             if (position.getCourse() > 360) {
@@ -111,6 +112,9 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.check(flags, 8)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
                 }
+                if (BitUtil.check(flags, 9) || BitUtil.check(flags, 10) || BitUtil.check(flags, 11)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+                }
                 if (BitUtil.check(flags, 12)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                 }
@@ -119,6 +123,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 position.set(Position.KEY_GSM, BitUtil.between(flags, 16, 20));
+                position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
 
                 position.setAltitude(parser.nextDouble());
 

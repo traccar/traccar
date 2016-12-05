@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -24,6 +26,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
@@ -32,11 +35,18 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int MSG_LOGIN_REQUEST = 0x80;
+    public static final int MSG_LOGIN_REQUEST_2 = 0x21;
+    public static final int MSG_LOGIN_RESPONSE = 0x00;
+    public static final int MSG_HEARTBEAT_REQUEST = 0xF0;
+    public static final int MSG_HEARTBEAT_RESPONSE = 0xFF;
+    public static final int MSG_REPORT_ONCE = 0x90;
+    public static final int MSG_REPORT_INTERVAL = 0x93;
+
+    public static final int MODE_GPRS = 0x30;
+    public static final int MODE_GPRS_SMS = 0x33;
+
     private static final Pattern PATTERN = new PatternBuilder()
-            .text("[")
-            .expression(".")
-            .number("d{10}")
-            .expression(".")
             .text("(")
             .expression("[A-Z]+")
             .number("(dd)(dd)(dd)")              // time
@@ -45,24 +55,55 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)(dd.dddd)([EW])")      // longitude
             .number("(ddd.ddd)")                 // speed
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
-            .number("d+")
             .any()
             .text(")")
-            .text("]").optional()
             .compile();
+
+    private void sendResponse(Channel channel, int type, ChannelBuffer dataSequence, ChannelBuffer content) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeByte('[');
+            response.writeByte(type);
+            response.writeBytes(dataSequence);
+            response.writeByte(content.readableBytes());
+            response.writeBytes(content);
+            response.writeByte(']');
+            channel.write(response);
+        }
+    }
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
+        ChannelBuffer buf = (ChannelBuffer) msg;
 
-        if (sentence.startsWith("[!")) {
+        buf.skipBytes(1); // header
+        int type = buf.readUnsignedByte();
+        ChannelBuffer dataSequence = buf.readBytes(10);
+        int length = buf.readUnsignedByte();
 
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(14, 14 + 15));
-            if (deviceSession != null && channel != null) {
-                channel.write("[”0000000001" + sentence.substring(13) + "]");
+        if (type == MSG_LOGIN_REQUEST || type == MSG_LOGIN_REQUEST_2) {
+
+            ChannelBuffer data = buf.readBytes(length);
+
+            String id;
+            if (type == MSG_LOGIN_REQUEST) {
+                id =  data.toString(StandardCharsets.US_ASCII);
+            } else {
+                id = data.copy(1, 15).toString(StandardCharsets.US_ASCII);
             }
+
+            if (getDeviceSession(channel, remoteAddress, id) != null) {
+                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                response.writeByte(MODE_GPRS);
+                response.writeBytes(data);
+                sendResponse(channel, MSG_LOGIN_RESPONSE, dataSequence, response);
+            }
+
+        } else if (type == MSG_HEARTBEAT_REQUEST) {
+
+            sendResponse(channel, MSG_HEARTBEAT_RESPONSE, dataSequence, buf.readBytes(length));
 
         } else {
 
@@ -71,7 +112,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Parser parser = new Parser(PATTERN, sentence);
+            Parser parser = new Parser(PATTERN, buf.readBytes(length).toString(StandardCharsets.US_ASCII));
             if (!parser.matches()) {
                 return null;
             }
@@ -92,6 +133,7 @@ public class Tk102ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateBuilder.getDate());
 
             return position;
+
         }
 
         return null;

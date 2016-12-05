@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ public class Jt600FrameDecoder extends FrameDecoder {
         char type = (char) buf.getByte(buf.readerIndex());
 
         if (type == '$') {
-            int length = buf.getUnsignedShort(buf.readerIndex() + 7) + 10;
+            boolean longFormat = buf.getUnsignedByte(buf.readerIndex() + 1) == 0x75;
+            int length = buf.getUnsignedShort(buf.readerIndex() + (longFormat ? 8 : 7)) + 10;
             if (length >= buf.readableBytes()) {
                 return buf.readBytes(length);
             }

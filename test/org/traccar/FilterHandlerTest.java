@@ -6,17 +6,27 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
+import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
+import org.traccar.model.Device;
 
-public class FilterHandlerTest {
+public class FilterHandlerTest extends BaseTest {
 
     private FilterHandler filtingHandler;
     private FilterHandler passingHandler;
 
     @Before
     public void setUp() {
-        filtingHandler = new FilterHandler(true, true, true, true, true, 10, 10);
-        passingHandler = new FilterHandler(false, false, false, false, false, 0, 0);
+        passingHandler = new FilterHandler();
+        filtingHandler = new FilterHandler();
+        filtingHandler.setFilterInvalid(true);
+        filtingHandler.setFilterZero(true);
+        filtingHandler.setFilterDuplicate(true);
+        filtingHandler.setFilterFuture(true);
+        filtingHandler.setFilterApproximate(true);
+        filtingHandler.setFilterStatic(true);
+        filtingHandler.setFilterDistance(10);
+        filtingHandler.setFilterLimit(10);
     }
 
     @After
@@ -24,7 +34,7 @@ public class FilterHandlerTest {
         filtingHandler = null;
         passingHandler = null;
     }
-    
+
     private Position createPosition(
             long deviceId,
             Date time,

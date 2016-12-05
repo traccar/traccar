@@ -22,41 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class ProtocolTest {
-
-    static {
-        Context.init(new IdentityManager() {
-
-            private Device createDevice() {
-                Device device = new Device();
-                device.setId(1);
-                device.setName("test");
-                device.setUniqueId("123456789012345");
-                return device;
-            }
-
-            @Override
-            public Device getDeviceById(long id) {
-                return createDevice();
-            }
-
-            @Override
-            public Device getDeviceByUniqueId(String uniqueId) {
-                return createDevice();
-            }
-            
-            @Override
-            public Position getLastPosition(long deviceId) {
-                return null;
-            }
-            
-            @Override
-            public boolean isLatestPosition(Position position) {
-                return true;
-            }
-
-        });
-    }
+public class ProtocolTest extends BaseTest {
 
     protected Position position(String time, boolean valid, double lat, double lon) throws ParseException {
 
@@ -96,7 +62,7 @@ public class ProtocolTest {
     }
 
     protected ChannelBuffer buffer(String... data) {
-        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.US_ASCII);
+        return ChannelBuffers.copiedBuffer(concatenateStrings(data), StandardCharsets.ISO_8859_1);
     }
 
     protected DefaultHttpRequest request(String url) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_COMPACT = 0x0100;
     public static final int MSG_FULL = 0x00FE;
+
+    private static final String[] DIRECTIONS = new String[] {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
     @Override
     protected Object decode(
@@ -119,8 +121,13 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
             matcher = pattern.matcher(sentence);
             if (matcher.find()) {
+                for (int i = 0; i < DIRECTIONS.length; i++) {
+                    if (matcher.group(1).equals(DIRECTIONS[i])) {
+                        position.setCourse(i * 45.0);
+                        break;
+                    }
+                }
                 position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(matcher.group(2))));
-                position.setCourse(0); // matcher.group(1) for course
             }
 
             pattern = Pattern.compile("(\\d{1,2}:\\d{2} \\w{3} \\d{1,2})");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         Collection<Event> events = new ArrayList<>();
         double speed = position.getSpeed();
         double speedLimit = Context.getDeviceManager()
-                .lookupServerDouble(device.getId(), ATTRIBUTE_SPEED_LIMIT, 0);
+                .lookupAttributeDouble(device.getId(), ATTRIBUTE_SPEED_LIMIT, 0, false);
         if (speedLimit == 0) {
             return null;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public abstract class BaseProtocol implements Protocol {
         if (supportedCommands.contains(command.getType())) {
             activeDevice.write(command);
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-            String data = (String) command.getAttributes().get(Command.KEY_DATA);
+            String data = command.getString(Command.KEY_DATA);
             if (activeDevice.getChannel().getPipeline().get(StringEncoder.class) != null) {
                 activeDevice.write(data);
             } else {

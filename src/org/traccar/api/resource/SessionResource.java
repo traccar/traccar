@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -48,7 +49,7 @@ public class SessionResource extends BaseResource {
 
     @PermitAll
     @GET
-    public User get() throws SQLException {
+    public User get(@QueryParam("token") String token) throws SQLException {
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
         if (userId == null) {
             Cookie[] cookies = request.getCookies();
@@ -64,7 +65,13 @@ public class SessionResource extends BaseResource {
                 }
             }
             if (email != null && password != null) {
-                User user = Context.getDataManager().login(email, password);
+                User user = Context.getPermissionsManager().login(email, password);
+                if (user != null) {
+                    userId = user.getId();
+                    request.getSession().setAttribute(USER_ID_KEY, userId);
+                }
+            } else if (token != null) {
+                User user = Context.getPermissionsManager().getUserByToken(token);
                 if (user != null) {
                     userId = user.getId();
                     request.getSession().setAttribute(USER_ID_KEY, userId);
@@ -73,6 +80,7 @@ public class SessionResource extends BaseResource {
         }
 
         if (userId != null) {
+            Context.getPermissionsManager().checkUserEnabled(userId);
             return Context.getPermissionsManager().getUser(userId);
         } else {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());

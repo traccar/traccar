@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,10 @@ public final class Log {
 
     private static Logger logger = null;
 
+    public static String getAppVersion() {
+        return Log.class.getPackage().getImplementationVersion();
+    }
+
     public static void setupLogger(Config config) throws IOException {
 
         Layout layout = new PatternLayout("%d{" + DATE_FORMAT + "} %5p: %m%n");
@@ -72,7 +76,7 @@ public final class Log {
         });
 
         Log.logSystemInfo();
-        Log.info("Version: " + Log.class.getPackage().getImplementationVersion());
+        Log.info("Version: " + getAppVersion());
     }
 
     public static Logger getLogger() {

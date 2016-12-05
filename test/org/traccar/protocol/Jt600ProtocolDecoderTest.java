@@ -11,6 +11,15 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
 
         Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(new Jt600Protocol());
 
+        verifyPosition(decoder, binary(
+                "2475604055531611002311111600311326144436028210791d016c0000001f070000000020c03c4f6d07d80ccf"));
+
+        verifyPosition(decoder, binary(
+                "2475201509260111002313101503464722331560113555309F00000000002D0500CB206800F064109326381A03"));
+
+        verifyPosition(decoder, binary(
+                "2475605035891613002328091601152806086750106533350c00000000000a000000000000e1ff4f97007f1607"));
+
         verifyPosition(decoder, buffer(
                 "(3301210003,U01,040812,185302,T,22.564025,N,113.242329,E,5.21,152,9,32%,00000000000011,10133,5173,22,100,1)"));
 
@@ -66,6 +75,15 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
 
         verifyNothing(decoder, buffer(
                 "(6221107674,2,U09,129,2,A,280513113036,E,02711.0500,S,1721.0876,A,030613171243,E,02756.7618,S,2300.0325,3491,538200,14400,1)"));
+
+        verifyPosition(decoder, buffer(
+                "(3301210003,U02,040812,185302,T,00.000000,N,000.000000,E,0,0,0,0%,00000000000011,741,51,22,0,1,05)"));
+
+        verifyPosition(decoder, buffer(
+                "(3301210003,U06,4,250916,133207,T,7.011013,N,25.060708,W,27.61,102,10,0%,00101011000000,0,1,0,448,0,126,1,30)"));
+
+        verifyPosition(decoder, buffer(
+                "(3551001012,U01,010100,000032,F,0.000000,N,0.000000,E,0.00,0,0,10%,00000000010000,15748,7923,23,0,0,3E)"));
 
     }
 

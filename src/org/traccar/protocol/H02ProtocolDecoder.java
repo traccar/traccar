@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
             }
         }
-        position.set(Position.KEY_IGNITION, BitUtil.check(status, 10));
+        position.set(Position.KEY_IGNITION, !BitUtil.check(status, 10));
         position.set(Position.KEY_STATUS, status);
     }
 
@@ -167,6 +167,28 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:(dd)(dd)(dd))?,")        // date (ddmmyy)
             .any()
             .number("(x{8})")                    // status
+            .groupBegin()
+            .number(", *(x+),")                  // mcc
+            .number(" *(x+),")                   // mnc
+            .number(" *(x+),")                   // lac
+            .number(" *(x+)")                    // cid
+            .groupEnd("?")
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_NBR = new PatternBuilder()
+            .text("*")
+            .expression("..,")                   // manufacturer
+            .number("(d+),")                     // imei
+            .text("NBR,")
+            .number("(dd)(dd)(dd),")             // time
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("d+,")                       // gsm delay time
+            .number("d+,")                       // count
+            .number("((?:d+,d+,d+,)+)")          // cells
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(x{8})")                    // status
             .any()
             .compile();
 
@@ -177,13 +199,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder();
@@ -221,6 +243,55 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, parser.nextLong(16));
 
+        if (parser.hasNext(4)) {
+            int mcc = parser.nextInt(16);
+            int mnc = parser.nextInt(16);
+            int lac = parser.nextInt(16);
+            int cid = parser.nextInt(16);
+            if (mcc != 0 && mnc != 0 && lac != 0 && cid != 0) {
+                position.set(Position.KEY_MCC, mcc);
+                position.set(Position.KEY_MNC, mnc);
+                position.set(Position.KEY_LAC, lac);
+                position.set(Position.KEY_CID, cid);
+            }
+        }
+
+        return position;
+    }
+
+    private Position decodeLbs(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_NBR, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+        position.set(Position.KEY_MCC, parser.nextInt());
+        position.set(Position.KEY_MNC, parser.nextInt());
+
+        String[] cells = parser.next().split(","); // decode all in future
+        position.set(Position.KEY_LAC, Integer.parseInt(cells[0]));
+        position.set(Position.KEY_CID, Integer.parseInt(cells[1]));
+        position.set(Position.KEY_GSM, Integer.parseInt(cells[2]));
+
+        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+
+        getLastLocation(position, dateBuilder.getDate());
+
+        processStatus(position, parser.nextLong(16));
+
         return position;
     }
 
@@ -234,7 +305,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         // handle X mode?
 
         if (marker.equals("*")) {
-            return decodeText(buf.toString(StandardCharsets.US_ASCII), channel, remoteAddress);
+            String sentence = buf.toString(StandardCharsets.US_ASCII);
+            if (sentence.contains(",NBR,")) {
+                return decodeLbs(sentence, channel, remoteAddress);
+            } else {
+                return decodeText(sentence, channel, remoteAddress);
+            }
         } else if (marker.equals("$")) {
             return decodeBinary(buf, channel, remoteAddress);
         }

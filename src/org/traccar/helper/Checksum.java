@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2015 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,10 +194,19 @@ public final class Checksum {
         return checksum;
     }
 
+    public static int xor(String string) {
+        byte checksum = 0;
+        for (byte b : string.getBytes(StandardCharsets.US_ASCII)) {
+            checksum ^= b;
+        }
+        return checksum;
+    }
+
     public static String nmea(String msg) {
         int checksum = 0;
-        for (byte b : msg.getBytes(StandardCharsets.US_ASCII)) {
-            checksum ^= b;
+        byte[] bytes = msg.getBytes(StandardCharsets.US_ASCII);
+        for (int i = 1; i < bytes.length; i++) {
+            checksum ^= bytes[i];
         }
         return String.format("*%02x", checksum).toUpperCase();
     }

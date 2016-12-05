@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
 public class H02FrameDecoder extends FrameDecoder {
+
+    private static final int MESSAGE_SHORT = 32;
+    private static final int MESSAGE_LONG = 45;
 
     private int messageLength;
 
@@ -49,10 +52,19 @@ public class H02FrameDecoder extends FrameDecoder {
                 return buf.readBytes(index + 1 - buf.readerIndex());
             }
 
-        } else if (marker == '$' && buf.readableBytes() >= messageLength) {
+        } else if (marker == '$') {
 
-            // Return binary message
-            return buf.readBytes(messageLength);
+            if (messageLength == 0) {
+                if (buf.readableBytes() == MESSAGE_LONG) {
+                    messageLength = MESSAGE_LONG;
+                } else {
+                    messageLength = MESSAGE_SHORT;
+                }
+            }
+
+            if (buf.readableBytes() >= messageLength) {
+                return buf.readBytes(messageLength);
+            }
 
         }
 

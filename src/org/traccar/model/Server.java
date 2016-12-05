@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,16 @@
  */
 package org.traccar.model;
 
+import org.traccar.helper.Log;
+
 public class Server extends Extensible {
+
+    public String getVersion() {
+        return Log.getAppVersion();
+    }
+
+    public void setVersion(String version) {
+    }
 
     private boolean registration;
 
@@ -125,6 +134,26 @@ public class Server extends Extensible {
 
     public void setTwelveHourFormat(boolean twelveHourFormat) {
         this.twelveHourFormat = twelveHourFormat;
+    }
+
+    private boolean forceSettings;
+
+    public boolean getForceSettings() {
+        return forceSettings;
+    }
+
+    public void setForceSettings(boolean forceSettings) {
+        this.forceSettings = forceSettings;
+    }
+
+    private String coordinateFormat;
+
+    public String getCoordinateFormat() {
+        return coordinateFormat;
+    }
+
+    public void setCoordinateFormat(String coordinateFormat) {
+        this.coordinateFormat = coordinateFormat;
     }
 
 }

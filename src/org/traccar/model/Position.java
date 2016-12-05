@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ public class Position extends Message {
     public static final String KEY_OUTPUT = "output";
     public static final String KEY_POWER = "power";
     public static final String KEY_BATTERY = "battery";
+    public static final String KEY_CELL_TOWERS = "cellTowers";
     public static final String KEY_MCC = "mcc";
     public static final String KEY_MNC = "mnc";
     public static final String KEY_LAC = "lac";
@@ -58,7 +59,9 @@ public class Position extends Message {
     public static final String KEY_MOTION = "motion";
     public static final String KEY_ARMED = "armed";
     public static final String KEY_ACCURACY = "accuracy";
+    public static final String KEY_GEOFENCE = "geofence";
 
+    public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed";
     public static final String KEY_OBD_ODOMETER = "obdOdometer";
 
@@ -81,6 +84,8 @@ public class Position extends Message {
     public static final String ALARM_LOW_BATTERY = "lowBattery";
     public static final String ALARM_FAULT = "fault";
     public static final String ALARM_POWER_OFF = "powerOff";
+    public static final String ALARM_POWER_ON = "powerOn";
+    public static final String ALARM_DOOR = "door";
     public static final String ALARM_GEOFENCE = "geofence";
     public static final String ALARM_GEOFENCE_ENTER = "geofenceEnter";
     public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
@@ -91,6 +96,8 @@ public class Position extends Message {
     public static final String ALARM_BREAKING = "hardBreaking";
     public static final String ALARM_FATIGUE_DRIVING = "fatigueDriving";
     public static final String ALARM_POWER_CUT = "powerCut";
+    public static final String ALARM_JAMMING = "jamming";
+    public static final String ALARM_TEMPERATURE = "temperature";
 
     private String protocol;
 

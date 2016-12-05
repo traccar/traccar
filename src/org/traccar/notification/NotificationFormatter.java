@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,10 @@ public final class NotificationFormatter {
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_ONLINE = "Device: %1$s%n"
             + "Online%n"
             + "Time: %2$tc%n";
+    public static final String TITLE_TEMPLATE_TYPE_DEVICE_UNKNOWN = "%1$s: status is unknown";
+    public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_UNKNOWN = "Device: %1$s%n"
+            + "Status is unknown%n"
+            + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_OFFLINE = "%1$s: offline";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_OFFLINE = "Device: %1$s%n"
             + "Offline%n"
@@ -47,46 +51,51 @@ public final class NotificationFormatter {
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_MOVING = "%1$s: moving";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_MOVING = "Device: %1$s%n"
             + "Moving%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_STOPPED = "%1$s: stopped";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_STOPPED = "Device: %1$s%n"
             + "Stopped%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "%1$s: exceeds the speed";
     public static final String MESSAGE_TEMPLATE_TYPE_DEVICE_OVERSPEED = "Device: %1$s%n"
             + "Exceeds the speed: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_GEOFENCE_ENTER = "%1$s: has entered geofence";
     public static final String MESSAGE_TEMPLATE_TYPE_GEOFENCE_ENTER = "Device: %1$s%n"
             + "Has entered geofence: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_GEOFENCE_EXIT = "%1$s: has exited geofence";
     public static final String MESSAGE_TEMPLATE_TYPE_GEOFENCE_EXIT = "Device: %1$s%n"
             + "Has exited geofence: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_ALARM = "%1$s: alarm!";
     public static final String MESSAGE_TEMPLATE_TYPE_ALARM = "Device: %1$s%n"
             + "Alarm: %5$s%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static final String TITLE_TEMPLATE_TYPE_IGNITION_ON = "%1$s: ignition ON";
     public static final String MESSAGE_TEMPLATE_TYPE_IGNITION_ON = "Device: %1$s%n"
             + "Ignition ON%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
     public static final String TITLE_TEMPLATE_TYPE_IGNITION_OFF = "%1$s: ignition OFF";
     public static final String MESSAGE_TEMPLATE_TYPE_IGNITION_OFF = "Device: %1$s%n"
             + "Ignition OFF%n"
-            + "Point: http://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
+            + "Time: %2$tc%n";
+    public static final String TITLE_TEMPLATE_TYPE_MAINTENANCE = "%1$s: maintenance is required";
+    public static final String MESSAGE_TEMPLATE_TYPE_MAINTENANCE = "Device: %1$s%n"
+            + "Maintenance is required%n"
+            + "Point: https://www.openstreetmap.org/?mlat=%3$f&mlon=%4$f#map=16/%3$f/%4$f%n"
             + "Time: %2$tc%n";
 
     public static String formatTitle(long userId, Event event, Position position) {
@@ -100,6 +109,9 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_DEVICE_ONLINE:
                 formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName());
+                break;
+            case Event.TYPE_DEVICE_UNKNOWN:
+                formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_UNKNOWN, device.getName());
                 break;
             case Event.TYPE_DEVICE_OFFLINE:
                 formatter.format(TITLE_TEMPLATE_TYPE_DEVICE_OFFLINE, device.getName());
@@ -128,6 +140,9 @@ public final class NotificationFormatter {
             case Event.TYPE_IGNITION_OFF:
                 formatter.format(TITLE_TEMPLATE_TYPE_IGNITION_OFF, device.getName());
                 break;
+            case Event.TYPE_MAINTENANCE:
+                formatter.format(TITLE_TEMPLATE_TYPE_MAINTENANCE, device.getName());
+                break;
             default:
                 formatter.format("Unknown type");
                 break;
@@ -149,6 +164,9 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_DEVICE_ONLINE:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_ONLINE, device.getName(), event.getServerTime());
+                break;
+            case Event.TYPE_DEVICE_UNKNOWN:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_UNKNOWN, device.getName(), event.getServerTime());
                 break;
             case Event.TYPE_DEVICE_OFFLINE:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_DEVICE_OFFLINE, device.getName(), event.getServerTime());
@@ -186,6 +204,10 @@ public final class NotificationFormatter {
                 break;
             case Event.TYPE_IGNITION_OFF:
                 formatter.format(MESSAGE_TEMPLATE_TYPE_IGNITION_OFF, device.getName(), position.getFixTime(),
+                        position.getLatitude(), position.getLongitude());
+                break;
+            case Event.TYPE_MAINTENANCE:
+                formatter.format(MESSAGE_TEMPLATE_TYPE_MAINTENANCE, device.getName(), position.getFixTime(),
                         position.getLatitude(), position.getLongitude());
                 break;
             default:

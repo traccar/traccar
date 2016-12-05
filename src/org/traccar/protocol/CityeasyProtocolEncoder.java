@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2015 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,13 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_POSITION_SINGLE:
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_REQUEST, content);
             case Command.TYPE_POSITION_PERIODIC:
-                content.writeShort(((Number) command.getAttributes().get(Command.KEY_FREQUENCY)).intValue());
+                content.writeShort(command.getInteger(Command.KEY_FREQUENCY));
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_INTERVAL, content);
             case Command.TYPE_POSITION_STOP:
                 content.writeShort(0);
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_INTERVAL, content);
             case Command.TYPE_SET_TIMEZONE:
-                int timezone = ((Number) command.getAttributes().get(Command.KEY_TIMEZONE)).intValue();
+                int timezone = command.getInteger(Command.KEY_TIMEZONE);
                 if (timezone < 0) {
                     content.writeByte(1);
                 } else {
