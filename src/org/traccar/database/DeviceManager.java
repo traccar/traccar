@@ -49,6 +49,7 @@ public class DeviceManager implements IdentityManager {
     private AtomicLong devicesLastUpdate = new AtomicLong();
 
     private Map<Long, Group> groupsById;
+    private Map<String, Group> groupsByName;
     private AtomicLong groupsLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
@@ -245,15 +246,21 @@ public class DeviceManager implements IdentityManager {
             if (groupsById == null) {
                 groupsById = new ConcurrentHashMap<>(databaseGroups.size());
             }
+            if(groupsByName == null){
+                groupsByName = new ConcurrentHashMap<>(databaseGroups.size());
+            }
             Set<Long> databaseGroupsIds = new HashSet<>();
+            Set<String> databaseGroupsNames = new HashSet<>();
             for (Group group : databaseGroups) {
                 databaseGroupsIds.add(group.getId());
+                databaseGroupsNames.add(group.getName());
                 if (groupsById.containsKey(group.getId())) {
                     Group cachedGroup = groupsById.get(group.getId());
                     cachedGroup.setName(group.getName());
                     cachedGroup.setGroupId(group.getGroupId());
                 } else {
                     groupsById.put(group.getId(), group);
+                    groupsByName.put(group.getName(), group);
                 }
             }
             for (Long cachedGroupId : groupsById.keySet()) {
@@ -268,6 +275,8 @@ public class DeviceManager implements IdentityManager {
     public Group getGroupById(long id) {
         return groupsById.get(id);
     }
+
+    public Group getGroupByName(String name) { return groupsByName.get(name); }
 
     public Collection<Group> getAllGroups() {
         boolean forceUpdate = groupsById.isEmpty();

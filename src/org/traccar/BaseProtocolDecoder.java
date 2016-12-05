@@ -19,6 +19,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
 
 import java.net.InetSocketAddress;
@@ -34,8 +35,22 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public long addUnknownDevice(String uniqueId) {
         Device device = new Device();
+        String defaultGroupName = Context.getConfig().getString("database.registerUnknown.defaultGroup", "NOTDEFINED");
         device.setName(uniqueId);
         device.setUniqueId(uniqueId);
+        device.setCategory(Context.getConfig().getString("database.registerUnknown.defaultCategory", "default"));
+
+        if(!defaultGroupName.equals("NOTDEFINED")){
+//            for (Group g:Context.getDeviceManager().getAllGroups()) {
+//                if(g.getName().equalsIgnoreCase(defaultGroupName)){
+//                    device.setGroupId(g.getGroupId());
+//                    break;
+//                }
+//            }
+            Group defaultGroup = Context.getDeviceManager().getGroupByName(defaultGroupName);
+            if(defaultGroup != null)
+                device.setGroupId(defaultGroup.getId());
+        }
 
         try {
             Context.getDeviceManager().addDevice(device);
