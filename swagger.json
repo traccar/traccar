@@ -462,10 +462,18 @@
                         "type": "integer"
                     },
                     {
-                        "$ref": "#/parameters/fromTime"
+                        "name": "from",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "format": "date-time"
                     },
                     {
-                        "$ref": "#/parameters/toTime"
+                        "name": "to",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "format": "date-time"
                     },
                     {
                         "name" : "id",
@@ -864,50 +872,25 @@
         },
         "/reports/route": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of Positions within the time period for the Devices or Groups",
+                "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "parameters": [
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/deviceIdArray"
                     },
                     {
-                        "name": "groupId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/groupIdArray"
                     },
                     {
-                        "name": "from",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/fromTime"
                     },
                     {
-                        "name": "to",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/toTime"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -920,60 +903,34 @@
         },
         "/reports/events": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of Events within the time period for the Devices or Groups",
+                "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "parameters": [
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/deviceIdArray"
                     },
                     {
-                        "name": "groupId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/groupIdArray"
                     },
                     {
                         "name": "type",
                         "in": "query",
                         "description": "% can be used to return events of all types",
-                        "required": true,
                         "type": "array",
                         "items": {
                             "type": "string"
                         }
                     },
                     {
-                        "name": "from",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/fromTime"
                     },
                     {
-                        "name": "to",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/toTime"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -986,50 +943,25 @@
         },
         "/reports/summary": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of ReportSummary within the time period for the Devices or Groups",
+                "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "parameters": [
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/deviceIdArray"
                     },
                     {
-                        "name": "groupId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/groupIdArray"
                     },
                     {
-                        "name": "from",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/fromTime"
                     },
                     {
-                        "name": "to",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/toTime"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1042,50 +974,25 @@
         },
         "/reports/trips": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of ReportTrips within the time period for the Devices or Groups",
+                "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "parameters": [
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/deviceIdArray"
                     },
                     {
-                        "name": "groupId",
-                        "in": "query",
-                        "description": "at least one deviceId or one groupId must be passed",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        }
+                        "$ref": "#/parameters/groupIdArray"
                     },
                     {
-                        "name": "from",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/fromTime"
                     },
                     {
-                        "name": "to",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/toTime"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1098,30 +1005,18 @@
         },
         "/statistics": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch server Statistics",
                 "parameters": [
                     {
-                        "name": "from",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/fromTime"
                     },
                     {
-                        "name": "to",
-                        "in": "query",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/toTime"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1709,20 +1604,38 @@
         "userId": {
             "name": "userId",
             "in": "query",
-            "description": "Standard users can use this with their only with their own _userId_",
+            "description": "Standard users can use this only with their own _userId_",
             "type": "integer"
+        },
+        "deviceIdArray": {
+            "name": "deviceId",
+            "in": "query",
+            "type": "array",
+            "items": {
+                "type": "integer"
+            },
+            "collectionFormat": "multi"
+        },
+        "groupIdArray": {
+            "name": "groupId",
+            "in": "query",
+            "type": "array",
+            "items": {
+                "type": "integer"
+            },
+            "collectionFormat": "multi"
         },
         "fromTime": {
             "name": "from",
             "in": "query",
-            "required": false,
+            "required": true,
             "type": "string",
             "format": "date-time"
         },
         "toTime": {
             "name": "to",
             "in": "query",
-            "required": false,
+            "required": true,
             "type": "string",
             "format": "date-time"
         }
