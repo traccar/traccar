@@ -325,12 +325,7 @@
         },
         "/permissions/devices": {
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Link a Device to a User",
                 "parameters": [
                     {
                         "name": "body",
@@ -344,20 +339,17 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/DevicePermission"
                         }
+                    },
+                    "400": {
+                      "description": "No permission"
                     }
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Remove a Device from a User",
                 "parameters": [
                     {
                         "name": "body",
@@ -370,20 +362,14 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
         },
         "/permissions/groups": {
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Link a Group to a User",
                 "parameters": [
                     {
                         "name": "body",
@@ -397,7 +383,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/GroupPermission"
                         }
@@ -405,12 +390,7 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Remove a Group from a User",
                 "parameters": [
                     {
                         "name": "body",
@@ -423,20 +403,14 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
         },
         "/permissions/geofences": {
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Link a Geofence to a User",
                 "parameters": [
                     {
                         "name": "body",
@@ -450,7 +424,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/GeofencePermission"
                         }
@@ -458,12 +431,7 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Remove a Geofence from a User",
                 "parameters": [
                     {
                         "name": "body",
@@ -476,8 +444,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
