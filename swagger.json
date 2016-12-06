@@ -1029,12 +1029,8 @@
         },
         "/attributes/aliases": {
             "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Fetch a list of AttributeAlias",
+                "description": "Without params, it returns a list of AttributeAlias from all the user's Devices",
                 "parameters": [
                     {
                         "name": "deviceId",
@@ -1046,7 +1042,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1057,12 +1052,7 @@
                 }
             },
             "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Set an AttributeAlias",
                 "parameters": [
                     {
                         "name": "body",
@@ -1076,7 +1066,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/AttributeAlias"
                         }
@@ -1086,18 +1075,10 @@
         },
         "/attributes/aliases/{id}": {
             "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Update an AttributeAlias",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     },
                     {
                         "name": "body",
@@ -1111,7 +1092,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "headers": {},
                         "schema": {
                             "$ref": "#/definitions/AttributeAlias"
                         }
@@ -1119,24 +1099,15 @@
                 }
             },
             "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
+                "summary": "Delete an AttributeAlias",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "type": "integer"
+                        "$ref": "#/parameters/entityId"
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "headers": {}
+                        "description": "No Content"
                     }
                 }
             }
@@ -1155,10 +1126,16 @@
                     "type": "string"
                 },
                 "deviceTime": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "fixTime": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "serverTime": {
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "outdated": {
                     "type": "boolean"
@@ -1176,7 +1153,8 @@
                     "type": "number"
                 },
                 "speed": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "In knots"
                 },
                 "course": {
                     "type": "number"
@@ -1235,7 +1213,8 @@
                     "type": "boolean"
                 },
                 "expirationTime": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "deviceLimit": {
                     "type": "integer"
@@ -1322,7 +1301,8 @@
                     "type": "string"
                 },
                 "lastUpdate": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "positionId": {
                     "type": "integer"
@@ -1342,7 +1322,12 @@
                 "category": {
                     "type": "string"
                 },
-                "geofenceIds": {},
+                "geofenceIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "attributes": {}
             }
         },
@@ -1457,7 +1442,8 @@
                     "type": "string"
                 },
                 "serverTime": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "deviceId": {
                     "type": "integer"
@@ -1480,13 +1466,16 @@
                     "type": "string"
                 },
                 "maxSpeed": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "in knots"
                 },
                 "averageSpeed": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "in knots"
                 },
                 "distance": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "in meters"
                 },
                 "engineHours": {
                     "type": "integer"
@@ -1502,19 +1491,23 @@
                     "type": "string"
                 },
                 "maxSpeed": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "in knots"
                 },
                 "averageSpeed": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "in knots"
                 },
                 "distance": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "in meters"
                 },
                 "duration": {
                     "type": "integer"
                 },
                 "startTime": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "startAddress": {
                     "type": "string"
@@ -1526,7 +1519,8 @@
                     "type": "number"
                 },
                 "endTime": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "endAddress": {
                     "type": "string"
@@ -1542,7 +1536,8 @@
         "Statistics": {
             "properties": {
                 "captureTime": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "activeUsers": {
                     "type": "integer"
@@ -1583,7 +1578,8 @@
                     "type": "integer"
                 },
                 "totalDistance": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "in meters"
                 }
             }
         }
