@@ -246,7 +246,7 @@ public class DeviceManager implements IdentityManager {
             if (groupsById == null) {
                 groupsById = new ConcurrentHashMap<>(databaseGroups.size());
             }
-            if(groupsByName == null){
+            if (groupsByName == null) {
                 groupsByName = new ConcurrentHashMap<>(databaseGroups.size());
             }
             Set<Long> databaseGroupsIds = new HashSet<>();
@@ -274,7 +274,9 @@ public class DeviceManager implements IdentityManager {
         return groupsById.get(id);
     }
 
-    public Group getGroupByName(String name) { return groupsByName.get(name); }
+    public Group getGroupByName(String name) {
+        return groupsByName.get(name);
+    }
 
     public Collection<Group> getAllGroups() {
         boolean forceUpdate = groupsById.isEmpty();
