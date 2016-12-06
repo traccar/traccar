@@ -73,12 +73,7 @@
                 "summary": "Create a Device",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Device"
-                        }
+                        "$ref": "#/parameters/DeviceInBody"
                     }
                 ],
                 "responses": {
@@ -99,12 +94,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Device"
-                        }
+                        "$ref": "#/parameters/DeviceInBody"
                     }
                 ],
                 "responses": {
@@ -158,12 +148,7 @@
                 "summary": "Link a Geofence to a Device",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/DeviceGeofence"
-                        }
+                        "$ref": "#/parameters/DeviceGeofenceInBody"
                     }
                 ],
                 "responses": {
@@ -179,12 +164,7 @@
                 "summary": "Remove a Geofence from a Device",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/DeviceGeofence"
-                        }
+                        "$ref": "#/parameters/DeviceGeofenceInBody"
                     }
                 ],
                 "responses": {
@@ -222,12 +202,7 @@
                 "summary": "Create a Group",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
+                        "$ref": "#/parameters/GroupInBody"
                     }
                 ],
                 "responses": {
@@ -251,12 +226,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
+                        "$ref": "#/parameters/GroupInBody"
                     }
                 ],
                 "responses": {
@@ -287,12 +257,7 @@
                 "summary": "Link a Geofence to a Group",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GroupGeofence"
-                        }
+                        "$ref": "#/parameters/GroupGeofenceInBody"
                     }
                 ],
                 "responses": {
@@ -308,12 +273,7 @@
                 "summary": "Remove a Geofence from a Group",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GroupGeofence"
-                        }
+                        "$ref": "#/parameters/GroupGeofenceInBody"
                     }
                 ],
                 "responses": {
@@ -328,12 +288,7 @@
                 "summary": "Link a Device to a User",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/DevicePermission"
-                        }
+                        "$ref": "#/parameters/DevicePermissionInBody"
                     }
                 ],
                 "responses": {
@@ -352,12 +307,7 @@
                 "summary": "Remove a Device from a User",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/DevicePermission"
-                        }
+                        "$ref": "#/parameters/DevicePermissionInBody"
                     }
                 ],
                 "responses": {
@@ -372,12 +322,7 @@
                 "summary": "Link a Group to a User",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GroupPermission"
-                        }
+                        "$ref": "#/parameters/GroupPermissionInBody"
                     }
                 ],
                 "responses": {
@@ -393,12 +338,7 @@
                 "summary": "Remove a Group from a User",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GroupPermission"
-                        }
+                        "$ref": "#/parameters/GroupPermissionInBody"
                     }
                 ],
                 "responses": {
@@ -413,12 +353,7 @@
                 "summary": "Link a Geofence to a User",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GeofencePermission"
-                        }
+                        "$ref": "#/parameters/GeofencePermissionInBody"
                     }
                 ],
                 "responses": {
@@ -434,12 +369,7 @@
                 "summary": "Remove a Geofence from a User",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/GeofencePermission"
-                        }
+                        "$ref": "#/parameters/GeofencePermissionInBody"
                     }
                 ],
                 "responses": {
@@ -616,12 +546,7 @@
                 "summary": "Create a User",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/User"
-                        }
+                        "$ref": "#/parameters/UserInBody"
                     }
                 ],
                 "responses": {
@@ -642,12 +567,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/User"
-                        }
+                        "$ref": "#/parameters/UserInBody"
                     }
                 ],
                 "responses": {
@@ -682,7 +602,6 @@
                         "name": "all",
                         "in": "query",
                         "description": "To fetch a list of all available Notifications",
-                        "required": true,
                         "type": "boolean"
                     },
                     {
@@ -759,9 +678,7 @@
                         "$ref": "#/parameters/all"
                     },
                     {
-                        "name": "userId",
-                        "in": "query",
-                        "type": "integer"
+                        "$ref": "#/parameters/userId"
                     },
                     {
                         "name": "groupId",
@@ -769,9 +686,7 @@
                         "type": "integer"
                     },
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "type": "integer"
+                        "$ref": "#/parameters/deviceId"
                     },
                     {
                         "name": "refresh",
@@ -796,12 +711,7 @@
                 "summary": "Create a Geofence",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Geofence"
-                        }
+                        "$ref": "#/parameters/GeofenceInBody"
                     }
                 ],
                 "responses": {
@@ -822,12 +732,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Geofence"
-                        }
+                        "$ref": "#/parameters/GeofenceInBody"
                     }
                 ],
                 "responses": {
@@ -1033,10 +938,7 @@
                 "description": "Without params, it returns a list of AttributeAlias from all the user's Devices",
                 "parameters": [
                     {
-                        "name": "deviceId",
-                        "in": "query",
-                        "required": false,
-                        "type": "integer"
+                        "$ref": "#/parameters/deviceId"
                     }
                 ],
                 "responses": {
@@ -1055,12 +957,7 @@
                 "summary": "Set an AttributeAlias",
                 "parameters": [
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/AttributeAlias"
-                        }
+                        "$ref": "#/parameters/AttributeAliasInBody"
                     }
                 ],
                 "responses": {
@@ -1081,12 +978,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/AttributeAlias"
-                        }
+                        "$ref": "#/parameters/AttributeAliasInBody"
                     }
                 ],
                 "responses": {
@@ -1602,6 +1494,92 @@
             "in": "query",
             "description": "Standard users can use this only with their own _userId_",
             "type": "integer"
+        },
+        "deviceId": {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Standard users can use this only with _userId_s, they have access to",
+            "type": "integer"
+        },
+        "DeviceInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Device"
+            }
+        },
+        "DeviceGeofenceInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/DeviceGeofence"
+            }
+        },
+        "GroupInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Group"
+            }
+        },
+        "GroupGeofenceInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/GroupGeofence"
+            }
+        },
+        "DevicePermissionInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/DevicePermission"
+            }
+        },
+        "GroupPermissionInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/GroupPermission"
+            }
+        },
+        "GeofencePermissionInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/GeofencePermission"
+            }
+        },
+        "UserInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/User"
+            }
+        },
+        "GeofenceInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Geofence"
+            }
+        },
+        "AttributeAliasInBody": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/AttributeAlias"
+            }
         },
         "deviceIdArray": {
             "name": "deviceId",
