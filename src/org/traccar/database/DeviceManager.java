@@ -313,17 +313,24 @@ public class DeviceManager implements IdentityManager {
         checkGroupCycles(group);
         dataManager.addGroup(group);
         groupsById.put(group.getId(), group);
+        groupsByName.put(group.getName(), group);
     }
 
     public void updateGroup(Group group) throws SQLException {
+        String oldGroupName = groupsById.get(group.getId()).getName();
         checkGroupCycles(group);
         dataManager.updateGroup(group);
         groupsById.put(group.getId(), group);
+        if (!oldGroupName.equals(group.getName())) {
+            groupsByName.remove(oldGroupName);
+        }
+        groupsByName.put(group.getName(), group);
     }
 
     public void removeGroup(long groupId) throws SQLException {
         dataManager.removeGroup(groupId);
         groupsById.remove(groupId);
+        groupsByName.remove(getGroupById(groupId).getName());
     }
 
     public boolean lookupAttributeBoolean(
