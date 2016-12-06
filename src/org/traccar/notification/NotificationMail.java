@@ -61,6 +61,11 @@ public final class NotificationMail {
                 properties.put("mail.smtp.ssl.trust", sslTrust);
             }
 
+            String sslProtocols = provider.getString("mail.smtp.ssl.protocols");
+            if (sslProtocols != null) {
+                properties.put("mail.smtp.ssl.protocols", sslProtocols);
+            }
+
             properties.put("mail.smtp.auth", provider.getString("mail.smtp.auth"));
 
             String username = provider.getString("mail.smtp.username");
