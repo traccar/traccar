@@ -1,0 +1,9 @@
+#set($subject = "$device.name: command result received")
+<!DOCTYPE html>
+<html>
+<body>
+Device: $device.name<br>
+Result: $position.getString("result")<br>
+Time: $event.serverTime<br>
+</body>
+</html>  

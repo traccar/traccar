@@ -17,6 +17,9 @@ package org.traccar;
 
 import com.ning.http.client.AsyncHttpClient;
 
+import java.util.Properties;
+
+import org.apache.velocity.app.VelocityEngine;
 import org.traccar.database.AliasesManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
@@ -123,6 +126,12 @@ public final class Context {
 
     public static NotificationManager getNotificationManager() {
         return notificationManager;
+    }
+
+    private static VelocityEngine velocityEngine;
+
+    public static VelocityEngine getVelocityEngine() {
+        return velocityEngine;
     }
 
     private static final AsyncHttpClient ASYNC_HTTP_CLIENT = new AsyncHttpClient();
@@ -242,6 +251,13 @@ public final class Context {
 
         if (config.getBoolean("event.enable")) {
             notificationManager = new NotificationManager(dataManager);
+            Properties velocityProperties = new Properties();
+            velocityProperties.setProperty("file.resource.loader.path",
+                    Context.getConfig().getString("mail.templatesPath", "templates/mail") + "/");
+            velocityProperties.setProperty("runtime.log.logsystem.class",
+                    "org.apache.velocity.runtime.log.NullLogChute");
+            velocityEngine = new VelocityEngine();
+            velocityEngine.init(velocityProperties);
         }
 
         serverManager = new ServerManager();
