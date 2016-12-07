@@ -29,21 +29,6 @@ import org.traccar.reports.ReportUtils;
 
 public final class NotificationFormatter {
 
-    public static class MailMessage {
-        private String subject;
-        private String body;
-        public MailMessage(String subject, String body) {
-            this.subject = subject;
-            this.body = body;
-        }
-        public String getSubject() {
-            return subject;
-        }
-        public String getBody() {
-            return body;
-        }
-    }
-
     private NotificationFormatter() {
     }
 
@@ -66,8 +51,6 @@ public final class NotificationFormatter {
             template = Context.getVelocityEngine().getTemplate(event.getType() + ".vm");
         } catch (ResourceNotFoundException error) {
             Log.warning(error);
-        }
-        if (template == null) {
             template = Context.getVelocityEngine().getTemplate("unknown.vm");
         }
 

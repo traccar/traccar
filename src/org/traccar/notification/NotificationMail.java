@@ -29,7 +29,6 @@ import org.traccar.helper.Log;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.NotificationFormatter.MailMessage;
 
 public final class NotificationMail {
 
