@@ -106,8 +106,9 @@ public final class NotificationMail {
         }
 
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-        message.setSubject(NotificationFormatter.formatTitle(userId, event, position));
-        message.setText(NotificationFormatter.formatMessage(userId, event, position));
+        MailMessage mailMessage = NotificationFormatter.formatMessage(userId, event, position);
+        message.setSubject(mailMessage.getSubject());
+        message.setContent(mailMessage.getBody(), "text/html; charset=utf-8");
 
         Transport transport = session.getTransport();
         try {

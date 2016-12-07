@@ -1,0 +1,9 @@
+#set($subject = "$device.name: offline")
+<!DOCTYPE html>
+<html>
+<body>
+Device: $device.name<br>
+Offline<br>
+Time: $event.serverTime<br>
+</body>
+</html>  
