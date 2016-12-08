@@ -50,7 +50,7 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendResponse(Channel channel) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(BLOCK_LENGTH);
+            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, BLOCK_LENGTH);
             response.writeByte(MSG_ACKNOWLEDGEMENT);
             response.writeMedium(1);
             response.writeByte(0x00); // success
