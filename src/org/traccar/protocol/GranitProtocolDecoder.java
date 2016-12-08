@@ -61,7 +61,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     private static void sendResponseCurrent(Channel channel, int deviceId, long time) {
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
         response.writeBytes("BB+UGRC~".getBytes(StandardCharsets.US_ASCII));
-        response.writeShort(6); //binary length
+        response.writeShort(6); // length
         response.writeInt((int) time);
         response.writeShort(deviceId);
         appendChecksum(response, 16);
@@ -71,7 +71,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
     private static void sendResponseArchive(Channel channel, int deviceId, int packNum) {
         ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
         response.writeBytes("BB+ARCF~".getBytes(StandardCharsets.US_ASCII));
-        response.writeShort(4); //binary length
+        response.writeShort(4); // length
         response.writeShort(packNum);
         response.writeShort(deviceId);
         appendChecksum(response, 14);
@@ -95,14 +95,19 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         int latDegrees = buf.readUnsignedByte();
         int lonMinutes = buf.readUnsignedShort();
         int latMinutes = buf.readUnsignedShort();
+
         double latitude = latDegrees + latMinutes / 60000.0;
         double longitude = lonDegrees + lonMinutes / 60000.0;
-        if (!BitUtil.check(flags, 4)) {
-            latitude = -latitude;
+
+        if (position.getValid()) {
+            if (!BitUtil.check(flags, 4)) {
+                latitude = -latitude;
+            }
+            if (!BitUtil.check(flags, 5)) {
+                longitude = -longitude;
+            }
         }
-        if (!BitUtil.check(flags, 5)) {
-            longitude = -longitude;
-        }
+
         position.setLongitude(longitude);
         position.setLatitude(latitude);
 
@@ -135,11 +140,11 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
 
         position.setAltitude(buf.readUnsignedByte() * 10);
 
-        short diOut = buf.readUnsignedByte();
+        int output = buf.readUnsignedByte();
         for (int i = 0; i < 8; i++) {
-            position.set(Position.PREFIX_IO + (i + 1), BitUtil.check(diOut, i));
+            position.set(Position.PREFIX_IO + (i + 1), BitUtil.check(output, i));
         }
-        buf.skipBytes(1); //StatMess
+        buf.readUnsignedByte(); // status message buffer
     }
 
     @Override

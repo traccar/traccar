@@ -135,7 +135,9 @@ public class ProtocolTest extends BaseTest {
             if (expected != null) {
 
                 if (expected.getFixTime() != null) {
-                    Assert.assertEquals("time", expected.getFixTime(), position.getFixTime());
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    Assert.assertEquals("time", dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()));
                 }
                 Assert.assertEquals("valid", expected.getValid(), position.getValid());
                 Assert.assertEquals("latitude", expected.getLatitude(), position.getLatitude(), 0.00001);
