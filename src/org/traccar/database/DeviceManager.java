@@ -49,7 +49,6 @@ public class DeviceManager implements IdentityManager {
     private AtomicLong devicesLastUpdate = new AtomicLong();
 
     private Map<Long, Group> groupsById;
-    private Map<String, Group> groupsByName;
     private AtomicLong groupsLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
@@ -246,9 +245,6 @@ public class DeviceManager implements IdentityManager {
             if (groupsById == null) {
                 groupsById = new ConcurrentHashMap<>(databaseGroups.size());
             }
-            if (groupsByName == null) {
-                groupsByName = new ConcurrentHashMap<>(databaseGroups.size());
-            }
             Set<Long> databaseGroupsIds = new HashSet<>();
             for (Group group : databaseGroups) {
                 databaseGroupsIds.add(group.getId());
@@ -258,7 +254,6 @@ public class DeviceManager implements IdentityManager {
                     cachedGroup.setGroupId(group.getGroupId());
                 } else {
                     groupsById.put(group.getId(), group);
-                    groupsByName.put(group.getName(), group);
                 }
             }
             for (Long cachedGroupId : groupsById.keySet()) {
@@ -272,10 +267,6 @@ public class DeviceManager implements IdentityManager {
 
     public Group getGroupById(long id) {
         return groupsById.get(id);
-    }
-
-    public Group getGroupByName(String name) {
-        return groupsByName.get(name);
     }
 
     public Collection<Group> getAllGroups() {
@@ -313,24 +304,17 @@ public class DeviceManager implements IdentityManager {
         checkGroupCycles(group);
         dataManager.addGroup(group);
         groupsById.put(group.getId(), group);
-        groupsByName.put(group.getName(), group);
     }
 
     public void updateGroup(Group group) throws SQLException {
-        String oldGroupName = groupsById.get(group.getId()).getName();
         checkGroupCycles(group);
         dataManager.updateGroup(group);
         groupsById.put(group.getId(), group);
-        if (!oldGroupName.equals(group.getName())) {
-            groupsByName.remove(oldGroupName);
-        }
-        groupsByName.put(group.getName(), group);
     }
 
     public void removeGroup(long groupId) throws SQLException {
         dataManager.removeGroup(groupId);
         groupsById.remove(groupId);
-        groupsByName.remove(getGroupById(groupId).getName());
     }
 
     public boolean lookupAttributeBoolean(
