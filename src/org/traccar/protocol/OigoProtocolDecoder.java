@@ -155,7 +155,8 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         boolean negative = value < 0;
         value = Math.abs(value);
         double minutes = (value % 100000) * 0.001;
-        double degrees = value / 100000 + minutes / 60;
+        value /= 100000;
+        double degrees = value + minutes / 60;
         return negative ? -degrees : degrees;
     }
 
