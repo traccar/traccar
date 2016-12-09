@@ -29,4 +29,5 @@ public class EventResource extends BaseResource {
         }
         return event;
     }
+
 }

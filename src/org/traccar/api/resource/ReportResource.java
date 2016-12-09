@@ -27,6 +27,7 @@ import org.traccar.reports.model.TripReport;
 import org.traccar.reports.Route;
 
 @Path("reports")
+@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ReportResource extends BaseResource {
 
@@ -35,7 +36,6 @@ public class ReportResource extends BaseResource {
 
     @Path("route")
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Collection<Position> getRoute(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
@@ -59,7 +59,6 @@ public class ReportResource extends BaseResource {
 
     @Path("events")
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Collection<Event> getEvents(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
@@ -85,7 +84,6 @@ public class ReportResource extends BaseResource {
 
     @Path("summary")
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Collection<SummaryReport> getSummary(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") String from, @QueryParam("to") String to) throws SQLException {
