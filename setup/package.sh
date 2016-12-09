@@ -22,7 +22,7 @@ check_requirement () {
   fi 
 }
 
-check_requirement "ls ../../ext-6.0.1" "Missing ../../ext-6.0.1 (https://www.sencha.com/legal/GPL/)"
+check_requirement "ls ../../ext-6.2.0" "Missing ../../ext-6.2.0 (https://www.sencha.com/legal/GPL/)"
 check_requirement "ls yajsw-*.zip" "Missing yajsw-*.zip (https://sourceforge.net/projects/yajsw/files/)"
 check_requirement "ls innosetup-*.exe" "Missing isetup-*.exe (http://www.jrsoftware.org/isdl.php)"
 check_requirement "which sencha" "Missing sencha cmd package (https://www.sencha.com/products/extjs/cmd-download/)"
