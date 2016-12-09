@@ -11,7 +11,7 @@
 <body>
 Device: $device.name<br>
 Exceeds the speed: $speedString<br>
-Point: <a href="https://www.openstreetmap.org/?mlat=$position.latitude&mlon=$position.longitude#map=16/$position.latitude/$position.longitude">#if($position.address)$position.address#{else}$position.latitude°, $position.longitude°#end</a><br>
 Time: $event.serverTime<br>
+Point: <a href="$webUrl?eventId=$event.id">#if($position.address)$position.address#{else}$position.latitude°, $position.longitude°#end</a><br>
 </body>
 </html>  
