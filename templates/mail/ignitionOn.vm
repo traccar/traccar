@@ -5,6 +5,6 @@
 Device: $device.name<br>
 Ignition ON<br>
 Time: $event.serverTime<br>
-Point: <a href="$webUrl?eventId=$event.id">#if($position.address)$position.address#{else}$position.latitude°, $position.longitude°#end</a><br>
+Point: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude°, $position.longitude°#{end}</a><br>
 </body>
 </html>  

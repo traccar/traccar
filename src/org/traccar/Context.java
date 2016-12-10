@@ -21,6 +21,7 @@ import java.net.InetAddress;
 import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.AliasesManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
@@ -259,8 +260,8 @@ public final class Context {
                     "org.apache.velocity.runtime.log.NullLogChute");
 
             String address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
-            String port = config.getString("web.port", "8082");
-            String webUrl = "http://" + address + ":" + port + "/";
+            int port = config.getInteger("web.port", 8082);
+            String webUrl = URIUtil.newURI("http", address, port, "", "");
             webUrl = Context.getConfig().getString("web.url", webUrl);
             velocityProperties.setProperty("web.url", webUrl);
 
