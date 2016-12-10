@@ -45,6 +45,7 @@ public final class NotificationFormatter {
         if (event.getGeofenceId() != 0) {
             velocityContext.put("geofence", Context.getGeofenceManager().getGeofence(event.getGeofenceId()));
         }
+        velocityContext.put("webUrl", Context.getVelocityEngine().getProperty("web.url"));
 
         Template template = null;
         try {

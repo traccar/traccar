@@ -17,9 +17,11 @@ package org.traccar;
 
 import com.ning.http.client.AsyncHttpClient;
 
+import java.net.InetAddress;
 import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.AliasesManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
@@ -256,6 +258,13 @@ public final class Context {
                     Context.getConfig().getString("mail.templatesPath", "templates/mail") + "/");
             velocityProperties.setProperty("runtime.log.logsystem.class",
                     "org.apache.velocity.runtime.log.NullLogChute");
+
+            String address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
+            int port = config.getInteger("web.port", 8082);
+            String webUrl = URIUtil.newURI("http", address, port, "", "");
+            webUrl = Context.getConfig().getString("web.url", webUrl);
+            velocityProperties.setProperty("web.url", webUrl);
+
             velocityEngine = new VelocityEngine();
             velocityEngine.init(velocityProperties);
         }
