@@ -192,7 +192,11 @@ public final class Context {
             int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
                 case "nominatim":
-                    reverseGeocoder = new NominatimReverseGeocoder(url, cacheSize);
+                    if (key != null) {
+                        reverseGeocoder = new NominatimReverseGeocoder(url, key, cacheSize);
+                    } else {
+                        reverseGeocoder = new NominatimReverseGeocoder(url, cacheSize);
+                    }
                     break;
                 case "gisgraphy":
                     reverseGeocoder = new GisgraphyReverseGeocoder(url, cacheSize);

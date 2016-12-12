@@ -27,6 +27,10 @@ public class NominatimReverseGeocoder extends JsonReverseGeocoder {
         super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1", cacheSize);
     }
 
+    public NominatimReverseGeocoder(String url, String key, int cacheSize) {
+        super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1&key=" + key, cacheSize);
+    }
+
     @Override
     public Address parseAddress(JsonObject json) {
         JsonObject result = json.getJsonObject("address");
