@@ -248,4 +248,25 @@ public class Position extends Message {
         this.address = address;
     }
 
+    // This uses the ‘haversine’ formula to calculate the great-circle distance between two points
+	public Double getDistanceInMetersFromPosition(Position secondPosition) {
+		double d2r = Math.PI / 180; // PI / 180
+		
+		double lat1 = getLatitude().doubleValue();
+		double lat2 = secondPosition.getLatitude().doubleValue();
+		
+	    double dLon = (secondPosition.getLongitude().doubleValue() - getLongitude().doubleValue()) * d2r;
+	    double dLat = (lat2 - lat1) * d2r;
+	    
+	    lat1 = lat1 * d2r;
+	    lat2 = lat2 * d2r;
+	    
+	    double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+	            Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+	    double d = 6371000 * c; // r= 6371 for kms
+	    
+		return Double.valueOf(d);
+	}
+    
 }
