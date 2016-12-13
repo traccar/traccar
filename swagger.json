@@ -78,7 +78,7 @@
                 "summary": "Create a Device",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/DeviceInBody"
+                        "$ref": "#/parameters/Device"
                     }
                 ],
                 "responses": {
@@ -99,7 +99,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "$ref": "#/parameters/DeviceInBody"
+                        "$ref": "#/parameters/Device"
                     }
                 ],
                 "responses": {
@@ -153,7 +153,7 @@
                 "summary": "Link a Geofence to a Device",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/DeviceGeofenceInBody"
+                        "$ref": "#/parameters/DeviceGeofence"
                     }
                 ],
                 "responses": {
@@ -169,7 +169,7 @@
                 "summary": "Remove a Geofence from a Device",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/DeviceGeofenceInBody"
+                        "$ref": "#/parameters/DeviceGeofence"
                     }
                 ],
                 "responses": {
@@ -207,7 +207,7 @@
                 "summary": "Create a Group",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GroupInBody"
+                        "$ref": "#/parameters/Group"
                     }
                 ],
                 "responses": {
@@ -231,7 +231,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "$ref": "#/parameters/GroupInBody"
+                        "$ref": "#/parameters/Group"
                     }
                 ],
                 "responses": {
@@ -262,7 +262,7 @@
                 "summary": "Link a Geofence to a Group",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GroupGeofenceInBody"
+                        "$ref": "#/parameters/GroupGeofence"
                     }
                 ],
                 "responses": {
@@ -278,7 +278,7 @@
                 "summary": "Remove a Geofence from a Group",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GroupGeofenceInBody"
+                        "$ref": "#/parameters/GroupGeofence"
                     }
                 ],
                 "responses": {
@@ -293,7 +293,7 @@
                 "summary": "Link a Device to a User",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/DevicePermissionInBody"
+                        "$ref": "#/parameters/DevicePermission"
                     }
                 ],
                 "responses": {
@@ -312,7 +312,7 @@
                 "summary": "Remove a Device from a User",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/DevicePermissionInBody"
+                        "$ref": "#/parameters/DevicePermission"
                     }
                 ],
                 "responses": {
@@ -327,7 +327,7 @@
                 "summary": "Link a Group to a User",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GroupPermissionInBody"
+                        "$ref": "#/parameters/GroupPermission"
                     }
                 ],
                 "responses": {
@@ -343,7 +343,7 @@
                 "summary": "Remove a Group from a User",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GroupPermissionInBody"
+                        "$ref": "#/parameters/GroupPermission"
                     }
                 ],
                 "responses": {
@@ -358,7 +358,7 @@
                 "summary": "Link a Geofence to a User",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GeofencePermissionInBody"
+                        "$ref": "#/parameters/GeofencePermission"
                     }
                 ],
                 "responses": {
@@ -374,7 +374,7 @@
                 "summary": "Remove a Geofence from a User",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GeofencePermissionInBody"
+                        "$ref": "#/parameters/GeofencePermission"
                     }
                 ],
                 "responses": {
@@ -553,7 +553,7 @@
                 "summary": "Create a User",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/UserInBody"
+                        "$ref": "#/parameters/User"
                     }
                 ],
                 "responses": {
@@ -574,7 +574,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "$ref": "#/parameters/UserInBody"
+                        "$ref": "#/parameters/User"
                     }
                 ],
                 "responses": {
@@ -718,7 +718,7 @@
                 "summary": "Create a Geofence",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/GeofenceInBody"
+                        "$ref": "#/parameters/Geofence"
                     }
                 ],
                 "responses": {
@@ -739,7 +739,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "$ref": "#/parameters/GeofenceInBody"
+                        "$ref": "#/parameters/Geofence"
                     }
                 ],
                 "responses": {
@@ -964,7 +964,7 @@
                 "summary": "Set an AttributeAlias",
                 "parameters": [
                     {
-                        "$ref": "#/parameters/AttributeAliasInBody"
+                        "$ref": "#/parameters/AttributeAlias"
                     }
                 ],
                 "responses": {
@@ -985,7 +985,7 @@
                         "$ref": "#/parameters/entityId"
                     },
                     {
-                        "$ref": "#/parameters/AttributeAliasInBody"
+                        "$ref": "#/parameters/AttributeAlias"
                     }
                 ],
                 "responses": {
@@ -1056,7 +1056,7 @@
                 },
                 "speed": {
                     "type": "number",
-                    "description": "In knots"
+                    "description": "in knots"
                 },
                 "course": {
                     "type": "number"
@@ -1517,7 +1517,7 @@
             "description": "Standard users can use this only with _userId_s, they have access to",
             "type": "integer"
         },
-        "DeviceInBody": {
+        "Device": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1525,7 +1525,7 @@
                 "$ref": "#/definitions/Device"
             }
         },
-        "DeviceGeofenceInBody": {
+        "DeviceGeofence": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1533,7 +1533,7 @@
                 "$ref": "#/definitions/DeviceGeofence"
             }
         },
-        "GroupInBody": {
+        "Group": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1541,7 +1541,7 @@
                 "$ref": "#/definitions/Group"
             }
         },
-        "GroupGeofenceInBody": {
+        "GroupGeofence": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1549,7 +1549,7 @@
                 "$ref": "#/definitions/GroupGeofence"
             }
         },
-        "DevicePermissionInBody": {
+        "DevicePermission": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1557,7 +1557,7 @@
                 "$ref": "#/definitions/DevicePermission"
             }
         },
-        "GroupPermissionInBody": {
+        "GroupPermission": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1565,7 +1565,7 @@
                 "$ref": "#/definitions/GroupPermission"
             }
         },
-        "GeofencePermissionInBody": {
+        "GeofencePermission": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1573,7 +1573,7 @@
                 "$ref": "#/definitions/GeofencePermission"
             }
         },
-        "UserInBody": {
+        "User": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1581,7 +1581,7 @@
                 "$ref": "#/definitions/User"
             }
         },
-        "GeofenceInBody": {
+        "Geofence": {
             "name": "body",
             "in": "body",
             "required": true,
@@ -1589,7 +1589,7 @@
                 "$ref": "#/definitions/Geofence"
             }
         },
-        "AttributeAliasInBody": {
+        "AttributeAlias": {
             "name": "body",
             "in": "body",
             "required": true,
