@@ -9,11 +9,16 @@
     "schemes": [
         "http"
     ],
+    "security": [
+        {
+            "basicAuth": []
+        }
+    ],
     "consumes": [
-      "application/json"
+        "application/json"
     ],
     "produces": [
-      "application/json"
+        "application/json"
     ],
     "paths": {
         "/commands": {
@@ -1612,6 +1617,12 @@
             "required": true,
             "type": "string",
             "format": "date-time"
+        }
+    },
+    "securityDefinitions": {
+        "basicAuth": {
+            "type": "basic",
+            "description": "Basic HTTP authorization with _email_ and _password_"
         }
     }
 }
