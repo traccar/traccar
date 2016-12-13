@@ -4,7 +4,7 @@
         "version": "3.9",
         "title": "traccar"
     },
-    "host": "traccar.org",
+    "host": "demo.traccar.org",
     "basePath": "/api",
     "schemes": [
         "http"
@@ -399,6 +399,7 @@
                     {
                         "name": "from",
                         "in": "query",
+                        "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
                         "required": false,
                         "type": "string",
                         "format": "date-time"
@@ -406,6 +407,7 @@
                     {
                         "name": "to",
                         "in": "query",
+                        "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
                         "required": false,
                         "type": "string",
                         "format": "date-time"
@@ -1024,15 +1026,18 @@
                 },
                 "deviceTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "fixTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "serverTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "outdated": {
                     "type": "boolean"
@@ -1111,7 +1116,8 @@
                 },
                 "expirationTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "deviceLimit": {
                     "type": "integer"
@@ -1199,7 +1205,8 @@
                 },
                 "lastUpdate": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "positionId": {
                     "type": "integer"
@@ -1340,7 +1347,8 @@
                 },
                 "serverTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "deviceId": {
                     "type": "integer"
@@ -1404,7 +1412,8 @@
                 },
                 "startTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "startAddress": {
                     "type": "string"
@@ -1417,7 +1426,8 @@
                 },
                 "endTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "endAddress": {
                     "type": "string"
@@ -1434,7 +1444,8 @@
             "properties": {
                 "captureTime": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`"
                 },
                 "activeUsers": {
                     "type": "integer"
@@ -1607,6 +1618,7 @@
         "fromTime": {
             "name": "from",
             "in": "query",
+            "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
             "required": true,
             "type": "string",
             "format": "date-time"
@@ -1614,6 +1626,7 @@
         "toTime": {
             "name": "to",
             "in": "query",
+            "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
             "required": true,
             "type": "string",
             "format": "date-time"
