@@ -664,7 +664,7 @@
                         }
                     },
                     "400": {
-                        "description": "Could happen when trying to fetch from an pffline device or the user does not have permission"
+                        "description": "Could happen when trying to fetch from an offline device or the user does not have permission"
                     }
                 }
             }
