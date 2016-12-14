@@ -37,6 +37,8 @@ import liquibase.resource.ResourceAccessor;
 import org.traccar.Config;
 import org.traccar.helper.Log;
 import org.traccar.model.AttributeAlias;
+import org.traccar.model.Calendar;
+import org.traccar.model.CalendarPermission;
 import org.traccar.model.Device;
 import org.traccar.model.DevicePermission;
 import org.traccar.model.Event;
@@ -484,4 +486,45 @@ public class DataManager {
                 .executeUpdate());
     }
 
+    public Collection<Calendar> getCalendars() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectCalendarsAll"))
+                .executeQuery(Calendar.class);
+    }
+
+    public void addCalendar(Calendar calendar) throws SQLException {
+        calendar.setId(QueryBuilder.create(dataSource, getQuery("database.insertCalendar"), true)
+                .setObject(calendar)
+                .executeUpdate());
+    }
+
+    public void updateCalendar(Calendar calendar) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.updateCalendar"))
+                .setObject(calendar)
+                .executeUpdate();
+    }
+
+    public void removeCalendar(long calendarId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.deleteCalendar"))
+                .setLong("id", calendarId)
+                .executeUpdate();
+    }
+
+    public Collection<CalendarPermission> getCalendarPermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectCalendarPermissions"))
+                .executeQuery(CalendarPermission.class);
+    }
+
+    public void linkCalendar(long userId, long calendarId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkCalendar"))
+                .setLong("userId", userId)
+                .setLong("calendarId", calendarId)
+                .executeUpdate();
+    }
+
+    public void unlinkCalendar(long userId, long calendarId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkCalendar"))
+                .setLong("userId", userId)
+                .setLong("calendarId", calendarId)
+                .executeUpdate();
+    }
 }

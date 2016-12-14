@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.AliasesManager;
+import org.traccar.database.CalendarManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -122,6 +123,12 @@ public final class Context {
 
     public static GeofenceManager getGeofenceManager() {
         return geofenceManager;
+    }
+
+    private static CalendarManager calendarManager;
+
+    public static CalendarManager getCalendarManager() {
+        return calendarManager;
     }
 
     private static NotificationManager notificationManager;
@@ -253,6 +260,7 @@ public final class Context {
 
         if (config.getBoolean("event.geofenceHandler")) {
             geofenceManager = new GeofenceManager(dataManager);
+            calendarManager = new CalendarManager(dataManager);
         }
 
         if (config.getBoolean("event.enable")) {

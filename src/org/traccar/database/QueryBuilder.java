@@ -240,6 +240,23 @@ public final class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder setBlob(String name, byte[] value) throws SQLException {
+        for (int i : indexes(name)) {
+            try {
+                if (value == null) {
+                    statement.setNull(i, Types.BLOB);
+                } else {
+                    statement.setBytes(i, value);
+                }
+            } catch (SQLException error) {
+                statement.close();
+                connection.close();
+                throw error;
+            }
+        }
+        return this;
+    }
+
     public QueryBuilder setObject(Object object) throws SQLException {
 
         Method[] methods = object.getClass().getMethods();
@@ -260,6 +277,8 @@ public final class QueryBuilder {
                         setString(name, (String) method.invoke(object));
                     } else if (method.getReturnType().equals(Date.class)) {
                         setDate(name, (Date) method.invoke(object));
+                    } else if (method.getReturnType().equals(byte[].class)) {
+                        setBlob(name, (byte[]) method.invoke(object));
                     } else if (method.getReturnType().equals(Map.class)) {
                         if (Context.getConfig().getBoolean("database.xml")) {
                             setString(name, MiscFormatter.toXmlString((Map) method.invoke(object)));
@@ -372,6 +391,17 @@ public final class QueryBuilder {
                         } catch (IllegalAccessException | InvocationTargetException | JsonParsingException error) {
                             Log.warning(error);
                         }
+                    }
+                }
+            });
+        } else if (parameterType.equals(byte[].class)) {
+            processors.add(new ResultSetProcessor<T>() {
+                @Override
+                public void process(T object, ResultSet resultSet) throws SQLException {
+                    try {
+                        method.invoke(object, resultSet.getBytes(name));
+                    } catch (IllegalAccessException | InvocationTargetException error) {
+                        Log.warning(error);
                     }
                 }
             });

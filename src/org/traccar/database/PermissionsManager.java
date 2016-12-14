@@ -207,6 +207,12 @@ public class PermissionsManager {
         }
     }
 
+    public void checkCalendar(long userId, long calendarId) throws SecurityException {
+        if (!Context.getCalendarManager().checkCalendar(userId, calendarId) && !isAdmin(userId)) {
+            throw new SecurityException("Calendar access denied");
+        }
+    }
+
     public Server getServer() {
         return server;
     }

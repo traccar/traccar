@@ -57,14 +57,22 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         Collection<Event> events = new ArrayList<>();
         for (long geofenceId : newGeofences) {
-            Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
-            event.setGeofenceId(geofenceId);
-            events.add(event);
+            long calendarId = geofenceManager.getGeofence(geofenceId).getCalendarId();
+            if (calendarId == 0 || Context.getCalendarManager().getCalendar(calendarId) == null
+                    || Context.getCalendarManager().getCalendar(calendarId).checkMoment(position.getFixTime())) {
+                Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position.getDeviceId(), position.getId());
+                event.setGeofenceId(geofenceId);
+                events.add(event);
+            }
         }
         for (long geofenceId : oldGeofences) {
-            Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
-            event.setGeofenceId(geofenceId);
-            events.add(event);
+            long calendarId = geofenceManager.getGeofence(geofenceId).getCalendarId();
+            if (calendarId == 0 || Context.getCalendarManager().getCalendar(calendarId) == null
+                    || Context.getCalendarManager().getCalendar(calendarId).checkMoment(position.getFixTime())) {
+                Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position.getDeviceId(), position.getId());
+                event.setGeofenceId(geofenceId);
+                events.add(event);
+            }
         }
         return events;
     }
