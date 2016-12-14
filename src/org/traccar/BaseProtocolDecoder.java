@@ -23,6 +23,7 @@ import org.traccar.model.Position;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -165,13 +166,29 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     @Override
-    protected void onMessageEvent(Channel channel, SocketAddress remoteAddress, Object msg) {
+    protected void onMessageEvent(
+            Channel channel, SocketAddress remoteAddress, Object originalMessage, Object decodedMessage) {
         if (Context.getStatisticsManager() != null) {
             Context.getStatisticsManager().registerMessageReceived();
         }
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (deviceSession != null) {
-            Context.getConnectionManager().updateDevice(deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
+        Position position = null;
+        if (decodedMessage != null) {
+            if (decodedMessage instanceof Position) {
+                position = (Position) decodedMessage;
+            } else if (decodedMessage instanceof Collection) {
+                Collection positions = (Collection) decodedMessage;
+                if (!positions.isEmpty()) {
+                    position = (Position) positions.iterator().next();
+                }
+            }
+        }
+        if (position != null) {
+            Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_ONLINE, new Date());
+        } else {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession != null) {
+                Context.getConnectionManager().updateDevice(deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
+            }
         }
     }
 
