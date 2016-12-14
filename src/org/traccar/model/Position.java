@@ -68,7 +68,6 @@ public class Position extends Message {
     public static final String KEY_OBD_DRIVING_RANGE = "drivingRange";
     public static final String KEY_OBD_SINGLE_FUEL_CONSUMPTION = "singleFuelConsumption";
     public static final String KEY_OBD_TOTAL_FUEL_CONSUMPTION = "totalFuelConsumption";
-    public static final String KEY_OBD_CURRENT_ERROR = "currentError";
     public static final String KEY_OBD_HARSH_ACCELERATION = "harshAcelerationNo";
     public static final String KEY_OBD_HARSH_BREAK = "harshBreakerNo";
     public static final String KEY_OBD_TOTAL_IGNITION = "totalIgnitionNo";

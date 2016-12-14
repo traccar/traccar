@@ -114,11 +114,9 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SERVER = 0x0002;
     public static final int MSG_LOGIN = 0x5000;
     public static final int MSG_LOGIN_RESPONSE = 0x4000;
-
     public static final int MSG_POSITION = 0x9955;
     public static final int MSG_POSITION_LOGGED = 0x9016;
     public static final int MSG_ALARM = 0x9999;
-
     public static final int MSG_RFID = 0x9966;
 
     public static final int MSG_OBD_RT = 0x9901;
@@ -302,7 +300,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
         position.set(Position.KEY_OBD_SINGLE_FUEL_CONSUMPTION, parser.nextDouble());
         position.set(Position.KEY_OBD_TOTAL_FUEL_CONSUMPTION, parser.nextDouble());
-        position.set(Position.KEY_OBD_CURRENT_ERROR, parser.nextInt());
+        position.set(Position.KEY_DTCS, parser.nextInt());
         position.set(Position.KEY_OBD_HARSH_ACCELERATION, parser.nextInt());
         position.set(Position.KEY_OBD_HARSH_BREAK, parser.nextInt());
         return position;
