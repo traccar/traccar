@@ -102,7 +102,7 @@ public class WebServer {
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setResourceBase(config.getString("web.path"));
         if (config.getBoolean("web.debug")) {
-            resourceHandler.setWelcomeFiles(new String[] {"debug.html"});
+            resourceHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
             resourceHandler.setMinMemoryMappedContentLength(-1); // avoid locking files on Windows
         } else {
             resourceHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
