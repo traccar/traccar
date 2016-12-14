@@ -183,11 +183,13 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             }
         }
         if (position != null) {
-            Context.getConnectionManager().updateDevice(position.getDeviceId(), Device.STATUS_ONLINE, new Date());
+            Context.getConnectionManager().updateDevice(
+                    position.getDeviceId(), Device.STATUS_ONLINE, new Date());
         } else {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession != null) {
-                Context.getConnectionManager().updateDevice(deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
+                Context.getConnectionManager().updateDevice(
+                        deviceSession.getDeviceId(), Device.STATUS_ONLINE, new Date());
             }
         }
     }
