@@ -20,6 +20,12 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
                 "#P#"));
 
         verifyPosition(decoder, text(
+                "#D#151216;135910;5321.1466;N;04441.7929;E;87;156;265.000000;12;1.000000;241;NA;NA;NA;odo:2:0.000000,total_fuel:1:430087,can_fls:1:201,can_taho:1:11623,can_mileage:1:140367515"));
+
+        verifyPosition(decoder, text(
+                "#D#151216;140203;5312.59514;N;04830.37834;E;53;273;NA;10;NA;NA;NA;NA;NA;EvId:1:1,Board:2:12.81,Accum:2:4.28"));
+
+        verifyPosition(decoder, text(
                 "#SD#270413;205601;5544.6025;N;03739.6834;E;1;2;3;4"),
                 position("2013-04-27 20:56:01.000", true, 55.74338, 37.66139));
 
