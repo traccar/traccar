@@ -89,7 +89,7 @@ public class AutoGradeProtocolDecoder extends BaseProtocolDecoder {
 
         position.setCourse(parser.nextDouble());
 
-        int status = (byte) parser.next().charAt(0);
+        int status = parser.next().charAt(0);
         position.set(Position.KEY_STATUS, status);
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
 
