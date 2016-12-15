@@ -206,14 +206,15 @@
     </entry>
 
     <entry key='database.insertGeofence'>
-        INSERT INTO geofences (name, description, area, attributes)
-        VALUES (:name, :description, :area, :attributes)
+        INSERT INTO geofences (name, description, calendarid, area, attributes)
+        VALUES (:name, :description, :calendarid, :area, :attributes)
     </entry>
 
     <entry key='database.updateGeofence'>
         UPDATE geofences SET
         name = :name,
         description = :description,
+        calendarid = :calendarid,
         area = :area,
         attributes = :attributes
         WHERE id = :id
@@ -314,6 +315,39 @@
     <entry key='database.insertStatistics'>
         INSERT INTO statistics (captureTime, activeUsers, activeDevices, requests, messagesReceived, messagesStored, attributes)
         VALUES (:captureTime, :activeUsers, :activeDevices, :requests, :messagesReceived, :messagesStored, :attributes)
+    </entry>
+    
+    <entry key='database.selectCalendarsAll'>
+        SELECT * FROM calendars
+    </entry>
+
+    <entry key='database.insertCalendar'>
+        INSERT INTO calendars (name, calendarData, attributes)
+        VALUES (:name, :calendarData, :attributes)
+    </entry>
+
+    <entry key='database.updateCalendar'>
+        UPDATE calendars SET
+        name = :name,
+        calendarData = :calendarData,
+        attributes = :attributes
+        WHERE id = :id
+    </entry>
+
+    <entry key='database.deleteCalendar'>
+        DELETE FROM calendars WHERE id = :id
+    </entry>
+
+    <entry key='database.selectCalendarPermissions'>
+        SELECT userId, calendarId FROM user_calendar
+    </entry>
+
+    <entry key='database.linkCalendar'>
+        INSERT INTO user_calendar (userId, calendarId) VALUES (:userId, :calendarId)
+    </entry>
+
+    <entry key='database.unlinkCalendar'>
+        DELETE FROM user_calendar WHERE userId = :userId AND calendarId = :calendarId
     </entry>
 
     <!-- PROTOCOL CONFIG -->

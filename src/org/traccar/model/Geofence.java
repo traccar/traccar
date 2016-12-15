@@ -84,4 +84,13 @@ public class Geofence extends Extensible {
         this.geometry = geometry;
     }
 
+    private long calendarId;
+
+    public long getCalendarId() {
+        return calendarId;
+    }
+
+    public void setCalendarId(long calendarId) {
+        this.calendarId = calendarId;
+    }
 }

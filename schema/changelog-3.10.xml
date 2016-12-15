@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.10">
+
+  <changeSet author="author" id="changelog-3.10">
+
+    <createTable tableName="calendars">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="calendardata" type="BLOB">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="user_calendar">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="calendarid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_calendar" baseColumnNames="userid" constraintName="fk_user_calendar_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_calendar" baseColumnNames="calendarid" constraintName="fk_user_calendar_geofenceid" referencedTableName="calendars" referencedColumnNames="id" onDelete="CASCADE" />
+    
+    <addColumn tableName="geofences">
+      <column name="calendarid" type="INT" />
+    </addColumn>
+    
+    <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="geofences" constraintName="fk_geofence_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars"/>
+
+  </changeSet>
+</databaseChangeLog>
