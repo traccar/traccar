@@ -55,7 +55,9 @@ public class Calendar extends Extensible {
     }
 
     public void setCalendarData(byte[] calendarData) throws IOException, ParserException, SQLException {
-        setCalendar(calendarData);
+        CalendarBuilder builder = new CalendarBuilder();
+        calendar = builder.build(new ByteArrayInputStream(calendarData));
+        this.calendarData = calendarData.clone();
     }
 
     private net.fortuna.ical4j.model.Calendar calendar;
@@ -65,15 +67,9 @@ public class Calendar extends Extensible {
         return calendar;
     }
 
-    public void setCalendar(byte[] calendarData) throws IOException, ParserException, SQLException {
-        CalendarBuilder builder = new CalendarBuilder();
-        calendar = builder.build(new ByteArrayInputStream(calendarData));
-        this.calendarData = calendarData.clone();
-    }
-
     public boolean checkMoment(Date date) {
         if (calendar != null) {
-            Period period = new Period(new DateTime(date), new Dur(0, 0, 0, 1));
+            Period period = new Period(new DateTime(date), new Dur(0, 0, 0, 0));
             Rule<Component> periodRule = new PeriodRule<Component>(period);
             Filter<CalendarComponent> filter = new Filter<CalendarComponent>(new Rule[] {periodRule}, Filter.MATCH_ANY);
             Collection<CalendarComponent> events = filter.filter(calendar.getComponents(Component.VEVENT));

@@ -42,13 +42,17 @@ public class CalendarTest {
                 "END:VEVENT\n" + 
                 "END:VCALENDAR";
         Calendar calendar = new Calendar();
-        calendar.setCalendar(calendarString.getBytes());
+        calendar.setCalendarData(calendarString.getBytes());
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssX");
-        
-        Date date = format.parse("2016-12-13 23:01:00+05");
+
+        Date date = format.parse("2016-12-13 22:59:59+05");
+        Assert.assertTrue(!calendar.checkMoment(date));
+        date = format.parse("2016-12-13 23:00:01+05");
         Assert.assertTrue(calendar.checkMoment(date));
-        
-        date = format.parse("2016-12-13 07:01:00+05");
+
+        date = format.parse("2016-12-13 06:59:59+05");
+        Assert.assertTrue(calendar.checkMoment(date));
+        date = format.parse("2016-12-13 07:00:01+05");
         Assert.assertTrue(!calendar.checkMoment(date));
     }
 }
