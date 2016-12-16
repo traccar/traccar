@@ -142,7 +142,7 @@ fi"
 }
 
 package_universal () {
-  mkdir -p out/{conf,data,lib,logs,web,schema}
+  mkdir -p out/{conf,data,lib,logs,web,schema,templates}
 
   copy_files
 
