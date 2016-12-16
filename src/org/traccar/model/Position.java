@@ -60,25 +60,11 @@ public class Position extends Message {
     public static final String KEY_ARMED = "armed";
     public static final String KEY_ACCURACY = "accuracy";
     public static final String KEY_GEOFENCE = "geofence";
+
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed";
     public static final String KEY_OBD_ODOMETER = "obdOdometer";
-    public static final String KEY_OBD_ENGINE_LOAD = "engineLoad";
-    public static final String KEY_OBD_AVERAGE_FUEL = "averageFuelConsumition";
-    public static final String KEY_OBD_DRIVING_RANGE = "drivingRange";
-    public static final String KEY_OBD_SINGLE_FUEL_CONSUMPTION = "singleFuelConsumption";
-    public static final String KEY_OBD_TOTAL_FUEL_CONSUMPTION = "totalFuelConsumption";
-    public static final String KEY_OBD_HARSH_ACCELERATION = "harshAcelerationNo";
-    public static final String KEY_OBD_HARSH_BREAK = "harshBreakerNo";
-    public static final String KEY_OBD_TOTAL_IGNITION = "totalIgnitionNo";
-    public static final String KEY_OBD_TOTAL_DRIVING_TIME = "totalDrivingTime";
-    public static final String KEY_OBD_TOTAL_IDLING_TIME = "totalIdlingTime";
-    public static final String KEY_OBD_AVERAGE_HOT_START = "averageHotStartTime";
-    public static final String KEY_OBD_AVERAGE_SPEED = "averageSpeed";
-    public static final String KEY_OBD_HISTORY_HIGHT_SPEED = "historyHightestSpeed";
-    public static final String KEY_OBD_HISTORY_HIGHT_RPM = "historyHightestRPM";
-    public static final String KEY_OBD_TOTAL_HARSH_ACCELERATION = "totalHarshAccerleration";
-    public static final String KEY_OBD_TOTAL_HARSH_BRAKE = "totalHarshBrake";
+
     public static final String KEY_RESULT = "result";
 
     // Starts with 1 not 0

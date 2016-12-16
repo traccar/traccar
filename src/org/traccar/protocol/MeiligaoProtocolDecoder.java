@@ -292,17 +292,17 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.nextInt());
         position.set(Position.KEY_OBD_SPEED, parser.nextInt());
         position.set(Position.KEY_THROTTLE, parser.nextDouble());
-        position.set(Position.KEY_OBD_ENGINE_LOAD, parser.nextDouble());
+        position.set("engineLoad", parser.nextDouble());
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
-        position.set(Position.KEY_OBD_AVERAGE_FUEL, parser.nextDouble());
-        position.set(Position.KEY_OBD_DRIVING_RANGE, parser.nextDouble());
+        position.set("averageFuelConsumition", parser.nextDouble());
+        position.set("drivingRange", parser.nextDouble());
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
-        position.set(Position.KEY_OBD_SINGLE_FUEL_CONSUMPTION, parser.nextDouble());
-        position.set(Position.KEY_OBD_TOTAL_FUEL_CONSUMPTION, parser.nextDouble());
+        position.set("singleFuelConsumption", parser.nextDouble());
+        position.set("totalFuelConsumption", parser.nextDouble());
         position.set(Position.KEY_DTCS, parser.nextInt());
-        position.set(Position.KEY_OBD_HARSH_ACCELERATION, parser.nextInt());
-        position.set(Position.KEY_OBD_HARSH_BREAK, parser.nextInt());
+        position.set("harshAcelerationNo", parser.nextInt());
+        position.set("harshBreakerNo", parser.nextInt());
         return position;
     }
 
@@ -314,15 +314,15 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        position.set(Position.KEY_OBD_TOTAL_IGNITION, parser.nextInt());
-        position.set(Position.KEY_OBD_TOTAL_DRIVING_TIME, parser.nextDouble());
-        position.set(Position.KEY_OBD_TOTAL_IDLING_TIME, parser.nextDouble());
-        position.set(Position.KEY_OBD_AVERAGE_HOT_START, parser.nextInt());
-        position.set(Position.KEY_OBD_AVERAGE_SPEED, parser.nextInt());
-        position.set(Position.KEY_OBD_HISTORY_HIGHT_SPEED, parser.nextInt());
-        position.set(Position.KEY_OBD_HISTORY_HIGHT_RPM, parser.nextInt());
-        position.set(Position.KEY_OBD_TOTAL_HARSH_ACCELERATION, parser.nextInt());
-        position.set(Position.KEY_OBD_TOTAL_HARSH_BRAKE, parser.nextInt());
+        position.set("totalIgnitionNo", parser.nextInt());
+        position.set("totalDrivingTime", parser.nextDouble());
+        position.set("totalIdlingTime", parser.nextDouble());
+        position.set("averageHotStartTime", parser.nextInt());
+        position.set("averageSpeed", parser.nextInt());
+        position.set("historyHightestSpeed", parser.nextInt());
+        position.set("historyHightestRPM", parser.nextInt());
+        position.set("totalHarshAccerleration", parser.nextInt());
+        position.set("totalHarshBrake", parser.nextInt());
         return position;
     }
 
