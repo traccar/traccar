@@ -466,7 +466,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 position.set("tripDistance", buf.readUnsignedInt() * 5);
                 position.set("serviceDistance", (buf.readUnsignedInt() - 2105540607) * 5);
             } else if (type == 0x0A) {
-                position.set("brakeData", ChannelBuffers.hexDump(buf.readBytes(length)));
+                ChannelBuffer brakeData = buf.readBytes(length);
+                position.set("absStatusCounter", brakeData.readUnsignedShort());
+                position.set("atvbStatusCounter", brakeData.readUnsignedShort());
+                position.set("vdcActiveCounter", brakeData.readUnsignedShort());
             } else if (type == 0x0B) {
                 position.set("brakeMinMaxData", ChannelBuffers.hexDump(buf.readBytes(length)));
             } else if (type == 0x0C) {
