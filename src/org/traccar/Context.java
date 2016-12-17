@@ -242,7 +242,11 @@ public final class Context {
 
             switch (type) {
                 case "mozilla":
-                    locationProvider = new MozillaLocationProvider();
+                    if (key != null) {
+                        locationProvider = new MozillaLocationProvider(key);
+                    } else {
+                        locationProvider = new MozillaLocationProvider();
+                    }
                     break;
                 default:
                     locationProvider = new OpenCellIdLocationProvider(key);

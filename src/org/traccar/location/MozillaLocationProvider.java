@@ -25,15 +25,17 @@ import javax.json.JsonReader;
 
 public class MozillaLocationProvider extends BaseLocationProvider {
 
+    private static final String URL = "https://location.services.mozilla.com/v1/geolocate";
+
     private String url;
     private String template;
 
     public MozillaLocationProvider() {
-        this("https://location.services.mozilla.com/v1/geolocate", "test");
+        this("test");
     }
 
-    public MozillaLocationProvider(String url, String key) {
-        this.url = url + "?key=" + key;
+    public MozillaLocationProvider(String key) {
+        this.url = URL + "?key=" + key;
 
         template = new StringBuilder()
                 .append("{\"cellTowers\":[{")
