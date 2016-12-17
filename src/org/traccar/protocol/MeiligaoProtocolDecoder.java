@@ -91,8 +91,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // average fuel
             .number("(d+.d+),")                  // driving range
             .number("(d+.?d*),")                 // odometer
-            .number("(d+.d+),")                  // Single Fuel Consumption
-            .number("(d+.d+),")                  // Total Fuel Consumption
+            .number("(d+.d+),")                  // single fuel consumption
+            .number("(d+.d+),")                  // total fuel consumption
             .number("(d+),")                     // error code count
             .number("(d+),")                     // harsh acceleration count
             .number("(d+)")                      // harsh break count
@@ -303,6 +303,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_DTCS, parser.nextInt());
         position.set("harshAcelerationNo", parser.nextInt());
         position.set("harshBreakerNo", parser.nextInt());
+
         return position;
     }
 
@@ -323,6 +324,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("historyHightestRPM", parser.nextInt());
         position.set("totalHarshAccerleration", parser.nextInt());
         position.set("totalHarshBrake", parser.nextInt());
+
         return position;
     }
 
