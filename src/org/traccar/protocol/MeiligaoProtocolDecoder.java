@@ -87,29 +87,40 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // throttle
             .number("(d+.d+),")                  // engine load
             .number("(-?d+),")                   // coolant temp
-            .number("d+.d+,")                    // instantaneous fuel
+            .number("(d+.d+),")                  // instantaneous fuel
             .number("(d+.d+),")                  // average fuel
             .number("(d+.d+),")                  // driving range
             .number("(d+.?d*),")                 // odometer
-            .number("(d+.d+),")
-            .number("(d+.d+),")
+            .number("(d+.d+),")                  // Single Fuel Consumption
+            .number("(d+.d+),")                  // Total Fuel Consumption
             .number("(d+),")                     // error code count
-            .number("d+,")                       // harsh acceleration count
-            .number("d+")                        // harsh break count
+            .number("(d+),")                     // harsh acceleration count
+            .number("(d+)")                      // harsh break count
+            .compile();
+
+    private static final Pattern PATTERN_OBDA = new PatternBuilder()
+            .number("(d+),")                     // Total ignition
+            .number("(d+.d+),")                  // Total driving time
+            .number("(d+.d+),")                  // Total idling time
+            .number("(d+),")                     // Average hot start time
+            .number("(d+),")                     // Average speed
+            .number("(d+),")                     // history hightest speed
+            .number("(d+),")                     // history hightest rpm
+            .number("(d+),")                     // total harsh acceleration
+            .number("(d+)")                      // total harsh break n0
             .compile();
 
     public static final int MSG_HEARTBEAT = 0x0001;
     public static final int MSG_SERVER = 0x0002;
     public static final int MSG_LOGIN = 0x5000;
     public static final int MSG_LOGIN_RESPONSE = 0x4000;
-
     public static final int MSG_POSITION = 0x9955;
     public static final int MSG_POSITION_LOGGED = 0x9016;
     public static final int MSG_ALARM = 0x9999;
-
     public static final int MSG_RFID = 0x9966;
 
     public static final int MSG_OBD_RT = 0x9901;
+    public static final int MSG_OBD_RTA = 0x9902;
 
     private DeviceSession identify(ChannelBuffer buf, Channel channel, SocketAddress remoteAddress) {
         StringBuilder builder = new StringBuilder();
@@ -284,11 +295,34 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("engineLoad", parser.nextDouble());
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
-        position.set("drivingRange", parser.nextDouble() * 1000);
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set("averageFuelConsumition", parser.nextDouble());
+        position.set("drivingRange", parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble());
         position.set("singleFuelConsumption", parser.nextDouble());
         position.set("totalFuelConsumption", parser.nextDouble());
+        position.set(Position.KEY_DTCS, parser.nextInt());
+        position.set("harshAcelerationNo", parser.nextInt());
+        position.set("harshBreakerNo", parser.nextInt());
+        return position;
+    }
 
+    private Position decodeObdA(Position position, String sentence) {
+        Parser parser = new Parser(PATTERN_OBDA, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        getLastLocation(position, null);
+
+        position.set("totalIgnitionNo", parser.nextInt());
+        position.set("totalDrivingTime", parser.nextDouble());
+        position.set("totalIdlingTime", parser.nextDouble());
+        position.set("averageHotStartTime", parser.nextInt());
+        position.set("averageSpeed", parser.nextInt());
+        position.set("historyHightestSpeed", parser.nextInt());
+        position.set("historyHightestRPM", parser.nextInt());
+        position.set("totalHarshAccerleration", parser.nextInt());
+        position.set("totalHarshBrake", parser.nextInt());
         return position;
     }
 
@@ -305,11 +339,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             if (command == MSG_LOGIN) {
-                response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
+                response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
                 sendResponse(channel, remoteAddress, id, MSG_LOGIN_RESPONSE, response);
                 return null;
             } else if (command == MSG_HEARTBEAT) {
-                response = ChannelBuffers.wrappedBuffer(new byte[] {0x01});
+                response = ChannelBuffers.wrappedBuffer(new byte[]{0x01});
                 sendResponse(channel, remoteAddress, id, MSG_HEARTBEAT, response);
                 return null;
             } else if (command == MSG_SERVER) {
@@ -353,6 +387,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return decodeRfid(position, sentence);
         } else if (command == MSG_OBD_RT) {
             return decodeObd(position, sentence);
+        } else if (command == MSG_OBD_RTA) {
+            return decodeObdA(position, sentence);
         }
 
         return null;
