@@ -60,7 +60,7 @@ public class NotificationManager {
                 Notification notification = getUserNotificationByType(userId, event.getType());
                 if (notification != null) {
                     if (notification.getWeb()) {
-                        Context.getConnectionManager().updateEvent(userId, event, position);
+                        Context.getConnectionManager().updateEvent(userId, event);
                     }
                     if (notification.getMail()) {
                         NotificationMail.sendMailAsync(userId, event, position);

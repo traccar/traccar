@@ -146,10 +146,10 @@ public class ConnectionManager {
         }
     }
 
-    public synchronized void updateEvent(long userId, Event event, Position position) {
+    public synchronized void updateEvent(long userId, Event event) {
         if (listeners.containsKey(userId)) {
             for (UpdateListener listener : listeners.get(userId)) {
-                listener.onUpdateEvent(event, position);
+                listener.onUpdateEvent(event);
             }
         }
     }
@@ -157,7 +157,7 @@ public class ConnectionManager {
     public interface UpdateListener {
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
-        void onUpdateEvent(Event event, Position position);
+        void onUpdateEvent(Event event);
     }
 
     public synchronized void addListener(long userId, UpdateListener listener) {

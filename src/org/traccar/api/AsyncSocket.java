@@ -76,12 +76,9 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     @Override
-    public void onUpdateEvent(Event event, Position position) {
+    public void onUpdateEvent(Event event) {
         Map<String, Collection<?>> data = new HashMap<>();
         data.put(KEY_EVENTS, Collections.singletonList(event));
-        if (position != null) {
-            data.put(KEY_POSITIONS, Collections.singletonList(position));
-        }
         sendData(data);
     }
 
