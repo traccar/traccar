@@ -16,8 +16,8 @@
  */
 package org.traccar.events;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -48,11 +48,11 @@ public class IgnitionEventHandler extends BaseEventHandler {
         }
 
         if (ignition && !oldIgnition) {
-            result = new ArrayList<>();
-            result.add(new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()));
+            result = Collections.singleton(
+                    new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()));
         } else if (!ignition && oldIgnition) {
-            result = new ArrayList<>();
-            result.add(new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()));
+            result = Collections.singleton(
+                    new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()));
         }
         return result;
     }

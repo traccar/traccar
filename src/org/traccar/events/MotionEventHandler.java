@@ -15,8 +15,8 @@
  */
 package org.traccar.events;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -43,7 +43,6 @@ public class MotionEventHandler extends BaseEventHandler {
             return null;
         }
 
-        Collection<Event> result = null;
         double speed = position.getSpeed();
         double oldSpeed = 0;
         Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
@@ -51,13 +50,13 @@ public class MotionEventHandler extends BaseEventHandler {
             oldSpeed = lastPosition.getSpeed();
         }
         if (speed > speedThreshold && oldSpeed <= speedThreshold) {
-            result = new ArrayList<>();
-            result.add(new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
+            return Collections.singleton(
+                    new Event(Event.TYPE_DEVICE_MOVING, position.getDeviceId(), position.getId()));
         } else if (speed <= speedThreshold && oldSpeed > speedThreshold) {
-            result = new ArrayList<>();
-            result.add(new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
+            return Collections.singleton(
+                    new Event(Event.TYPE_DEVICE_STOPPED, position.getDeviceId(), position.getId()));
         }
-        return result;
+        return null;
     }
 
 }

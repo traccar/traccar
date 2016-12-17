@@ -16,8 +16,8 @@
  */
 package org.traccar.events;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -45,7 +45,6 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         double maintenanceStart = Context.getDeviceManager()
                 .lookupAttributeDouble(device.getId(), ATTRIBUTE_MAINTENANCE_START, 0, false);
 
-        Collection<Event> events = new ArrayList<>();
         double oldTotalDistance = 0.0;
         double newTotalDistance = 0.0;
 
@@ -57,11 +56,12 @@ public class MaintenanceEventHandler extends BaseEventHandler {
 
         oldTotalDistance -= maintenanceStart;
         newTotalDistance -= maintenanceStart;
+
         if ((long) (oldTotalDistance / maintenanceInterval) < (long) (newTotalDistance / maintenanceInterval)) {
-            events.add(new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId()));
+            return Collections.singleton(new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId()));
         }
 
-        return events;
+        return null;
     }
 
 }

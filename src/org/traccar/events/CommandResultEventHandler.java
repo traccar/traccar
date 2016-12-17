@@ -15,8 +15,8 @@
  */
 package org.traccar.events;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.model.Event;
@@ -28,9 +28,9 @@ public class CommandResultEventHandler extends BaseEventHandler {
     protected Collection<Event> analyzePosition(Position position) {
         Object commandResult = position.getAttributes().get(Position.KEY_RESULT);
         if (commandResult != null) {
-            Collection<Event> events = new ArrayList<>();
-            events.add(new Event(Event.TYPE_COMMAND_RESULT, position.getDeviceId(), position.getId()));
-            return events;
+            Event event = new Event(Event.TYPE_COMMAND_RESULT, position.getDeviceId(), position.getId());
+            event.set(Position.KEY_RESULT, (String) commandResult);
+            return Collections.singleton(event);
         }
         return null;
     }

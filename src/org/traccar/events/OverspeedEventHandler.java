@@ -15,8 +15,8 @@
  */
 package org.traccar.events;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.traccar.BaseEventHandler;
 import org.traccar.Context;
@@ -45,7 +45,6 @@ public class OverspeedEventHandler extends BaseEventHandler {
             return null;
         }
 
-        Collection<Event> events = new ArrayList<>();
         double speed = position.getSpeed();
         double speedLimit = Context.getDeviceManager()
                 .lookupAttributeDouble(device.getId(), ATTRIBUTE_SPEED_LIMIT, 0, false);
@@ -60,9 +59,10 @@ public class OverspeedEventHandler extends BaseEventHandler {
             }
         }
         if (speed > speedLimit && oldSpeed <= speedLimit) {
-            events.add(new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
+            return Collections.singleton(
+                    new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
         }
-        return events;
+        return null;
     }
 
 }
