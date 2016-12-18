@@ -141,4 +141,5 @@ public class Device extends Extensible {
     public void setCategory(String category) {
         this.category = category;
     }
+
 }

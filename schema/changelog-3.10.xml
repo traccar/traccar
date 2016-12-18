@@ -41,5 +41,12 @@
     
     <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="geofences" constraintName="fk_geofence_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars"/>
 
+    <addColumn tableName="positions">
+      <column name="accuracy" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="network" type="VARCHAR(4000)" />
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>

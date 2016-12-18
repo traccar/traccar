@@ -248,4 +248,24 @@ public class Position extends Message {
         this.address = address;
     }
 
+    private double accuracy;
+
+    public double getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(double accuracy) {
+        this.accuracy = accuracy;
+    }
+
+    private Network network;
+
+    public Network getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
 }
