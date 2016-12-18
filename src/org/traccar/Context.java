@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ning.http.client.AsyncHttpClient;
 
 import java.net.InetAddress;
@@ -63,6 +64,12 @@ public final class Context {
 
     public static boolean isLoggerEnabled() {
         return loggerEnabled;
+    }
+
+    private static ObjectMapper objectMapper;
+
+    public static ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
     private static IdentityManager identityManager;
@@ -180,6 +187,8 @@ public final class Context {
         if (loggerEnabled) {
             Log.setupLogger(config);
         }
+
+        objectMapper = new ObjectMapper();
 
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);

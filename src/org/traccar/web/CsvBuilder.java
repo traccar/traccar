@@ -27,11 +27,12 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.traccar.Context;
 import org.traccar.helper.Log;
-import org.traccar.model.MiscFormatter;
 
 public class CsvBuilder {
 
@@ -95,11 +96,15 @@ public class CsvBuilder {
                     } else if (method.getReturnType().equals(Map.class)) {
                         Map value = (Map) method.invoke(object);
                         if (value != null) {
-                            String map = MiscFormatter.toJson(value).toString();
-                            map = map.replaceAll("[\\{\\}\"]", "");
-                            map = map.replaceAll(",", " ");
-                            builder.append(map);
-                            addSeparator();
+                            try {
+                                String map = Context.getObjectMapper().writeValueAsString(value);
+                                map = map.replaceAll("[\\{\\}\"]", "");
+                                map = map.replaceAll(",", " ");
+                                builder.append(map);
+                                addSeparator();
+                            } catch (JsonProcessingException e) {
+                                Log.warning(e);
+                            }
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {

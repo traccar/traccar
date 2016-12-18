@@ -15,17 +15,16 @@
  */
 package org.traccar.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.traccar.Context;
 import org.traccar.database.ConnectionManager;
+import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.web.JsonConverter;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -84,11 +83,11 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
 
     private void sendData(Map<String, Collection<?>> data) {
         if (!data.isEmpty() && isConnected()) {
-            JsonObjectBuilder json = Json.createObjectBuilder();
-            for (Map.Entry<String, Collection<?>> entry : data.entrySet()) {
-                json.add(entry.getKey(), JsonConverter.arrayToJson(entry.getValue()));
+            try {
+                getRemote().sendString(Context.getObjectMapper().writeValueAsString(data), null);
+            } catch (JsonProcessingException e) {
+                Log.warning(e);
             }
-            getRemote().sendString(json.build().toString(), null);
         }
     }
 }

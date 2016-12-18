@@ -15,10 +15,10 @@
  */
 package org.traccar;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
-import org.traccar.model.MiscFormatter;
 import org.traccar.model.Position;
 
 import java.io.UnsupportedEncodingException;
@@ -77,8 +77,6 @@ public class WebDataHandler extends BaseDataHandler {
 
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
 
-        String attributes = MiscFormatter.toJsonString(position.getAttributes());
-
         String request = url
                 .replace("{name}", device.getName())
                 .replace("{uniqueId}", device.getUniqueId())
@@ -105,9 +103,10 @@ public class WebDataHandler extends BaseDataHandler {
 
         if (request.contains("{attributes}")) {
             try {
+                String attributes = Context.getObjectMapper().writeValueAsString(position.getAttributes());
                 request = request.replace(
                         "{attributes}", URLEncoder.encode(attributes, StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException error) {
+            } catch (UnsupportedEncodingException | JsonProcessingException error) {
                 Log.warning(error);
             }
         }

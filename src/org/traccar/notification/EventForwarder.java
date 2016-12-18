@@ -15,19 +15,18 @@
  */
 package org.traccar.notification;
 
-import java.nio.charset.StandardCharsets;
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import org.traccar.Context;
+import org.traccar.helper.Log;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
-import org.traccar.web.JsonConverter;
 
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class EventForwarder {
 
@@ -67,24 +66,29 @@ public final class EventForwarder {
     }
 
     private byte[] preparePayload(Event event, Position position) {
-        JsonObjectBuilder json = Json.createObjectBuilder();
-        json.add(KEY_EVENT, JsonConverter.objectToJson(event));
+        Map<String, Object> data = new HashMap<>();
+        data.put(KEY_EVENT, event);
         if (position != null) {
-            json.add(KEY_POSITION, JsonConverter.objectToJson(position));
+            data.put(KEY_POSITION, position);
         }
         if (event.getDeviceId() != 0) {
             Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
             if (device != null) {
-                json.add(KEY_DEVICE, JsonConverter.objectToJson(device));
+                data.put(KEY_DEVICE, device);
             }
         }
         if (event.getGeofenceId() != 0) {
             Geofence geofence = Context.getGeofenceManager().getGeofence(event.getGeofenceId());
             if (geofence != null) {
-                json.add(KEY_GEOFENCE, JsonConverter.objectToJson(geofence));
+                data.put(KEY_GEOFENCE, geofence);
             }
         }
-        return json.build().toString().getBytes(StandardCharsets.UTF_8);
+        try {
+            return Context.getObjectMapper().writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
+        } catch (JsonProcessingException e) {
+            Log.warning(e);
+            return null;
+        }
     }
 
 }
