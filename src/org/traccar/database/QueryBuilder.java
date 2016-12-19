@@ -308,7 +308,8 @@ public final class QueryBuilder {
     }
 
     private <T> void addProcessors(
-            List<ResultSetProcessor<T>> processors, Class<?> parameterType, final Method method, final String name) {
+            List<ResultSetProcessor<T>> processors,
+            final Class<?> parameterType, final Method method, final String name) {
 
         if (parameterType.equals(boolean.class)) {
             processors.add(new ResultSetProcessor<T>() {
@@ -397,7 +398,7 @@ public final class QueryBuilder {
                     String value = resultSet.getString(name);
                     if (value != null) {
                         try {
-                            method.invoke(object, Context.getObjectMapper().readValue(value, Map.class));
+                            method.invoke(object, Context.getObjectMapper().readValue(value, parameterType.getClass()));
                         } catch (InvocationTargetException | IllegalAccessException | IOException error) {
                             Log.warning(error);
                         }
