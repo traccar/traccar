@@ -16,7 +16,6 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.traccar.Context;
 
 import javax.ws.rs.ext.ContextResolver;
