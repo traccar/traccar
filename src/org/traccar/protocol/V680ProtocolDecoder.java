@@ -89,7 +89,7 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             position.set("password", parser.next());
             position.set(Position.KEY_EVENT, parser.next());
             position.set("packet", parser.next());
-            position.set(Position.KEY_GSM, parser.next());
+            position.set(Position.KEY_RSSI, parser.next());
 
             double lon = parser.nextDouble();
             boolean west = parser.next().equals("W");

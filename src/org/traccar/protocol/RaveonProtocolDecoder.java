@@ -90,7 +90,7 @@ public class RaveonProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.KEY_POWER, parser.nextDouble());
         position.set(Position.KEY_INPUT, parser.nextInt());
-        position.set(Position.KEY_GSM, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
         position.setCourse(parser.nextInt());

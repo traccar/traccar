@@ -136,7 +136,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             buf.readUnsignedByte(); // terminal info
             position.set(Position.PREFIX_IO + 1, buf.readUnsignedShort());
-            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             buf.readUnsignedByte(); // GSM status
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
             position.set(Position.KEY_POWER, buf.readUnsignedShort());

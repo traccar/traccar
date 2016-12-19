@@ -78,7 +78,7 @@ public class MaestroProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.nextInt() == 1);
 
         position.set(Position.KEY_BATTERY, parser.nextDouble());
-        position.set(Position.KEY_GSM, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
 

@@ -119,7 +119,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_IO + 2, parser.next());
             position.set("immobilizer", parser.next());
             position.set(Position.KEY_POWER, parser.next());
-            position.set(Position.KEY_GSM, parser.next());
+            position.set(Position.KEY_RSSI, parser.next());
         }
 
         if (parser.hasNext(7)) {

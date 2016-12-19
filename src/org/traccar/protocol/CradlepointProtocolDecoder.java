@@ -81,7 +81,7 @@ public class CradlepointProtocolDecoder extends BaseProtocolDecoder {
 
         parser.skip(4);
 
-        position.set(Position.KEY_GSM, parser.next());
+        position.set(Position.KEY_RSSI, parser.next());
 
         return position;
     }

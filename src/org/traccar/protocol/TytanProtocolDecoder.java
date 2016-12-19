@@ -171,7 +171,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             // Status
             flags = buf.readUnsignedByte();
             position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
-            position.set(Position.KEY_GSM, BitUtil.between(flags, 2, 5));
+            position.set(Position.KEY_RSSI, BitUtil.between(flags, 2, 5));
             position.setCourse((BitUtil.from(flags, 5) * 45 + 180) % 360);
 
             // Speed

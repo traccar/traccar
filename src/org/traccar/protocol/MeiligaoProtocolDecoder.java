@@ -245,7 +245,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_GSM, parser.nextInt(16));
+            position.set(Position.KEY_RSSI, parser.nextInt(16));
         }
 
         if (parser.hasNext()) {

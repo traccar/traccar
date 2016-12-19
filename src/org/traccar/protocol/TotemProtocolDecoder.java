@@ -313,7 +313,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                     CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16))));
 
             position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
 
             position.setCourse(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));

@@ -159,7 +159,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_IGNITION, BitUtil.check(flags, 1));
         position.set(Position.KEY_STATUS, flags);
         position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
-        position.set(Position.KEY_GSM, buf.readUnsignedByte());
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
     }
 

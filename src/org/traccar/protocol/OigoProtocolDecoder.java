@@ -117,7 +117,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 8)) {
-            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         }
 
         if (BitUtil.check(mask, 9)) {
@@ -204,7 +204,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         dateBuilder.setSecond(buf.readUnsignedByte());
         position.setTime(dateBuilder.getDate());
 
-        position.set(Position.KEY_GSM, buf.readUnsignedByte());
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
         int index = buf.readUnsignedByte();
 

@@ -84,7 +84,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.PREFIX_TEMP + 1, buf.readByte());
-        position.set(Position.KEY_GSM, buf.readUnsignedByte());
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         buf.readUnsignedShort(); // mcc
         buf.readUnsignedShort(); // mnc
         buf.readUnsignedShort(); // lac

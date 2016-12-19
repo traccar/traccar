@@ -136,7 +136,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             int value = parser.nextInt(16);
             position.set(Position.KEY_BATTERY, value >> 8);
-            position.set(Position.KEY_GSM, (value >> 4) & 0xf);
+            position.set(Position.KEY_RSSI, (value >> 4) & 0xf);
             position.set(Position.KEY_SATELLITES, value & 0xf);
         }
 

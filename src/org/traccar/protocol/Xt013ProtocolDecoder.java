@@ -88,7 +88,7 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("F"));
 
         position.set(Position.KEY_GPS, parser.next());
-        position.set(Position.KEY_GSM, parser.next());
+        position.set(Position.KEY_RSSI, parser.next());
         position.set(Position.KEY_BATTERY, parser.next());
         position.set(Position.KEY_CHARGE, parser.next());
 

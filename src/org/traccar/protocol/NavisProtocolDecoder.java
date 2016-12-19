@@ -102,7 +102,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
         }
         position.set(Position.KEY_STATUS, buf.readUnsignedByte());
-        position.set(Position.KEY_GSM, buf.readUnsignedByte());
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
         if (isFormat(format, F10, F20, F30)) {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedShort());

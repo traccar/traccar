@@ -106,7 +106,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
             position.set(Position.KEY_IGNITION, parser.nextInt() != 0);
@@ -140,7 +140,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             position.setCourse(parser.nextDouble());
 
-            position.set(Position.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
 

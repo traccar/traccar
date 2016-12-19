@@ -95,7 +95,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
         if (type != MSG_MINI_EVENT_REPORT) {
             position.set("carrier", buf.readUnsignedShort());
-            position.set(Position.KEY_GSM, buf.readShort());
+            position.set(Position.KEY_RSSI, buf.readShort());
         }
 
         position.set("modem", buf.readUnsignedByte());

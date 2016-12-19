@@ -123,7 +123,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
-            position.set(Position.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.KEY_STATUS, parser.nextInt(16));
 
             int mcc = parser.nextInt();

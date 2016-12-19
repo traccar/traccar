@@ -104,7 +104,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             String value = data[i * 2 + 1];
             switch (key) {
                 case "CSQ1":
-                    position.set(Position.KEY_GSM, Integer.parseInt(value));
+                    position.set(Position.KEY_RSSI, Integer.parseInt(value));
                     break;
                 case "NSQ1":
                     position.set(Position.KEY_SATELLITES, Integer.parseInt(value));

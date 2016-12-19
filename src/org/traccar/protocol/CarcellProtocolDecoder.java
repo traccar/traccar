@@ -123,7 +123,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         Double internalBattery = (parser.nextDouble() + 100d) * 0.0294d;
         position.set(Position.KEY_BATTERY, internalBattery);
-        position.set(Position.KEY_GSM, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set("jamming", parser.next().equals("1"));
         position.set(Position.KEY_GPS, parser.nextInt());
 

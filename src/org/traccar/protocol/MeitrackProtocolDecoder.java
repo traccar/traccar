@@ -115,7 +115,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
 
         position.set(Position.KEY_SATELLITES, parser.next());
-        position.set(Position.KEY_GSM, parser.next());
+        position.set(Position.KEY_RSSI, parser.next());
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
@@ -200,7 +200,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(buf.readUnsignedByte() == 1);
 
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
             position.setCourse(buf.readUnsignedShort());

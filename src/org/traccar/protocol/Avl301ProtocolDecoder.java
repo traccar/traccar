@@ -133,7 +133,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             // parse other flags
 
             position.set(Position.KEY_POWER, buf.readUnsignedByte());
-            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
             return position;
         }

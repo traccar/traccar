@@ -140,7 +140,7 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_BATTERY, parser.next());
-        position.set(Position.KEY_GSM, parser.next());
+        position.set(Position.KEY_RSSI, parser.next());
 
         if (!newFormat) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1609.34);

@@ -70,7 +70,7 @@ public class Gt02ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             position.set(Position.KEY_POWER, power);
-            position.set(Position.KEY_GSM, gsm);
+            position.set(Position.KEY_RSSI, gsm);
 
             if (channel != null) {
                 byte[] response = {0x54, 0x68, 0x1A, 0x0D, 0x0A};

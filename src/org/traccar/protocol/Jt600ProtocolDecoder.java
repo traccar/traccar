@@ -113,7 +113,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             position.setNetwork(new Network(
                     CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort())));
 
-            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             position.set(Position.KEY_INDEX, buf.readUnsignedByte());
 
         } else if (version == 1) {
@@ -131,7 +131,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 position.setNetwork(new Network(CellTower.fromCidLac(cid, lac)));
             }
 
-            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
 
         } else if (version == 2) {
 
@@ -261,7 +261,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(new Network(CellTower.fromCidLac(parser.nextInt(), parser.nextInt())));
 
-        position.set(Position.KEY_GSM, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
         position.set(Position.KEY_INDEX, parser.nextInt());
 

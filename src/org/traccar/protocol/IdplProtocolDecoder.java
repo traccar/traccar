@@ -93,7 +93,7 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
 
         position.set(Position.KEY_SATELLITES, parser.nextInt());
-        position.set(Position.KEY_GSM, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
         parser.next(); // vehicle status
         position.set(Position.KEY_POWER, parser.nextInt());
         position.set(Position.KEY_BATTERY, parser.nextDouble());

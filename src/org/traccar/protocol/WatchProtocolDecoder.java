@@ -136,7 +136,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(parser.nextDouble());
 
             position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_GSM, parser.nextInt());
+            position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
 
             position.set("steps", parser.nextInt());

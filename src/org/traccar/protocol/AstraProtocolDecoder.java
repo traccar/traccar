@@ -100,7 +100,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             int quality = buf.readUnsignedByte();
             position.set(Position.KEY_SATELLITES, quality & 0xf);
-            position.set(Position.KEY_GSM, quality >> 4);
+            position.set(Position.KEY_RSSI, quality >> 4);
 
             buf.readUnsignedByte(); // geofence events
 

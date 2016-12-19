@@ -127,7 +127,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 position.setValid(satellites >= 3);
                 position.set(Position.KEY_SATELLITES, satellites);
 
-                position.set(Position.KEY_GSM, buf.readUnsignedByte());
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
                 long extraFlags = buf.readLong();

@@ -175,7 +175,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
                 if (subtype == MSG_STATE_FULL_INFO_T104) {
 
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                    position.set(Position.KEY_GSM, buf.readUnsignedByte());
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     position.set(Position.KEY_EVENT, buf.readUnsignedShort());
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     position.set(Position.KEY_INPUT, buf.readUnsignedByte());
