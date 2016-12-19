@@ -21,6 +21,8 @@ import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -171,8 +173,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_LAC, parser.nextInt(16));
-            position.set(Position.KEY_CID, parser.nextInt(16));
+            position.setNetwork(new Network(
+                    CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16))));
 
             return position;
 

@@ -22,6 +22,8 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -249,8 +251,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             int lac = parser.nextInt(16);
             int cid = parser.nextInt(16);
             if (lac != 0 && cid != 0) {
-                position.set(Position.KEY_LAC, lac);
-                position.set(Position.KEY_CID, cid);
+                position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
             }
 
             position.set(Position.PREFIX_TEMP + 1, parser.next());
@@ -272,8 +273,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_ADC + 2, parser.next());
             position.set(Position.PREFIX_TEMP + 1, parser.next());
             position.set(Position.PREFIX_TEMP + 2, parser.next());
-            position.set(Position.KEY_LAC, parser.nextInt(16));
-            position.set(Position.KEY_CID, parser.nextInt(16));
+
+            position.setNetwork(new Network(
+                    CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16))));
 
             position.setValid(parser.next().equals("A"));
             position.set(Position.KEY_SATELLITES, parser.next());
@@ -307,8 +309,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 1, parser.next());
             position.set(Position.PREFIX_TEMP + 2, parser.next());
 
-            position.set(Position.KEY_LAC, parser.nextInt(16));
-            position.set(Position.KEY_CID, parser.nextInt(16));
+            position.setNetwork(new Network(
+                    CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16))));
+
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_GSM, parser.nextInt());
 

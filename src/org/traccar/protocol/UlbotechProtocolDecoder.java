@@ -24,6 +24,8 @@ import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -182,15 +184,15 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_LBS:
-                    position.set(Position.KEY_MCC, buf.readUnsignedShort());
-                    position.set(Position.KEY_MNC, buf.readUnsignedShort());
-                    position.set(Position.KEY_LAC, buf.readUnsignedShort());
                     if (length == 11) {
-                        position.set(Position.KEY_CID, buf.readUnsignedInt());
+                        position.setNetwork(new Network(CellTower.from(
+                                buf.readUnsignedShort(), buf.readUnsignedShort(),
+                                buf.readUnsignedShort(), buf.readUnsignedInt(), -buf.readUnsignedByte())));
                     } else {
-                        position.set(Position.KEY_CID, buf.readUnsignedShort());
+                        position.setNetwork(new Network(CellTower.from(
+                                buf.readUnsignedShort(), buf.readUnsignedShort(),
+                                buf.readUnsignedShort(), buf.readUnsignedShort(), -buf.readUnsignedByte())));
                     }
-                    position.set(Position.KEY_GSM, -buf.readUnsignedByte());
                     if (length > 9 && length != 11) {
                         buf.skipBytes(length - 9);
                     }

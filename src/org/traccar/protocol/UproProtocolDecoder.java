@@ -24,6 +24,8 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -154,14 +156,11 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
                     break;
                 case 'P':
-                    position.set(Position.KEY_MCC,
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)));
-                    position.set(Position.KEY_MNC,
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)));
-                    position.set(Position.KEY_LAC,
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16));
-                    position.set(Position.KEY_CID,
-                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16));
+                    position.setNetwork(new Network(CellTower.from(
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)),
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII)),
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16),
+                            Integer.parseInt(data.readBytes(4).toString(StandardCharsets.US_ASCII), 16))));
                     break;
                 case 'Q':
                     position.set("obd-pid", ChannelBuffers.hexDump(data));

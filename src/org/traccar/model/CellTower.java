@@ -16,17 +16,43 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.traccar.Context;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class CellTower {
 
-    private Integer cellId;
+    public static CellTower from(int mcc, int mnc, int lac, long cid) {
+        CellTower cellTower = new CellTower();
+        cellTower.setMobileCountryCode(mcc);
+        cellTower.setMobileNetworkCode(mnc);
+        cellTower.setLocationAreaCode(lac);
+        cellTower.setCellId(cid);
+        return cellTower;
+    }
 
-    public Integer getCellId() {
+    public static CellTower from(int mcc, int mnc, int lac, long cid, int rssi) {
+        CellTower cellTower = CellTower.from(mcc, mnc, lac, cid);
+        cellTower.setSignalStrength(rssi);
+        return cellTower;
+    }
+
+    public static CellTower fromLacCid(int lac, long cid) {
+        return from(
+                Context.getConfig().getInteger("location.mcc"),
+                Context.getConfig().getInteger("location.mnc"), lac, cid);
+    }
+
+    public static CellTower fromCidLac(long cid, int lac) {
+        return fromLacCid(lac, cid);
+    }
+
+    private Long cellId;
+
+    public Long getCellId() {
         return cellId;
     }
 
-    public void setCellId(Integer cellId) {
+    public void setCellId(Long cellId) {
         this.cellId = cellId;
     }
 
@@ -58,6 +84,16 @@ public class CellTower {
 
     public void setMobileNetworkCode(Integer mobileNetworkCode) {
         this.mobileNetworkCode = mobileNetworkCode;
+    }
+
+    private Integer signalStrength;
+
+    public Integer getSignalStrength() {
+        return signalStrength;
+    }
+
+    public void setSignalStrength(Integer signalStrength) {
+        this.signalStrength = signalStrength;
     }
 
 }

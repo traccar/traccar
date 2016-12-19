@@ -21,6 +21,8 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -100,8 +102,8 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(buf.readUnsignedByte());
             position.setCourse(buf.readUnsignedByte());
 
-            position.set(Position.KEY_LAC, buf.readUnsignedShort());
-            position.set(Position.KEY_CID, buf.readUnsignedShort());
+            position.setNetwork(new Network(
+                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
 
             return position;
 

@@ -22,6 +22,8 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -118,10 +120,8 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         blockEnd = buf.readerIndex() + blockLength;
 
         if (blockLength > 0) {
-
-            position.set(Position.KEY_LAC, buf.readUnsignedShort());
-            position.set(Position.KEY_CID, buf.readUnsignedShort());
-
+            position.setNetwork(new Network(
+                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
         }
 
         buf.readerIndex(blockEnd);

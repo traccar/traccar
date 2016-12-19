@@ -23,6 +23,13 @@ import java.util.Collection;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Network {
 
+    public Network() {
+    }
+
+    public Network(CellTower cellTower) {
+        addCellTower(cellTower);
+    }
+
     private Integer homeMobileCountryCode;
 
     public Integer getHomeMobileCountryCode() {

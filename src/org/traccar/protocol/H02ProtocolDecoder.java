@@ -25,6 +25,8 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -249,10 +251,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             int lac = parser.nextInt(16);
             int cid = parser.nextInt(16);
             if (mcc != 0 && mnc != 0 && lac != 0 && cid != 0) {
-                position.set(Position.KEY_MCC, mcc);
-                position.set(Position.KEY_MNC, mnc);
-                position.set(Position.KEY_LAC, lac);
-                position.set(Position.KEY_CID, cid);
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
             }
         }
 
@@ -278,13 +277,17 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-        position.set(Position.KEY_MCC, parser.nextInt());
-        position.set(Position.KEY_MNC, parser.nextInt());
+        Network network = new Network();
+        int mcc = parser.nextInt();
+        int mnc = parser.nextInt();
 
-        String[] cells = parser.next().split(","); // decode all in future
-        position.set(Position.KEY_LAC, Integer.parseInt(cells[0]));
-        position.set(Position.KEY_CID, Integer.parseInt(cells[1]));
-        position.set(Position.KEY_GSM, Integer.parseInt(cells[2]));
+        String[] cells = parser.next().split(",");
+        for (int i = 0; i < cells.length / 3; i++) {
+            network.addCellTower(CellTower.from(mcc, mnc, Integer.parseInt(cells[i * 3]),
+                    Integer.parseInt(cells[i * 3 + 1]), Integer.parseInt(cells[i * 3 + 2])));
+        }
+
+        position.setNetwork(network);
 
         dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
 

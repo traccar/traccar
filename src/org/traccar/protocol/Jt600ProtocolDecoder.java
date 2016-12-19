@@ -25,6 +25,8 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -108,8 +110,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, battery + "%");
             }
 
-            position.set(Position.KEY_CID, buf.readUnsignedShort());
-            position.set(Position.KEY_LAC, buf.readUnsignedShort());
+            position.setNetwork(new Network(
+                    CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort())));
+
             position.set(Position.KEY_GSM, buf.readUnsignedByte());
             position.set(Position.KEY_INDEX, buf.readUnsignedByte());
 
@@ -125,8 +128,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             int cid = buf.readUnsignedShort();
             int lac = buf.readUnsignedShort();
             if (cid != 0 && lac != 0) {
-                position.set(Position.KEY_CID, cid);
-                position.set(Position.KEY_LAC, lac);
+                position.setNetwork(new Network(CellTower.fromCidLac(cid, lac)));
             }
 
             position.set(Position.KEY_GSM, buf.readUnsignedByte());
@@ -256,8 +258,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_BATTERY, parser.next());
         position.set(Position.KEY_STATUS, parser.nextInt(2));
-        position.set(Position.KEY_CID, parser.nextInt());
-        position.set(Position.KEY_LAC, parser.nextInt());
+
+        position.setNetwork(new Network(CellTower.fromCidLac(parser.nextInt(), parser.nextInt())));
+
         position.set(Position.KEY_GSM, parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
         position.set(Position.KEY_INDEX, parser.nextInt());

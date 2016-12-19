@@ -25,6 +25,8 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -142,10 +144,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             lbsLength = buf.readUnsignedByte();
         }
 
-        position.set(Position.KEY_MCC, buf.readUnsignedShort());
-        position.set(Position.KEY_MNC, buf.readUnsignedByte());
-        position.set(Position.KEY_LAC, buf.readUnsignedShort());
-        position.set(Position.KEY_CID, buf.readUnsignedMedium());
+        position.setNetwork(new Network(CellTower.from(
+                buf.readUnsignedShort(), buf.readUnsignedByte(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
         if (lbsLength > 0) {
             buf.skipBytes(lbsLength - 9);

@@ -11,7 +11,7 @@ public class CityeasyProtocolDecoderTest extends ProtocolTest {
 
         CityeasyProtocolDecoder decoder = new CityeasyProtocolDecoder(new CityeasyProtocol());
 
-        verifyAttributes(decoder, binary(
+        verifyNotNull(decoder, binary(
                 "545400853575570249020100033b3430342c34352c31303638312c31313632312c33352c31303638312c31313632322c32332c31303638312c32383938332c32332c31303638312c31313632332c32312c31303638312c32333338312c31372c31303638312c32323538332c31372c31303638312c32363434312c31330000000d352e0d0a"));
 
         verifyNothing(decoder, binary(

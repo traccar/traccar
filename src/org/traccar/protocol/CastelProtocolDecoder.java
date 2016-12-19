@@ -24,6 +24,8 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -331,8 +333,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
             decodeStat(position, buf);
 
-            position.set(Position.KEY_LAC, buf.readUnsignedShort());
-            position.set(Position.KEY_CID, buf.readUnsignedShort());
+            position.setNetwork(new Network(
+                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
 
             return position;
 
@@ -366,8 +368,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // geo-fencing flags
                 buf.readUnsignedByte(); // additional flags
 
-                position.set(Position.KEY_LAC, buf.readUnsignedShort());
-                position.set(Position.KEY_CID, buf.readUnsignedShort());
+                position.setNetwork(new Network(
+                        CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
 
                 positions.add(position);
             }

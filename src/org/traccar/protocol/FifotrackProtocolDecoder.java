@@ -22,6 +22,8 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -104,10 +106,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, parser.nextInt(16));
         }
 
-        position.set(Position.KEY_MCC, parser.nextInt());
-        position.set(Position.KEY_MNC, parser.nextInt());
-        position.set(Position.KEY_LAC, parser.nextInt(16));
-        position.set(Position.KEY_CID, parser.nextInt(16));
+        position.setNetwork(new Network(CellTower.from(
+                parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
 
         String[] adc = parser.next().split("\\|");
         for (int i = 0; i < adc.length; i++) {

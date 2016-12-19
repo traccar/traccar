@@ -22,6 +22,8 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -108,10 +110,8 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
         position.setCourse(buf.readUnsignedShort());
 
-        position.set(Position.KEY_MCC, buf.readUnsignedShort());
-        position.set(Position.KEY_MNC, buf.readUnsignedShort());
-        position.set(Position.KEY_LAC, buf.readUnsignedShort());
-        position.set(Position.KEY_CID, buf.readUnsignedMedium());
+        position.setNetwork(new Network(CellTower.from(
+                buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
         position.setValid((buf.readUnsignedByte() & 0x01) != 0);
 
@@ -148,11 +148,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(flags, 1)) {
-            position.set(Position.KEY_MCC, buf.readUnsignedShort());
-            position.set(Position.KEY_MNC, buf.readUnsignedShort());
-            position.set(Position.KEY_LAC, buf.readUnsignedShort());
-            position.set(Position.KEY_CID, buf.readUnsignedInt());
-            position.set(Position.KEY_GSM, buf.readUnsignedByte());
+            position.setNetwork(new Network(CellTower.from(
+                    buf.readUnsignedShort(), buf.readUnsignedShort(),
+                    buf.readUnsignedShort(), buf.readUnsignedInt(), buf.readUnsignedByte())));
         }
 
         if (BitUtil.check(flags, 2)) {

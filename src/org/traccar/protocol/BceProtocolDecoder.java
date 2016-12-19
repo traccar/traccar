@@ -21,6 +21,8 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -128,10 +130,9 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     if (BitUtil.check(mask, 14)) {
-                        position.set(Position.KEY_MCC, buf.readUnsignedShort());
-                        position.set(Position.KEY_MNC, buf.readUnsignedByte());
-                        position.set(Position.KEY_LAC, buf.readUnsignedShort());
-                        position.set(Position.KEY_CID, buf.readUnsignedShort());
+                        position.setNetwork(new Network(CellTower.from(
+                                buf.readUnsignedShort(), buf.readUnsignedByte(),
+                                buf.readUnsignedShort(), buf.readUnsignedShort())));
                         position.set(Position.KEY_GSM, buf.readUnsignedByte());
                         buf.readUnsignedByte();
                     }

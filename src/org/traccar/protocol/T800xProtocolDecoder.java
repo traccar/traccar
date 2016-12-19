@@ -24,6 +24,8 @@ import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -169,10 +171,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 buf.readBytes(array);
                 ChannelBuffer swapped = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, array);
 
-                position.set(Position.KEY_MCC, swapped.readUnsignedShort());
-                position.set(Position.KEY_MNC, swapped.readUnsignedShort());
-                position.set(Position.KEY_LAC, swapped.readUnsignedShort());
-                position.set(Position.KEY_CID, swapped.readUnsignedShort());
+                position.setNetwork(new Network(CellTower.from(
+                        swapped.readUnsignedShort(), swapped.readUnsignedShort(),
+                        swapped.readUnsignedShort(), swapped.readUnsignedShort())));
 
                 // two more cell towers
 
