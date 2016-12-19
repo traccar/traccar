@@ -16,6 +16,7 @@
 package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ning.http.client.AsyncHttpClient;
 
 import java.net.InetAddress;
@@ -189,6 +190,8 @@ public final class Context {
         }
 
         objectMapper = new ObjectMapper();
+        objectMapper.setConfig(
+                objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
 
         if (config.hasKey("database.url")) {
             dataManager = new DataManager(config);
