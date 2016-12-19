@@ -24,7 +24,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WatchProtocolEncoder extends StringProtocolEncoder {
+public class WatchProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    @Override
+    public String formatValue(String key, Object value) {
+        if (key.equals(Command.KEY_TIMEZONE)) {
+            float offset = ((Number) value).longValue();
+            if (offset > 0) {
+                return "+" + String.format("%f", offset);
+            }
+        }
+
+        return null;
+    }
 
     protected String formatCommand(Command command, String format, String... keys) {
         String content = super.formatCommand(command, format, keys);
@@ -104,6 +116,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "TK," + getBinaryData(command));
             case Command.TYPE_POSITION_PERIODIC:
                 return formatCommand(command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
+            case Command.TYPE_SET_TIMEZONE:
+                return formatCommand(command, "LZ,0,{%s}", Command.KEY_TIMEZONE);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
