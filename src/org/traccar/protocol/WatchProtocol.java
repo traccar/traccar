@@ -32,6 +32,7 @@ public class WatchProtocol extends BaseProtocol {
         super("watch");
         setSupportedCommands(
                 Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_SOS_NUMBER,
                 Command.TYPE_ALARM_SOS,
                 Command.TYPE_ALARM_BATTERY,
@@ -40,7 +41,8 @@ public class WatchProtocol extends BaseProtocol {
                 Command.TYPE_SILENCE_TIME,
                 Command.TYPE_ALARM_CLOCK,
                 Command.TYPE_SET_PHONEBOOK,
-                Command.TYPE_VOICE_MESSAGE);
+                Command.TYPE_VOICE_MESSAGE
+            );
     }
 
     @Override

@@ -102,6 +102,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "PHB,{%s}", Command.KEY_DATA);
             case Command.TYPE_VOICE_MESSAGE:
                 return formatCommand(command, "TK," + getBinaryData(command));
+            case Command.TYPE_POSITION_PERIODIC:
+                return formatCommand(command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
