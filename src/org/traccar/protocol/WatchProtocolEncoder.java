@@ -106,8 +106,8 @@ public class WatchProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
             case Command.TYPE_SET_TIMEZONE:
                 return formatCommand(command, "LZ,,{%s}", Command.KEY_TIMEZONE);
-            case Command.TYPE_SET_HEARTS:
-                return formatCommand(command, "FLOWER,{%s}", Command.KEY_HEARTS);
+            case Command.TYPE_SET_INDICATOR:
+                return formatCommand(command, "FLOWER,{%s}", Command.KEY_DATA);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;
