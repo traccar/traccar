@@ -44,6 +44,7 @@ import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.OpenCageReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
+import org.traccar.location.GoogleLocationProvider;
 import org.traccar.location.LocationProvider;
 import org.traccar.location.MozillaLocationProvider;
 import org.traccar.location.OpenCellIdLocationProvider;
@@ -249,19 +250,20 @@ public final class Context {
         }
 
         if (config.getBoolean("location.enable")) {
-            String type = config.getString("location.type", "opencellid");
+            String type = config.getString("location.type", "mozilla");
             String key = config.getString("location.key");
 
             switch (type) {
-                case "mozilla":
+                case "google":
+                    locationProvider = new GoogleLocationProvider(key);
+                case "opencellid":
+                    locationProvider = new OpenCellIdLocationProvider(key);
+                default:
                     if (key != null) {
                         locationProvider = new MozillaLocationProvider(key);
                     } else {
                         locationProvider = new MozillaLocationProvider();
                     }
-                    break;
-                default:
-                    locationProvider = new OpenCellIdLocationProvider(key);
                     break;
             }
         }
@@ -311,6 +313,7 @@ public final class Context {
 
     public static void init(IdentityManager testIdentityManager) {
         config = new Config();
+        objectMapper = new ObjectMapper();
         identityManager = testIdentityManager;
     }
 

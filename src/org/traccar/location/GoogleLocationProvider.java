@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,12 @@
  */
 package org.traccar.location;
 
-import org.traccar.model.Network;
+public class GoogleLocationProvider extends UniversalLocationProvider {
 
-public interface LocationProvider {
+    private static final String URL = "https://www.googleapis.com/geolocation/v1/geolocate";
 
-    interface LocationProviderCallback {
-
-        void onSuccess(double latitude, double longitude, double accuracy);
-
-        void onFailure();
-
+    public GoogleLocationProvider(String key) {
+        super(URL, key);
     }
-
-    void getLocation(Network network, LocationProviderCallback callback);
 
 }

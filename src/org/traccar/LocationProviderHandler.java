@@ -44,15 +44,17 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
         Object message = e.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
-            if (position.getOutdated() || processInvalidPositions && !position.getValid()) {
-                locationProvider.getLocation(position.getAttributes(), new LocationProvider.LocationProviderCallback() {
+            if ((position.getOutdated() || processInvalidPositions && !position.getValid())
+                    && position.getNetwork() != null) {
+                locationProvider.getLocation(position.getNetwork(), new LocationProvider.LocationProviderCallback() {
                     @Override
-                    public void onSuccess(double latitude, double longitude) {
+                    public void onSuccess(double latitude, double longitude, double accuracy) {
                         position.set(Position.KEY_APPROXIMATE, true);
                         position.setValid(true);
                         position.setFixTime(position.getDeviceTime());
                         position.setLatitude(latitude);
                         position.setLongitude(longitude);
+                        position.setAccuracy(accuracy);
                         Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
                     }
 

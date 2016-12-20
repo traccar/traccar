@@ -7,6 +7,7 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
 import org.traccar.database.IdentityManager;
+import org.traccar.model.CellTower;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -174,16 +175,13 @@ public class ProtocolTest extends BaseTest {
             Assert.assertFalse("no attributes", attributes.isEmpty());
         }
 
-        if (attributes.containsKey(Position.KEY_LAC) || attributes.containsKey(Position.KEY_CID)) {
-            checkInteger(attributes.get(Position.KEY_LAC), 1, 65535);
-            checkInteger(attributes.get(Position.KEY_CID), 0, 268435455);
-        }
-
-        if (attributes.containsKey(Position.KEY_MCC) || attributes.containsKey(Position.KEY_MNC)) {
-            checkInteger(attributes.get(Position.KEY_MCC), 100, 999);
-            checkInteger(attributes.get(Position.KEY_MNC), 0, 999);
-            Assert.assertTrue("value missing", attributes.containsKey(Position.KEY_LAC));
-            Assert.assertTrue("value missing", attributes.containsKey(Position.KEY_CID));
+        if (position.getNetwork() != null) {
+            for (CellTower cellTower : position.getNetwork().getCellTowers()) {
+                checkInteger(cellTower.getMobileCountryCode(), 0, 999);
+                checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
+                checkInteger(cellTower.getLocationAreaCode(), 1, 65535);
+                checkInteger(cellTower.getCellId(), 0, 268435455);
+            }
         }
 
     }

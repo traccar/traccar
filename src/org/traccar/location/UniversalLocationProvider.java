@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,48 +15,39 @@
  */
 package org.traccar.location;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
 import org.traccar.Context;
-import org.traccar.model.CellTower;
+import org.traccar.helper.Log;
 import org.traccar.model.Network;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-public class OpenCellIdLocationProvider implements LocationProvider {
+public class UniversalLocationProvider implements LocationProvider {
 
     private String url;
 
-    public OpenCellIdLocationProvider(String key) {
-        this("http://opencellid.org/cell/get", key);
-    }
-
-    public OpenCellIdLocationProvider(String url, String key) {
-        this.url = url + "?format=json&mcc=%d&mnc=%d&lac=%d&cellid=%d&key=" + key;
+    public UniversalLocationProvider(String url, String key) {
+        this.url = url + "?key=" + key;
     }
 
     @Override
     public void getLocation(Network network, final LocationProviderCallback callback) {
-        if (network.getCellTowers() != null && !network.getCellTowers().isEmpty()) {
-
-            CellTower cellTower = network.getCellTowers().iterator().next();
-            String request = String.format(url, cellTower.getMobileCountryCode(), cellTower.getMobileNetworkCode(),
-                    cellTower.getLocationAreaCode(), cellTower.getCellId());
-
-            Context.getAsyncHttpClient().prepareGet(request).execute(new AsyncCompletionHandler() {
+        try {
+            String request = Context.getObjectMapper().writeValueAsString(network);
+            Context.getAsyncHttpClient().preparePost(url).setBody(request).execute(new AsyncCompletionHandler() {
                 @Override
                 public Object onCompleted(Response response) throws Exception {
                     try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
                         JsonObject json = reader.readObject();
-                        if (json.containsKey("lat") && json.containsKey("lon")) {
-                            callback.onSuccess(
-                                    json.getJsonNumber("lat").doubleValue(),
-                                    json.getJsonNumber("lon").doubleValue(), 0);
-                        } else {
-                            callback.onFailure();
-                        }
+                        JsonObject location = json.getJsonObject("location");
+                        callback.onSuccess(
+                                location.getJsonNumber("lat").doubleValue(),
+                                location.getJsonNumber("lon").doubleValue(),
+                                json.getJsonNumber("accuracy").doubleValue());
                     }
                     return null;
                 }
@@ -66,8 +57,8 @@ public class OpenCellIdLocationProvider implements LocationProvider {
                     callback.onFailure();
                 }
             });
-
-        } else {
+        } catch (JsonProcessingException e) {
+            Log.warning(e);
             callback.onFailure();
         }
     }
