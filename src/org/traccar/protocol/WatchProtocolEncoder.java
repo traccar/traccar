@@ -21,13 +21,26 @@ import org.traccar.model.Command;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WatchProtocolEncoder extends StringProtocolEncoder {
+public class WatchProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    @Override
+    public String formatValue(String key, Object value) {
+        if (key.equals(Command.KEY_TIMEZONE)) {
+            double offset = ((Number) value).longValue() / 60.0;
+            DecimalFormat fmt = new DecimalFormat("+#.##;-#.##");
+            return fmt.format(offset);
+        }
+
+        return null;
+    }
+
 
     protected String formatCommand(Command command, String format, String... keys) {
-        String content = super.formatCommand(command, format, keys);
+        String content = super.formatCommand(command, format, this, keys);
         return String.format("[CS*%s*%04x*%s]",
                 getUniqueId(command.getDeviceId()), content.length(), content);
     }
