@@ -46,7 +46,7 @@ public class UniversalLocationProvider implements LocationProvider {
                         JsonObject location = json.getJsonObject("location");
                         callback.onSuccess(
                                 location.getJsonNumber("lat").doubleValue(),
-                                location.getJsonNumber("lon").doubleValue(),
+                                location.getJsonNumber("lng").doubleValue(),
                                 json.getJsonNumber("accuracy").doubleValue());
                     }
                     return null;

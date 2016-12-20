@@ -5,24 +5,20 @@ import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
-import org.traccar.model.Position;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class LocationProviderTest extends BaseTest {
 
     private boolean enable = false;
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         if (enable) {
-            testMozilla();
+            testGoogleLocationProvider();
         }
     }
 
-    public void testMozilla() {
-        MozillaLocationProvider locationProvider = new MozillaLocationProvider();
+    public void testGoogleLocationProvider() throws Exception {
+        GoogleLocationProvider locationProvider = new GoogleLocationProvider("KEY");
 
         Network network = new Network(CellTower.from(260, 2, 10250, 26511));
 
@@ -39,11 +35,7 @@ public class LocationProviderTest extends BaseTest {
             }
         });
 
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(Long.MAX_VALUE);
     }
 
 }
