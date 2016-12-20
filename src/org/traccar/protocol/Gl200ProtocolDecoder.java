@@ -326,7 +326,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
 
-        parser.next(); // battery percentage
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY, parser.next() + "%");
+        }
 
         position.set(Position.PREFIX_TEMP + 1, parser.next());
 

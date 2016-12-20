@@ -11,6 +11,9 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new Gl200Protocol());
 
         verifyAttributes(decoder, text(
+                "+RESP:GTINF,210102,A100004D9EF2AE,,41,,8,99,0,17.7,21,3.58,0,1,1,0,0,20161216135038,4,,,,,20161216135038,00AB$"));
+
+        verifyAttributes(decoder, text(
                 "+RESP:GTSTR,400201,862365030034957,GL500,0,0,2,23.1,5,2,0.2,0,36.0,0.623089,51.582744,20161129174625,0234,0015,03C3,3550,,,,20161129174625,0026$"));
 
         verifyNothing(decoder, text(
