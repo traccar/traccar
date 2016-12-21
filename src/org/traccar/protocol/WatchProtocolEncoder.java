@@ -30,7 +30,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     @Override
     public String formatValue(String key, Object value) {
         if (key.equals(Command.KEY_TIMEZONE)) {
-            double offset = ((Number) value).longValue() / 60.0;
+            double offset = ((Number) value).longValue() / 3600.0;
             DecimalFormat fmt = new DecimalFormat("+#.##;-#.##");
             return fmt.format(offset);
         }
