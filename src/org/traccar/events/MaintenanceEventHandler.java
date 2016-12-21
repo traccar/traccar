@@ -58,7 +58,9 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         newTotalDistance -= maintenanceStart;
 
         if ((long) (oldTotalDistance / maintenanceInterval) < (long) (newTotalDistance / maintenanceInterval)) {
-            return Collections.singleton(new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId()));
+            Event event = new Event(Event.TYPE_MAINTENANCE, position.getDeviceId(), position.getId());
+            event.set(Position.KEY_TOTAL_DISTANCE, newTotalDistance);
+            return Collections.singleton(event);
         }
 
         return null;
