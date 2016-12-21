@@ -398,7 +398,7 @@ public final class QueryBuilder {
                     String value = resultSet.getString(name);
                     if (value != null) {
                         try {
-                            method.invoke(object, Context.getObjectMapper().readValue(value, parameterType.getClass()));
+                            method.invoke(object, Context.getObjectMapper().readValue(value, parameterType));
                         } catch (InvocationTargetException | IllegalAccessException | IOException error) {
                             Log.warning(error);
                         }
