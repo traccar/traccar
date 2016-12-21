@@ -59,8 +59,10 @@ public class OverspeedEventHandler extends BaseEventHandler {
             }
         }
         if (speed > speedLimit && oldSpeed <= speedLimit) {
-            return Collections.singleton(
-                    new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId()));
+            Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position.getDeviceId(), position.getId());
+            event.set("speed", speed);
+            event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
+            return Collections.singleton(event);
         }
         return null;
     }
