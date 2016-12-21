@@ -21,16 +21,14 @@ import org.traccar.model.Position;
 
 public class FilterHandler extends BaseDataHandler {
 
-    private static final long FILTER_FUTURE_LIMIT = 5 * 60 * 1000;
-
     private boolean filterInvalid;
     private boolean filterZero;
     private boolean filterDuplicate;
-    private boolean filterFuture;
     private boolean filterApproximate;
     private boolean filterStatic;
     private int filterDistance;
     private long filterLimit;
+    private long filterFuture;
 
     public void setFilterInvalid(boolean filterInvalid) {
         this.filterInvalid = filterInvalid;
@@ -42,10 +40,6 @@ public class FilterHandler extends BaseDataHandler {
 
     public void setFilterDuplicate(boolean filterDuplicate) {
         this.filterDuplicate = filterDuplicate;
-    }
-
-    public void setFilterFuture(boolean filterFuture) {
-        this.filterFuture = filterFuture;
     }
 
     public void setFilterApproximate(boolean filterApproximate) {
@@ -64,17 +58,21 @@ public class FilterHandler extends BaseDataHandler {
         this.filterLimit = filterLimit;
     }
 
+    public void setFilterFuture(long filterFuture) {
+        this.filterFuture = filterFuture;
+    }
+
     public FilterHandler() {
         Config config = Context.getConfig();
         if (config != null) {
             filterInvalid = config.getBoolean("filter.invalid");
             filterZero = config.getBoolean("filter.zero");
             filterDuplicate = config.getBoolean("filter.duplicate");
-            filterFuture = config.getBoolean("filter.future");
             filterApproximate = config.getBoolean("filter.approximate");
             filterStatic = config.getBoolean("filter.static");
             filterDistance = config.getInteger("filter.distance");
             filterLimit = config.getLong("filter.limit") * 1000;
+            filterFuture = config.getLong("filter.future") * 1000;
         }
     }
 
@@ -107,7 +105,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filterFuture(Position position) {
-        return filterFuture && position.getFixTime().getTime() > System.currentTimeMillis() + FILTER_FUTURE_LIMIT;
+        return filterFuture != 0 && position.getFixTime().getTime() > System.currentTimeMillis() + filterFuture;
     }
 
     private boolean filterApproximate(Position position) {
