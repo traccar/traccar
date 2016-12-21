@@ -396,7 +396,7 @@ public final class QueryBuilder {
                 @Override
                 public void process(T object, ResultSet resultSet) throws SQLException {
                     String value = resultSet.getString(name);
-                    if (value != null) {
+                    if (value != null && !value.isEmpty()) {
                         try {
                             method.invoke(object, Context.getObjectMapper().readValue(value, parameterType));
                         } catch (InvocationTargetException | IllegalAccessException | IOException error) {
