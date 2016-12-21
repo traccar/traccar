@@ -222,8 +222,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
 
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-                if (deviceSession != null) {
+                if (getDeviceSession(channel, remoteAddress, imei) != null) {
                     buf.skipBytes(buf.readableBytes() - 6);
                     sendResponse(channel, type, buf.readUnsignedShort());
                 }
@@ -235,11 +234,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     return null;
                 }
 
-                if (type == MSG_LBS_EXTEND) {
+                Position position = new Position();
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setProtocol(getProtocolName());
 
-                    Position position = new Position();
-                    position.setDeviceId(deviceSession.getDeviceId());
-                    position.setProtocol(getProtocolName());
+                if (type == MSG_LBS_EXTEND) {
 
                     DateBuilder dateBuilder = new DateBuilder(timeZone)
                             .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -257,13 +256,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     position.setNetwork(network);
 
-                    return position;
-
-                } if (type == MSG_STRING) {
-
-                    Position position = new Position();
-                    position.setDeviceId(deviceSession.getDeviceId());
-                    position.setProtocol(getProtocolName());
+                } else if (type == MSG_STRING) {
 
                     getLastLocation(position, null);
 
@@ -274,17 +267,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set("command", buf.readBytes(commandLength - 1).toString(StandardCharsets.US_ASCII));
                     }
 
-                    buf.readUnsignedShort(); // language
-
-                    sendResponse(channel, type, buf.readUnsignedShort());
-
-                    return position;
-
                 } else if (isSupported(type)) {
-
-                    Position position = new Position();
-                    position.setDeviceId(deviceSession.getDeviceId());
-                    position.setProtocol(getProtocolName());
 
                     if (hasGps(type)) {
                         decodeGps(position, buf);
@@ -304,23 +287,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     }
 
-                    if (buf.readableBytes() > 6) {
-                        buf.skipBytes(buf.readableBytes() - 6);
-                    }
-                    int index = buf.readUnsignedShort();
-                    position.set(Position.KEY_INDEX, index);
-                    sendResponse(channel, type, index);
-
-                    return position;
-
                 } else {
 
                     buf.skipBytes(dataLength);
                     if (type != MSG_COMMAND_0 && type != MSG_COMMAND_1 && type != MSG_COMMAND_2) {
                         sendResponse(channel, type, buf.readUnsignedShort());
                     }
+                    return null;
 
                 }
+
+                if (buf.readableBytes() > 6) {
+                    buf.skipBytes(buf.readableBytes() - 6);
+                }
+                sendResponse(channel, type, buf.readUnsignedShort());
+
+                return position;
 
             }
 
