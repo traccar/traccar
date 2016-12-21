@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class ConnectionManager {
@@ -42,9 +43,9 @@ public class ConnectionManager {
     private final long deviceTimeout;
     private final boolean enableStatusEvents;
 
-    private final Map<Long, ActiveDevice> activeDevices = new HashMap<>();
-    private final Map<Long, Set<UpdateListener>> listeners = new HashMap<>();
-    private final Map<Long, Timeout> timeouts = new HashMap<>();
+    private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
+    private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
+    private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong("status.timeout", DEFAULT_TIMEOUT) * 1000;
