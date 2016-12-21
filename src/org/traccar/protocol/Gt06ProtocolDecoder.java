@@ -235,7 +235,31 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     return null;
                 }
 
-                if (type == MSG_STRING) {
+                if (type == MSG_LBS_EXTEND) {
+
+                    Position position = new Position();
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    position.setProtocol(getProtocolName());
+
+                    DateBuilder dateBuilder = new DateBuilder(timeZone)
+                            .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                            .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+                    getLastLocation(position, dateBuilder.getDate());
+
+                    int mcc = buf.readUnsignedShort();
+                    int mnc = buf.readUnsignedByte();
+
+                    Network network = new Network();
+                    for (int i = 0; i < 7; i++) {
+                        network.addCellTower(CellTower.from(
+                                mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedMedium(), -buf.readUnsignedByte()));
+                    }
+                    position.setNetwork(network);
+
+                    return position;
+
+                } if (type == MSG_STRING) {
 
                     Position position = new Position();
                     position.setDeviceId(deviceSession.getDeviceId());
