@@ -21,13 +21,26 @@ import org.traccar.model.Command;
 
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WatchProtocolEncoder extends StringProtocolEncoder {
+public class WatchProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
+
+    @Override
+    public String formatValue(String key, Object value) {
+        if (key.equals(Command.KEY_TIMEZONE)) {
+            double offset = ((Number) value).longValue() / 3600.0;
+            DecimalFormat fmt = new DecimalFormat("+#.##;-#.##");
+            return fmt.format(offset);
+        }
+
+        return null;
+    }
+
 
     protected String formatCommand(Command command, String format, String... keys) {
-        String content = super.formatCommand(command, format, keys);
+        String content = super.formatCommand(command, format, this, keys);
         return String.format("[CS*%s*%04x*%s]",
                 getUniqueId(command.getDeviceId()), content.length(), content);
     }
@@ -102,6 +115,12 @@ public class WatchProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "PHB,{%s}", Command.KEY_DATA);
             case Command.TYPE_VOICE_MESSAGE:
                 return formatCommand(command, "TK," + getBinaryData(command));
+            case Command.TYPE_POSITION_PERIODIC:
+                return formatCommand(command, "UPLOAD,{%s}", Command.KEY_FREQUENCY);
+            case Command.TYPE_SET_TIMEZONE:
+                return formatCommand(command, "LZ,,{%s}", Command.KEY_TIMEZONE);
+            case Command.TYPE_SET_INDICATOR:
+                return formatCommand(command, "FLOWER,{%s}", Command.KEY_DATA);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 break;

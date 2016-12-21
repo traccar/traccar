@@ -41,6 +41,7 @@ public class Command extends Message {
     public static final String TYPE_OUTPUT_CONTROL = "outputControl";
     public static final String TYPE_VOICE_MONITORING = "voiceMonitoring";
     public static final String TYPE_SET_AGPS = "setAgps";
+    public static final String TYPE_SET_INDICATOR = "setIndicator";
 
     public static final String TYPE_MODE_POWER_SAVING = "modePowerSaving";
     public static final String TYPE_MODE_DEEP_SLEEP = "modeDeepSleep";
