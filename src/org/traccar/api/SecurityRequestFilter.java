@@ -38,6 +38,8 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
     public static final String BASIC_REALM = "Basic realm=\"api\"";
+    public static final String X_REQUESTED_WITH = "X-Requested-With";
+    public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
     public static String[] decodeBasicAuth(String auth) {
         auth = auth.replaceFirst("[B|b]asic ", "");
@@ -99,8 +101,11 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         } else {
             Method method = resourceInfo.getResourceMethod();
             if (!method.isAnnotationPresent(PermitAll.class)) {
-                throw new WebApplicationException(
-                        Response.status(Response.Status.UNAUTHORIZED).header(WWW_AUTHENTICATE, BASIC_REALM).build());
+                Response.ResponseBuilder responseBuilder = Response.status(Response.Status.UNAUTHORIZED);
+                if (!XML_HTTP_REQUEST.equals(request.getHeader(X_REQUESTED_WITH))) {
+                    responseBuilder.header(WWW_AUTHENTICATE, BASIC_REALM);
+                }
+                throw new WebApplicationException(responseBuilder.build());
             }
         }
 
