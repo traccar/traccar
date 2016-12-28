@@ -20,6 +20,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class WifiAccessPoint {
 
+    public static WifiAccessPoint from(String macAddress, int signalStrength) {
+        WifiAccessPoint wifiAccessPoint = new WifiAccessPoint();
+        wifiAccessPoint.setMacAddress(macAddress);
+        wifiAccessPoint.setSignalStrength(signalStrength);
+        return wifiAccessPoint;
+    }
+
     private String macAddress;
 
     public String getMacAddress() {
@@ -28,6 +35,16 @@ public class WifiAccessPoint {
 
     public void setMacAddress(String macAddress) {
         this.macAddress = macAddress;
+    }
+
+    private Integer signalStrength;
+
+    public Integer getSignalStrength() {
+        return signalStrength;
+    }
+
+    public void setSignalStrength(Integer signalStrength) {
+        this.signalStrength = signalStrength;
     }
 
 }

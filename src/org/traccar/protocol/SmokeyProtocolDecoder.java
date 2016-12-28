@@ -21,14 +21,44 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
     public SmokeyProtocolDecoder(SmokeyProtocol protocol) {
         super(protocol);
+    }
+
+    public static final int MSG_DATE_RECORD = 0;
+    public static final int MSG_DATE_RECORD_ACK = 1;
+
+    private static void sendResponse(
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer id, int index, int report) {
+
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeBytes("SM".getBytes(StandardCharsets.US_ASCII));
+            response.writeByte(3); // protocol version
+            response.writeByte(MSG_DATE_RECORD_ACK);
+            response.writeBytes(id);
+            response.writeInt(0); // timestamp
+            response.writeByte(index);
+            response.writeByte(report - 0x200);
+
+            short checksum = (short) 0xF5A0;
+            for (int i = 0; i < response.readableBytes(); i += 2) {
+                checksum ^= ChannelBuffers.swapShort(response.getShort(i));
+            }
+            response.writeShort(checksum);
+
+            channel.write(response, remoteAddress);
+        }
     }
 
     @Override
@@ -42,17 +72,13 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        String id = ChannelBuffers.hexDump(buf.readBytes(8));
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        ChannelBuffer id = buf.readBytes(8);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ChannelBuffers.hexDump(id));
         if (deviceSession == null) {
             return null;
         }
 
-        if (type == 0) {
-
-            /*if (channel != null) {
-                // TODO send ack
-            }*/
+        if (type == MSG_DATE_RECORD) {
 
             buf.readUnsignedShort(); // firmware version
 
@@ -60,20 +86,65 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_STATUS, buf.readUnsignedByte());
+            int status = buf.readUnsignedShort();
+            position.set(Position.KEY_STATUS, status);
 
             DateBuilder dateBuilder = new DateBuilder()
                     .setDate(2000, 1, 1).addSeconds(buf.readUnsignedInt());
 
             getLastLocation(position, dateBuilder.getDate());
 
-            position.set(Position.KEY_INDEX, buf.readUnsignedByte());
+            int index = buf.readUnsignedByte();
+            position.set(Position.KEY_INDEX, index);
 
-            buf.readUnsignedShort(); // task / parameter number
+            int report = buf.readUnsignedShort();
 
             buf.readUnsignedShort(); // length
 
-            // data
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+
+            Network network = new Network();
+
+            if (report != 0x0203) {
+
+                int count = 1;
+                if (report != 0x0200) {
+                    count = buf.readUnsignedByte();
+                }
+
+                for (int i = 0; i < count; i++) {
+                    int mcc = buf.readUnsignedShort();
+                    int mnc = buf.readUnsignedShort();
+                    int lac = buf.readUnsignedShort();
+                    int cid = buf.readUnsignedShort();
+                    if (i == 0) {
+                        buf.readByte(); // timing advance
+                    }
+                    int rssi = buf.readByte();
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                }
+
+            }
+
+            if (report == 0x0202 || report == 0x0203) {
+
+                int count = buf.readUnsignedByte();
+
+                for (int i = 0; i < count; i++) {
+                    buf.readerIndex(buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0) + 1); // ssid
+
+                    String mac = String.format("%02x:%02x:%02x:%02x:%02x:%02x",
+                            buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(),
+                            buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+                    network.addWifiAccessPoint(WifiAccessPoint.from(mac, buf.readByte()));
+                }
+
+            }
+
+            position.setNetwork(network);
+
+            sendResponse(channel, remoteAddress, id, index, report);
 
             return position;
 
