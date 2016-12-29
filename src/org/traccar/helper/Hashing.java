@@ -19,13 +19,23 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 
 public final class Hashing {
 
     public static final int ITERATIONS = 1000;
     public static final int SALT_SIZE = 24;
     public static final int HASH_SIZE = 24;
+
+    private static SecretKeyFactory factory;
+    static {
+        try {
+            factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+        } catch (NoSuchAlgorithmException e) {
+        }
+    }
 
     public static class HashingResult {
 
@@ -52,10 +62,9 @@ public final class Hashing {
     private static byte[] function(char[] password, byte[] salt) {
         try {
             PBEKeySpec spec = new PBEKeySpec(password, salt, ITERATIONS, HASH_SIZE * Byte.SIZE);
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             return factory.generateSecret(spec).getEncoded();
-        } catch (GeneralSecurityException error) {
-            throw new SecurityException(error);
+        } catch (InvalidKeySpecException e) {
+            throw new SecurityException(e);
         }
     }
 
