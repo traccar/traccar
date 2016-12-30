@@ -35,8 +35,12 @@ public class ReverseGeocoderTest {
 
         reverseGeocoder.getAddress(new AddressFormat(), 37.4217550, -122.0846330, new ReverseGeocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("1600 Amphitheatre Pkwy, Mountain View, CA, US", waitAddress());
@@ -47,8 +51,12 @@ public class ReverseGeocoderTest {
 
         reverseGeocoder.getAddress(new AddressFormat(), 40.7337807, -73.9974401, new ReverseGeocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("35 West 9th Street, NYC, New York, US",  waitAddress());
@@ -59,8 +67,12 @@ public class ReverseGeocoderTest {
 
         reverseGeocoder.getAddress(new AddressFormat(), 48.8530000, 2.3400000, new ReverseGeocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("Rue du Jardinet, Paris, FR",  waitAddress());
@@ -72,8 +84,12 @@ public class ReverseGeocoderTest {
 
         reverseGeocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new ReverseGeocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("Charleston Road, California, US",  waitAddress());
@@ -84,8 +100,12 @@ public class ReverseGeocoderTest {
 
         reverseGeocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new ReverseGeocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("Estrella Avenue, Arcadia, California, United States",  waitAddress());

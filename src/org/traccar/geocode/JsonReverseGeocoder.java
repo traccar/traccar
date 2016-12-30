@@ -53,7 +53,7 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
         if (cache != null) {
             String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
             if (cachedAddress != null) {
-                callback.onResult(cachedAddress);
+                callback.onSuccess(cachedAddress);
                 return;
             }
         }
@@ -69,9 +69,9 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
                         if (cache != null) {
                             cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
                         }
-                        callback.onResult(formattedAddress);
+                        callback.onSuccess(formattedAddress);
                     } else {
-                        callback.onResult(null);
+                        callback.onFailure(new IllegalArgumentException("Empty address"));
                     }
                 }
                 return null;
@@ -79,7 +79,7 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
 
             @Override
             public void onThrowable(Throwable t) {
-                callback.onResult(null);
+                callback.onFailure(t);
             }
         });
     }

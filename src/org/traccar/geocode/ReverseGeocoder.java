@@ -19,7 +19,9 @@ public interface ReverseGeocoder {
 
     interface ReverseGeocoderCallback {
 
-        void onResult(String address);
+        void onSuccess(String address);
+
+        void onFailure(Throwable e);
 
     }
 
