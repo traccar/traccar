@@ -15,7 +15,7 @@
  */
 package org.traccar.geocoder;
 
-public interface ReverseGeocoder {
+public interface Geocoder {
 
     interface ReverseGeocoderCallback {
 

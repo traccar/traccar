@@ -55,7 +55,7 @@ public class OpenCellIdGeolocationProvider implements GeolocationProvider {
                                     json.getJsonNumber("lat").doubleValue(),
                                     json.getJsonNumber("lon").doubleValue(), 0);
                         } else {
-                            callback.onFailure(new IllegalArgumentException("Coordinates are missing"));
+                            callback.onFailure(new GeolocationException("Coordinates are missing"));
                         }
                     }
                     return null;
@@ -68,7 +68,7 @@ public class OpenCellIdGeolocationProvider implements GeolocationProvider {
             });
 
         } else {
-            callback.onFailure(new IllegalArgumentException("No network information"));
+            callback.onFailure(new GeolocationException("No network information"));
         }
     }
 

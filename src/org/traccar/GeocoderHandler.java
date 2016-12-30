@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,27 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
+import org.traccar.geocoder.AddressFormat;
+import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
-import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.model.Position;
 
-public class LocationProviderHandler implements ChannelUpstreamHandler {
+public class GeocoderHandler implements ChannelUpstreamHandler {
 
-    private final GeolocationProvider geolocationProvider;
+    private final Geocoder geocoder;
     private final boolean processInvalidPositions;
+    private final AddressFormat addressFormat;
 
-    public LocationProviderHandler(GeolocationProvider geolocationProvider, boolean processInvalidPositions) {
-        this.geolocationProvider = geolocationProvider;
+    public GeocoderHandler(Geocoder geocoder, boolean processInvalidPositions) {
+        this.geocoder = geocoder;
         this.processInvalidPositions = processInvalidPositions;
+
+        String formatString = Context.getConfig().getString("geocoder.format");
+        if (formatString != null) {
+            addressFormat = new AddressFormat(formatString);
+        } else {
+            addressFormat = new AddressFormat();
+        }
     }
 
     @Override
@@ -45,23 +54,18 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
         Object message = event.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
-            if ((position.getOutdated() || processInvalidPositions && !position.getValid())
-                    && position.getNetwork() != null) {
-                geolocationProvider.getLocation(position.getNetwork(), new GeolocationProvider.LocationProviderCallback() {
+            if (processInvalidPositions || position.getValid()) {
+                geocoder.getAddress(addressFormat, position.getLatitude(), position.getLongitude(),
+                        new Geocoder.ReverseGeocoderCallback() {
                     @Override
-                    public void onSuccess(double latitude, double longitude, double accuracy) {
-                        position.set(Position.KEY_APPROXIMATE, true);
-                        position.setValid(true);
-                        position.setFixTime(position.getDeviceTime());
-                        position.setLatitude(latitude);
-                        position.setLongitude(longitude);
-                        position.setAccuracy(accuracy);
+                    public void onSuccess(String address) {
+                        position.setAddress(address);
                         Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
 
                     @Override
                     public void onFailure(Throwable e) {
-                        Log.warning("Geolocation failed", e);
+                        Log.warning("Geocoding failed", e);
                         Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
                 });

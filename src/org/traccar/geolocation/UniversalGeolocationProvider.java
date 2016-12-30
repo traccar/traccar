@@ -43,7 +43,8 @@ public class UniversalGeolocationProvider implements GeolocationProvider {
                     try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
                         JsonObject json = reader.readObject();
                         if (json.containsKey("error")) {
-                            callback.onFailure(new RuntimeException(json.getJsonObject("error").getString("message")));
+                            callback.onFailure(
+                                    new GeolocationException(json.getJsonObject("error").getString("message")));
                         } else {
                             JsonObject location = json.getJsonObject("location");
                             callback.onSuccess(

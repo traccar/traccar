@@ -27,13 +27,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class JsonReverseGeocoder implements ReverseGeocoder {
+public abstract class JsonGeocoder implements Geocoder {
 
     private final String url;
 
     private Map<Map.Entry<Double, Double>, String> cache;
 
-    public JsonReverseGeocoder(String url, final int cacheSize) {
+    public JsonGeocoder(String url, final int cacheSize) {
         this.url = url;
         if (cacheSize > 0) {
             this.cache = Collections.synchronizedMap(new LinkedHashMap<Map.Entry<Double, Double>, String>() {
@@ -71,7 +71,7 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
                         }
                         callback.onSuccess(formattedAddress);
                     } else {
-                        callback.onFailure(new IllegalArgumentException("Empty address"));
+                        callback.onFailure(new GeocoderException("Empty address"));
                     }
                 }
                 return null;

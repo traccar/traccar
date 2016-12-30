@@ -18,38 +18,41 @@ package org.traccar.geocoder;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-public class BingMapsReverseGeocoder extends JsonReverseGeocoder {
+public class MapQuestGeocoder extends JsonGeocoder {
 
-    public BingMapsReverseGeocoder(String url, String key, int cacheSize) {
-        super(url + "/Locations/%f,%f?key=" + key + "&include=ciso2", cacheSize);
+    public MapQuestGeocoder(String url, String key, int cacheSize) {
+        super(url + "?key=" + key + "&location=%f,%f", cacheSize);
     }
 
     @Override
     public Address parseAddress(JsonObject json) {
-        JsonArray result = json.getJsonArray("resourceSets");
+        JsonArray result = json.getJsonArray("results");
         if (result != null) {
-            JsonObject location =
-                    result.getJsonObject(0).getJsonArray("resources").getJsonObject(0).getJsonObject("address");
-            if (location != null) {
+            JsonArray locations = result.getJsonObject(0).getJsonArray("locations");
+            if (locations != null) {
+                JsonObject location = locations.getJsonObject(0);
+
                 Address address = new Address();
-                if (location.containsKey("addressLine")) {
-                    address.setStreet(location.getString("addressLine"));
+
+                if (location.containsKey("street")) {
+                    address.setStreet(location.getString("street"));
                 }
-                if (location.containsKey("locality")) {
-                    address.setSettlement(location.getString("locality"));
+                if (location.containsKey("adminArea5")) {
+                    address.setSettlement(location.getString("adminArea5"));
                 }
-                if (location.containsKey("adminDistrict2")) {
-                    address.setDistrict(location.getString("adminDistrict2"));
+                if (location.containsKey("adminArea4")) {
+                    address.setDistrict(location.getString("adminArea4"));
                 }
-                if (location.containsKey("adminDistrict")) {
-                    address.setState(location.getString("adminDistrict"));
+                if (location.containsKey("adminArea3")) {
+                    address.setState(location.getString("adminArea3"));
                 }
-                if (location.containsKey("countryRegionIso2")) {
-                    address.setCountry(location.getString("countryRegionIso2").toUpperCase());
+                if (location.containsKey("adminArea1")) {
+                    address.setCountry(location.getString("adminArea1").toUpperCase());
                 }
                 if (location.containsKey("postalCode")) {
                     address.setPostcode(location.getString("postalCode"));
                 }
+
                 return address;
             }
         }

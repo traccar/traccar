@@ -34,15 +34,15 @@ import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.StatisticsManager;
-import org.traccar.geocoder.BingMapsReverseGeocoder;
-import org.traccar.geocoder.FactualReverseGeocoder;
-import org.traccar.geocoder.GeocodeFarmReverseGeocoder;
-import org.traccar.geocoder.GisgraphyReverseGeocoder;
-import org.traccar.geocoder.GoogleReverseGeocoder;
-import org.traccar.geocoder.MapQuestReverseGeocoder;
-import org.traccar.geocoder.NominatimReverseGeocoder;
-import org.traccar.geocoder.OpenCageReverseGeocoder;
-import org.traccar.geocoder.ReverseGeocoder;
+import org.traccar.geocoder.BingMapsGeocoder;
+import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeocodeFarmGeocoder;
+import org.traccar.geocoder.GisgraphyGeocoder;
+import org.traccar.geocoder.GoogleGeocoder;
+import org.traccar.geocoder.MapQuestGeocoder;
+import org.traccar.geocoder.NominatimGeocoder;
+import org.traccar.geocoder.OpenCageGeocoder;
+import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.GeolocationProvider;
@@ -104,10 +104,10 @@ public final class Context {
         return permissionsManager;
     }
 
-    private static ReverseGeocoder reverseGeocoder;
+    private static Geocoder geocoder;
 
-    public static ReverseGeocoder getReverseGeocoder() {
-        return reverseGeocoder;
+    public static Geocoder getGeocoder() {
+        return geocoder;
     }
 
     private static GeolocationProvider geolocationProvider;
@@ -213,37 +213,37 @@ public final class Context {
             switch (type) {
                 case "nominatim":
                     if (key != null) {
-                        reverseGeocoder = new NominatimReverseGeocoder(url, key, cacheSize);
+                        geocoder = new NominatimGeocoder(url, key, cacheSize);
                     } else {
-                        reverseGeocoder = new NominatimReverseGeocoder(url, cacheSize);
+                        geocoder = new NominatimGeocoder(url, cacheSize);
                     }
                     break;
                 case "gisgraphy":
-                    reverseGeocoder = new GisgraphyReverseGeocoder(url, cacheSize);
+                    geocoder = new GisgraphyGeocoder(url, cacheSize);
                     break;
                 case "mapquest":
-                    reverseGeocoder = new MapQuestReverseGeocoder(url, key, cacheSize);
+                    geocoder = new MapQuestGeocoder(url, key, cacheSize);
                     break;
                 case "opencage":
-                    reverseGeocoder = new OpenCageReverseGeocoder(url, key, cacheSize);
+                    geocoder = new OpenCageGeocoder(url, key, cacheSize);
                     break;
                 case "bingmaps":
-                    reverseGeocoder = new BingMapsReverseGeocoder(url, key, cacheSize);
+                    geocoder = new BingMapsGeocoder(url, key, cacheSize);
                     break;
                 case "factual":
-                    reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
+                    geocoder = new FactualGeocoder(url, key, cacheSize);
                     break;
                 case "geocodefarm":
                     if (key != null) {
-                        reverseGeocoder = new GeocodeFarmReverseGeocoder(key, cacheSize);
+                        geocoder = new GeocodeFarmGeocoder(key, cacheSize);
                     } else {
-                        reverseGeocoder = new GeocodeFarmReverseGeocoder(cacheSize);
+                        geocoder = new GeocodeFarmGeocoder(cacheSize);
                     }
                 default:
                     if (key != null) {
-                        reverseGeocoder = new GoogleReverseGeocoder(key, cacheSize);
+                        geocoder = new GoogleGeocoder(key, cacheSize);
                     } else {
-                        reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
+                        geocoder = new GoogleGeocoder(cacheSize);
                     }
                     break;
             }

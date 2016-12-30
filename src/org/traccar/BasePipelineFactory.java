@@ -48,8 +48,8 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     private FilterHandler filterHandler;
     private CoordinatesHandler coordinatesHandler;
     private DistanceHandler distanceHandler;
-    private ReverseGeocoderHandler reverseGeocoderHandler;
-    private LocationProviderHandler locationProviderHandler;
+    private GeocoderHandler geocoderHandler;
+    private GeolocationHandler geolocationHandler;
     private HemisphereHandler hemisphereHandler;
     private CopyAttributesHandler copyAttributesHandler;
 
@@ -125,13 +125,13 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
             coordinatesHandler = new CoordinatesHandler();
         }
 
-        if (Context.getReverseGeocoder() != null) {
-            reverseGeocoderHandler = new ReverseGeocoderHandler(
-                    Context.getReverseGeocoder(), Context.getConfig().getBoolean("geocoder.processInvalidPositions"));
+        if (Context.getGeocoder() != null) {
+            geocoderHandler = new GeocoderHandler(
+                    Context.getGeocoder(), Context.getConfig().getBoolean("geocoder.processInvalidPositions"));
         }
 
         if (Context.getGeolocationProvider() != null) {
-            locationProviderHandler = new LocationProviderHandler(
+            geolocationHandler = new GeolocationHandler(
                     Context.getGeolocationProvider(), Context.getConfig().getBoolean("location.processInvalidPositions"));
         }
 
@@ -189,11 +189,11 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
         if (hemisphereHandler != null) {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
-        if (reverseGeocoderHandler != null) {
-            pipeline.addLast("geocoder", reverseGeocoderHandler);
+        if (geocoderHandler != null) {
+            pipeline.addLast("geocoder", geocoderHandler);
         }
-        if (locationProviderHandler != null) {
-            pipeline.addLast("location", locationProviderHandler);
+        if (geolocationHandler != null) {
+            pipeline.addLast("location", geolocationHandler);
         }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
 

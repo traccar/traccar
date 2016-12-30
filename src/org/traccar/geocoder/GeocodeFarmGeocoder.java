@@ -17,15 +17,15 @@ package org.traccar.geocoder;
 
 import javax.json.JsonObject;
 
-public class GeocodeFarmReverseGeocoder extends JsonReverseGeocoder {
+public class GeocodeFarmGeocoder extends JsonGeocoder {
 
     private static final String URL = "https://www.geocode.farm/v3/json/reverse/";
 
-    public GeocodeFarmReverseGeocoder(int cacheSize) {
+    public GeocodeFarmGeocoder(int cacheSize) {
         super(URL + "?lat=%f&lon=%f&country=us&lang=en&count=1", cacheSize);
     }
 
-    public GeocodeFarmReverseGeocoder(String key, int cacheSize) {
+    public GeocodeFarmGeocoder(String key, int cacheSize) {
         super(URL + "?lat=%f&lon=%f&country=us&lang=en&count=1&key=" + key, cacheSize);
     }
 
