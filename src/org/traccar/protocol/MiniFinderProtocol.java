@@ -35,11 +35,13 @@ public class MiniFinderProtocol extends BaseProtocol {
                 Command.TYPE_VOICE_MONITORING,
                 Command.TYPE_ALARM_SPEED,
                 Command.TYPE_ALARM_GEOFENCE,
+                Command.TYPE_ALARM_VIBRATION,
                 Command.TYPE_SET_AGPS,
                 Command.TYPE_ALARM_FALL,
                 Command.TYPE_MODE_POWER_SAVING,
                 Command.TYPE_MODE_DEEP_SLEEP,
-                Command.TYPE_SOS_NUMBER);
+                Command.TYPE_SOS_NUMBER,
+                Command.TYPE_SET_INDICATOR);
     }
 
     @Override
