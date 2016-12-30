@@ -30,7 +30,7 @@ public class LocationProviderTest extends BaseTest {
             }
 
             @Override
-            public void onFailure() {
+            public void onFailure(Throwable e) {
                 Assert.fail();
             }
         });

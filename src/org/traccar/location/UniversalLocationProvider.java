@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Network;
 
 import javax.json.Json;
@@ -54,12 +53,11 @@ public class UniversalLocationProvider implements LocationProvider {
 
                 @Override
                 public void onThrowable(Throwable t) {
-                    callback.onFailure();
+                    callback.onFailure(t);
                 }
             });
         } catch (JsonProcessingException e) {
-            Log.warning(e);
-            callback.onFailure();
+            callback.onFailure(e);
         }
     }
 

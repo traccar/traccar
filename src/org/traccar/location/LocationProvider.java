@@ -23,7 +23,7 @@ public interface LocationProvider {
 
         void onSuccess(double latitude, double longitude, double accuracy);
 
-        void onFailure();
+        void onFailure(Throwable e);
 
     }
 

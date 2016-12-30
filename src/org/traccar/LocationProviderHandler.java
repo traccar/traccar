@@ -20,6 +20,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
+import org.traccar.helper.Log;
 import org.traccar.location.LocationProvider;
 import org.traccar.model.Position;
 
@@ -40,8 +41,8 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
             return;
         }
 
-        final MessageEvent e = (MessageEvent) evt;
-        Object message = e.getMessage();
+        final MessageEvent event = (MessageEvent) evt;
+        Object message = event.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
@@ -55,19 +56,20 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
                         position.setLatitude(latitude);
                         position.setLongitude(longitude);
                         position.setAccuracy(accuracy);
-                        Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
 
                     @Override
-                    public void onFailure() {
-                        Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                    public void onFailure(Throwable e) {
+                        Log.warning("Geolocation failed", e);
+                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
                 });
             } else {
-                Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
             }
         } else {
-            Channels.fireMessageReceived(ctx, message, e.getRemoteAddress());
+            Channels.fireMessageReceived(ctx, message, event.getRemoteAddress());
         }
     }
 

@@ -55,7 +55,7 @@ public class OpenCellIdLocationProvider implements LocationProvider {
                                     json.getJsonNumber("lat").doubleValue(),
                                     json.getJsonNumber("lon").doubleValue(), 0);
                         } else {
-                            callback.onFailure();
+                            callback.onFailure(new IllegalArgumentException("Coordinates are missing"));
                         }
                     }
                     return null;
@@ -63,12 +63,12 @@ public class OpenCellIdLocationProvider implements LocationProvider {
 
                 @Override
                 public void onThrowable(Throwable t) {
-                    callback.onFailure();
+                    callback.onFailure(t);
                 }
             });
 
         } else {
-            callback.onFailure();
+            callback.onFailure(new IllegalArgumentException("No network information"));
         }
     }
 
