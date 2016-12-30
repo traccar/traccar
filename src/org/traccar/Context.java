@@ -256,8 +256,10 @@ public final class Context {
             switch (type) {
                 case "google":
                     geolocationProvider = new GoogleGeolocationProvider(key);
+                    break;
                 case "opencellid":
                     geolocationProvider = new OpenCellIdGeolocationProvider(key);
+                    break;
                 default:
                     if (key != null) {
                         geolocationProvider = new MozillaGeolocationProvider(key);
