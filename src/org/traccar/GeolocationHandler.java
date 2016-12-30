@@ -47,7 +47,8 @@ public class GeolocationHandler implements ChannelUpstreamHandler {
             final Position position = (Position) message;
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
                     && position.getNetwork() != null) {
-                geolocationProvider.getLocation(position.getNetwork(), new GeolocationProvider.LocationProviderCallback() {
+                geolocationProvider.getLocation(position.getNetwork(),
+                        new GeolocationProvider.LocationProviderCallback() {
                     @Override
                     public void onSuccess(double latitude, double longitude, double accuracy) {
                         position.set(Position.KEY_APPROXIMATE, true);
