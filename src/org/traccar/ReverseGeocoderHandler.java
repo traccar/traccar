@@ -20,8 +20,8 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
-import org.traccar.geocode.AddressFormat;
-import org.traccar.geocode.ReverseGeocoder;
+import org.traccar.geocoder.AddressFormat;
+import org.traccar.geocoder.ReverseGeocoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
