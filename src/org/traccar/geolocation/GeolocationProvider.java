@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.location;
+package org.traccar.geolocation;
 
 import org.traccar.model.Network;
 
-public interface LocationProvider {
+public interface GeolocationProvider {
 
     interface LocationProviderCallback {
 

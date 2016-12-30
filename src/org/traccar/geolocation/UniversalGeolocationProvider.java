@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.location;
+package org.traccar.geolocation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ning.http.client.AsyncCompletionHandler;
@@ -25,11 +25,11 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-public class UniversalLocationProvider implements LocationProvider {
+public class UniversalGeolocationProvider implements GeolocationProvider {
 
     private String url;
 
-    public UniversalLocationProvider(String url, String key) {
+    public UniversalGeolocationProvider(String url, String key) {
         this.url = url + "?key=" + key;
     }
 
@@ -42,11 +42,15 @@ public class UniversalLocationProvider implements LocationProvider {
                 public Object onCompleted(Response response) throws Exception {
                     try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
                         JsonObject json = reader.readObject();
-                        JsonObject location = json.getJsonObject("location");
-                        callback.onSuccess(
-                                location.getJsonNumber("lat").doubleValue(),
-                                location.getJsonNumber("lng").doubleValue(),
-                                json.getJsonNumber("accuracy").doubleValue());
+                        if (json.containsKey("error")) {
+                            callback.onFailure(new RuntimeException(json.getJsonObject("error").getString("message")));
+                        } else {
+                            JsonObject location = json.getJsonObject("location");
+                            callback.onSuccess(
+                                    location.getJsonNumber("lat").doubleValue(),
+                                    location.getJsonNumber("lng").doubleValue(),
+                                    json.getJsonNumber("accuracy").doubleValue());
+                        }
                     }
                     return null;
                 }

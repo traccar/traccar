@@ -21,16 +21,16 @@ import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.traccar.helper.Log;
-import org.traccar.location.LocationProvider;
+import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.model.Position;
 
 public class LocationProviderHandler implements ChannelUpstreamHandler {
 
-    private final LocationProvider locationProvider;
+    private final GeolocationProvider geolocationProvider;
     private final boolean processInvalidPositions;
 
-    public LocationProviderHandler(LocationProvider locationProvider, boolean processInvalidPositions) {
-        this.locationProvider = locationProvider;
+    public LocationProviderHandler(GeolocationProvider geolocationProvider, boolean processInvalidPositions) {
+        this.geolocationProvider = geolocationProvider;
         this.processInvalidPositions = processInvalidPositions;
     }
 
@@ -47,7 +47,7 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
             final Position position = (Position) message;
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
                     && position.getNetwork() != null) {
-                locationProvider.getLocation(position.getNetwork(), new LocationProvider.LocationProviderCallback() {
+                geolocationProvider.getLocation(position.getNetwork(), new GeolocationProvider.LocationProviderCallback() {
                     @Override
                     public void onSuccess(double latitude, double longitude, double accuracy) {
                         position.set(Position.KEY_APPROXIMATE, true);

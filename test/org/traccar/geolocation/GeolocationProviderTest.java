@@ -1,4 +1,4 @@
-package org.traccar.location;
+package org.traccar.geolocation;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -6,7 +6,7 @@ import org.traccar.BaseTest;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
-public class LocationProviderTest extends BaseTest {
+public class GeolocationProviderTest extends BaseTest {
 
     private boolean enable = false;
 
@@ -18,11 +18,11 @@ public class LocationProviderTest extends BaseTest {
     }
 
     public void testGoogleLocationProvider() throws Exception {
-        GoogleLocationProvider locationProvider = new GoogleLocationProvider("KEY");
+        GoogleGeolocationProvider locationProvider = new GoogleGeolocationProvider("KEY");
 
         Network network = new Network(CellTower.from(260, 2, 10250, 26511));
 
-        locationProvider.getLocation(network, new LocationProvider.LocationProviderCallback() {
+        locationProvider.getLocation(network, new GeolocationProvider.LocationProviderCallback() {
             @Override
             public void onSuccess(double latitude, double longitude, double accuracy) {
                 Assert.assertEquals(60.07254, latitude, 0.00001);

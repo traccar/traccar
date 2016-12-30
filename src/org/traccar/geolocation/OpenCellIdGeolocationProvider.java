@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.location;
+package org.traccar.geolocation;
 
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
@@ -25,15 +25,15 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-public class OpenCellIdLocationProvider implements LocationProvider {
+public class OpenCellIdGeolocationProvider implements GeolocationProvider {
 
     private String url;
 
-    public OpenCellIdLocationProvider(String key) {
+    public OpenCellIdGeolocationProvider(String key) {
         this("http://opencellid.org/cell/get", key);
     }
 
-    public OpenCellIdLocationProvider(String url, String key) {
+    public OpenCellIdGeolocationProvider(String url, String key) {
         this.url = url + "?format=json&mcc=%d&mnc=%d&lac=%d&cellid=%d&key=" + key;
     }
 

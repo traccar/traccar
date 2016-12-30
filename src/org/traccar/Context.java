@@ -44,10 +44,10 @@ import org.traccar.geocode.NominatimReverseGeocoder;
 import org.traccar.geocode.OpenCageReverseGeocoder;
 import org.traccar.geocode.ReverseGeocoder;
 import org.traccar.helper.Log;
-import org.traccar.location.GoogleLocationProvider;
-import org.traccar.location.LocationProvider;
-import org.traccar.location.MozillaLocationProvider;
-import org.traccar.location.OpenCellIdLocationProvider;
+import org.traccar.geolocation.GoogleGeolocationProvider;
+import org.traccar.geolocation.GeolocationProvider;
+import org.traccar.geolocation.MozillaGeolocationProvider;
+import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
 import org.traccar.web.WebServer;
 
@@ -110,10 +110,10 @@ public final class Context {
         return reverseGeocoder;
     }
 
-    private static LocationProvider locationProvider;
+    private static GeolocationProvider geolocationProvider;
 
-    public static LocationProvider getLocationProvider() {
-        return locationProvider;
+    public static GeolocationProvider getGeolocationProvider() {
+        return geolocationProvider;
     }
 
     private static WebServer webServer;
@@ -249,20 +249,20 @@ public final class Context {
             }
         }
 
-        if (config.getBoolean("location.enable")) {
-            String type = config.getString("location.type", "mozilla");
-            String key = config.getString("location.key");
+        if (config.getBoolean("geolocation.enable")) {
+            String type = config.getString("geolocation.type", "mozilla");
+            String key = config.getString("geolocation.key");
 
             switch (type) {
                 case "google":
-                    locationProvider = new GoogleLocationProvider(key);
+                    geolocationProvider = new GoogleGeolocationProvider(key);
                 case "opencellid":
-                    locationProvider = new OpenCellIdLocationProvider(key);
+                    geolocationProvider = new OpenCellIdGeolocationProvider(key);
                 default:
                     if (key != null) {
-                        locationProvider = new MozillaLocationProvider(key);
+                        geolocationProvider = new MozillaGeolocationProvider(key);
                     } else {
-                        locationProvider = new MozillaLocationProvider();
+                        geolocationProvider = new MozillaGeolocationProvider();
                     }
                     break;
             }
