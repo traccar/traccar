@@ -20,17 +20,18 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
-import org.traccar.geocode.AddressFormat;
-import org.traccar.geocode.ReverseGeocoder;
+import org.traccar.geocoder.AddressFormat;
+import org.traccar.geocoder.Geocoder;
+import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
-public class ReverseGeocoderHandler implements ChannelUpstreamHandler {
+public class GeocoderHandler implements ChannelUpstreamHandler {
 
-    private final ReverseGeocoder geocoder;
+    private final Geocoder geocoder;
     private final boolean processInvalidPositions;
     private final AddressFormat addressFormat;
 
-    public ReverseGeocoderHandler(ReverseGeocoder geocoder, boolean processInvalidPositions) {
+    public GeocoderHandler(Geocoder geocoder, boolean processInvalidPositions) {
         this.geocoder = geocoder;
         this.processInvalidPositions = processInvalidPositions;
 
@@ -49,24 +50,30 @@ public class ReverseGeocoderHandler implements ChannelUpstreamHandler {
             return;
         }
 
-        final MessageEvent e = (MessageEvent) evt;
-        Object message = e.getMessage();
+        final MessageEvent event = (MessageEvent) evt;
+        Object message = event.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
             if (processInvalidPositions || position.getValid()) {
                 geocoder.getAddress(addressFormat, position.getLatitude(), position.getLongitude(),
-                        new ReverseGeocoder.ReverseGeocoderCallback() {
+                        new Geocoder.ReverseGeocoderCallback() {
                     @Override
-                    public void onResult(String address) {
+                    public void onSuccess(String address) {
                         position.setAddress(address);
-                        Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable e) {
+                        Log.warning("Geocoding failed", e);
+                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
                 });
             } else {
-                Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
             }
         } else {
-            Channels.fireMessageReceived(ctx, message, e.getRemoteAddress());
+            Channels.fireMessageReceived(ctx, message, event.getRemoteAddress());
         }
     }
 

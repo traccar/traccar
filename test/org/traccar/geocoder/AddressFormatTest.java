@@ -1,4 +1,4 @@
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import org.junit.Assert;
 import org.junit.Test;

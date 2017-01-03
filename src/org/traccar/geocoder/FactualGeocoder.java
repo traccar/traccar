@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import javax.json.JsonObject;
 
-public class FactualReverseGeocoder extends JsonReverseGeocoder {
+public class FactualGeocoder extends JsonGeocoder {
 
-    public FactualReverseGeocoder(String url, String key, int cacheSize) {
+    public FactualGeocoder(String url, String key, int cacheSize) {
         super(url + "?latitude=%f&longitude=%f&KEY=" + key, cacheSize);
     }
 

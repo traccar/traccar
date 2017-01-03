@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.location;
+package org.traccar.geolocation;
 
-public class GoogleLocationProvider extends UniversalLocationProvider {
+public class GoogleGeolocationProvider extends UniversalGeolocationProvider {
 
     private static final String URL = "https://www.googleapis.com/geolocation/v1/geolocate";
 
-    public GoogleLocationProvider(String key) {
+    public GoogleGeolocationProvider(String key) {
         super(URL, key);
     }
 

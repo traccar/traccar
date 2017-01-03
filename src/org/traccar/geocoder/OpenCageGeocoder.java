@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-public class OpenCageReverseGeocoder extends JsonReverseGeocoder {
+public class OpenCageGeocoder extends JsonGeocoder {
 
-    public OpenCageReverseGeocoder(String url, String key, int cacheSize) {
+    public OpenCageGeocoder(String url, String key, int cacheSize) {
         super(url + "/json?q=%f,%f&key=" + key, cacheSize);
     }
 

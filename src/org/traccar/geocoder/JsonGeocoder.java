@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.Response;
@@ -27,13 +27,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class JsonReverseGeocoder implements ReverseGeocoder {
+public abstract class JsonGeocoder implements Geocoder {
 
     private final String url;
 
     private Map<Map.Entry<Double, Double>, String> cache;
 
-    public JsonReverseGeocoder(String url, final int cacheSize) {
+    public JsonGeocoder(String url, final int cacheSize) {
         this.url = url;
         if (cacheSize > 0) {
             this.cache = Collections.synchronizedMap(new LinkedHashMap<Map.Entry<Double, Double>, String>() {
@@ -53,7 +53,7 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
         if (cache != null) {
             String cachedAddress = cache.get(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude));
             if (cachedAddress != null) {
-                callback.onResult(cachedAddress);
+                callback.onSuccess(cachedAddress);
                 return;
             }
         }
@@ -69,9 +69,9 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
                         if (cache != null) {
                             cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
                         }
-                        callback.onResult(formattedAddress);
+                        callback.onSuccess(formattedAddress);
                     } else {
-                        callback.onResult(null);
+                        callback.onFailure(new GeocoderException("Empty address"));
                     }
                 }
                 return null;
@@ -79,7 +79,7 @@ public abstract class JsonReverseGeocoder implements ReverseGeocoder {
 
             @Override
             public void onThrowable(Throwable t) {
-                callback.onResult(null);
+                callback.onFailure(t);
             }
         });
     }

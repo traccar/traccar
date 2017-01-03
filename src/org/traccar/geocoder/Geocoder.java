@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2013 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.location;
+package org.traccar.geocoder;
 
-import org.traccar.model.Network;
+public interface Geocoder {
 
-public interface LocationProvider {
+    interface ReverseGeocoderCallback {
 
-    interface LocationProviderCallback {
+        void onSuccess(String address);
 
-        void onSuccess(double latitude, double longitude, double accuracy);
-
-        void onFailure();
+        void onFailure(Throwable e);
 
     }
 
-    void getLocation(Network network, LocationProviderCallback callback);
+    void getAddress(AddressFormat format, double latitude, double longitude, ReverseGeocoderCallback callback);
 
 }

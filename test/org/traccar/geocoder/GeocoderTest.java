@@ -1,9 +1,9 @@
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ReverseGeocoderTest {
+public class GeocoderTest {
 
     private boolean enable = false;
 
@@ -31,61 +31,81 @@ public class ReverseGeocoderTest {
     }
 
     public void testGoogle() throws InterruptedException {
-        ReverseGeocoder reverseGeocoder = new GoogleReverseGeocoder();
+        Geocoder geocoder = new GoogleGeocoder();
 
-        reverseGeocoder.getAddress(new AddressFormat(), 37.4217550, -122.0846330, new ReverseGeocoder.ReverseGeocoderCallback() {
+        geocoder.getAddress(new AddressFormat(), 37.4217550, -122.0846330, new Geocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("1600 Amphitheatre Pkwy, Mountain View, CA, US", waitAddress());
     }
 
     public void testNominatim() throws InterruptedException {
-        ReverseGeocoder reverseGeocoder = new NominatimReverseGeocoder();
+        Geocoder geocoder = new NominatimGeocoder();
 
-        reverseGeocoder.getAddress(new AddressFormat(), 40.7337807, -73.9974401, new ReverseGeocoder.ReverseGeocoderCallback() {
+        geocoder.getAddress(new AddressFormat(), 40.7337807, -73.9974401, new Geocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("35 West 9th Street, NYC, New York, US",  waitAddress());
     }
 
     public void testGisgraphy() throws InterruptedException {
-        ReverseGeocoder reverseGeocoder = new GisgraphyReverseGeocoder();
+        Geocoder geocoder = new GisgraphyGeocoder();
 
-        reverseGeocoder.getAddress(new AddressFormat(), 48.8530000, 2.3400000, new ReverseGeocoder.ReverseGeocoderCallback() {
+        geocoder.getAddress(new AddressFormat(), 48.8530000, 2.3400000, new Geocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("Rue du Jardinet, Paris, FR",  waitAddress());
     }
 
     public void testOpenCage() throws InterruptedException {
-        ReverseGeocoder reverseGeocoder = new OpenCageReverseGeocoder(
+        Geocoder geocoder = new OpenCageGeocoder(
                 "http://api.opencagedata.com/geocode/v1", "SECRET", 0);
 
-        reverseGeocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new ReverseGeocoder.ReverseGeocoderCallback() {
+        geocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new Geocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("Charleston Road, California, US",  waitAddress());
     }
 
     public void testGeocodeFarm() throws InterruptedException {
-        ReverseGeocoder reverseGeocoder = new GeocodeFarmReverseGeocoder(0);
+        Geocoder geocoder = new GeocodeFarmGeocoder(0);
 
-        reverseGeocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new ReverseGeocoder.ReverseGeocoderCallback() {
+        geocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new Geocoder.ReverseGeocoderCallback() {
             @Override
-            public void onResult(String address) {
+            public void onSuccess(String address) {
                 setAddress(address);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
             }
         });
         Assert.assertEquals("Estrella Avenue, Arcadia, California, United States",  waitAddress());

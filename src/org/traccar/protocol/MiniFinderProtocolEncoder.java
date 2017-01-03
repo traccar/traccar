@@ -58,6 +58,8 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
                 return formatCommand(command, "{%s}J1{%s}", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
             case Command.TYPE_ALARM_GEOFENCE:
                 return formatCommand(command, "{%s}R1{%s}", Command.KEY_DEVICE_PASSWORD, Command.KEY_RADIUS);
+            case Command.TYPE_ALARM_VIBRATION:
+                return formatCommand(command, "{%s}W1,{%s}", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
             case Command.TYPE_SET_AGPS:
                 return formatCommand(command, "{%s}AGPS{%s}", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
             case Command.TYPE_ALARM_FALL:
@@ -69,6 +71,8 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
             case Command.TYPE_SOS_NUMBER:
                 return formatCommand(command, "{%s}{%s}1,{%s}", this,
                         Command.KEY_DEVICE_PASSWORD, Command.KEY_INDEX, Command.KEY_PHONE);
+            case Command.TYPE_SET_INDICATOR:
+                return formatCommand(command, "{%s}LED{%s}", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
             default:
                 Log.warning(new UnsupportedOperationException(command.getType()));
                 return null;

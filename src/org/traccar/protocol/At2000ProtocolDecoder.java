@@ -59,6 +59,16 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private static void sendRequest(Channel channel) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, BLOCK_LENGTH);
+            response.writeByte(MSG_TRACK_REQUEST);
+            response.writeMedium(ChannelBuffers.swapMedium(0));
+            response.writerIndex(BLOCK_LENGTH);
+            channel.write(response);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -127,6 +137,10 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         sendResponse(channel);
+
+        if (type == MSG_DEVICE_ID) {
+            sendRequest(channel);
+        }
 
         return null;
     }

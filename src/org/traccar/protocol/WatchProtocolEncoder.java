@@ -22,7 +22,9 @@ import org.traccar.model.Command;
 import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class WatchProtocolEncoder extends StringProtocolEncoder implements StringProtocolEncoder.ValueFormatter {
@@ -31,7 +33,7 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     public String formatValue(String key, Object value) {
         if (key.equals(Command.KEY_TIMEZONE)) {
             double offset = ((Number) value).longValue() / 3600.0;
-            DecimalFormat fmt = new DecimalFormat("+#.##;-#.##");
+            DecimalFormat fmt = new DecimalFormat("+#.##;-#.##", DecimalFormatSymbols.getInstance(Locale.US));
             return fmt.format(offset);
         }
 

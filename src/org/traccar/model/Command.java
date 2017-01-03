@@ -53,6 +53,7 @@ public class Command extends Message {
     public static final String TYPE_ALARM_CLOCK = "alarmClock";
     public static final String TYPE_ALARM_SPEED = "alarmSpeed";
     public static final String TYPE_ALARM_FALL = "alarmFall";
+    public static final String TYPE_ALARM_VIBRATION = "alarmVibration";
 
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";

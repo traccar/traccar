@@ -34,20 +34,20 @@ import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.StatisticsManager;
-import org.traccar.geocode.BingMapsReverseGeocoder;
-import org.traccar.geocode.FactualReverseGeocoder;
-import org.traccar.geocode.GeocodeFarmReverseGeocoder;
-import org.traccar.geocode.GisgraphyReverseGeocoder;
-import org.traccar.geocode.GoogleReverseGeocoder;
-import org.traccar.geocode.MapQuestReverseGeocoder;
-import org.traccar.geocode.NominatimReverseGeocoder;
-import org.traccar.geocode.OpenCageReverseGeocoder;
-import org.traccar.geocode.ReverseGeocoder;
+import org.traccar.geocoder.BingMapsGeocoder;
+import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeocodeFarmGeocoder;
+import org.traccar.geocoder.GisgraphyGeocoder;
+import org.traccar.geocoder.GoogleGeocoder;
+import org.traccar.geocoder.MapQuestGeocoder;
+import org.traccar.geocoder.NominatimGeocoder;
+import org.traccar.geocoder.OpenCageGeocoder;
+import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
-import org.traccar.location.GoogleLocationProvider;
-import org.traccar.location.LocationProvider;
-import org.traccar.location.MozillaLocationProvider;
-import org.traccar.location.OpenCellIdLocationProvider;
+import org.traccar.geolocation.GoogleGeolocationProvider;
+import org.traccar.geolocation.GeolocationProvider;
+import org.traccar.geolocation.MozillaGeolocationProvider;
+import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
 import org.traccar.web.WebServer;
 
@@ -104,16 +104,16 @@ public final class Context {
         return permissionsManager;
     }
 
-    private static ReverseGeocoder reverseGeocoder;
+    private static Geocoder geocoder;
 
-    public static ReverseGeocoder getReverseGeocoder() {
-        return reverseGeocoder;
+    public static Geocoder getGeocoder() {
+        return geocoder;
     }
 
-    private static LocationProvider locationProvider;
+    private static GeolocationProvider geolocationProvider;
 
-    public static LocationProvider getLocationProvider() {
-        return locationProvider;
+    public static GeolocationProvider getGeolocationProvider() {
+        return geolocationProvider;
     }
 
     private static WebServer webServer;
@@ -213,56 +213,58 @@ public final class Context {
             switch (type) {
                 case "nominatim":
                     if (key != null) {
-                        reverseGeocoder = new NominatimReverseGeocoder(url, key, cacheSize);
+                        geocoder = new NominatimGeocoder(url, key, cacheSize);
                     } else {
-                        reverseGeocoder = new NominatimReverseGeocoder(url, cacheSize);
+                        geocoder = new NominatimGeocoder(url, cacheSize);
                     }
                     break;
                 case "gisgraphy":
-                    reverseGeocoder = new GisgraphyReverseGeocoder(url, cacheSize);
+                    geocoder = new GisgraphyGeocoder(url, cacheSize);
                     break;
                 case "mapquest":
-                    reverseGeocoder = new MapQuestReverseGeocoder(url, key, cacheSize);
+                    geocoder = new MapQuestGeocoder(url, key, cacheSize);
                     break;
                 case "opencage":
-                    reverseGeocoder = new OpenCageReverseGeocoder(url, key, cacheSize);
+                    geocoder = new OpenCageGeocoder(url, key, cacheSize);
                     break;
                 case "bingmaps":
-                    reverseGeocoder = new BingMapsReverseGeocoder(url, key, cacheSize);
+                    geocoder = new BingMapsGeocoder(url, key, cacheSize);
                     break;
                 case "factual":
-                    reverseGeocoder = new FactualReverseGeocoder(url, key, cacheSize);
+                    geocoder = new FactualGeocoder(url, key, cacheSize);
                     break;
                 case "geocodefarm":
                     if (key != null) {
-                        reverseGeocoder = new GeocodeFarmReverseGeocoder(key, cacheSize);
+                        geocoder = new GeocodeFarmGeocoder(key, cacheSize);
                     } else {
-                        reverseGeocoder = new GeocodeFarmReverseGeocoder(cacheSize);
+                        geocoder = new GeocodeFarmGeocoder(cacheSize);
                     }
                 default:
                     if (key != null) {
-                        reverseGeocoder = new GoogleReverseGeocoder(key, cacheSize);
+                        geocoder = new GoogleGeocoder(key, cacheSize);
                     } else {
-                        reverseGeocoder = new GoogleReverseGeocoder(cacheSize);
+                        geocoder = new GoogleGeocoder(cacheSize);
                     }
                     break;
             }
         }
 
-        if (config.getBoolean("location.enable")) {
-            String type = config.getString("location.type", "mozilla");
-            String key = config.getString("location.key");
+        if (config.getBoolean("geolocation.enable")) {
+            String type = config.getString("geolocation.type", "mozilla");
+            String key = config.getString("geolocation.key");
 
             switch (type) {
                 case "google":
-                    locationProvider = new GoogleLocationProvider(key);
+                    geolocationProvider = new GoogleGeolocationProvider(key);
+                    break;
                 case "opencellid":
-                    locationProvider = new OpenCellIdLocationProvider(key);
+                    geolocationProvider = new OpenCellIdGeolocationProvider(key);
+                    break;
                 default:
                     if (key != null) {
-                        locationProvider = new MozillaLocationProvider(key);
+                        geolocationProvider = new MozillaGeolocationProvider(key);
                     } else {
-                        locationProvider = new MozillaLocationProvider();
+                        geolocationProvider = new MozillaGeolocationProvider();
                     }
                     break;
             }

@@ -20,16 +20,17 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
-import org.traccar.location.LocationProvider;
+import org.traccar.helper.Log;
+import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.model.Position;
 
-public class LocationProviderHandler implements ChannelUpstreamHandler {
+public class GeolocationHandler implements ChannelUpstreamHandler {
 
-    private final LocationProvider locationProvider;
+    private final GeolocationProvider geolocationProvider;
     private final boolean processInvalidPositions;
 
-    public LocationProviderHandler(LocationProvider locationProvider, boolean processInvalidPositions) {
-        this.locationProvider = locationProvider;
+    public GeolocationHandler(GeolocationProvider geolocationProvider, boolean processInvalidPositions) {
+        this.geolocationProvider = geolocationProvider;
         this.processInvalidPositions = processInvalidPositions;
     }
 
@@ -40,13 +41,14 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
             return;
         }
 
-        final MessageEvent e = (MessageEvent) evt;
-        Object message = e.getMessage();
+        final MessageEvent event = (MessageEvent) evt;
+        Object message = event.getMessage();
         if (message instanceof Position) {
             final Position position = (Position) message;
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
                     && position.getNetwork() != null) {
-                locationProvider.getLocation(position.getNetwork(), new LocationProvider.LocationProviderCallback() {
+                geolocationProvider.getLocation(position.getNetwork(),
+                        new GeolocationProvider.LocationProviderCallback() {
                     @Override
                     public void onSuccess(double latitude, double longitude, double accuracy) {
                         position.set(Position.KEY_APPROXIMATE, true);
@@ -55,19 +57,20 @@ public class LocationProviderHandler implements ChannelUpstreamHandler {
                         position.setLatitude(latitude);
                         position.setLongitude(longitude);
                         position.setAccuracy(accuracy);
-                        Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
 
                     @Override
-                    public void onFailure() {
-                        Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                    public void onFailure(Throwable e) {
+                        Log.warning(e);
+                        Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
                 });
             } else {
-                Channels.fireMessageReceived(ctx, position, e.getRemoteAddress());
+                Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
             }
         } else {
-            Channels.fireMessageReceived(ctx, message, e.getRemoteAddress());
+            Channels.fireMessageReceived(ctx, message, event.getRemoteAddress());
         }
     }
 

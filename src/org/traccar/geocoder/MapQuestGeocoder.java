@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-public class MapQuestReverseGeocoder extends JsonReverseGeocoder {
+public class MapQuestGeocoder extends JsonGeocoder {
 
-    public MapQuestReverseGeocoder(String url, String key, int cacheSize) {
+    public MapQuestGeocoder(String url, String key, int cacheSize) {
         super(url + "?key=" + key + "&location=%f,%f", cacheSize);
     }
 

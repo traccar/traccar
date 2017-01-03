@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import javax.json.JsonObject;
 
-public class NominatimReverseGeocoder extends JsonReverseGeocoder {
+public class NominatimGeocoder extends JsonGeocoder {
 
-    public NominatimReverseGeocoder() {
+    public NominatimGeocoder() {
         this("http://nominatim.openstreetmap.org/reverse", 0);
     }
 
-    public NominatimReverseGeocoder(String url, int cacheSize) {
+    public NominatimGeocoder(String url, int cacheSize) {
         super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1", cacheSize);
     }
 
-    public NominatimReverseGeocoder(String url, String key, int cacheSize) {
+    public NominatimGeocoder(String url, String key, int cacheSize) {
         super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1&key=" + key, cacheSize);
     }
 

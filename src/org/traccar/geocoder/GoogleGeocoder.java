@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
-public class GoogleReverseGeocoder extends JsonReverseGeocoder {
+public class GoogleGeocoder extends JsonGeocoder {
 
-    public GoogleReverseGeocoder() {
+    public GoogleGeocoder() {
         this(0);
     }
 
-    public GoogleReverseGeocoder(int cacheSize) {
+    public GoogleGeocoder(int cacheSize) {
         super("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f", cacheSize);
     }
 
-    public GoogleReverseGeocoder(String key, int cacheSize) {
+    public GoogleGeocoder(String key, int cacheSize) {
         super("https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&key=" + key, cacheSize);
     }
 

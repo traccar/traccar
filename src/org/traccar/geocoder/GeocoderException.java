@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
-public interface ReverseGeocoder {
+public class GeocoderException extends RuntimeException {
 
-    interface ReverseGeocoderCallback {
-
-        void onResult(String address);
-
+    public GeocoderException(String message) {
+        super(message);
     }
-
-    void getAddress(AddressFormat format, double latitude, double longitude, ReverseGeocoderCallback callback);
 
 }

@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geocode;
+package org.traccar.geocoder;
 
 import javax.json.JsonObject;
 
-public class GisgraphyReverseGeocoder extends JsonReverseGeocoder {
+public class GisgraphyGeocoder extends JsonGeocoder {
 
-    public GisgraphyReverseGeocoder() {
+    public GisgraphyGeocoder() {
         this("http://services.gisgraphy.com/reversegeocoding/search", 0);
     }
 
-    public GisgraphyReverseGeocoder(String url, int cacheSize) {
+    public GisgraphyGeocoder(String url, int cacheSize) {
         super(url + "?format=json&lat=%f&lng=%f&from=1&to=1", cacheSize);
     }
 
