@@ -13,16 +13,16 @@ public class GeolocationProviderTest extends BaseTest {
     @Test
     public void test() throws Exception {
         if (enable) {
-            testGoogleLocationProvider();
+            testLocationProvider();
         }
     }
 
-    public void testGoogleLocationProvider() throws Exception {
-        GoogleGeolocationProvider locationProvider = new GoogleGeolocationProvider("KEY");
+    public void testLocationProvider() throws Exception {
+        MozillaGeolocationProvider provider = new MozillaGeolocationProvider();
 
-        Network network = new Network(CellTower.from(260, 2, 10250, 26511));
+        Network network = new Network(CellTower.from(208, 1, 2, 1234567));
 
-        locationProvider.getLocation(network, new GeolocationProvider.LocationProviderCallback() {
+        provider.getLocation(network, new GeolocationProvider.LocationProviderCallback() {
             @Override
             public void onSuccess(double latitude, double longitude, double accuracy) {
                 Assert.assertEquals(60.07254, latitude, 0.00001);

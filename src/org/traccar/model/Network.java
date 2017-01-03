@@ -50,7 +50,7 @@ public class Network {
         this.homeMobileNetworkCode = homeMobileNetworkCode;
     }
 
-    private String radioType;
+    private String radioType = "gsm";
 
     public String getRadioType() {
         return radioType;

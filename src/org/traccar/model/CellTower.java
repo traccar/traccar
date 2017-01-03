@@ -46,6 +46,16 @@ public class CellTower {
         return fromLacCid(lac, cid);
     }
 
+    private String radioType;
+
+    public String getRadioType() {
+        return radioType;
+    }
+
+    public void setRadioType(String radioType) {
+        this.radioType = radioType;
+    }
+
     private Long cellId;
 
     public Long getCellId() {
