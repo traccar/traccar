@@ -19,6 +19,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Seconds;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -49,8 +50,8 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(3); // protocol version
             response.writeByte(MSG_DATE_RECORD_ACK);
             response.writeBytes(id);
-            response.writeInt(
-                    Seconds.secondsBetween(new DateTime(2000, 1, 1, 0, 0), new DateTime()).getSeconds());
+            response.writeInt(Seconds.secondsBetween(
+                    new DateTime(2000, 1, 1, 0, 0, DateTimeZone.UTC), new DateTime(DateTimeZone.UTC)).getSeconds());
             response.writeByte(index);
             response.writeByte(report - 0x200);
 
