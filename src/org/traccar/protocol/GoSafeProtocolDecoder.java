@@ -156,7 +156,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_HDOP, parser.next());
 
-        if (parser.hasNext(4)) {
+        if (parser.hasNext(5)) {
             position.setNetwork(new Network(CellTower.from(
                     parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16), parser.nextInt())));
         }
