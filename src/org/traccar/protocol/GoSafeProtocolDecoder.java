@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,13 +69,13 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .groupBegin()
             .text("GSM:")
-            .number("d+;")                       // registration
-            .number("d+;")                       // gsm signal
+            .number("d*;")                       // registration
+            .number("d*;")                       // gsm signal
             .number("(d+);")                     // mcc
             .number("(d+);")                     // mnc
             .number("(x+);")                     // lac
             .number("(x+);")                     // cid
-            .number("-d+")                       // rssi
+            .number("(-d+)")                     // rssi
             .expression("[^,]*,?")
             .groupEnd("?")
             .groupBegin()
@@ -86,8 +86,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .groupBegin()
             .text("ADC:")
-            .number("(d+.d+);")                  // power
-            .number("(d+.d+),?")                 // battery
+            .number("(d+.d+)")                   // power
+            .number("(?:;(d+.d+))?,?")           // battery
             .groupEnd("?")
             .groupBegin()
             .text("DTT:")
@@ -158,7 +158,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(4)) {
             position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16), parser.nextInt())));
         }
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextInt());
