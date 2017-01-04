@@ -483,5 +483,6 @@
     <entry key='at2000.port'>5128</entry>
     <entry key='maestro.port'>5129</entry>
     <entry key='ais.port'>5130</entry>
+    <entry key='gt30.port'>5131</entry>
 
 </properties>
