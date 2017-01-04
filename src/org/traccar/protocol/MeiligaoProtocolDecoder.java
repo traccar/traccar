@@ -73,7 +73,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_RFID = new PatternBuilder()
             .number("|(dd)(dd)(dd),")            // time
-            .number("(dd)(dd)(dd),")             // Date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude
@@ -99,11 +99,11 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_OBDA = new PatternBuilder()
-            .number("(d+),")                     // Total ignition
-            .number("(d+.d+),")                  // Total driving time
-            .number("(d+.d+),")                  // Total idling time
-            .number("(d+),")                     // Average hot start time
-            .number("(d+),")                     // Average speed
+            .number("(d+),")                     // total ignition
+            .number("(d+.d+),")                  // total driving time
+            .number("(d+.d+),")                  // total idling time
+            .number("(d+),")                     // average hot start time
+            .number("(d+),")                     // average speed
             .number("(d+),")                     // history hightest speed
             .number("(d+),")                     // history hightest rpm
             .number("(d+),")                     // total harsh acceleration
