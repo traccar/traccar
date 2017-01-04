@@ -104,8 +104,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),")                  // total idling time
             .number("(d+),")                     // average hot start time
             .number("(d+),")                     // average speed
-            .number("(d+),")                     // history hightest speed
-            .number("(d+),")                     // history hightest rpm
+            .number("(d+),")                     // history highest speed
+            .number("(d+),")                     // history highest rpm
             .number("(d+),")                     // total harsh acceleration
             .number("(d+)")                      // total harsh break n0
             .compile();
@@ -320,8 +320,8 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("totalIdlingTime", parser.nextDouble());
         position.set("averageHotStartTime", parser.nextInt());
         position.set("averageSpeed", parser.nextInt());
-        position.set("historyHightestSpeed", parser.nextInt());
-        position.set("historyHightestRPM", parser.nextInt());
+        position.set("historyHighestSpeed", parser.nextInt());
+        position.set("historyHighestRpm", parser.nextInt());
         position.set("totalHarshAccerleration", parser.nextInt());
         position.set("totalHarshBrake", parser.nextInt());
 
