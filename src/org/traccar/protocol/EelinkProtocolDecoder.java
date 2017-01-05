@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,11 +116,27 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
         position.setValid((buf.readUnsignedByte() & 0x01) != 0);
 
         if (type == MSG_ALARM) {
-            position.set(Position.KEY_ALARM, buf.readUnsignedByte());
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
         }
 
-        if (type == MSG_STATE) {
-            position.set(Position.KEY_STATUS, decodeAlarm(buf.readUnsignedByte()));
+        if (buf.readableBytes() >= 2 * 5) {
+
+            int status = buf.readUnsignedShort();
+            if (BitUtil.check(status, 1)) {
+                position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
+            }
+            if (BitUtil.check(status, 7)) {
+                position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
+            }
+            position.set(Position.KEY_STATUS, status);
+
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() + "mV");
+
+            buf.readUnsignedShort(); // signal strength
+
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+
         }
 
         return position;
