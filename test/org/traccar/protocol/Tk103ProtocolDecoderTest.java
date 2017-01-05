@@ -10,6 +10,9 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
 
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
+        verifyNotNull(decoder, text(
+                "(087073104337BZ00,740,000,3bf7,0425,3bf7,0bf5,3bf7,09e7,3bf7,cbad,3bf7,0dcf,3bf7,c7b2,01000000)"));
+
         verifyNothing(decoder, text(
                 "(087073005534BP00HSO"));
 
