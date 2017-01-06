@@ -154,6 +154,9 @@ public class ProtocolTest extends BaseTest {
                 Assert.assertTrue("latitude >= -90", position.getLatitude() >= -90);
                 Assert.assertTrue("latitude <= 90", position.getLatitude() <= 90);
 
+                Assert.assertTrue("longitude >= -180", position.getLongitude() >= -180);
+                Assert.assertTrue("longitude <= 180", position.getLongitude() <= 180);
+
             }
 
             Assert.assertTrue("altitude >= -12262", position.getAltitude() >= -12262);
