@@ -22,6 +22,8 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -53,6 +55,57 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             default:
                 return null;
         }
+    }
+
+    private void decodeCards(Position position, ChannelBuffer buf) {
+
+        int index = 1;
+        for (int i = 0; i < 4; i++) {
+
+            int blockLength = buf.readUnsignedShort();
+            int blockEnd = buf.readerIndex() + blockLength;
+
+            if (blockLength > 0) {
+
+                int count = buf.readUnsignedByte();
+                for (int j = 0; j < count; j++) {
+
+                    int length = buf.readUnsignedByte();
+
+                    boolean odd = length % 2 != 0;
+                    if (odd) {
+                        length += 1;
+                    }
+
+                    String num = ChannelBuffers.hexDump(buf.readBytes(length / 2));
+
+                    if (odd) {
+                        num = num.substring(1);
+                    }
+
+                    position.set("card" + index, num);
+                }
+            }
+
+            buf.readerIndex(blockEnd);
+        }
+
+    }
+
+    private void decodePassengers(Position position, ChannelBuffer buf) {
+
+        int blockLength = buf.readUnsignedShort();
+        int blockEnd = buf.readerIndex() + blockLength;
+
+        if (blockLength > 0) {
+
+            position.set("passengersOn", buf.readUnsignedMedium());
+            position.set("passengersOff", buf.readUnsignedMedium());
+
+        }
+
+        buf.readerIndex(blockEnd);
+
     }
 
     @Override
@@ -132,6 +185,11 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         blockLength = buf.readUnsignedShort();
         blockEnd = buf.readerIndex() + blockLength;
 
+        if (blockLength > 0 && (hardware == 0x10A || hardware == 0x10B)) {
+            position.setNetwork(new Network(
+                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+        }
+
         buf.readerIndex(blockEnd);
 
         // Status info
@@ -159,55 +217,12 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         if (hardware == 0x10A || hardware == 0x10B) {
 
-            // Cards
-
-            int index = 1;
-            for (int i = 0; i < 4; i++) {
-
-                blockLength = buf.readUnsignedShort();
-                blockEnd = buf.readerIndex() + blockLength;
-
-                if (blockLength > 0) {
-
-                    int count = buf.readUnsignedByte();
-                    for (int j = 0; j < count; j++) {
-
-                        int length = buf.readUnsignedByte();
-
-                        boolean odd = length % 2 != 0;
-                        if (odd) {
-                            length += 1;
-                        }
-
-                        String num = ChannelBuffers.hexDump(buf.readBytes(length / 2));
-
-                        if (odd) {
-                            num = num.substring(1);
-                        }
-
-                        position.set("card" + index, num);
-                    }
-                }
-
-                buf.readerIndex(blockEnd);
-            }
+            decodeCards(position, buf);
 
             buf.skipBytes(buf.readUnsignedShort()); // temperature
             buf.skipBytes(buf.readUnsignedShort()); // lock
 
-            // Passengers
-
-            blockLength = buf.readUnsignedShort();
-            blockEnd = buf.readerIndex() + blockLength;
-
-            if (blockLength > 0) {
-
-                position.set("passengersOn", buf.readUnsignedMedium());
-                position.set("passengersOff", buf.readUnsignedMedium());
-
-            }
-
-            buf.readerIndex(blockEnd);
+            decodePassengers(position, buf);
 
         }
 
