@@ -37,6 +37,7 @@ public class Gt30ProtocolDecoder extends BaseProtocolDecoder {
             .number("x{4}")                      // length
             .expression("(.{14})")               // device id
             .number("x{4}")                      // type
+            .expression("(.)?")                  // alarm
             .number("(dd)(dd)(dd).(d+),")        // time
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
@@ -51,6 +52,23 @@ public class Gt30ProtocolDecoder extends BaseProtocolDecoder {
             .number("|(-?d+)")                   // altitude
             .number("x{4}")                      // checksum
             .compile();
+
+    private String decodeAlarm(int value) {
+        switch (value) {
+            case 0x01:
+            case 0x02:
+            case 0x03:
+                return Position.ALARM_SOS;
+            case 0x10:
+                return Position.ALARM_LOW_BATTERY;
+            case 0x11:
+                return Position.ALARM_OVERSPEED;
+            case 0x12:
+                return Position.ALARM_GEOFENCE;
+            default:
+                return null;
+        }
+    }
 
     @Override
     protected Object decode(
@@ -69,6 +87,10 @@ public class Gt30ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ALARM, decodeAlarm(parser.next().charAt(0)));
+        }
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
