@@ -38,8 +38,8 @@ public class CellTower {
 
     public static CellTower fromLacCid(int lac, long cid) {
         return from(
-                Context.getConfig().getInteger("location.mcc"),
-                Context.getConfig().getInteger("location.mnc"), lac, cid);
+                Context.getConfig().getInteger("geolocation.mcc"),
+                Context.getConfig().getInteger("geolocation.mnc"), lac, cid);
     }
 
     public static CellTower fromCidLac(long cid, int lac) {
