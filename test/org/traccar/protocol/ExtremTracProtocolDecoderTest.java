@@ -11,6 +11,9 @@ public class ExtremTracProtocolDecoderTest extends ProtocolTest {
         ExtremTracProtocolDecoder decoder = new ExtremTracProtocolDecoder(new ExtremTracProtocol());
 
         verifyPosition(decoder, text(
+                "$GPRMC,862106020628733,050859.000,A,1404.8573,N,08710.9967,W,0.00,0,080117,0,,00C8,00218,99,,,,,,0.00"));
+
+        verifyPosition(decoder, text(
                 "$GPRMC,10000000001,092313.299,A,2238.8947,N,11355.2253,E,0.00,311.19,010307,0,,"));
 
         verifyPosition(decoder, text(
