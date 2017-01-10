@@ -322,14 +322,14 @@
     </entry>
 
     <entry key='database.insertCalendar'>
-        INSERT INTO calendars (name, calendarData, attributes)
-        VALUES (:name, :calendarData, :attributes)
+        INSERT INTO calendars (name, data, attributes)
+        VALUES (:name, :data, :attributes)
     </entry>
 
     <entry key='database.updateCalendar'>
         UPDATE calendars SET
         name = :name,
-        calendarData = :calendarData,
+        data = :data,
         attributes = :attributes
         WHERE id = :id
     </entry>
