@@ -16,6 +16,7 @@
 package org.traccar.notification;
 
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -49,10 +50,10 @@ public final class NotificationFormatter {
 
         Template template = null;
         try {
-            template = Context.getVelocityEngine().getTemplate(event.getType() + ".vm");
+            template = Context.getVelocityEngine().getTemplate(event.getType() + ".vm", StandardCharsets.UTF_8.name());
         } catch (ResourceNotFoundException error) {
             Log.warning(error);
-            template = Context.getVelocityEngine().getTemplate("unknown.vm");
+            template = Context.getVelocityEngine().getTemplate("unknown.vm", StandardCharsets.UTF_8.name());
         }
 
         StringWriter writer = new StringWriter();
