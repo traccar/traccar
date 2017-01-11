@@ -30,6 +30,9 @@ public class At2000FrameDecoder extends FrameDecoder {
 
     private boolean firstPacket = true;
 
+    private ChannelBuffer currentBuffer;
+    private int acknowledgedBytes;
+
     private void sendResponse(Channel channel) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 2 * BLOCK_LENGTH);
@@ -63,7 +66,11 @@ public class At2000FrameDecoder extends FrameDecoder {
         }
 
         if (buf.readableBytes() >= length || buf.readableBytes() % ACK_LENGTH == 0) {
-            sendResponse(channel);
+            if (buf != currentBuffer || buf.readableBytes() > acknowledgedBytes) {
+                sendResponse(channel);
+                currentBuffer = buf;
+                acknowledgedBytes = buf.readableBytes();
+            }
         }
 
         if (buf.readableBytes() >= length) {
