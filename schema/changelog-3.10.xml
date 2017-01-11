@@ -15,7 +15,7 @@
       <column name="name" type="VARCHAR(128)">
         <constraints nullable="false" />
       </column>
-      <column name="calendardata" type="BLOB">
+      <column name="data" type="BLOB">
         <constraints nullable="false" />
       </column>
       <column name="attributes" type="VARCHAR(4000)">

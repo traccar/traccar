@@ -1,7 +1,7 @@
 package org.traccar.reports;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.traccar.BaseTest;
 import org.traccar.model.Position;
 import org.traccar.reports.model.TripReport;
 
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-public class TripsTest {
+public class TripsTest extends BaseTest {
 
     private Date date(String time) throws ParseException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -39,7 +39,6 @@ public class TripsTest {
         return position;
     }
 
-    @Ignore
     @Test
     public void testDetectTripsSimple() throws ParseException {
 
