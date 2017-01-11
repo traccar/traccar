@@ -29,8 +29,20 @@ import org.traccar.protocol.TeltonikaProtocolDecoder;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainEventHandler extends IdleStateAwareChannelHandler {
+
+    private final Set<String> connectionlessProtocols = new HashSet<>();
+
+    public MainEventHandler() {
+        String connectionlessProtocolList = Context.getConfig().getString("status.ignoreOffline");
+        if (connectionlessProtocolList != null) {
+            connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split(",")));
+        }
+    }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
@@ -80,8 +92,9 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         Log.info(formatChannel(e.getChannel()) + " disconnected");
         closeChannel(e.getChannel());
 
-        if (ctx.getPipeline().get("httpDecoder") == null
-                && !(ctx.getPipeline().get("objectDecoder") instanceof TeltonikaProtocolDecoder)) {
+        BaseProtocolDecoder protocolDecoder = (BaseProtocolDecoder) ctx.getPipeline().get("objectDecoder");
+        if (ctx.getPipeline().get("httpDecoder") == null &&
+                !connectionlessProtocols.contains(protocolDecoder.getProtocolName())) {
             Context.getConnectionManager().removeActiveDevice(e.getChannel());
         }
     }
@@ -103,4 +116,5 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
             channel.close();
         }
     }
+
 }
