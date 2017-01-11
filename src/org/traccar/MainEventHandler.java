@@ -25,7 +25,6 @@ import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
-import org.traccar.protocol.TeltonikaProtocolDecoder;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
