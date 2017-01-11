@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,8 +305,6 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
         String marker = buf.toString(0, 1, StandardCharsets.US_ASCII);
 
-        // handle X mode?
-
         if (marker.equals("*")) {
             String sentence = buf.toString(StandardCharsets.US_ASCII);
             if (sentence.contains(",NBR,")) {
@@ -316,6 +314,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             }
         } else if (marker.equals("$")) {
             return decodeBinary(buf, channel, remoteAddress);
+        } else if (marker.equals("X")) {
+            return null; // X mode
         }
 
         return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class H02FrameDecoder extends FrameDecoder {
 
         char marker = (char) buf.getByte(buf.readerIndex());
 
-        while (marker != '*' && marker != '$' && buf.readableBytes() > 0) {
+        while (marker != '*' && marker != '$' && marker != 'X' && buf.readableBytes() > 0) {
             buf.skipBytes(1);
             if (buf.readableBytes() > 0) {
                 marker = (char) buf.getByte(buf.readerIndex());
@@ -64,6 +64,12 @@ public class H02FrameDecoder extends FrameDecoder {
 
             if (buf.readableBytes() >= messageLength) {
                 return buf.readBytes(messageLength);
+            }
+
+        } else if (marker == 'X') {
+
+            if (buf.readableBytes() >= MESSAGE_SHORT) {
+                return buf.readBytes(MESSAGE_SHORT);
             }
 
         }
