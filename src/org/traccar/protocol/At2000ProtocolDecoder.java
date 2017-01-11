@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,17 +47,6 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SESSION_END = 0x0c;
 
     private Cipher cipher;
-
-    private static void sendResponse(Channel channel) {
-        if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 2 * BLOCK_LENGTH);
-            response.writeByte(MSG_ACKNOWLEDGEMENT);
-            response.writeMedium(ChannelBuffers.swapMedium(1));
-            response.writeByte(0x00); // success
-            response.writerIndex(2 * BLOCK_LENGTH);
-            channel.write(response);
-        }
-    }
 
     private static void sendRequest(Channel channel) {
         if (channel != null) {
@@ -135,8 +124,6 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         }
-
-        sendResponse(channel);
 
         if (type == MSG_DEVICE_ID) {
             sendRequest(channel);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,30 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
+import java.nio.ByteOrder;
+
 public class At2000FrameDecoder extends FrameDecoder {
 
     private static final int BLOCK_LENGTH = 16;
+    private static final int ACK_LENGTH = 496;
 
     private boolean firstPacket = true;
+
+    private void sendResponse(Channel channel) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.directBuffer(ByteOrder.LITTLE_ENDIAN, 2 * BLOCK_LENGTH);
+            response.writeByte(At2000ProtocolDecoder.MSG_ACKNOWLEDGEMENT);
+            response.writeMedium(ChannelBuffers.swapMedium(1));
+            response.writeByte(0x00); // success
+            response.writerIndex(2 * BLOCK_LENGTH);
+            channel.write(response);
+        }
+    }
 
     @Override
     protected Object decode(
@@ -45,6 +60,10 @@ public class At2000FrameDecoder extends FrameDecoder {
         length += BLOCK_LENGTH;
         if (length % BLOCK_LENGTH != 0) {
             length = (length / BLOCK_LENGTH + 1) * BLOCK_LENGTH;
+        }
+
+        if (buf.readableBytes() >= length || buf.readableBytes() % ACK_LENGTH == 0) {
+            sendResponse(channel);
         }
 
         if (buf.readableBytes() >= length) {
