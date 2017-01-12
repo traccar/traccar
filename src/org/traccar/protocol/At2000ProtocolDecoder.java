@@ -31,6 +31,8 @@ import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class At2000ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -100,28 +102,55 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
             byte[] data = new byte[buf.capacity() - BLOCK_LENGTH];
             buf.readBytes(data);
             buf = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, cipher.update(data));
 
-            buf.readUnsignedShort(); // index
-            buf.readUnsignedShort(); // reserved
+            List<Position> positions = new LinkedList<>();
 
-            position.setValid(true);
+            while (buf.readableBytes() >= 63) {
 
-            position.setTime(new Date(buf.readLong() * 1000));
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
 
-            position.setLatitude(buf.readFloat());
-            position.setLongitude(buf.readFloat());
-            position.setAltitude(buf.readFloat());
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloat()));
-            position.setCourse(buf.readFloat());
+                buf.readUnsignedShort(); // index
+                buf.readUnsignedShort(); // reserved
 
-            return position;
+                position.setValid(true);
+
+                position.setTime(new Date(buf.readLong() * 1000));
+
+                position.setLatitude(buf.readFloat());
+                position.setLongitude(buf.readFloat());
+                position.setAltitude(buf.readFloat());
+                position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloat()));
+                position.setCourse(buf.readFloat());
+
+                buf.readUnsignedInt(); // geozone event
+                buf.readUnsignedInt(); // io events
+                buf.readUnsignedInt(); // geozone value
+                buf.readUnsignedInt(); // io values
+                buf.readUnsignedShort(); // operator
+
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() + "mV");
+
+                buf.readUnsignedShort(); // cid
+                buf.readUnsignedByte(); // rssi
+                buf.readUnsignedByte(); // current profile
+
+                position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
+                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte());
+                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+
+                positions.add(position);
+
+            }
+
+            return positions;
 
         }
 
