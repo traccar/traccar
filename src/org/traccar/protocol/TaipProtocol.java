@@ -40,6 +40,7 @@ public class TaipProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '<'));
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("objectEncoder", new TaipProtocolEncoder());
                 pipeline.addLast("objectDecoder", new TaipProtocolDecoder(TaipProtocol.this, true));
             }
         });
@@ -48,6 +49,7 @@ public class TaipProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
+                pipeline.addLast("objectEncoder", new TaipProtocolEncoder());
                 pipeline.addLast("objectDecoder", new TaipProtocolDecoder(TaipProtocol.this, false));
             }
         });
