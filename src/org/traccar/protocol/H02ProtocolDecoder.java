@@ -244,16 +244,6 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, parser.nextLong(16));
 
-        if (parser.hasNext(4)) {
-            int mcc = parser.nextInt(16);
-            int mnc = parser.nextInt(16);
-            int lac = parser.nextInt(16);
-            int cid = parser.nextInt(16);
-            if (mcc != 0 && mnc != 0 && lac != 0 && cid != 0) {
-                position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
-            }
-        }
-
         return position;
     }
 
@@ -304,20 +294,20 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
         String marker = buf.toString(0, 1, StandardCharsets.US_ASCII);
 
-        if (marker.equals("*")) {
-            String sentence = buf.toString(StandardCharsets.US_ASCII);
-            if (sentence.contains(",NBR,")) {
-                return decodeLbs(sentence, channel, remoteAddress);
-            } else {
-                return decodeText(sentence, channel, remoteAddress);
-            }
-        } else if (marker.equals("$")) {
-            return decodeBinary(buf, channel, remoteAddress);
-        } else if (marker.equals("X")) {
-            return null; // X mode
+        switch (marker) {
+            case "*":
+                String sentence = buf.toString(StandardCharsets.US_ASCII);
+                if (sentence.contains(",NBR,")) {
+                    return decodeLbs(sentence, channel, remoteAddress);
+                } else {
+                    return decodeText(sentence, channel, remoteAddress);
+                }
+            case "$":
+                return decodeBinary(buf, channel, remoteAddress);
+            case "X":
+            default:
+                return null;
         }
-
-        return null;
     }
 
 }
