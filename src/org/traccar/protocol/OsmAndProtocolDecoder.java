@@ -119,6 +119,9 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                 case "altitude":
                     position.setAltitude(Double.parseDouble(value));
                     break;
+                case "accuracy":
+                    position.setAccuracy(Double.parseDouble(value));
+                    break;
                 case "hdop":
                     position.set(Position.KEY_HDOP, Double.parseDouble(value));
                     break;
