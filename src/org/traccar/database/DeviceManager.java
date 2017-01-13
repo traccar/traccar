@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,6 +160,15 @@ public class DeviceManager implements IdentityManager {
         return devices;
     }
 
+    public Collection<Device> getManagedDevices(long userId) throws SQLException {
+        Collection<Device> devices = new ArrayList<>();
+        devices.addAll(getDevices(userId));
+        for (long otherUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+            devices.addAll(getDevices(otherUserId));
+        }
+        return devices;
+    }
+
     public void addDevice(Device device) throws SQLException {
         dataManager.addDevice(device);
 
@@ -285,6 +294,15 @@ public class DeviceManager implements IdentityManager {
         Collection<Group> groups = new ArrayList<>();
         for (long id : Context.getPermissionsManager().getGroupPermissions(userId)) {
             groups.add(getGroupById(id));
+        }
+        return groups;
+    }
+
+    public Collection<Group> getManagedGroups(long userId) throws SQLException {
+        Collection<Group> groups = new ArrayList<>();
+        groups.addAll(getGroups(userId));
+        for (long otherUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+            groups.addAll(getGroups(otherUserId));
         }
         return groups;
     }

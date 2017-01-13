@@ -92,8 +92,8 @@ public class MainEventHandler extends IdleStateAwareChannelHandler {
         closeChannel(e.getChannel());
 
         BaseProtocolDecoder protocolDecoder = (BaseProtocolDecoder) ctx.getPipeline().get("objectDecoder");
-        if (ctx.getPipeline().get("httpDecoder") == null &&
-                !connectionlessProtocols.contains(protocolDecoder.getProtocolName())) {
+        if (ctx.getPipeline().get("httpDecoder") == null
+                && !connectionlessProtocols.contains(protocolDecoder.getProtocolName())) {
             Context.getConnectionManager().removeActiveDevice(e.getChannel());
         }
     }

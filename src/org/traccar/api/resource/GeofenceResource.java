@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,12 @@ public class GeofenceResource extends BaseResource {
 
         Set<Long> result;
         if (all) {
-            Context.getPermissionsManager().checkAdmin(getUserId());
-            result = new HashSet<>(geofenceManager.getAllGeofencesIds());
+            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                result = new HashSet<>(geofenceManager.getAllGeofencesIds());
+            } else {
+                Context.getPermissionsManager().checkManager(getUserId());
+                result = new HashSet<>(geofenceManager.getManagedGeofencesIds(getUserId()));
+            }
         } else {
             if (userId == 0) {
                 userId = getUserId();

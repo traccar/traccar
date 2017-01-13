@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.Statistics;
 import org.traccar.model.User;
+import org.traccar.model.UserPermission;
 import org.traccar.model.DeviceGeofence;
 import org.traccar.model.GeofencePermission;
 
@@ -525,6 +526,25 @@ public class DataManager {
         QueryBuilder.create(dataSource, getQuery("database.unlinkCalendar"))
                 .setLong("userId", userId)
                 .setLong("calendarId", calendarId)
+                .executeUpdate();
+    }
+
+    public Collection<UserPermission> getUserPermissions() throws SQLException {
+        return QueryBuilder.create(dataSource, getQuery("database.selectUserPermissions"))
+                .executeQuery(UserPermission.class);
+    }
+
+    public void linkUser(long userId, long otherUserId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.linkUser"))
+                .setLong("userId", userId)
+                .setLong("otherUserId", otherUserId)
+                .executeUpdate();
+    }
+
+    public void unlinkUser(long userId, long otherUserId) throws SQLException {
+        QueryBuilder.create(dataSource, getQuery("database.unlinkUser"))
+                .setLong("userId", userId)
+                .setLong("otherUserId", otherUserId)
                 .executeUpdate();
     }
 }

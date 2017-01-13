@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,16 @@ public class User extends Extensible {
 
     public void setDeviceLimit(int deviceLimit) {
         this.deviceLimit = deviceLimit;
+    }
+
+    private int userLimit;
+
+    public int getUserLimit() {
+        return userLimit;
+    }
+
+    public void setUserLimit(int userLimit) {
+        this.userLimit = userLimit;
     }
 
     private String token;
