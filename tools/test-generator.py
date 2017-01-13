@@ -39,7 +39,7 @@ def send(conn, lat, lon, course, speed, alarm, ignition, accuracy):
         params = params + (('alarm', 'sos'),)
     if ignition:
         params = params + (('ignition', 'true'),)
-    if ignition:
+    if accuracy:
         params = params + (('accuracy', accuracy),)
     conn.request('GET', '?' + urllib.urlencode(params))
     conn.getresponse().read()
