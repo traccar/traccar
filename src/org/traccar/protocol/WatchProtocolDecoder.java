@@ -124,7 +124,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        position.setNetwork(network);
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
     }
 
     @Override
