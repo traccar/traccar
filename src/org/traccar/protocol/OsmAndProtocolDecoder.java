@@ -128,9 +128,6 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                 case "batt":
                     position.set(Position.KEY_BATTERY, value);
                     break;
-                case "alarm":
-                    position.set(Position.KEY_ALARM, value.equals("sos") ? Position.ALARM_SOS : Position.ALARM_GENERAL);
-                    break;
                 default:
                     position.set(entry.getKey(), value);
                     break;
