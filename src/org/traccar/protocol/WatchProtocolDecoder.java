@@ -97,7 +97,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private void decodeLbs(Position position, String data) {
+    private void decodeTail(Position position, String data) {
         String[] values = data.split(",");
         int index = 0;
 
@@ -200,7 +200,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt(16)));
 
-            decodeLbs(position, parser.next());
+            decodeTail(position, parser.next());
 
             return position;
 
