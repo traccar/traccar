@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,21 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         return String.format("%02d%02d%02d%02d%02d", d1, d2, d3, d4, d5);
     }
 
+    private void sendResponse(Channel channel, byte calibration) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeByte(0x24); response.writeByte(0x24); // header
+            response.writeByte(MSG_HEARTBEAT); // size
+            response.writeShort(5);
+            response.writeByte(calibration);
+            response.writeByte(0); // main order
+            response.writeByte(0); // slave order
+            response.writeByte(1); // calibration
+            response.writeByte(0x0D);
+            channel.write(response);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -70,22 +85,9 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(), buf.readUnsignedByte(),
                 buf.readUnsignedByte(), buf.readUnsignedByte());
 
-        if (type == MSG_HEARTBEAT) {
+        sendResponse(channel, buf.getByte(buf.writerIndex() - 2));
 
-            if (channel != null) {
-                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-                response.writeByte(0x24); response.writeByte(0x24); // header
-                response.writeByte(MSG_HEARTBEAT); // size
-                response.writeShort(5);
-                response.writeByte(buf.readUnsignedByte());
-                response.writeByte(0); // main order
-                response.writeByte(0); // slave order
-                response.writeByte(1); // calibration
-                response.writeByte(0x0D);
-                channel.write(response);
-            }
-
-        } else if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
+        if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
                 || type == MSG_ALARM_DATA || type == MSG_BLIND_AREA) {
 
             Position position = new Position();
