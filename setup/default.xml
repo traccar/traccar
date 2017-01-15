@@ -64,14 +64,15 @@
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO users (name, email, hashedPassword, salt, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, token, attributes)
-        VALUES (:name, :email, :hashedPassword, :salt, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :token, :attributes)
+        INSERT INTO users (name, email, hashedPassword, salt, readonly, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, token, attributes)
+        VALUES (:name, :email, :hashedPassword, :salt, :readonly, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :token, :attributes)
     </entry>
 
     <entry key='database.updateUser'>
         UPDATE users SET
         name = :name,
         email = :email,
+        readonly = :readonly,
         admin = :admin,
         map = :map,
         distanceUnit = :distanceUnit,
