@@ -178,7 +178,7 @@ public class ProtocolTest extends BaseTest {
             Assert.assertFalse("no attributes", attributes.isEmpty());
         }
 
-        if (position.getNetwork() != null) {
+        if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
             for (CellTower cellTower : position.getNetwork().getCellTowers()) {
                 checkInteger(cellTower.getMobileCountryCode(), 0, 999);
                 checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
