@@ -245,8 +245,8 @@ public class GeofenceManager {
     public final Set<Long> getManagedGeofencesIds(long userId) {
         Set<Long> geofences = new HashSet<>();
         geofences.addAll(getUserGeofencesIds(userId));
-        for (long otherUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
-            geofences.addAll(getUserGeofencesIds(otherUserId));
+        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+            geofences.addAll(getUserGeofencesIds(managedUserId));
         }
         return geofences;
     }

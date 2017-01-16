@@ -534,17 +534,17 @@ public class DataManager {
                 .executeQuery(UserPermission.class);
     }
 
-    public void linkUser(long userId, long otherUserId) throws SQLException {
+    public void linkUser(long userId, long managedUserId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.linkUser"))
                 .setLong("userId", userId)
-                .setLong("otherUserId", otherUserId)
+                .setLong("managedUserId", managedUserId)
                 .executeUpdate();
     }
 
-    public void unlinkUser(long userId, long otherUserId) throws SQLException {
+    public void unlinkUser(long userId, long managedUserId) throws SQLException {
         QueryBuilder.create(dataSource, getQuery("database.unlinkUser"))
                 .setLong("userId", userId)
-                .setLong("otherUserId", otherUserId)
+                .setLong("managedUserId", managedUserId)
                 .executeUpdate();
     }
 }

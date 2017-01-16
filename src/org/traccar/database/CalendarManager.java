@@ -73,8 +73,8 @@ public class CalendarManager {
     public Collection<Calendar> getManagedCalendars(long userId) {
         ArrayList<Calendar> result = new ArrayList<>();
         result.addAll(getUserCalendars(userId));
-        for (long otherUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
-            result.addAll(getUserCalendars(otherUserId));
+        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+            result.addAll(getUserCalendars(managedUserId));
         }
         return result;
     }

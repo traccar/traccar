@@ -38,18 +38,17 @@ public class UserPermissionResource extends BaseResource {
     @POST
     public Response add(UserPermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        if (entity.getUserId() == entity.getOtherUserId()) {
-            throw new SecurityException("Selfmanagement prohibited");
+        if (entity.getUserId() != entity.getManagedUserId()) {
+            Context.getDataManager().linkUser(entity.getUserId(), entity.getManagedUserId());
+            Context.getPermissionsManager().refreshUserPermissions();
         }
-        Context.getDataManager().linkUser(entity.getUserId(), entity.getOtherUserId());
-        Context.getPermissionsManager().refreshUserPermissions();
         return Response.ok(entity).build();
     }
 
     @DELETE
     public Response remove(UserPermission entity) throws SQLException {
         Context.getPermissionsManager().checkAdmin(getUserId());
-        Context.getDataManager().unlinkUser(entity.getUserId(), entity.getOtherUserId());
+        Context.getDataManager().unlinkUser(entity.getUserId(), entity.getManagedUserId());
         Context.getPermissionsManager().refreshUserPermissions();
         return Response.noContent().build();
     }

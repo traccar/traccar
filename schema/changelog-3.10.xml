@@ -56,13 +56,13 @@
       <column name="userid" type="INT">
         <constraints nullable="false" />
       </column>
-      <column name="otheruserid" type="INT">
+      <column name="manageduserid" type="INT">
         <constraints nullable="false" />
       </column>
     </createTable>
 
     <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="userid" constraintName="fk_user_user_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
-    <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="otheruserid" constraintName="fk_user_user_otheruserid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="manageduserid" constraintName="fk_user_user_manageduserid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
 
   </changeSet>
 </databaseChangeLog>

@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -114,7 +113,7 @@ public class PermissionsManager {
         userPermissions.clear();
         try {
             for (UserPermission permission : dataManager.getUserPermissions()) {
-                getUserPermissions(permission.getUserId()).add(permission.getOtherUserId());
+                getUserPermissions(permission.getUserId()).add(permission.getManagedUserId());
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -250,27 +249,25 @@ public class PermissionsManager {
 
     public void checkGroup(long userId, long groupId) throws SecurityException {
         if (!getGroupPermissions(userId).contains(groupId) && !isAdmin(userId)) {
-            Iterator<Long> iterator = getUserPermissions(userId).iterator();
-            boolean managed = false;
-            while (!managed && iterator.hasNext()) {
-                managed = getGroupPermissions(iterator.next()).contains(groupId);
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (getGroupPermissions(managedUserId).contains(groupId)) {
+                    return;
+                }
             }
-            if (!managed) {
-                throw new SecurityException("Group access denied");
-            }
+            throw new SecurityException("Group access denied");
         }
     }
 
     public void checkDevice(long userId, long deviceId) throws SecurityException {
         if (!getDevicePermissions(userId).contains(deviceId) && !isAdmin(userId)) {
-            Iterator<Long> iterator = getUserPermissions(userId).iterator();
-            boolean managed = false;
-            while (!managed && iterator.hasNext()) {
-                managed = getDevicePermissions(iterator.next()).contains(deviceId);
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (getDevicePermissions(managedUserId).contains(deviceId)) {
+                    return;
+                }
             }
-            if (!managed) {
-                throw new SecurityException("Device access denied");
-            }
+            throw new SecurityException("Device access denied");
         }
     }
 
@@ -282,27 +279,25 @@ public class PermissionsManager {
 
     public void checkGeofence(long userId, long geofenceId) throws SecurityException {
         if (!Context.getGeofenceManager().checkGeofence(userId, geofenceId) && !isAdmin(userId)) {
-            Iterator<Long> iterator = getUserPermissions(userId).iterator();
-            boolean managed = false;
-            while (!managed && iterator.hasNext()) {
-                managed = Context.getGeofenceManager().checkGeofence(iterator.next(), geofenceId);
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (Context.getGeofenceManager().checkGeofence(managedUserId, geofenceId)) {
+                    return;
+                }
             }
-            if (!managed) {
-                throw new SecurityException("Geofence access denied");
-            }
+            throw new SecurityException("Geofence access denied");
         }
     }
 
     public void checkCalendar(long userId, long calendarId) throws SecurityException {
         if (!Context.getCalendarManager().checkCalendar(userId, calendarId) && !isAdmin(userId)) {
-            Iterator<Long> iterator = getUserPermissions(userId).iterator();
-            boolean managed = false;
-            while (!managed && iterator.hasNext()) {
-                managed = Context.getCalendarManager().checkCalendar(iterator.next(), calendarId);
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (Context.getCalendarManager().checkCalendar(managedUserId, calendarId)) {
+                    return;
+                }
             }
-            if (!managed) {
-                throw new SecurityException("Calendar access denied");
-            }
+            throw new SecurityException("Calendar access denied");
         }
     }
 
@@ -321,8 +316,8 @@ public class PermissionsManager {
 
     public Collection<User> getUsers(long userId) {
         Collection<User> result = new ArrayList<>();
-        for (long otherUserId : getUserPermissions(userId)) {
-            result.add(users.get(otherUserId));
+        for (long managedUserId : getUserPermissions(userId)) {
+            result.add(users.get(managedUserId));
         }
         return result;
     }

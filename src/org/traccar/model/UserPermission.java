@@ -28,14 +28,14 @@ public class UserPermission {
         this.userId = userId;
     }
 
-    private long otherUserId;
+    private long managedUserId;
 
-    public long getOtherUserId() {
-        return otherUserId;
+    public long getManagedUserId() {
+        return managedUserId;
     }
 
-    public void setOtherUserId(long otherUserId) {
-        this.otherUserId = otherUserId;
+    public void setManagedUserId(long managedUserId) {
+        this.managedUserId = managedUserId;
     }
 
 }
