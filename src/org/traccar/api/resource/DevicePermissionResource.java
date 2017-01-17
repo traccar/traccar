@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,12 @@ public class DevicePermissionResource extends BaseResource {
 
     @POST
     public Response add(DevicePermission entity) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+        Context.getPermissionsManager().checkReadonly(getUserId());
+        Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
+        Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
+        if (!Context.getPermissionsManager().isAdmin(getUserId())) {
+            Context.getPermissionsManager().checkDeviceLimit(entity.getUserId());
+        }
         Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
@@ -46,7 +51,9 @@ public class DevicePermissionResource extends BaseResource {
 
     @DELETE
     public Response remove(DevicePermission entity) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+        Context.getPermissionsManager().checkReadonly(getUserId());
+        Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
+        Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         Context.getDataManager().unlinkDevice(entity.getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {

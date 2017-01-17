@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,9 @@ public class GroupPermissionResource extends BaseResource {
 
     @POST
     public Response add(GroupPermission entity) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+        Context.getPermissionsManager().checkReadonly(getUserId());
+        Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
+        Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
         Context.getDataManager().linkGroup(entity.getUserId(), entity.getGroupId());
         Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
@@ -46,7 +48,9 @@ public class GroupPermissionResource extends BaseResource {
 
     @DELETE
     public Response remove(GroupPermission entity) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+        Context.getPermissionsManager().checkReadonly(getUserId());
+        Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
+        Context.getPermissionsManager().checkGroup(getUserId(), entity.getGroupId());
         Context.getDataManager().unlinkGroup(entity.getUserId(), entity.getGroupId());
         Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {

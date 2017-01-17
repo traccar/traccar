@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,12 @@ public class GroupResource extends BaseResource {
     public Collection<Group> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
         if (all) {
-            Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getDeviceManager().getAllGroups();
+            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                return Context.getDeviceManager().getAllGroups();
+            } else {
+                Context.getPermissionsManager().checkManager(getUserId());
+                return Context.getDeviceManager().getManagedGroups(getUserId());
+            }
         } else {
             if (userId == 0) {
                 userId = getUserId();

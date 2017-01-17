@@ -48,5 +48,21 @@
       <column name="network" type="VARCHAR(4000)" />
     </addColumn>
 
+    <addColumn tableName="users">
+      <column name="userlimit" type="INT" defaultValueNumeric="0" />
+    </addColumn>
+
+    <createTable tableName="user_user">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="manageduserid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="userid" constraintName="fk_user_user_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="manageduserid" constraintName="fk_user_user_manageduserid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
+
   </changeSet>
 </databaseChangeLog>

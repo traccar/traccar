@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Calendar;
 import org.traccar.model.CalendarPermission;
@@ -65,6 +66,15 @@ public class CalendarManager {
         ArrayList<Calendar> result = new ArrayList<>();
         for (long calendarId : getUserCalendarIds(userId)) {
             result.add(calendars.get(calendarId));
+        }
+        return result;
+    }
+
+    public Collection<Calendar> getManagedCalendars(long userId) {
+        ArrayList<Calendar> result = new ArrayList<>();
+        result.addAll(getUserCalendars(userId));
+        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+            result.addAll(getUserCalendars(managedUserId));
         }
         return result;
     }

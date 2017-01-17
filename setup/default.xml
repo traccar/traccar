@@ -64,8 +64,8 @@
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO users (name, email, hashedPassword, salt, readonly, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, token, attributes)
-        VALUES (:name, :email, :hashedPassword, :salt, :readonly, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :token, :attributes)
+        INSERT INTO users (name, email, hashedPassword, salt, readonly, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, userLimit, token, attributes)
+        VALUES (:name, :email, :hashedPassword, :salt, :readonly, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :userLimit, :token, :attributes)
     </entry>
 
     <entry key='database.updateUser'>
@@ -85,6 +85,7 @@
         disabled = :disabled,
         expirationTime = :expirationTime,
         deviceLimit = :deviceLimit,
+        userLimit = :userLimit,
         token = :token,
         attributes = :attributes
         WHERE id = :id
@@ -349,6 +350,18 @@
 
     <entry key='database.unlinkCalendar'>
         DELETE FROM user_calendar WHERE userId = :userId AND calendarId = :calendarId
+    </entry>
+    
+    <entry key='database.selectUserPermissions'>
+        SELECT userId, managedUserId FROM user_user
+    </entry>
+
+    <entry key='database.linkUser'>
+        INSERT INTO user_user (userId, managedUserId) VALUES (:userId, :managedUserId)
+    </entry>
+
+    <entry key='database.unlinkUser'>
+        DELETE FROM user_user WHERE userId = :userId AND managedUserId = :managedUserId
     </entry>
 
     <!-- PROTOCOL CONFIG -->

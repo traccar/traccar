@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,6 +240,15 @@ public class GeofenceManager {
         } finally {
             geofencesLock.readLock().unlock();
         }
+    }
+
+    public final Set<Long> getManagedGeofencesIds(long userId) {
+        Set<Long> geofences = new HashSet<>();
+        geofences.addAll(getUserGeofencesIds(userId));
+        for (long managedUserId : Context.getPermissionsManager().getUserPermissions(userId)) {
+            geofences.addAll(getUserGeofencesIds(managedUserId));
+        }
+        return geofences;
     }
 
     public final Collection<Geofence> getGeofences(Set<Long> geofencesIds) {

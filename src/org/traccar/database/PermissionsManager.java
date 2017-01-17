@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ import org.traccar.model.Group;
 import org.traccar.model.GroupPermission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.model.UserPermission;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,6 +48,8 @@ public class PermissionsManager {
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
     private final Map<Long, Set<Long>> deviceUsers = new HashMap<>();
     private final Map<Long, Set<Long>> groupDevices = new HashMap<>();
+
+    private final Map<Long, Set<Long>> userPermissions = new HashMap<>();
 
     public Set<Long> getGroupPermissions(long userId) {
         if (!groupPermissions.containsKey(userId)) {
@@ -75,10 +79,18 @@ public class PermissionsManager {
         return groupDevices.get(groupId);
     }
 
+    public Set<Long> getUserPermissions(long userId) {
+        if (!userPermissions.containsKey(userId)) {
+            userPermissions.put(userId, new HashSet<Long>());
+        }
+        return userPermissions.get(userId);
+    }
+
     public PermissionsManager(DataManager dataManager) {
         this.dataManager = dataManager;
         refreshUsers();
         refreshPermissions();
+        refreshUserPermissions();
     }
 
     public final void refreshUsers() {
@@ -91,6 +103,17 @@ public class PermissionsManager {
                 if (user.getToken() != null) {
                     usersTokens.put(user.getToken(), user.getId());
                 }
+            }
+        } catch (SQLException error) {
+            Log.warning(error);
+        }
+    }
+
+    public final void refreshUserPermissions() {
+        userPermissions.clear();
+        try {
+            for (UserPermission permission : dataManager.getUserPermissions()) {
+                getUserPermissions(permission.getUserId()).add(permission.getManagedUserId());
             }
         } catch (SQLException error) {
             Log.warning(error);
@@ -146,6 +169,39 @@ public class PermissionsManager {
         }
     }
 
+    public boolean isManager(long userId) {
+        return users.containsKey(userId) && users.get(userId).getUserLimit() > 0;
+    }
+
+    public void checkManager(long userId) throws SecurityException {
+        if (!isManager(userId)) {
+            throw new SecurityException("Manager access required");
+        }
+    }
+
+    public void checkManager(long userId, long managedUserId) throws SecurityException {
+        checkManager(userId);
+        if (!userPermissions.get(userId).contains(managedUserId)) {
+            throw new SecurityException("User access denied");
+        }
+    }
+
+    public void checkUserLimit(long userId) throws SecurityException {
+        if (!isAdmin(userId) && userPermissions.get(userId).size() >= users.get(userId).getUserLimit()) {
+            throw new SecurityException("Manager user limit reached");
+        }
+    }
+
+    public void checkDeviceLimit(long userId) throws SecurityException {
+        int deviceLimit = users.get(userId).getDeviceLimit();
+        if (deviceLimit != 0) {
+            int deviceCount = getDevicePermissions(userId).size();
+            if (deviceCount >= deviceLimit) {
+                throw new SecurityException("User device limit reached");
+            }
+        }
+    }
+
     public boolean isReadonly(long userId) {
         return users.containsKey(userId) && users.get(userId).getReadonly();
     }
@@ -168,29 +224,49 @@ public class PermissionsManager {
 
     public void checkUserUpdate(long userId, User before, User after) throws SecurityException {
         if (before.getAdmin() != after.getAdmin()
-                || before.getReadonly() != after.getReadonly()
-                || before.getDisabled() != after.getDisabled()
                 || before.getDeviceLimit() != after.getDeviceLimit()
+                || before.getUserLimit() != after.getUserLimit()) {
+            checkAdmin(userId);
+        }
+        if (before.getReadonly() != after.getReadonly()
+                || before.getDisabled() != after.getDisabled()
                 || !Objects.equals(before.getExpirationTime(), after.getExpirationTime())
                 || !Objects.equals(before.getToken(), after.getToken())) {
-            checkAdmin(userId);
+            if (userId == after.getId()) {
+                checkAdmin(userId);
+            }
+            if (!isAdmin(userId)) {
+                checkManager(userId);
+            }
         }
     }
 
-    public void checkUser(long userId, long otherUserId) throws SecurityException {
-        if (userId != otherUserId) {
-            checkAdmin(userId);
+    public void checkUser(long userId, long managedUserId) throws SecurityException {
+        if (userId != managedUserId && !isAdmin(userId)) {
+            checkManager(userId, managedUserId);
         }
     }
 
     public void checkGroup(long userId, long groupId) throws SecurityException {
-        if (!getGroupPermissions(userId).contains(groupId)) {
+        if (!getGroupPermissions(userId).contains(groupId) && !isAdmin(userId)) {
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (getGroupPermissions(managedUserId).contains(groupId)) {
+                    return;
+                }
+            }
             throw new SecurityException("Group access denied");
         }
     }
 
     public void checkDevice(long userId, long deviceId) throws SecurityException {
-        if (!getDevicePermissions(userId).contains(deviceId)) {
+        if (!getDevicePermissions(userId).contains(deviceId) && !isAdmin(userId)) {
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (getDevicePermissions(managedUserId).contains(deviceId)) {
+                    return;
+                }
+            }
             throw new SecurityException("Device access denied");
         }
     }
@@ -203,12 +279,24 @@ public class PermissionsManager {
 
     public void checkGeofence(long userId, long geofenceId) throws SecurityException {
         if (!Context.getGeofenceManager().checkGeofence(userId, geofenceId) && !isAdmin(userId)) {
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (Context.getGeofenceManager().checkGeofence(managedUserId, geofenceId)) {
+                    return;
+                }
+            }
             throw new SecurityException("Geofence access denied");
         }
     }
 
     public void checkCalendar(long userId, long calendarId) throws SecurityException {
         if (!Context.getCalendarManager().checkCalendar(userId, calendarId) && !isAdmin(userId)) {
+            checkManager(userId);
+            for (long managedUserId : getUserPermissions(userId)) {
+                if (Context.getCalendarManager().checkCalendar(managedUserId, calendarId)) {
+                    return;
+                }
+            }
             throw new SecurityException("Calendar access denied");
         }
     }
@@ -222,8 +310,22 @@ public class PermissionsManager {
         this.server = server;
     }
 
-    public Collection<User> getUsers() {
+    public Collection<User> getAllUsers() {
         return users.values();
+    }
+
+    public Collection<User> getUsers(long userId) {
+        Collection<User> result = new ArrayList<>();
+        for (long managedUserId : getUserPermissions(userId)) {
+            result.add(users.get(managedUserId));
+        }
+        return result;
+    }
+
+    public Collection<User> getManagedUsers(long userId) {
+        Collection<User> result = getUsers(userId);
+        result.add(users.get(userId));
+        return result;
     }
 
     public User getUser(long userId) {
@@ -257,6 +359,7 @@ public class PermissionsManager {
         usersTokens.remove(users.get(userId).getToken());
         users.remove(userId);
         refreshPermissions();
+        refreshUserPermissions();
     }
 
     public User login(String email, String password) throws SQLException {

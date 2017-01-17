@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,12 @@ public class DeviceResource extends BaseResource {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
         if (all) {
-            Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getDeviceManager().getAllDevices();
+            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                return Context.getDeviceManager().getAllDevices();
+            } else {
+                Context.getPermissionsManager().checkManager(getUserId());
+                return Context.getDeviceManager().getManagedDevices(getUserId());
+            }
         } else {
             if (userId == 0) {
                 userId = getUserId();
@@ -58,13 +62,7 @@ public class DeviceResource extends BaseResource {
     @POST
     public Response add(Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        int deviceLimit = Context.getPermissionsManager().getUser(getUserId()).getDeviceLimit();
-        if (deviceLimit != 0) {
-            int deviceCount = Context.getPermissionsManager().getDevicePermissions(getUserId()).size();
-            if (deviceCount >= deviceLimit) {
-                throw new SecurityException("User device limit reached");
-            }
-        }
+        Context.getPermissionsManager().checkDeviceLimit(getUserId());
         Context.getDeviceManager().addDevice(entity);
         Context.getDataManager().linkDevice(getUserId(), entity.getId());
         Context.getPermissionsManager().refreshPermissions();

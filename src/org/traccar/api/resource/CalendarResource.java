@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
- * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,12 @@ public class CalendarResource extends BaseResource {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
 
         if (all) {
-            Context.getPermissionsManager().checkAdmin(getUserId());
-            return Context.getCalendarManager().getAllCalendars();
+            if (Context.getPermissionsManager().isAdmin(getUserId())) {
+                return Context.getCalendarManager().getAllCalendars();
+            } else {
+                Context.getPermissionsManager().checkManager(getUserId());
+                return Context.getCalendarManager().getManagedCalendars(getUserId());
+            }
         } else {
             if (userId == 0) {
                 userId = getUserId();
