@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,31 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private void decodeAdc(Position position, ChannelBuffer buf, int length) {
+        for (int i = 0; i < length / 2; i++) {
+            int value = buf.readUnsignedShort();
+            int id = BitUtil.from(value, 12);
+            value = BitUtil.to(value, 12);
+            switch (id) {
+                case 0:
+                    position.set(Position.KEY_POWER, value * (100 + 10) / 4096.0 - 10);
+                    break;
+                case 1:
+                    position.set(Position.PREFIX_TEMP + 1, value * (125 + 55) / 4096.0 - 55);
+                    break;
+                case 2:
+                    position.set(Position.KEY_BATTERY, value * (100 + 10) / 4096.0 - 10);
+                    break;
+                case 3:
+                    position.set(Position.PREFIX_ADC + 1, value * (100 + 10) / 4096.0 - 10);
+                    break;
+                default:
+                    position.set(Position.PREFIX_IO + id, value);
+                    break;
+            }
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -210,10 +235,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_ADC:
-                    for (int i = 0; i < length / 2; i++) {
-                        int value = buf.readUnsignedShort();
-                        position.set(Position.PREFIX_ADC + BitUtil.from(value, 12), BitUtil.to(value, 12));
-                    }
+                    decodeAdc(position, buf, length);
                     break;
 
                 case DATA_GEOFENCE:
