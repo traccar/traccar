@@ -179,9 +179,9 @@ public class PermissionsManager {
         }
     }
 
-    public void checkManager(long userId, long otherUserId) throws SecurityException {
+    public void checkManager(long userId, long managedUserId) throws SecurityException {
         checkManager(userId);
-        if (!userPermissions.get(userId).contains(otherUserId)) {
+        if (!userPermissions.get(userId).contains(managedUserId)) {
             throw new SecurityException("User access denied");
         }
     }
@@ -241,9 +241,9 @@ public class PermissionsManager {
         }
     }
 
-    public void checkUser(long userId, long otherUserId) throws SecurityException {
-        if (userId != otherUserId && !isAdmin(userId)) {
-            checkManager(userId, otherUserId);
+    public void checkUser(long userId, long managedUserId) throws SecurityException {
+        if (userId != managedUserId && !isAdmin(userId)) {
+            checkManager(userId, managedUserId);
         }
     }
 

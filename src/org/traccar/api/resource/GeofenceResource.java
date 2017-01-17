@@ -52,20 +52,20 @@ public class GeofenceResource extends BaseResource {
             geofenceManager.refreshGeofences();
         }
 
-        Set<Long> result;
+        Set<Long> result = new HashSet<>();
         if (all) {
             if (Context.getPermissionsManager().isAdmin(getUserId())) {
-                result = new HashSet<>(geofenceManager.getAllGeofencesIds());
+                result.addAll(geofenceManager.getAllGeofencesIds());
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                result = new HashSet<>(geofenceManager.getManagedGeofencesIds(getUserId()));
+                result.addAll(geofenceManager.getManagedGeofencesIds(getUserId()));
             }
         } else {
             if (userId == 0) {
                 userId = getUserId();
             }
             Context.getPermissionsManager().checkUser(getUserId(), userId);
-            result = new HashSet<>(geofenceManager.getUserGeofencesIds(userId));
+            result.addAll(geofenceManager.getUserGeofencesIds(userId));
         }
 
         if (groupId != 0) {
