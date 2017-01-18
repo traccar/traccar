@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
@@ -211,11 +212,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private List<Position> parseData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private List<Position> parseData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
+            boolean connectionless, int avlOffset, short packetId) {
         List<Position> positions = new LinkedList<>();
 
-        buf.skipBytes(4); // marker
-        buf.readUnsignedInt(); // data length
+        buf.skipBytes(avlOffset); // marker
+        if (!connectionless) {
+            buf.readUnsignedInt(); // data length
+        }
         int codec = buf.readUnsignedByte();
         int count = buf.readUnsignedByte();
 
@@ -240,27 +244,57 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(4);
-            response.writeInt(count);
-            channel.write(response);
+            if (connectionless) {
+                ChannelBuffer response = ChannelBuffers.directBuffer(5);
+                response.writeShort(3);
+                response.writeShort(packetId);
+                response.writeByte(0x02);
+                channel.write(response, remoteAddress);
+            } else {
+                ChannelBuffer response = ChannelBuffers.directBuffer(4);
+                response.writeInt(count);
+                channel.write(response);
+            }
         }
 
         return positions;
     }
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
+
+        if (channel instanceof DatagramChannel) {
+            return decodeUDP(channel, remoteAddress, buf);
+        } else {
+            return decodeTCP(channel, remoteAddress, buf);
+        }
+    }
+
+    protected Object decodeTCP(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
         if (buf.getUnsignedShort(0) > 0) {
             parseIdentification(channel, remoteAddress, buf);
         } else {
-            return parseData(channel, remoteAddress, buf);
+            return parseData(channel, remoteAddress, buf, false, 4, (short) 0);
         }
 
         return null;
+    }
+
+    protected Object decodeUDP(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
+        int udpPacketLength = buf.getUnsignedShort(0);
+        short udpPacketId = buf.getShort(2);
+        byte udpPacketType = buf.getByte(4);
+
+        byte packetId = buf.getByte(5);
+        int imeiLength = buf.getUnsignedShort(6);
+        String imei = buf.toString(8, imeiLength, StandardCharsets.US_ASCII);
+        int avlDataArrOffset = 8 + imeiLength;
+        int avlDataArrLength = udpPacketLength - avlDataArrOffset + 2;
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        return parseData(channel, remoteAddress, buf, true, avlDataArrOffset, udpPacketId);
     }
 
 }
