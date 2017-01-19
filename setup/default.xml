@@ -498,5 +498,6 @@
     <entry key='maestro.port'>5129</entry>
     <entry key='ais.port'>5130</entry>
     <entry key='gt30.port'>5131</entry>
+    <entry key='tmg.port'>5132</entry>
 
 </properties>
