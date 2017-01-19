@@ -214,10 +214,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> parseData(
-            Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int offset, int packetId, String... imei) {
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int packetId, String... imei) {
         List<Position> positions = new LinkedList<>();
-
-        buf.skipBytes(offset); // marker
 
         if (!(channel instanceof DatagramChannel)) {
             buf.readUnsignedInt(); // data length
@@ -281,7 +279,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (buf.getUnsignedShort(0) > 0) {
             parseIdentification(channel, remoteAddress, buf);
         } else {
-            return parseData(channel, remoteAddress, buf, 4, 0);
+            buf.skipBytes(4);
+            return parseData(channel, remoteAddress, buf, 0);
         }
 
         return null;
@@ -289,12 +288,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     protected Object decodeUdp(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
-        int packetId = buf.getShort(2);
-        int imeiLength = buf.getUnsignedShort(6);
+        buf.skipBytes(2);
+        int packetId = buf.readUnsignedShort();
+        buf.skipBytes(2);
+        int imeiLength = buf.readUnsignedShort();
         String imei = buf.toString(8, imeiLength, StandardCharsets.US_ASCII);
-        int offset = 8 + imeiLength;
+        buf.skipBytes(imeiLength);
 
-        return parseData(channel, remoteAddress, buf, offset, packetId, imei);
+        return parseData(channel, remoteAddress, buf, packetId, imei);
 
     }
 
