@@ -10,6 +10,12 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
 
         HuabaoProtocolDecoder decoder = new HuabaoProtocolDecoder(new HuabaoProtocol());
 
+        verifyPosition(decoder, binary(
+                "7e0200002c00160128561400020000000000040001005de1f7065c6cef00000000000017011710044201040000a9002a02000030011b3101030c7e"));
+
+        verifyPosition(decoder, binary(
+                "7e0200002c00160128561400030000000000040007005de13c065c6cdb00160000000017011710054201040000a9002a02000030011b310104e47e"));
+
         verifyNothing(decoder, binary(
                 "7e0100002d0141305678720024002c012f373031313142534a2d41362d424400000000000000000000003035363738373201d4c14238383838386d7e"));
 
