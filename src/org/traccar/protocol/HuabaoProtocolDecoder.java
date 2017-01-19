@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,32 +42,32 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_OIL_CONTROL = 0XA006;
 
     public static final int RESULT_SUCCESS = 0;
 
-    private void sendResponse(
-            Channel channel, SocketAddress remoteAddress, int type, ChannelBuffer id, ChannelBuffer data) {
-        ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-        response.writeByte(0x7e);
-        response.writeShort(type);
-        response.writeShort(data.readableBytes());
-        response.writeBytes(id);
-        response.writeShort(1); // index
-        response.writeBytes(data);
-        response.writeByte(Checksum.xor(response.toByteBuffer(1, response.readableBytes() - 1)));
-        response.writeByte(0x7e);
-        if (channel != null) {
-            channel.write(response, remoteAddress);
-        }
+    public static ChannelBuffer formatMessage(int type, ChannelBuffer id, ChannelBuffer data) {
+        ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
+        buf.writeByte(0x7e);
+        buf.writeShort(type);
+        buf.writeShort(data.readableBytes());
+        buf.writeBytes(id);
+        buf.writeShort(1); // index
+        buf.writeBytes(data);
+        buf.writeByte(Checksum.xor(buf.toByteBuffer(1, buf.readableBytes() - 1)));
+        buf.writeByte(0x7e);
+        return buf;
     }
 
     private void sendGeneralResponse(
             Channel channel, SocketAddress remoteAddress, ChannelBuffer id, int type, int index) {
-        ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-        response.writeShort(index);
-        response.writeShort(type);
-        response.writeByte(RESULT_SUCCESS);
-        sendResponse(channel, remoteAddress, MSG_GENERAL_RESPONSE, id, response);
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeShort(index);
+            response.writeShort(type);
+            response.writeByte(RESULT_SUCCESS);
+            channel.write(formatMessage(MSG_GENERAL_RESPONSE, id, response), remoteAddress);
+        }
     }
 
     private String decodeAlarm(long value) {
@@ -115,11 +115,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_TERMINAL_REGISTER) {
 
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
-            response.writeShort(index);
-            response.writeByte(RESULT_SUCCESS);
-            response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));
-            sendResponse(channel, remoteAddress, MSG_TERMINAL_REGISTER_RESPONSE, id, response);
+            if (channel != null) {
+                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                response.writeShort(index);
+                response.writeByte(RESULT_SUCCESS);
+                response.writeBytes("authentication".getBytes(StandardCharsets.US_ASCII));
+                channel.write(formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, response), remoteAddress);
+            }
 
         } else if (type == MSG_TERMINAL_AUTH) {
 

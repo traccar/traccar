@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class HuabaoProtocol extends BaseProtocol {
 
     public HuabaoProtocol() {
         super("huabao");
+        setSupportedCommands(
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
@@ -34,6 +38,7 @@ public class HuabaoProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new HuabaoFrameDecoder());
+                pipeline.addLast("objectEncoder", new HuabaoProtocolEncoder());
                 pipeline.addLast("objectDecoder", new HuabaoProtocolDecoder(HuabaoProtocol.this));
             }
         });
