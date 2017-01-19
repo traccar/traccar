@@ -39,7 +39,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private void parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private DeviceSession parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, StandardCharsets.US_ASCII);
@@ -54,6 +54,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
             channel.write(response);
         }
+        return deviceSession;
     }
 
     public static final int CODEC_GH3000 = 0x07;
@@ -212,18 +213,21 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private List<Position> parseData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf,
-            boolean connectionless, int avlOffset, short packetId) {
+    private List<Position> parseData(
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int offset, int packetId, String... imei) {
         List<Position> positions = new LinkedList<>();
 
-        buf.skipBytes(avlOffset); // marker
-        if (!connectionless) {
+        buf.skipBytes(offset); // marker
+
+        if (!(channel instanceof DatagramChannel)) {
             buf.readUnsignedInt(); // data length
         }
+
         int codec = buf.readUnsignedByte();
         int count = buf.readUnsignedByte();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+
         if (deviceSession == null) {
             return null;
         }
@@ -244,7 +248,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            if (connectionless) {
+            if (channel instanceof DatagramChannel) {
                 ChannelBuffer response = ChannelBuffers.directBuffer(5);
                 response.writeShort(3);
                 response.writeShort(packetId);
@@ -266,35 +270,32 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         if (channel instanceof DatagramChannel) {
-            return decodeUDP(channel, remoteAddress, buf);
+            return decodeUdp(channel, remoteAddress, buf);
         } else {
-            return decodeTCP(channel, remoteAddress, buf);
+            return decodeTcp(channel, remoteAddress, buf);
         }
     }
 
-    protected Object decodeTCP(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
+    protected Object decodeTcp(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
         if (buf.getUnsignedShort(0) > 0) {
             parseIdentification(channel, remoteAddress, buf);
         } else {
-            return parseData(channel, remoteAddress, buf, false, 4, (short) 0);
+            return parseData(channel, remoteAddress, buf, 4, 0);
         }
 
         return null;
     }
 
-    protected Object decodeUDP(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
-        int udpPacketLength = buf.getUnsignedShort(0);
-        short udpPacketId = buf.getShort(2);
-        byte udpPacketType = buf.getByte(4);
+    protected Object decodeUdp(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
-        byte packetId = buf.getByte(5);
+        int packetId = buf.getShort(2);
         int imeiLength = buf.getUnsignedShort(6);
         String imei = buf.toString(8, imeiLength, StandardCharsets.US_ASCII);
-        int avlDataArrOffset = 8 + imeiLength;
-        int avlDataArrLength = udpPacketLength - avlDataArrOffset + 2;
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-        return parseData(channel, remoteAddress, buf, true, avlDataArrOffset, udpPacketId);
+        int offset = 8 + imeiLength;
+
+        return parseData(channel, remoteAddress, buf, offset, packetId, imei);
+
     }
 
 }
