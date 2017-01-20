@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
@@ -38,7 +39,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private void parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private DeviceSession parseIdentification(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         int length = buf.readUnsignedShort();
         String imei = buf.toString(buf.readerIndex(), length, StandardCharsets.US_ASCII);
@@ -53,6 +54,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
             channel.write(response);
         }
+        return deviceSession;
     }
 
     public static final int CODEC_GH3000 = 0x07;
@@ -211,15 +213,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private List<Position> parseData(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
+    private List<Position> parseData(
+            Channel channel, SocketAddress remoteAddress, ChannelBuffer buf, int packetId, String... imei) {
         List<Position> positions = new LinkedList<>();
 
-        buf.skipBytes(4); // marker
-        buf.readUnsignedInt(); // data length
+        if (!(channel instanceof DatagramChannel)) {
+            buf.readUnsignedInt(); // data length
+        }
+
         int codec = buf.readUnsignedByte();
         int count = buf.readUnsignedByte();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+
         if (deviceSession == null) {
             return null;
         }
@@ -240,27 +246,57 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.directBuffer(4);
-            response.writeInt(count);
-            channel.write(response);
+            if (channel instanceof DatagramChannel) {
+                ChannelBuffer response = ChannelBuffers.directBuffer(5);
+                response.writeShort(3);
+                response.writeShort(packetId);
+                response.writeByte(0x02);
+                channel.write(response, remoteAddress);
+            } else {
+                ChannelBuffer response = ChannelBuffers.directBuffer(4);
+                response.writeInt(count);
+                channel.write(response);
+            }
         }
 
         return positions;
     }
 
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ChannelBuffer buf = (ChannelBuffer) msg;
+
+        if (channel instanceof DatagramChannel) {
+            return decodeUdp(channel, remoteAddress, buf);
+        } else {
+            return decodeTcp(channel, remoteAddress, buf);
+        }
+    }
+
+    protected Object decodeTcp(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
 
         if (buf.getUnsignedShort(0) > 0) {
             parseIdentification(channel, remoteAddress, buf);
         } else {
-            return parseData(channel, remoteAddress, buf);
+            buf.skipBytes(4);
+            return parseData(channel, remoteAddress, buf, 0);
         }
 
         return null;
+    }
+
+    protected Object decodeUdp(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
+
+        buf.skipBytes(2);
+        int packetId = buf.readUnsignedShort();
+        buf.skipBytes(2);
+        int imeiLength = buf.readUnsignedShort();
+        String imei = buf.toString(8, imeiLength, StandardCharsets.US_ASCII);
+        buf.skipBytes(imeiLength);
+
+        return parseData(channel, remoteAddress, buf, packetId, imei);
+
     }
 
 }
