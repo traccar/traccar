@@ -24,6 +24,8 @@ import org.traccar.model.Network;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
 public class UniversalGeolocationProvider implements GeolocationProvider {
 
@@ -37,7 +39,10 @@ public class UniversalGeolocationProvider implements GeolocationProvider {
     public void getLocation(Network network, final LocationProviderCallback callback) {
         try {
             String request = Context.getObjectMapper().writeValueAsString(network);
-            Context.getAsyncHttpClient().preparePost(url).setBody(request).execute(new AsyncCompletionHandler() {
+            Context.getAsyncHttpClient().preparePost(url)
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                    .setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(request.length()))
+                    .setBody(request).execute(new AsyncCompletionHandler() {
                 @Override
                 public Object onCompleted(Response response) throws Exception {
                     try (JsonReader reader = Json.createReader(response.getResponseBodyAsStream())) {
