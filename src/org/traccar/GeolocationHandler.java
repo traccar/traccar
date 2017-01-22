@@ -57,6 +57,10 @@ public class GeolocationHandler implements ChannelUpstreamHandler {
                         position.setLatitude(latitude);
                         position.setLongitude(longitude);
                         position.setAccuracy(accuracy);
+                        position.setAltitude(0);
+                        position.setSpeed(0);
+                        position.setCourse(0);
+                        position.set(Position.KEY_RSSI, 0);
                         Channels.fireMessageReceived(ctx, position, event.getRemoteAddress());
                     }
 
