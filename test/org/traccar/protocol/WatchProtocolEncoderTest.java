@@ -46,6 +46,14 @@ public class WatchProtocolEncoderTest extends ProtocolTest {
 
         command.set(Command.KEY_TIMEZONE, -11 * 60 * 60 - 30 * 60);
         Assert.assertEquals("[CS*123456789012345*0009*LZ,,-11.5]", encoder.encodeCommand(command));
+
+        command.setType(Command.TYPE_CUSTOM);
+        command.set(Command.KEY_DATA, "[CS*123456789012345*0009*LZ,,-11.5]");
+        Assert.assertEquals("[CS*123456789012345*0009*LZ,,-11.5]", encoder.encodeCommand(command));
+
+        command.set(Command.KEY_DATA, "foo");
+        Assert.assertEquals("[CS*123456789012345*0003*foo]", encoder.encodeCommand(command));
+
     }
 
 }
