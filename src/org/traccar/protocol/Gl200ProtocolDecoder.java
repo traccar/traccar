@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;
@@ -228,6 +229,19 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text(",")
             .number("(xxxx)")                    // count number
             .text("$").optional()
+            .compile();
+
+    private static final Pattern PATTERN_WIF = new PatternBuilder()
+            .text("+RESP:GTWIF,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(d+),")                     // count
+            .groupBegin()
+            .number("(x{12}),")                  // bssid
+            .number("(-?d+),,,,")                // rssi
+            .groupEnd("+")
+            .any()
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -587,6 +601,34 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeWif(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_WIF, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        Network network = new Network();
+
+        int count = parser.nextInt();
+        for (int i = 0; i < count; i++) {
+            String mac = parser.next().replaceAll("(..)", "$1:");
+            network.addWifiAccessPoint(WifiAccessPoint.from(mac.substring(0, mac.length() - 1), parser.nextInt()));
+        }
+
+        return position;
+    }
+
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
@@ -720,6 +762,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "IDA":
                     result = decodeIda(channel, remoteAddress, sentence);
+                    break;
+                case "WIF":
+                    result = decodeWif(channel, remoteAddress, sentence);
                     break;
                 case "VER":
                     result = decodeVer(channel, remoteAddress, sentence);
