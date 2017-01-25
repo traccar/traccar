@@ -190,6 +190,16 @@ public class User extends Extensible {
         this.userLimit = userLimit;
     }
 
+    private boolean deviceReadonly;
+
+    public boolean getDeviceReadonly() {
+        return deviceReadonly;
+    }
+
+    public void setDeviceReadonly(boolean deviceReadonly) {
+        this.deviceReadonly = deviceReadonly;
+    }
+
     private String token;
 
     public String getToken() {

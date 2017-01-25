@@ -64,5 +64,15 @@
     <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="userid" constraintName="fk_user_user_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="user_user" baseColumnNames="manageduserid" constraintName="fk_user_user_manageduserid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
 
+    <update tableName="users">
+        <column name="devicelimit" valueNumeric="-1" />
+        <where>devicelimit = 0</where>
+    </update>
+    <addDefaultValue tableName="users" columnName="devicelimit" defaultValueNumeric="-1" />
+
+    <addColumn tableName="users">
+      <column name="devicereadonly" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
   </changeSet>
 </databaseChangeLog>

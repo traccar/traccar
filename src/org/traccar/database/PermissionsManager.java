@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -170,7 +169,7 @@ public class PermissionsManager {
     }
 
     public boolean isManager(long userId) {
-        return users.containsKey(userId) && users.get(userId).getUserLimit() > 0;
+        return users.containsKey(userId) && users.get(userId).getUserLimit() != 0;
     }
 
     public void checkManager(long userId) throws SecurityException {
@@ -187,15 +186,21 @@ public class PermissionsManager {
     }
 
     public void checkUserLimit(long userId) throws SecurityException {
-        if (!isAdmin(userId) && userPermissions.get(userId).size() >= users.get(userId).getUserLimit()) {
+        int userLimit = users.get(userId).getUserLimit();
+        if (userLimit != -1 && userPermissions.get(userId).size() >= userLimit) {
             throw new SecurityException("Manager user limit reached");
         }
     }
 
-    public void checkDeviceLimit(long userId) throws SecurityException {
+    public void checkDeviceLimit(long userId) throws SecurityException, SQLException {
         int deviceLimit = users.get(userId).getDeviceLimit();
-        if (deviceLimit != 0) {
-            int deviceCount = getDevicePermissions(userId).size();
+        if (deviceLimit != -1) {
+            int deviceCount = 0;
+            if (isManager(userId)) {
+                deviceCount = Context.getDeviceManager().getManagedDevices(userId).size();
+            } else {
+                deviceCount = getDevicePermissions(userId).size();
+            }
             if (deviceCount >= deviceLimit) {
                 throw new SecurityException("User device limit reached");
             }
@@ -206,9 +211,19 @@ public class PermissionsManager {
         return users.containsKey(userId) && users.get(userId).getReadonly();
     }
 
+    public boolean isDeviceReadonly(long userId) {
+        return users.containsKey(userId) && users.get(userId).getDeviceReadonly();
+    }
+
     public void checkReadonly(long userId) throws SecurityException {
         if (!isAdmin(userId) && (server.getReadonly() || isReadonly(userId))) {
             throw new SecurityException("Account is readonly");
+        }
+    }
+
+    public void checkDeviceReadonly(long userId) throws SecurityException {
+        if (!isAdmin(userId) && isDeviceReadonly(userId)) {
+            throw new SecurityException("Account is device readonly");
         }
     }
 
@@ -228,10 +243,14 @@ public class PermissionsManager {
                 || before.getUserLimit() != after.getUserLimit()) {
             checkAdmin(userId);
         }
+        if (users.containsKey(userId) && users.get(userId).getExpirationTime() != null
+                && (after.getExpirationTime() == null
+                || users.get(userId).getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
+            checkAdmin(userId);
+        }
         if (before.getReadonly() != after.getReadonly()
-                || before.getDisabled() != after.getDisabled()
-                || !Objects.equals(before.getExpirationTime(), after.getExpirationTime())
-                || !Objects.equals(before.getToken(), after.getToken())) {
+                || before.getDeviceReadonly() != after.getDeviceReadonly()
+                || before.getDisabled() != after.getDisabled()) {
             if (userId == after.getId()) {
                 checkAdmin(userId);
             }

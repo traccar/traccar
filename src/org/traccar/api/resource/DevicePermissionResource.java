@@ -38,9 +38,6 @@ public class DevicePermissionResource extends BaseResource {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        if (!Context.getPermissionsManager().isAdmin(getUserId())) {
-            Context.getPermissionsManager().checkDeviceLimit(entity.getUserId());
-        }
         Context.getDataManager().linkDevice(entity.getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
@@ -52,7 +49,11 @@ public class DevicePermissionResource extends BaseResource {
     @DELETE
     public Response remove(DevicePermission entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
-        Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
+        if (getUserId() != entity.getUserId()) {
+            Context.getPermissionsManager().checkUser(getUserId(), entity.getUserId());
+        } else {
+            Context.getPermissionsManager().checkAdmin(getUserId());
+        }
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         Context.getDataManager().unlinkDevice(entity.getUserId(), entity.getDeviceId());
         Context.getPermissionsManager().refreshPermissions();

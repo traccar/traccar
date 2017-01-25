@@ -64,7 +64,7 @@ public class UserResource extends BaseResource {
                 Context.getPermissionsManager().checkUserLimit(getUserId());
             } else {
                 Context.getPermissionsManager().checkRegistration(getUserId());
-                entity.setDeviceLimit(Context.getConfig().getInteger("users.defaultDeviceLimit"));
+                entity.setDeviceLimit(Context.getConfig().getInteger("users.defaultDeviceLimit", -1));
                 int expirationDays = Context.getConfig().getInteger("users.defaultExpirationDays");
                 if (expirationDays > 0) {
                     entity.setExpirationTime(
@@ -86,6 +86,7 @@ public class UserResource extends BaseResource {
     @Path("{id}")
     @PUT
     public Response update(User entity) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
         User before = Context.getPermissionsManager().getUser(entity.getId());
         Context.getPermissionsManager().checkUser(getUserId(), entity.getId());
         Context.getPermissionsManager().checkUserUpdate(getUserId(), before, entity);
@@ -99,6 +100,7 @@ public class UserResource extends BaseResource {
     @Path("{id}")
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
+        Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkUser(getUserId(), id);
         Context.getPermissionsManager().removeUser(id);
         if (Context.getGeofenceManager() != null) {

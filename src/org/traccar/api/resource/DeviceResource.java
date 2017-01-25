@@ -62,6 +62,7 @@ public class DeviceResource extends BaseResource {
     @POST
     public Response add(Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDeviceLimit(getUserId());
         Context.getDeviceManager().addDevice(entity);
         Context.getDataManager().linkDevice(getUserId(), entity.getId());
@@ -76,6 +77,7 @@ public class DeviceResource extends BaseResource {
     @PUT
     public Response update(Device entity) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getId());
         Context.getDeviceManager().updateDevice(entity);
         if (Context.getGeofenceManager() != null) {
@@ -88,6 +90,7 @@ public class DeviceResource extends BaseResource {
     @DELETE
     public Response remove(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkReadonly(getUserId());
+        Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), id);
         Context.getDeviceManager().removeDevice(id);
         Context.getPermissionsManager().refreshPermissions();
