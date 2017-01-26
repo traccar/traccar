@@ -1,7 +1,6 @@
 package org.traccar.events;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.util.Collection;
 
@@ -21,9 +20,7 @@ public class IgnitionEventHandlerTest extends BaseTest {
         position.set(Position.KEY_IGNITION, true);
         position.setValid(true);
         Collection<Event> events = ignitionEventHandler.analyzePosition(position);
-        assertNotNull(events);
-        Event event = (Event) events.toArray()[0];
-        assertEquals(Event.TYPE_IGNITION_ON, event.getType());
+        assertEquals(events, null);
     }
 
 }
