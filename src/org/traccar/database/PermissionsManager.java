@@ -151,6 +151,7 @@ public class PermissionsManager {
             Log.warning(error);
         }
 
+        deviceUsers.clear();
         for (Map.Entry<Long, Set<Long>> entry : devicePermissions.entrySet()) {
             for (long deviceId : entry.getValue()) {
                 getDeviceUsers(deviceId).add(entry.getKey());
