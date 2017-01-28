@@ -77,7 +77,10 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_TYPE, parser.next());
+        int event = parser.nextInt();
+        position.set(Position.KEY_TYPE, event);
+
+        position.set(Position.KEY_ALARM, decodeAlarm(event));
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
@@ -105,4 +108,25 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private String decodeAlarm(int eventId) {
+
+        switch (eventId) {
+            case 1:
+                return Position.ALARM_POWER_ON;
+            case 2:
+                return Position.ALARM_SOS;
+            case 5:
+                return Position.ALARM_POWER_OFF;
+            case 7:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 8:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 22:
+                return Position.ALARM_LOW_BATTERY;
+            case 25:
+                return Position.ALARM_MOVEMENT;
+            default:
+                return null;
+        }
+    }
 }
