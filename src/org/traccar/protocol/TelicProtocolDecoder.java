@@ -115,40 +115,16 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_ON;
             case 2:
                 return Position.ALARM_SOS;
-            case 3:
-                return null; // Position lock alarm
-            case 4:
-                return null; // Alarm Tracking
             case 5:
                 return Position.ALARM_POWER_OFF;
-            case 6:
-                return null; // Course change
             case 7:
                 return Position.ALARM_GEOFENCE_ENTER;
             case 8:
                 return Position.ALARM_GEOFENCE_EXIT;
-            case 9:
-                return null; // GPS fix lost
-            case 10:
-                return null; // Periodic wakeup / Routine message
-            case 13:
-                return null; // Digital input 2 Low -> High / Charger connected
-            case 14:
-                return null; // Digital input 2 High -> Low / Charger disconnected
-            case 15:
-                return null; // Digital input 3 Low -> High
-            case 16:
-                return null; // Digital input 3 High -> Low
-            case 21:
-                return null; // Analog input 1 High / Battery level OK
             case 22:
                 return Position.ALARM_LOW_BATTERY;
             case 25:
                 return Position.ALARM_MOVEMENT;
-            case 26:
-                return null; // Device is stationary
-            case 29:
-                return null; // Force GPRS reconnection
             default:
                 return null;
         }
