@@ -27,6 +27,12 @@ public class WifiAccessPoint {
         return wifiAccessPoint;
     }
 
+    public static WifiAccessPoint from(String macAddress, int signalStrength, int channel) {
+        WifiAccessPoint wifiAccessPoint = from(macAddress, signalStrength);
+        wifiAccessPoint.setChannel(channel);
+        return wifiAccessPoint;
+    }
+
     private String macAddress;
 
     public String getMacAddress() {
@@ -45,6 +51,16 @@ public class WifiAccessPoint {
 
     public void setSignalStrength(Integer signalStrength) {
         this.signalStrength = signalStrength;
+    }
+
+    private Integer channel;
+
+    public Integer getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Integer channel) {
+        this.channel = channel;
     }
 
 }
