@@ -93,6 +93,10 @@ public class Position extends Message {
     public static final String ALARM_JAMMING = "jamming";
     public static final String ALARM_TEMPERATURE = "temperature";
     public static final String ALARM_PARKING = "parking";
+    public static final String ALARM_SHOCK = "shock";
+    public static final String ALARM_BONNET = "bonnet";
+    public static final String ALARM_FOOT_BRAKE = "footBrake";
+    public static final String ALARM_OIL_LEAK = "oilLeak";
 
     private String protocol;
 

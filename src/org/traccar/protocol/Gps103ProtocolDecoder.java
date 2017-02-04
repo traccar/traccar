@@ -102,6 +102,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(String value) {
+        if (value.startsWith("T:")) {
+            return Position.ALARM_TEMPERATURE;
+        } else if (value.startsWith("oil")) {
+            return Position.ALARM_OIL_LEAK;
+        }
         switch (value) {
             case "tracker":
                 return null;
@@ -123,6 +128,16 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_DOOR;
             case "ac alarm":
                 return Position.ALARM_POWER_CUT;
+            case "accident alarm":
+                return Position.ALARM_ACCIDENT;
+            case "sensor alarm":
+                return Position.ALARM_SHOCK;
+            case "bonnet alarm":
+                return Position.ALARM_BONNET;
+            case "footbrake alarm":
+                return Position.ALARM_FOOT_BRAKE;
+            case "DTC":
+                return Position.ALARM_FAULT;
             default:
                 return null;
         }
@@ -232,6 +247,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, true);
         } else if (alarm.equals("acc off")) {
             position.set(Position.KEY_IGNITION, false);
+        } else if (alarm.startsWith("T:")) {
+            position.set(Position.PREFIX_TEMP + 1, alarm.substring(2));
+        } else if (alarm.startsWith("oil ")) {
+            position.set("oil", alarm.substring(4));
         }
 
         DateBuilder dateBuilder = new DateBuilder()
