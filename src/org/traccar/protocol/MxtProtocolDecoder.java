@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -36,6 +38,21 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_NACK = 0x03;
     public static final int MSG_POSITION = 0x31;
 
+    private static void sendResponse(Channel channel, int device, long id, int crc) {
+        if (channel != null) {
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            response.writeByte(0x01); // header
+            response.writeByte(device);
+            response.writeByte(MSG_ACK);
+            response.writeInt((int) id);
+            response.writeShort(crc);
+            response.writeShort(Checksum.crc16(
+                    Checksum.CRC16_CCITT_FALSE, response.toByteBuffer(0, response.readableBytes())));
+            response.writeByte(0x04); // ending
+            channel.write(response);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -43,11 +60,11 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         buf.readUnsignedByte(); // start
-        buf.readUnsignedByte(); // device descriptor
+        int device = buf.readUnsignedByte(); // device descriptor
         int type = buf.readUnsignedByte();
 
-        String id = String.valueOf(buf.readUnsignedInt());
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        long id = buf.readUnsignedInt();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
         if (deviceSession == null) {
             return null;
         }
@@ -133,6 +150,9 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(infoGroups, 7)) {
                 position.set(Position.KEY_RFID, buf.readUnsignedInt());
             }
+
+            buf.readerIndex(buf.writerIndex() - 3);
+            sendResponse(channel, device, id, buf.readUnsignedShort());
 
             return position;
         }
