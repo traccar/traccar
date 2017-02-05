@@ -32,6 +32,7 @@ import org.traccar.model.WifiAccessPoint;
 import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
@@ -237,11 +238,13 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("(d+),")                     // count
-            .groupBegin()
-            .number("(x{12}),")                  // bssid
-            .number("(-?d+),,,,")                // rssi
-            .groupEnd("+")
-            .any()
+            .number("((?:x{12},-?d+,,,,)+),,,,") // wifi
+            .number("(d{1,3}),")                 // battery
+            .number("(dddd)(dd)(dd)")            // date
+            .number("(dd)(dd)(dd)").optional(2)  // time
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -620,11 +623,17 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         Network network = new Network();
 
-        int count = parser.nextInt();
-        for (int i = 0; i < count; i++) {
-            String mac = parser.next().replaceAll("(..)", "$1:");
-            network.addWifiAccessPoint(WifiAccessPoint.from(mac.substring(0, mac.length() - 1), parser.nextInt()));
+        parser.nextInt(); // count
+        Matcher matcher = Pattern.compile("([0-9a-fA-F]{12}),(-?\\d+),,,,").matcher(parser.next());
+        while (matcher.find()) {
+            String mac = matcher.group(1).replaceAll("(..)", "$1:");
+            network.addWifiAccessPoint(WifiAccessPoint.from(
+                    mac.substring(0, mac.length() - 1), Integer.parseInt(matcher.group(2))));
         }
+
+        position.setNetwork(network);
+
+        position.set(Position.KEY_BATTERY, parser.nextInt());
 
         return position;
     }
