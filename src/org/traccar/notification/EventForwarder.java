@@ -38,8 +38,6 @@ public final class EventForwarder {
         header = Context.getConfig().getString("event.forward.header", "");
     }
 
-    private static final String USER_AGENT = "Traccar Server";
-
     private static final String KEY_POSITION = "position";
     private static final String KEY_EVENT = "event";
     private static final String KEY_GEOFENCE = "geofence";
@@ -49,14 +47,13 @@ public final class EventForwarder {
 
         BoundRequestBuilder requestBuilder = Context.getAsyncHttpClient().preparePost(url);
 
-        requestBuilder.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-        requestBuilder.addHeader("User-Agent", USER_AGENT);
+        requestBuilder.addHeader("Content-Type", "application/json; charset=utf-8");
         if (!header.equals("")) {
             String[] headerLines = header.split("\\r?\\n");
             for (String headerLine: headerLines) {
                 String[] splitedLine = headerLine.split(":", 2);
                 if (splitedLine.length == 2) {
-                    requestBuilder.addHeader(splitedLine[0].trim(), splitedLine[1].trim());
+                    requestBuilder.setHeader(splitedLine[0].trim(), splitedLine[1].trim());
                 }
             }
         }
