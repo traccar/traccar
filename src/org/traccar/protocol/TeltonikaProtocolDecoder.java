@@ -71,28 +71,47 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private void decodeParameter(Position position, int id, long value) {
+    private void decodeParameter(Position position, int id, ChannelBuffer buf, int length) {
         switch (id) {
             case 9:
-                position.set(Position.PREFIX_ADC + 1, value);
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
                 break;
             case 66:
-                position.set(Position.KEY_POWER, value);
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() + "mV");
                 break;
-            case 68:
-                position.set(Position.KEY_BATTERY, value);
+            case 67:
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() + "mV");
                 break;
-            case 85:
-                position.set(Position.KEY_RPM, value);
+            case 72:
+                position.set(Position.PREFIX_TEMP + 1, buf.readInt() * 0.1);
+                break;
+            case 73:
+                position.set(Position.PREFIX_TEMP + 2, buf.readInt() * 0.1);
+                break;
+            case 74:
+                position.set(Position.PREFIX_TEMP + 3, buf.readInt() * 0.1);
+                break;
+            case 78:
+                position.set(Position.KEY_RFID, buf.readLong());
                 break;
             case 182:
-                position.set(Position.KEY_HDOP, value);
-                break;
-            case 239:
-                position.set(Position.KEY_IGNITION, value == 1);
+                position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
                 break;
             default:
-                position.set(Position.PREFIX_IO + id, value);
+                switch (length) {
+                    case 1:
+                        position.set(Position.PREFIX_IO + id, buf.readUnsignedByte());
+                        break;
+                    case 2:
+                        position.set(Position.PREFIX_IO + id, buf.readUnsignedShort());
+                        break;
+                    case 4:
+                        position.set(Position.PREFIX_IO + id, buf.readUnsignedInt());
+                        break;
+                    case 8:
+                        position.set(Position.PREFIX_IO + id, buf.readLong());
+                        break;
+                }
                 break;
         }
     }
@@ -183,7 +202,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 1)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf.readUnsignedByte());
+                decodeParameter(position, buf.readUnsignedByte(), buf, 1);
             }
         }
 
@@ -191,7 +210,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 2)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf.readUnsignedShort());
+                decodeParameter(position, buf.readUnsignedByte(), buf, 2);
             }
         }
 
@@ -199,7 +218,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(globalMask, 3)) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf.readUnsignedInt());
+                decodeParameter(position, buf.readUnsignedByte(), buf, 4);
             }
         }
 
@@ -207,7 +226,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_FM4X00) {
             int cnt = buf.readUnsignedByte();
             for (int j = 0; j < cnt; j++) {
-                decodeParameter(position, buf.readUnsignedByte(), buf.readLong());
+                decodeParameter(position, buf.readUnsignedByte(), buf, 8);
             }
         }
 
