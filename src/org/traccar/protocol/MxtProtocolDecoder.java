@@ -27,6 +27,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.ByteOrder;
 
 public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
@@ -40,16 +41,27 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendResponse(Channel channel, int device, long id, int crc) {
         if (channel != null) {
-            ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+            ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
             response.writeByte(0x01); // header
             response.writeByte(device);
             response.writeByte(MSG_ACK);
             response.writeInt((int) id);
             response.writeShort(crc);
             response.writeShort(Checksum.crc16(
-                    Checksum.CRC16_CCITT_FALSE, response.toByteBuffer(0, response.readableBytes())));
+                    Checksum.CRC16_XMODEM, response.toByteBuffer(1, response.readableBytes() - 1)));
             response.writeByte(0x04); // ending
             channel.write(response);
+
+            ChannelBuffer encoded = ChannelBuffers.dynamicBuffer();
+            while (response.readable()) {
+                int b = response.readByte();
+                if (response.readerIndex() != 1 && response.readableBytes() != 0
+                        && (b == 0x01 || b == 0x04 || b == 0x10 || b == 0x11 || b == 0x13)) {
+                    encoded.writeByte(0x10);
+                    b += 0x20;
+                }
+                response.writeByte(b);
+            }
         }
     }
 
