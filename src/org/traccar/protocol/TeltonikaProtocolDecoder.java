@@ -109,6 +109,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_IO + id, buf.readUnsignedInt());
                         break;
                     case 8:
+                    default:
                         position.set(Position.PREFIX_IO + id, buf.readLong());
                         break;
                 }
