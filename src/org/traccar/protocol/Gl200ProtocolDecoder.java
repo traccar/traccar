@@ -278,11 +278,15 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
             .number("(-?d{1,5}.d)?,")            // altitude
-            .number("(-?d{1,3}.d{6}),")          // longitude
-            .number("(-?d{1,2}.d{6}),")          // latitude
+            .number("(-?d{1,3}.d{6})?,")         // longitude
+            .number("(-?d{1,2}.d{6})?,")         // latitude
             .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd)").optional(2)  // time
             .text(",")
+            .number("(0ddd),")                   // mcc
+            .number("(0ddd),")                   // mnc
+            .number("(xxxx),")                   // lac
+            .number("(xxxx),").optional(4)       // cell
             .any()
             .number("(dddd)(dd)(dd)")            // date
             .number("(dd)(dd)(dd)").optional(2)  // time
@@ -703,17 +707,28 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
-        position.setValid(true);
-        position.setLongitude(parser.nextDouble());
-        position.setLatitude(parser.nextDouble());
-
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        if (parser.hasNext(2)) {
+            position.setValid(true);
+            position.setLongitude(parser.nextDouble());
+            position.setLatitude(parser.nextDouble());
+        } else {
+            getLastLocation(position, null);
+        }
 
         if (parser.hasNext(6)) {
-            dateBuilder = new DateBuilder()
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+        }
+
+        if (parser.hasNext(4)) {
+            position.setNetwork(new Network(CellTower.from(
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+        }
+
+        if (parser.hasNext(6)) {
+            DateBuilder dateBuilder = new DateBuilder()
                     .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
             if (!position.getOutdated() && position.getFixTime().after(dateBuilder.getDate())) {
