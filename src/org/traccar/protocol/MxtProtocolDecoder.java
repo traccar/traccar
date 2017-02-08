@@ -42,26 +42,25 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
     private static void sendResponse(Channel channel, int device, long id, int crc) {
         if (channel != null) {
             ChannelBuffer response = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 0);
-            response.writeByte(0x01); // header
             response.writeByte(device);
             response.writeByte(MSG_ACK);
             response.writeInt((int) id);
             response.writeShort(crc);
             response.writeShort(Checksum.crc16(
-                    Checksum.CRC16_XMODEM, response.toByteBuffer(1, response.readableBytes() - 1)));
-            response.writeByte(0x04); // ending
-            channel.write(response);
+                    Checksum.CRC16_XMODEM, response.toByteBuffer()));
 
             ChannelBuffer encoded = ChannelBuffers.dynamicBuffer();
+            encoded.writeByte(0x01); // header
             while (response.readable()) {
                 int b = response.readByte();
-                if (response.readerIndex() != 1 && response.readableBytes() != 0
-                        && (b == 0x01 || b == 0x04 || b == 0x10 || b == 0x11 || b == 0x13)) {
+                if (b == 0x01 || b == 0x04 || b == 0x10 || b == 0x11 || b == 0x13) {
                     encoded.writeByte(0x10);
                     b += 0x20;
                 }
-                response.writeByte(b);
+                encoded.writeByte(b);
             }
+            encoded.writeByte(0x04); // ending
+            channel.write(encoded);
         }
     }
 
