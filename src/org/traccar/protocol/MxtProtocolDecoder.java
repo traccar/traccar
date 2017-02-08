@@ -47,7 +47,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             response.writeInt((int) id);
             response.writeShort(crc);
             response.writeShort(Checksum.crc16(
-                    Checksum.CRC16_XMODEM, response.toByteBuffer(0, response.readableBytes())));
+                    Checksum.CRC16_XMODEM, response.toByteBuffer()));
 
             ChannelBuffer encoded = ChannelBuffers.dynamicBuffer();
             encoded.writeByte(0x01); // header
