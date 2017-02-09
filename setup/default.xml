@@ -501,5 +501,6 @@
     <entry key='gt30.port'>5131</entry>
     <entry key='tmg.port'>5132</entry>
     <entry key='pretrace.port'>5133</entry>
+    <entry key='pricol.port'>5134</entry>
 
 </properties>
