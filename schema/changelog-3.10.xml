@@ -99,6 +99,14 @@
         DELETE FROM user_user WHERE manageduserid IN (SELECT deleted.id FROM deleted)
       END
     </sql>
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-3.7-mssql">
+
+    <preConditions onFail="MARK_RAN">
+      <dbms type="mssql" />
+    </preConditions>
     <sql>
       CREATE TRIGGER tg_groups_delete
       ON groups FOR DELETE
