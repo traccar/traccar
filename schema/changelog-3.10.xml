@@ -34,11 +34,11 @@
 
     <addForeignKeyConstraint baseTableName="user_calendar" baseColumnNames="userid" constraintName="fk_user_calendar_userid" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE" />
     <addForeignKeyConstraint baseTableName="user_calendar" baseColumnNames="calendarid" constraintName="fk_user_calendar_geofenceid" referencedTableName="calendars" referencedColumnNames="id" onDelete="CASCADE" />
-    
+
     <addColumn tableName="geofences">
       <column name="calendarid" type="INT" />
     </addColumn>
-    
+
     <addForeignKeyConstraint baseColumnNames="calendarid" baseTableName="geofences" constraintName="fk_geofence_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="calendars"/>
 
     <addColumn tableName="positions">
@@ -75,6 +75,7 @@
     </addColumn>
 
   </changeSet>
+
   <changeSet author="author" id="changelog-3.10-notmssql">
 
     <preConditions onFail="MARK_RAN">
@@ -95,7 +96,14 @@
       CREATE TRIGGER tg_users_delete
       ON users FOR DELETE
       AS BEGIN
-        DELETE FROM user_user WHERE managedUserId IN (SELECT deleted.id FROM deleted)
+        DELETE FROM user_user WHERE manageduserid IN (SELECT deleted.id FROM deleted)
+      END
+    </sql>
+    <sql>
+      CREATE TRIGGER tg_groups_delete
+      ON groups FOR DELETE
+      AS BEGIN
+        UPDATE groups SET groupid = NULL WHERE groupid IN (SELECT deleted.id FROM deleted)
       END
     </sql>
 
