@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // gsm
             .number("(d+),")                     // speed
             .number("(d+),")                     // distance
+            .groupBegin()
             .number("d+,")                       // driver code
             .number("(d+),")                     // fuel
             .number("([01]),")                   // io 1
@@ -65,26 +66,57 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("([01]),")                   // course bit 1
             .number("([01]),")                   // course bit 2
             .number("([01]),")                   // course bit 3
+            .or()
+            .number("(d+),")                     // course
+            .number("(?:d+,){3}")                // reserved
+            .number("[01],")                     // over speed start
+            .number("[01],")                     // over speed end
+            .number("(?:d+,){3}")                // reserved
+            .number("([01]),")                   // power status
+            .number("(?:d+,){2}")                // reserved
+            .number("[01],")                     // ignition on event
+            .number("([01]),")                   // ignition
+            .number("[01],")                     // ignition off event
+            .number("(?:d+,){5}")                // reserved
+            .number("[01],")                     // low battery
+            .number("[01],")                     // corner packet
+            .number("(?:d+,){6}")                // reserved
+            .number("[01],")                     // hard acceleration
+            .number("[01],")                     // hard breaking
+            .number("[01],[01],[01],[01],")      // course bits
+            .number("(d+),")                     // external voltage
+            .number("(d+),")                     // internal voltage
+            .number("(?:d+,){6}")                // reserved
+            .expression("P([^,]+),")             // obd
+            .expression("D([^,]+),")             // dtcs
+            .number("-?d+,")                     // accelerometer x
+            .number("-?d+,")                     // accelerometer y
+            .number("-?d+,")                     // accelerometer z
+            .number("d+,")                       // delta distance
+            .groupEnd()
             .text("*")
-            .number("(xx)")                      // checksum
+            .number("xx")                        // checksum
             .compile();
 
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
+        org.traccar.helper.PatternUtil.MatchResult matchResult =
+                org.traccar.helper.PatternUtil.checkPattern(PATTERN.pattern(), (String) msg);
+
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_EVENT, parser.nextInt());
@@ -104,16 +136,36 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
         position.set(Position.KEY_ODOMETER, parser.next());
-        position.set(Position.KEY_FUEL, parser.next());
-        position.set(Position.PREFIX_IO + 1, parser.next());
-        position.set(Position.KEY_CHARGE, parser.next());
-        position.set(Position.PREFIX_IO + 2, parser.next());
 
-        position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+        if (parser.hasNext(9)) {
 
-        int course = (parser.nextInt() << 3) + (parser.nextInt() << 2) + (parser.nextInt() << 1) + parser.nextInt();
-        if (course > 0 && course <= 8) {
-            position.setCourse((course - 1) * 45);
+            position.set(Position.KEY_FUEL, parser.next());
+            position.set(Position.PREFIX_IO + 1, parser.next());
+            position.set(Position.KEY_CHARGE, parser.next());
+            position.set(Position.PREFIX_IO + 2, parser.next());
+
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+
+            int course = (parser.nextInt() << 3) + (parser.nextInt() << 2) + (parser.nextInt() << 1) + parser.nextInt();
+            if (course > 0 && course <= 8) {
+                position.setCourse((course - 1) * 45);
+            }
+
+        } else {
+
+            position.setCourse(parser.nextInt());
+
+            position.set(Position.KEY_CHARGE, parser.next());
+            position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
+            position.set(Position.KEY_POWER, parser.nextInt());
+            position.set(Position.KEY_BATTERY, parser.nextInt());
+
+            String obd = parser.next();
+            position.set("obd", obd.substring(1, obd.length() - 1));
+
+            String dtcs = parser.next();
+            position.set(Position.KEY_DTCS, dtcs.substring(1, dtcs.length() - 1).replace('|', ' '));
+
         }
 
         return position;
