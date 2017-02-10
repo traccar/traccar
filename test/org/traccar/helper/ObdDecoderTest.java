@@ -16,4 +16,10 @@ public class ObdDecoderTest {
 
     }
 
+    @Test
+    public void testDecodeCodes() throws Exception {
+        Assert.assertEquals("P0D14", ObdDecoder.decodeCodes("0D14").getValue());
+        Assert.assertEquals("dtcs", ObdDecoder.decodeCodes("0D14").getKey());
+    }
+
 }
