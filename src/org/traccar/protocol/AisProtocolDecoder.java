@@ -24,6 +24,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -110,7 +111,7 @@ public class AisProtocolDecoder extends BaseProtocolDecoder {
 
                     if (count == 1) {
                         BitBuffer bits = new BitBuffer();
-                        bits.writeEncoded(parser.next().getBytes());
+                        bits.writeEncoded(parser.next().getBytes(StandardCharsets.US_ASCII));
                         position = decodePayload(channel, remoteAddress, bits);
                     } else {
                         BitBuffer bits = buffers.get(id);
@@ -118,7 +119,7 @@ public class AisProtocolDecoder extends BaseProtocolDecoder {
                             bits = new BitBuffer();
                             buffers.put(id, bits);
                         }
-                        bits.writeEncoded(parser.next().getBytes());
+                        bits.writeEncoded(parser.next().getBytes(StandardCharsets.US_ASCII));
                         if (count == index) {
                             position = decodePayload(channel, remoteAddress, bits);
                             buffers.remove(id);

@@ -44,34 +44,44 @@ public class H02FrameDecoder extends FrameDecoder {
             }
         }
 
-        if (marker == '*') {
+        switch (marker) {
+            case '*':
 
-            // Return text message
-            int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
-            if (index != -1) {
-                return buf.readBytes(index + 1 - buf.readerIndex());
-            }
-
-        } else if (marker == '$') {
-
-            if (messageLength == 0) {
-                if (buf.readableBytes() == MESSAGE_LONG) {
-                    messageLength = MESSAGE_LONG;
-                } else {
-                    messageLength = MESSAGE_SHORT;
+                // Return text message
+                int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
+                if (index != -1) {
+                    return buf.readBytes(index + 1 - buf.readerIndex());
                 }
-            }
 
-            if (buf.readableBytes() >= messageLength) {
-                return buf.readBytes(messageLength);
-            }
+                break;
 
-        } else if (marker == 'X') {
+            case '$':
 
-            if (buf.readableBytes() >= MESSAGE_SHORT) {
-                return buf.readBytes(MESSAGE_SHORT);
-            }
+                if (messageLength == 0) {
+                    if (buf.readableBytes() == MESSAGE_LONG) {
+                        messageLength = MESSAGE_LONG;
+                    } else {
+                        messageLength = MESSAGE_SHORT;
+                    }
+                }
 
+                if (buf.readableBytes() >= messageLength) {
+                    return buf.readBytes(messageLength);
+                }
+
+                break;
+
+            case 'X':
+
+                if (buf.readableBytes() >= MESSAGE_SHORT) {
+                    return buf.readBytes(MESSAGE_SHORT);
+                }
+
+                break;
+
+            default:
+
+                throw new IllegalArgumentException();
         }
 
         return null;

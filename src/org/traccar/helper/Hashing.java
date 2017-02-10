@@ -33,6 +33,7 @@ public final class Hashing {
         try {
             factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
     }
 

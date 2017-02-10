@@ -67,9 +67,6 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        org.traccar.helper.PatternUtil.MatchResult matchResult =
-                org.traccar.helper.PatternUtil.checkPattern(PATTERN.pattern(), (String) msg);
-
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;

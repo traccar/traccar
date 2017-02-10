@@ -65,12 +65,11 @@ public class At2000FrameDecoder extends FrameDecoder {
             length = (length / BLOCK_LENGTH + 1) * BLOCK_LENGTH;
         }
 
-        if (buf.readableBytes() >= length || buf.readableBytes() % ACK_LENGTH == 0) {
-            if (buf != currentBuffer || buf.readableBytes() > acknowledgedBytes) {
-                sendResponse(channel);
-                currentBuffer = buf;
-                acknowledgedBytes = buf.readableBytes();
-            }
+        if ((buf.readableBytes() >= length || buf.readableBytes() % ACK_LENGTH == 0)
+                && (buf != currentBuffer || buf.readableBytes() > acknowledgedBytes)) {
+            sendResponse(channel);
+            currentBuffer = buf;
+            acknowledgedBytes = buf.readableBytes();
         }
 
         if (buf.readableBytes() >= length) {
