@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
@@ -84,6 +85,10 @@ public class PricolProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
         position.set(Position.KEY_RPM, buf.readUnsignedShort());
+
+        if (channel != null) {
+            channel.write(ChannelBuffers.copiedBuffer("ACK", StandardCharsets.US_ASCII));
+        }
 
         return position;
     }
