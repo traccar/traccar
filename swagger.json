@@ -509,11 +509,19 @@
                 }
             }
         },
-        "/session": {
+        "/session/{token}": {
             "get": {
                 "summary": "Fetch Session information",
                 "consumes": [
                     "application/x-www-form-urlencoded"
+                ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": false,
+                        "type": "string"
+                    }
                 ],
                 "responses": {
                     "200": {
