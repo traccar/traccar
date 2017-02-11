@@ -540,7 +540,7 @@
                 }
             }
         },
-        "/session/{token}": {
+        "/session": {
             "get": {
                 "summary": "Fetch Session information",
                 "consumes": [
@@ -549,7 +549,7 @@
                 "parameters": [
                     {
                         "name": "token",
-                        "in": "path",
+                        "in": "query",
                         "required": false,
                         "type": "string"
                     }
