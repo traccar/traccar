@@ -1617,7 +1617,7 @@
                 },
                 "data": {
                     "type": "string",
-                    "description": "base64 encoded file in iCalendar format"
+                    "description": "base64 encoded in iCalendar format"
                 },
                 "atributes": {}
             }
@@ -1734,6 +1734,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/AttributeAlias"
+            }
+        },
+        "Calendar": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Calendar"
             }
         },
         "deviceIdArray": {
