@@ -827,6 +827,14 @@
             "get": {
                 "summary": "Fetch a list of Positions within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
@@ -858,6 +866,14 @@
             "get": {
                 "summary": "Fetch a list of Events within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
@@ -898,6 +914,14 @@
             "get": {
                 "summary": "Fetch a list of ReportSummary within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
@@ -929,6 +953,14 @@
             "get": {
                 "summary": "Fetch a list of ReportTrips within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
