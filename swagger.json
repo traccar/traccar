@@ -384,6 +384,37 @@
                 }
             }
         },
+        "/permissions/calendars": {
+            "post": {
+                "summary": "Link a Calendar to a User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/CalendarPermission"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CalendarPermission"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Remove a Calendar from a User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/CalendarPermission"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/positions": {
             "get": {
                 "summary" : "Fetches a list of Positions",
@@ -1354,6 +1385,16 @@
                 }
             }
         },
+        "CalendarPermission": {
+            "properties": {
+                "userId": {
+                    "type": "integer"
+                },
+                "calendarId": {
+                    "type": "integer"
+                }
+            }
+        },
         "GroupGeofence": {
             "properties": {
                 "groupId": {
@@ -1579,7 +1620,7 @@
                     "description": "base64 encoded file in iCalendar format"
                 },
                 "atributes": {}
-          }
+            }
         }
     },
     "parameters": {
@@ -1661,6 +1702,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/GeofencePermission"
+            }
+        },
+        "CalendarPermission": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/CalendarPermission"
             }
         },
         "User": {
