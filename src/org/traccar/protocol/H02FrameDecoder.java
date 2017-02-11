@@ -81,7 +81,7 @@ public class H02FrameDecoder extends FrameDecoder {
 
             default:
 
-                throw new IllegalArgumentException();
+                return null;
         }
 
         return null;
