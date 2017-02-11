@@ -614,6 +614,15 @@
         "/users": {
             "get": {
                 "summary": "Fetch a list of Users",
+                "parameters": [
+                    {
+                      "name": "userId",
+                      "in": "query",
+                      "description": "Can only be used by admin or manger users",
+                      "required": false,
+                      "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1472,6 +1481,16 @@
                     "type": "integer"
                 },
                 "calendarId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UserPermission": {
+            "properties": {
+                "userId": {
+                    "type": "integer"
+                },
+                "managedUserId": {
                     "type": "integer"
                 }
             }
