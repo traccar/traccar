@@ -419,6 +419,16 @@
             "get": {
                 "summary" : "Fetches a list of Positions",
                 "description" : "Without any params, it returns a list of last known positions for all the user's Devices. _from_ and _to_ fields are not required with _id_",
+                "consumes": [
+                    "application/json",
+                    "text/csv",
+                    "application/gpx+xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/csv",
+                    "application/gpx+xml"
+                ],
                 "parameters": [
                     {
                         "name": "deviceId",
