@@ -1010,6 +1010,81 @@
                     }
                 }
             }
+        },
+        "/calendars": {
+            "get": {
+                "summary": "Fetch a list of Calendars",
+                "description": "Without params, it returns a list of Calendars the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Calendar"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Calendar"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Calendar"
+                        }
+                    }
+                }
+            }
+        },
+        "/calendars/{id}": {
+            "put": {
+                "summary": "Update a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Calendar"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Calendar"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1490,6 +1565,21 @@
                     "description": "in meters"
                 }
             }
+        },
+        "Calendar": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string",
+                    "description": "base64 encoded file in iCalendar format"
+                },
+                "atributes": {}
+          }
         }
     },
     "parameters": {
@@ -1502,7 +1592,7 @@
         "all": {
             "name": "all",
             "in": "query",
-            "description": "Can only be used by admin users to fetch all entities",
+            "description": "Can only be used by admins or managers to fetch all entities",
             "type": "boolean"
         },
         "userId": {
