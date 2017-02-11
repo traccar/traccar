@@ -415,6 +415,37 @@
                 }
             }
         },
+        "/permissions/users": {
+            "post": {
+                "summary": "Link a User to a manager User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/UserPermission"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserPermission"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Remove a User from a manager User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/UserPermission"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/positions": {
             "get": {
                 "summary" : "Fetches a list of Positions",
@@ -1760,6 +1791,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/CalendarPermission"
+            }
+        },
+        "UserPermission": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/UserPermission"
             }
         },
         "User": {
