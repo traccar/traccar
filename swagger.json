@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.9",
+        "version": "3.10",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -618,7 +618,7 @@
                     {
                       "name": "userId",
                       "in": "query",
-                      "description": "Can only be used by admin or manger users",
+                      "description": "Can only be used by admin or manager users",
                       "required": false,
                       "type": "string"
                     }
@@ -877,11 +877,11 @@
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "consumes": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "produces": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "parameters": [
                     {
@@ -916,11 +916,11 @@
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "consumes": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "produces": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "parameters": [
                     {
@@ -964,11 +964,11 @@
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "consumes": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "produces": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "parameters": [
                     {
@@ -1003,11 +1003,11 @@
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
                 "consumes": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "produces": [
                     "application/json",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "parameters": [
                     {
