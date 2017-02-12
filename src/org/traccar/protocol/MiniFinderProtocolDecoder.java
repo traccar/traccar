@@ -34,7 +34,42 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
+    // The !A record is not in the documentation for MiniFinder or EV-07S.
+    // Eview, the manufacturer, indicated that resellers could implement new record types.
+    // Using the data in MiniFinderProtocolDecoderTest.java as a guide
+    private static final Pattern PATTERN_A = new PatternBuilder()
+            .expression("!A,")
+            .number("(d+)/(d+)/(d+),")           // date
+            .number("(d+):(d+):(d+),")           // time
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(d+.?d*),")                 // unknown
+            .number("(d+.?d*),")                 // unknown
+            .number("(d+.?d*)")                  // unknown
+            .compile();
+
+    // The !C record is not in the documentation for MiniFinder or EV-07S
+    // Eview, the manufacturer, indicated that resellers could implement new record types.
+    // Using the data in MiniFinderProtocolDecoderTest.java as a guide
+    private static final Pattern PATTERN_C = new PatternBuilder()
+            .expression("!C,")
+            .number("(d+)/(d+)/(d+),")           // date
+            .number("(d+):(d+):(d+),")           // time
+            .number("(-?d+.d+),")                // latitude
+            .number("(-?d+.d+),")                // longitude
+            .number("(d+.?d*),")                 // speed (km/h)
+            .number("(d+.?d*),")                 // course
+            .number("(x+),")                     // flags
+            .number("(-?d+.d+),")                // altitude (meters)
+            .number("(d+),")                     // battery (percentage)
+            .number("(d+.?d*),")                 // unknown
+            .number("(d+.?d*),")                 // unknown
+            .number("(d+.?d*)")                  // unknown
+            .compile();
+
+    // The !B (buffered data) records are the same as !D (live data) records.
+    // This was confirmed with the manufacturer, Eview.
+    private static final Pattern PATTERN_BD = new PatternBuilder()
             .expression("![BD],")
             .number("(d+)/(d+)/(d+),")           // date
             .number("(d+):(d+):(d+),")           // time
@@ -50,24 +85,56 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*)")                  // HDOP, confirmed with Eview manufacturer
             .compile();
 
+    private void decodeFlags(Position position, int flags) {
+
+        position.setValid(BitUtil.check(flags, 0));
+
+        if (BitUtil.check(flags, 2)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
+        }
+        if (BitUtil.check(flags, 6)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        }
+        if (BitUtil.check(flags, 7)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+        }
+        if (BitUtil.check(flags, 8)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+        }
+        if (BitUtil.check(flags, 9) || BitUtil.check(flags, 10) || BitUtil.check(flags, 11)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+        }
+        if (BitUtil.check(flags, 12)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+        }
+        if (BitUtil.check(flags, 15) || BitUtil.check(flags, 14)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+        }
+
+        position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 20));
+        position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
 
-        if (sentence.startsWith("!1")) {
+        if (sentence.startsWith("!1,")) {
 
             getDeviceSession(channel, remoteAddress, sentence.substring(3, sentence.length()));
 
-        } else if (sentence.matches("![BD].*")) {
+            return null;
+        }
 
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession == null) {
-                return null;
-            }
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
 
-            Parser parser = new Parser(PATTERN, sentence);
+        if (sentence.startsWith("!B,") || sentence.startsWith("!D,")) {
+            Parser parser = new Parser(PATTERN_BD, sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -90,34 +157,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(0);
             }
 
-            int flags = parser.nextInt(16);
-
-            position.setValid(BitUtil.check(flags, 0));
-
-            if (BitUtil.check(flags, 2)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
-            }
-            if (BitUtil.check(flags, 6)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-            }
-            if (BitUtil.check(flags, 7)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-            }
-            if (BitUtil.check(flags, 8)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
-            }
-            if (BitUtil.check(flags, 9) || BitUtil.check(flags, 10) || BitUtil.check(flags, 11)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
-            }
-            if (BitUtil.check(flags, 12)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-            }
-            if (BitUtil.check(flags, 15) || BitUtil.check(flags, 14)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
-            }
-
-            position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 20));
-            position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
+            decodeFlags(position, parser.nextInt(16));
 
             position.setAltitude(parser.nextDouble());
 
@@ -126,8 +166,74 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
             position.set(Position.KEY_HDOP, parser.nextDouble());
 
+            position.set(Position.KEY_TYPE, sentence.substring(1, 2));
+
             return position;
         }
+
+        if (sentence.startsWith("!C,")) {
+            Parser parser = new Parser(PATTERN_C, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+
+            position.setCourse(parser.nextDouble());
+            if (position.getCourse() > 360) {
+                position.setCourse(0);
+            }
+
+            decodeFlags(position, parser.nextInt(16));
+
+            position.setAltitude(parser.nextDouble());
+
+            position.set(Position.KEY_BATTERY, parser.nextInt());
+
+            // Ignoring last three fields, unknown
+            position.set("unknown", parser.next() + "," + parser.next() + "," + parser.next());
+
+            position.set(Position.KEY_TYPE, sentence.substring(1, 2));
+
+            return position;
+        }
+
+        if (sentence.startsWith("!A,")) {
+            Parser parser = new Parser(PATTERN_A, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+            position.setTime(dateBuilder.getDate());
+
+            position.setLatitude(parser.nextDouble());
+            position.setLongitude(parser.nextDouble());
+
+            // Ignoring last three fields, unknown
+            position.set("unknown", parser.next() + "," + parser.next() + "," + parser.next());
+
+            return position;
+        }
+
+        // If we get here, we didn't understand the message
 
         return null;
     }
