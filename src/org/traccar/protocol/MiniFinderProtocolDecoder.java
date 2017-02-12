@@ -90,41 +90,41 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
                 position.setCourse(0);
             }
 
-                int flags = parser.nextInt(16);
+            int flags = parser.nextInt(16);
 
-                position.setValid(BitUtil.check(flags, 0));
+            position.setValid(BitUtil.check(flags, 0));
 
-                if (BitUtil.check(flags, 2)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
-                }
-                if (BitUtil.check(flags, 6)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                }
-                if (BitUtil.check(flags, 7)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                }
-                if (BitUtil.check(flags, 8)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
-                }
-                if (BitUtil.check(flags, 9) || BitUtil.check(flags, 10) || BitUtil.check(flags, 11)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
-                }
-                if (BitUtil.check(flags, 12)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                }
-                if (BitUtil.check(flags, 15) || BitUtil.check(flags, 14)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
-                }
+            if (BitUtil.check(flags, 2)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
+            }
+            if (BitUtil.check(flags, 6)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            }
+            if (BitUtil.check(flags, 7)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            }
+            if (BitUtil.check(flags, 8)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+            }
+            if (BitUtil.check(flags, 9) || BitUtil.check(flags, 10) || BitUtil.check(flags, 11)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+            }
+            if (BitUtil.check(flags, 12)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            }
+            if (BitUtil.check(flags, 15) || BitUtil.check(flags, 14)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+            }
 
-                position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 20));
-                position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
+            position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 20));
+            position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
 
-                position.setAltitude(parser.nextDouble());
+            position.setAltitude(parser.nextDouble());
 
-                position.set(Position.KEY_BATTERY, parser.nextInt());
-                position.set(Position.KEY_SATELLITES, parser.nextInt());
-                position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
-                position.set(Position.KEY_HDOP, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
+            position.set(Position.KEY_HDOP, parser.nextDouble());
 
             return position;
         }
