@@ -224,11 +224,17 @@ def make_responses_table(responses):
     except KeyError as e:
         handleException('KeyError', e)
 
+def sorted_by_method(section):
+    sorting_function = lambda x: [ 'GET', 'POST', 'PUT', 'DELETE' ].index(
+        x['title'].split(' ')[0]
+    )
+    return sorted(sorted(section), key=sorting_function)
+
 def make_paths(sections, json_data):
     md = '<h2><a name="paths"></a>Paths</h2>\n'
     for key in sorted(sections):
         md += '<h3><a name="paths_{0}"></a>{0}</h3>\n'.format(key)
-        for section in sections[key]:
+        for section in sorted_by_method(sections[key]):
             md += '<h4><a name="{}"></a><code>{}</code></h4>\n'.format(
                 section['href'], section['title']
             )
@@ -256,7 +262,7 @@ def make_contents(path_section, json_data):
     for key in sorted(path_section):
         md += '      <li><a href="#paths_{0}">{0}</a>\n'.format(key)
         md += '        <ul>\n'
-        for section in path_section[key]:
+        for section in sorted_by_method(path_section[key]):
             md += '          <li><a href="#{}">{}</a></li>\n'.format(
                 section['href'], section['title']
             )
