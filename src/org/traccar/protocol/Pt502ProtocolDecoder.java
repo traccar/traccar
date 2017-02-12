@@ -65,7 +65,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             case "TOW":
                 return Position.ALARM_TOW;
             case "HDA":
-                return Position.ALARM_ACCELETATION;
+                return Position.ALARM_ACCELERATION;
             case "HDB":
                 return Position.ALARM_BREAKING;
             case "FDA":
