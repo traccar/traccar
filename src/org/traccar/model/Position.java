@@ -22,9 +22,11 @@ public class Position extends Message {
     public static final String KEY_ORIGINAL = "raw";
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
-    public static final String KEY_SATELLITES = "sat";
+    public static final String KEY_SATELLITES = "sat"; // in use
+    public static final String KEY_SATELLITES_VISIBLE = "satVisible";
     public static final String KEY_RSSI = "rssi";
     public static final String KEY_GPS = "gps";
+    public static final String KEY_FIX = "fix"; // GPS, GSM, none
     public static final String KEY_EVENT = "event";
     public static final String KEY_ALARM = "alarm";
     public static final String KEY_STATUS = "status";
@@ -97,6 +99,7 @@ public class Position extends Message {
     public static final String ALARM_BONNET = "bonnet";
     public static final String ALARM_FOOT_BRAKE = "footBrake";
     public static final String ALARM_OIL_LEAK = "oilLeak";
+
 
     private String protocol;
 
