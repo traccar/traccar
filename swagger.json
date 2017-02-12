@@ -1260,6 +1260,12 @@
                 "address": {
                     "type": "string"
                 },
+                "accuracy": {
+                    "type": "number"
+                },
+                "network": {
+                    "type": "string"
+                },
                 "attributes": {}
             }
         },
@@ -1317,6 +1323,12 @@
                 },
                 "deviceLimit": {
                     "type": "integer"
+                },
+                "userLimit": {
+                    "type": "integer"
+                },
+                "deviceReadonly": {
+                    "type": "boolean"
                 },
                 "token": {
                     "type": "string"
@@ -1536,6 +1548,9 @@
                 "area": {
                     "type": "string"
                 },
+                "calendarId": {
+                    "type": "integer"
+                },
                 "attributes": {}
             }
         },
@@ -1549,6 +1564,12 @@
                 },
                 "userId": {
                     "type": "integer"
+                },
+                "web": {
+                    "type": "boolean"
+                },
+                "mail": {
+                    "type": "boolean"
                 },
                 "attributes": {}
             }
