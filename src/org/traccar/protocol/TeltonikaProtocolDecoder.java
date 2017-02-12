@@ -73,14 +73,29 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeParameter(Position position, int id, ChannelBuffer buf, int length) {
         switch (id) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                position.set("di" + id, buf.readUnsignedByte());
+                break;
             case 9:
                 position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                break;
+            case 21:
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                break;
+            case 22:
+                position.set("profile", buf.readUnsignedByte());
                 break;
             case 66:
                 position.set(Position.KEY_POWER, buf.readUnsignedShort() + "mV");
                 break;
             case 67:
                 position.set(Position.KEY_BATTERY, buf.readUnsignedShort() + "mV");
+                break;
+            case 70:
+                position.set("pcbTemp", buf.readInt() * 0.1);
                 break;
             case 72:
                 position.set(Position.PREFIX_TEMP + 1, buf.readInt() * 0.1);
