@@ -35,23 +35,19 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .expression("![A-D],")
+            .expression("![BD],")
             .number("(d+)/(d+)/(d+),")           // date
             .number("(d+):(d+):(d+),")           // time
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
-            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // speed (km/h)
             .number("(d+.?d*),")                 // course
-            .groupBegin()
             .number("(x+),")                     // flags
-            .number("(-?d+.d+),")                // altitude
-            .number("(d+),")                     // battery
+            .number("(-?d+.d+),")                // altitude (meters)
+            .number("(d+),")                     // battery (percentage)
             .number("(d+),")                     // satellites in use
             .number("(d+),")                     // satellites in view
-            .text("0")
-            .or()
-            .any()
-            .groupEnd()
+            .number("(d+.?d*)")                  // HDOP, confirmed with Eview manufacturer
             .compile();
 
     @Override
@@ -64,7 +60,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             getDeviceSession(channel, remoteAddress, sentence.substring(3, sentence.length()));
 
-        } else if (sentence.matches("![A-D].*")) {
+        } else if (sentence.matches("![BD].*")) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
@@ -93,8 +89,6 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             if (position.getCourse() > 360) {
                 position.setCourse(0);
             }
-
-            if (parser.hasNext(5)) {
 
                 int flags = parser.nextInt(16);
 
@@ -127,16 +121,14 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
                 position.setAltitude(parser.nextDouble());
 
-                position.set(Position.KEY_BATTERY, parser.next());
-                position.set(Position.KEY_SATELLITES, parser.next());
-
-            }
+                position.set(Position.KEY_BATTERY, parser.nextInt());
+                position.set(Position.KEY_SATELLITES, parser.nextInt());
+                position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
+                position.set(Position.KEY_HDOP, parser.nextDouble());
 
             return position;
-
         }
 
         return null;
     }
-
 }
