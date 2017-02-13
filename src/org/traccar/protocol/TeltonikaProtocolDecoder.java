@@ -82,12 +82,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 9:
                 position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
                 break;
-            case 21:
-                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                break;
-            case 22:
-                position.set("profile", buf.readUnsignedByte());
-                break;
             case 66:
                 position.set(Position.KEY_POWER, buf.readUnsignedShort() + "mV");
                 break;
@@ -95,7 +89,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, buf.readUnsignedShort() + "mV");
                 break;
             case 70:
-                position.set("pcbTemp", buf.readInt() * 0.1);
+                position.set("pcbTemp", (length == 4 ? buf.readInt() : buf.readShort()) * 0.1);
                 break;
             case 72:
                 position.set(Position.PREFIX_TEMP + 1, buf.readInt() * 0.1);
