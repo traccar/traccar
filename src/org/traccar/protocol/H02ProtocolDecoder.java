@@ -165,16 +165,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
-            .number("(?:(dd)(dd)(dd))?,")        // date (ddmmyy)
+            .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
             .any()
-            .number("(x{8})")                    // status
-            .groupBegin()
-            .number(", *(x+),")                  // mcc
-            .number(" *(x+),")                   // mnc
-            .number(" *(x+),")                   // lac
-            .number(" *(x+)")                    // cid
-            .groupEnd("?")
-            .any()
+            .number(",(x{8})")                   // status
+            .expression("(?:#|,.*)")
             .compile();
 
     private static final Pattern PATTERN_NBR = new PatternBuilder()
