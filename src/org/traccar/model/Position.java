@@ -75,6 +75,7 @@ public class Position extends Message {
     public static final String ALARM_LOW_SPEED = "lowspeed";
     public static final String ALARM_OVERSPEED = "overspeed";
     public static final String ALARM_FALL_DOWN = "fallDown";
+    public static final String ALARM_LOW_POWER = "lowPower";
     public static final String ALARM_LOW_BATTERY = "lowBattery";
     public static final String ALARM_FAULT = "fault";
     public static final String ALARM_POWER_OFF = "powerOff";
@@ -97,6 +98,7 @@ public class Position extends Message {
     public static final String ALARM_BONNET = "bonnet";
     public static final String ALARM_FOOT_BRAKE = "footBrake";
     public static final String ALARM_OIL_LEAK = "oilLeak";
+    public static final String ALARM_TAMPERING = "tampering";
 
     private String protocol;
 

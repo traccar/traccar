@@ -35,7 +35,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$")
-            .expression("...,")                  // type
+            .expression("(...),")                // type
             .expression("[LH],")                 // history
             .number("(d+),")                     // imei
             .number("(dd)(dd)(dddd),")           // date
@@ -53,7 +53,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // visible satellites
             .number("[^,]*,")                    // operator
             .number("d+,")                       // rssi
-            .number("x+,")                       // cid
+            .number("[^,]*,")                       // cid
             .expression("([01]),")               // ignition
             .number("(d+.?d*),")                 // battery
             .number("(d+.?d*),")                 // power
@@ -72,6 +72,8 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String type = parser.next();
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
@@ -80,6 +82,31 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        switch (type) {
+            case "rmv":
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                break;
+            case "ebl":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                break;
+            case "ibl":
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            case "tmp":
+            case "smt":
+            case "btt":
+                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                break;
+            case "ion":
+                position.set(Position.KEY_IGNITION, true);
+                break;
+            case "iof":
+                position.set(Position.KEY_IGNITION, false);
+                break;
+            default:
+                break;
+        }
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
