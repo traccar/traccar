@@ -1,17 +1,15 @@
 package org.traccar.geocoder;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class GeocoderTest {
 
-    private boolean enable = false;
-
+    @Ignore
     @Test
     public void test() throws InterruptedException {
-        if (enable) {
-            testGoogle();
-        }
+        testGoogle();
     }
 
     private String address;
