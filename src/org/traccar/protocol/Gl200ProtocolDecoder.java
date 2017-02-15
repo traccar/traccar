@@ -107,7 +107,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_LOCATION = new PatternBuilder()
-            .number("(?:d{1,2})?,")              // gps accuracy
+            .number("(d{1,2})?,")                // hdop
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
             .number("(-?d{1,5}.d)?,")            // altitude
@@ -399,6 +399,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeLocation(Position position, Parser parser) {
+        position.set(Position.KEY_HDOP, parser.next());
+
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
