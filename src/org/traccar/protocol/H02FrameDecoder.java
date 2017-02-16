@@ -50,7 +50,12 @@ public class H02FrameDecoder extends FrameDecoder {
                 // Return text message
                 int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '#');
                 if (index != -1) {
-                    return buf.readBytes(index + 1 - buf.readerIndex());
+                    ChannelBuffer result = buf.readBytes(index + 1 - buf.readerIndex());
+                    while (buf.readable()
+                            && (buf.getByte(buf.readerIndex()) == '\r' || buf.getByte(buf.readerIndex()) == '\n')) {
+                        buf.readByte(); // skip new line
+                    }
+                    return result;
                 }
 
                 break;
