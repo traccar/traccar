@@ -34,24 +34,16 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    // The !A record is not in the documentation for MiniFinder or EV-07S.
-    // Eview, the manufacturer, indicated that resellers could implement new record types.
-    // Using the data in MiniFinderProtocolDecoderTest.java as a guide
     private static final Pattern PATTERN_A = new PatternBuilder()
             .expression("!A,")
             .number("(d+)/(d+)/(d+),")           // date
             .number("(d+):(d+):(d+),")           // time
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
-            .number("(d+.?d*),")                 // unknown
-            .number("(d+.?d*),")                 // unknown
-            .number("(d+.?d*)")                  // unknown
+            .any()
             .compile();
 
-    // The !C record is not in the documentation for MiniFinder or EV-07S
-    // Eview, the manufacturer, indicated that resellers could implement new record types.
-    // Using the data in MiniFinderProtocolDecoderTest.java as a guide
-    private static final Pattern PATTERN_C = new PatternBuilder()
+   private static final Pattern PATTERN_C = new PatternBuilder()
             .expression("!C,")
             .number("(d+)/(d+)/(d+),")           // date
             .number("(d+):(d+):(d+),")           // time
@@ -62,9 +54,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+),")                     // flags
             .number("(-?d+.d+),")                // altitude (meters)
             .number("(d+),")                     // battery (percentage)
-            .number("(d+.?d*),")                 // unknown
-            .number("(d+.?d*),")                 // unknown
-            .number("(d+.?d*)")                  // unknown
+            .any()
             .compile();
 
     // The !B (buffered data) records are the same as !D (live data) records.
@@ -82,7 +72,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // battery (percentage)
             .number("(d+),")                     // satellites in use
             .number("(d+),")                     // satellites in view
-            .number("(d+.?d*)")                  // HDOP, confirmed with Eview manufacturer
+            .number("(d+.?d*)")                  // hdop
             .compile();
 
     private void decodeFlags(Position position, int flags) {
@@ -201,9 +191,6 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_BATTERY, parser.nextInt());
 
-            // Ignoring last three fields, unknown
-            position.set("unknown", parser.next() + "," + parser.next() + "," + parser.next());
-
             position.set(Position.KEY_TYPE, sentence.substring(1, 2));
 
             return position;
@@ -227,14 +214,12 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
 
-            // Ignoring last three fields, unknown
-            position.set("unknown", parser.next() + "," + parser.next() + "," + parser.next());
+            position.set(Position.KEY_TYPE, sentence.substring(1, 2));
 
             return position;
         }
 
-        // If we get here, we didn't understand the message
-
         return null;
     }
+
 }
