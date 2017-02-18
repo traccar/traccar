@@ -95,8 +95,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude(buf.readUnsignedShort());
 
-        buf.readUnsignedShort(); // satellites in fix
-        buf.readUnsignedShort(); // satellites in track
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedShort()); // satellites in fix
+        position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedShort()); // satellites in track
         buf.readUnsignedShort(); // GPS antenna state
 
         position.setSpeed(buf.readUnsignedShort() * 0.194384);
@@ -107,7 +107,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
-        buf.readUnsignedShort(); // battery charger status
+        position.set(Position.KEY_CHARGE, buf.readUnsignedShort()); // battery charger status
 
         position.setTime(convertTimestamp(buf.readUnsignedInt()));
 
@@ -133,8 +133,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude(buf.readUnsignedShort());
 
-        buf.readUnsignedByte(); // satellites in fix
-        buf.readUnsignedByte(); // satellites in track
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte()); // satellites in fix
+        position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte()); // satellites in track
 
         position.setSpeed(buf.readUnsignedShort() * 0.194384);
         position.setCourse(buf.readUnsignedShort());
@@ -219,8 +219,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(buf.readInt() * 0.0000001);
         position.setAltitude(buf.readUnsignedShort());
 
-        buf.readUnsignedByte(); // satellites in fix
-        buf.readUnsignedByte(); // satellites in track
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte()); // satellites in fix
+        position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte()); // satellites in track
 
         position.setSpeed(buf.readUnsignedShort() * 0.194384);
         position.setCourse(buf.readUnsignedShort() * 0.1);
@@ -258,7 +258,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
         position.setCourse(buf.readUnsignedByte() * 2.0);
 
-        buf.readUnsignedByte(); // satellites in fix
+        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte()); // satellites in fix
 
         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
