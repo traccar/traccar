@@ -6,10 +6,8 @@ import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Assert;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 import javax.xml.bind.DatatypeConverter;
