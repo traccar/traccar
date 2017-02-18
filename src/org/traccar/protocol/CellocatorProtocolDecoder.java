@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,19 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(short reason) {
+        switch (reason) {
+            case 70:
+                return Position.ALARM_SOS;
+            case 80:
+                return Position.ALARM_POWER_CUT;
+            case 81:
+                return Position.ALARM_LOW_POWER;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -106,7 +119,8 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             operator += buf.readUnsignedByte();
 
             buf.readUnsignedByte(); // reason data
-            buf.readUnsignedByte(); // reason
+            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+
             buf.readUnsignedByte(); // mode
             buf.readUnsignedInt(); // IO
 
