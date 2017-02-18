@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ning.http.client.AsyncHttpClient;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
@@ -281,9 +282,14 @@ public final class Context {
             velocityProperties.setProperty("runtime.log.logsystem.class",
                     "org.apache.velocity.runtime.log.NullLogChute");
 
-            String address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
-            int port = config.getInteger("web.port", 8082);
-            String webUrl = URIUtil.newURI("http", address, port, "", "");
+            String address;
+            try {
+                address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                address = "localhost";
+            }
+
+            String webUrl = URIUtil.newURI("http", address, config.getInteger("web.port", 8082), "", "");
             webUrl = Context.getConfig().getString("web.url", webUrl);
             velocityProperties.setProperty("web.url", webUrl);
 
