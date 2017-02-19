@@ -145,7 +145,7 @@ public class ProtocolTest extends BaseTest {
             } else {
 
                 Assert.assertNotNull(position.getFixTime());
-                Assert.assertTrue("year > 2000", position.getFixTime().after(new Date(946684800000L)));
+                Assert.assertTrue("year > 1999", position.getFixTime().after(new Date(915148800000L)));
                 Assert.assertTrue("time < +25 hours",
                         position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000);
 
