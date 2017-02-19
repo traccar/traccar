@@ -275,6 +275,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .any()
+            .number("(d{1,2})?,")                // hdop
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
             .number("(-?d{1,5}.d)?,")            // altitude
@@ -399,7 +400,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeLocation(Position position, Parser parser) {
-        position.set(Position.KEY_HDOP, parser.next());
+        int hdop = parser.nextInt();
+        position.setValid(hdop > 0);
+        position.set(Position.KEY_HDOP, hdop);
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
@@ -705,12 +708,15 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        int hdop = parser.nextInt();
+        position.setValid(hdop > 0);
+        position.set(Position.KEY_HDOP, hdop);
+
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
         if (parser.hasNext(2)) {
-            position.setValid(true);
             position.setLongitude(parser.nextDouble());
             position.setLatitude(parser.nextDouble());
         } else {
