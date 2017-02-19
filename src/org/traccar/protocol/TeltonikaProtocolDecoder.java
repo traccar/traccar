@@ -162,7 +162,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(locationMask, 6)) {
-                    buf.readUnsignedByte(); // rssi
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 }
 
                 if (BitUtil.check(locationMask, 7)) {
