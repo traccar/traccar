@@ -34,46 +34,58 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private static final Pattern PATTERN_A = new PatternBuilder()
-            .expression("!A,")
+    private static final Pattern PATTERN_FIX = new PatternBuilder()
             .number("(d+)/(d+)/(d+),")           // date
             .number("(d+):(d+):(d+),")           // time
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
-            .any()
             .compile();
 
-   private static final Pattern PATTERN_C = new PatternBuilder()
-            .expression("!C,")
-            .number("(d+)/(d+)/(d+),")           // date
-            .number("(d+):(d+):(d+),")           // time
-            .number("(-?d+.d+),")                // latitude
-            .number("(-?d+.d+),")                // longitude
+    private static final Pattern PATTERN_STATE = new PatternBuilder()
             .number("(d+.?d*),")                 // speed (km/h)
             .number("(d+.?d*),")                 // course
             .number("(x+),")                     // flags
             .number("(-?d+.d+),")                // altitude (meters)
             .number("(d+),")                     // battery (percentage)
-            .any()
             .compile();
 
-    // The !B (buffered data) records are the same as !D (live data) records.
-    // This was confirmed with the manufacturer, Eview.
-    private static final Pattern PATTERN_BD = new PatternBuilder()
-            .expression("![BD],")
-            .number("(d+)/(d+)/(d+),")           // date
-            .number("(d+):(d+):(d+),")           // time
-            .number("(-?d+.d+),")                // latitude
-            .number("(-?d+.d+),")                // longitude
-            .number("(d+.?d*),")                 // speed (km/h)
-            .number("(d+.?d*),")                 // course
-            .number("(x+),")                     // flags
-            .number("(-?d+.d+),")                // altitude (meters)
-            .number("(d+),")                     // battery (percentage)
+    private static final Pattern PATTERN_GPS_PRECISION = new PatternBuilder()
             .number("(d+),")                     // satellites in use
             .number("(d+),")                     // satellites in view
             .number("(d+.?d*)")                  // hdop
             .compile();
+
+    private static final Pattern PATTERN_A = new PatternBuilder()
+            .text("!A,")
+            .expression(PATTERN_FIX.pattern())
+            .any()                               // unknown 3 fields
+            .compile();
+
+   private static final Pattern PATTERN_C = new PatternBuilder()
+            .text("!C,")
+            .expression(PATTERN_FIX.pattern())
+            .expression(PATTERN_STATE.pattern())
+            .any()                               // unknown 3 fields
+            .compile();
+
+    // The !B (buffered data) records are the same as !D (live data) records.
+    private static final Pattern PATTERN_BD = new PatternBuilder()
+            .expression("![BD],")
+            .expression(PATTERN_FIX.pattern())
+            .expression(PATTERN_STATE.pattern())
+            .expression(PATTERN_GPS_PRECISION.pattern())
+            .compile();
+
+    private void decodeFix(Position position, Parser parser) {
+
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setTime(dateBuilder.getDate());
+
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+    }
 
     private void decodeFlags(Position position, int flags) {
 
@@ -105,6 +117,29 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, BitUtil.check(flags, 22));
     }
 
+    private void decodeState(Position position, Parser parser) {
+
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+
+        position.setCourse(parser.nextDouble());
+        if (position.getCourse() > 360) {
+            position.setCourse(0);
+        }
+
+        decodeFlags(position, parser.nextInt(16));
+
+        position.setAltitude(parser.nextDouble());
+
+        position.set(Position.KEY_BATTERY, parser.nextInt());
+    }
+
+    private void decodeGPSPrecision(Position position, Parser parser) {
+
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -123,98 +158,49 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (sentence.startsWith("!B,") || sentence.startsWith("!D,")) {
+        if (!sentence.matches("![A-D],.*")) {
+            return null;
+        }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        String recordType = sentence.substring(1, 2);
+        position.set(Position.KEY_TYPE, recordType);
+
+        if (recordType.matches("[BD]")) {
             Parser parser = new Parser(PATTERN_BD, sentence);
             if (!parser.matches()) {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
-
-            position.setLatitude(parser.nextDouble());
-            position.setLongitude(parser.nextDouble());
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-
-            position.setCourse(parser.nextDouble());
-            if (position.getCourse() > 360) {
-                position.setCourse(0);
-            }
-
-            decodeFlags(position, parser.nextInt(16));
-
-            position.setAltitude(parser.nextDouble());
-
-            position.set(Position.KEY_BATTERY, parser.nextInt());
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
-            position.set(Position.KEY_HDOP, parser.nextDouble());
-
-            position.set(Position.KEY_TYPE, sentence.substring(1, 2));
+            decodeFix(position, parser);
+            decodeState(position, parser);
+            decodeGPSPrecision(position, parser);
 
             return position;
         }
 
-        if (sentence.startsWith("!C,")) {
+        if (recordType.matches("C")) {
             Parser parser = new Parser(PATTERN_C, sentence);
             if (!parser.matches()) {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
-
-            position.setLatitude(parser.nextDouble());
-            position.setLongitude(parser.nextDouble());
-            position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-
-            position.setCourse(parser.nextDouble());
-            if (position.getCourse() > 360) {
-                position.setCourse(0);
-            }
-
-            decodeFlags(position, parser.nextInt(16));
-
-            position.setAltitude(parser.nextDouble());
-
-            position.set(Position.KEY_BATTERY, parser.nextInt());
-
-            position.set(Position.KEY_TYPE, sentence.substring(1, 2));
+            decodeFix(position, parser);
+            decodeState(position, parser);
 
             return position;
         }
 
-        if (sentence.startsWith("!A,")) {
+        if (recordType.matches("A")) {
             Parser parser = new Parser(PATTERN_A, sentence);
             if (!parser.matches()) {
                 return null;
             }
 
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
-
-            position.setLatitude(parser.nextDouble());
-            position.setLongitude(parser.nextDouble());
-
-            position.set(Position.KEY_TYPE, sentence.substring(1, 2));
+            decodeFix(position, parser);
 
             return position;
         }
