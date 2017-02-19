@@ -50,9 +50,9 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.?d*),")               // altitude
             .number("(d+.d+),")                  // hdop
             .number("(d+),")                     // satellites
-            .number("d+,")                       // visible satellites
-            .number("[^,]*,")                    // operator
-            .number("d+,")                       // rssi
+            .number("(d+),")                     // visible satellites
+            .number("([^,]*),")                  // operator
+            .number("(d+),")                     // rssi
             .number("x+,")                       // cid
             .expression("([01]),")               // ignition
             .number("(d+.?d*),")                 // battery
@@ -95,6 +95,9 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_HDOP, parser.nextDouble());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
+        position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
+        position.set("operator", parser.next());
+        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
         position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_POWER, parser.nextDouble());
