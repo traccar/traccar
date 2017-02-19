@@ -456,11 +456,11 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set("dtcsCodes", parser.next());
         position.set(Position.KEY_THROTTLE, parser.next());
         position.set(Position.KEY_FUEL, parser.next());
-        position.set(Position.KEY_OBD_ODOMETER, parser.next());
+        position.set(Position.KEY_OBD_ODOMETER, parser.nextInt() * 1000);
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
         if (parser.hasNext(6)) {
             DateBuilder dateBuilder = new DateBuilder()
@@ -515,7 +515,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_BATTERY, parser.next());
 
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_HOURS, parser.next());
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
@@ -671,7 +671,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_BATTERY, parser.next());
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
