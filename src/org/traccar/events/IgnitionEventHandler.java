@@ -30,10 +30,7 @@ public class IgnitionEventHandler extends BaseEventHandler {
     @Override
     protected Collection<Event> analyzePosition(Position position) {
         Device device = Context.getIdentityManager().getDeviceById(position.getDeviceId());
-        if (device == null) {
-            return null;
-        }
-        if (!Context.getIdentityManager().isLatestPosition(position) || !position.getValid()) {
+        if (device == null || !Context.getIdentityManager().isLatestPosition(position)) {
             return null;
         }
 

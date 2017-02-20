@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .text("RGP")                         // type
+            .expression("(?:RGP|RCQ|RBR)")       // type
+            .number("(?:dd)?")
             .number("(dd)(dd)(dd)")              // date
             .number("(dd)(dd)(dd)")              // time
             .groupEnd()
@@ -56,6 +57,13 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("([-+]ddd)(d{5})")           // longitude
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
+            .groupBegin()
+            .number("(xx)")                      // input
+            .number("(xx)")                      // satellites
+            .number("(ddd)")                     // battery
+            .number("(x{8})")                    // odometer
+            .number("[01]")                      // gps power
+            .groupEnd("?")
             .number("(d)")                       // fix mode
             .any()
             .compile();
@@ -93,15 +101,10 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        String week = parser.next();
-        String day = parser.next();
-        String seconds = parser.next();
-        if (seconds != null) {
-            if (week != null && day != null) {
-                position.setTime(getTime(Integer.parseInt(week), Integer.parseInt(day), Integer.parseInt(seconds)));
-            } else {
-                position.setTime(getTime(Integer.parseInt(seconds)));
-            }
+        if (parser.hasNext(2)) {
+            position.setTime(getTime(parser.nextInt(), parser.nextInt(), parser.nextInt()));
+        } else if (parser.hasNext()) {
+            position.setTime(getTime(parser.nextInt()));
         }
 
         if (parser.hasNext(6)) {
@@ -115,6 +118,14 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
+
+        if (parser.hasNext(4)) {
+            position.set(Position.KEY_INPUT, parser.nextInt(16));
+            position.set(Position.KEY_SATELLITES, parser.nextInt(16));
+            position.set(Position.KEY_BATTERY, parser.nextInt());
+            position.set(Position.KEY_ODOMETER, parser.nextLong(16));
+        }
+
         position.setValid(parser.nextInt() != 0);
 
         String[] attributes = null;

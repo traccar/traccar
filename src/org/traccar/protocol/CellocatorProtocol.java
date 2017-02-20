@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
 import java.util.List;
@@ -28,6 +29,8 @@ public class CellocatorProtocol extends BaseProtocol {
 
     public CellocatorProtocol() {
         super("cellocator");
+        setSupportedCommands(
+                Command.TYPE_OUTPUT_CONTROL);
     }
 
     @Override
@@ -36,6 +39,7 @@ public class CellocatorProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new CellocatorFrameDecoder());
+                pipeline.addLast("objectEncoder", new CellocatorProtocolEncoder());
                 pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         };
@@ -45,6 +49,7 @@ public class CellocatorProtocol extends BaseProtocol {
         server = new TrackerServer(new ConnectionlessBootstrap(), getName()) {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
+                pipeline.addLast("objectEncoder", new CellocatorProtocolEncoder());
                 pipeline.addLast("objectDecoder", new CellocatorProtocolDecoder(CellocatorProtocol.this));
             }
         };

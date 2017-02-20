@@ -102,6 +102,10 @@ public class At2000ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
+            if (buf.capacity() <= BLOCK_LENGTH) {
+                return null; // empty message
+            }
+
             byte[] data = new byte[buf.capacity() - BLOCK_LENGTH];
             buf.readBytes(data);
             buf = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, cipher.update(data));

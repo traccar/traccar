@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.ning.http.client.AsyncHttpClient;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
@@ -208,15 +209,12 @@ public final class Context {
             String type = config.getString("geocoder.type", "google");
             String url = config.getString("geocoder.url");
             String key = config.getString("geocoder.key");
+            String language = config.getString("geocoder.language");
 
             int cacheSize = config.getInteger("geocoder.cacheSize");
             switch (type) {
                 case "nominatim":
-                    if (key != null) {
-                        geocoder = new NominatimGeocoder(url, key, cacheSize);
-                    } else {
-                        geocoder = new NominatimGeocoder(url, cacheSize);
-                    }
+                    geocoder = new NominatimGeocoder(url, key, cacheSize);
                     break;
                 case "gisgraphy":
                     geocoder = new GisgraphyGeocoder(url, cacheSize);
@@ -234,17 +232,10 @@ public final class Context {
                     geocoder = new FactualGeocoder(url, key, cacheSize);
                     break;
                 case "geocodefarm":
-                    if (key != null) {
-                        geocoder = new GeocodeFarmGeocoder(key, cacheSize);
-                    } else {
-                        geocoder = new GeocodeFarmGeocoder(cacheSize);
-                    }
+                    geocoder = new GeocodeFarmGeocoder(key, cacheSize);
+                    break;
                 default:
-                    if (key != null) {
-                        geocoder = new GoogleGeocoder(key, cacheSize);
-                    } else {
-                        geocoder = new GoogleGeocoder(cacheSize);
-                    }
+                    geocoder = new GoogleGeocoder(key, language, cacheSize);
                     break;
             }
         }
@@ -291,9 +282,14 @@ public final class Context {
             velocityProperties.setProperty("runtime.log.logsystem.class",
                     "org.apache.velocity.runtime.log.NullLogChute");
 
-            String address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
-            int port = config.getInteger("web.port", 8082);
-            String webUrl = URIUtil.newURI("http", address, port, "", "");
+            String address;
+            try {
+                address = config.getString("web.address", InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                address = "localhost";
+            }
+
+            String webUrl = URIUtil.newURI("http", address, config.getInteger("web.port", 8082), "", "");
             webUrl = Context.getConfig().getString("web.url", webUrl);
             velocityProperties.setProperty("web.url", webUrl);
 

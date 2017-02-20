@@ -55,6 +55,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     private static final int TAG_ADC1 = 0x51;
     private static final int TAG_ADC2 = 0x52;
     private static final int TAG_ADC3 = 0x53;
+    private static final int TAG_ARRAY = 0xea;
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -81,7 +82,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             0x20, 0x33, 0x44, 0x90, 0xc0, 0xc2, 0xc3, 0xd3,
             0xd4, 0xdb, 0xdc, 0xdd, 0xde, 0xdf, 0xf0, 0xf9,
             0x5a, 0x47, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6,
-            0xf7, 0xf8
+            0xf7, 0xf8, 0xe2, 0xe9
         };
         for (int i : l1) {
             TAG_LENGTH_MAP.put(i, 1);
@@ -102,7 +103,11 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static int getTagLength(int tag) {
-        return TAG_LENGTH_MAP.get(tag);
+        Integer length = TAG_LENGTH_MAP.get(tag);
+        if (length == null) {
+            throw new IllegalArgumentException("Unknown tag: " + tag);
+        }
+        return length;
     }
 
     private void sendReply(Channel channel, int checksum) {
@@ -205,6 +210,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
                 case TAG_ADC3:
                     position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
+                    break;
+
+                case TAG_ARRAY:
+                    buf.skipBytes(buf.readUnsignedByte());
                     break;
 
                 default:

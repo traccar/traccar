@@ -46,7 +46,16 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
         try {
             Context.getDeviceManager().addDevice(device);
+
             Log.info("Automatically registered device " + uniqueId);
+
+            if (defaultGroupId != 0) {
+                Context.getPermissionsManager().refreshPermissions();
+                if (Context.getGeofenceManager() != null) {
+                    Context.getGeofenceManager().refresh();
+                }
+            }
+
             return device.getId();
         } catch (SQLException e) {
             Log.warning(e);

@@ -19,16 +19,18 @@ import javax.json.JsonObject;
 
 public class NominatimGeocoder extends JsonGeocoder {
 
-    public NominatimGeocoder() {
-        this("http://nominatim.openstreetmap.org/reverse", 0);
-    }
-
-    public NominatimGeocoder(String url, int cacheSize) {
-        super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1", cacheSize);
+    private static String formatUrl(String url, String key) {
+        if (url == null) {
+            url = "http://nominatim.openstreetmap.org/reverse";
+        }
+        if (key != null) {
+            url += "&key=" + key;
+        }
+        return url;
     }
 
     public NominatimGeocoder(String url, String key, int cacheSize) {
-        super(url + "?format=json&lat=%f&lon=%f&zoom=18&addressdetails=1&key=" + key, cacheSize);
+        super(formatUrl(url, key), cacheSize);
     }
 
     @Override

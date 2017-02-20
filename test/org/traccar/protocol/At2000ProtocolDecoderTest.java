@@ -19,6 +19,14 @@ public class At2000ProtocolDecoderTest extends ProtocolTest {
         decoder = new At2000ProtocolDecoder(new At2000Protocol());
 
         verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "01012f00000000000000000000000000003335373435343037313632373539388b57ec3a6ec7e3310a1ceb0a70fd751b8f2e7be6df1d6dcd80129f66fff0ea1c"));
+
+        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+                "89000000000000000000000000000000"));
+
+        decoder = new At2000ProtocolDecoder(new At2000Protocol());
+
+        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "01012f0000000000000000000000000000333537343534303731363036313936ddf189075add9a32d97b54073025963e65849a3a59940d05fd8db655fc84bc6d"));
 
         verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,

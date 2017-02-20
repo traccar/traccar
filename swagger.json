@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "3.9",
+        "version": "3.10",
         "title": "traccar"
     },
     "host": "demo.traccar.org",
@@ -384,10 +384,82 @@
                 }
             }
         },
+        "/permissions/calendars": {
+            "post": {
+                "summary": "Link a Calendar to a User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/CalendarPermission"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CalendarPermission"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Remove a Calendar from a User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/CalendarPermission"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/permissions/users": {
+            "post": {
+                "summary": "Link a User to a manager User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/UserPermission"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserPermission"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Remove a User from a manager User",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/UserPermission"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/positions": {
             "get": {
                 "summary" : "Fetches a list of Positions",
                 "description" : "Without any params, it returns a list of last known positions for all the user's Devices. _from_ and _to_ fields are not required with _id_",
+                "consumes": [
+                    "application/json",
+                    "text/csv",
+                    "application/gpx+xml"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/csv",
+                    "application/gpx+xml"
+                ],
                 "parameters": [
                     {
                         "name": "deviceId",
@@ -474,6 +546,14 @@
                 "consumes": [
                     "application/x-www-form-urlencoded"
                 ],
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -534,6 +614,15 @@
         "/users": {
             "get": {
                 "summary": "Fetch a list of Users",
+                "parameters": [
+                    {
+                      "name": "userId",
+                      "in": "query",
+                      "description": "Can only be used by admin or manager users",
+                      "required": false,
+                      "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -786,6 +875,14 @@
             "get": {
                 "summary": "Fetch a list of Positions within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
@@ -817,6 +914,14 @@
             "get": {
                 "summary": "Fetch a list of Events within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
@@ -857,6 +962,14 @@
             "get": {
                 "summary": "Fetch a list of ReportSummary within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
@@ -888,6 +1001,14 @@
             "get": {
                 "summary": "Fetch a list of ReportTrips within the time period for the Devices or Groups",
                 "description": "At least one _deviceId_ or one _groupId_ must be passed",
+                "consumes": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                ],
                 "parameters": [
                     {
                         "$ref": "#/parameters/deviceIdArray"
@@ -1010,6 +1131,81 @@
                     }
                 }
             }
+        },
+        "/calendars": {
+            "get": {
+                "summary": "Fetch a list of Calendars",
+                "description": "Without params, it returns a list of Calendars the user has access to",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/all"
+                    },
+                    {
+                        "$ref": "#/parameters/userId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Calendar"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/Calendar"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Calendar"
+                        }
+                    }
+                }
+            }
+        },
+        "/calendars/{id}": {
+            "put": {
+                "summary": "Update a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    },
+                    {
+                        "$ref": "#/parameters/Calendar"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Calendar"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a Calendar",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/entityId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1062,6 +1258,12 @@
                     "type": "number"
                 },
                 "address": {
+                    "type": "string"
+                },
+                "accuracy": {
+                    "type": "number"
+                },
+                "network": {
                     "type": "string"
                 },
                 "attributes": {}
@@ -1121,6 +1323,12 @@
                 },
                 "deviceLimit": {
                     "type": "integer"
+                },
+                "userLimit": {
+                    "type": "integer"
+                },
+                "deviceReadonly": {
+                    "type": "boolean"
                 },
                 "token": {
                     "type": "string"
@@ -1279,6 +1487,26 @@
                 }
             }
         },
+        "CalendarPermission": {
+            "properties": {
+                "userId": {
+                    "type": "integer"
+                },
+                "calendarId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UserPermission": {
+            "properties": {
+                "userId": {
+                    "type": "integer"
+                },
+                "managedUserId": {
+                    "type": "integer"
+                }
+            }
+        },
         "GroupGeofence": {
             "properties": {
                 "groupId": {
@@ -1320,6 +1548,9 @@
                 "area": {
                     "type": "string"
                 },
+                "calendarId": {
+                    "type": "integer"
+                },
                 "attributes": {}
             }
         },
@@ -1333,6 +1564,12 @@
                 },
                 "userId": {
                     "type": "integer"
+                },
+                "web": {
+                    "type": "boolean"
+                },
+                "mail": {
+                    "type": "boolean"
                 },
                 "attributes": {}
             }
@@ -1490,6 +1727,21 @@
                     "description": "in meters"
                 }
             }
+        },
+        "Calendar": {
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string",
+                    "description": "base64 encoded in iCalendar format"
+                },
+                "atributes": {}
+            }
         }
     },
     "parameters": {
@@ -1502,7 +1754,7 @@
         "all": {
             "name": "all",
             "in": "query",
-            "description": "Can only be used by admin users to fetch all entities",
+            "description": "Can only be used by admins or managers to fetch all entities",
             "type": "boolean"
         },
         "userId": {
@@ -1573,6 +1825,22 @@
                 "$ref": "#/definitions/GeofencePermission"
             }
         },
+        "CalendarPermission": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/CalendarPermission"
+            }
+        },
+        "UserPermission": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/UserPermission"
+            }
+        },
         "User": {
             "name": "body",
             "in": "body",
@@ -1595,6 +1863,14 @@
             "required": true,
             "schema": {
                 "$ref": "#/definitions/AttributeAlias"
+            }
+        },
+        "Calendar": {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+                "$ref": "#/definitions/Calendar"
             }
         },
         "deviceIdArray": {

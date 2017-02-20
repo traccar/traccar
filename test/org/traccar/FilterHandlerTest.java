@@ -1,14 +1,14 @@
 package org.traccar;
 
-import java.util.Date;
 import org.junit.After;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
-import org.traccar.model.Device;
+
+import java.util.Date;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class FilterHandlerTest extends BaseTest {
 
