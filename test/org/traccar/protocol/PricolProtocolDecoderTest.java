@@ -10,6 +10,9 @@ public class PricolProtocolDecoderTest extends ProtocolTest {
 
         PricolProtocolDecoder decoder = new PricolProtocolDecoder(new PricolProtocol());
 
+        verifyPosition(decoder, binary(
+                "3c5052493030303350020000011402110b222b0455152e4e001de819ca450000000000000003820249000000000000000000000000000000000000000040003e"));
+
         verifyNotNull(decoder, binary(
                 "3c544553303030324b02000000000000000000000000000000000000000000000000000000037c01f4000000000000000000000000000000000000000000003e"));
 
