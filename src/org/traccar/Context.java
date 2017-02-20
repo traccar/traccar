@@ -232,7 +232,7 @@ public final class Context {
                     geocoder = new FactualGeocoder(url, key, cacheSize);
                     break;
                 case "geocodefarm":
-                    geocoder = new GeocodeFarmGeocoder(key, cacheSize);
+                    geocoder = new GeocodeFarmGeocoder(key, language, cacheSize);
                     break;
                 default:
                     geocoder = new GoogleGeocoder(key, language, cacheSize);
