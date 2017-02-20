@@ -23,6 +23,8 @@ import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -80,6 +82,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void readCustomData(Position position, ChannelBuffer buf, String form) {
+        CellTower cellTower = new CellTower();
         String[] keys = form.substring(1).split("%");
         for (String key : keys) {
             switch (key) {
@@ -93,16 +96,19 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
                     break;
                 case "GQ":
-                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    cellTower.setSignalStrength((int) buf.readUnsignedByte());
                     break;
                 case "CE":
-                    buf.readUnsignedInt(); // cid
+                    cellTower.setCellId(buf.readUnsignedInt()); // cid
                     break;
                 case "LC":
-                    buf.readUnsignedShort(); // lac
+                    cellTower.setLocationAreaCode(buf.readUnsignedShort()); // lac
                     break;
                 case "CN":
-                    buf.readUnsignedInt(); // mcc + mnc
+                    int combinedMobileCodes; // Decimal:  CCCNN
+                    combinedMobileCodes = (int) (buf.readUnsignedInt() % 100000);
+                    cellTower.setMobileCountryCode(combinedMobileCodes / 100);
+                    cellTower.setMobileNetworkCode(combinedMobileCodes % 100);
                     break;
                 case "RL":
                     buf.readUnsignedByte(); // rxlev
@@ -167,6 +173,15 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 default:
                     break;
             }
+        }
+
+        if (cellTower.getMobileCountryCode() != null
+            && cellTower.getMobileNetworkCode() != null
+            && cellTower.getCellId() != null
+            && cellTower.getLocationAreaCode() != null) {
+            position.setNetwork(new Network(cellTower));
+        } else if (cellTower.getSignalStrength() != null) {
+            position.set(Position.KEY_RSSI, cellTower.getSignalStrength());
         }
     }
 
