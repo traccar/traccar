@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +34,7 @@ public final class NotificationFormatter {
     private NotificationFormatter() {
     }
 
-    public static MailMessage formatMessage(long userId, Event event, Position position) {
+    private static VelocityContext prepareContext(long userId, Event event, Position position) {
         Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
 
         VelocityContext velocityContext = new VelocityContext();
@@ -47,18 +48,42 @@ public final class NotificationFormatter {
             velocityContext.put("geofence", Context.getGeofenceManager().getGeofence(event.getGeofenceId()));
         }
         velocityContext.put("webUrl", Context.getVelocityEngine().getProperty("web.url"));
+        return velocityContext;
+    }
 
+    public static MailMessage formatMailMessage(long userId, Event event, Position position) {
+        VelocityContext velocityContext = prepareContext(userId, event, position);
+        String mailTemplatesPath = Context.getConfig().getString("mail.templatesPath", "mail") + "/";
         Template template = null;
         try {
-            template = Context.getVelocityEngine().getTemplate(event.getType() + ".vm", StandardCharsets.UTF_8.name());
+            template = Context.getVelocityEngine().getTemplate(mailTemplatesPath + event.getType() + ".vm",
+                    StandardCharsets.UTF_8.name());
         } catch (ResourceNotFoundException error) {
             Log.warning(error);
-            template = Context.getVelocityEngine().getTemplate("unknown.vm", StandardCharsets.UTF_8.name());
+            template = Context.getVelocityEngine().getTemplate(mailTemplatesPath + "unknown.vm",
+                    StandardCharsets.UTF_8.name());
         }
 
         StringWriter writer = new StringWriter();
         template.merge(velocityContext, writer);
         String subject = (String) velocityContext.get("subject");
         return new MailMessage(subject, writer.toString());
+    }
+
+    public static String formatSmsMessage(long userId, Event event, Position position) {
+        VelocityContext velocityContext = prepareContext(userId, event, position);
+        String smsTemplatesPath = Context.getConfig().getString("sms.templatesPath", "sms") + "/";
+        Template template = null;
+        try {
+            template = Context.getVelocityEngine().getTemplate(smsTemplatesPath + event.getType() + ".vm",
+                    StandardCharsets.UTF_8.name());
+        } catch (ResourceNotFoundException error) {
+            Log.warning(error);
+            template = Context.getVelocityEngine().getTemplate(smsTemplatesPath + "unknown.vm",
+                    StandardCharsets.UTF_8.name());
+        }
+        StringWriter writer = new StringWriter();
+        template.merge(velocityContext, writer);
+        return writer.toString();
     }
 }

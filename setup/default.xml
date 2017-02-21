@@ -64,14 +64,15 @@
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO users (name, email, hashedPassword, salt, readonly, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, userLimit, deviceReadonly, token, attributes)
-        VALUES (:name, :email, :hashedPassword, :salt, :readonly, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :userLimit, :deviceReadonly, :token, :attributes)
+        INSERT INTO users (name, email, phone, hashedPassword, salt, readonly, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, userLimit, deviceReadonly, token, attributes)
+        VALUES (:name, :email, :phone, :hashedPassword, :salt, :readonly, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :userLimit, :deviceReadonly, :token, :attributes)
     </entry>
 
     <entry key='database.updateUser'>
         UPDATE users SET
         name = :name,
         email = :email,
+        phone = :phone,
         readonly = :readonly,
         admin = :admin,
         map = :map,
@@ -268,8 +269,8 @@
     </entry>
 
     <entry key='database.insertNotification'>
-        INSERT INTO notifications (userId, type, web, mail, attributes)
-        VALUES (:userId, :type, :web, :mail, :attributes)
+        INSERT INTO notifications (userId, type, web, mail, sms, attributes)
+        VALUES (:userId, :type, :web, :mail, :sms, :attributes)
     </entry>
 
     <entry key='database.updateNotification'>
@@ -278,6 +279,7 @@
         type = :type,
         web = :web,
         mail = :mail,
+        sms = :sms,
         attributes = :attributes
         WHERE id = :id
     </entry>
