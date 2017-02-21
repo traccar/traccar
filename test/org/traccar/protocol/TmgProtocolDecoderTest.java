@@ -11,6 +11,12 @@ public class TmgProtocolDecoderTest extends ProtocolTest {
         TmgProtocolDecoder decoder = new TmgProtocolDecoder(new TmgProtocol());
 
         verifyPosition(decoder, text(
+                "$nor,L,868325023006341,14022017,103947,1,2836.6542,N,07706.2504,E,0.0,0.0,0.0,0.0,0,22,VODAFONE - DELH,15,49B7,1,2.57,13.2,00000010,00000000,0111,00.0,00.0,0.0,SW10.12,NA,#"));
+
+        verifyPosition(decoder, text(
+                "$rid,L,868325023006341,14022017,103706,1,2836.6542,N,07706.2504,E,0.0,0.0,0.0,0.0,0,22,VODAFONE - DELH,15,49B7,1,2.57,13.2,00000011,00000000,0111,00.0,00.0,0.0,SW10.12,0004909463,#"));
+
+        verifyPosition(decoder, text(
                 "$ion,H,868324023777431,27012017,101057,4,2830.2952,N,07705.2532,E,0.0,202.38,225.9,1.22,8,20,N.A,0,N.A,1,4.09,00.0,00000111,00000000,1101,00.0-00.0,00.0-0.0,4.42,01.02,#"));
 
         verifyPosition(decoder, text(

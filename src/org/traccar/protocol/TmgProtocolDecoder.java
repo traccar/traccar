@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -60,6 +61,11 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .expression("([01]+),")              // input
             .expression("([01]+),")              // output
             .expression("[01]+,")                // temper status
+            .number("(d+.?d*),")                 // adc1
+            .number("(d+.?d*),")                 // adc2
+            .number("d+.?d*,")                   // trip meter
+            .expression("([^,]*),")              // software version
+            .expression("([^,]*),").optional()   // rfid
             .any()
             .compile();
 
@@ -128,8 +134,21 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
         position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_INPUT, parser.nextInt(2));
-        position.set(Position.KEY_OUTPUT, parser.nextInt(2));
+
+        int input = parser.nextInt(2);
+        int output = parser.nextInt(2);
+
+        if (!BitUtil.check(input, 0)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+        }
+
+        position.set(Position.KEY_INPUT, input);
+        position.set(Position.KEY_OUTPUT, output);
+
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+        position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
+        position.set(Position.KEY_VERSION_FW, parser.next());
+        position.set(Position.KEY_RFID, parser.next());
 
         return position;
     }
