@@ -79,6 +79,7 @@ public class Geofence extends Extensible {
         return geometry;
     }
 
+    @JsonIgnore
     public void setGeometry(GeofenceGeometry geometry) {
         area = geometry.toWkt();
         this.geometry = geometry;
