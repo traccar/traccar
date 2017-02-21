@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,24 +38,6 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     public GalileoProtocolDecoder(GalileoProtocol protocol) {
         super(protocol);
     }
-
-    private static final int TAG_IMEI = 0x03;
-    private static final int TAG_DATE = 0x20;
-    private static final int TAG_COORDINATES = 0x30;
-    private static final int TAG_SPEED_COURSE = 0x33;
-    private static final int TAG_ALTITUDE = 0x34;
-    private static final int TAG_STATUS = 0x40;
-    private static final int TAG_POWER = 0x41;
-    private static final int TAG_BATTERY = 0x42;
-    private static final int TAG_ODOMETER = 0xd4;
-    private static final int TAG_REFRIGERATOR = 0x5b;
-    private static final int TAG_PRESSURE = 0x5c;
-    private static final int TAG_CAN = 0xc1;
-    private static final int TAG_ADC0 = 0x50;
-    private static final int TAG_ADC1 = 0x51;
-    private static final int TAG_ADC2 = 0x52;
-    private static final int TAG_ADC3 = 0x53;
-    private static final int TAG_ARRAY = 0xea;
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -96,10 +78,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         for (int i : l4) {
             TAG_LENGTH_MAP.put(i, 4);
         }
-        TAG_LENGTH_MAP.put(TAG_COORDINATES, 9);
-        TAG_LENGTH_MAP.put(TAG_IMEI, 15);
-        TAG_LENGTH_MAP.put(TAG_REFRIGERATOR, 7); // variable length
-        TAG_LENGTH_MAP.put(TAG_PRESSURE, 68);
+        TAG_LENGTH_MAP.put(0x5b, 7); // variable length
+        TAG_LENGTH_MAP.put(0x5c, 68);
     }
 
     private static int getTagLength(int tag) {
@@ -149,77 +129,87 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             tags.add(tag);
 
             switch (tag) {
-
-                case TAG_IMEI:
+                case 0x01:
+                    position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
+                    break;
+                case 0x02:
+                    position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+                    break;
+                case 0x03:
                     getDeviceSession(channel, remoteAddress, buf.readBytes(15).toString(StandardCharsets.US_ASCII));
                     break;
-
-                case TAG_DATE:
+                case 0x04:
+                    position.set("deviceId", buf.readUnsignedShort());
+                    break;
+                case 0x10:
+                    position.set(Position.KEY_INDEX, buf.readUnsignedShort());
+                    break;
+                case 0x20:
                     position.setTime(new Date(buf.readUnsignedInt() * 1000));
                     break;
-
-                case TAG_COORDINATES:
+                case 0x30:
                     hasLocation = true;
                     position.setValid((buf.readUnsignedByte() & 0xf0) == 0x00);
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
                     break;
-
-                case TAG_SPEED_COURSE:
+                case 0x33:
                     position.setSpeed(buf.readUnsignedShort() * 0.0539957);
                     position.setCourse(buf.readUnsignedShort() * 0.1);
                     break;
-
-                case TAG_ALTITUDE:
+                case 0x34:
                     position.setAltitude(buf.readShort());
                     break;
-
-                case TAG_STATUS:
+                case 0x40:
                     position.set(Position.KEY_STATUS, buf.readUnsignedShort());
                     break;
-
-                case TAG_POWER:
+                case 0x41:
                     position.set(Position.KEY_POWER, buf.readUnsignedShort());
                     break;
-
-                case TAG_BATTERY:
+                case 0x42:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
                     break;
-
-                case TAG_ODOMETER:
+                case 0x43:
+                    position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
+                    break;
+                case 0x44:
+                    position.set(Position.KEY_ACCELERATION, buf.readUnsignedInt());
+                    break;
+                case 0x45:
+                    position.set(Position.KEY_OUTPUT, buf.readUnsignedShort());
+                    break;
+                case 0x46:
+                    position.set(Position.KEY_INPUT, buf.readUnsignedShort());
+                    break;
+                case 0xd4:
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     break;
-
-                case TAG_CAN:
+                case 0xc1:
                     position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
                     position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
                     position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
                     break;
-
-                case TAG_ADC0:
+                case 0x50:
                     position.set(Position.PREFIX_ADC + 0, buf.readUnsignedShort());
                     break;
-
-                case TAG_ADC1:
+                case 0x51:
                     position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
                     break;
-
-                case TAG_ADC2:
+                case 0x52:
                     position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
                     break;
-
-                case TAG_ADC3:
+                case 0x53:
                     position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
                     break;
-
-                case TAG_ARRAY:
-                    buf.skipBytes(buf.readUnsignedByte());
+                case 0xe2:
+                    position.set("userData", buf.readUnsignedInt());
                     break;
-
+                case 0xea:
+                    position.set("userDataArray", ChannelBuffers.hexDump(buf.readBytes(buf.readUnsignedByte())));
+                    break;
                 default:
                     buf.skipBytes(getTagLength(tag));
                     break;
-
             }
         }
         if (hasLocation && position.getFixTime() != null) {

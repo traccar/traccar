@@ -208,7 +208,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
 
         int index = buf.readUnsignedByte();
 
-        position.set(Position.KEY_VERSION, buf.readUnsignedByte());
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
         position.set(Position.KEY_ODOMETER, (long) (buf.readUnsignedInt() * 1609.34));
 

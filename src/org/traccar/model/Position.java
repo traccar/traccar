@@ -39,7 +39,8 @@ public class Position extends Message {
     public static final String KEY_FUEL = "fuel";
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption";
     public static final String KEY_RFID = "rfid";
-    public static final String KEY_VERSION = "version";
+    public static final String KEY_VERSION_FW = "versionFw";
+    public static final String KEY_VERSION_HW = "versionHw";
     public static final String KEY_TYPE = "type";
     public static final String KEY_IGNITION = "ignition";
     public static final String KEY_FLAGS = "flags";
@@ -56,6 +57,8 @@ public class Position extends Message {
     public static final String KEY_ARMED = "armed";
     public static final String KEY_ACCURACY = "accuracy";
     public static final String KEY_GEOFENCE = "geofence";
+    public static final String KEY_ACCELERATION = "acceleration";
+    public static final String KEY_DEVICE_TEMP = "deviceTemp";
 
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed";
