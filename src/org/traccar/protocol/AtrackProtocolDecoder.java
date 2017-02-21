@@ -93,7 +93,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
                     break;
                 case "GQ":
-                    buf.readUnsignedByte(); // rssi
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     break;
                 case "CE":
                     buf.readUnsignedInt(); // cid
