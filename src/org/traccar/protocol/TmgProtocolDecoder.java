@@ -61,8 +61,8 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .expression("([01]+),")              // input
             .expression("([01]+),")              // output
             .expression("[01]+,")                // temper status
-            .number("(d+.?d*),")                 // adc1
-            .number("(d+.?d*),")                 // adc2
+            .number("(d+.?d*)[^,]*,")            // adc1
+            .number("(d+.?d*)[^,]*,")            // adc2
             .number("d+.?d*,")                   // trip meter
             .expression("([^,]*),")              // software version
             .expression("([^,]*),").optional()   // rfid
