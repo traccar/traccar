@@ -140,7 +140,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             position.setCourse(parser.nextDouble());
 
-            position.set(Position.KEY_RSSI, parser.nextInt());
+            int rssi = parser.nextInt();
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
 
@@ -150,7 +150,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt())));
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt(), rssi)));
 
             return position;
         }

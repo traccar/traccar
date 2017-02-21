@@ -166,11 +166,15 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(locationMask, 5)) {
-                    position.setNetwork(new Network(
-                            CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
-                }
+                    CellTower cellTower = CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort());
 
-                if (BitUtil.check(locationMask, 6)) {
+                    if (BitUtil.check(locationMask, 6)) {
+                        cellTower.setSignalStrength((int) buf.readUnsignedByte());
+                    }
+
+                    position.setNetwork(new Network(cellTower));
+
+                } else if (BitUtil.check(locationMask, 6)) {
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 }
 

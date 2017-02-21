@@ -132,8 +132,8 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
                     if (BitUtil.check(mask, 14)) {
                         position.setNetwork(new Network(CellTower.from(
                                 buf.readUnsignedShort(), buf.readUnsignedByte(),
-                                buf.readUnsignedShort(), buf.readUnsignedShort())));
-                        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                                buf.readUnsignedShort(), buf.readUnsignedShort(),
+                                buf.readUnsignedByte())));
                         buf.readUnsignedByte();
                     }
 

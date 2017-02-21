@@ -110,10 +110,14 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, battery + "%");
             }
 
-            position.setNetwork(new Network(
-                    CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort())));
+            int cid  = buf.readUnsignedShort();
+            int lac  = buf.readUnsignedShort();
+            int rssi = buf.readUnsignedByte();
 
-            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            CellTower cellTower = CellTower.fromCidLac(cid, lac);
+            cellTower.setSignalStrength(rssi);
+            position.setNetwork(new Network(cellTower));
+
             position.set(Position.KEY_INDEX, buf.readUnsignedByte());
 
         } else if (version == 1) {
@@ -125,13 +129,17 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setAltitude(buf.readUnsignedShort());
 
-            int cid = buf.readUnsignedShort();
-            int lac = buf.readUnsignedShort();
-            if (cid != 0 && lac != 0) {
-                position.setNetwork(new Network(CellTower.fromCidLac(cid, lac)));
-            }
+            int cid  = buf.readUnsignedShort();
+            int lac  = buf.readUnsignedShort();
+            int rssi = buf.readUnsignedByte();
 
-            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            if (cid != 0 && lac != 0) {
+                CellTower cellTower = CellTower.fromCidLac(cid, lac);
+                cellTower.setSignalStrength(rssi);
+                position.setNetwork(new Network(cellTower));
+            } else {
+                position.set(Position.KEY_RSSI, rssi);
+            }
 
         } else if (version == 2) {
 
@@ -259,9 +267,10 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.next());
         position.set(Position.KEY_STATUS, parser.nextInt(2));
 
-        position.setNetwork(new Network(CellTower.fromCidLac(parser.nextInt(), parser.nextInt())));
+        CellTower cellTower = CellTower.fromCidLac(parser.nextInt(), parser.nextInt());
+        cellTower.setSignalStrength(parser.nextInt());
+        position.setNetwork(new Network(cellTower));
 
-        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextLong() * 1000);
         position.set(Position.KEY_INDEX, parser.nextInt());
 

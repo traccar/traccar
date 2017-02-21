@@ -151,7 +151,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxxx)")                    // lac
             .number("(xxxx)")                    // cid
             .number("(dd)")                      // satellites
-            .number("(dd)")                      // gsm
+            .number("(dd)")                      // gsm (rssi)
             .number("(ddd)")                     // course
             .number("(ddd)")                     // speed
             .number("(dd.d)")                    // hdop
@@ -309,11 +309,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 1, parser.next());
             position.set(Position.PREFIX_TEMP + 2, parser.next());
 
-            position.setNetwork(new Network(
-                    CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16))));
-
+            CellTower cellTower = CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16));
             position.set(Position.KEY_SATELLITES, parser.nextInt());
-            position.set(Position.KEY_RSSI, parser.nextInt());
+            cellTower.setSignalStrength(parser.nextInt());
+            position.setNetwork(new Network(cellTower));
 
             position.setCourse(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
