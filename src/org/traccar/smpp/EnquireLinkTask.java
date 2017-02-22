@@ -43,13 +43,13 @@ public class EnquireLinkTask implements Runnable {
                 smppSession.enquireLink(new EnquireLink(), enquireLinkTimeout);
             } catch (SmppTimeoutException | SmppChannelException
                     | RecoverablePduException | UnrecoverablePduException error) {
-                Log.warning("Enquire link failed, executing reconnect: " + error);
+                Log.warning("Enquire link failed, executing reconnect: ", error);
                 smppClient.reconnect();
             } catch (InterruptedException error) {
                 Log.info("Enquire link interrupted, probably killed by reconnecting");
             }
         } else {
-            Log.error("Enquire link running while session is not connected");
+            Log.warning("Enquire link running while session is not connected");
         }
     }
 

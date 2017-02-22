@@ -193,7 +193,7 @@ public class SmppClient {
             submit.setSourceAddress(new Address(sourceTon, sourceNpi, sourceAddress));
             submit.setDestAddress(new Address(destTon, destNpi, destAddress));
             submit.setRegisteredDelivery(SmppConstants.REGISTERED_DELIVERY_SMSC_RECEIPT_REQUESTED);
-            submit.setDataCoding((byte) dataCoding);
+            submit.setDataCoding(dataCoding);
             submit.setShortMessage(textBytes);
             SubmitSmResp submitResponce = getSession().submit(submit, submitTimeout);
             Log.debug("SMS submited, msg_id: " + submitResponce.getMessageId());

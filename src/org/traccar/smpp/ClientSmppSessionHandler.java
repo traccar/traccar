@@ -43,11 +43,18 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
         PduResponse response = null;
         try {
             if (request instanceof DeliverSm) {
-                Log.debug("Message Received: "
-                        + CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
-                        smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()))
-                        + ", Source Address: "
-                        + ((DeliverSm) request).getSourceAddress().getAddress());
+                if (request.getOptionalParameters() != null) {
+                    Log.debug("Message Delivered: "
+                            + request.getOptionalParameter(SmppConstants.TAG_RECEIPTED_MSG_ID).getValueAsString()
+                            + ", State: "
+                            + request.getOptionalParameter(SmppConstants.TAG_MSG_STATE).getValueAsByte());
+                } else {
+                    Log.debug("Message Received: "
+                            + CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
+                            smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()))
+                            + ", Source Address: "
+                            + ((DeliverSm) request).getSourceAddress().getAddress());
+                }
             }
             response = request.createResponse();
         } catch (Throwable error) {
