@@ -73,7 +73,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextDouble());
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-        position.set(Position.KEY_ACCURACY, parser.nextDouble());
+        position.setAccuracy(parser.nextDouble());
 
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
