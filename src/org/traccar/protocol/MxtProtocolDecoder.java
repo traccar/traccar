@@ -134,7 +134,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(infoGroups, 2)) {
                 position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                 position.set(Position.KEY_HDOP, buf.readUnsignedByte());
-                buf.readUnsignedByte(); // GPS accuracy
+                position.setAccuracy(buf.readUnsignedByte());
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 buf.readUnsignedShort(); // time since boot
                 buf.readUnsignedByte(); // input voltage
