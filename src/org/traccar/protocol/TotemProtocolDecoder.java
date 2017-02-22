@@ -50,9 +50,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // date
             .expression("[^*]*").text("*")
             .number("xx|")                       // checksum
-            .number("d+.d+|")                    // pdop
+            .number("(d+.d+)|")                    // pdop
             .number("(d+.d+)|")                  // hdop
-            .number("d+.d+|")                    // vdop
+            .number("(d+.d+)|")                    // vdop
             .number("(d+)|")                     // io status
             .number("d+|")                       // time
             .number("d")                         // charged
@@ -242,7 +242,9 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setTime(dateBuilder.getDate());
 
+            position.set("pdop", parser.next());
             position.set(Position.KEY_HDOP, parser.next());
+            position.set("vdop", parser.next());
             position.set(Position.PREFIX_IO + 1, parser.next());
             position.set(Position.KEY_BATTERY, parser.next());
             position.set(Position.KEY_POWER, parser.nextDouble());
