@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.notification.EventForwarder;
+import org.traccar.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
 public final class Context {
@@ -177,6 +178,12 @@ public final class Context {
         return statisticsManager;
     }
 
+    private static SmppClient smppClient;
+
+    public static SmppClient getSmppManager() {
+        return smppClient;
+    }
+
     public static void init(String[] arguments) throws Exception {
 
         config = new Config();
@@ -278,7 +285,7 @@ public final class Context {
             notificationManager = new NotificationManager(dataManager);
             Properties velocityProperties = new Properties();
             velocityProperties.setProperty("file.resource.loader.path",
-                    Context.getConfig().getString("mail.templatesPath", "templates/mail") + "/");
+                    Context.getConfig().getString("templates.rootPath", "templates") + "/");
             velocityProperties.setProperty("runtime.log.logsystem.class",
                     "org.apache.velocity.runtime.log.NullLogChute");
 
@@ -306,6 +313,10 @@ public final class Context {
         aliasesManager = new AliasesManager(dataManager);
 
         statisticsManager = new StatisticsManager();
+
+        if (config.getBoolean("sms.smpp.enable")) {
+            smppClient = new SmppClient();
+        }
 
     }
 

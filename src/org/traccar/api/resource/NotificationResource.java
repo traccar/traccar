@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,12 @@ import org.traccar.api.BaseResource;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.notification.NotificationMail;
+import org.traccar.notification.NotificationSms;
+
+import com.cloudhopper.smpp.type.RecoverablePduException;
+import com.cloudhopper.smpp.type.SmppChannelException;
+import com.cloudhopper.smpp.type.SmppTimeoutException;
+import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
 @Path("users/notifications")
 @Produces(MediaType.APPLICATION_JSON)
@@ -62,8 +68,10 @@ public class NotificationResource extends BaseResource {
 
     @Path("test")
     @POST
-    public Response testMail() throws MessagingException {
+    public Response testMessage() throws MessagingException, RecoverablePduException,
+            UnrecoverablePduException, SmppTimeoutException, SmppChannelException, InterruptedException {
         NotificationMail.sendMailSync(getUserId(), new Event("test", 0), null);
+        NotificationSms.sendSmsSync(getUserId(), new Event("test", 0), null);
         return Response.noContent().build();
     }
 

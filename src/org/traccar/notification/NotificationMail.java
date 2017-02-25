@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +107,7 @@ public final class NotificationMail {
         }
 
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
-        MailMessage mailMessage = NotificationFormatter.formatMessage(userId, event, position);
+        MailMessage mailMessage = NotificationFormatter.formatMailMessage(userId, event, position);
         message.setSubject(mailMessage.getSubject());
         message.setContent(mailMessage.getBody(), "text/html; charset=utf-8");
 
