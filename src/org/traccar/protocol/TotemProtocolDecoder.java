@@ -218,11 +218,11 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
             }
             DateBuilder dateBuilder = new DateBuilder();
-            int year = 0;
+            int year = 0, month = 0, day = 0;
             if (pattern == PATTERN2) {
-                dateBuilder.setDay(parser.nextInt()).setMonth(parser.nextInt());
-                year = parser.nextInt();
-                dateBuilder.setYear(year);
+                day   = parser.nextInt();
+                month = parser.nextInt();
+                year  = parser.nextInt();
             }
             dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
@@ -233,13 +233,14 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(parser.nextDouble());
 
             if (pattern == PATTERN1) {
-                dateBuilder.setDay(parser.nextInt()).setMonth(parser.nextInt());
-                year = parser.nextInt();
-                dateBuilder.setYear(year);
+                day   = parser.nextInt();
+                month = parser.nextInt();
+                year  = parser.nextInt();
             }
             if (year == 0) {
                 return null; // ignore invalid data
             }
+            dateBuilder.setDate(year, month, day);
             position.setTime(dateBuilder.getDate());
 
             if (pattern == PATTERN1) {
@@ -286,19 +287,15 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(parser.next().equals("A"));
             position.set(Position.KEY_SATELLITES, parser.next());
-
             position.setCourse(parser.nextDouble());
             position.setSpeed(parser.nextDouble());
-
             position.set("pdop", parser.next());
-
             position.set(Position.KEY_ODOMETER, parser.next());
 
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
 
         } else if (pattern == PATTERN4) {
-
             position.set(Position.KEY_STATUS, parser.next());
 
             DateBuilder dateBuilder = new DateBuilder()
@@ -323,14 +320,12 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
             position.setCourse(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
-
             position.set(Position.KEY_HDOP, parser.nextDouble());
             position.set(Position.KEY_ODOMETER, parser.nextInt() * 1000);
 
             position.setValid(true);
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
-
         }
         if (channel != null) {
             channel.write("ACK OK\r\n");
