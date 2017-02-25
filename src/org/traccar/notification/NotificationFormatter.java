@@ -51,20 +51,14 @@ public final class NotificationFormatter {
         return velocityContext;
     }
 
-    private static Template getTemplate(Event event, boolean mail) {
+    private static Template getTemplate(Event event, String path) {
         Template template;
-        String subPath = "";
-        if (mail) {
-            subPath = Context.getConfig().getString("mail.templatesPath", "mail") + "/";
-        } else {
-            subPath  = Context.getConfig().getString("sms.templatesPath", "sms") + "/";
-        }
         try {
-            template = Context.getVelocityEngine().getTemplate(subPath + event.getType() + ".vm",
+            template = Context.getVelocityEngine().getTemplate(path + event.getType() + ".vm",
                     StandardCharsets.UTF_8.name());
         } catch (ResourceNotFoundException error) {
             Log.warning(error);
-            template = Context.getVelocityEngine().getTemplate(subPath + "unknown.vm",
+            template = Context.getVelocityEngine().getTemplate(path + "unknown.vm",
                     StandardCharsets.UTF_8.name());
         }
         return template;
@@ -73,14 +67,16 @@ public final class NotificationFormatter {
     public static MailMessage formatMailMessage(long userId, Event event, Position position) {
         VelocityContext velocityContext = prepareContext(userId, event, position);
         StringWriter writer = new StringWriter();
-        getTemplate(event, true).merge(velocityContext, writer);
+        getTemplate(event, Context.getConfig().getString("mail.templatesPath", "mail") + "/")
+                .merge(velocityContext, writer);
         return new MailMessage((String) velocityContext.get("subject"), writer.toString());
     }
 
     public static String formatSmsMessage(long userId, Event event, Position position) {
         VelocityContext velocityContext = prepareContext(userId, event, position);
         StringWriter writer = new StringWriter();
-        getTemplate(event, false).merge(velocityContext, writer);
+        getTemplate(event, Context.getConfig().getString("sms.templatesPath", "sms") + "/")
+                .merge(velocityContext, writer);
         return writer.toString();
     }
 }
