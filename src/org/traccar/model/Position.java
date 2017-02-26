@@ -61,6 +61,7 @@ public class Position extends Message {
     public static final String KEY_GEOFENCE = "geofence";
     public static final String KEY_ACCELERATION = "acceleration";
     public static final String KEY_DEVICE_TEMP = "deviceTemp";
+    public static final String KEY_OPERATOR = "operator";
 
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed";

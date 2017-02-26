@@ -178,7 +178,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(locationMask, 7)) {
-                    position.set("operator", buf.readUnsignedInt());
+                    position.set(Position.KEY_OPERATOR, buf.readUnsignedInt());
                 }
 
             } else {
