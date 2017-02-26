@@ -41,6 +41,7 @@ public class Position extends Message {
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption";
     public static final String KEY_RFID = "rfid";
     public static final String KEY_VERSION = "version";
+    public static final String KEY_VERSION_HARDWARE = "hardwareVersion";
     public static final String KEY_TYPE = "type";
     public static final String KEY_IGNITION = "ignition";
     public static final String KEY_FLAGS = "flags";

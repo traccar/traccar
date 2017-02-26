@@ -132,7 +132,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set("hardwareVersion", hardware);
+        position.set(Position.KEY_VERSION_HARDWARE, hardware);
         position.set(Position.KEY_VERSION, firmware);
 
         position.setDeviceTime(new DateBuilder()

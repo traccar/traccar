@@ -109,7 +109,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set("hardwareVersion", buf.readUnsignedByte()); // hardware version
+            position.set(Position.KEY_VERSION_HARDWARE, buf.readUnsignedByte()); // hardware version
             position.set(Position.KEY_VERSION, buf.readUnsignedByte()); // software version
             position.set("protocolVersion", buf.readUnsignedByte()); // protocol version
 

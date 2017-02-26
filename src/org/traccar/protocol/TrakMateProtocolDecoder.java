@@ -126,7 +126,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         position.set(Position.KEY_VERSION, parser.next());
-        position.set("hardwareVersion", parser.next()); // hardware version
+        position.set(Position.KEY_VERSION_HARDWARE, parser.next()); // hardware version
 
         return position;
     }
