@@ -213,7 +213,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+            position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0010) != 0) {
