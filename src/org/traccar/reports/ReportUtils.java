@@ -85,8 +85,10 @@ public final class ReportUtils {
                     case "meitrack":
                     case "galileo":
                     case "noran":
-                        BigDecimal v = new BigDecimal(firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL).toString());
-                        v = v.subtract(new BigDecimal(lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL).toString()));
+                        BigDecimal v = new BigDecimal(firstPosition.getAttributes()
+                                                        .get(Position.KEY_FUEL_LEVEL).toString());
+                        v = v.subtract(new BigDecimal(lastPosition.getAttributes()
+                                                        .get(Position.KEY_FUEL_LEVEL).toString()));
                         return v.setScale(2, RoundingMode.HALF_EVEN).toString() + " %";
                     default:
                         break;
