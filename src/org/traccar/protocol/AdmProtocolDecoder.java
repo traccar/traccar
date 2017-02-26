@@ -77,7 +77,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort() * 0.1);
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
 
-            position.set("acceleration", buf.readUnsignedByte()); // acceleration
+            position.set(Position.KEY_ACCELERATION, buf.readUnsignedByte()); // acceleration
 
             position.setAltitude(buf.readUnsignedShort());
 
