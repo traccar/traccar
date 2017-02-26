@@ -119,7 +119,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
     private void decodeCanData(ChannelBuffer buf, Position position) {
 
         buf.readUnsignedMedium(); // packet identifier
-        position.set(Position.KEY_VERSION, buf.readUnsignedByte()); // version
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte()); // version
         int count = buf.readUnsignedByte();
         buf.readUnsignedByte(); // batch count
         buf.readUnsignedShort(); // selector bit
@@ -183,7 +183,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                             position.set("serviceIndicator", ChannelBuffers.swapInt(value.readInt()));
                             break;
                         case 0x18:
-                            position.set(Position.KEY_VERSION, ChannelBuffers.swapInt(value.readInt()) * 0.01);
+                            position.set(Position.KEY_VERSION_FW, ChannelBuffers.swapInt(value.readInt()) * 0.01);
                             break;
                         default:
                             break;
@@ -435,7 +435,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             return;
         }
 
-        position.set(Position.KEY_VERSION, buf.readUnsignedByte()); // version
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte()); // version
         buf.readUnsignedShort(); // event
         buf.readUnsignedByte(); // data validity
         buf.readUnsignedByte(); // towed

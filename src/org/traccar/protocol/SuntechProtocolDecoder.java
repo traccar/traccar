@@ -65,7 +65,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_VERSION, values[index++]);
+        position.set(Position.KEY_VERSION_FW, values[index++]);
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -116,7 +116,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // model
         }
 
-        position.set(Position.KEY_VERSION, values[index++]);
+        position.set(Position.KEY_VERSION_FW, values[index++]);
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

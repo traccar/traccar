@@ -106,7 +106,7 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_OUTPUT, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextInt());
         position.set(Position.PREFIX_ADC + 2, parser.nextInt());
-        position.set(Position.KEY_VERSION, parser.next());
+        position.set(Position.KEY_VERSION_FW, parser.next());
         position.set(Position.KEY_ARCHIVE, parser.next().equals("R"));
 
         parser.next(); // checksum

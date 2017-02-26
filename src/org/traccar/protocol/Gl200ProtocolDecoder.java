@@ -387,8 +387,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set("deviceType", parser.next());
-        position.set(Position.KEY_VERSION, parser.nextInt(16));
-        position.set(Position.KEY_VERSION_HARDWARE, parser.nextInt(16));
+        position.set(Position.KEY_VERSION_FW, parser.nextInt(16));
+        position.set(Position.KEY_VERSION_HW, parser.nextInt(16));
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())

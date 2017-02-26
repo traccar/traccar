@@ -66,7 +66,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_VERSION, buf.readUnsignedByte()); // firmware version
+            position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte()); // firmware version
             buf.readUnsignedShort(); // index
 
             position.set(Position.KEY_STATUS, buf.readUnsignedShort());
