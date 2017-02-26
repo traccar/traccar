@@ -465,7 +465,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             } else if (type == 0x06) {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 5);
                 position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5);
-                position.set("serviceDistance", (buf.readUnsignedInt() - 2105540607) * 5);
+                position.set(Position.KEY_ODOMETER_SERVICE, (buf.readUnsignedInt() - 2105540607) * 5);
             } else if (type == 0x0A) {
                 ChannelBuffer brakeData = buf.readBytes(length);
                 position.set("absStatusCounter", brakeData.readUnsignedShort());
