@@ -32,7 +32,7 @@ public class Position extends Message {
     public static final String KEY_ALARM = "alarm";
     public static final String KEY_STATUS = "status";
     public static final String KEY_ODOMETER = "odometer"; // meters
-    public static final String KEY_TRIP_ODOMETER = "tripOdometer";
+    public static final String KEY_ODOMETER_TRIP = "tripOdometer";
     public static final String KEY_HOURS = "hours";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";

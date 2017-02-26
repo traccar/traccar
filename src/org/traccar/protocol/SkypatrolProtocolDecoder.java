@@ -154,7 +154,7 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(mask, 20)) {
-                position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt());
+                position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
             }
 
             if (BitUtil.check(mask, 21)) {
