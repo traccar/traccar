@@ -73,7 +73,7 @@ public class GpsmtaProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextDouble());
         position.setSpeed(parser.nextInt());
         position.setCourse(parser.nextInt());
-        parser.next();
+        position.setAccuracy(parser.nextInt());
         position.setAltitude(parser.nextInt());
 
         position.set(Position.KEY_STATUS, parser.nextInt());

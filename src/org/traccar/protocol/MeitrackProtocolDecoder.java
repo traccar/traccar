@@ -54,7 +54,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time
             .number("([AV]),")                   // validity
             .number("(d+),")                     // satellites
-            .number("(d+),")                     // gsm signal
+            .number("(d+),")                     // gsm signal (rssi)
             .number("(d+.?d*),")                 // speed
             .number("(d+),")                     // course
             .number("(d+.?d*),")                 // hdop
@@ -64,7 +64,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // mcc
             .number("(d+)|")                     // mnc
             .number("(x+)|")                     // lac
-            .number("(x+),")                     // cell
+            .number("(x+),")                     // cell id (cid)
             .number("(x+),")                     // state
             .number("(x+)?|")                    // adc1
             .number("(x+)?|")                    // adc2
@@ -115,7 +115,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.setValid(parser.next().equals("A"));
 
         position.set(Position.KEY_SATELLITES, parser.next());
-        position.set(Position.KEY_RSSI, parser.next());
+        int rssi = parser.nextInt();
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
@@ -128,7 +128,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set("runtime", parser.next());
 
         position.setNetwork(new Network(
-                CellTower.from(parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+                CellTower.from(parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16), rssi)));
 
         position.set(Position.KEY_STATUS, parser.next());
 
@@ -200,7 +200,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(buf.readUnsignedByte() == 1);
 
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            int rssi = buf.readUnsignedByte();
 
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
             position.setCourse(buf.readUnsignedShort());
@@ -214,7 +214,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.setNetwork(new Network(CellTower.from(
                     buf.readUnsignedShort(), buf.readUnsignedShort(),
-                    buf.readUnsignedShort(), buf.readUnsignedShort())));
+                    buf.readUnsignedShort(), buf.readUnsignedShort(),
+                    rssi)));
 
             position.set(Position.KEY_STATUS, buf.readUnsignedShort());
 

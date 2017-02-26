@@ -123,7 +123,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
-            position.set(Position.KEY_RSSI, parser.nextInt());
+            int rssi = parser.nextInt();
             position.set(Position.KEY_STATUS, parser.nextInt(16));
 
             int mcc = parser.nextInt();
@@ -133,7 +133,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_HDOP, parser.nextInt() * 0.1);
 
-            position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(16), parser.nextInt(16))));
+            position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(16), parser.nextInt(16), rssi)));
 
             position.set(Position.KEY_ODOMETER, parser.nextInt());
 

@@ -490,7 +490,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                         break;
                 }
                 buf.readUnsignedByte();
-                buf.readBytes(17); // vin
+                position.set(Position.KEY_VIN, buf.readBytes(17).toString(StandardCharsets.US_ASCII));
                 position.set("towedDetectionStatus", buf.readUnsignedByte());
             } else if (type == 0x0E) {
                 buf.skipBytes(length);

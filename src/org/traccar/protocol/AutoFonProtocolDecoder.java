@@ -23,6 +23,8 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -84,11 +86,14 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.PREFIX_TEMP + 1, buf.readByte());
-        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-        buf.readUnsignedShort(); // mcc
-        buf.readUnsignedShort(); // mnc
-        buf.readUnsignedShort(); // lac
-        buf.readUnsignedShort(); // cid
+
+        int rssi = buf.readUnsignedByte();
+        CellTower cellTower = CellTower.from(buf.readUnsignedShort(),
+                                             buf.readUnsignedShort(),
+                                             buf.readUnsignedShort(),
+                                             buf.readUnsignedShort(),
+                                             rssi);
+        position.setNetwork(new Network(cellTower));
 
         int valid = buf.readUnsignedByte();
         position.setValid((valid & 0xc0) != 0);
@@ -182,6 +187,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             buf.readByte(); // mode
             buf.readByte(); // gprs sending interval
 
+            // Should call position.setNetwork() here
             buf.skipBytes(6); // mcc, mnc, lac, cid
 
             int valid = buf.readUnsignedByte();
