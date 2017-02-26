@@ -102,8 +102,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(buf.readUnsignedShort() * 0.194384);
         position.setCourse(buf.readUnsignedShort());
 
-        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
-        buf.readUnsignedInt(); // delta distance
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance in meters
+        position.set(Position.KEY_DISTANCE, buf.readUnsignedInt()); // delta distance in meters
 
         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
@@ -140,8 +140,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(buf.readUnsignedShort());
 
         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
-        buf.readUnsignedShort(); // maximum speed
-        buf.readUnsignedShort(); // minimum speed
+        position.set("maximumSpeed", buf.readUnsignedShort()); // maximum speed
+        position.set("minimumSpeed", buf.readUnsignedShort()); // minimum speed
 
         position.set(Position.PREFIX_IO + 1, buf.readUnsignedShort()); // VSAUT1 voltage
         position.set(Position.PREFIX_IO + 2, buf.readUnsignedShort()); // VSAUT2 voltage
@@ -228,8 +228,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(buf.readUnsignedShort() * 0.194384);
         position.setCourse(buf.readUnsignedShort() * 0.1);
 
-        buf.readUnsignedByte(); // maximum speed
-        buf.readUnsignedByte(); // minimum speed
+        position.set("maximumSpeed", buf.readUnsignedByte()); // maximum speed
+        position.set("minimumSpeed", buf.readUnsignedByte()); // minimum speed
         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
 
         position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte()); // supply voltage 1
