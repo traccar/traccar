@@ -463,8 +463,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 position.set("brakeLining", buf.readUnsignedByte() * 0.4);
                 position.set("brakeTemperature", buf.readUnsignedByte() * 10);
             } else if (type == 0x06) {
-                position.set("totalDistance", buf.readUnsignedInt() * 5);
-                position.set("tripDistance", buf.readUnsignedInt() * 5);
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 5);
+                position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt() * 5);
                 position.set("serviceDistance", (buf.readUnsignedInt() - 2105540607) * 5);
             } else if (type == 0x0A) {
                 ChannelBuffer brakeData = buf.readBytes(length);
