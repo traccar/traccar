@@ -528,7 +528,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set("serviceDistance", buf.readInt());
             buf.readUnsignedByte(); // driver activity
             position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
-            position.set(Position.KEY_FUEL, buf.readUnsignedByte());
+            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0040) != 0) {

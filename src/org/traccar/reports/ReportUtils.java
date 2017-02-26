@@ -78,15 +78,17 @@ public final class ReportUtils {
 
     public static String calculateFuel(Position firstPosition, Position lastPosition) {
 
-        if (firstPosition.getAttributes().get(Position.KEY_FUEL) != null
-                && lastPosition.getAttributes().get(Position.KEY_FUEL) != null) {
+        if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
+                && lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
             try {
                 switch (firstPosition.getProtocol()) {
                     case "meitrack":
                     case "galileo":
                     case "noran":
-                        BigDecimal v = new BigDecimal(firstPosition.getAttributes().get(Position.KEY_FUEL).toString());
-                        v = v.subtract(new BigDecimal(lastPosition.getAttributes().get(Position.KEY_FUEL).toString()));
+                        BigDecimal v = new BigDecimal(firstPosition.getAttributes()
+                                                        .get(Position.KEY_FUEL_LEVEL).toString());
+                        v = v.subtract(new BigDecimal(lastPosition.getAttributes()
+                                                        .get(Position.KEY_FUEL_LEVEL).toString()));
                         return v.setScale(2, RoundingMode.HALF_EVEN).toString() + " %";
                     default:
                         break;

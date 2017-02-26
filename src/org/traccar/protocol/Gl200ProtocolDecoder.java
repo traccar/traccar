@@ -455,7 +455,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set("dtcsNumber", parser.next());
         position.set("dtcsCodes", parser.next());
         position.set(Position.KEY_THROTTLE, parser.next());
-        position.set(Position.KEY_FUEL, parser.next());
+        position.set(Position.KEY_FUEL_LEVEL, parser.next());
         position.set(Position.KEY_OBD_ODOMETER, parser.nextInt() * 1000);
 
         decodeLocation(position, parser);
@@ -533,7 +533,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_RPM, parser.next());
-        position.set(Position.KEY_FUEL, parser.next());
+        position.set(Position.KEY_FUEL_LEVEL, parser.next());
 
         // workaround for wrong location time
         if (parser.hasNext(6)) {

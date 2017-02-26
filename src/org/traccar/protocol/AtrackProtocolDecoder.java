@@ -143,7 +143,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort()); // engine coolant temp
                     break;
                 case "FL":
-                    position.set(Position.KEY_FUEL, buf.readUnsignedByte());
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
                     break;
                 case "ML":
                     buf.readUnsignedByte(); // mil status
