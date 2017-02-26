@@ -89,7 +89,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         buf.readUnsignedShort(); // report trigger
-        buf.readUnsignedShort(); // flags
+        position.set(Position.KEY_FLAGS, buf.readUnsignedShort()); // flags
 
         position.setLatitude(buf.readInt() * 0.0000001);
         position.setLongitude(buf.readInt() * 0.0000001);
@@ -97,12 +97,12 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_SATELLITES, buf.readUnsignedShort()); // satellites in fix
         position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedShort()); // satellites in track
-        buf.readUnsignedShort(); // GPS antenna state
+        position.set("gpsAntennaState", buf.readUnsignedShort()); // GPS antenna state
 
         position.setSpeed(buf.readUnsignedShort() * 0.194384);
         position.setCourse(buf.readUnsignedShort());
 
-        buf.readUnsignedInt(); // distance
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
         buf.readUnsignedInt(); // delta distance
 
         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
@@ -139,13 +139,14 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(buf.readUnsignedShort() * 0.194384);
         position.setCourse(buf.readUnsignedShort());
 
-        buf.readUnsignedInt(); // distance
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
         buf.readUnsignedShort(); // maximum speed
         buf.readUnsignedShort(); // minimum speed
 
-        buf.readUnsignedShort(); // VSAUT1 voltage
-        buf.readUnsignedShort(); // VSAUT2 voltage
-        buf.readUnsignedShort(); // solar voltage
+        position.set(Position.PREFIX_IO + 1, buf.readUnsignedShort()); // VSAUT1 voltage
+        position.set(Position.PREFIX_IO + 2, buf.readUnsignedShort()); // VSAUT2 voltage
+        position.set(Position.PREFIX_IO + 3, buf.readUnsignedShort()); // solar voltage
+
         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
         return position;
@@ -170,6 +171,7 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setValid((flags & 0x80) == 0x80 && (flags & 0x40) == 0x40);
 
         buf.readUnsignedByte(); // reserved
+
         return position;
     }
 
@@ -193,7 +195,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
         position.setValid((flags & 0x80) == 0x80 && (flags & 0x40) == 0x40);
 
         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-        buf.readUnsignedInt(); // distance
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
+
         return position;
     }
 
@@ -227,10 +230,10 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // maximum speed
         buf.readUnsignedByte(); // minimum speed
-        buf.readUnsignedInt(); // distance
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
 
-        buf.readUnsignedByte(); // supply voltage 1
-        buf.readUnsignedByte(); // supply voltage 2
+        position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte()); // supply voltage 1
+        position.set(Position.PREFIX_IO + 2, buf.readUnsignedByte()); // supply voltage 2
         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
         return position;
@@ -262,7 +265,8 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
-        buf.readUnsignedInt(); // distance
+        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt()); // distance
+
         return position;
     }
 

@@ -182,7 +182,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.check(flags, 7)) {
                     position.set(Position.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
-                    buf.readByte(); // microcontroller temperature
+                    position.set("microcontrollerTemperature", buf.readByte()); // microcontroller temperature
 
                     position.set(Position.KEY_RSSI, (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
 
@@ -222,7 +222,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(new FloatReader().readFloat(buf) / Math.PI * 180);
         position.setTime(new TimeReader().readTime(buf));
 
-        buf.readUnsignedByte(); // status
+        position.set(Position.KEY_STATUS, buf.readUnsignedByte()); // status
 
         if (BitUtil.check(flags, 0)) {
             position.setAltitude(buf.readUnsignedShort());
@@ -241,7 +241,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             position.set("engine", buf.readUnsignedShort() * 0.125);
             position.set("pedals", buf.readUnsignedByte());
             position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
-            buf.readUnsignedShort(); // service odometer
+            position.set("serviceOdometer", buf.readUnsignedShort()); // service odometer
         }
 
         if (BitUtil.check(flags, 3)) {
@@ -261,7 +261,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(flags, 5)) {
             position.set(Position.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
             position.set(Position.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
-            buf.readByte(); // microcontroller temperature
+            position.set("microcontrollerTemperature", buf.readByte()); // microcontroller temperature
 
             position.set(Position.KEY_RSSI, buf.getUnsignedByte(buf.readerIndex()) >> 5);
 
