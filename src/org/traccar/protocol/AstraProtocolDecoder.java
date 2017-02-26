@@ -93,7 +93,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // max journey speed
             buf.skipBytes(6); // accelerometer
-            position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedShort()); // journey distance
+            position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort()); // journey distance
             buf.readUnsignedShort(); // journey idle time
 
             position.setAltitude(buf.readUnsignedByte() * 20);

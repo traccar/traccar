@@ -331,7 +331,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0100) != 0) {
-            position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt() * 5);
+            position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5);
         }
 
         if ((selector & 0x8000) != 0) {
@@ -463,7 +463,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 position.set("brakeTemperature", buf.readUnsignedByte() * 10);
             } else if (type == 0x06) {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 5);
-                position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt() * 5);
+                position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5);
                 position.set("serviceDistance", (buf.readUnsignedInt() - 2105540607) * 5);
             } else if (type == 0x0A) {
                 ChannelBuffer brakeData = buf.readBytes(length);
