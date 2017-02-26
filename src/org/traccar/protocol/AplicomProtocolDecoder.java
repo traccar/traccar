@@ -183,7 +183,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                             position.set("serviceIndicator", ChannelBuffers.swapInt(value.readInt()));
                             break;
                         case 0x18:
-                            position.set("softwareVersion", ChannelBuffers.swapInt(value.readInt()) * 0.01);
+                            position.set(Position.KEY_VERSION, ChannelBuffers.swapInt(value.readInt()) * 0.01);
                             break;
                         default:
                             break;
