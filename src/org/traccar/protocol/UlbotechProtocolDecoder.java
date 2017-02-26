@@ -248,7 +248,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case DATA_FUEL:
-                    position.set("fuelConsumption", buf.readUnsignedInt() / 10000.0);
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() / 10000.0);
                     break;
 
                 case DATA_OBD2_ALARM:

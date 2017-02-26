@@ -201,6 +201,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
 
         position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_GPS, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set("alertType", parser.nextInt());
 
         return position;
     }

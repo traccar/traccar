@@ -126,7 +126,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         position.set(Position.KEY_VERSION_FW, parser.next());
-        parser.next(); // hardware version
+        position.set(Position.KEY_VERSION_HW, parser.next()); // hardware version
 
         return position;
     }
@@ -195,13 +195,13 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
 
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
-        parser.next(); // dop1
-        parser.next(); // dop2
-        parser.next(); // analog input
+        position.set("dop1", parser.next()); // dop1
+        position.set("dop2", parser.next()); // dop2
+        position.set(Position.KEY_INPUT, parser.next()); // analog input
         position.set(Position.KEY_BATTERY, parser.nextDouble()); // device battery voltage
-        parser.next(); // vehicle internal voltage
+        position.set(Position.KEY_POWER, parser.next()); // vehicle internal voltage
         position.set(Position.KEY_ODOMETER, parser.nextDouble()); // gps odometer
-        parser.next(); // pulse odometer
+        position.set("pulseOdometer", parser.next()); // pulse odometer
         position.set(Position.KEY_STATUS, parser.nextInt());
 
         position.setValid(parser.nextInt() != 0);
