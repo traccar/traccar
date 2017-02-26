@@ -126,7 +126,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
             operator <<= 8;
             operator += buf.readUnsignedByte();
-            position.set("operator", operator);
+            position.set(Position.KEY_OPERATOR, operator);
 
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedInt()); // ADC
             position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium()); // Odometer
