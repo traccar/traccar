@@ -54,7 +54,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time
             .number("([AV]),")                   // validity
             .number("(d+),")                     // satellites
-            .number("(d+),")                     // gsm signal (rssi)
+            .number("(d+),")                     // rssi
             .number("(d+.?d*),")                 // speed
             .number("(d+),")                     // course
             .number("(d+.?d*),")                 // hdop
@@ -64,7 +64,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // mcc
             .number("(d+)|")                     // mnc
             .number("(x+)|")                     // lac
-            .number("(x+),")                     // cell id (cid)
+            .number("(x+),")                     // cid
             .number("(x+),")                     // state
             .number("(x+)?|")                    // adc1
             .number("(x+)?|")                    // adc2

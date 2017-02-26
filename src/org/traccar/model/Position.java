@@ -23,6 +23,7 @@ public class Position extends Message {
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
     public static final String KEY_VDOP = "vdop";
+    public static final String KEY_PDOP = "pdop";
     public static final String KEY_SATELLITES = "sat"; // in use
     public static final String KEY_SATELLITES_VISIBLE = "satVisible";
     public static final String KEY_RSSI = "rssi";

@@ -122,14 +122,14 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
             buf.readUnsignedByte(); // mode
-            buf.readUnsignedInt(); // IO
+            buf.readUnsignedInt(); // io
 
             operator <<= 8;
             operator += buf.readUnsignedByte();
             position.set("operator", operator);
 
-            buf.readUnsignedInt(); // ADC
-            buf.readUnsignedMedium(); // Odometer
+            buf.readUnsignedInt(); // adc
+            buf.readUnsignedMedium(); // odometer
             buf.skipBytes(6); // multi-purpose data
 
             buf.readUnsignedShort(); // gps fix
@@ -137,10 +137,9 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // mode 1
             buf.readUnsignedByte(); // mode 2
 
-            int satellites = buf.readUnsignedByte();
-            position.setValid(satellites >= 3);
-            position.set(Position.KEY_SATELLITES, satellites);
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
+            position.setValid(true);
             position.setLongitude(buf.readInt() / Math.PI * 180 / 100000000);
             position.setLatitude(buf.readInt() / Math.PI * 180 / 100000000.0);
             position.setAltitude(buf.readInt() * 0.01);

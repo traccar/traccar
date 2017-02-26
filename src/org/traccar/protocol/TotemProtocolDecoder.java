@@ -244,10 +244,10 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateBuilder.getDate());
 
             if (pattern == PATTERN1) {
-                position.set("pdop", parser.next());
+                position.set(Position.KEY_PDOP, parser.next());
                 position.set(Position.KEY_HDOP, parser.next());
-                position.set("vdop", parser.next());
-            } else if (pattern == PATTERN2) {
+                position.set(Position.KEY_VDOP, parser.next());
+            } else {
                 position.set(Position.KEY_HDOP, parser.next());
             }
 

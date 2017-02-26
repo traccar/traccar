@@ -110,12 +110,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_BATTERY, battery + "%");
             }
 
-            int cid  = buf.readUnsignedShort();
-            int lac  = buf.readUnsignedShort();
-            int rssi = buf.readUnsignedByte();
-
-            CellTower cellTower = CellTower.fromCidLac(cid, lac);
-            cellTower.setSignalStrength(rssi);
+            CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
+            cellTower.setSignalStrength((int) buf.readUnsignedByte());
             position.setNetwork(new Network(cellTower));
 
             position.set(Position.KEY_INDEX, buf.readUnsignedByte());
