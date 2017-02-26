@@ -295,7 +295,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set("engineLoad", parser.nextDouble());
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
-        position.set("averageFuelConsumition", parser.nextDouble());
+        position.set("averageFuelConsumption", parser.nextDouble());
         position.set("drivingRange", parser.nextDouble());
         position.set(Position.KEY_ODOMETER, parser.nextDouble());
         position.set("singleFuelConsumption", parser.nextDouble());
