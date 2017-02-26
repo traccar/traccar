@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.joda.time.DateTime;
 import org.jxls.area.Area;
 import org.jxls.builder.xls.XlsCommentAreaBuilder;
@@ -201,7 +202,7 @@ public final class Trips {
             DeviceReport deviceTrips = new DeviceReport();
             Device device = Context.getIdentityManager().getDeviceById(deviceId);
             deviceTrips.setDeviceName(device.getName());
-            sheetNames.add(deviceTrips.getDeviceName());
+            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
             if (device.getGroupId() != 0) {
                 Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
                 if (group != null) {
