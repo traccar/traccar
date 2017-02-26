@@ -191,7 +191,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case TAG_CAN:
-                    position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                     position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
                     position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
                     break;

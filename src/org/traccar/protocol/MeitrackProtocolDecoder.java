@@ -155,7 +155,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             String fuel = parser.next();
-            position.set(Position.KEY_FUEL,
+            position.set(Position.KEY_FUEL_LEVEL,
                     Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
         }
 
