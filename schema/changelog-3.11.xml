@@ -16,6 +16,10 @@
       <column name="sms" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <addColumn tableName="server">
+      <column name="devicereadonly" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
   </changeSet>
 
 </databaseChangeLog>
