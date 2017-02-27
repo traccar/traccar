@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,10 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+")
             .number(",(d+)")                     // satellites
             .number(",(d+)")                     // imei
-            .number(",([01])")                   // ignition
+            .expression(",([01])")               // ignition
             .number(",(d+)")                     // fuel
             .number(",(d+)").optional(5)         // battery
+            .number("((?:,d+)+)?")               // parameters
             .any()
             .compile();
 
@@ -137,6 +138,13 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, parser.hasNext() && parser.next().equals("1"));
             position.set(Position.KEY_FUEL, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
+        }
+
+        if (parser.hasNext()) {
+            String[] parameters = parser.next().split(",");
+            for (int i = 1; i < parameters.length; i++) {
+                position.set(Position.PREFIX_IO + i, parameters[i]);
+            }
         }
 
         if (deviceSession != null) {

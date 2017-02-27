@@ -16,6 +16,9 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
         verifyNothing(decoder, text(
                 "358244017671308"));
 
+        verifyPosition(decoder, text(
+                "$GPRMC,073446.000,A,1255.5125,N,07738.2948,E,0.00,0.53,080316,D*71,11,865733027593268,1,090,086,123,456,789,987,12345"));
+
         verifyNotNull(decoder, text(
                 "$GPRMC,161223.000,A,2517.0545,S,05739.1788,W,0.0,0.0,011196,,,A*61"));
 
