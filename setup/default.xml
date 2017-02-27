@@ -41,6 +41,7 @@
         UPDATE server SET
         registration = :registration,
         readonly = :readonly,
+        deviceReadonly = :deviceReadonly,
         map = :map,
         bingKey = :bingKey,
         mapUrl = :mapUrl,

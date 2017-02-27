@@ -46,6 +46,16 @@ public class Server extends Extensible {
         this.readonly = readonly;
     }
 
+    private boolean deviceReadonly;
+
+    public boolean getDeviceReadonly() {
+        return deviceReadonly;
+    }
+
+    public void setDeviceReadonly(boolean deviceReadonly) {
+        this.deviceReadonly = deviceReadonly;
+    }
+
     private String map;
 
     public String getMap() {

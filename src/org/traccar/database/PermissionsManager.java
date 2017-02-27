@@ -223,7 +223,7 @@ public class PermissionsManager {
     }
 
     public void checkDeviceReadonly(long userId) throws SecurityException {
-        if (!isAdmin(userId) && isDeviceReadonly(userId)) {
+        if (!isAdmin(userId) && (server.getDeviceReadonly() || isDeviceReadonly(userId))) {
             throw new SecurityException("Account is device readonly");
         }
     }
