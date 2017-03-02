@@ -33,6 +33,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.DatatypeConverter;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 @Path("session")
@@ -49,7 +54,7 @@ public class SessionResource extends BaseResource {
 
     @PermitAll
     @GET
-    public User get(@QueryParam("token") String token) throws SQLException {
+    public User get(@QueryParam("token") String token) throws SQLException, UnsupportedEncodingException {
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
         if (userId == null) {
             Cookie[] cookies = request.getCookies();
@@ -57,10 +62,14 @@ public class SessionResource extends BaseResource {
             if (cookies != null) {
                 for (int i = 0; i < cookies.length; i++) {
                     if (cookies[i].getName().equals(USER_COOKIE_KEY)) {
-                        email = cookies[i].getValue();
+                        byte[] emailBytes = DatatypeConverter.parseBase64Binary(
+                                URLDecoder.decode(cookies[i].getValue(), StandardCharsets.US_ASCII.name()));
+                        email = new String(emailBytes, StandardCharsets.UTF_8);
                     }
                     if (cookies[i].getName().equals(PASS_COOKIE_KEY)) {
-                        password = cookies[i].getValue();
+                        byte[] passwordBytes = DatatypeConverter.parseBase64Binary(
+                                URLDecoder.decode(cookies[i].getValue(), StandardCharsets.US_ASCII.name()));
+                        password = new String(passwordBytes, StandardCharsets.UTF_8);
                     }
                 }
             }
