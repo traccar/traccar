@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.traccar.BaseProtocol;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
@@ -36,11 +37,6 @@ import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
-
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
 public class DeviceManager implements IdentityManager {
 
@@ -60,11 +56,14 @@ public class DeviceManager implements IdentityManager {
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
+    private boolean fallbackToSms;
+
     public DeviceManager(DataManager dataManager) {
         this.dataManager = dataManager;
         this.config = Context.getConfig();
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
+        fallbackToSms = config.getBoolean("command.fallbackToSms");
         if (dataManager != null) {
             try {
                 updateGroupCache(true);
@@ -428,25 +427,30 @@ public class DeviceManager implements IdentityManager {
         }
     }
 
-    public void sendCommand(Command command) throws RecoverablePduException, UnrecoverablePduException,
-            SmppTimeoutException, SmppChannelException, InterruptedException {
+    public void sendCommand(Command command) throws Exception {
+        long deviceId = command.getDeviceId();
         if (command.getSms()) {
-            Position lastPosition = getLastPosition(command.getDeviceId());
+            Position lastPosition = getLastPosition(deviceId);
             if (lastPosition != null) {
-                Context.getServerManager().getProtocol(lastPosition.getProtocol())
-                        .sendSmsCommand(devicesById.get(command.getDeviceId()).getPhone(), command);
+                BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
+                protocol.sendSmsCommand(devicesById.get(deviceId).getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmppManager().sendMessageSync(devicesById.get(command.getDeviceId()).getPhone(),
+                Context.getSmppManager().sendMessageSync(devicesById.get(deviceId).getPhone(),
                         command.getString(Command.KEY_DATA), true);
             } else {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(command.getDeviceId());
+            ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
             if (activeDevice != null) {
                 activeDevice.sendCommand(command);
             } else {
-                throw new RuntimeException("Device is not online");
+                if (fallbackToSms) {
+                    command.setSms(true);
+                    sendCommand(command);
+                } else {
+                    throw new RuntimeException("Device is not online");
+                }
             }
         }
     }
@@ -455,12 +459,9 @@ public class DeviceManager implements IdentityManager {
         List<CommandType> result = new ArrayList<>();
         Position lastPosition = Context.getDeviceManager().getLastPosition(deviceId);
         if (lastPosition != null) {
+            BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
             Collection<String> commands;
-            if (sms) {
-                commands = Context.getServerManager().getProtocol(lastPosition.getProtocol()).getSupportedSmsCommands();
-            } else {
-                commands = Context.getServerManager().getProtocol(lastPosition.getProtocol()).getSupportedCommands();
-            }
+            commands = sms ? protocol.getSupportedSmsCommands() : protocol.getSupportedCommands();
             for (String commandKey : commands) {
                 result.add(new CommandType(commandKey));
             }

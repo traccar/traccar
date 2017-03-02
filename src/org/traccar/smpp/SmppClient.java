@@ -199,13 +199,8 @@ public class SmppClient {
         if (getSession() != null && getSession().isBound()) {
             SubmitSm submit = new SubmitSm();
             byte[] textBytes;
-            if (command) {
-                textBytes = CharsetUtil.encode(message, commandsCharsetName);
-                submit.setDataCoding(commandsDataCoding);
-            } else {
-                textBytes = CharsetUtil.encode(message, notificationsCharsetName);
-                submit.setDataCoding(notificationsDataCoding);
-            }
+            textBytes = CharsetUtil.encode(message, command ? commandsCharsetName : notificationsCharsetName);
+            submit.setDataCoding(command ? commandsDataCoding : notificationsDataCoding);
             submit.setShortMessage(textBytes);
             submit.setSourceAddress(new Address(sourceTon, sourceNpi, sourceAddress));
             submit.setDestAddress(new Address(destTon, destNpi, destAddress));

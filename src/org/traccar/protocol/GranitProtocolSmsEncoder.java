@@ -16,14 +16,14 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.BaseProtocolSmsEncoder;
+import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
 
-public class GranitProtocolSmsEncoder extends BaseProtocolSmsEncoder {
+public class GranitProtocolSmsEncoder extends StringProtocolEncoder {
 
     @Override
-    protected String encodeSmsCommand(Command command) {
+    protected String encodeCommand(Command command) {
         switch (command.getType()) {
         case Command.TYPE_REBOOT_DEVICE:
             return "BB+RESET";

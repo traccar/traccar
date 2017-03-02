@@ -19,11 +19,6 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Command;
 
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -37,8 +32,7 @@ import javax.ws.rs.core.Response;
 public class CommandResource extends BaseResource {
 
     @POST
-    public Response add(Command entity) throws RecoverablePduException, UnrecoverablePduException,
-            SmppTimeoutException, SmppChannelException, InterruptedException {
+    public Response add(Command entity) throws Exception {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
         Context.getDeviceManager().sendCommand(entity);

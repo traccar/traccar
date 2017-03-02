@@ -37,7 +37,7 @@ public abstract class BaseProtocol implements Protocol {
     private final Set<String> supportedCommands = new HashSet<>();
     private final Set<String> supportedSmsCommands = new HashSet<>();
 
-    private BaseProtocolSmsEncoder smsEncoder = null;
+    private StringProtocolEncoder smsEncoder = null;
 
     public BaseProtocol(String name) {
         this.name = name;
@@ -86,7 +86,7 @@ public abstract class BaseProtocol implements Protocol {
         }
     }
 
-    public void setSmsEncoder(BaseProtocolSmsEncoder smsEncoder) {
+    public void setSmsEncoder(StringProtocolEncoder smsEncoder) {
         this.smsEncoder = smsEncoder;
     }
 
@@ -97,7 +97,7 @@ public abstract class BaseProtocol implements Protocol {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
                 Context.getSmppManager().sendMessageSync(phone, command.getString(Command.KEY_DATA), true);
             } else if (supportedSmsCommands.contains(command.getType()) && smsEncoder != null) {
-                Context.getSmppManager().sendMessageSync(phone, smsEncoder.encodeSmsCommand(command), true);
+                Context.getSmppManager().sendMessageSync(phone, (String) smsEncoder.encodeCommand(command), true);
             } else {
                 throw new RuntimeException(
                         "Command " + command.getType() + " is not supported in protocol " + getName());
