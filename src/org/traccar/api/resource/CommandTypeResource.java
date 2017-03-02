@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
+ * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +26,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.sql.SQLException;
 import java.util.Collection;
 
 @Path("commandtypes")
@@ -34,9 +34,9 @@ import java.util.Collection;
 public class CommandTypeResource extends BaseResource {
 
     @GET
-    public Collection<CommandType> get(@QueryParam("deviceId") long deviceId) throws SQLException {
+    public Collection<CommandType> get(@QueryParam("deviceId") long deviceId, @QueryParam("sms") boolean sms) {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        return Context.getConnectionManager().getActiveDevice(deviceId).getCommandTypes();
+        return Context.getDeviceManager().getCommandTypes(deviceId, sms);
     }
 
 }

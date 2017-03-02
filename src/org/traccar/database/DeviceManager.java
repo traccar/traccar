@@ -29,11 +29,18 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.Command;
+import org.traccar.model.CommandType;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
+
+import com.cloudhopper.smpp.type.RecoverablePduException;
+import com.cloudhopper.smpp.type.SmppChannelException;
+import com.cloudhopper.smpp.type.SmppTimeoutException;
+import com.cloudhopper.smpp.type.UnrecoverablePduException;
 
 public class DeviceManager implements IdentityManager {
 
@@ -419,5 +426,47 @@ public class DeviceManager implements IdentityManager {
         } else {
             throw new IllegalArgumentException();
         }
+    }
+
+    public void sendCommand(Command command) throws RecoverablePduException, UnrecoverablePduException,
+            SmppTimeoutException, SmppChannelException, InterruptedException {
+        if (command.getSms()) {
+            Position lastPosition = getLastPosition(command.getDeviceId());
+            if (lastPosition != null) {
+                Context.getServerManager().getProtocol(lastPosition.getProtocol())
+                        .sendSmsCommand(devicesById.get(command.getDeviceId()).getPhone(), command);
+            } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
+                Context.getSmppManager().sendMessageSync(devicesById.get(command.getDeviceId()).getPhone(),
+                        command.getString(Command.KEY_DATA), true);
+            } else {
+                throw new RuntimeException("Command " + command.getType() + " is not supported");
+            }
+        } else {
+            ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(command.getDeviceId());
+            if (activeDevice != null) {
+                activeDevice.sendCommand(command);
+            } else {
+                throw new RuntimeException("Device is not online");
+            }
+        }
+    }
+
+    public Collection<CommandType> getCommandTypes(long deviceId, boolean sms) {
+        List<CommandType> result = new ArrayList<>();
+        Position lastPosition = Context.getDeviceManager().getLastPosition(deviceId);
+        if (lastPosition != null) {
+            Collection<String> commands;
+            if (sms) {
+                commands = Context.getServerManager().getProtocol(lastPosition.getProtocol()).getSupportedSmsCommands();
+            } else {
+                commands = Context.getServerManager().getProtocol(lastPosition.getProtocol()).getSupportedCommands();
+            }
+            for (String commandKey : commands) {
+                result.add(new CommandType(commandKey));
+            }
+        } else {
+            result.add(new CommandType(Command.TYPE_CUSTOM));
+        }
+        return result;
     }
 }

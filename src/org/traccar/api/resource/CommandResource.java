@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,11 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Command;
 
+import com.cloudhopper.smpp.type.RecoverablePduException;
+import com.cloudhopper.smpp.type.SmppChannelException;
+import com.cloudhopper.smpp.type.SmppTimeoutException;
+import com.cloudhopper.smpp.type.UnrecoverablePduException;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -32,10 +37,11 @@ import javax.ws.rs.core.Response;
 public class CommandResource extends BaseResource {
 
     @POST
-    public Response add(Command entity) {
+    public Response add(Command entity) throws RecoverablePduException, UnrecoverablePduException,
+            SmppTimeoutException, SmppChannelException, InterruptedException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getDeviceId());
-        Context.getConnectionManager().getActiveDevice(entity.getDeviceId()).sendCommand(entity);
+        Context.getDeviceManager().sendCommand(entity);
         return Response.ok(entity).build();
     }
 

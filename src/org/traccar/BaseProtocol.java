@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,11 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
 import org.traccar.model.Command;
 
+import com.cloudhopper.smpp.type.RecoverablePduException;
+import com.cloudhopper.smpp.type.SmppChannelException;
+import com.cloudhopper.smpp.type.SmppTimeoutException;
+import com.cloudhopper.smpp.type.UnrecoverablePduException;
+
 import javax.xml.bind.DatatypeConverter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +35,9 @@ public abstract class BaseProtocol implements Protocol {
 
     private final String name;
     private final Set<String> supportedCommands = new HashSet<>();
+    private final Set<String> supportedSmsCommands = new HashSet<>();
+
+    private BaseProtocolSmsEncoder smsEncoder = null;
 
     public BaseProtocol(String name) {
         this.name = name;
@@ -44,9 +52,20 @@ public abstract class BaseProtocol implements Protocol {
         supportedCommands.addAll(Arrays.asList(commands));
     }
 
+    public void setSupportedSmsCommands(String... commands) {
+        supportedSmsCommands.addAll(Arrays.asList(commands));
+    }
+
     @Override
     public Collection<String> getSupportedCommands() {
         Set<String> commands = new HashSet<>(supportedCommands);
+        commands.add(Command.TYPE_CUSTOM);
+        return commands;
+    }
+
+    @Override
+    public Collection<String> getSupportedSmsCommands() {
+        Set<String> commands = new HashSet<>(supportedSmsCommands);
         commands.add(Command.TYPE_CUSTOM);
         return commands;
     }
@@ -64,6 +83,27 @@ public abstract class BaseProtocol implements Protocol {
             }
         } else {
             throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());
+        }
+    }
+
+    public void setSmsEncoder(BaseProtocolSmsEncoder smsEncoder) {
+        this.smsEncoder = smsEncoder;
+    }
+
+    @Override
+    public void sendSmsCommand(String phone, Command command) throws RecoverablePduException, UnrecoverablePduException,
+            SmppTimeoutException, SmppChannelException, InterruptedException {
+        if (Context.getSmppManager() != null) {
+            if (command.getType().equals(Command.TYPE_CUSTOM)) {
+                Context.getSmppManager().sendMessageSync(phone, command.getString(Command.KEY_DATA), true);
+            } else if (supportedSmsCommands.contains(command.getType()) && smsEncoder != null) {
+                Context.getSmppManager().sendMessageSync(phone, smsEncoder.encodeSmsCommand(command), true);
+            } else {
+                throw new RuntimeException(
+                        "Command " + command.getType() + " is not supported in protocol " + getName());
+            }
+        } else {
+            throw new RuntimeException("Smpp client is not enabled");
         }
     }
 

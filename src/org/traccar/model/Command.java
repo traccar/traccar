@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,5 +65,15 @@ public class Command extends Message {
     public static final String KEY_DATA = "data";
     public static final String KEY_INDEX = "index";
     public static final String KEY_PHONE = "phone";
+
+    private boolean sms;
+
+    public boolean getSms() {
+        return sms;
+    }
+
+    public void setSms(boolean sms) {
+        this.sms = sms;
+    }
 
 }
