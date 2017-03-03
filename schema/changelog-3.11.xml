@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-3.11">
+
+  <changeSet author="author" id="changelog-3.11">
+
+    <addColumn tableName="users">
+      <column name="phone" type="VARCHAR(128)" />
+    </addColumn>
+    
+    <addColumn tableName="notifications">
+      <column name="sms" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <addColumn tableName="server">
+      <column name="devicereadonly" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+  </changeSet>
+
+</databaseChangeLog>

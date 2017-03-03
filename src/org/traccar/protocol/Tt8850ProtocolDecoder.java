@@ -79,9 +79,8 @@ public class Tt8850ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        int accuracy = parser.nextInt();
-        position.setValid(accuracy < 20);
-        position.setAccuracy(accuracy);
+        position.setValid(true);
+        position.setAccuracy(parser.nextInt());
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());

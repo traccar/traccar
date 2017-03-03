@@ -118,7 +118,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(1)) {
-            position.set("accel", parser.nextInt());
+            position.set(Position.KEY_ACCELERATION, parser.nextInt());
         }
 
         Double internalBattery = (parser.nextDouble() + 100d) * 0.0294d;

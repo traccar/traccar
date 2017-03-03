@@ -32,6 +32,7 @@ import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import org.traccar.database.QueryIgnore;
 
 public class Calendar extends Extensible {
 
@@ -59,6 +60,7 @@ public class Calendar extends Extensible {
 
     private net.fortuna.ical4j.model.Calendar calendar;
 
+    @QueryIgnore
     @JsonIgnore
     public net.fortuna.ical4j.model.Calendar getCalendar() {
         return calendar;
@@ -76,4 +78,5 @@ public class Calendar extends Extensible {
         }
         return false;
     }
+
 }

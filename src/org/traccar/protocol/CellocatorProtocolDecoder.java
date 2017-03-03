@@ -137,10 +137,9 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             position.set("mode1", buf.readUnsignedByte()); // mode 1
             position.set("mode2", buf.readUnsignedByte()); // mode 2
 
-            int satellites = buf.readUnsignedByte();
-            position.setValid(satellites >= 3);
-            position.set(Position.KEY_SATELLITES, satellites);
+            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 
+            position.setValid(true);
             position.setLongitude(buf.readInt() / Math.PI * 180 / 100000000);
             position.setLatitude(buf.readInt() / Math.PI * 180 / 100000000.0);
             position.setAltitude(buf.readInt() * 0.01);

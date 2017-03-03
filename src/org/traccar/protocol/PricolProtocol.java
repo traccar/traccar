@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.FixedLengthFrameDecoder;
@@ -35,6 +36,12 @@ public class PricolProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new FixedLengthFrameDecoder(64));
+                pipeline.addLast("objectDecoder", new PricolProtocolDecoder(PricolProtocol.this));
+            }
+        });
+        serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
+            @Override
+            protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("objectDecoder", new PricolProtocolDecoder(PricolProtocol.this));
             }
         });

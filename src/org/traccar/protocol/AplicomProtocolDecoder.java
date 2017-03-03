@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int DEFAULT_SELECTOR_D = 0x0002fC;
     private static final int DEFAULT_SELECTOR_E = 0x007ffc;
+    private static final int DEFAULT_SELECTOR_F = 0x0007fd;
 
     private static final int EVENT_DATA = 119;
 
@@ -498,6 +499,63 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeF(Position position, ChannelBuffer buf, int selector) {
+
+        getLastLocation(position, null);
+
+        buf.readUnsignedShort(); // event
+
+        if ((selector & 0x0004) != 0) {
+            buf.skipBytes(4); // snapshot time
+        }
+
+        buf.readUnsignedByte(); // data validity
+
+        if ((selector & 0x0008) != 0) {
+            position.set(Position.KEY_RPM, buf.readUnsignedShort());
+            position.set("rpmMax", buf.readUnsignedShort());
+            position.set("rpmMin", buf.readUnsignedShort());
+        }
+
+        if ((selector & 0x0010) != 0) {
+            position.set("engineTemp", buf.readShort());
+            position.set("engineTempMax", buf.readShort());
+            position.set("engineTempMin", buf.readShort());
+        }
+
+        if ((selector & 0x0020) != 0) {
+            position.set(Position.KEY_HOURS, buf.readUnsignedInt());
+            position.set("serviceDistance", buf.readInt());
+            buf.readUnsignedByte(); // driver activity
+            position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
+            position.set(Position.KEY_FUEL, buf.readUnsignedByte());
+        }
+
+        if ((selector & 0x0040) != 0) {
+            position.set("totalFuelUsed", buf.readUnsignedInt());
+        }
+
+        if ((selector & 0x0080) != 0) {
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+        }
+
+        if ((selector & 0x0100) != 0) {
+            position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
+            position.set("speedMax", buf.readUnsignedByte());
+            position.set("speedMin", buf.readUnsignedByte());
+            position.set("hardBreaking", buf.readUnsignedByte());
+        }
+
+        if ((selector & 0x0200) != 0) {
+            buf.readUnsignedByte(); // tachograph based speed
+            buf.readUnsignedByte(); // driver 1 state
+            buf.readUnsignedByte(); // driver 2 state
+            buf.readUnsignedByte(); // tachograph status
+            position.set("overspeedCount", buf.readUnsignedByte());
+        }
+
+    }
+
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
@@ -518,6 +576,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         int selector = DEFAULT_SELECTOR_D;
         if (protocol == 'E') {
             selector = DEFAULT_SELECTOR_E;
+        } else if (protocol == 'F') {
+            selector = DEFAULT_SELECTOR_F;
         }
         if ((version & 0x40) != 0) {
             selector = buf.readUnsignedMedium();
@@ -541,6 +601,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             decodeE(position, buf, selector);
         } else if (protocol == 'H') {
             decodeH(position, buf, selector);
+        } else if (protocol == 'F') {
+            decodeF(position, buf, selector);
         } else {
             return null;
         }

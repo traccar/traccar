@@ -88,11 +88,9 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, buf.readByte());
 
         int rssi = buf.readUnsignedByte();
-        CellTower cellTower = CellTower.from(buf.readUnsignedShort(),
-                                             buf.readUnsignedShort(),
-                                             buf.readUnsignedShort(),
-                                             buf.readUnsignedShort(),
-                                             rssi);
+        CellTower cellTower = CellTower.from(
+                buf.readUnsignedShort(), buf.readUnsignedShort(),
+                buf.readUnsignedShort(), buf.readUnsignedShort(), rssi);
         position.setNetwork(new Network(cellTower));
 
         int valid = buf.readUnsignedByte();
@@ -187,7 +185,6 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             buf.readByte(); // mode
             buf.readByte(); // gprs sending interval
 
-            // Should call position.setNetwork() here
             buf.skipBytes(6); // mcc, mnc, lac, cid
 
             int valid = buf.readUnsignedByte();

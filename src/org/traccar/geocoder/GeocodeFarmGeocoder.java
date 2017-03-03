@@ -19,15 +19,19 @@ import javax.json.JsonObject;
 
 public class GeocodeFarmGeocoder extends JsonGeocoder {
 
-    private static String formatUrl(String key) {
+    private static String formatUrl(String key, String language) {
         String url = "https://www.geocode.farm/v3/json/reverse/";
+        url += "?lat=%f&lon=%f&country=us&count=1";
         if (key != null) {
             url += "&key=" + key;
         }
+        if (language != null) {
+            url += "&lang=" + language;
+        }
         return url;
     }
-    public GeocodeFarmGeocoder(String key, int cacheSize) {
-        super(formatUrl(key), cacheSize);
+    public GeocodeFarmGeocoder(String key, String language, int cacheSize) {
+        super(formatUrl(key, language), cacheSize);
     }
 
     @Override

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.joda.time.DateTime;
 import org.jxls.area.Area;
 import org.jxls.builder.xls.XlsCommentAreaBuilder;
@@ -98,7 +99,7 @@ public final class Events {
             DeviceReport deviceEvents = new DeviceReport();
             Device device = Context.getIdentityManager().getDeviceById(deviceId);
             deviceEvents.setDeviceName(device.getName());
-            sheetNames.add(deviceEvents.getDeviceName());
+            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() != 0) {
                 Group group = Context.getDeviceManager().getGroupById(device.getGroupId());
                 if (group != null) {

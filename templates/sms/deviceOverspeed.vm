@@ -1,0 +1,8 @@
+#if($speedUnits == 'kmh')
+#set($speedString = $position.speed * 1.852 + ' km/h')
+#elseif($speedUnits == 'mph')
+#set($speedString = $position.speed * 1.15078 + ' mph')
+#else
+#set($speedString = "$position.speed kn")
+#end
+$device.name exceeds the speed $speedString at $event.serverTime

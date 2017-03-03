@@ -94,7 +94,7 @@ public class GeocoderTest {
     }
 
     public void testGeocodeFarm() throws InterruptedException {
-        Geocoder geocoder = new GeocodeFarmGeocoder(null, 0);
+        Geocoder geocoder = new GeocodeFarmGeocoder(null, null, 0);
 
         geocoder.getAddress(new AddressFormat(), 34.116302, -118.051519, new Geocoder.ReverseGeocoderCallback() {
             @Override

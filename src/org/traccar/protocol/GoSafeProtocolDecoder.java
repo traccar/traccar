@@ -64,7 +64,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+);")                     // course
             .number("(d+);")                     // altitude
             .number("(d+.d+)")                   // hdop
-            .number("(?:;d+.d+)?")               // vdop
+            .number(";(d+.d+)").optional()       // vdop
             .expression(",?")
             .groupEnd()
             .groupBegin()
@@ -154,7 +154,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
 
-        position.set(Position.KEY_HDOP, parser.next());
+        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_VDOP, parser.nextDouble());
 
         if (parser.hasNext(5)) {
             position.setNetwork(new Network(CellTower.from(

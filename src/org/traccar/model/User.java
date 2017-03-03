@@ -42,6 +42,16 @@ public class User extends Extensible {
         this.email = email;
     }
 
+    private String phone;
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     private boolean readonly;
 
     public boolean getReadonly() {

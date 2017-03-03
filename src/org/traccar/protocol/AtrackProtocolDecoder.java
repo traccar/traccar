@@ -99,14 +99,13 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     cellTower.setSignalStrength((int) buf.readUnsignedByte());
                     break;
                 case "CE":
-                    cellTower.setCellId(buf.readUnsignedInt()); // cid
+                    cellTower.setCellId(buf.readUnsignedInt());
                     break;
                 case "LC":
-                    cellTower.setLocationAreaCode(buf.readUnsignedShort()); // lac
+                    cellTower.setLocationAreaCode(buf.readUnsignedShort());
                     break;
                 case "CN":
-                    int combinedMobileCodes; // Decimal:  CCCNN
-                    combinedMobileCodes = (int) (buf.readUnsignedInt() % 100000);
+                    int combinedMobileCodes = (int) (buf.readUnsignedInt() % 100000); // cccnn
                     cellTower.setMobileCountryCode(combinedMobileCodes / 100);
                     cellTower.setMobileNetworkCode(combinedMobileCodes % 100);
                     break;
