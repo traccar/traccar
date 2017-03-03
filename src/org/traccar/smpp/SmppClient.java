@@ -148,9 +148,11 @@ public class SmppClient {
     }
 
     public void scheduleReconnect() {
-        reconnectionTask = reconnectionExecutor.scheduleWithFixedDelay(
-                new ReconnectionTask(this),
-                reconnectionDelay, reconnectionDelay, TimeUnit.MILLISECONDS);
+        if (reconnectionTask == null || reconnectionTask.isDone()) {
+            reconnectionTask = reconnectionExecutor.scheduleWithFixedDelay(
+                    new ReconnectionTask(this),
+                    reconnectionDelay, reconnectionDelay, TimeUnit.MILLISECONDS);
+        }
     }
 
     private void stopReconnectionkTask() {
