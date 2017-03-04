@@ -132,7 +132,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextInt());
 
         if (parser.hasNext(9)) {
 

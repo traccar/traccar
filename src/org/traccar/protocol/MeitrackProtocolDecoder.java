@@ -124,7 +124,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.setAltitude(parser.nextDouble());
 
-        position.set(Position.KEY_ODOMETER, parser.next());
+        position.set(Position.KEY_ODOMETER, parser.nextInt());
         position.set("runtime", parser.next());
 
         position.setNetwork(new Network(
