@@ -437,13 +437,13 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte()); // version
-        buf.readUnsignedShort(); // event
-        buf.readUnsignedByte(); // data validity
-        buf.readUnsignedByte(); // towed
+        position.set(Position.KEY_EVENT, buf.readUnsignedShort()); // event
+        position.set("dataValidity", buf.readUnsignedByte()); // data validity
+        position.set("towed", buf.readUnsignedByte()); // towed
         buf.readUnsignedShort(); // length
 
         while (buf.readableBytes() > 0) {
-            buf.readUnsignedByte(); // towed position
+            position.set("towedPosition", buf.readUnsignedByte());
             int type = buf.readUnsignedByte();
             int length = buf.readUnsignedByte();
 
@@ -526,7 +526,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x0020) != 0) {
             position.set(Position.KEY_HOURS, buf.readUnsignedInt());
             position.set("serviceDistance", buf.readInt());
-            buf.readUnsignedByte(); // driver activity
+            position.set("driverActivity", buf.readUnsignedByte());
             position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
             position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
@@ -547,10 +547,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0200) != 0) {
-            buf.readUnsignedByte(); // tachograph based speed
-            buf.readUnsignedByte(); // driver 1 state
-            buf.readUnsignedByte(); // driver 2 state
-            buf.readUnsignedByte(); // tachograph status
+            position.set("tachographSpeed", buf.readUnsignedByte());
+            position.set("driver1State", buf.readUnsignedByte());
+            position.set("driver2State", buf.readUnsignedByte());
+            position.set("tachographStatus", buf.readUnsignedByte());
             position.set("overspeedCount", buf.readUnsignedByte());
         }
 
