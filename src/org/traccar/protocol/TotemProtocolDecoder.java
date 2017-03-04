@@ -289,7 +289,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, parser.next());
             position.setCourse(parser.nextDouble());
             position.setSpeed(parser.nextDouble());
-            position.set("pdop", parser.next());
+            position.set(Position.KEY_PDOP, parser.next());
             position.set(Position.KEY_ODOMETER, parser.nextInt() * 1000);
 
             position.setLatitude(parser.nextCoordinate());
