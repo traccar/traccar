@@ -67,7 +67,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_TYPE, buf.readUnsignedByte());
 
-        position.set("command", buf.readBytes(buf.readInt()).toString(StandardCharsets.US_ASCII));
+        position.set(Position.KEY_COMMAND, buf.readBytes(buf.readInt()).toString(StandardCharsets.US_ASCII));
 
     }
 

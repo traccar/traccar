@@ -66,7 +66,7 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set("mode", buf.readUnsignedByte());
-        position.set("command", buf.readUnsignedByte());
+        position.set(Position.KEY_COMMAND, buf.readUnsignedByte());
         position.set(Position.KEY_POWER, buf.readUnsignedShort());  // mV
 
         buf.skipBytes(5);  // status

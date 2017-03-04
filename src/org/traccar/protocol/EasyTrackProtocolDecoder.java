@@ -77,7 +77,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set("command", parser.next());
+        position.set(Position.KEY_COMMAND, parser.next());
 
         position.setValid(parser.next().equals("A"));
 
