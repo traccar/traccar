@@ -103,7 +103,7 @@ public abstract class BaseProtocol implements Protocol {
                         "Command " + command.getType() + " is not supported in protocol " + getName());
             }
         } else {
-            throw new RuntimeException("Smpp client is not enabled");
+            throw new RuntimeException("SMPP client is not enabled");
         }
     }
 

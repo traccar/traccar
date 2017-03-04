@@ -68,7 +68,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
 
     @Override
     public void fireChannelUnexpectedlyClosed() {
-        Log.warning("Smpp session channel unexpectedly closed");
+        Log.warning("SMPP session channel unexpectedly closed");
         smppClient.scheduleReconnect();
     }
 }

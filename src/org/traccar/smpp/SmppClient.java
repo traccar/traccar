@@ -149,10 +149,10 @@ public class SmppClient {
             smppSession = clientBootstrap.bind(sessionConfig, sessionHandler);
             stopReconnectionkTask();
             runEnquireLinkTask();
-            Log.info("Smpp session connected");
+            Log.info("SMPP session connected");
         } catch (SmppTimeoutException | SmppChannelException
                 | UnrecoverablePduException | InterruptedException error) {
-            Log.warning("Unable to connect to smpp server: ", error);
+            Log.warning("Unable to connect to SMPP server: ", error);
         }
     }
 
@@ -187,7 +187,7 @@ public class SmppClient {
 
     private void destroySession() {
         if (smppSession != null) {
-            Log.debug("Cleaning up smpp session... ");
+            Log.debug("Cleaning up SMPP session... ");
             smppSession.destroy();
             smppSession = null;
         }
@@ -206,12 +206,12 @@ public class SmppClient {
             submit.setDestAddress(new Address(destTon, destNpi, destAddress));
             SubmitSmResp submitResponce = getSession().submit(submit, submitTimeout);
             if (submitResponce.getCommandStatus() == SmppConstants.STATUS_OK) {
-                Log.debug("SMS submited, msg_id: " + submitResponce.getMessageId());
+                Log.debug("SMS submitted, message id: " + submitResponce.getMessageId());
             } else {
                 throw new IllegalStateException(submitResponce.getResultMessage());
             }
         } else {
-            throw new SmppChannelException("Smpp session is not connected");
+            throw new SmppChannelException("SMPP session is not connected");
         }
     }
 
