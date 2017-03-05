@@ -26,9 +26,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.traccar.BaseProtocol;
 import org.traccar.Config;
 import org.traccar.Context;
 import org.traccar.helper.Log;
+import org.traccar.model.Command;
+import org.traccar.model.CommandType;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
 import org.traccar.model.Group;
@@ -53,11 +56,14 @@ public class DeviceManager implements IdentityManager {
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
+    private boolean fallbackToSms;
+
     public DeviceManager(DataManager dataManager) {
         this.dataManager = dataManager;
         this.config = Context.getConfig();
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
+        fallbackToSms = config.getBoolean("command.fallbackToSms");
         if (dataManager != null) {
             try {
                 updateGroupCache(true);
@@ -419,5 +425,49 @@ public class DeviceManager implements IdentityManager {
         } else {
             throw new IllegalArgumentException();
         }
+    }
+
+    public void sendCommand(Command command) throws Exception {
+        long deviceId = command.getDeviceId();
+        if (command.getSms()) {
+            Position lastPosition = getLastPosition(deviceId);
+            if (lastPosition != null) {
+                BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
+                protocol.sendSmsCommand(devicesById.get(deviceId).getPhone(), command);
+            } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
+                Context.getSmppManager().sendMessageSync(devicesById.get(deviceId).getPhone(),
+                        command.getString(Command.KEY_DATA), true);
+            } else {
+                throw new RuntimeException("Command " + command.getType() + " is not supported");
+            }
+        } else {
+            ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
+            if (activeDevice != null) {
+                activeDevice.sendCommand(command);
+            } else {
+                if (fallbackToSms) {
+                    command.setSms(true);
+                    sendCommand(command);
+                } else {
+                    throw new RuntimeException("Device is not online");
+                }
+            }
+        }
+    }
+
+    public Collection<CommandType> getCommandTypes(long deviceId, boolean sms) {
+        List<CommandType> result = new ArrayList<>();
+        Position lastPosition = Context.getDeviceManager().getLastPosition(deviceId);
+        if (lastPosition != null) {
+            BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
+            Collection<String> commands;
+            commands = sms ? protocol.getSupportedSmsCommands() : protocol.getSupportedCommands();
+            for (String commandKey : commands) {
+                result.add(new CommandType(commandKey));
+            }
+        } else {
+            result.add(new CommandType(Command.TYPE_CUSTOM));
+        }
+        return result;
     }
 }

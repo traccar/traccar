@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,8 @@ package org.traccar.database;
 import org.jboss.netty.channel.Channel;
 import org.traccar.Protocol;
 import org.traccar.model.Command;
-import org.traccar.model.CommandType;
 
 import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class ActiveDevice {
 
@@ -45,16 +41,6 @@ public class ActiveDevice {
 
     public long getDeviceId() {
         return deviceId;
-    }
-
-    public Collection<CommandType> getCommandTypes() {
-        List<CommandType> result = new ArrayList<>();
-
-        for (String commandKey : protocol.getSupportedCommands()) {
-            result.add(new CommandType(commandKey));
-        }
-
-        return result;
     }
 
     public void sendCommand(Command command) {

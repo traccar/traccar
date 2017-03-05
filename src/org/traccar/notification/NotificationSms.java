@@ -35,7 +35,7 @@ public final class NotificationSms {
         User user = Context.getPermissionsManager().getUser(userId);
         if (Context.getSmppManager() != null && user.getPhone() != null) {
             Context.getSmppManager().sendMessageAsync(user.getPhone(),
-                    NotificationFormatter.formatSmsMessage(userId, event, position));
+                    NotificationFormatter.formatSmsMessage(userId, event, position), false);
         }
     }
 
@@ -44,7 +44,7 @@ public final class NotificationSms {
         User user = Context.getPermissionsManager().getUser(userId);
         if (Context.getSmppManager() != null && user.getPhone() != null) {
             Context.getSmppManager().sendMessageSync(user.getPhone(),
-                    NotificationFormatter.formatSmsMessage(userId, event, position));
+                    NotificationFormatter.formatSmsMessage(userId, event, position), false);
         }
     }
 }

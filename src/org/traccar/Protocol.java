@@ -16,4 +16,8 @@ public interface Protocol {
 
     void initTrackerServers(List<TrackerServer> serverList);
 
+    Collection<String> getSupportedSmsCommands();
+
+    void sendSmsCommand(String phone, Command command) throws Exception;
+
 }

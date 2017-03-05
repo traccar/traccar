@@ -44,14 +44,14 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
         try {
             if (request instanceof DeliverSm) {
                 if (request.getOptionalParameters() != null) {
-                    Log.debug("Message Delivered: "
+                    Log.debug("SMS Message Delivered: "
                             + request.getOptionalParameter(SmppConstants.TAG_RECEIPTED_MSG_ID).getValueAsString()
                             + ", State: "
                             + request.getOptionalParameter(SmppConstants.TAG_MSG_STATE).getValueAsByte());
                 } else {
-                    Log.debug("Message Received: "
+                    Log.debug("SMS Message Received: "
                             + CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
-                            smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()))
+                            smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding())).trim()
                             + ", Source Address: "
                             + ((DeliverSm) request).getSourceAddress().getAddress());
                 }
@@ -68,7 +68,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
 
     @Override
     public void fireChannelUnexpectedlyClosed() {
-        Log.warning("Smpp session channel unexpectedly closed");
+        Log.warning("SMPP session channel unexpectedly closed");
         smppClient.scheduleReconnect();
     }
 }
