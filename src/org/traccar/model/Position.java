@@ -34,7 +34,7 @@ public class Position extends Message {
     public static final String KEY_ODOMETER = "odometer";                   // kilometers
     public static final String KEY_ODOMETER_SERVICE = "serviceOdometer";    // kilometers
     public static final String KEY_ODOMETER_TRIP = "tripOdometer";          // kilometers
-    public static final String KEY_HOURS = "hours";                         // decimal hours
+    public static final String KEY_HOURS = "hours";                         // hours
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
     public static final String KEY_POWER = "power";                         // volts
@@ -65,7 +65,7 @@ public class Position extends Message {
     public static final String KEY_COMMAND = "command";
 
     public static final String KEY_DTCS = "dtcs";
-    public static final String KEY_OBD_SPEED = "obdSpeed";                  // meters/second
+    public static final String KEY_OBD_SPEED = "obdSpeed";                  // knots
     public static final String KEY_OBD_ODOMETER = "obdOdometer";            // kilometers
 
     public static final String KEY_RESULT = "result";
@@ -217,7 +217,7 @@ public class Position extends Message {
         this.longitude = longitude;
     }
 
-    private double altitude;
+    private double altitude;  // value in meters
 
     public double getAltitude() {
         return altitude;
