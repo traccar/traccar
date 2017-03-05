@@ -108,7 +108,7 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(parser.nextDouble());
 
             position.set(Position.KEY_INPUT, parser.nextInt(2));
-            position.set(Position.KEY_POWER, parser.nextDouble() / 10);
+            position.set(Position.KEY_POWER, parser.nextDouble() * 0.1);
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());

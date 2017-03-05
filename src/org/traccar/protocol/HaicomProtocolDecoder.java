@@ -105,7 +105,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_GPS, parser.next());
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
-        position.set(Position.KEY_BATTERY, parser.nextDouble() / 10);
+        position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
 
         return position;
     }

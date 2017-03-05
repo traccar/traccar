@@ -275,7 +275,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(dateBuilder.getDate());
 
             position.set(Position.PREFIX_IO + 1, parser.next());
-            position.set(Position.KEY_BATTERY, parser.nextDouble() / 10);
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
             position.set(Position.KEY_POWER, parser.nextDouble());
             position.set(Position.PREFIX_ADC + 1, parser.next());
             position.set(Position.PREFIX_ADC + 2, parser.next());
@@ -303,7 +303,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                     .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
             position.setTime(dateBuilder.getDate());
 
-            position.set(Position.KEY_BATTERY, parser.nextDouble() / 10);
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
             position.set(Position.KEY_POWER, parser.nextDouble());
 
             position.set(Position.PREFIX_ADC + 1, parser.next());
