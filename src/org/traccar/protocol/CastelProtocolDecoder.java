@@ -178,8 +178,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedInt(); // ACC ON time
         buf.readUnsignedInt(); // UTC time
         position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt()); // trip odometer
-        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt()); // total fuel consumption
+        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
+        position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
         buf.readUnsignedShort(); // current fuel consumption
         position.set(Position.KEY_STATUS, buf.readUnsignedInt());
         buf.skipBytes(8);
@@ -263,8 +263,8 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedInt(); // ACC ON time
             buf.readUnsignedInt(); // UTC time
             long odometer = buf.readUnsignedInt();
-            long tripOdometer = buf.readUnsignedInt(); // trip odometer
-            long fuelConsumption = buf.readUnsignedInt(); // total fuel consumption
+            long tripOdometer = buf.readUnsignedInt();
+            long fuelConsumption = buf.readUnsignedInt();
             buf.readUnsignedShort(); // current fuel consumption
             long status = buf.readUnsignedInt();
             buf.skipBytes(8);

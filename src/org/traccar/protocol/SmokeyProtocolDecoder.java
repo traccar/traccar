@@ -88,7 +88,7 @@ public class SmokeyProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_VERSION_FW, buf.readUnsignedShort()); // firmware version
+            position.set(Position.KEY_VERSION_FW, buf.readUnsignedShort());
 
             int status = buf.readUnsignedShort();
             position.set(Position.KEY_STATUS, status);

@@ -122,7 +122,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_RPM, buf.readUnsignedShort());
                     break;
                 case "GS":
-                    position.set(Position.KEY_RSSI, buf.readUnsignedByte()); // gsm status
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     break;
                 case "DT":
                     position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() == 1);
@@ -149,7 +149,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // mil status
                     break;
                 case "FC":
-                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt()); // fuel used
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
                     break;
                 case "CI":
                     readString(buf); // format string

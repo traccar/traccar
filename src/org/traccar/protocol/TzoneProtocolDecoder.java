@@ -119,8 +119,8 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         if (buf.readUnsignedShort() != 0x2424) {
             return null;
         }
-        int hardware = buf.readUnsignedShort(); // model
-        long firmware = buf.readUnsignedInt(); // firmware
+        int hardware = buf.readUnsignedShort();
+        long firmware = buf.readUnsignedInt();
 
         String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
@@ -202,10 +202,10 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         if (blockLength >= 13) {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
-            position.set("terminalInfo", buf.readUnsignedByte()); // terminal info
+            position.set("terminalInfo", buf.readUnsignedByte());
             position.set(Position.PREFIX_IO + 1, buf.readUnsignedShort());
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-            position.set("gsmStatus", buf.readUnsignedByte()); // GSM status
+            position.set("gsmStatus", buf.readUnsignedByte());
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
             position.set(Position.KEY_POWER, buf.readUnsignedShort());
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());

@@ -182,7 +182,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.check(flags, 7)) {
                     position.set(Position.KEY_BATTERY, buf.getUnsignedByte(buf.readerIndex()) >> 2);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() & 0x03ff);
-                    position.set("microcontrollerTemperature", buf.readByte()); // microcontroller temperature
+                    position.set("microcontrollerTemperature", buf.readByte());
 
                     position.set(Position.KEY_RSSI, (buf.getUnsignedByte(buf.readerIndex()) >> 4) & 0x07);
 

@@ -120,7 +120,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
     private void decodeCanData(ChannelBuffer buf, Position position) {
 
         buf.readUnsignedMedium(); // packet identifier
-        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte()); // version
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
         int count = buf.readUnsignedByte();
         buf.readUnsignedByte(); // batch count
         buf.readUnsignedShort(); // selector bit
@@ -436,10 +436,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             return;
         }
 
-        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte()); // version
-        position.set(Position.KEY_EVENT, buf.readUnsignedShort()); // event
-        position.set("dataValidity", buf.readUnsignedByte()); // data validity
-        position.set("towed", buf.readUnsignedByte()); // towed
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+        position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+        position.set("dataValidity", buf.readUnsignedByte());
+        position.set("towed", buf.readUnsignedByte());
         buf.readUnsignedShort(); // length
 
         while (buf.readableBytes() > 0) {
