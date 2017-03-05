@@ -506,5 +506,6 @@
     <entry key='pretrace.port'>5133</entry>
     <entry key='pricol.port'>5134</entry>
     <entry key='siwi.port'>5135</entry>
+    <entry key='starlink.port'>5136</entry>
 
 </properties>
