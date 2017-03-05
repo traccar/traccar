@@ -20,11 +20,6 @@ import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.traccar.database.ActiveDevice;
 import org.traccar.model.Command;
 
-import com.cloudhopper.smpp.type.RecoverablePduException;
-import com.cloudhopper.smpp.type.SmppChannelException;
-import com.cloudhopper.smpp.type.SmppTimeoutException;
-import com.cloudhopper.smpp.type.UnrecoverablePduException;
-
 import javax.xml.bind.DatatypeConverter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -91,8 +86,7 @@ public abstract class BaseProtocol implements Protocol {
     }
 
     @Override
-    public void sendSmsCommand(String phone, Command command) throws RecoverablePduException, UnrecoverablePduException,
-            SmppTimeoutException, SmppChannelException, InterruptedException {
+    public void sendSmsCommand(String phone, Command command) throws Exception {
         if (Context.getSmppManager() != null) {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
                 Context.getSmppManager().sendMessageSync(phone, command.getString(Command.KEY_DATA), true);
