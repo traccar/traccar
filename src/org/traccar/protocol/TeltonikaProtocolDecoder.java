@@ -96,10 +96,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
                 break;
             case 66:
-                position.set(Position.KEY_POWER, readValue(buf, length, false) + "mV");
+                position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
                 break;
             case 67:
-                position.set(Position.KEY_BATTERY, readValue(buf, length, false) + "mV");
+                position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
             case 70:
                 position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true) * 0.1);

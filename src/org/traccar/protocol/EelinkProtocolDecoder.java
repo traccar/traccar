@@ -130,7 +130,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
             position.set(Position.KEY_STATUS, status);
 
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() + "mV");
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
 
             position.set(Position.KEY_RSSI, buf.readUnsignedShort());
 
