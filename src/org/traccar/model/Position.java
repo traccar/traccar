@@ -31,16 +31,16 @@ public class Position extends Message {
     public static final String KEY_EVENT = "event";
     public static final String KEY_ALARM = "alarm";
     public static final String KEY_STATUS = "status";
-    public static final String KEY_ODOMETER = "odometer"; // meters
-    public static final String KEY_ODOMETER_SERVICE = "serviceOdometer";
-    public static final String KEY_ODOMETER_TRIP = "tripOdometer";
-    public static final String KEY_HOURS = "hours";
+    public static final String KEY_ODOMETER = "odometer";                   // kilometers
+    public static final String KEY_ODOMETER_SERVICE = "serviceOdometer";    // kilometers
+    public static final String KEY_ODOMETER_TRIP = "tripOdometer";          // kilometers
+    public static final String KEY_HOURS = "hours";                         // decimal hours
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
-    public static final String KEY_POWER = "power";
-    public static final String KEY_BATTERY = "battery";
-    public static final String KEY_FUEL_LEVEL = "fuel";
-    public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption";
+    public static final String KEY_POWER = "power";                         // volts
+    public static final String KEY_BATTERY = "battery";                     // volts
+    public static final String KEY_FUEL_LEVEL = "fuel";                     // liters
+    public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption";    // liter/hour
     public static final String KEY_RFID = "rfid";
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
@@ -50,8 +50,8 @@ public class Position extends Message {
     public static final String KEY_CHARGE = "charge";
     public static final String KEY_IP = "ip";
     public static final String KEY_ARCHIVE = "archive";
-    public static final String KEY_DISTANCE = "distance"; // meters
-    public static final String KEY_TOTAL_DISTANCE = "totalDistance";
+    public static final String KEY_DISTANCE = "distance";                   // kilometers
+    public static final String KEY_TOTAL_DISTANCE = "totalDistance";        // kilometers
     public static final String KEY_RPM = "rpm";
     public static final String KEY_VIN = "vin";
     public static final String KEY_APPROXIMATE = "approximate";
@@ -60,13 +60,13 @@ public class Position extends Message {
     public static final String KEY_ARMED = "armed";
     public static final String KEY_GEOFENCE = "geofence";
     public static final String KEY_ACCELERATION = "acceleration";
-    public static final String KEY_DEVICE_TEMP = "deviceTemp";
+    public static final String KEY_DEVICE_TEMP = "deviceTemp";              // celsius
     public static final String KEY_OPERATOR = "operator";
     public static final String KEY_COMMAND = "command";
 
     public static final String KEY_DTCS = "dtcs";
-    public static final String KEY_OBD_SPEED = "obdSpeed";
-    public static final String KEY_OBD_ODOMETER = "obdOdometer";
+    public static final String KEY_OBD_SPEED = "obdSpeed";                  // meters/second
+    public static final String KEY_OBD_ODOMETER = "obdOdometer";            // kilometers
 
     public static final String KEY_RESULT = "result";
 
