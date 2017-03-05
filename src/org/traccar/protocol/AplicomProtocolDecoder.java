@@ -234,8 +234,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x8000) != 0) {
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
         }
 
         // Pulse rate 1
