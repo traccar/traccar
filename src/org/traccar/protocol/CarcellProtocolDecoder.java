@@ -140,7 +140,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(4)) {
             position.set("cloned", parser.next().equals("1"));
 
-            position.set(Position.KEY_ALARM, parser.next());
+            parser.next(); // panic button status
 
             String painelStatus = parser.next();
             if (painelStatus.equals("1")) {
@@ -154,7 +154,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(5)) {
             position.set("timeUntilDelivery", parser.nextInt());
-            position.set(Position.KEY_ALARM, parser.next());
+            parser.next(); // panic button status
             position.set(Position.KEY_INPUT, parser.next()); // aux
 
             Double mainVoltage = parser.nextDouble() / 100d;
