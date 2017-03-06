@@ -34,9 +34,10 @@ import java.util.Collection;
 public class CommandTypeResource extends BaseResource {
 
     @GET
-    public Collection<CommandType> get(@QueryParam("deviceId") long deviceId, @QueryParam("sms") boolean sms) {
+    public Collection<CommandType> get(@QueryParam("deviceId") long deviceId,
+            @QueryParam("textChannel") boolean textChannel) {
         Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        return Context.getDeviceManager().getCommandTypes(deviceId, sms);
+        return Context.getDeviceManager().getCommandTypes(deviceId, textChannel);
     }
 
 }

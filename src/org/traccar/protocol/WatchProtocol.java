@@ -30,7 +30,7 @@ public class WatchProtocol extends BaseProtocol {
 
     public WatchProtocol() {
         super("watch");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_SOS_NUMBER,

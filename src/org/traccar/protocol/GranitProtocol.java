@@ -29,12 +29,12 @@ public class GranitProtocol extends BaseProtocol {
 
     public GranitProtocol() {
         super("granit");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_SINGLE);
-        setSmsEncoder(new GranitProtocolSmsEncoder());
-        setSupportedSmsCommands(
+        setTextCommandEncoder(new GranitProtocolSmsEncoder());
+        setSupportedTextCommands(
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_PERIODIC);
     }

@@ -29,7 +29,7 @@ public class H02Protocol extends BaseProtocol {
 
     public H02Protocol() {
         super("h02");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
                 Command.TYPE_ENGINE_STOP,

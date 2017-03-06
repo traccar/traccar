@@ -56,14 +56,14 @@ public class DeviceManager implements IdentityManager {
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
 
-    private boolean fallbackToSms;
+    private boolean fallbackToText;
 
     public DeviceManager(DataManager dataManager) {
         this.dataManager = dataManager;
         this.config = Context.getConfig();
         dataRefreshDelay = config.getLong("database.refreshDelay", DEFAULT_REFRESH_DELAY) * 1000;
         lookupGroupsAttribute = config.getBoolean("deviceManager.lookupGroupsAttribute");
-        fallbackToSms = config.getBoolean("command.fallbackToSms");
+        fallbackToText = config.getBoolean("command.fallbackToSms");
         if (dataManager != null) {
             try {
                 updateGroupCache(true);
@@ -429,11 +429,11 @@ public class DeviceManager implements IdentityManager {
 
     public void sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
-        if (command.getSms()) {
+        if (command.getTextChannel()) {
             Position lastPosition = getLastPosition(deviceId);
             if (lastPosition != null) {
                 BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                protocol.sendSmsCommand(devicesById.get(deviceId).getPhone(), command);
+                protocol.sendTextCommand(devicesById.get(deviceId).getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
                 Context.getSmppManager().sendMessageSync(devicesById.get(deviceId).getPhone(),
                         command.getString(Command.KEY_DATA), true);
@@ -445,8 +445,8 @@ public class DeviceManager implements IdentityManager {
             if (activeDevice != null) {
                 activeDevice.sendCommand(command);
             } else {
-                if (fallbackToSms) {
-                    command.setSms(true);
+                if (fallbackToText) {
+                    command.setTextChannel(true);
                     sendCommand(command);
                 } else {
                     throw new RuntimeException("Device is not online");
@@ -455,13 +455,13 @@ public class DeviceManager implements IdentityManager {
         }
     }
 
-    public Collection<CommandType> getCommandTypes(long deviceId, boolean sms) {
+    public Collection<CommandType> getCommandTypes(long deviceId, boolean textChannel) {
         List<CommandType> result = new ArrayList<>();
         Position lastPosition = Context.getDeviceManager().getLastPosition(deviceId);
         if (lastPosition != null) {
             BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
             Collection<String> commands;
-            commands = sms ? protocol.getSupportedSmsCommands() : protocol.getSupportedCommands();
+            commands = textChannel ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands();
             for (String commandKey : commands) {
                 result.add(new CommandType(commandKey));
             }

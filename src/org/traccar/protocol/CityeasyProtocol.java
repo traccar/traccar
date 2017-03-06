@@ -28,7 +28,7 @@ public class CityeasyProtocol extends BaseProtocol {
 
     public CityeasyProtocol() {
         super("cityeasy");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,

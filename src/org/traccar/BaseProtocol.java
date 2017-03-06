@@ -29,10 +29,10 @@ import java.util.Set;
 public abstract class BaseProtocol implements Protocol {
 
     private final String name;
-    private final Set<String> supportedCommands = new HashSet<>();
-    private final Set<String> supportedSmsCommands = new HashSet<>();
+    private final Set<String> supportedDataCommands = new HashSet<>();
+    private final Set<String> supportedTextCommands = new HashSet<>();
 
-    private StringProtocolEncoder smsEncoder = null;
+    private StringProtocolEncoder textCommandEncoder = null;
 
     public BaseProtocol(String name) {
         this.name = name;
@@ -43,31 +43,36 @@ public abstract class BaseProtocol implements Protocol {
         return name;
     }
 
+    public void setSupportedDataCommands(String... commands) {
+        supportedDataCommands.addAll(Arrays.asList(commands));
+    }
+
+    public void setSupportedTextCommands(String... commands) {
+        supportedTextCommands.addAll(Arrays.asList(commands));
+    }
+
     public void setSupportedCommands(String... commands) {
-        supportedCommands.addAll(Arrays.asList(commands));
-    }
-
-    public void setSupportedSmsCommands(String... commands) {
-        supportedSmsCommands.addAll(Arrays.asList(commands));
+        supportedDataCommands.addAll(Arrays.asList(commands));
+        supportedTextCommands.addAll(Arrays.asList(commands));
     }
 
     @Override
-    public Collection<String> getSupportedCommands() {
-        Set<String> commands = new HashSet<>(supportedCommands);
+    public Collection<String> getSupportedDataCommands() {
+        Set<String> commands = new HashSet<>(supportedDataCommands);
         commands.add(Command.TYPE_CUSTOM);
         return commands;
     }
 
     @Override
-    public Collection<String> getSupportedSmsCommands() {
-        Set<String> commands = new HashSet<>(supportedSmsCommands);
+    public Collection<String> getSupportedTextCommands() {
+        Set<String> commands = new HashSet<>(supportedTextCommands);
         commands.add(Command.TYPE_CUSTOM);
         return commands;
     }
 
     @Override
-    public void sendCommand(ActiveDevice activeDevice, Command command) {
-        if (supportedCommands.contains(command.getType())) {
+    public void sendDataCommand(ActiveDevice activeDevice, Command command) {
+        if (supportedDataCommands.contains(command.getType())) {
             activeDevice.write(command);
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
@@ -81,17 +86,18 @@ public abstract class BaseProtocol implements Protocol {
         }
     }
 
-    public void setSmsEncoder(StringProtocolEncoder smsEncoder) {
-        this.smsEncoder = smsEncoder;
+    public void setTextCommandEncoder(StringProtocolEncoder textCommandEncoder) {
+        this.textCommandEncoder = textCommandEncoder;
     }
 
     @Override
-    public void sendSmsCommand(String phone, Command command) throws Exception {
+    public void sendTextCommand(String destAddress, Command command) throws Exception {
         if (Context.getSmppManager() != null) {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmppManager().sendMessageSync(phone, command.getString(Command.KEY_DATA), true);
-            } else if (supportedSmsCommands.contains(command.getType()) && smsEncoder != null) {
-                Context.getSmppManager().sendMessageSync(phone, (String) smsEncoder.encodeCommand(command), true);
+                Context.getSmppManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
+            } else if (supportedTextCommands.contains(command.getType()) && textCommandEncoder != null) {
+                Context.getSmppManager().sendMessageSync(destAddress,
+                        (String) textCommandEncoder.encodeCommand(command), true);
             } else {
                 throw new RuntimeException(
                         "Command " + command.getType() + " is not supported in protocol " + getName());

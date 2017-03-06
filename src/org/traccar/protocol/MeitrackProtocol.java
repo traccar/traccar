@@ -30,7 +30,7 @@ public class MeitrackProtocol extends BaseProtocol {
 
     public MeitrackProtocol() {
         super("meitrack");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
