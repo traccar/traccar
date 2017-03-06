@@ -507,5 +507,6 @@
     <entry key='pricol.port'>5134</entry>
     <entry key='siwi.port'>5135</entry>
     <entry key='starlink.port'>5136</entry>
+    <entry key='dmt.port'>5137</entry>
 
 </properties>
