@@ -10,6 +10,9 @@ public class LaipacProtocolDecoderTest extends ProtocolTest {
 
         LaipacProtocolDecoder decoder = new LaipacProtocolDecoder(new LaipacProtocol());
 
+        verifyPosition(decoder, text(
+                "$AVRMC,80006405,212645,r,3013.9938,N,08133.3998,W,0.00,0.00,010317,a,4076,0,1,0,0,53170583,310260*78"));
+
         verifyNothing(decoder, text(
                 "$AVSYS,99999999,V1.50,SN0000103,32768*15"));
         
