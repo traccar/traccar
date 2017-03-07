@@ -29,12 +29,8 @@ public class WondexProtocol extends BaseProtocol {
 
     public WondexProtocol() {
         super("wondex");
+        setTextCommandEncoder(new WondexProtocolEncoder());
         setSupportedCommands(
-                Command.TYPE_REBOOT_DEVICE,
-                Command.TYPE_POSITION_SINGLE,
-                Command.TYPE_IDENTIFICATION);
-        setSmsEncoder(new WondexProtocolEncoder());
-        setSupportedSmsCommands(
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_IDENTIFICATION);

@@ -30,7 +30,7 @@ public class MiniFinderProtocol extends BaseProtocol {
 
     public MiniFinderProtocol() {
         super("minifinder");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_VOICE_MONITORING,
                 Command.TYPE_ALARM_SPEED,

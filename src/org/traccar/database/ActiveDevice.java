@@ -44,7 +44,7 @@ public class ActiveDevice {
     }
 
     public void sendCommand(Command command) {
-        protocol.sendCommand(this, command);
+        protocol.sendDataCommand(this, command);
     }
 
     public void write(Object message) {

@@ -28,7 +28,7 @@ public class NoranProtocol extends BaseProtocol {
 
     public NoranProtocol() {
         super("noran");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,

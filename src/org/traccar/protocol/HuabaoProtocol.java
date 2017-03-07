@@ -27,7 +27,7 @@ public class HuabaoProtocol extends BaseProtocol {
 
     public HuabaoProtocol() {
         super("huabao");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
     }

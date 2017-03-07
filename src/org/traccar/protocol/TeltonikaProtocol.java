@@ -28,7 +28,7 @@ public class TeltonikaProtocol extends BaseProtocol {
 
     public TeltonikaProtocol() {
         super("teltonika");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
     }
 

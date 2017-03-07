@@ -31,7 +31,7 @@ public class XexunProtocol extends BaseProtocol {
 
     public XexunProtocol() {
         super("xexun");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
     }

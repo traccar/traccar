@@ -28,7 +28,7 @@ public class RuptelaProtocol extends BaseProtocol {
 
     public RuptelaProtocol() {
         super("ruptela");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
     }
 

@@ -29,7 +29,7 @@ public class CellocatorProtocol extends BaseProtocol {
 
     public CellocatorProtocol() {
         super("cellocator");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL);
     }
 

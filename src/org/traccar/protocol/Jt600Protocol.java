@@ -28,7 +28,7 @@ public class Jt600Protocol extends BaseProtocol {
 
     public Jt600Protocol() {
         super("jt600");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_SET_TIMEZONE,

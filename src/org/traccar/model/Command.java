@@ -66,14 +66,14 @@ public class Command extends Message {
     public static final String KEY_INDEX = "index";
     public static final String KEY_PHONE = "phone";
 
-    private boolean sms;
+    private boolean textChannel;
 
-    public boolean getSms() {
-        return sms;
+    public boolean getTextChannel() {
+        return textChannel;
     }
 
-    public void setSms(boolean sms) {
-        this.sms = sms;
+    public void setTextChannel(boolean textChannel) {
+        this.textChannel = textChannel;
     }
 
 }

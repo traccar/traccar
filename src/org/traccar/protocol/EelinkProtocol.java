@@ -28,7 +28,7 @@ public class EelinkProtocol extends BaseProtocol {
 
     public EelinkProtocol() {
         super("eelink");
-        setSupportedCommands(
+        setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
