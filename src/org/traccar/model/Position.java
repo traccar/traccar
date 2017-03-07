@@ -32,13 +32,14 @@ public class Position extends Message {
     public static final String KEY_ALARM = "alarm";
     public static final String KEY_STATUS = "status";
     public static final String KEY_ODOMETER = "odometer"; // meters
-    public static final String KEY_TRIP_ODOMETER = "tripOdometer";
+    public static final String KEY_ODOMETER_SERVICE = "serviceOdometer";
+    public static final String KEY_ODOMETER_TRIP = "tripOdometer";
     public static final String KEY_HOURS = "hours";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
     public static final String KEY_POWER = "power";
     public static final String KEY_BATTERY = "battery";
-    public static final String KEY_FUEL = "fuel";
+    public static final String KEY_FUEL_LEVEL = "fuel";
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption";
     public static final String KEY_RFID = "rfid";
     public static final String KEY_VERSION_FW = "versionFw";
@@ -57,10 +58,10 @@ public class Position extends Message {
     public static final String KEY_THROTTLE = "throttle";
     public static final String KEY_MOTION = "motion";
     public static final String KEY_ARMED = "armed";
-    public static final String KEY_ACCURACY = "accuracy";
     public static final String KEY_GEOFENCE = "geofence";
     public static final String KEY_ACCELERATION = "acceleration";
     public static final String KEY_DEVICE_TEMP = "deviceTemp";
+    public static final String KEY_OPERATOR = "operator";
 
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed";

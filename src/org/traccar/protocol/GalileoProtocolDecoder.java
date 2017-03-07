@@ -185,7 +185,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     break;
                 case 0xc1:
-                    position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                     position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
                     position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
                     break;

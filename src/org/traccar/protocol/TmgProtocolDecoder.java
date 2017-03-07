@@ -129,7 +129,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_SATELLITES_VISIBLE, parser.nextInt());
-        position.set("operator", parser.next());
+        position.set(Position.KEY_OPERATOR, parser.next());
         position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
         position.set(Position.KEY_BATTERY, parser.nextDouble());

@@ -92,7 +92,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
 
-            position.set(Position.KEY_DISTANCE, parser.nextDouble() * 1000);
+            position.set(Position.KEY_ODOMETER_TRIP, parser.nextDouble() * 1000);
             position.set(Position.KEY_EVENT, parser.next());
 
             int status = parser.nextInt();
