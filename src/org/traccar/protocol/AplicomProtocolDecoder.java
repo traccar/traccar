@@ -218,7 +218,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         if ((selector & 0x0010) != 0) {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-            position.set("maximumSpeed", buf.readUnsignedByte()); // maximum speed
+            position.set("maximumSpeed", buf.readUnsignedByte());
             position.setCourse(buf.readUnsignedByte() * 2.0);
         }
 

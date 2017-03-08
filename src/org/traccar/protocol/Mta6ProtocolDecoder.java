@@ -222,7 +222,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(new FloatReader().readFloat(buf) / Math.PI * 180);
         position.setTime(new TimeReader().readTime(buf));
 
-        position.set(Position.KEY_STATUS, buf.readUnsignedByte()); // status
+        position.set(Position.KEY_STATUS, buf.readUnsignedByte());
 
         if (BitUtil.check(flags, 0)) {
             position.setAltitude(buf.readUnsignedShort());
@@ -241,7 +241,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
             position.set("engine", buf.readUnsignedShort() * 0.125);
             position.set("pedals", buf.readUnsignedByte());
             position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
-            position.set(Position.KEY_ODOMETER_SERVICE, buf.readUnsignedShort()); // service odometer
+            position.set(Position.KEY_ODOMETER_SERVICE, buf.readUnsignedShort());
         }
 
         if (BitUtil.check(flags, 3)) {

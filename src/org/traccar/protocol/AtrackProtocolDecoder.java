@@ -113,7 +113,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // rxlev
                     break;
                 case "PC":
-                    position.set(Position.PREFIX_COUNT + 1, buf.readUnsignedInt()); // pulse count
+                    position.set(Position.PREFIX_COUNT + 1, buf.readUnsignedInt());
                     break;
                 case "AT":
                     position.setAltitude(buf.readUnsignedInt());
@@ -140,7 +140,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                     break;
                 case "ET":
-                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort()); // engine coolant temp
+                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
                     break;
                 case "FL":
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());

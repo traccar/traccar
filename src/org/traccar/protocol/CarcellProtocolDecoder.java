@@ -155,7 +155,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(5)) {
             position.set("timeUntilDelivery", parser.nextInt());
             parser.next(); // panic button status
-            position.set(Position.KEY_INPUT, parser.next()); // aux
+            position.set(Position.KEY_INPUT, parser.next());
 
             Double mainVoltage = parser.nextDouble() / 100d;
             position.set(Position.KEY_POWER, mainVoltage);
