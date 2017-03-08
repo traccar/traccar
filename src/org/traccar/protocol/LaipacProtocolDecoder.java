@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,21 +91,23 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
         String checksum = parser.next();
-        String response = null;
 
-        if (type.equals("0") && Character.isLowerCase(status.charAt(0))) {
-            response = "$EAVACK,0," + checksum;
-            response += Checksum.nmea(response);
-        } else if (type.equals("S") || type.equals("T")) {
-            response = "$AVCFG,00000000,t*21";
-        } else if (type.equals("3")) {
-            response = "$AVCFG,00000000,d*31";
-        } else if (type.equals("X") || type.equals("4")) {
-            response = "$AVCFG,00000000,x*2D";
-        }
+        if (channel != null) {
 
-        if (response != null && channel != null) {
-            channel.write(response + "\r\n");
+            if (Character.isLowerCase(status.charAt(0))) {
+                String response = "$EAVACK," + type + "," + checksum;
+                response += Checksum.nmea(response);
+                channel.write(response);
+            }
+
+            if (type.equals("S") || type.equals("T")) {
+                channel.write("$AVCFG,00000000,t*21");
+            } else if (type.equals("3")) {
+                channel.write("$AVCFG,00000000,d*31");
+            } else if (type.equals("X") || type.equals("4")) {
+                channel.write("$AVCFG,00000000,x*2D");
+            }
+
         }
 
         return position;
