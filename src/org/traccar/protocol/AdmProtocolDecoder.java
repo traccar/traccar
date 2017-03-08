@@ -66,7 +66,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             position.setProtocol(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            buf.readUnsignedByte(); // firmware version
+            position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
             buf.readUnsignedShort(); // index
 
             position.set(Position.KEY_STATUS, buf.readUnsignedShort());
@@ -77,7 +77,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedShort() * 0.1);
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
 
-            buf.readUnsignedByte(); // acceleration
+            position.set(Position.KEY_ACCELERATION, buf.readUnsignedByte());
 
             position.setAltitude(buf.readUnsignedShort());
 

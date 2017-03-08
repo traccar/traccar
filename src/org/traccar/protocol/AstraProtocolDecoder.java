@@ -93,7 +93,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedByte(); // max journey speed
             buf.skipBytes(6); // accelerometer
-            buf.readUnsignedShort(); // journey distance
+            position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort());
             buf.readUnsignedShort(); // journey idle time
 
             position.setAltitude(buf.readUnsignedByte() * 20);
@@ -105,12 +105,9 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // geofence events
 
             if (BitUtil.check(status, 8)) {
-
                 position.set(Position.KEY_RFID, buf.readBytes(7).toString(StandardCharsets.US_ASCII));
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium() * 1000);
-
-                buf.readUnsignedShort(); // engine time
-
+                position.set(Position.KEY_HOURS, buf.readUnsignedShort());
             }
 
             if (BitUtil.check(status, 6)) {

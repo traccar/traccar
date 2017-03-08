@@ -264,7 +264,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                     if (commandLength > 0) {
                         buf.readUnsignedByte(); // server flag (reserved)
-                        position.set("command", buf.readBytes(commandLength - 1).toString(StandardCharsets.US_ASCII));
+                        position.set(Position.KEY_COMMAND,
+                                buf.readBytes(commandLength - 1).toString(StandardCharsets.US_ASCII));
                     }
 
                 } else if (isSupported(type)) {

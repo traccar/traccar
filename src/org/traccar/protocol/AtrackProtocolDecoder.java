@@ -113,7 +113,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // rxlev
                     break;
                 case "PC":
-                    buf.readUnsignedInt(); // pulse count
+                    position.set(Position.PREFIX_COUNT + 1, buf.readUnsignedInt());
                     break;
                 case "AT":
                     position.setAltitude(buf.readUnsignedInt());
@@ -122,7 +122,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_RPM, buf.readUnsignedShort());
                     break;
                 case "GS":
-                    buf.readUnsignedByte(); // gsm status
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     break;
                 case "DT":
                     position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() == 1);
@@ -140,16 +140,16 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                     break;
                 case "ET":
-                    buf.readUnsignedShort(); // engine coolant temp
+                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
                     break;
                 case "FL":
-                    position.set(Position.KEY_FUEL, buf.readUnsignedByte());
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
                     break;
                 case "ML":
                     buf.readUnsignedByte(); // mil status
                     break;
                 case "FC":
-                    buf.readUnsignedInt(); // fuel used
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
                     break;
                 case "CI":
                     readString(buf); // format string

@@ -74,7 +74,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set("command", parser.next());
+        position.set(Position.KEY_COMMAND, parser.next());
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());

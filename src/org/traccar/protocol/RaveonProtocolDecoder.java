@@ -95,7 +95,7 @@ public class RaveonProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
         position.setCourse(parser.nextInt());
 
-        parser.next(); // alerts
+        position.set(Position.KEY_ALARM, parser.next());
 
         return position;
     }

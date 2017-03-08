@@ -85,16 +85,16 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RSSI, buf.readUnsignedShort());
             position.set(Position.KEY_SATELLITES, buf.readUnsignedShort());
             position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedShort());
-            buf.readUnsignedShort(); // gps antenna state
+            position.set("gpsAntennaStatus", buf.readUnsignedShort());
 
             position.setSpeed(buf.readUnsignedShort() * 0.194384);
             position.setCourse((double) buf.readUnsignedShort());
 
-            buf.readUnsignedInt(); // distance
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
             position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
 
-            position.set(Position.KEY_CHARGE, buf.readUnsignedShort()); // battery charger status
+            position.set(Position.KEY_CHARGE, buf.readUnsignedShort());
 
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
 

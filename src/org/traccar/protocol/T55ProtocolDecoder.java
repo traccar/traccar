@@ -136,7 +136,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_IGNITION, parser.hasNext() && parser.next().equals("1"));
-            position.set(Position.KEY_FUEL, parser.nextInt());
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
             position.set(Position.KEY_BATTERY, parser.nextInt());
         }
 

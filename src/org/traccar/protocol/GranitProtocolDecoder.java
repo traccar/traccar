@@ -89,7 +89,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, BitUtil.from(satDel, 4));
 
         int pdop = BitUtil.to(satDel, 4);
-        position.set("pdop", pdop);
+        position.set(Position.KEY_PDOP, pdop);
 
         int lonDegrees = buf.readUnsignedByte();
         int latDegrees = buf.readUnsignedByte();

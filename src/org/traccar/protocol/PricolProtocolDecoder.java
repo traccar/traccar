@@ -51,11 +51,11 @@ public class PricolProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        buf.readUnsignedByte(); // event type
-        buf.readUnsignedByte(); // packet version
-        buf.readUnsignedByte(); // device status
-        buf.readUnsignedByte(); // gsm status
-        buf.readUnsignedByte(); // gps status
+        position.set("eventType", buf.readUnsignedByte());
+        position.set("packetVersion", buf.readUnsignedByte());
+        position.set(Position.KEY_STATUS, buf.readUnsignedByte());
+        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+        position.set(Position.KEY_GPS, buf.readUnsignedByte());
 
         position.setTime(new DateBuilder()
                 .setDateReverse(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -76,8 +76,8 @@ public class PricolProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, buf.readUnsignedShort());
         position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
 
-        buf.readUnsignedByte(); // analog alerts
-        buf.readUnsignedShort(); // custom alert types
+        position.set("analogAlerts", buf.readUnsignedByte());
+        position.set("customAlertTypes", buf.readUnsignedShort());
 
         for (int i = 1; i <= 5; i++) {
             position.set(Position.PREFIX_ADC + i, buf.readUnsignedShort());

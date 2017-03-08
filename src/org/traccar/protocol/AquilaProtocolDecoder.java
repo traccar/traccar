@@ -136,7 +136,7 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext(9)) {
 
-            position.set(Position.KEY_FUEL, parser.next());
+            position.set(Position.KEY_FUEL_LEVEL, parser.next());
             position.set(Position.PREFIX_IO + 1, parser.next());
             position.set(Position.KEY_CHARGE, parser.next());
             position.set(Position.PREFIX_IO + 2, parser.next());

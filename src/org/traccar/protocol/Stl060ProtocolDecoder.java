@@ -100,7 +100,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextInt());
             position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
             position.set(Position.KEY_INPUT, parser.nextInt() + parser.nextInt() << 1);
-            position.set(Position.KEY_FUEL, parser.nextInt());
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
         }
 
         // New format
@@ -111,7 +111,7 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RFID, parser.next());
             position.set(Position.KEY_ODOMETER, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
-            position.set(Position.KEY_FUEL, parser.nextInt());
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
             position.set(Position.KEY_ACCELERATION, parser.nextInt() == 1);
             position.set(Position.KEY_OUTPUT, parser.nextInt() + parser.nextInt() << 1);
         }

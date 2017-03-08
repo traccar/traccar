@@ -109,9 +109,9 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            buf.readUnsignedByte(); // hardware version
-            buf.readUnsignedByte(); // software version
-            buf.readUnsignedByte(); // protocol version
+            position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
+            position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+            position.set("protocolVersion", buf.readUnsignedByte());
 
             position.set(Position.KEY_STATUS, buf.getUnsignedByte(buf.readerIndex()) & 0x0f);
 
@@ -121,21 +121,21 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // reason data
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
-            buf.readUnsignedByte(); // mode
-            buf.readUnsignedInt(); // io
+            position.set("mode", buf.readUnsignedByte());
+            position.set(Position.PREFIX_IO + 1, buf.readUnsignedInt());
 
             operator <<= 8;
             operator += buf.readUnsignedByte();
-            position.set("operator", operator);
+            position.set(Position.KEY_OPERATOR, operator);
 
-            buf.readUnsignedInt(); // adc
-            buf.readUnsignedMedium(); // odometer
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedInt());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
             buf.skipBytes(6); // multi-purpose data
 
-            buf.readUnsignedShort(); // gps fix
-            buf.readUnsignedByte(); // location status
-            buf.readUnsignedByte(); // mode 1
-            buf.readUnsignedByte(); // mode 2
+            position.set(Position.KEY_GPS, buf.readUnsignedShort());
+            position.set("locationStatus", buf.readUnsignedByte());
+            position.set("mode1", buf.readUnsignedByte());
+            position.set("mode2", buf.readUnsignedByte());
 
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
 

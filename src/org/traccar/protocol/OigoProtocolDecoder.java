@@ -121,11 +121,11 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 9)) {
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() + "mV");
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
         }
 
         if (BitUtil.check(mask, 10)) {
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() + "mV");
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
         }
 
         if (BitUtil.check(mask, 11)) {
@@ -198,7 +198,7 @@ public class OigoProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(buf.readUnsignedShort());
         position.setSpeed(UnitsConverter.knotsFromMph(buf.readUnsignedByte()));
 
-        position.set(Position.KEY_POWER, buf.readUnsignedByte() * 100 + "mV");
+        position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
         position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
 
         dateBuilder.setSecond(buf.readUnsignedByte());

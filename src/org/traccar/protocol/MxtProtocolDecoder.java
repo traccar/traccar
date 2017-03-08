@@ -137,7 +137,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
                 position.setAccuracy(buf.readUnsignedByte());
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                 buf.readUnsignedShort(); // time since boot
-                buf.readUnsignedByte(); // input voltage
+                position.set(Position.KEY_POWER, buf.readUnsignedByte());
                 position.set(Position.PREFIX_TEMP + 1, buf.readByte());
             }
 

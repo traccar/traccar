@@ -70,7 +70,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // interval
             buf.skipBytes(8); // settings
         }
-        buf.readUnsignedByte(); // status
+        position.set(Position.KEY_STATUS, buf.readUnsignedByte());
         if (!history) {
             buf.readUnsignedShort();
         }

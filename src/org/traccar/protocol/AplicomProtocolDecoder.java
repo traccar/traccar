@@ -120,7 +120,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
     private void decodeCanData(ChannelBuffer buf, Position position) {
 
         buf.readUnsignedMedium(); // packet identifier
-        buf.readUnsignedByte(); // version
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
         int count = buf.readUnsignedByte();
         buf.readUnsignedByte(); // batch count
         buf.readUnsignedShort(); // selector bit
@@ -213,12 +213,12 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedInt() * 1000));
             position.setLatitude(buf.readInt() / 1000000.0);
             position.setLongitude(buf.readInt() / 1000000.0);
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+            position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0010) != 0) {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-            buf.readUnsignedByte(); // maximum speed
+            position.set("maximumSpeed", buf.readUnsignedByte());
             position.setCourse(buf.readUnsignedByte() * 2.0);
         }
 
@@ -234,8 +234,8 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x8000) != 0) {
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 1000.0);
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
         }
 
         // Pulse rate 1
@@ -332,7 +332,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0100) != 0) {
-            position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt() * 5);
+            position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5);
         }
 
         if ((selector & 0x8000) != 0) {
@@ -436,14 +436,14 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             return;
         }
 
-        buf.readUnsignedByte(); // version
-        buf.readUnsignedShort(); // event
-        buf.readUnsignedByte(); // data validity
-        buf.readUnsignedByte(); // towed
+        position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+        position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+        position.set("dataValidity", buf.readUnsignedByte());
+        position.set("towed", buf.readUnsignedByte());
         buf.readUnsignedShort(); // length
 
         while (buf.readableBytes() > 0) {
-            buf.readUnsignedByte(); // towed position
+            position.set("towedPosition", buf.readUnsignedByte());
             int type = buf.readUnsignedByte();
             int length = buf.readUnsignedByte();
 
@@ -463,9 +463,9 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
                 position.set("brakeLining", buf.readUnsignedByte() * 0.4);
                 position.set("brakeTemperature", buf.readUnsignedByte() * 10);
             } else if (type == 0x06) {
-                position.set("totalDistance", buf.readUnsignedInt() * 5);
-                position.set("tripDistance", buf.readUnsignedInt() * 5);
-                position.set("serviceDistance", (buf.readUnsignedInt() - 2105540607) * 5);
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 5);
+                position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5);
+                position.set(Position.KEY_ODOMETER_SERVICE, (buf.readUnsignedInt() - 2105540607) * 5);
             } else if (type == 0x0A) {
                 ChannelBuffer brakeData = buf.readBytes(length);
                 position.set("absStatusCounter", brakeData.readUnsignedShort());
@@ -526,9 +526,9 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         if ((selector & 0x0020) != 0) {
             position.set(Position.KEY_HOURS, buf.readUnsignedInt());
             position.set("serviceDistance", buf.readInt());
-            buf.readUnsignedByte(); // driver activity
+            position.set("driverActivity", buf.readUnsignedByte());
             position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
-            position.set(Position.KEY_FUEL, buf.readUnsignedByte());
+            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0040) != 0) {
@@ -547,10 +547,10 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0200) != 0) {
-            buf.readUnsignedByte(); // tachograph based speed
-            buf.readUnsignedByte(); // driver 1 state
-            buf.readUnsignedByte(); // driver 2 state
-            buf.readUnsignedByte(); // tachograph status
+            position.set("tachographSpeed", buf.readUnsignedByte());
+            position.set("driver1State", buf.readUnsignedByte());
+            position.set("driver2State", buf.readUnsignedByte());
+            position.set("tachographStatus", buf.readUnsignedByte());
             position.set("overspeedCount", buf.readUnsignedByte());
         }
 

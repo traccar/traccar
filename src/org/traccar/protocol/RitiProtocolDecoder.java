@@ -66,15 +66,15 @@ public class RitiProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set("mode", buf.readUnsignedByte());
-        position.set("command", buf.readUnsignedByte());
-        position.set(Position.KEY_POWER, buf.readUnsignedShort());
+        position.set(Position.KEY_COMMAND, buf.readUnsignedByte());
+        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
 
-        buf.skipBytes(5);
-        buf.readUnsignedShort();
-        buf.readUnsignedShort();
+        buf.skipBytes(5);  // status
+        buf.readUnsignedShort();  // idleCount
+        buf.readUnsignedShort();  // idleTime in seconds
 
         position.set(Position.KEY_DISTANCE, buf.readUnsignedInt());
-        position.set(Position.KEY_TRIP_ODOMETER, buf.readUnsignedInt());
+        position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
 
         // Parse GPRMC
         int end = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '*');

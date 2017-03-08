@@ -115,7 +115,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
                     switch (dataType) {
                         case 0x01:
-                            position.set(Position.KEY_FUEL,
+                            position.set(Position.KEY_FUEL_LEVEL,
                                     buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
                             break;
                         case 0x02:
