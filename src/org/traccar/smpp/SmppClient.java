@@ -59,6 +59,7 @@ public class SmppClient {
     private Integer reconnectionDelay;
 
     private String sourceAddress;
+    private String commandSourceAddress;
     private int submitTimeout;
     private String notificationsCharsetName;
     private byte notificationsDataCoding;
@@ -67,6 +68,8 @@ public class SmppClient {
 
     private byte sourceTon;
     private byte sourceNpi;
+    private byte commandSourceTon;
+    private byte commandSourceNpi;
 
     private byte destTon;
     private byte destNpi;
@@ -84,6 +87,7 @@ public class SmppClient {
         sessionConfig.getLoggingOptions().setLogPdu(Context.getConfig().getBoolean("sms.smpp.logPdu"));
 
         sourceAddress = Context.getConfig().getString("sms.smpp.sourceAddress", "");
+        commandSourceAddress = Context.getConfig().getString("sms.smpp.commandSourceAddress", sourceAddress);
         submitTimeout = Context.getConfig().getInteger("sms.smpp.submitTimeout", 10000);
 
         notificationsCharsetName = Context.getConfig().getString("sms.smpp.notificationsCharset",
@@ -97,7 +101,9 @@ public class SmppClient {
 
 
         sourceTon = (byte) Context.getConfig().getInteger("sms.smpp.sourceTon", SmppConstants.TON_ALPHANUMERIC);
+        commandSourceTon = (byte) Context.getConfig().getInteger("sms.smpp.commandSourceTon", sourceTon);
         sourceNpi = (byte) Context.getConfig().getInteger("sms.smpp.sourceNpi", SmppConstants.NPI_UNKNOWN);
+        commandSourceNpi = (byte) Context.getConfig().getInteger("sms.smpp.commandSourceNpi", sourceNpi);
 
         destTon = (byte) Context.getConfig().getInteger("sms.smpp.destTon", SmppConstants.TON_INTERNATIONAL);
         destNpi = (byte) Context.getConfig().getInteger("sms.smpp.destNpi", SmppConstants.NPI_E164);
@@ -204,7 +210,8 @@ public class SmppClient {
             textBytes = CharsetUtil.encode(message, command ? commandsCharsetName : notificationsCharsetName);
             submit.setDataCoding(command ? commandsDataCoding : notificationsDataCoding);
             submit.setShortMessage(textBytes);
-            submit.setSourceAddress(new Address(sourceTon, sourceNpi, sourceAddress));
+            submit.setSourceAddress(command ? new Address(commandSourceTon, commandSourceNpi, commandSourceAddress)
+                    : new Address(sourceTon, sourceNpi, sourceAddress));
             submit.setDestAddress(new Address(destTon, destNpi, destAddress));
             SubmitSmResp submitResponce = getSession().submit(submit, submitTimeout);
             if (submitResponce.getCommandStatus() == SmppConstants.STATUS_OK) {
