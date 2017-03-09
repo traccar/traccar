@@ -11,6 +11,9 @@ public class SiwiProtocolDecoderTest extends ProtocolTest {
         SiwiProtocolDecoder decoder = new SiwiProtocolDecoder(new SiwiProtocol());
 
         verifyPosition(decoder, text(
+                "$SIWI,9803932,23992,E,0,,0,1,1,0,5055,0,5,A,22.289887,70.807192,152,168,102922,090317,28,1,12,5,4098,1,0,13,0,0,0,1.0,3.1CHKS_4.82,0!"));
+
+        verifyPosition(decoder, text(
                 "$SIWI,2845,1320,Q,10,airtelgprs.com,1,1,0,0,876578,43,9,A,19.0123456,72.65347,45,0,055929,071107,22,5,1,0,3700,1210,0,2500,1230,321,0,1.1,4.0,1!"));
 
         verifyPosition(decoder, text(

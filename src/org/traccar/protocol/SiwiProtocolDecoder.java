@@ -88,6 +88,7 @@ public class SiwiProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
         position.setAltitude(parser.nextDouble());
+        position.setCourse(parser.nextInt());
 
         DateBuilder dateBuilder = new DateBuilder(TimeZone.getTimeZone("IST"))
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
