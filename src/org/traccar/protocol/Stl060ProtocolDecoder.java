@@ -37,8 +37,8 @@ public class Stl060ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .text("D001,")                       // type
             .expression("[^,]*,")                // vehicle
-            .number("(dd)/(dd)/(dd),")           // date
-            .number("(dd):(dd):(dd),")           // time
+            .number("(dd)/(dd)/(dd),")           // date (dd/mm/yy)
+            .number("(dd):(dd):(dd),")           // time (hh:mm:ss)
             .number("(dd)(dd).?(d+)([NS]),")     // latitude
             .number("(ddd)(dd).?(d+)([EW]),")    // longitude
             .number("(d+.?d*),")                 // speed

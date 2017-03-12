@@ -40,7 +40,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .text("ATL")
             .number("(d{15}),")                  // imei
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).ddd,")         // time
+            .number("(dd)(dd)(dd).ddd,")         // time (hhmmss.ms)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -48,7 +48,7 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .any()
             .text("#")
             .number("([01]+),")                  // io status

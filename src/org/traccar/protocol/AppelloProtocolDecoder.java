@@ -35,8 +35,8 @@ public class AppelloProtocolDecoder extends BaseProtocolDecoder {
             .text("FOLLOWIT,")                   // brand
             .number("(d+),")                     // imei
             .groupBegin()
-            .number("(dd)(dd)(dd)")              // date
-            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss.ms)
             .or()
             .text("UTCTIME,")
             .groupEnd()

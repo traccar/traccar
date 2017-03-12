@@ -41,14 +41,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)(,)?")                  // device id
             .expression(".{4},?")                // command
             .number("d*")                        // imei?
-            .number("(dd)(dd)(dd),?")            // date
+            .number("(dd)(dd)(dd),?")            // date (yymmdd or mmddyy?)
             .expression("([AV]),?")              // validity
             .number("(d+)(dd.d+)")               // latitude
             .expression("([NS]),?")
             .number("(d+)(dd.d+)")               // longitude
             .expression("([EW]),?")
             .number("(d+.d)(?:d*,)?")            // speed
-            .number("(dd)(dd)(dd),?")            // time
+            .number("(dd)(dd)(dd),?")            // time (hhmmss)
             .number("(d+.?d{1,2}),?")            // course
             .number("(?:([01]{8})|(x{8}))?,?")   // state
             .number("(?:L(x+))?")                // odometer

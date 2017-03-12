@@ -149,7 +149,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .expression("[^,]+,")
             .any()
-            .number("(?:(dd)(dd)(dd))?,")        // time
+            .number("(?:(dd)(dd)(dd))?,")        // time (hhmmss)
             .expression("([AV])?,")              // validity
             .groupBegin()
             .number("-(d+)-(d+.d+),")            // latitude
@@ -176,7 +176,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .expression("..,")                   // manufacturer
             .number("(d+),")                     // imei
             .text("NBR,")
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("d+,")                       // gsm delay time
