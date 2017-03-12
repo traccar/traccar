@@ -49,7 +49,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // event
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
-            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("([AV]),")                   // validity
             .number("(d+),")                     // satellites
