@@ -15,13 +15,15 @@
  */
 package org.traccar.helper;
 
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
 
     private int position;
-    private Matcher matcher;
+    private final Matcher matcher;
 
     public Parser(Pattern pattern, String input) {
         matcher = pattern.matcher(input);
@@ -163,6 +165,159 @@ public class Parser {
 
     public double nextCoordinate() {
         return nextCoordinate(CoordinateFormat.DEG_MIN_HEM);
+    }
+
+    public enum DateTimeFormat {
+        HMS,         // HHMMSS
+        SMH,         // SSMMHH
+
+        HMS_Y4MD,    // HHMMSSYYYYMMDD
+        HMS_Y2MD,    // HHMMSSYYMMDD
+
+        HMS_DMY4,    // HHMMSSDDMMYYYY
+        HMS_DMY2,    // HHMMSSDDMMYY
+
+        SMH_Y4MD,    // SSMMHHYYYYMMD
+        SMH_Y2MD,    // SSMMHHYYMMDD
+
+        SMH_DMY4,    // SSMMHHDDMMYYYY
+        SMH_DMY2,    // SSMMHHDDMMYY
+
+        DMY4_HMS,    // DDMMYYYYHHMMSS
+        DMY4_HMSms,  // DDMMYYYYHHMMSS.m+
+        DMY2_HMS,    // DDMMYYHHMMSS
+        DMY2_HMSms,  // DDMMYYHHMMSS.m+
+
+        Y4MD_HMS,    // YYYYMMDDHHMMSS
+        Y4MD_HMSms,  // YYYYMMDDHHMMSS.m+
+        Y2MD_HMS,    // YYMMDDHHMMSS
+        Y2MD_HMSms,  // YYMMDDHHMMSS.m+
+
+        ISO8601      // YYYY-MM-DDTHH:MM:SS+HH:MM
+    }
+
+    private static final DateTimeFormat DEFAULT_FORMAT = DateTimeFormat.Y4MD_HMS;
+    private static final String DEFAULT_TZ = "UTC";
+    private static final int DEFAULT_RADIX = 10;
+
+    public Date nextDateTime(DateTimeFormat format, String tz, int radix) {
+        int year = 0, month = 0, day = 0;
+        int hour = 0, minute = 0, second = 0, millisecond = 0;
+        TimeZone timeZone = TimeZone.getTimeZone(tz);
+
+        switch (format) {
+            case HMS:
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                break;
+            case SMH:
+                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
+                break;
+            case HMS_Y4MD:
+            case HMS_Y2MD:
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
+                break;
+            case HMS_DMY4:
+            case HMS_DMY2:
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
+                break;
+            case SMH_Y4MD:
+            case SMH_Y2MD:
+                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
+                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
+                break;
+            case SMH_DMY4:
+            case SMH_DMY2:
+                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
+                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
+                break;
+            case DMY4_HMS:
+            case DMY4_HMSms:
+            case DMY2_HMS:
+            case DMY2_HMSms:
+                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                break;
+            case Y4MD_HMS:
+            case Y4MD_HMSms:
+            case Y2MD_HMS:
+            case Y2MD_HMSms:
+            case ISO8601:
+            default:
+                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                break;
+        }
+
+        switch (format) {
+            case HMS_Y2MD:
+            case HMS_DMY2:
+            case SMH_Y2MD:
+            case SMH_DMY2:
+            case DMY2_HMS:
+            case DMY2_HMSms:
+            case Y2MD_HMS:
+            case Y2MD_HMSms:
+                if (year >= 0 && year < 100) {
+                    year += 2000; // Future Y3K issue :)
+                }
+                break;
+            case ISO8601:
+                timeZone = TimeZone.getTimeZone("GMT" + next()); // ([+-]d{2}:d{2})
+                break;
+            default:
+                break;
+        }
+
+        switch (format) {
+            case Y4MD_HMSms:
+            case Y2MD_HMSms:
+            case DMY4_HMSms:
+            case DMY2_HMSms:
+                millisecond = nextInt(radix); // (d+)
+                break;
+            default:
+                break;
+        }
+
+        DateBuilder dateBuilder = new DateBuilder(timeZone);
+
+        if (format != DateTimeFormat.HMS || format != DateTimeFormat.SMH) {
+                dateBuilder.setDate(year, month, day);
+        }
+
+        dateBuilder.setTime(hour, minute, second, millisecond);
+
+        return dateBuilder.getDate();
+    }
+
+    public Date nextDateTime(String tz, int radix) {
+        return nextDateTime(DEFAULT_FORMAT, tz, radix);
+    }
+
+    public Date nextDateTime(DateTimeFormat format, int radix) {
+        return nextDateTime(format, DEFAULT_TZ, radix);
+    }
+
+    public Date nextDateTime(DateTimeFormat format, String tz) {
+        return nextDateTime(format, tz, DEFAULT_RADIX);
+    }
+
+    public Date nextDateTime(DateTimeFormat format) {
+        return nextDateTime(format, DEFAULT_TZ, DEFAULT_RADIX);
+    }
+
+    public Date nextDateTime(String tz) {
+        return nextDateTime(DEFAULT_FORMAT, tz, DEFAULT_RADIX);
+    }
+
+    public Date nextDateTime(int radix) {
+        return nextDateTime(DEFAULT_FORMAT, DEFAULT_TZ, radix);
+    }
+
+    public Date nextDateTime() {
+        return nextDateTime(DEFAULT_FORMAT, DEFAULT_TZ, DEFAULT_RADIX);
     }
 
 }

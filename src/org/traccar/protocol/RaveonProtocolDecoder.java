@@ -18,14 +18,12 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 public class RaveonProtocolDecoder extends BaseProtocolDecoder {
@@ -40,7 +38,7 @@ public class RaveonProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")
             .number("(-?)(d+)(dd.d+),")          // latitude
             .number("(-?)(d+)(dd.d+),")          // longitude
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(d),")                      // validity
             .number("(d+),")                     // satellites
             .number("(-?d+),")                   // altitude
@@ -77,9 +75,7 @@ public class RaveonProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
 
-        DateBuilder dateBuilder = new DateBuilder(new Date())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS));
 
         position.setValid(parser.nextInt() != 0);
 

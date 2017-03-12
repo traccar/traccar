@@ -61,7 +61,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // device id
             .text("ZC20,")
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("d+,")                       // battery level
             .number("(d+),")                     // battery voltage
             .number("(d+),")                     // power voltage
@@ -138,11 +138,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-
-            getLastLocation(position, dateBuilder.getDate());
+            getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
 
             int battery = parser.nextInt();
             if (battery != 65535) {

@@ -21,7 +21,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
@@ -40,8 +39,8 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .groupBegin()
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("([AV]),")                   // validity
             .number("(d+),")                     // satellites
             .number("([NS]),(d+.d+),")           // latitude
@@ -98,10 +97,7 @@ public class CityeasyProtocolDecoder extends BaseProtocolDecoder {
 
             if (parser.hasNext(15)) {
 
-                DateBuilder dateBuilder = new DateBuilder()
-                        .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-                position.setTime(dateBuilder.getDate());
+                position.setTime(parser.nextDateTime());
 
                 position.setValid(parser.next().equals("A"));
                 position.set(Position.KEY_SATELLITES, parser.next());

@@ -43,8 +43,8 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             .text("*GS")                         // header
             .number("d+,")                       // protocol version
             .number("(d+),")                     // imei
-            .number("(dd)(dd)(dd)")              // time
-            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .expression("(.*)#?")                // data
             .compile();
 
@@ -242,10 +242,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
             Date time = null;
             if (parser.hasNext(6)) {
-                DateBuilder dateBuilder = new DateBuilder()
-                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                        .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-                time = dateBuilder.getDate();
+                time = parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2);
             }
 
             List<Position> positions = new LinkedList<>();
