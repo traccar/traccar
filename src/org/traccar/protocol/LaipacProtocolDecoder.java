@@ -36,7 +36,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$AVRMC,")
             .expression("([^,]+),")              // identifier
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([AVRPavrp]),")         // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")

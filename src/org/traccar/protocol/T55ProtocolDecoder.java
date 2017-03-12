@@ -36,7 +36,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_GPRMC = new PatternBuilder()
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss.ms)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -44,7 +44,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .expression("[^*]+")
             .text("*")
             .expression("[^,]+")
@@ -59,7 +59,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_GPGGA = new PatternBuilder()
             .text("$GPGGA,")
-            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss.ms)
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude

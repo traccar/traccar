@@ -34,8 +34,8 @@ public class Ardi01ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // imei
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(-?d+.d+),")                // longitude
             .number("(-?d+.d+),")                // latitude
             .number("(d+.?d*),")                 // speed

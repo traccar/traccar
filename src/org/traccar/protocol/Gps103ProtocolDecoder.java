@@ -38,8 +38,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .text("imei:")
             .number("(d+),")                     // imei
             .expression("([^,]+),")              // alarm
-            .number("(dd)/?(dd)/?(dd) ?")        // local date
-            .number("(dd):?(dd)(?:dd)?,")        // local time
+            .number("(dd)/?(dd)/?(dd) ?")        // local date (yymmdd)
+            .number("(dd):?(dd)(?:dd)?,")        // local time (hhmmss)
             .expression("([^,]+)?,")             // rfid
             .expression("[FL],")                 // full / low
             .groupBegin()

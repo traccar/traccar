@@ -55,8 +55,8 @@ public class Tt8850ProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxxx)?,")                  // lac
             .number("(xxxx)?,")                  // cell
             .any()
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(xxxx)")
             .compile();
 

@@ -38,8 +38,8 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
             .text("$$")
             .number("(d+),")                     // imei
             .number("(d+),")                     // event
-            .number("(dddd)/(dd)/(dd),")         // date
-            .number("(dd):(dd):(dd),")           // time
+            .number("(dddd)/(dd)/(dd),")         // date (yyyy/mm/dd)
+            .number("(dd):(dd):(dd),")           // time (hh:mm:ss)
             .number("(-?d+.?d*),")               // latitude
             .number("(-?d+.?d*),")               // longitude
             .number("(-?d+.?d*),")               // altitude
