@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TimeZone;
 
 public final class ReportUtils {
 
@@ -44,6 +45,14 @@ public final class ReportUtils {
             unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
         }
         return unit != null ? unit : "kn";
+    }
+
+    public static TimeZone getTimezone(long userId) {
+        String timezone = Context.getPermissionsManager().getUser(userId).getTimezone();
+        if (timezone == null) {
+            timezone = Context.getPermissionsManager().getServer().getTimezone();
+        }
+        return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {

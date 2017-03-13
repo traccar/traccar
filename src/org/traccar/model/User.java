@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.helper.Hashing;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 public class User extends Extensible {
 
@@ -265,4 +266,17 @@ public class User extends Extensible {
         return Hashing.validatePassword(password, hashedPassword, salt);
     }
 
+    private String timezone;
+
+    public void setTimezone(String timezone) {
+        if (timezone != null) {
+            this.timezone = TimeZone.getTimeZone(timezone).getID();
+        } else {
+            this.timezone = null;
+        }
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
 }
