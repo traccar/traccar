@@ -17,8 +17,8 @@ package org.traccar.protocol;
 
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
@@ -26,12 +26,27 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
 
+    private String[] dataTags;
+    private DateFormat dateFormat;
+
     public StarLinkProtocolDecoder(StarLinkProtocol protocol) {
         super(protocol);
+
+        String format = Context.getConfig().getString(
+                getProtocolName() + ".format", "#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,"
+                + "#IN1#,#IN2#,#IN3#,#IN4#,#OUT1#,#OUT2#,#OUT3#,#OUT4#,#LAC#,#CID#,#VIN#,#VBAT#,#DEST#,#IGN#,#ENG#");
+        dataTags = format.split(",");
+
+        dateFormat = new SimpleDateFormat(
+                Context.getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -40,22 +55,19 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{6}|d{15}),")             // id
             .number("(d+),")                     // type
             .number("(d+),")                     // index
-            .number("(dd)(dd)(dd)")              // event date
-            .number("(dd)(dd)(dd),")             // event time
-            .number("(d+),")                     // event
-            .number("(dd)(dd)(dd)")              // fix date
-            .number("(dd)(dd)(dd),")             // fix time
-            .number("([-+])(dd)(dd.d+),")        // latitude
-            .number("([-+])(ddd)(dd.d+),")       // longitude
-            .number("(d+.d+),")                  // speed
-            .number("(d+),")                     // course
-            .number("(d+),")                     // odometer
-            .number("(d+),")                     // lac
-            .number("(d+),")                     // cid
-            .number("(d+.d+),")                  // power
-            .number("(d+.d+)")                   // battery
-            .any()
+            .expression("(.+)")                  // data
+            .text("*")
+            .number("xx")                        // checksum
             .compile();
+
+    public static final int MSG_EVENT_REPORT = 6;
+
+    private double parseCoordinate(String value) {
+        int minutesIndex = value.indexOf('.') - 2;
+        double result = Double.parseDouble(value.substring(1, minutesIndex));
+        result += Double.parseDouble(value.substring(minutesIndex)) / 60;
+        return value.charAt(0) == '+' ? result : -result;
+    }
 
     @Override
     protected Object decode(
@@ -71,38 +83,99 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        int type = parser.nextInt();
+        if (type != MSG_EVENT_REPORT) {
+            return null;
+        }
+
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_TYPE, parser.nextInt());
         position.set(Position.KEY_INDEX, parser.nextInt());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setDeviceTime(dateBuilder.getDate());
+        String[] data = parser.next().split(",");
+        Integer lac = null, cid = null;
 
-        position.set(Position.KEY_EVENT, parser.nextInt());
+        for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
+            switch (dataTags[i]) {
+                case "#EDT#":
+                    position.setDeviceTime(dateFormat.parse(data[i]));
+                    break;
+                case "EID":
+                    position.set(Position.KEY_EVENT, data[i]);
+                    break;
+                case "#PDT#":
+                    position.setFixTime(dateFormat.parse(data[i]));
+                    break;
+                case "#LAT#":
+                    position.setLatitude(parseCoordinate(data[i]));
+                    break;
+                case "#LONG#":
+                    position.setLongitude(parseCoordinate(data[i]));
+                    break;
+                case "#SPD#":
+                    position.setSpeed(Double.parseDouble(data[i]));
+                    break;
+                case "#HEAD#":
+                    position.setCourse(Integer.parseInt(data[i]));
+                    break;
+                case "#ODO#":
+                    position.set(Position.KEY_ODOMETER, Integer.parseInt(data[i]));
+                    break;
+                case "#IN1#":
+                    position.set(Position.PREFIX_IN + 1, Integer.parseInt(data[i]));
+                    break;
+                case "#IN2#":
+                    position.set(Position.PREFIX_IN + 2, Integer.parseInt(data[i]));
+                    break;
+                case "#IN3#":
+                    position.set(Position.PREFIX_IN + 3, Integer.parseInt(data[i]));
+                    break;
+                case "#IN4#":
+                    position.set(Position.PREFIX_IN + 4, Integer.parseInt(data[i]));
+                    break;
+                case "#OUT1#":
+                    position.set(Position.PREFIX_OUT + 1, Integer.parseInt(data[i]));
+                    break;
+                case "#OUT2#":
+                    position.set(Position.PREFIX_OUT + 2, Integer.parseInt(data[i]));
+                    break;
+                case "#OUT3#":
+                    position.set(Position.PREFIX_OUT + 3, Integer.parseInt(data[i]));
+                    break;
+                case "#OUT4#":
+                    position.set(Position.PREFIX_OUT + 4, Integer.parseInt(data[i]));
+                    break;
+                case "#LAC#":
+                    lac = Integer.parseInt(data[i]);
+                    break;
+                case "#CID#":
+                    cid = Integer.parseInt(data[i]);
+                    break;
+                case "#VIN#":
+                    position.set(Position.KEY_POWER, Double.parseDouble(data[i]));
+                    break;
+                case "#VBAT#":
+                    position.set(Position.KEY_BATTERY, Double.parseDouble(data[i]));
+                    break;
+                case "#DEST#":
+                    position.set("destination", data[i]);
+                    break;
+                case "#IGN#":
+                    position.set(Position.KEY_IGNITION, data[i].equals("1"));
+                    break;
+                case "#ENG#":
+                    position.set("engine", data[i].equals("1"));
+                    break;
+                default:
+                    break;
+            }
+        }
 
-        dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setFixTime(dateBuilder.getDate());
-
-        position.setValid(true);
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
-
-        position.setSpeed(parser.nextDouble());
-        position.setCourse(parser.nextInt());
-
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
-
-        position.setNetwork(new Network(CellTower.fromLacCid(parser.nextInt(), parser.nextInt())));
-
-        position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        if (lac != null && cid != null) {
+            position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+        }
 
         return position;
     }
