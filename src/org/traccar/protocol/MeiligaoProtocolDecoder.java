@@ -39,7 +39,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(dd)(dd)(dd).?(d+)?,")      // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).?(ddd)?,")     // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")

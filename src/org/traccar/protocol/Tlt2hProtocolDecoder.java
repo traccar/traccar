@@ -45,7 +45,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
             .number("#(x+)?")                    // cell info
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).(d+),")        // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
