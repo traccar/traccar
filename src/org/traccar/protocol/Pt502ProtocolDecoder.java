@@ -41,7 +41,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             .any().text("$")
             .expression("([^,]+),")              // type
             .number("(d+),")                     // id
-            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.dddd),")            // latitude
             .expression("([NS]),")
