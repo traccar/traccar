@@ -33,7 +33,7 @@ public class TrackboxProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
             .number("(dd)(dd.dddd)([NS]),")      // latitude
             .number("(ddd)(dd.dddd)([EW]),")     // longitude
             .number("(d+.d),")                   // hdop
