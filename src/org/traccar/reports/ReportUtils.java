@@ -32,25 +32,37 @@ public final class ReportUtils {
     }
 
     public static String getDistanceUnit(long userId) {
-        String unit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
-        if (unit == null || Context.getPermissionsManager().getServer().getForceSettings()) {
-            unit  = Context.getPermissionsManager().getServer().getDistanceUnit();
+        String unit;
+        String userUnit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
+        String serverUnit = Context.getPermissionsManager().getServer().getDistanceUnit();
+        if (Context.getPermissionsManager().getServer().getForceSettings()) {
+            unit = serverUnit != null ? serverUnit : userUnit;
+        } else {
+            unit = userUnit != null ? userUnit : serverUnit;
         }
         return unit != null ? unit : "km";
     }
 
     public static String getSpeedUnit(long userId) {
-        String unit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
-        if (unit == null || Context.getPermissionsManager().getServer().getForceSettings()) {
-            unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
+        String unit;
+        String userUnit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
+        String serverUnit = Context.getPermissionsManager().getServer().getSpeedUnit();
+        if (Context.getPermissionsManager().getServer().getForceSettings()) {
+            unit = serverUnit != null ? serverUnit : userUnit;
+        } else {
+            unit = userUnit != null ? userUnit : serverUnit;
         }
         return unit != null ? unit : "kn";
     }
 
     public static TimeZone getTimezone(long userId) {
-        String timezone = Context.getPermissionsManager().getUser(userId).getTimezone();
-        if (timezone == null || Context.getPermissionsManager().getServer().getForceSettings()) {
-            timezone = Context.getPermissionsManager().getServer().getTimezone();
+        String timezone;
+        String userTimezone = Context.getPermissionsManager().getUser(userId).getTimezone();
+        String serverTimezone = Context.getPermissionsManager().getServer().getTimezone();
+        if (Context.getPermissionsManager().getServer().getForceSettings()) {
+            timezone = serverTimezone != null ? serverTimezone : userTimezone;
+        } else {
+            timezone = userTimezone != null ? userTimezone : serverTimezone;
         }
         return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
