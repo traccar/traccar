@@ -415,7 +415,7 @@ public class PermissionsManager {
             }
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException exception) {
-          return defaultValue;
+            return defaultValue;
         }
         if (server.getForceSettings()) {
             preference = serverPreference != null ? serverPreference : userPreference;
