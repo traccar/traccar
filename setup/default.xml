@@ -51,6 +51,8 @@
         longitude = :longitude,
         zoom = :zoom,
         twelveHourFormat = :twelveHourFormat,
+        coordinateFormat = :coordinateFormat,
+        forceSettings = :forceSettings,
         timezone = :timezone,
         attributes = :attributes
         WHERE id = :id
