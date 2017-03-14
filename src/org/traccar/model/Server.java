@@ -171,11 +171,7 @@ public class Server extends Extensible {
     private String timezone;
 
     public void setTimezone(String timezone) {
-        if (timezone != null) {
-            this.timezone = TimeZone.getTimeZone(timezone).getID();
-        } else {
-            this.timezone = null;
-        }
+        this.timezone = timezone != null ? TimeZone.getTimeZone(timezone).getID() : null;
     }
 
     public String getTimezone() {

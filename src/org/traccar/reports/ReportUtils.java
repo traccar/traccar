@@ -33,7 +33,7 @@ public final class ReportUtils {
 
     public static String getDistanceUnit(long userId) {
         String unit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
-        if (unit == null) {
+        if (unit == null || Context.getPermissionsManager().getServer().getForceSettings()) {
             unit  = Context.getPermissionsManager().getServer().getDistanceUnit();
         }
         return unit != null ? unit : "km";
@@ -41,7 +41,7 @@ public final class ReportUtils {
 
     public static String getSpeedUnit(long userId) {
         String unit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
-        if (unit == null) {
+        if (unit == null || Context.getPermissionsManager().getServer().getForceSettings()) {
             unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
         }
         return unit != null ? unit : "kn";
@@ -49,7 +49,7 @@ public final class ReportUtils {
 
     public static TimeZone getTimezone(long userId) {
         String timezone = Context.getPermissionsManager().getUser(userId).getTimezone();
-        if (timezone == null) {
+        if (timezone == null || Context.getPermissionsManager().getServer().getForceSettings()) {
             timezone = Context.getPermissionsManager().getServer().getTimezone();
         }
         return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
