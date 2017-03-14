@@ -25,7 +25,6 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.model.UserPermission;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -413,8 +412,7 @@ public class PermissionsManager {
             if (method != null) {
                 serverPreference = method.invoke(server, (Object[]) null);
             }
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException exception) {
+        } catch (ReflectiveOperationException | SecurityException | IllegalArgumentException exception) {
             return defaultValue;
         }
         if (server.getForceSettings()) {
