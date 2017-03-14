@@ -5,4 +5,4 @@
 #else
 #set($speedString = "$position.speed kn")
 #end
-$device.name exceeds the speed $speedString at $event.serverTime
+$device.name exceeds the speed $speedString at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)

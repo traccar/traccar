@@ -1,1 +1,1 @@
-$device.name online at $event.serverTime
+$device.name online at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)

@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TimeZone;
 
 public final class ReportUtils {
 
@@ -31,19 +32,16 @@ public final class ReportUtils {
     }
 
     public static String getDistanceUnit(long userId) {
-        String unit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
-        if (unit == null) {
-            unit  = Context.getPermissionsManager().getServer().getDistanceUnit();
-        }
-        return unit != null ? unit : "km";
+        return (String) Context.getPermissionsManager().lookupPreference(userId, "distanceUnit", "km");
     }
 
     public static String getSpeedUnit(long userId) {
-        String unit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
-        if (unit == null) {
-            unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
-        }
-        return unit != null ? unit : "kn";
+        return (String) Context.getPermissionsManager().lookupPreference(userId, "speedUnit", "kn");
+    }
+
+    public static TimeZone getTimezone(long userId) {
+        String timezone = (String) Context.getPermissionsManager().lookupPreference(userId, "timezone", null);
+        return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {

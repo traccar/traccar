@@ -15,6 +15,8 @@
  */
 package org.traccar.model;
 
+import java.util.TimeZone;
+
 import org.traccar.helper.Log;
 
 public class Server extends Extensible {
@@ -166,4 +168,13 @@ public class Server extends Extensible {
         this.coordinateFormat = coordinateFormat;
     }
 
+    private String timezone;
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone != null ? TimeZone.getTimeZone(timezone).getID() : null;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
 }
