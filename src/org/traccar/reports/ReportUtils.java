@@ -32,38 +32,15 @@ public final class ReportUtils {
     }
 
     public static String getDistanceUnit(long userId) {
-        String unit;
-        String userUnit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
-        String serverUnit = Context.getPermissionsManager().getServer().getDistanceUnit();
-        if (Context.getPermissionsManager().getServer().getForceSettings()) {
-            unit = serverUnit != null ? serverUnit : userUnit;
-        } else {
-            unit = userUnit != null ? userUnit : serverUnit;
-        }
-        return unit != null ? unit : "km";
+        return (String) Context.getPermissionsManager().lookupPreference(userId, "distanceUnit", "km");
     }
 
     public static String getSpeedUnit(long userId) {
-        String unit;
-        String userUnit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
-        String serverUnit = Context.getPermissionsManager().getServer().getSpeedUnit();
-        if (Context.getPermissionsManager().getServer().getForceSettings()) {
-            unit = serverUnit != null ? serverUnit : userUnit;
-        } else {
-            unit = userUnit != null ? userUnit : serverUnit;
-        }
-        return unit != null ? unit : "kn";
+        return (String) Context.getPermissionsManager().lookupPreference(userId, "speedUnit", "kn");
     }
 
     public static TimeZone getTimezone(long userId) {
-        String timezone;
-        String userTimezone = Context.getPermissionsManager().getUser(userId).getTimezone();
-        String serverTimezone = Context.getPermissionsManager().getServer().getTimezone();
-        if (Context.getPermissionsManager().getServer().getForceSettings()) {
-            timezone = serverTimezone != null ? serverTimezone : userTimezone;
-        } else {
-            timezone = userTimezone != null ? userTimezone : serverTimezone;
-        }
+        String timezone = (String) Context.getPermissionsManager().lookupPreference(userId, "timezone", null);
         return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
