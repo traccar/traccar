@@ -24,8 +24,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
 
-import org.joda.time.DateTime;
+import org.apache.velocity.tools.generic.DateTool;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
@@ -79,8 +80,8 @@ public final class Summary {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            DateTime from, DateTime to) throws SQLException, IOException {
-        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from.toDate(), to.toDate());
+            Date from, Date to) throws SQLException, IOException {
+        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to);
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
@@ -90,7 +91,10 @@ public final class Summary {
             jxlsContext.putVar("to", to);
             jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
             jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
-            jxlsContext.putVar("timezone", from.getZone());
+            jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
+            jxlsContext.putVar("dateTool", new DateTool());
+            jxlsContext.putVar("timezone", ReportUtils.getTimezone(userId));
+            jxlsContext.putVar("locale", Locale.getDefault());
             JxlsHelper.getInstance().setUseFastFormulaProcessor(false)
                     .processTemplate(inputStream, outputStream, jxlsContext);
         }

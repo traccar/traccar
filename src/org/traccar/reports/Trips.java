@@ -25,9 +25,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.joda.time.DateTime;
+import org.apache.velocity.tools.generic.DateTool;
 import org.jxls.area.Area;
 import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.common.CellRef;
@@ -193,12 +194,12 @@ public final class Trips {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            DateTime from, DateTime to) throws SQLException, IOException {
+            Date from, Date to) throws SQLException, IOException {
         ArrayList<DeviceReport> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<TripReport> trips = detectTrips(deviceId, from.toDate(), to.toDate());
+            Collection<TripReport> trips = detectTrips(deviceId, from, to);
             DeviceReport deviceTrips = new DeviceReport();
             Device device = Context.getIdentityManager().getDeviceById(deviceId);
             deviceTrips.setDeviceName(device.getName());
@@ -222,7 +223,10 @@ public final class Trips {
             jxlsContext.putVar("to", to);
             jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
             jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
-            jxlsContext.putVar("timezone", from.getZone());
+            jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
+            jxlsContext.putVar("dateTool", new DateTool());
+            jxlsContext.putVar("timezone", ReportUtils.getTimezone(userId));
+            jxlsContext.putVar("locale", Locale.getDefault());
             Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
             List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
             for (Area xlsArea : xlsAreas) {
