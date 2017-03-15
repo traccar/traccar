@@ -503,8 +503,6 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        buf.readUnsignedShort(); // event
-
         if ((selector & 0x0004) != 0) {
             buf.skipBytes(4); // snapshot time
         }
