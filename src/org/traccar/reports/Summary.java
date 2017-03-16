@@ -24,10 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Locale;
 
-import org.apache.velocity.tools.generic.DateTool;
-import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
 import org.traccar.model.Position;
@@ -85,16 +82,10 @@ public final class Summary {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
-            org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
+            org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
             jxlsContext.putVar("summaries", summaries);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);
-            jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
-            jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
-            jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
-            jxlsContext.putVar("dateTool", new DateTool());
-            jxlsContext.putVar("timezone", ReportUtils.getTimezone(userId));
-            jxlsContext.putVar("locale", Locale.getDefault());
             JxlsHelper.getInstance().setUseFastFormulaProcessor(false)
                     .processTemplate(inputStream, outputStream, jxlsContext);
         }

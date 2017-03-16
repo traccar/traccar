@@ -24,18 +24,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.apache.velocity.tools.generic.DateTool;
-import org.jxls.area.Area;
-import org.jxls.builder.xls.XlsCommentAreaBuilder;
-import org.jxls.common.CellRef;
-import org.jxls.formula.StandardFormulaProcessor;
-import org.jxls.transform.Transformer;
-import org.jxls.transform.poi.PoiTransformer;
-import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -82,27 +72,12 @@ public final class Route {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/route.xlsx")) {
-            org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
+            org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
             jxlsContext.putVar("devices", devicesRoutes);
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);
-            jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
-            jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
-            jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
-            jxlsContext.putVar("dateTool", new DateTool());
-            jxlsContext.putVar("timezone", ReportUtils.getTimezone(userId));
-            jxlsContext.putVar("locale", Locale.getDefault());
-            jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
-            Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
-            List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
-            for (Area xlsArea : xlsAreas) {
-                xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), jxlsContext);
-                xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
-                xlsArea.processFormulas();
-            }
-            transformer.deleteSheet(xlsAreas.get(0).getStartCellRef().getSheetName());
-            transformer.write();
+            ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);
         }
     }
 }
