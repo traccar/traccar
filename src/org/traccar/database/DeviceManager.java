@@ -34,6 +34,7 @@ import org.traccar.model.Command;
 import org.traccar.model.CommandType;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
+import org.traccar.model.Event;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -49,6 +50,7 @@ public class DeviceManager implements IdentityManager {
 
     private Map<Long, Device> devicesById;
     private Map<String, Device> devicesByUniqueId;
+    private Map<String, Device> devicesByPhone;
     private AtomicLong devicesLastUpdate = new AtomicLong();
 
     private Map<Long, Group> groupsById;
@@ -90,24 +92,39 @@ public class DeviceManager implements IdentityManager {
             if (devicesByUniqueId == null) {
                 devicesByUniqueId = new ConcurrentHashMap<>(databaseDevices.size());
             }
+            if (devicesByPhone == null) {
+                devicesByPhone = new ConcurrentHashMap<>(databaseDevices.size());
+            }
             Set<Long> databaseDevicesIds = new HashSet<>();
             Set<String> databaseDevicesUniqueIds = new HashSet<>();
+            Set<String> databaseDevicesPhones = new HashSet<>();
             for (Device device : databaseDevices) {
                 databaseDevicesIds.add(device.getId());
                 databaseDevicesUniqueIds.add(device.getUniqueId());
+                databaseDevicesPhones.add(device.getPhone());
                 if (devicesById.containsKey(device.getId())) {
                     Device cachedDevice = devicesById.get(device.getId());
                     cachedDevice.setName(device.getName());
                     cachedDevice.setGroupId(device.getGroupId());
+                    cachedDevice.setCategory(device.getCategory());
+                    cachedDevice.setContact(device.getContact());
+                    cachedDevice.setModel(device.getModel());
                     cachedDevice.setAttributes(device.getAttributes());
                     if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
-                        devicesByUniqueId.remove(cachedDevice.getUniqueId());
                         devicesByUniqueId.put(device.getUniqueId(), cachedDevice);
                     }
                     cachedDevice.setUniqueId(device.getUniqueId());
+                    if (device.getPhone() != null && !device.getPhone().isEmpty()
+                            && !device.getPhone().equals(cachedDevice.getPhone())) {
+                        devicesByPhone.put(device.getPhone(), cachedDevice);
+                    }
+                    cachedDevice.setPhone(device.getPhone());
                 } else {
                     devicesById.put(device.getId(), device);
                     devicesByUniqueId.put(device.getUniqueId(), device);
+                    if (device.getPhone() != null && !device.getPhone().isEmpty()) {
+                        devicesByPhone.put(device.getPhone(), device);
+                    }
                     if (geofenceManager != null) {
                         Position lastPosition = getLastPosition(device.getId());
                         if (lastPosition != null) {
@@ -127,8 +144,14 @@ public class DeviceManager implements IdentityManager {
                     devicesByUniqueId.remove(cachedDeviceUniqId);
                 }
             }
+            for (String cachedDevicePhone : devicesByPhone.keySet()) {
+                if (!databaseDevicesPhones.contains(cachedDevicePhone)) {
+                    devicesByPhone.remove(cachedDevicePhone);
+                }
+            }
             databaseDevicesIds.clear();
             databaseDevicesUniqueIds.clear();
+            databaseDevicesPhones.clear();
         }
     }
 
@@ -144,6 +167,10 @@ public class DeviceManager implements IdentityManager {
         updateDeviceCache(forceUpdate);
 
         return devicesByUniqueId.get(uniqueId);
+    }
+
+    public Device getDeviceByPhone(String phone) {
+        return devicesByPhone.get(phone);
     }
 
     public Collection<Device> getAllDevices() {
@@ -180,6 +207,9 @@ public class DeviceManager implements IdentityManager {
 
         devicesById.put(device.getId(), device);
         devicesByUniqueId.put(device.getUniqueId(), device);
+        if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
+            devicesByPhone.put(device.getPhone(), device);
+        }
     }
 
     public void updateDevice(Device device) throws SQLException {
@@ -187,6 +217,9 @@ public class DeviceManager implements IdentityManager {
 
         devicesById.put(device.getId(), device);
         devicesByUniqueId.put(device.getUniqueId(), device);
+        if (device.getPhone() != null && !device.getPhone().isEmpty()) {
+            devicesByPhone.put(device.getPhone(), device);
+        }
     }
 
     public void updateDeviceStatus(Device device) throws SQLException {
@@ -202,8 +235,12 @@ public class DeviceManager implements IdentityManager {
 
         if (devicesById.containsKey(deviceId)) {
             String deviceUniqueId = devicesById.get(deviceId).getUniqueId();
+            String phone = devicesById.get(deviceId).getPhone();
             devicesById.remove(deviceId);
             devicesByUniqueId.remove(deviceUniqueId);
+            if (phone != null && !phone.isEmpty()) {
+                devicesByPhone.remove(phone);
+            }
         }
         positions.remove(deviceId);
     }
@@ -469,5 +506,14 @@ public class DeviceManager implements IdentityManager {
             result.add(new CommandType(Command.TYPE_CUSTOM));
         }
         return result;
+    }
+
+    public void handleTextMessage(String phone, String message) {
+        Device device = devicesByPhone.get(phone);
+        if (device != null && Context.getNotificationManager() != null) {
+            Event event = new Event(Event.TYPE_TEXT_MESSAGE, device.getId());
+            event.set("message", message);
+            Context.getNotificationManager().updateEvent(event, null);
+        }
     }
 }

@@ -58,6 +58,8 @@ public class Event extends Message {
 
     public static final String TYPE_MAINTENANCE = "maintenance";
 
+    public static final String TYPE_TEXT_MESSAGE = "textMessage";
+
     private Date serverTime;
 
     public Date getServerTime() {
