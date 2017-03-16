@@ -26,17 +26,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.joda.time.DateTime;
-import org.jxls.area.Area;
-import org.jxls.builder.xls.XlsCommentAreaBuilder;
-import org.jxls.common.CellRef;
-import org.jxls.formula.StandardFormulaProcessor;
-import org.jxls.transform.Transformer;
-import org.jxls.transform.poi.PoiTransformer;
-import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -70,13 +61,13 @@ public final class Events {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Collection<String> types, DateTime from, DateTime to) throws SQLException, IOException {
+            Collection<String> types, Date from, Date to) throws SQLException, IOException {
         ArrayList<DeviceReport> devicesEvents = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from.toDate(), to.toDate());
+            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
                 Event event = iterator.next();
@@ -112,25 +103,13 @@ public final class Events {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/events.xlsx")) {
-            org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
+            org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
             jxlsContext.putVar("devices", devicesEvents);
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("geofenceNames", geofenceNames);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);
-            jxlsContext.putVar("distanceUnit", ReportUtils.getDistanceUnit(userId));
-            jxlsContext.putVar("speedUnit", ReportUtils.getSpeedUnit(userId));
-            jxlsContext.putVar("timezone", from.getZone());
-            jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
-            Transformer transformer = TransformerFactory.createTransformer(inputStream, outputStream);
-            List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
-            for (Area xlsArea : xlsAreas) {
-                xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), jxlsContext);
-                xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
-                xlsArea.processFormulas();
-            }
-            transformer.deleteSheet(xlsAreas.get(0).getStartCellRef().getSheetName());
-            transformer.write();
+            ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);
         }
     }
 }
