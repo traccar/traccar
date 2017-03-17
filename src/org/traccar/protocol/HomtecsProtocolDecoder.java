@@ -34,7 +34,7 @@ public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .expression("([^,]+),")              // id
             .number("(dd)(dd)(dd),")             // date (yymmdd)
-            .number("(dd)(dd)(dd).(d+),")        // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss)
             .number("(d+),")                     // satellites
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -63,7 +63,7 @@ public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMSS));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMS));
 
         position.setValid(true);
         position.set(Position.KEY_SATELLITES, parser.nextInt());
