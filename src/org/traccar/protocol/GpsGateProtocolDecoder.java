@@ -35,7 +35,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_GPRMC = new PatternBuilder()
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).?(ddd)?,")     // time (hhmmss.sss)
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -60,7 +60,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .number("(dd)(dd)(dd).?(d+)?,")      // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([01])")                // validity
             .any()
             .compile();
@@ -123,7 +123,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             DateBuilder dateBuilder = new DateBuilder()
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
             position.setValid(parser.next().equals("A"));
             position.setLatitude(parser.nextCoordinate());
@@ -158,7 +158,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(parser.nextDouble());
             position.setCourse(parser.nextDouble());
 
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMSms));
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
 
             position.setValid(parser.next().equals("1"));
 
