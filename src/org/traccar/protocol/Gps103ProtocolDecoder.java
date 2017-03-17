@@ -43,7 +43,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+)?,")             // rfid
             .expression("[FL],")                 // full / low
             .groupBegin()
-            .number("(dd)(dd)(dd).(d+)")         // time utc (hhmmss.sss)
+            .number("(dd)(dd)(dd).d+")           // time utc (hhmmss)
             .or()
             .number("(?:d{1,5}.d+)?")
             .groupEnd()
@@ -263,7 +263,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         String utcHours = parser.next();
         String utcMinutes = parser.next();
 
-        dateBuilder.setTime(localHours, localMinutes, parser.nextInt(), parser.nextInt());
+        dateBuilder.setTime(localHours, localMinutes, parser.nextInt());
 
         // Timezone calculation
         if (utcHours != null && utcMinutes != null) {
