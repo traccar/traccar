@@ -96,6 +96,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
 
         String[] data = parser.next().split(",");
         Integer lac = null, cid = null;
+        int event = 0;
 
         for (int i = 0; i < Math.min(data.length, dataTags.length); i++) {
             switch (dataTags[i]) {
@@ -103,7 +104,8 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     position.setDeviceTime(dateFormat.parse(data[i]));
                     break;
                 case "#EID#":
-                    position.set(Position.KEY_EVENT, data[i]);
+                    event = Integer.parseInt(data[i]);
+                    position.set(Position.KEY_EVENT, event);
                     break;
                 case "#PDT#":
                     position.setFixTime(dateFormat.parse(data[i]));
@@ -175,6 +177,10 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (lac != null && cid != null) {
             position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+        }
+
+        if (event == 20) {
+            position.set(Position.KEY_RFID, data[data.length - 1]);
         }
 
         return position;

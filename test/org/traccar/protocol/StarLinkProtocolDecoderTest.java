@@ -11,6 +11,12 @@ public class StarLinkProtocolDecoderTest extends ProtocolTest {
         StarLinkProtocolDecoder decoder = new StarLinkProtocolDecoder(new StarLinkProtocol());
 
         verifyPosition(decoder, text(
+                "$SLU0330D5,06,3556,170314063523,19,170314061634,+3211.7187,+03452.8106,000.0,332,015074,1,1,0,0,0,0,0,0,10443,32722,12.870,03.790,,0,0*FC"));
+
+        verifyPosition(decoder, text(
+                "$SLU0330D5,06,3555,170314063453,20,170314061634,+3211.7187,+03452.8106,000.0,332,015074,1,1,0,0,0,0,0,0,10443,32722,12.838,03.790,,0,0,1,,1122*74"));
+
+        verifyPosition(decoder, text(
                 "$SLU006968,06,375153,170117051824,01,170117051823,+3203.2073,+03448.1360,000.0,300,085725,1,1,0,0,0,0,0,0,10422,36201,12.655,04.085,,0,0,0,99*45"));
 
         verifyPosition(decoder, text(
