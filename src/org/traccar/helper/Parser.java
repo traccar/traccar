@@ -177,9 +177,9 @@ public class Parser {
         SMH_DMY,     // SSMMHHDDMMYYYY or SSMMHHDDMMYY
 
         DMY_HMS,     // DDMMYYYYHHMMSS or DDMMYYHHMMSS
-        DMY_HMSms,   // DDMMYYYYHHMMSS.sss or DDMMYYHHMMSS.sss
+        DMY_HMSS,    // DDMMYYYYHHMMSS.sss or DDMMYYHHMMSS.sss
         YMD_HMS,     // YYYYMMDDHHMMSS or YYMMDDHHMMSS
-        YMD_HMSms,   // YYYYMMDDHHMMSS.sss or YYMMDDHHMMSS.sss
+        YMD_HMSS,    // YYYYMMDDHHMMSS.sss or YYMMDDHHMMSS.sss
 
         ISO8601      // YYYY-MM-DDTHH:MM:SS+HH:MM
     }
@@ -217,12 +217,12 @@ public class Parser {
                 day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
                 break;
             case DMY_HMS:
-            case DMY_HMSms:
+            case DMY_HMSS:
                 day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
                 hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
                 break;
             case YMD_HMS:
-            case YMD_HMSms:
+            case YMD_HMSS:
             case ISO8601:
             default:
                 year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
@@ -231,8 +231,8 @@ public class Parser {
         }
 
         switch (format) {
-            case YMD_HMSms:
-            case DMY_HMSms:
+            case YMD_HMSS:
+            case DMY_HMSS:
                 millisecond = nextInt(radix); // (ddd)
                 break;
             case ISO8601:
