@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -34,6 +35,11 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
 
     public Xt2400ProtocolDecoder(Xt2400Protocol protocol) {
         super(protocol);
+
+        String config = Context.getConfig().getString(getProtocolName() + ".config");
+        if (config != null) {
+            setConfig(config);
+        }
     }
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
