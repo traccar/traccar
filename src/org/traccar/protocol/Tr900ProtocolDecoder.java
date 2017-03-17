@@ -74,7 +74,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.nextInt() == 1);
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));

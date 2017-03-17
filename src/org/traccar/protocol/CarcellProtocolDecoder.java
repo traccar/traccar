@@ -128,7 +128,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         position.set("clockType", parser.next());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.set("blocked", parser.next().equals("1"));
         position.set(Position.KEY_IGNITION, parser.next().equals("1"));

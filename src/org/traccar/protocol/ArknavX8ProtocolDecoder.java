@@ -71,7 +71,7 @@ public class ArknavX8ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_TYPE, parser.next());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());

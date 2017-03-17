@@ -74,7 +74,7 @@ public class Xt013ProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());

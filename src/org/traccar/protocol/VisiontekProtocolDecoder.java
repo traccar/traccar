@@ -90,7 +90,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         if (parser.hasNext(8)) {
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));

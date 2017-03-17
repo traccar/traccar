@@ -93,8 +93,8 @@ public class GnxProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ARCHIVE, true);
         }
 
-        position.setDeviceTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2, "GMT+5:30"));
-        position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2, "GMT+5:30"));
+        position.setDeviceTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY, "GMT+5:30"));
+        position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY, "GMT+5:30"));
 
         position.setValid(parser.nextInt() != 0);
 

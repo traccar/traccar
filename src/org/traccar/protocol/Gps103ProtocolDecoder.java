@@ -204,7 +204,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+            getLastLocation(position, parser.nextDateTime());
 
             position.set(Position.KEY_ODOMETER, parser.nextInt());
             parser.next(); // instant fuel consumption

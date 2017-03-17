@@ -73,7 +73,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_VERSION_FW, parser.next());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         int flags = parser.nextInt();
 

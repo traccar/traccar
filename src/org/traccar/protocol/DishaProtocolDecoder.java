@@ -76,7 +76,7 @@ public class DishaProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());

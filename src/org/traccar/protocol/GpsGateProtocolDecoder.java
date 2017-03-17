@@ -158,7 +158,7 @@ public class GpsGateProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(parser.nextDouble());
             position.setCourse(parser.nextDouble());
 
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
             position.setValid(parser.next().equals("1"));
 

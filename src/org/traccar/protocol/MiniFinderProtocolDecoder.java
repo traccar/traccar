@@ -77,7 +77,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeFix(Position position, Parser parser) {
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
     }

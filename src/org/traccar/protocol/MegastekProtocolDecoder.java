@@ -287,7 +287,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ARCHIVE, true);
         }
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());

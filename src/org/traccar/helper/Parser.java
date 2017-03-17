@@ -171,32 +171,20 @@ public class Parser {
         HMS,         // HHMMSS
         SMH,         // SSMMHH
 
-        HMS_Y4MD,    // HHMMSSYYYYMMDD
-        HMS_Y2MD,    // HHMMSSYYMMDD
+        HMS_YMD,     // HHMMSSYYYYMMDD or HHMMSSYYMMDD
+        HMS_DMY,     // HHMMSSDDMMYYYY or HHMMSSDDMMYY
+        SMH_YMD,     // SSMMHHYYYYMMDD or SSMMHHYYMMDD
+        SMH_DMY,     // SSMMHHDDMMYYYY or SSMMHHDDMMYY
 
-        HMS_DMY4,    // HHMMSSDDMMYYYY
-        HMS_DMY2,    // HHMMSSDDMMYY
-
-        SMH_Y4MD,    // SSMMHHYYYYMMD
-        SMH_Y2MD,    // SSMMHHYYMMDD
-
-        SMH_DMY4,    // SSMMHHDDMMYYYY
-        SMH_DMY2,    // SSMMHHDDMMYY
-
-        DMY4_HMS,    // DDMMYYYYHHMMSS
-        DMY4_HMSms,  // DDMMYYYYHHMMSS.m+
-        DMY2_HMS,    // DDMMYYHHMMSS
-        DMY2_HMSms,  // DDMMYYHHMMSS.m+
-
-        Y4MD_HMS,    // YYYYMMDDHHMMSS
-        Y4MD_HMSms,  // YYYYMMDDHHMMSS.m+
-        Y2MD_HMS,    // YYMMDDHHMMSS
-        Y2MD_HMSms,  // YYMMDDHHMMSS.m+
+        DMY_HMS,     // DDMMYYYYHHMMSS or DDMMYYHHMMSS
+        DMY_HMSms,   // DDMMYYYYHHMMSS.sss or DDMMYYHHMMSS.sss
+        YMD_HMS,     // YYYYMMDDHHMMSS or YYMMDDHHMMSS
+        YMD_HMSms,   // YYYYMMDDHHMMSS.sss or YYMMDDHHMMSS.sss
 
         ISO8601      // YYYY-MM-DDTHH:MM:SS+HH:MM
     }
 
-    private static final DateTimeFormat DEFAULT_FORMAT = DateTimeFormat.Y4MD_HMS;
+    private static final DateTimeFormat DEFAULT_FORMAT = DateTimeFormat.YMD_HMS;
     private static final String DEFAULT_TZ = "UTC";
     private static final int DEFAULT_RADIX = 10;
 
@@ -212,37 +200,29 @@ public class Parser {
             case SMH:
                 second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
                 break;
-            case HMS_Y4MD:
-            case HMS_Y2MD:
+            case HMS_YMD:
                 hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
                 year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
                 break;
-            case HMS_DMY4:
-            case HMS_DMY2:
+            case HMS_DMY:
                 hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
                 day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
                 break;
-            case SMH_Y4MD:
-            case SMH_Y2MD:
+            case SMH_YMD:
                 second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
                 year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
                 break;
-            case SMH_DMY4:
-            case SMH_DMY2:
+            case SMH_DMY:
                 second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
                 day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
                 break;
-            case DMY4_HMS:
-            case DMY4_HMSms:
-            case DMY2_HMS:
-            case DMY2_HMSms:
+            case DMY_HMS:
+            case DMY_HMSms:
                 day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
                 hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
                 break;
-            case Y4MD_HMS:
-            case Y4MD_HMSms:
-            case Y2MD_HMS:
-            case Y2MD_HMSms:
+            case YMD_HMS:
+            case YMD_HMSms:
             case ISO8601:
             default:
                 year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
@@ -251,17 +231,9 @@ public class Parser {
         }
 
         switch (format) {
-            case HMS_Y2MD:
-            case HMS_DMY2:
-            case SMH_Y2MD:
-            case SMH_DMY2:
-            case DMY2_HMS:
-            case DMY2_HMSms:
-            case Y2MD_HMS:
-            case Y2MD_HMSms:
-                if (year >= 0 && year < 100) {
-                    year += 2000; // Future Y3K issue :)
-                }
+            case YMD_HMSms:
+            case DMY_HMSms:
+                millisecond = nextInt(radix); // (ddd)
                 break;
             case ISO8601:
                 timeZone = TimeZone.getTimeZone("GMT" + next()); // ([+-]d{2}:d{2})
@@ -270,15 +242,8 @@ public class Parser {
                 break;
         }
 
-        switch (format) {
-            case Y4MD_HMSms:
-            case Y2MD_HMSms:
-            case DMY4_HMSms:
-            case DMY2_HMSms:
-                millisecond = nextInt(radix); // (d+)
-                break;
-            default:
-                break;
+        if (year >= 0 && year < 100) {
+            year += 2000; // Future Y3K issue :)
         }
 
         DateBuilder dateBuilder = new DateBuilder(timeZone);

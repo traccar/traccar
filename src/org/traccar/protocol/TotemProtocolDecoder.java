@@ -270,7 +270,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
             }
 
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
             position.set(Position.PREFIX_IO + 1, parser.next());
             position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);

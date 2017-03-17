@@ -81,7 +81,7 @@ public class MaestroProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
         position.set(Position.KEY_IGNITION, parser.nextInt() == 1);
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());

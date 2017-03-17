@@ -63,7 +63,7 @@ public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMSms));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMSms));
 
         position.setValid(true);
         position.set(Position.KEY_SATELLITES, parser.nextInt());

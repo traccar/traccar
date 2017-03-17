@@ -75,7 +75,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_HDOP, parser.nextDouble());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         return position;
     }

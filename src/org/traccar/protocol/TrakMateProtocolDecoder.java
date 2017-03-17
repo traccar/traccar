@@ -119,7 +119,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.set(Position.KEY_VERSION_FW, parser.next());
         position.set(Position.KEY_VERSION_HW, parser.next());
@@ -150,7 +150,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
@@ -179,7 +179,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());

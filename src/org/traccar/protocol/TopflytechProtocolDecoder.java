@@ -62,7 +62,7 @@ public class TopflytechProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());

@@ -84,7 +84,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ALARM, parser.next());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextDouble());

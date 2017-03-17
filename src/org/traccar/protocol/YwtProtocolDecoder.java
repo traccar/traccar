@@ -87,7 +87,7 @@ public class YwtProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG));

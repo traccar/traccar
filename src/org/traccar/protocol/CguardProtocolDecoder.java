@@ -62,7 +62,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        position.setTime(parser.nextDateTime());
 
         position.setValid(true);
         position.setLatitude(parser.nextDouble());
@@ -88,7 +88,7 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+        getLastLocation(position, parser.nextDateTime());
 
         String[] data = parser.next().split(":");
         for (int i = 0; i < data.length / 2; i++) {

@@ -108,7 +108,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(6)) {
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         }
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));

@@ -138,7 +138,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+            getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
             int battery = parser.nextInt();
             if (battery != 65535) {

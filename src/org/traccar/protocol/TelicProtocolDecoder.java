@@ -81,7 +81,7 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ALARM, decodeAlarm(event));
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         if (parser.hasNext(6)) {
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));

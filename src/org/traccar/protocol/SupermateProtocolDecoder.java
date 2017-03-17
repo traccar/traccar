@@ -79,7 +79,7 @@ public class SupermateProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS, 16));
+        position.setTime(parser.nextDateTime(16));
 
         if (parser.nextInt(16) == 8) {
             position.setLatitude(-parser.nextInt(16) / 600000.0);

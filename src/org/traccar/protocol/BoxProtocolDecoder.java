@@ -81,7 +81,7 @@ public class BoxProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
             position.setProtocol(getProtocolName());
 
-            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.Y2MD_HMS));
+            position.setTime(parser.nextDateTime());
 
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());

@@ -88,7 +88,7 @@ public class SiwiProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble());
         position.setCourse(parser.nextInt());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2, "IST"));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY, "IST"));
 
         return position;
     }

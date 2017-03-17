@@ -265,7 +265,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2));
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate());

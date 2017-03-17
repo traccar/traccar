@@ -242,7 +242,7 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
 
             Date time = null;
             if (parser.hasNext(6)) {
-                time = parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY2);
+                time = parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY);
             }
 
             List<Position> positions = new LinkedList<>();
