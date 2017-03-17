@@ -39,7 +39,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(dd)(dd)(dd).?(ddd)?,")     // time (hhmmss.sss)
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -211,9 +211,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        if (parser.hasNext()) {
-            dateBuilder.setMillis(parser.nextInt());
-        }
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
