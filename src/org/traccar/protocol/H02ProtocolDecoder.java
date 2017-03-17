@@ -142,6 +142,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse((buf.readUnsignedByte() & 0x0f) * 100.0 + BcdUtil.readInteger(buf, 2));
 
         processStatus(position, buf.readUnsignedInt());
+
         return position;
     }
 
@@ -170,7 +171,18 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:(dd)(dd)(dd))?")         // date (ddmmyy)
             .any()
             .number(",(x{8})")                   // status
-            .expression("(?:#|,.*)")
+            .groupBegin()
+            .number(",(d+),")                    // odometer
+            .number("(-?d+),")                   // temperature
+            .number("(d+.d+),")                  // fuel
+            .number("(-?d+),")                   // altitude
+            .number("(x+),")                     // lac
+            .number("(x+)#")                     // cid
+            .or()
+            .expression(",.*")
+            .or()
+            .text("#")
+            .groupEnd()
             .compile();
 
     private static final Pattern PATTERN_NBR = new PatternBuilder()
@@ -239,6 +251,16 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         processStatus(position, parser.nextLong(16));
+
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
+
+            position.setAltitude(parser.nextInt());
+
+            position.setNetwork(new Network(CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16))));
+        }
 
         return position;
     }
