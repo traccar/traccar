@@ -54,7 +54,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)|")                  // hdop
             .number("(d+.d+)|")                  // vdop
             .number("(d+)|")                     // io status
-            .number("d+|")                       // battery time (units?)
+            .number("d+|")                       // battery time
             .number("d")                         // charged
             .number("(ddd)")                     // battery
             .number("(dddd)|")                   // power

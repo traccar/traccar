@@ -41,7 +41,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)(,)?")                  // device id
             .expression(".{4},?")                // command
             .number("d*")                        // imei?
-            .number("(dd)(dd)(dd),?")            // date (yymmdd or mmddyy?)
+            .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
             .number("(d+)(dd.d+)")               // latitude
             .expression("([NS]),?")
