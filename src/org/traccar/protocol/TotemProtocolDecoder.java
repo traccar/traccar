@@ -41,7 +41,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // imei
             .expression("(..)")                  // alarm
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).d+,")          // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),([NS]),")       // latitude
             .number("(d+)(dd.d+),([EW]),")       // longitude

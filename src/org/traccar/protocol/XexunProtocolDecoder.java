@@ -37,7 +37,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .expression("G[PN]RMC,")
-            .number("(?:(dd)(dd)(dd))?.?d*,")    // time (hhmmss.sss)
+            .number("(?:(dd)(dd)(dd))?.?d*,")    // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d*?)(d?d.d+),([NS]),")     // latitude
             .number("(d*?)(d?d.d+),([EW])?,")    // longitude

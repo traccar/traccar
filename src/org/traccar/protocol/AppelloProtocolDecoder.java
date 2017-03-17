@@ -36,7 +36,7 @@ public class AppelloProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .groupBegin()
             .number("(dd)(dd)(dd)")              // date (yymmdd)
-            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss.ms)
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .or()
             .text("UTCTIME,")
             .groupEnd()

@@ -38,7 +38,7 @@ public class EnforaProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("GPRMC,")
-            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss.sss)
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
