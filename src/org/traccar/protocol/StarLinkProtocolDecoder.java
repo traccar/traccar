@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
@@ -77,11 +78,17 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_TYPE, parser.nextInt());
         position.set(Position.KEY_INDEX, parser.nextInt());
 
-        position.setDeviceTime(parser.nextDateTime());
+        DateBuilder dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setDeviceTime(dateBuilder.getDate());
 
         position.set(Position.KEY_EVENT, parser.nextInt());
 
-        position.setFixTime(parser.nextDateTime());
+        dateBuilder = new DateBuilder()
+                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+        position.setFixTime(dateBuilder.getDate());
 
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
