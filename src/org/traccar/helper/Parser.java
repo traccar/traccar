@@ -180,8 +180,6 @@ public class Parser {
         DMY_HMSS,    // DDMMYYYYHHMMSS.sss or DDMMYYHHMMSS.sss
         YMD_HMS,     // YYYYMMDDHHMMSS or YYMMDDHHMMSS
         YMD_HMSS,    // YYYYMMDDHHMMSS.sss or YYMMDDHHMMSS.sss
-
-        ISO8601      // YYYY-MM-DDTHH:MM:SS+HH:MM
     }
 
     private static final DateTimeFormat DEFAULT_FORMAT = DateTimeFormat.YMD_HMS;
@@ -223,23 +221,14 @@ public class Parser {
                 break;
             case YMD_HMS:
             case YMD_HMSS:
-            case ISO8601:
             default:
                 year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
                 hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
                 break;
         }
 
-        switch (format) {
-            case YMD_HMSS:
-            case DMY_HMSS:
+        if (format == DateTimeFormat.YMD_HMSS || format == DateTimeFormat.DMY_HMSS) {
                 millisecond = nextInt(radix); // (ddd)
-                break;
-            case ISO8601:
-                timeZone = TimeZone.getTimeZone("GMT" + next()); // ([+-]d{2}:d{2})
-                break;
-            default:
-                break;
         }
 
         if (year >= 0 && year < 100) {
