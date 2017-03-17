@@ -171,15 +171,15 @@ public class Parser {
         HMS,         // HHMMSS
         SMH,         // SSMMHH
 
-        HMS_YMD,     // HHMMSSYYYYMMDD or HHMMSSYYMMDD
-        HMS_DMY,     // HHMMSSDDMMYYYY or HHMMSSDDMMYY
-        SMH_YMD,     // SSMMHHYYYYMMDD or SSMMHHYYMMDD
-        SMH_DMY,     // SSMMHHDDMMYYYY or SSMMHHDDMMYY
+        HMS_YMD,     // HHMMSSYYYYMMDD      or  HHMMSSYYMMDD
+        HMS_DMY,     // HHMMSSDDMMYYYY      or  HHMMSSDDMMYY
+        SMH_YMD,     // SSMMHHYYYYMMDD      or  SSMMHHYYMMDD
+        SMH_DMY,     // SSMMHHDDMMYYYY      or  SSMMHHDDMMYY
 
-        DMY_HMS,     // DDMMYYYYHHMMSS or DDMMYYHHMMSS
-        DMY_HMSS,    // DDMMYYYYHHMMSS.sss or DDMMYYHHMMSS.sss
-        YMD_HMS,     // YYYYMMDDHHMMSS or YYMMDDHHMMSS
-        YMD_HMSS,    // YYYYMMDDHHMMSS.sss or YYMMDDHHMMSS.sss
+        DMY_HMS,     // DDMMYYYYHHMMSS      or  DDMMYYHHMMSS
+        DMY_HMSS,    // DDMMYYYYHHMMSS.sss  or  DDMMYYHHMMSS.sss
+        YMD_HMS,     // YYYYMMDDHHMMSS      or  YYMMDDHHMMSS
+        YMD_HMSS,    // YYYYMMDDHHMMSS.sss  or  YYMMDDHHMMSS.sss
     }
 
     private static final DateTimeFormat DEFAULT_FORMAT = DateTimeFormat.YMD_HMS;
@@ -193,37 +193,37 @@ public class Parser {
 
         switch (format) {
             case HMS:
-                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix);
                 break;
             case SMH:
-                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
+                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix);
                 break;
             case HMS_YMD:
-                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
-                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix);
+                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix);
                 break;
             case HMS_DMY:
-                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
-                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix);
+                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix);
                 break;
             case SMH_YMD:
-                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
-                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
+                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix);
+                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix);
                 break;
             case SMH_DMY:
-                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix); // (d{2})(d{2})(d{2})
-                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
+                second = nextInt(radix); minute = nextInt(radix); hour = nextInt(radix);
+                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix);
                 break;
             case DMY_HMS:
             case DMY_HMSS:
-                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix); // (d{2})(d{2})(d{2}|d{4})
-                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                day = nextInt(radix); month = nextInt(radix); year = nextInt(radix);
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix);
                 break;
             case YMD_HMS:
             case YMD_HMSS:
             default:
-                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix); // (d{2}|d{4})(d{2})(d{2})
-                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix); // (d{2})(d{2})(d{2})
+                year = nextInt(radix); month = nextInt(radix); day = nextInt(radix);
+                hour = nextInt(radix); minute = nextInt(radix); second = nextInt(radix);
                 break;
         }
 
@@ -232,7 +232,7 @@ public class Parser {
         }
 
         if (year >= 0 && year < 100) {
-            year += 2000; // Future Y3K issue :)
+            year += 2000;
         }
 
         DateBuilder dateBuilder = new DateBuilder(timeZone);
