@@ -39,7 +39,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(dd)(dd)(dd).?(d+)?,")      // time
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -72,7 +72,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_RFID = new PatternBuilder()
-            .number("|(dd)(dd)(dd),")            // time
+            .number("|(dd)(dd)(dd),")            // time (hhmmss)
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -211,9 +211,6 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        if (parser.hasNext()) {
-            dateBuilder.setMillis(parser.nextInt());
-        }
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
@@ -268,10 +265,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate());

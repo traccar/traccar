@@ -36,7 +36,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_GPRMC = new PatternBuilder()
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -44,7 +44,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .expression("[^*]+")
             .text("*")
             .expression("[^,]+")
@@ -59,7 +59,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_GPGGA = new PatternBuilder()
             .text("$GPGGA,")
-            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude
@@ -81,8 +81,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_TRCCR = new PatternBuilder()
             .text("$TRCCR,")
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
@@ -210,10 +210,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextDouble());

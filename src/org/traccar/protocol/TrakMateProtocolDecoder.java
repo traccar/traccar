@@ -19,7 +19,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -42,8 +41,8 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^ ]+)|")              // uid
             .number("(d+.d+)|")                  // latitude
             .number("(d+.d+)|")                  // longitude
-            .number("(dd)(dd)(dd)|")             // time
-            .number("(dd)(dd)(dd)|")             // date
+            .number("(dd)(dd)(dd)|")             // time (hhmmss)
+            .number("(dd)(dd)(dd)|")             // date (ddmmyy)
             .number("(d+.d+)|")                  // software ver
             .number("(d+.d+)|")                  // Hardware ver
             .any()
@@ -55,8 +54,8 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // seq
             .number("(d+.d+)|")                  // latitude
             .number("(d+.d+)|")                  // longitude
-            .number("(dd)(dd)(dd)|")             // time
-            .number("(dd)(dd)(dd)|")             // date
+            .number("(dd)(dd)(dd)|")             // time (hhmmss)
+            .number("(dd)(dd)(dd)|")             // date (ddmmyy)
             .number("(d+.d+)|")                  // speed
             .number("(d+.d+)|")                  // heading
             .number("(d+)|")                     // ignition
@@ -81,8 +80,8 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // Alert status
             .number("(d+.d+)|")                  // latitude
             .number("(d+.d+)|")                  // longitude
-            .number("(dd)(dd)(dd)|")             // time
-            .number("(dd)(dd)(dd)|")             // date
+            .number("(dd)(dd)(dd)|")             // time (hhmmss)
+            .number("(dd)(dd)(dd)|")             // date (ddmmyy)
             .number("(d+.d+)|")                  // speed
             .number("(d+.d+)|")                  // heading
             .any()
@@ -120,10 +119,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
 
-        DateBuilder dateBuilder = new DateBuilder(timeZone)
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.set(Position.KEY_VERSION_FW, parser.next());
         position.set(Position.KEY_VERSION_HW, parser.next());
@@ -154,10 +150,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
 
-        DateBuilder dateBuilder = new DateBuilder(timeZone)
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
@@ -186,10 +179,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
 
-        DateBuilder dateBuilder = new DateBuilder(timeZone)
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());

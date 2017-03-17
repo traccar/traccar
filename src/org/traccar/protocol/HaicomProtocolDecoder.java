@@ -19,7 +19,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -37,8 +36,8 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
             .text("$GPRS")
             .number("(d+),")                     // imei
             .expression("([^,]+),")              // version
-            .number("(dd)(dd)(dd),")             // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(d)")                       // flags
             .number("(dd)(d{5})")                // latitude
             .number("(ddd)(d{5}),")              // longitude
@@ -74,10 +73,7 @@ public class HaicomProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_VERSION_FW, parser.next());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime());
 
         int flags = parser.nextInt();
 

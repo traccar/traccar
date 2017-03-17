@@ -37,13 +37,13 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .expression("G[PN]RMC,")
-            .number("(?:(dd)(dd)(dd))?.(d+),")   // time
+            .number("(?:(dd)(dd)(dd))?.?d*,")    // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d*?)(d?d.d+),([NS]),")     // latitude
             .number("(d*?)(d?d.d+),([EW])?,")    // longitude
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*)?,")                // course
-            .number("(?:(dd)(dd)(dd))?,")        // date
+            .number("(?:(dd)(dd)(dd))?,")        // date (ddmmyy)
             .expression("[^*]*").text("*")
             .number("xx")                        // checksum
             .expression("\\r\\n").optional()
@@ -104,7 +104,7 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());

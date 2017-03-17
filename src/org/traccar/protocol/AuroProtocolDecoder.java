@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -44,8 +43,8 @@ public class AuroProtocolDecoder extends BaseProtocolDecoder {
             .number("d{10}")                     // status
             .number("([-+])(ddd)(dd)(dddd)")     // longitude
             .number("([-+])(ddd)(dd)(dddd)")     // latitude
-            .number("(dd)(dd)(dddd)")            // date
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dddd)")            // date (ddmmyyyy)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .number("(ddd)")                     // course
             .number("d{6}")
             .number("(ddd)")                     // speed
@@ -78,10 +77,7 @@ public class AuroProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_MIN));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_MIN));
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.setCourse(parser.nextDouble());
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));

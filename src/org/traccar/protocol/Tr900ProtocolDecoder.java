@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -37,7 +36,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // period
             .number("(d),")                      // fix
             .number("(dd)(dd)(dd),")             // date (yymmdd)
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([EW])")
             .number("(ddd)(dd.d+),")             // longitude
             .expression("([NS])")
@@ -75,10 +74,7 @@ public class Tr900ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.nextInt() == 1);
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime());
 
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));

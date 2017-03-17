@@ -38,12 +38,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .text("imei:")
             .number("(d+),")                     // imei
             .expression("([^,]+),")              // alarm
-            .number("(dd)/?(dd)/?(dd) ?")        // local date
-            .number("(dd):?(dd)(?:dd)?,")        // local time
+            .number("(dd)/?(dd)/?(dd) ?")        // local date (yymmdd)
+            .number("(dd):?(dd)(?:dd)?,")        // local time (hhmmss)
             .expression("([^,]+)?,")             // rfid
             .expression("[FL],")                 // full / low
             .groupBegin()
-            .number("(dd)(dd)(dd).(d+)")         // time utc (hhmmss.sss)
+            .number("(dd)(dd)(dd).d+")           // time utc (hhmmss)
             .or()
             .number("(?:d{1,5}.d+)?")
             .groupEnd()
@@ -85,8 +85,8 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .text("imei:")
             .number("(d+),")                     // imei
             .expression("OBD,")                  // type
-            .number("(dd)(dd)(dd)")              // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(d+),")                     // odometer
             .number("(d+.d+)?,")                 // fuel instant
             .number("(d+.d+)?,")                 // fuel average
@@ -204,11 +204,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-
-            getLastLocation(position, dateBuilder.getDate());
+            getLastLocation(position, parser.nextDateTime());
 
             position.set(Position.KEY_ODOMETER, parser.nextInt());
             parser.next(); // instant fuel consumption
@@ -267,7 +263,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         String utcHours = parser.next();
         String utcMinutes = parser.next();
 
-        dateBuilder.setTime(localHours, localMinutes, parser.nextInt(), parser.nextInt());
+        dateBuilder.setTime(localHours, localMinutes, parser.nextInt());
 
         // Timezone calculation
         if (utcHours != null && utcMinutes != null) {

@@ -18,14 +18,12 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class SiwiProtocolDecoder extends BaseProtocolDecoder {
@@ -53,8 +51,8 @@ public class SiwiProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // longitude
             .number("(-?d+),")                   // altitude
             .number("(d+),")                     // course
-            .number("(dd)(dd)(dd),")             // time
-            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .any()
             .compile();
 
@@ -90,10 +88,7 @@ public class SiwiProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble());
         position.setCourse(parser.nextInt());
 
-        DateBuilder dateBuilder = new DateBuilder(TimeZone.getTimeZone("IST"))
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY, "IST"));
 
         return position;
     }

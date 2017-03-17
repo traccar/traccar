@@ -22,7 +22,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.Parser.CoordinateFormat;
 import org.traccar.helper.PatternBuilder;
@@ -38,8 +37,8 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
             .text("*ID")                         // start of frame
             .number("(d+),")                     // command code
             .number("(d+),")                     // imei
-            .number("(dd)(dd)(dd),")             // current date
-            .number("(dd)(dd)(dd),")             // current time
+            .number("(dd)(dd)(dd),")             // current date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // current time (hhmmss)
             .expression("([A|V]),")              // gps fix
             .number("(dd)(dd).?(d+),([NS]),")    // latitude
             .number("(ddd)(dd).?(d+),([EW]),")   // longitude
@@ -81,10 +80,7 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate(CoordinateFormat.DEG_MIN_MIN_HEM));

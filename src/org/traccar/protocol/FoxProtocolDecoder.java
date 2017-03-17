@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -36,8 +35,8 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // status id
             .expression("([AV]),")               // validity
-            .number("(dd)(dd)(dd),")             // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(ddd)(dd.d+),")             // longitude
@@ -97,11 +96,7 @@ public class FoxProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(parser.next().equals("A"));
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
-
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));

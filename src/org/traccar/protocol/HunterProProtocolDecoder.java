@@ -35,7 +35,7 @@ public class HunterProProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number(">(d+)<")                    // identifier
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).?d*,")         // time
+            .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")

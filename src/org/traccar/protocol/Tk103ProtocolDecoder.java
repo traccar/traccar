@@ -41,14 +41,14 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)(,)?")                  // device id
             .expression(".{4},?")                // command
             .number("d*")                        // imei?
-            .number("(dd)(dd)(dd),?")            // date
+            .number("(dd)(dd)(dd),?")            // date (mmddyy if comma-delimited, otherwise yyddmm)
             .expression("([AV]),?")              // validity
             .number("(d+)(dd.d+)")               // latitude
             .expression("([NS]),?")
             .number("(d+)(dd.d+)")               // longitude
             .expression("([EW]),?")
             .number("(d+.d)(?:d*,)?")            // speed
-            .number("(dd)(dd)(dd),?")            // time
+            .number("(dd)(dd)(dd),?")            // time (hhmmss)
             .number("(d+.?d{1,2}),?")            // course
             .number("(?:([01]{8})|(x{8}))?,?")   // state
             .number("(?:L(x+))?")                // odometer
@@ -61,7 +61,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // device id
             .text("ZC20,")
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("d+,")                       // battery level
             .number("(d+),")                     // battery voltage
             .number("(d+),")                     // power voltage
@@ -138,11 +138,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-
-            getLastLocation(position, dateBuilder.getDate());
+            getLastLocation(position, parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
             int battery = parser.nextInt();
             if (battery != 65535) {

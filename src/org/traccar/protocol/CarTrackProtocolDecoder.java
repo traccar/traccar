@@ -40,7 +40,7 @@ public class CarTrackProtocolDecoder extends BaseProtocolDecoder {
             .text("&A")
             .number("(dddd)")                    // command
             .text("&B")
-            .number("(dd)(dd)(dd).(ddd),")       // time
+            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.dddd),")            // latitude
             .expression("([NS]),")

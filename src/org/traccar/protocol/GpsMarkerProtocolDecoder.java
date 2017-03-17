@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -37,8 +36,8 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
             .number("d")                         // type
             .number("(?:xx)?")                   // index
             .number("(d{15})")                   // imei
-            .number("T(dd)(dd)(dd)")             // date
-            .number("(dd)(dd)(dd)?")             // time
+            .number("T(dd)(dd)(dd)")             // date (ddmmyy)
+            .number("(dd)(dd)(dd)?")             // time (hhmmss)
             .expression("([NS])")
             .number("(dd)(dd)(dddd)")            // latitude
             .expression("([EW])")
@@ -71,10 +70,7 @@ public class GpsMarkerProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.setValid(true);
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN_MIN));

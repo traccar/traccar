@@ -47,12 +47,12 @@ public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,d+,").optional()         // input 2
             .expression("[01],")                 // fix type
             .number("(d+),")                     // satellites
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(dd)(dd.d+)([NS]),")        // latitude
             .number("(ddd)(dd.d+)([EW]),")       // longitude
             .number("(d+.d+),")                  // speed
             .number("(d+.d+),")                  // course
-            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .any()
             .compile();
 

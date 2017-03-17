@@ -19,7 +19,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -35,8 +34,8 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_FIX = new PatternBuilder()
-            .number("(d+)/(d+)/(d+),")           // date
-            .number("(d+):(d+):(d+),")           // time
+            .number("(d+)/(d+)/(d+),")           // date (dd/mm/yy)
+            .number("(d+):(d+):(d+),")           // time (hh:mm:ss)
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .compile();
@@ -78,11 +77,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeFix(Position position, Parser parser) {
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
-
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
     }

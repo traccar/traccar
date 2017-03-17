@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.Parser.CoordinateFormat;
 import org.traccar.helper.PatternBuilder;
@@ -57,8 +56,8 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .number("(d),")                      // jamming
             .number("(d+),")                     // hdop
             .expression("([CG]),?")                // clock type
-            .number("(dd)(dd)(dd),")             // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(d),")                      // block
             .number("(d),")                      // ignition
             .groupBegin()
@@ -67,7 +66,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
             .number("(d),")                      // painel
             .number("(d+),")                     // battery voltage
             .or()
-            .number("(dd),")                     // time
+            .number("(dd),")                     // time until delivery
             .expression("([AF])")                // panic
             .number("(d),")                      // aux
             .number("(d{2,4}),")                 // battery voltage
@@ -129,10 +128,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
         position.set("clockType", parser.next());
 
-        DateBuilder dateBuilder = new DateBuilder().
-                setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.set("blocked", parser.next().equals("1"));
         position.set(Position.KEY_IGNITION, parser.next().equals("1"));

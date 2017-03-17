@@ -38,14 +38,14 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("TRV")
             .number("APdd")
-            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
             .expression("([AV])")                // validity
             .number("(dd)(dd.d+)")               // latitude
             .expression("([NS])")
             .number("(ddd)(dd.d+)")              // longitude
             .expression("([EW])")
             .number("(ddd.d)")                   // speed
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .number("([d.]{6})")                 // course
             .number("(ddd)")                     // gsm
             .number("(ddd)")                     // satellites

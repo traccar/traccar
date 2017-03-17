@@ -35,7 +35,7 @@ public class ExtremTracProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$GPRMC,")
             .number("(d+),")                     // device id
-            .number("(dd)(dd)(dd).d+,")          // time
+            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -43,7 +43,7 @@ public class ExtremTracProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
-            .number("(dd)(dd)(dd),")             // date
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .any()
             .compile();
 
@@ -66,7 +66,7 @@ public class ExtremTracProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
 
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());

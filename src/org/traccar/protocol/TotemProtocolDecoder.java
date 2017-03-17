@@ -41,20 +41,20 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // imei
             .expression("(..)")                  // alarm
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).d+,")          // time
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),([NS]),")       // latitude
             .number("(d+)(dd.d+),([EW]),")       // longitude
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .expression("[^*]*").text("*")
             .number("xx|")                       // checksum
             .number("(d+.d+)|")                  // pdop
             .number("(d+.d+)|")                  // hdop
             .number("(d+.d+)|")                  // vdop
             .number("(d+)|")                     // io status
-            .number("d+|")                       // time
+            .number("d+|")                       // battery time
             .number("d")                         // charged
             .number("(ddd)")                     // battery
             .number("(dddd)|")                   // power
@@ -75,7 +75,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // imei
             .expression("(..)")                  // alarm type
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
-            .number("(dd)(dd)(dd)|")             // time
+            .number("(dd)(dd)(dd)|")             // time (hhmmss)
             .expression("([AV])|")               // validity
             .number("(d+)(dd.d+)|")              // latitude
             .expression("([NS])|")
@@ -103,8 +103,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")                        // length
             .number("(d+)|")                     // imei
             .expression("(..)")                  // alarm type
-            .number("(dd)(dd)(dd)")              // date (yymmdd)
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .number("(xxxx)")                    // io status
             .expression("[01]")                  // charging
             .number("(dd)")                      // battery
@@ -135,7 +135,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)|")                     // imei
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .number("(dd)")                      // battery
             .number("(dd)")                      // external power
             .number("(dddd)")                    // adc 1
@@ -269,10 +269,8 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             if (parser.hasNext()) {
                 position.set(Position.KEY_ALARM, decodeAlarm(Short.parseShort(parser.next(), 16)));
             }
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
+
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
             position.set(Position.PREFIX_IO + 1, parser.next());
             position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
@@ -298,10 +296,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         } else if (pattern == PATTERN4) {
             position.set(Position.KEY_STATUS, parser.next());
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
+            position.setTime(parser.nextDateTime());
 
             position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
             position.set(Position.KEY_POWER, parser.nextDouble());

@@ -19,7 +19,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -39,8 +38,8 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             .expression("(...),")                // type
             .expression("[LH],")                 // history
             .number("(d+),")                     // imei
-            .number("(dd)(dd)(dddd),")           // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dd)(dd)(dddd),")           // date (ddmmyyyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(d),")                      // status
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -114,10 +113,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         position.setValid(parser.nextInt() > 0);
         position.setLatitude(parser.nextCoordinate());

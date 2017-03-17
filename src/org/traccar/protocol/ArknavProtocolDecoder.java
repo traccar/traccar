@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -45,8 +44,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
             .number("(d+.?d*),")                 // hdop
-            .number("(dd):(dd):(dd) ")           // time
-            .number("(dd)-(dd)-(dd),")           // date
+            .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
+            .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
             .any()
             .compile();
 
@@ -76,10 +75,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_HDOP, parser.nextDouble());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
 
         return position;
     }

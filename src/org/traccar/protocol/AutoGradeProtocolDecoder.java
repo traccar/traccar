@@ -37,12 +37,12 @@ public class AutoGradeProtocolDecoder extends BaseProtocolDecoder {
             .text("(")
             .number("d{12}")                     // index
             .number("(d{15})")                   // imei
-            .number("(dd)(dd)(dd)")              // date
+            .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .expression("([AV])")                // validity
             .number("(d+)(dd.d+)([NS])")         // latitude
             .number("(d+)(dd.d+)([EW])")         // longitude
             .number("([d.]{5})")                 // speed
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .number("([d.]{6})")                 // course
             .expression("(.)")                   // status
             .number("A(xxxx)")

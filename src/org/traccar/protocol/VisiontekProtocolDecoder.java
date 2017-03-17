@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -37,8 +36,8 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
             .text("$1,")
             .expression("([^,]+),")              // identifier
             .number("(d+),").optional()          // imei
-            .number("(dd),(dd),(dd),")           // date
-            .number("(dd),(dd),(dd),")           // time
+            .number("(dd),(dd),(dd),")           // date (dd,mm,yy)
+            .number("(dd),(dd),(dd),")           // time (hh,mm,ss)
             .groupBegin()
             .number("(dd)(dd).?(d+)([NS]),")     // latitude
             .number("(ddd)(dd).?(d+)([EW]),")    // longitude
@@ -91,10 +90,7 @@ public class VisiontekProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
         if (parser.hasNext(8)) {
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));

@@ -38,7 +38,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)")                      // imei
             .expression("&?rmc[:=]")
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).(d+),")        // time
+            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")

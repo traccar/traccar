@@ -19,7 +19,6 @@ import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -38,16 +37,10 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .expression("([^,]{2}),")            // command
             .expression("([AV]),")               // validity
-            .number("(xx)")                      // year
-            .number("(xx)")                      // month
-            .number("(xx),")                     // day
-            .number("(xx)")                      // hours
-            .number("(xx)")                      // minutes
-            .number("(xx),")                     // seconds
-            .number("(x)")
-            .number("(x{7}),")                   // latitude
-            .number("(x)")
-            .number("(x{7}),")                   // longitude
+            .number("(xx)(xx)(xx),")             // date (yymmdd)
+            .number("(xx)(xx)(xx),")             // time (hhmmss)
+            .number("(x)(x{7}),")                // latitude
+            .number("(x)(x{7}),")                // longitude
             .number("(x{4}),")                   // speed
             .number("(x{4}),")                   // course
             .number("(x{8}),")                   // status
@@ -81,10 +74,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(parser.next().equals("A"));
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(16), parser.nextInt(16), parser.nextInt(16))
-                .setTime(parser.nextInt(16), parser.nextInt(16), parser.nextInt(16));
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime(16));
 
         if (BitUtil.check(parser.nextInt(16), 3)) {
             position.setLatitude(-parser.nextInt(16) / 600000.0);
