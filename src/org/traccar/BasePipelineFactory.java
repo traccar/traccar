@@ -188,14 +188,14 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
 
         addSpecificHandlers(pipeline);
 
+        if (geolocationHandler != null) {
+            pipeline.addLast("location", geolocationHandler);
+        }
         if (hemisphereHandler != null) {
             pipeline.addLast("hemisphere", hemisphereHandler);
         }
         if (geocoderHandler != null) {
             pipeline.addLast("geocoder", geocoderHandler);
-        }
-        if (geolocationHandler != null) {
-            pipeline.addLast("location", geolocationHandler);
         }
         pipeline.addLast("remoteAddress", new RemoteAddressHandler());
 

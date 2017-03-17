@@ -1,1 +1,1 @@
-$device.name stopped at $event.serverTime
+$device.name stopped at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)

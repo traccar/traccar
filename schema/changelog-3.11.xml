@@ -11,13 +11,21 @@
     <addColumn tableName="users">
       <column name="phone" type="VARCHAR(128)" />
     </addColumn>
-    
+
     <addColumn tableName="notifications">
       <column name="sms" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
     <addColumn tableName="server">
       <column name="devicereadonly" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <addColumn tableName="server">
+      <column name="timezone" type="VARCHAR(128)" />
+    </addColumn>
+
+    <addColumn tableName="users">
+      <column name="timezone" type="VARCHAR(128)" />
     </addColumn>
 
   </changeSet>

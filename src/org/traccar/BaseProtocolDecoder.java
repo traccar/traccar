@@ -162,6 +162,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 position.setAltitude(last.getAltitude());
                 position.setSpeed(last.getSpeed());
                 position.setCourse(last.getCourse());
+                position.setAccuracy(last.getAccuracy());
             } else {
                 position.setFixTime(new Date(0));
             }

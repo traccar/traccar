@@ -25,6 +25,7 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.model.UserPermission;
 
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -393,6 +394,33 @@ public class PermissionsManager {
 
     public User getUserByToken(String token) {
         return users.get(usersTokens.get(token));
+    }
+
+    public Object lookupPreference(long userId, String key, Object defaultValue) {
+        String methodName = "get" + key.substring(0, 1).toUpperCase() + key.substring(1);
+        Object preference;
+        Object serverPreference = null;
+        Object userPreference = null;
+        try {
+            Method method = null;
+            method = User.class.getMethod(methodName, (Class<?>[]) null);
+            if (method != null) {
+                userPreference = method.invoke(users.get(userId), (Object[]) null);
+            }
+            method = null;
+            method = Server.class.getMethod(methodName, (Class<?>[]) null);
+            if (method != null) {
+                serverPreference = method.invoke(server, (Object[]) null);
+            }
+        } catch (ReflectiveOperationException | SecurityException | IllegalArgumentException exception) {
+            return defaultValue;
+        }
+        if (server.getForceSettings()) {
+            preference = serverPreference != null ? serverPreference : userPreference;
+        } else {
+            preference = userPreference != null ? userPreference : serverPreference;
+        }
+        return preference != null ? preference : defaultValue;
     }
 
 }

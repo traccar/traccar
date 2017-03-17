@@ -1,1 +1,1 @@
-$device.name maintenance is required at $event.serverTime
+$device.name maintenance is required at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.serverTime, $locale, $timezone)

@@ -16,14 +16,28 @@
  */
 package org.traccar.reports;
 
+import org.apache.velocity.tools.generic.DateTool;
+import org.jxls.area.Area;
+import org.jxls.builder.xls.XlsCommentAreaBuilder;
+import org.jxls.common.CellRef;
+import org.jxls.formula.StandardFormulaProcessor;
+import org.jxls.transform.Transformer;
+import org.jxls.transform.poi.PoiTransformer;
+import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public final class ReportUtils {
 
@@ -31,19 +45,16 @@ public final class ReportUtils {
     }
 
     public static String getDistanceUnit(long userId) {
-        String unit = Context.getPermissionsManager().getUser(userId).getDistanceUnit();
-        if (unit == null) {
-            unit  = Context.getPermissionsManager().getServer().getDistanceUnit();
-        }
-        return unit != null ? unit : "km";
+        return (String) Context.getPermissionsManager().lookupPreference(userId, "distanceUnit", "km");
     }
 
     public static String getSpeedUnit(long userId) {
-        String unit = Context.getPermissionsManager().getUser(userId).getSpeedUnit();
-        if (unit == null) {
-            unit  = Context.getPermissionsManager().getServer().getSpeedUnit();
-        }
-        return unit != null ? unit : "kn";
+        return (String) Context.getPermissionsManager().lookupPreference(userId, "speedUnit", "kn");
+    }
+
+    public static TimeZone getTimezone(long userId) {
+        String timezone = (String) Context.getPermissionsManager().lookupPreference(userId, "timezone", null);
+        return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
@@ -96,6 +107,31 @@ public final class ReportUtils {
             }
         }
         return "-";
+    }
+
+    public static org.jxls.common.Context initializeContext(long userId) {
+        org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
+        jxlsContext.putVar("distanceUnit", getDistanceUnit(userId));
+        jxlsContext.putVar("speedUnit", getSpeedUnit(userId));
+        jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
+        jxlsContext.putVar("dateTool", new DateTool());
+        jxlsContext.putVar("timezone", getTimezone(userId));
+        jxlsContext.putVar("locale", Locale.getDefault());
+        jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
+        return jxlsContext;
+    }
+
+    public static void processTemplateWithSheets(InputStream templateStream, OutputStream targetStream,
+            org.jxls.common.Context jxlsContext) throws IOException {
+        Transformer transformer = TransformerFactory.createTransformer(templateStream, targetStream);
+        List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
+        for (Area xlsArea : xlsAreas) {
+            xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), jxlsContext);
+            xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
+            xlsArea.processFormulas();
+        }
+        transformer.deleteSheet(xlsAreas.get(0).getStartCellRef().getSheetName());
+        transformer.write();
     }
 
 }

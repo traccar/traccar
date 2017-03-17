@@ -51,6 +51,9 @@
         longitude = :longitude,
         zoom = :zoom,
         twelveHourFormat = :twelveHourFormat,
+        coordinateFormat = :coordinateFormat,
+        forceSettings = :forceSettings,
+        timezone = :timezone,
         attributes = :attributes
         WHERE id = :id
     </entry>
@@ -65,8 +68,8 @@
     </entry>
 
     <entry key='database.insertUser'>
-        INSERT INTO users (name, email, phone, hashedPassword, salt, readonly, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, userLimit, deviceReadonly, token, attributes)
-        VALUES (:name, :email, :phone, :hashedPassword, :salt, :readonly, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :userLimit, :deviceReadonly, :token, :attributes)
+        INSERT INTO users (name, email, phone, hashedPassword, salt, readonly, admin, map, distanceUnit, speedUnit, latitude, longitude, zoom, twelveHourFormat, coordinateFormat, disabled, expirationTime, deviceLimit, userLimit, deviceReadonly, token, timezone, attributes)
+        VALUES (:name, :email, :phone, :hashedPassword, :salt, :readonly, :admin, :map, :distanceUnit, :speedUnit, :latitude, :longitude, :zoom, :twelveHourFormat, :coordinateFormat, :disabled, :expirationTime, :deviceLimit, :userLimit, :deviceReadonly, :token, :timezone, :attributes)
     </entry>
 
     <entry key='database.updateUser'>
@@ -90,6 +93,7 @@
         userLimit = :userLimit,
         deviceReadonly = :deviceReadonly,
         token = :token,
+        timezone = :timezone,
         attributes = :attributes
         WHERE id = :id
     </entry>
@@ -508,5 +512,6 @@
     <entry key='siwi.port'>5135</entry>
     <entry key='starlink.port'>5136</entry>
     <entry key='dmt.port'>5137</entry>
+    <entry key='xt2400.port'>5138</entry>
 
 </properties>

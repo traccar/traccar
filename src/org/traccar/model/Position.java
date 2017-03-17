@@ -79,6 +79,8 @@ public class Position extends Message {
     public static final String PREFIX_ADC = "adc";
     public static final String PREFIX_IO = "io";
     public static final String PREFIX_COUNT = "count";
+    public static final String PREFIX_IN = "in";
+    public static final String PREFIX_OUT = "out";
 
     public static final String ALARM_GENERAL = "general";
     public static final String ALARM_SOS = "sos";
