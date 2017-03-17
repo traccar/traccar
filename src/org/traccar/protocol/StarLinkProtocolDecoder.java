@@ -102,7 +102,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 case "#EDT#":
                     position.setDeviceTime(dateFormat.parse(data[i]));
                     break;
-                case "EID":
+                case "#EID#":
                     position.set(Position.KEY_EVENT, data[i]);
                     break;
                 case "#PDT#":
