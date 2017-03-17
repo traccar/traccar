@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -45,8 +44,8 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(-?d+),")                   // index
             .text("UNITSTAT,")
-            .number("(dddd)(dd)(dd),")           // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dddd)(dd)(dd),")           // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("d+,")                       // node id
             .number("([NS])(d+).(d+.d+),")       // latitude
             .number("([EW])(d+).(d+.d+),")       // longitude
@@ -110,10 +109,7 @@ public class FlextrackProtocolDecoder extends BaseProtocolDecoder {
 
             sendAcknowledgement(channel, parser.next());
 
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
+            position.setTime(parser.nextDateTime());
 
             position.setValid(true);
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));

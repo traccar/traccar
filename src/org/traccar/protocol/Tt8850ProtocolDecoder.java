@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
-import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -49,15 +48,15 @@ public class Tt8850ProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d{1,5}.d)?,")            // altitude
             .number("(-?d{1,3}.d{6}),")          // longitude
             .number("(-?d{1,2}.d{6}),")          // latitude
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(0ddd)?,")                  // mcc
             .number("(0ddd)?,")                  // mnc
             .number("(xxxx)?,")                  // lac
             .number("(xxxx)?,")                  // cell
             .any()
-            .number("(dddd)(dd)(dd)")            // date
-            .number("(dd)(dd)(dd),")             // time
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(xxxx)")
             .compile();
 
@@ -87,10 +86,7 @@ public class Tt8850ProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(parser.nextDouble());
         position.setLatitude(parser.nextDouble());
 
-        DateBuilder dateBuilder = new DateBuilder()
-                .setDate(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-        position.setTime(dateBuilder.getDate());
+        position.setTime(parser.nextDateTime());
 
         if (parser.hasNext(4)) {
             position.setNetwork(new Network(

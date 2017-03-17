@@ -39,13 +39,13 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
             .number("M(x{6}),")                  // alarm
             .number("O(x{4}),")                  // output
             .number("I(x{4}),")                  // input
-            .number("D(dd)(dd)(dd),")            // time
+            .number("D(dd)(dd)(dd),")            // time (hhmmss)
             .expression("([AV]),")               // valid
             .number("([NS])(dd)(dd.d+),")        // latitude
             .number("([EW])(ddd)(dd.d+),")       // longitude
             .number("T(d+.d+),")                 // speed
             .number("H(d+.d+),")                 // course
-            .number("Y(dd)(dd)(dd),")            // date
+            .number("Y(dd)(dd)(dd),")            // date (ddmmyy)
             .number("G(d+)")                     // satellites
             .any()
             .compile();

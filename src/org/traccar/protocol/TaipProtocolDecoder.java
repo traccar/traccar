@@ -50,8 +50,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .or()
             .expression("(?:RGP|RCQ|RBR)")       // type
             .number("(?:dd)?")
-            .number("(dd)(dd)(dd)")              // date
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd)")              // date (mmddyy)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .groupEnd()
             .number("([-+]dd)(d{5})")            // latitude
             .number("([-+]ddd)(d{5})")           // longitude
@@ -108,10 +108,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(6)) {
-            DateBuilder dateBuilder = new DateBuilder()
-                    .setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt())
-                    .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
-            position.setTime(dateBuilder.getDate());
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY2_HMS));
         }
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));

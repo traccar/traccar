@@ -47,8 +47,8 @@ public class V680ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+),([NS]),")           // latitude
             .number("(d+.d+),")                  // speed
             .number("(d+.?d*)?#")                // course
-            .number("(dd)(dd)(dd)#")             // date
-            .number("(dd)(dd)(dd)")              // time
+            .number("(dd)(dd)(dd)#")             // date (ddmmyy)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .any()
             .compile();
 
