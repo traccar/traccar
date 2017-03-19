@@ -91,6 +91,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+        position.setValid(true);
 
         position.set(Position.KEY_INDEX, parser.nextInt());
 
@@ -123,7 +124,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     position.setCourse(Integer.parseInt(data[i]));
                     break;
                 case "#ODO#":
-                    position.set(Position.KEY_ODOMETER, Integer.parseInt(data[i]));
+                    position.set(Position.KEY_ODOMETER, Long.parseLong(data[i]) * 1000);
                     break;
                 case "#IN1#":
                     position.set(Position.PREFIX_IN + 1, Integer.parseInt(data[i]));
