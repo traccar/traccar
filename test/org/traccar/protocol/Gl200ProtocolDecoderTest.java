@@ -11,6 +11,12 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         Gl200ProtocolDecoder decoder = new Gl200ProtocolDecoder(new Gl200Protocol());
 
         verifyAttributes(decoder, text(
+                "+RESP:GTFRI,210102,354524044925825,,1,1,1,29,2.8,0,133.7,-90.203063,32.265473,20170318005208,,,,,10800,4,20170318005208,0002$"));
+
+        verifyAttributes(decoder, text(
+                "+RESP:GTFRI,210102,354524044925825,,1,1,1,,,,,,,,310,410,51bc,ca1dae6,10800,1,20170318214333,0002$"));
+
+        verifyAttributes(decoder, text(
                 "+RESP:GTGSM,400201,862365030025161,STR,0234,0015,003a,62a2,16,,0234,0015,003a,56a2,14,,0234,0015,003a,062a,13,,0234,0015,003a,32d9,11,,0234,0015,003a,56a0,11,,,,,,,,0234,0015,003a,7489,17,,20170219200048,0033$"));
 
         verifyAttributes(decoder, text(
