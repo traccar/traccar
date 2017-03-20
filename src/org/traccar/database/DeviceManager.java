@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -133,19 +134,19 @@ public class DeviceManager implements IdentityManager {
                     device.setStatus(Device.STATUS_OFFLINE);
                 }
             }
-            for (Long cachedDeviceId : devicesById.keySet()) {
-                if (!databaseDevicesIds.contains(cachedDeviceId)) {
-                    devicesById.remove(cachedDeviceId);
+            for (Iterator<Long> iterator = devicesById.keySet().iterator(); iterator.hasNext();) {
+                if (!databaseDevicesIds.contains(iterator.next())) {
+                    iterator.remove();
                 }
             }
-            for (String cachedDeviceUniqueId : devicesByUniqueId.keySet()) {
-                if (!databaseDevicesUniqueIds.contains(cachedDeviceUniqueId)) {
-                    devicesByUniqueId.remove(cachedDeviceUniqueId);
+            for (Iterator<String> iterator = devicesByUniqueId.keySet().iterator(); iterator.hasNext();) {
+                if (!databaseDevicesUniqueIds.contains(iterator.next())) {
+                    iterator.remove();
                 }
             }
-            for (String cachedDevicePhone : devicesByPhone.keySet()) {
-                if (!databaseDevicesPhones.contains(cachedDevicePhone)) {
-                    devicesByPhone.remove(cachedDevicePhone);
+            for (Iterator<String> iterator = devicesByPhone.keySet().iterator(); iterator.hasNext();) {
+                if (!databaseDevicesPhones.contains(iterator.next())) {
+                    iterator.remove();
                 }
             }
         }
