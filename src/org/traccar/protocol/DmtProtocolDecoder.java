@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
@@ -126,6 +127,42 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
                         position.setAccuracy(buf.readUnsignedByte());
                         position.setValid(buf.readUnsignedByte() != 0);
+
+                    } else if (fieldId == 2) {
+
+                        int input = buf.readInt();
+                        int output = buf.readUnsignedShort();
+                        int status = buf.readUnsignedShort();
+
+                        position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+
+                        position.set(Position.KEY_INPUT, input);
+                        position.set(Position.KEY_OUTPUT, output);
+                        position.set(Position.KEY_STATUS, status);
+
+                    } else if (fieldId == 6) {
+
+                        while (buf.readerIndex() < fieldEnd) {
+                            switch (buf.readUnsignedByte()) {
+                                case 1:
+                                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                                    break;
+                                case 2:
+                                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                                    break;
+                                case 3:
+                                    position.set(Position.KEY_DEVICE_TEMP, buf.readShort() * 0.01);
+                                    break;
+                                case 4:
+                                    position.set(Position.KEY_RSSI, buf.readUnsignedShort());
+                                    break;
+                                case 5:
+                                    position.set("solarPower", buf.readUnsignedShort() * 0.001);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
 
                     }
 
