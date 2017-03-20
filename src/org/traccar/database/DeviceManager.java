@@ -34,7 +34,6 @@ import org.traccar.model.Command;
 import org.traccar.model.CommandType;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceTotalDistance;
-import org.traccar.model.Event;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -139,9 +138,9 @@ public class DeviceManager implements IdentityManager {
                     devicesById.remove(cachedDeviceId);
                 }
             }
-            for (String cachedDeviceUniqId : devicesByUniqueId.keySet()) {
-                if (!databaseDevicesUniqueIds.contains(cachedDeviceUniqId)) {
-                    devicesByUniqueId.remove(cachedDeviceUniqId);
+            for (String cachedDeviceUniqueId : devicesByUniqueId.keySet()) {
+                if (!databaseDevicesUniqueIds.contains(cachedDeviceUniqueId)) {
+                    devicesByUniqueId.remove(cachedDeviceUniqueId);
                 }
             }
             for (String cachedDevicePhone : devicesByPhone.keySet()) {
@@ -149,9 +148,6 @@ public class DeviceManager implements IdentityManager {
                     devicesByPhone.remove(cachedDevicePhone);
                 }
             }
-            databaseDevicesIds.clear();
-            databaseDevicesUniqueIds.clear();
-            databaseDevicesPhones.clear();
         }
     }
 
@@ -506,14 +502,5 @@ public class DeviceManager implements IdentityManager {
             result.add(new CommandType(Command.TYPE_CUSTOM));
         }
         return result;
-    }
-
-    public void handleTextMessage(String phone, String message) {
-        Device device = devicesByPhone.get(phone);
-        if (device != null && Context.getNotificationManager() != null) {
-            Event event = new Event(Event.TYPE_TEXT_MESSAGE, device.getId());
-            event.set("message", message);
-            Context.getNotificationManager().updateEvent(event, null);
-        }
     }
 }

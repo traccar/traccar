@@ -16,7 +16,7 @@
  */
 package org.traccar.smpp;
 
-import org.traccar.Context;
+import org.traccar.events.TextMessageEventHandler;
 import org.traccar.helper.Log;
 
 import com.cloudhopper.commons.charset.CharsetUtil;
@@ -54,7 +54,7 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
                     String message = CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
                             smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
                     Log.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
-                    Context.getDeviceManager().handleTextMessage(sourceAddress, message);
+                    TextMessageEventHandler.handleTextMessage(sourceAddress, message);
                 }
             }
             response = request.createResponse();
