@@ -16,6 +16,7 @@
  */
 package org.traccar.smpp;
 
+import org.traccar.events.TextMessageEventHandler;
 import org.traccar.helper.Log;
 
 import com.cloudhopper.commons.charset.CharsetUtil;
@@ -49,11 +50,11 @@ public class ClientSmppSessionHandler extends DefaultSmppSessionHandler {
                             + ", State: "
                             + request.getOptionalParameter(SmppConstants.TAG_MSG_STATE).getValueAsByte());
                 } else {
-                    Log.debug("SMS Message Received: "
-                            + CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
-                            smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding())).trim()
-                            + ", Source Address: "
-                            + ((DeliverSm) request).getSourceAddress().getAddress());
+                    String sourceAddress = ((DeliverSm) request).getSourceAddress().getAddress();
+                    String message = CharsetUtil.decode(((DeliverSm) request).getShortMessage(),
+                            smppClient.mapDataCodingToCharset(((DeliverSm) request).getDataCoding()));
+                    Log.debug("SMS Message Received: " + message.trim() + ", Source Address: " + sourceAddress);
+                    TextMessageEventHandler.handleTextMessage(sourceAddress, message);
                 }
             }
             response = request.createResponse();
