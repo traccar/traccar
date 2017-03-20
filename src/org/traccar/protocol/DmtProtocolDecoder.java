@@ -133,6 +133,10 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
                 }
 
+                if (position.getFixTime() == null) {
+                    getLastLocation(position, position.getDeviceTime());
+                }
+
                 positions.add(position);
 
             }
