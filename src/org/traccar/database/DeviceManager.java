@@ -202,6 +202,7 @@ public class DeviceManager implements IdentityManager {
     public void addDevice(Device device) throws SQLException {
         dataManager.addDevice(device);
 
+        device.setStatus(Device.STATUS_OFFLINE);
         devicesById.put(device.getId(), device);
         devicesByUniqueId.put(device.getUniqueId(), device);
         if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
