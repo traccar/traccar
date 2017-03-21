@@ -37,15 +37,42 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_RECORDS = 1;
+    public static final int MSG_DEVICE_CONFIGURATION = 2;
+    public static final int MSG_DEVICE_VERSION = 3;
+    public static final int MSG_FIRMWARE_UPDATE = 4;
+    public static final int MSG_SET_CONNECTION = 5;
+    public static final int MSG_SET_ODOMETER = 6;
+    public static final int MSG_SMS_VIA_GPRS_RESPONSE = 7;
+    public static final int MSG_SMS_VIA_GPRS = 8;
     public static final int MSG_DTCS = 9;
+    public static final int MSG_SET_IO = 17;
     public static final int MSG_EXTENDED_RECORDS = 68;
-    public static final int MSG_DEVICE_CONFIGURATION = 102;
-    public static final int MSG_DEVICE_VERSION = 103;
-    public static final int MSG_FIRMWARE_UPDATE = 104;
-    public static final int MSG_SET_CONNECTION = 105;
-    public static final int MSG_SET_ODOMETER = 106;
-    public static final int MSG_SMS_VIA_GPRS = 108;
-    public static final int MSG_SET_IO = 117;
+
+    private Position decodeCommandResponse(DeviceSession deviceSession, int type, ChannelBuffer buf) {
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_TYPE, type);
+
+        switch (type) {
+            case MSG_DEVICE_CONFIGURATION:
+            case MSG_DEVICE_VERSION:
+            case MSG_FIRMWARE_UPDATE:
+            case MSG_SMS_VIA_GPRS_RESPONSE:
+                position.set(Position.KEY_RESULT,
+                        buf.toString(buf.readerIndex(), buf.readableBytes() - 2, StandardCharsets.US_ASCII).trim());
+                return position;
+            case MSG_SET_IO:
+                position.set(Position.KEY_RESULT,
+                        String.valueOf(buf.readUnsignedByte()));
+                return position;
+            default:
+                return null;
+        }
+    }
 
     @Override
     protected Object decode(
@@ -173,9 +200,11 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             return positions;
 
-        }
+        } else {
 
-        return null;
+            return decodeCommandResponse(deviceSession, type, buf);
+
+        }
     }
 
 }
