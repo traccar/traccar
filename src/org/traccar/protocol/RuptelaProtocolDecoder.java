@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import org.traccar.DeviceSession;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+import javax.xml.bind.DatatypeConverter;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,8 +37,15 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_RECORDS = 1;
+    public static final int MSG_DTCS = 9;
     public static final int MSG_EXTENDED_RECORDS = 68;
+    public static final int MSG_DEVICE_CONFIGURATION = 102;
+    public static final int MSG_DEVICE_VERSION = 103;
+    public static final int MSG_FIRMWARE_UPDATE = 104;
+    public static final int MSG_SET_CONNECTION = 105;
+    public static final int MSG_SET_ODOMETER = 106;
     public static final int MSG_SMS_VIA_GPRS = 108;
+    public static final int MSG_SET_IO = 117;
 
     @Override
     protected Object decode(
@@ -55,6 +64,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         if (type == MSG_RECORDS || type == MSG_EXTENDED_RECORDS) {
+
             List<Position> positions = new LinkedList<>();
 
             buf.readUnsignedByte(); // records left
@@ -124,11 +134,45 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (channel != null) {
-                byte[] response = {0x00, 0x02, 0x64, 0x01, 0x13, (byte) 0xbc};
-                channel.write(ChannelBuffers.wrappedBuffer(response)); // acknowledgement
+                channel.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary("0002640113bc")));
             }
 
             return positions;
+
+        } else if (type == MSG_DTCS) {
+
+            List<Position> positions = new LinkedList<>();
+
+            int count = buf.readUnsignedByte();
+
+            for (int i = 0; i < count; i++) {
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                buf.readUnsignedByte(); // reserved
+
+                position.setTime(new Date(buf.readUnsignedInt() * 1000));
+
+                position.setValid(true);
+                position.setLongitude(buf.readInt() / 10000000.0);
+                position.setLatitude(buf.readInt() / 10000000.0);
+
+                if (buf.readUnsignedByte() == 2) {
+                    position.set(Position.KEY_ARCHIVE, true);
+                }
+
+                position.set(Position.KEY_DTCS, buf.readBytes(5).toString(StandardCharsets.US_ASCII));
+
+                positions.add(position);
+            }
+
+            if (channel != null) {
+                channel.write(ChannelBuffers.wrappedBuffer(DatatypeConverter.parseHexBinary("00026d01c4a4")));
+            }
+
+            return positions;
+
         }
 
         return null;
