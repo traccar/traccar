@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,28 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private String decodeAlarm(int eventId) {
+
+        switch (eventId) {
+            case 1:
+                return Position.ALARM_POWER_ON;
+            case 2:
+                return Position.ALARM_SOS;
+            case 5:
+                return Position.ALARM_POWER_OFF;
+            case 7:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 8:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 22:
+                return Position.ALARM_LOW_BATTERY;
+            case 25:
+                return Position.ALARM_MOVEMENT;
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -77,9 +99,15 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         int event = parser.nextInt();
-        position.set(Position.KEY_TYPE, event);
+        position.set(Position.KEY_EVENT, event);
 
         position.set(Position.KEY_ALARM, decodeAlarm(event));
+
+        if (event == 11) {
+            position.set(Position.KEY_IGNITION, true);
+        } else if (event == 12) {
+            position.set(Position.KEY_IGNITION, false);
+        }
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
 
@@ -104,25 +132,4 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private String decodeAlarm(int eventId) {
-
-        switch (eventId) {
-            case 1:
-                return Position.ALARM_POWER_ON;
-            case 2:
-                return Position.ALARM_SOS;
-            case 5:
-                return Position.ALARM_POWER_OFF;
-            case 7:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 8:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 22:
-                return Position.ALARM_LOW_BATTERY;
-            case 25:
-                return Position.ALARM_MOVEMENT;
-            default:
-                return null;
-        }
-    }
 }
