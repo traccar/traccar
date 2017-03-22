@@ -51,7 +51,11 @@ public class Device extends Extensible {
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        if (STATUS_ONLINE.equals(status) || STATUS_UNKNOWN.equals(status)) {
+            this.status = status;
+        } else {
+            this.status = STATUS_OFFLINE;
+        }
     }
 
     private Date lastUpdate;
