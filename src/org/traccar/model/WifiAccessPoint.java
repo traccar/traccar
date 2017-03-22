@@ -15,7 +15,6 @@
  */
 package org.traccar.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Inlcude.NON_NULL)
