@@ -182,8 +182,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession != null) {
             if (sendResponse && channel != null) {
                 if (messageIndex != null) {
-                    String response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";";
-                    response += Checksum.nmea(response) + "<";
+                    String response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
+                    response += String.format("%02X", Checksum.xor(response)) + "<";
                     channel.write(response);
                 } else {
                     channel.write(uniqueId);
