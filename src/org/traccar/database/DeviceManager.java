@@ -131,7 +131,6 @@ public class DeviceManager implements IdentityManager {
                             device.setGeofenceIds(geofenceManager.getCurrentDeviceGeofences(lastPosition));
                         }
                     }
-                    device.setStatus(Device.STATUS_OFFLINE);
                 }
             }
             for (Iterator<Long> iterator = devicesById.keySet().iterator(); iterator.hasNext();) {
