@@ -17,6 +17,7 @@
 package org.traccar.reports;
 
 import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.NumberTool;
 import org.jxls.area.Area;
 import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.common.CellRef;
@@ -115,6 +116,7 @@ public final class ReportUtils {
         jxlsContext.putVar("speedUnit", getSpeedUnit(userId));
         jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
         jxlsContext.putVar("dateTool", new DateTool());
+        jxlsContext.putVar("numberTool", new NumberTool());
         jxlsContext.putVar("timezone", getTimezone(userId));
         jxlsContext.putVar("locale", Locale.getDefault());
         jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
