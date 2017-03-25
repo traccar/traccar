@@ -184,9 +184,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 0x11:
                 return Position.ALARM_POWER_OFF;
             default:
-                break;
+                return null;
         }
-        return null;
     }
 
     @Override

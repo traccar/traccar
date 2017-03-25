@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,27 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .text("\r\n").optional()
             .compile();
 
+    private String decodeAlarm(int event) {
+        switch (event) {
+            case 1:
+                return Position.ALARM_SOS;
+            case 17:
+                return Position.ALARM_LOW_BATTERY;
+            case 18:
+                return Position.ALARM_POWER_CUT;
+            case 19:
+                return Position.ALARM_OVERSPEED;
+            case 20:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 21:
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 36:
+                return Position.ALARM_TOW;
+            default:
+                return null;
+        }
+    }
+
     private Position decodeRegularMessage(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) {
 
         Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
@@ -102,6 +123,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         int event = parser.nextInt();
         position.set(Position.KEY_EVENT, event);
+        position.set(Position.KEY_ALARM, decodeAlarm(event));
 
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());
