@@ -50,11 +50,11 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
             .number("(d),")                      // validity
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
-            .number("(d+),")                     // satellites
+            .number("(d+)?,")                    // satellites
             .expression("(?:[^,]*,){7}")
             .number("(d+),")                     // battery
             .expression("[^,]*,")
-            .number("(d+),")                     // external
+            .number("(d+)")                      // external
             .any()
             .compile();
 
@@ -125,9 +125,12 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
-        position.set(Position.KEY_SATELLITES, parser.next());
-        position.set(Position.KEY_BATTERY, 3.4 + parser.nextInt() * 0.00345);
-        position.set(Position.KEY_POWER, 6.0 + parser.nextInt() * 0.125);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+        }
+
+        position.set(Position.KEY_BATTERY, parser.nextInt());
+        position.set(Position.KEY_POWER, parser.nextInt());
 
         return position;
     }
