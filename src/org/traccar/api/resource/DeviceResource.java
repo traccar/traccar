@@ -80,6 +80,7 @@ public class DeviceResource extends BaseResource {
         Context.getPermissionsManager().checkDeviceReadonly(getUserId());
         Context.getPermissionsManager().checkDevice(getUserId(), entity.getId());
         Context.getDeviceManager().updateDevice(entity);
+        Context.getPermissionsManager().refreshPermissions();
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refresh();
         }
