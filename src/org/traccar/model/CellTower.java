@@ -15,10 +15,10 @@
  */
 package org.traccar.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.traccar.Context;
 
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CellTower {
 
     public static CellTower from(int mcc, int mnc, int lac, long cid) {
