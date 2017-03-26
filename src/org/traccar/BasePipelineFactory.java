@@ -112,9 +112,12 @@ public abstract class BasePipelineFactory implements ChannelPipelineFactory {
     public BasePipelineFactory(TrackerServer server, String protocol) {
         this.server = server;
 
-        timeout = Context.getConfig().getInteger(protocol + ".timeout", 0);
+        timeout = Context.getConfig().getInteger(protocol + ".timeout");
         if (timeout == 0) {
-            timeout = Context.getConfig().getInteger(protocol + ".resetDelay", 0); // temporary
+            timeout = Context.getConfig().getInteger(protocol + ".resetDelay"); // temporary
+            if (timeout == 0) {
+                timeout = Context.getConfig().getInteger("server.timeout");
+            }
         }
 
         if (Context.getConfig().getBoolean("filter.enable")) {
