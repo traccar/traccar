@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.Parser;
+import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -32,6 +34,7 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -188,6 +191,33 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private static final Pattern PATTERN_FUEL = new PatternBuilder()
+            .text("!AIOIL,")
+            .number("d+,")                       // device address
+            .number("d+.d+,")                    // output value
+            .number("(d+.d+),")                  // temperature
+            .expression("[^,]+,")                // version
+            .number("dd")                        // back wave
+            .number("d")                         // software status code
+            .number("d,")                        // hardware status code
+            .number("(d+.d+),")                  // measured value
+            .expression("[01],")                 // movement status
+            .number("d+,")                       // excited wave times
+            .number("xx")                        // checksum
+            .compile();
+
+    private Position decodeFuelData(Position position, String sentence) {
+        Parser parser = new Parser(PATTERN_FUEL, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -333,6 +363,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set("door", BitUtil.check(flags, 0));
                     position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
                     return position;
+                } else if (subType == 0x0d) {
+                    buf.skipBytes(6);
+                    return decodeFuelData(position, buf.toString(
+                            buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
                 }
             }
 
