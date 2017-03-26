@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .expression("([^,]+),")              // id
+            .expression("([^_]+)")               // id
+            .text("_R")
+            .number("(x{8}),")                   // mac ending
             .number("(dd)(dd)(dd),")             // date (yymmdd)
             .number("(dd)(dd)(dd).d+,")          // time (hhmmss)
             .number("(d+),")                     // satellites
@@ -42,7 +44,9 @@ public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
             .expression("([EW]),")
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
-            .any()
+            .number("(d),")                      // fix status
+            .number("(d+.?d*)?,")                // hdop
+            .number("(d+.?d*)?")                 // altitude
             .compile();
 
     @Override
@@ -54,24 +58,32 @@ public class HomtecsProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
+        String id = parser.next();
+        String mac = parser.next();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id, id + "_R" + mac);
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.YMD_HMS));
 
-        position.setValid(true);
         position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextDouble());
+
+        position.setValid(parser.nextInt() > 0);
+
+        position.set(Position.KEY_HDOP, parser.nextDouble());
+
+        position.setAltitude(parser.nextDouble());
 
         return position;
     }
