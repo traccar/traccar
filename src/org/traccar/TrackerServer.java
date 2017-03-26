@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2014 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,6 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 
-/**
- * Tracker server
- */
 public abstract class TrackerServer {
 
     private final Bootstrap bootstrap;
@@ -49,7 +46,6 @@ public abstract class TrackerServer {
         this.bootstrap = bootstrap;
         this.protocol = protocol;
 
-        // Set appropriate channel factory
         if (bootstrap instanceof ServerBootstrap) {
             bootstrap.setFactory(GlobalChannelFactory.getFactory());
         } else if (bootstrap instanceof ConnectionlessBootstrap) {
@@ -69,22 +65,16 @@ public abstract class TrackerServer {
 
     protected abstract void addSpecificHandlers(ChannelPipeline pipeline);
 
-    /**
-     * Server port
-     */
-    private Integer port;
+    private int port;
 
-    public Integer getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(Integer port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
-    /**
-     * Server listening interface
-     */
     private String address;
 
     public String getAddress() {
@@ -95,17 +85,11 @@ public abstract class TrackerServer {
         this.address = address;
     }
 
-    /**
-     * Set endianness
-     */
     public void setEndianness(ByteOrder byteOrder) {
         bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(byteOrder));
         bootstrap.setOption("child.bufferFactory", new HeapChannelBufferFactory(byteOrder));
     }
 
-    /**
-     * Opened channels
-     */
     private final ChannelGroup allChannels = new DefaultChannelGroup();
 
     public ChannelGroup getChannelGroup() {
@@ -120,9 +104,6 @@ public abstract class TrackerServer {
         return bootstrap.getPipelineFactory();
     }
 
-    /**
-     * Start server
-     */
     public void start() {
         InetSocketAddress endpoint;
         if (address == null) {
@@ -143,9 +124,6 @@ public abstract class TrackerServer {
         }
     }
 
-    /**
-     * Stop server
-     */
     public void stop() {
         ChannelGroupFuture future = getChannelGroup().close();
         future.awaitUninterruptibly();
