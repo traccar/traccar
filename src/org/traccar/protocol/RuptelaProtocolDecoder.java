@@ -124,9 +124,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
 
                 if (type == MSG_EXTENDED_RECORDS) {
-                    buf.readUnsignedShort(); // event
+                    position.set(Position.KEY_EVENT, buf.readUnsignedShort());
                 } else {
-                    buf.readUnsignedByte(); // event
+                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                 }
 
                 // Read 1 byte data
