@@ -218,6 +218,162 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    protected Object decodeBasic(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
+
+        int length = buf.readUnsignedByte();
+        int dataLength = length - 5;
+        int type = buf.readUnsignedByte();
+
+        if (type == MSG_LOGIN) {
+
+            String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
+            buf.readUnsignedShort(); // type
+
+            // Timezone offset
+            if (dataLength > 10) {
+                int extensionBits = buf.readUnsignedShort();
+                int hours = (extensionBits >> 4) / 100;
+                int minutes = (extensionBits >> 4) % 100;
+                int offset = (hours * 60 + minutes) * 60;
+                if ((extensionBits & 0x8) != 0) {
+                    offset = -offset;
+                }
+                if (!forceTimeZone) {
+                    timeZone.setRawOffset(offset * 1000);
+                }
+            }
+
+            if (getDeviceSession(channel, remoteAddress, imei) != null) {
+                buf.skipBytes(buf.readableBytes() - 6);
+                sendResponse(channel, type, buf.readUnsignedShort());
+            }
+
+        } else {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position();
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.setProtocol(getProtocolName());
+
+            if (type == MSG_LBS_EXTEND) {
+
+                DateBuilder dateBuilder = new DateBuilder(timeZone)
+                        .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                        .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+                getLastLocation(position, dateBuilder.getDate());
+
+                int mcc = buf.readUnsignedShort();
+                int mnc = buf.readUnsignedByte();
+
+                Network network = new Network();
+                for (int i = 0; i < 7; i++) {
+                    network.addCellTower(CellTower.from(
+                            mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedMedium(), -buf.readUnsignedByte()));
+                }
+                position.setNetwork(network);
+
+            } else if (type == MSG_STRING) {
+
+                getLastLocation(position, null);
+
+                int commandLength = buf.readUnsignedByte();
+
+                if (commandLength > 0) {
+                    buf.readUnsignedByte(); // server flag (reserved)
+                    position.set(Position.KEY_COMMAND,
+                            buf.readBytes(commandLength - 1).toString(StandardCharsets.US_ASCII));
+                }
+
+            } else if (isSupported(type)) {
+
+                if (hasGps(type)) {
+                    decodeGps(position, buf);
+                } else {
+                    getLastLocation(position, null);
+                }
+
+                if (hasLbs(type)) {
+                    decodeLbs(position, buf, hasStatus(type));
+                }
+
+                if (hasStatus(type)) {
+                    decodeStatus(position, buf);
+                }
+
+                if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                }
+
+            } else {
+
+                buf.skipBytes(dataLength);
+                if (type != MSG_COMMAND_0 && type != MSG_COMMAND_1 && type != MSG_COMMAND_2) {
+                    sendResponse(channel, type, buf.readUnsignedShort());
+                }
+                return null;
+
+            }
+
+            if (buf.readableBytes() > 6) {
+                buf.skipBytes(buf.readableBytes() - 6);
+            }
+            sendResponse(channel, type, buf.readUnsignedShort());
+
+            return position;
+
+        }
+
+        return null;
+    }
+
+    protected Object decodeExtended(Channel channel, SocketAddress remoteAddress, ChannelBuffer buf) throws Exception {
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        buf.readUnsignedShort(); // length
+        int type = buf.readUnsignedByte();
+
+        if (type == MSG_INFO) {
+            int subType = buf.readUnsignedByte();
+
+            Position position = new Position();
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.setProtocol(getProtocolName());
+
+            getLastLocation(position, null);
+
+            if (subType == 0x00) {
+
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                return position;
+
+            } else if (subType == 0x05) {
+
+                int flags = buf.readUnsignedByte();
+                position.set("door", BitUtil.check(flags, 0));
+                position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
+                return position;
+
+            } else if (subType == 0x0d) {
+
+                buf.skipBytes(6);
+                return decodeFuelData(position, buf.toString(
+                        buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
+
+            }
+        }
+
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -227,149 +383,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         int header = buf.readShort();
 
         if (header == 0x7878) {
-
-            int length = buf.readUnsignedByte();
-            int dataLength = length - 5;
-            int type = buf.readUnsignedByte();
-
-            if (type == MSG_LOGIN) {
-
-                String imei = ChannelBuffers.hexDump(buf.readBytes(8)).substring(1);
-                buf.readUnsignedShort(); // type
-
-                // Timezone offset
-                if (dataLength > 10) {
-                    int extensionBits = buf.readUnsignedShort();
-                    int hours = (extensionBits >> 4) / 100;
-                    int minutes = (extensionBits >> 4) % 100;
-                    int offset = (hours * 60 + minutes) * 60;
-                    if ((extensionBits & 0x8) != 0) {
-                        offset = -offset;
-                    }
-                    if (!forceTimeZone) {
-                        timeZone.setRawOffset(offset * 1000);
-                    }
-                }
-
-                if (getDeviceSession(channel, remoteAddress, imei) != null) {
-                    buf.skipBytes(buf.readableBytes() - 6);
-                    sendResponse(channel, type, buf.readUnsignedShort());
-                }
-
-            } else {
-
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                if (deviceSession == null) {
-                    return null;
-                }
-
-                Position position = new Position();
-                position.setDeviceId(deviceSession.getDeviceId());
-                position.setProtocol(getProtocolName());
-
-                if (type == MSG_LBS_EXTEND) {
-
-                    DateBuilder dateBuilder = new DateBuilder(timeZone)
-                            .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                            .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-
-                    getLastLocation(position, dateBuilder.getDate());
-
-                    int mcc = buf.readUnsignedShort();
-                    int mnc = buf.readUnsignedByte();
-
-                    Network network = new Network();
-                    for (int i = 0; i < 7; i++) {
-                        network.addCellTower(CellTower.from(
-                                mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedMedium(), -buf.readUnsignedByte()));
-                    }
-                    position.setNetwork(network);
-
-                } else if (type == MSG_STRING) {
-
-                    getLastLocation(position, null);
-
-                    int commandLength = buf.readUnsignedByte();
-
-                    if (commandLength > 0) {
-                        buf.readUnsignedByte(); // server flag (reserved)
-                        position.set(Position.KEY_COMMAND,
-                                buf.readBytes(commandLength - 1).toString(StandardCharsets.US_ASCII));
-                    }
-
-                } else if (isSupported(type)) {
-
-                    if (hasGps(type)) {
-                        decodeGps(position, buf);
-                    } else {
-                        getLastLocation(position, null);
-                    }
-
-                    if (hasLbs(type)) {
-                        decodeLbs(position, buf, hasStatus(type));
-                    }
-
-                    if (hasStatus(type)) {
-                        decodeStatus(position, buf);
-                    }
-
-                    if (type == MSG_GPS_LBS_1 && buf.readableBytes() == 4 + 6) {
-                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-                    }
-
-                } else {
-
-                    buf.skipBytes(dataLength);
-                    if (type != MSG_COMMAND_0 && type != MSG_COMMAND_1 && type != MSG_COMMAND_2) {
-                        sendResponse(channel, type, buf.readUnsignedShort());
-                    }
-                    return null;
-
-                }
-
-                if (buf.readableBytes() > 6) {
-                    buf.skipBytes(buf.readableBytes() - 6);
-                }
-                sendResponse(channel, type, buf.readUnsignedShort());
-
-                return position;
-
-            }
-
+            return decodeBasic(channel, remoteAddress, buf);
         } else if (header == 0x7979) {
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession == null) {
-                return null;
-            }
-
-            buf.readUnsignedShort(); // length
-            int type = buf.readUnsignedByte();
-
-            if (type == MSG_INFO) {
-                int subType = buf.readUnsignedByte();
-
-                Position position = new Position();
-                position.setDeviceId(deviceSession.getDeviceId());
-                position.setProtocol(getProtocolName());
-
-                getLastLocation(position, null);
-
-                if (subType == 0x00) {
-                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                    return position;
-                } else if (subType == 0x05) {
-                    int flags = buf.readUnsignedByte();
-                    position.set("door", BitUtil.check(flags, 0));
-                    position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
-                    return position;
-                } else if (subType == 0x0d) {
-                    buf.skipBytes(6);
-                    return decodeFuelData(position, buf.toString(
-                            buf.readerIndex(), buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII));
-                }
-            }
-
+            return decodeExtended(channel, remoteAddress, buf);
         }
 
         return null;
