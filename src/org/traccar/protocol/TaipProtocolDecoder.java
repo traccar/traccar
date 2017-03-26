@@ -54,8 +54,13 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd)")              // date (mmddyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
             .groupEnd()
+            .groupBegin()
             .number("([-+]dd)(d{5})")            // latitude
             .number("([-+]ddd)(d{5})")           // longitude
+            .or()
+            .number("([-+])(dd)(dd.dddd)")       // latitude
+            .number("([-+])(ddd)(dd.dddd)")      // longitude
+            .groupEnd()
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
             .groupBegin()
@@ -112,8 +117,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         }
 
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));
+        if (parser.hasNext(4)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG));
+        }
+        if (parser.hasNext(6)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
+        }
+
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
 
