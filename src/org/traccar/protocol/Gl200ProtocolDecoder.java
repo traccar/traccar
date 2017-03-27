@@ -461,10 +461,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
         if (parser.hasNext(6)) {
-            Date date = parser.nextDateTime();
-            if (!position.getOutdated() && position.getFixTime().after(date)) {
-                position.setTime(date);
-            }
+            position.setDeviceTime(parser.nextDateTime());
         }
 
         return position;
@@ -531,12 +528,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.next());
         position.set(Position.KEY_FUEL_LEVEL, parser.next());
 
-        // workaround for wrong location time
         if (parser.hasNext(6)) {
-            Date date = parser.nextDateTime();
-            if (!position.getOutdated() && position.getFixTime().after(date)) {
-                position.setTime(date);
-            }
+            position.setDeviceTime(parser.nextDateTime());
         }
 
         return positions;
@@ -563,10 +556,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
         if (parser.hasNext(6)) {
-            Date date = parser.nextDateTime();
-            if (!position.getOutdated() && position.getFixTime().after(date)) {
-                position.setTime(date);
-            }
+            position.setDeviceTime(parser.nextDateTime());
         }
 
         return position;
@@ -594,10 +584,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
         if (parser.hasNext(6)) {
-            Date date = parser.nextDateTime();
-            if (!position.getOutdated() && position.getFixTime().after(date)) {
-                position.setTime(date);
-            }
+            position.setDeviceTime(parser.nextDateTime());
         }
 
         return position;
@@ -700,12 +687,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
-        // workaround for wrong location time
         if (parser.hasNext(6)) {
-            Date date = parser.nextDateTime();
-            if (!position.getOutdated() && position.getFixTime().after(date)) {
-                position.setTime(date);
-            }
+            position.setDeviceTime(parser.nextDateTime());
         }
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
@@ -755,10 +738,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(6)) {
-            Date date = parser.nextDateTime();
-            if (!position.getOutdated() && position.getFixTime().after(date)) {
-                position.setTime(date);
-            }
+            position.setDeviceTime(parser.nextDateTime());
         }
 
         switch (type) {
