@@ -43,14 +43,14 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .expression("R[EP]V")                // type
             .groupBegin()
-            .number("dd")                        // event index
+            .number("(dd)")                      // event
             .number("(dddd)")                    // week
             .number("(d)")                       // day
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
             .expression("(?:RGP|RCQ|RBR)")       // type
-            .number("(?:dd)?")
+            .number("(dd)?")                     // event
             .number("(dd)(dd)(dd)")              // date (mmddyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
             .groupEnd()
@@ -107,10 +107,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position();
         position.setProtocol(getProtocolName());
 
-        if (parser.hasNext(2)) {
+        if (parser.hasNext(3)) {
+            position.set(Position.KEY_EVENT, parser.nextInt());
             position.setTime(getTime(parser.nextInt(), parser.nextInt(), parser.nextInt()));
         } else if (parser.hasNext()) {
             position.setTime(getTime(parser.nextInt()));
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_EVENT, parser.nextInt());
         }
 
         if (parser.hasNext(6)) {
