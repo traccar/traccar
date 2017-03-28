@@ -83,8 +83,6 @@ public class TelicProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        org.traccar.helper.PatternUtil.MatchResult matchResult =
-                org.traccar.helper.PatternUtil.checkPattern(PATTERN.pattern(), (String) msg);
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
