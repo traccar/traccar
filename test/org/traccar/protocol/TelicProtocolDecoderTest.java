@@ -11,6 +11,12 @@ public class TelicProtocolDecoderTest extends ProtocolTest {
         TelicProtocolDecoder decoder = new TelicProtocolDecoder(new TelicProtocol());
 
         verifyPosition(decoder, text(
+                "442045993198,290317131935,0,290317131935,269158,465748,3,26,183,,,,184,85316567,226,01,00,68,218"));
+
+        verifyPosition(decoder, text(
+                "673091036017,290317131801,0,290317131801,262214,450536,3,40,199,8,,,154,19969553,,0011,00,59,240,0,0406"));
+
+        verifyPosition(decoder, text(
                 "092020621198,280317084155,0,280317084156,259762,444356,3,42,278,9,,,89,56793311,,0110,00,67,0,,0400"));
 
         verifyPosition(decoder, text(
