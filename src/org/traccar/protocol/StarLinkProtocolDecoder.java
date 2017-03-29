@@ -151,10 +151,14 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.PREFIX_OUT + 4, Integer.parseInt(data[i]));
                     break;
                 case "#LAC#":
-                    lac = Integer.parseInt(data[i]);
+                    if (!data[i].isEmpty()) {
+                        lac = Integer.parseInt(data[i]);
+                    }
                     break;
                 case "#CID#":
-                    cid = Integer.parseInt(data[i]);
+                    if (!data[i].isEmpty()) {
+                        cid = Integer.parseInt(data[i]);
+                    }
                     break;
                 case "#VIN#":
                     position.set(Position.KEY_POWER, Double.parseDouble(data[i]));
