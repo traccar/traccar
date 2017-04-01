@@ -195,6 +195,32 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private static final Pattern PATTERN_ERI = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTERI,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("x{8},")                     // mask
+            .number("(d+)?,")                    // power
+            .number("d{1,2},")                   // report type
+            .number("d{1,2},")                   // count
+            .expression("((?:")
+            .expression(PATTERN_LOCATION.pattern())
+            .expression(")+)")
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(d{5}:dd:dd)?,")            // hour meter
+            .number("(x+)?,")                    // adc 1
+            .number("(x+)?,")                    // adc 2
+            .number("(d{1,3})?,")                // battery
+            .number("(?:(xx)(xx)(xx))?,")        // device status
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private static final Pattern PATTERN_IGN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
@@ -455,6 +481,19 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private void decodeStatus(Position position, Parser parser) {
+        if (parser.hasNext(3)) {
+            int ignition = parser.nextInt(16);
+            if (BitUtil.check(ignition, 4)) {
+                position.set(Position.KEY_IGNITION, false);
+            } else if (BitUtil.check(ignition, 5)) {
+                position.set(Position.KEY_IGNITION, true);
+            }
+            position.set(Position.KEY_INPUT, parser.nextInt(16));
+            position.set(Position.KEY_OUTPUT, parser.nextInt(16));
+        }
+    }
+
     private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
@@ -502,19 +541,56 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 2, parser.next());
         position.set(Position.KEY_BATTERY, parser.next());
 
-        if (parser.hasNext(3)) {
-            int ignition = parser.nextInt(16);
-            if (BitUtil.check(ignition, 4)) {
-                position.set(Position.KEY_IGNITION, false);
-            } else if (BitUtil.check(ignition, 5)) {
-                position.set(Position.KEY_IGNITION, true);
-            }
-            position.set(Position.KEY_INPUT, parser.nextInt(16));
-            position.set(Position.KEY_OUTPUT, parser.nextInt(16));
-        }
+        decodeStatus(position, parser);
 
         position.set(Position.KEY_RPM, parser.next());
         position.set(Position.KEY_FUEL_LEVEL, parser.next());
+
+        if (parser.hasNext(6)) {
+            position.setDeviceTime(parser.nextDateTime());
+        }
+
+        return positions;
+    }
+
+    private Object decodeEri(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_ERI, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        LinkedList<Position> positions = new LinkedList<>();
+
+        int power = parser.nextInt();
+
+        Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
+        while (itemParser.find()) {
+            Position position = new Position();
+            position.setProtocol(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            decodeLocation(position, itemParser);
+
+            positions.add(position);
+        }
+
+        Position position = positions.getLast();
+
+        decodeLocation(position, parser);
+
+        position.set(Position.KEY_POWER, power);
+        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        position.set(Position.KEY_HOURS, parser.next());
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
+        position.set(Position.KEY_BATTERY, parser.next());
+
+        decodeStatus(position, parser);
 
         if (parser.hasNext(6)) {
             position.setDeviceTime(parser.nextDateTime());
@@ -724,6 +800,9 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "FRI":
                     result = decodeFri(channel, remoteAddress, sentence);
+                    break;
+                case "ERI":
+                    result = decodeEri(channel, remoteAddress, sentence);
                     break;
                 case "IGN":
                 case "IGF":
