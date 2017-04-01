@@ -115,16 +115,14 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
-            .groupBegin()
-            .number("(0ddd)?,")                  // mcc
-            .number("(0ddd)?,")                  // mnc
-            .number("(xxxx)?,")                  // lac
-            .number("(xxxx)?,")                  // cell
-            .or()
             .number("(d+)?,")                    // mcc
             .number("(d+)?,")                    // mnc
-            .number("(d+)?,")                    // lac
-            .number("(d+)?,")                    // cell
+            .groupBegin()
+            .number("(d+),")                     // lac
+            .number("(d+),")                     // cid
+            .or()
+            .number("(x+)?,")                    // lac
+            .number("(x+)?,")                    // cid
             .groupEnd()
             .number("(?:d+|(d+.d))?,")           // odometer
             .compile();
@@ -296,10 +294,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
-            .number("(0ddd),")                   // mcc
-            .number("(0ddd),")                   // mnc
-            .number("(xxxx),")                   // lac
-            .number("(xxxx),").optional(4)       // cell
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(x+),")                     // lac
+            .number("(x+),").optional(4)         // cell
             .any()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
@@ -334,21 +332,25 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
+        if (parser.matches()) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession != null) {
+                Position position = new Position();
+                position.setProtocol(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                return position;
+            }
+        }
+        return null;
+    }
+
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
-
         Parser parser = new Parser(PATTERN_INF, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_STATUS, parser.next());
 
@@ -378,18 +380,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeVer(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_VER, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         position.set("deviceType", parser.next());
         position.set(Position.KEY_VERSION_FW, parser.nextInt(16));
@@ -418,30 +412,25 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
         }
 
-        if (parser.hasNext(4)) {
-            position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
+        if (parser.hasNext(6)) {
+            int mcc = parser.nextInt();
+            int mnc = parser.nextInt();
+            if (parser.hasNext(2)) {
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(), parser.nextInt())));
+            } else {
+                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(16), parser.nextInt(16))));
+            }
         }
-
-        parser.skip(4); // alternative networks
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
     }
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_OBD, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_RPM, parser.next());
         position.set(Position.KEY_OBD_SPEED, parser.next());
@@ -536,18 +525,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeIgn(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_IGN, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         decodeLocation(position, parser);
 
@@ -563,18 +544,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeIda(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_IDA, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_RFID, parser.next());
 
@@ -591,18 +564,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeWif(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_WIF, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
 
@@ -625,18 +590,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeGsm(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_GSM, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
 
@@ -659,18 +616,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         int reportType = parser.nextInt();
         if (type.equals("NMR")) {
@@ -699,18 +648,10 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN_BASIC, sentence);
-        if (!parser.matches()) {
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
             return null;
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
 
         int hdop = parser.nextInt();
         position.setValid(hdop > 0);

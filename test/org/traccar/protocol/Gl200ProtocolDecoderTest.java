@@ -13,7 +13,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "+RESP:GTFRI,210102,354524044925825,,1,1,1,29,2.8,0,133.7,-90.203063,32.265473,20170318005208,,,,,10800,4,20170318005208,0002$"));
 
-        verifyAttributes(decoder, text(
+        verifyPositions(decoder, false, text(
                 "+RESP:GTFRI,210102,354524044925825,,1,1,1,,,,,,,,310,410,51bc,ca1dae6,10800,1,20170318214333,0002$"));
 
         verifyAttributes(decoder, text(
@@ -112,7 +112,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "+BUFF:GTFRI,060402,862894021808798,,,10,1,1,0.0,349,394.3,-63.287717,-17.662410,20160116234031,0736,0003,6ABA,8305,00,3326.8,,,,94,220100,,,,20160116194035,4D83"));
 
-        verifyPosition(decoder, text(
+        verifyPositions(decoder, text(
                 "+RESP:GTFRI,2C0204,867162020003125,GL300W,0,0,2,1,1.7,205,2867.0,-78.481127,-0.206828,20160215210433,0740,0000,7596,5891C,0.0,1,1.7,205,2867.0,-78.481127,-0.206828,20160215210503,0740,0000,7596,5891C,0.0,88,20160215210506,1E78$"));
 
         verifyPositions(decoder, text(
@@ -121,7 +121,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "+RESP:GTFRI,110100,A5868800000015,,0,0,1,1,4.3,92,70.0,121.354335,31.222073,20110214013254,0460,0000,18d8,6141,00,80,20110214013254,000C"));
 
-        verifyPositions(decoder, text(
+        verifyNotNull(decoder, text(
                 "+RESP:GTFRI,210102,A10000458356CE,,0,1,1,15,1.4,0,190.6,-85.765763,42.894896,20160208164505,4126,210,0,18673,00,92,20160208164507,00A6"));
 
         verifyPositions(decoder, text(
@@ -208,10 +208,10 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "+RESP:GTFRI,240100,135790246811220,,,10,2,1,4.3,92,70.0,121.354335,31.222073,20090214013254,0460,0000,18d8,6141,00,0,4.3,92,70.0,121.354335,31.222073,20090101000000,0460,0000,18d8,6141,00,2000.0,12345:12:34,,,80,,,,,20090214093254,11F0$"));
 
-        verifyPosition(decoder, text(
+        verifyNotNull(decoder, text(
                 "+RESP:GTSTT,280100,A1000043D20139,,42,0,0.1,321,228.6,-76.660884,39.832552,20150615120628,0310,0484,00600019,0A52,,20150615085741,0320$"));
 
-        verifyPosition(decoder, text(
+        verifyNotNull(decoder, text(
                 "+RESP:GTRTL,280100,A1000043D20139,,0,0,1,1,0.1,321,239.1,-76.661047,39.832501,20150615114455,0310,0484,00600019,0A52,,87,20150615074456,031E$"));
         
         verifyAttributes(decoder, text(
