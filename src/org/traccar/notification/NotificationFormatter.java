@@ -37,7 +37,7 @@ public final class NotificationFormatter {
     private NotificationFormatter() {
     }
 
-    private static VelocityContext prepareContext(long userId, Event event, Position position) {
+    public static VelocityContext prepareContext(long userId, Event event, Position position) {
         Device device = Context.getIdentityManager().getDeviceById(event.getDeviceId());
 
         VelocityContext velocityContext = new VelocityContext();
@@ -58,7 +58,7 @@ public final class NotificationFormatter {
         return velocityContext;
     }
 
-    private static Template getTemplate(Event event, String path) {
+    public static Template getTemplate(Event event, String path) {
         Template template;
         try {
             template = Context.getVelocityEngine().getTemplate(path + event.getType() + ".vm",
