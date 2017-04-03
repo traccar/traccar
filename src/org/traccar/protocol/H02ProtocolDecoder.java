@@ -179,9 +179,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+),")                     // lac
             .number("(x+)#")                     // cid
             .or()
-            .expression(",.*")
+            .number(",(d+),")
+            .number("(d+),")
+            .number("(d+),")
+            .number("(d+)#")
             .or()
-            .text("#")
+            .any()
             .groupEnd()
             .compile();
 
@@ -260,6 +263,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(parser.nextInt());
 
             position.setNetwork(new Network(CellTower.fromLacCid(parser.nextInt(16), parser.nextInt(16))));
+        }
+
+        if (parser.hasNext(4)) {
+            for (int i = 1; i <= 4; i++) {
+                position.set(Position.PREFIX_IO + i, parser.nextInt());
+            }
         }
 
         return position;
