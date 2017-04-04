@@ -36,8 +36,12 @@ import java.util.regex.Pattern;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean ignoreFixTime;
+
     public Gl200ProtocolDecoder(Gl200Protocol protocol) {
         super(protocol);
+
+        ignoreFixTime = Context.getConfig().getBoolean(getProtocolName() + ".ignoreFixTime");
     }
 
     private static final Pattern PATTERN_ACK = new PatternBuilder()
@@ -371,6 +375,16 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private void decodeDeviceTime(Position position, Parser parser) {
+        if (parser.hasNext(6)) {
+            if (ignoreFixTime) {
+                position.setTime(parser.nextDateTime());
+            } else {
+                position.setDeviceTime(parser.nextDateTime());
+            }
+        }
+    }
+
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_INF, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -474,9 +488,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
-        if (parser.hasNext(6)) {
-            position.setDeviceTime(parser.nextDateTime());
-        }
+        decodeDeviceTime(position, parser);
 
         return position;
     }
@@ -546,9 +558,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.next());
         position.set(Position.KEY_FUEL_LEVEL, parser.next());
 
-        if (parser.hasNext(6)) {
-            position.setDeviceTime(parser.nextDateTime());
-        }
+        decodeDeviceTime(position, parser);
 
         return positions;
     }
@@ -592,9 +602,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeStatus(position, parser);
 
-        if (parser.hasNext(6)) {
-            position.setDeviceTime(parser.nextDateTime());
-        }
+        decodeDeviceTime(position, parser);
 
         return positions;
     }
@@ -611,9 +619,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HOURS, parser.next());
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
-        if (parser.hasNext(6)) {
-            position.setDeviceTime(parser.nextDateTime());
-        }
+        decodeDeviceTime(position, parser);
 
         return position;
     }
@@ -631,9 +637,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
-        if (parser.hasNext(6)) {
-            position.setDeviceTime(parser.nextDateTime());
-        }
+        decodeDeviceTime(position, parser);
 
         return position;
     }
@@ -711,9 +715,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
-        if (parser.hasNext(6)) {
-            position.setDeviceTime(parser.nextDateTime());
-        }
+        decodeDeviceTime(position, parser);
 
         if (Context.getConfig().getBoolean(getProtocolName() + ".ack") && channel != null) {
             channel.write("+SACK:" + parser.next() + "$", remoteAddress);
@@ -753,9 +755,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
                     parser.nextInt(), parser.nextInt(), parser.nextInt(16), parser.nextInt(16))));
         }
 
-        if (parser.hasNext(6)) {
-            position.setDeviceTime(parser.nextDateTime());
-        }
+        decodeDeviceTime(position, parser);
 
         switch (type) {
             case "BPL":
