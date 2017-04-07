@@ -10,6 +10,9 @@ public class UlbotechProtocolDecoderTest extends ProtocolTest {
 
         UlbotechProtocolDecoder decoder = new UlbotechProtocolDecoder(new UlbotechProtocol());
 
+        verifyNothing(decoder, buffer(
+                "*TS01,353323081464660#"));
+
         verifyAttributes(decoder, buffer(
                 "*TS01,868323025245751,134955140317,WFE:0#"));
 
@@ -40,8 +43,8 @@ public class UlbotechProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "f8010103515790566431569e5fbb9d010e015ee2b906bde4a000000000009f03040a4000000404000115fe05060340173f22030711310583410c0000310d00312f834131000008040000b78c09077320290082c021100101120af8"));
 
-        verifyNothing(decoder, binary(
-                "2a545330312c33353430343330353133383934363023"));
+        verifyNothing(decoder, buffer(
+                "*TS01,354043051389460#"));
 
         verifyPosition(decoder, binary(
                 "f8010108679650230646339de69054010e015ee17506bde2c60000000000ac0304024000000404000009f705060390181422170711310583410c0000310d00312f834131018608040003130a100101136cf8"));

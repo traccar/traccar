@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.ObdDecoder;
 import org.traccar.helper.Parser;
@@ -340,8 +341,27 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
         ChannelBuffer buf = (ChannelBuffer) msg;
 
         if (buf.getUnsignedByte(buf.readerIndex()) == 0xF8) {
+
+            if (channel != null) {
+                ChannelBuffer response = ChannelBuffers.dynamicBuffer();
+                response.writeByte(0xF8);
+                response.writeByte(DATA_GPS);
+                response.writeByte(0xFE);
+                response.writeShort(buf.getShort(response.writerIndex() - 1 - 2));
+                response.writeShort(Checksum.crc16(Checksum.CRC16_XMODEM, response.toByteBuffer(1, 4)));
+                response.writeByte(0xF8);
+                channel.write(response);
+            }
+
             return decodeBinary(channel, remoteAddress, buf);
         } else {
+
+            if (channel != null) {
+                channel.write(ChannelBuffers.copiedBuffer(String.format("*TS01,ACK:%04X#",
+                        Checksum.crc16(Checksum.CRC16_XMODEM, buf.toByteBuffer(1, buf.writerIndex() - 2))),
+                        StandardCharsets.US_ASCII));
+            }
+
             return decodeText(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII));
         }
     }
