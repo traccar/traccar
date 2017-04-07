@@ -32,11 +32,8 @@ import java.util.regex.Pattern;
 
 public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
-    private final boolean sendResponse;
-
     public TaipProtocolDecoder(TaipProtocol protocol, boolean sendResponse) {
         super(protocol);
-        this.sendResponse = sendResponse;
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -197,13 +194,13 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (deviceSession != null) {
-            if (sendResponse && channel != null) {
+            if (channel != null) {
                 if (messageIndex != null) {
                     String response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
                     response += String.format("%02X", Checksum.xor(response)) + "<";
-                    channel.write(response);
+                    channel.write(response, remoteAddress);
                 } else {
-                    channel.write(uniqueId);
+                    channel.write(uniqueId, remoteAddress);
                 }
             }
 

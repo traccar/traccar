@@ -40,7 +40,7 @@ public class TaipProtocol extends BaseProtocol {
                 pipeline.addLast("frameDecoder", new CharacterDelimiterFrameDecoder(1024, '<'));
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new TaipProtocolDecoder(TaipProtocol.this, true));
+                pipeline.addLast("objectDecoder", new TaipProtocolDecoder(TaipProtocol.this));
             }
         });
         serverList.add(new TrackerServer(new ConnectionlessBootstrap(), getName()) {
@@ -48,7 +48,7 @@ public class TaipProtocol extends BaseProtocol {
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("stringDecoder", new StringDecoder());
                 pipeline.addLast("stringEncoder", new StringEncoder());
-                pipeline.addLast("objectDecoder", new TaipProtocolDecoder(TaipProtocol.this, false));
+                pipeline.addLast("objectDecoder", new TaipProtocolDecoder(TaipProtocol.this));
             }
         });
     }
