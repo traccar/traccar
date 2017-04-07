@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class TaipProtocolDecoder extends BaseProtocolDecoder {
 
-    public TaipProtocolDecoder(TaipProtocol protocol, boolean sendResponse) {
+    public TaipProtocolDecoder(TaipProtocol protocol) {
         super(protocol);
     }
 
