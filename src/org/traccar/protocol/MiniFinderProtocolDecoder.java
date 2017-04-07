@@ -142,18 +142,12 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         if (sentence.startsWith("!1,")) {
-
             getDeviceSession(channel, remoteAddress, sentence.substring(3, sentence.length()));
-
             return null;
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (deviceSession == null) {
-            return null;
-        }
-
-        if (!sentence.matches("![A-D],.*")) {
+        if (deviceSession == null || !sentence.matches("![A-D],.*")) {
             return null;
         }
 
@@ -161,10 +155,11 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         position.setProtocol(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        String recordType = sentence.substring(1, 2);
-        position.set(Position.KEY_TYPE, recordType);
+        String type = sentence.substring(1, 2);
+        position.set(Position.KEY_TYPE, type);
 
-        if (recordType.matches("[BD]")) {
+        if (type.equals("B") || type.equals("D")) {
+
             Parser parser = new Parser(PATTERN_BD, sentence);
             if (!parser.matches()) {
                 return null;
@@ -175,9 +170,9 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             decodeGPSPrecision(position, parser);
 
             return position;
-        }
 
-        if (recordType.matches("C")) {
+        } else if (type.equals("C")) {
+
             Parser parser = new Parser(PATTERN_C, sentence);
             if (!parser.matches()) {
                 return null;
@@ -187,9 +182,9 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             decodeState(position, parser);
 
             return position;
-        }
 
-        if (recordType.matches("A")) {
+        } else if (type.equals("A")) {
+
             Parser parser = new Parser(PATTERN_A, sentence);
             if (!parser.matches()) {
                 return null;
@@ -198,6 +193,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             decodeFix(position, parser);
 
             return position;
+
         }
 
         return null;
