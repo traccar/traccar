@@ -1,5 +1,6 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ *                Jose Castellanos
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +32,7 @@ public class EnforaProtocolEncoder extends StringProtocolEncoder {
 
         byte[] contentBytes = content.getBytes();
 
-        buf.writeByte(0x00); // Byte 0 Length
-        buf.writeByte(contentBytes.length + 6); // Byte 1 Length
+        buf.writeShort(contentBytes.length + 6); // Byte 0 Byte 1 Length
         buf.writeByte(0x00); // Byte 2 Api Number Sequence
         buf.writeByte(0x00); // Byte 3 Api Number Sequence
         buf.writeByte(0x04); // Byte 4 Command Type 4 AT Command
@@ -45,9 +45,6 @@ public class EnforaProtocolEncoder extends StringProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-
-        initDevicePassword(command, "");
-
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:
                 return encodeContent(command.getString(Command.KEY_DATA));
