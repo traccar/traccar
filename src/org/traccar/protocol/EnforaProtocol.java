@@ -20,6 +20,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import java.util.List;
 
@@ -27,6 +28,10 @@ public class EnforaProtocol extends BaseProtocol {
 
     public EnforaProtocol() {
         super("enfora");
+        setSupportedDataCommands(
+                Command.TYPE_CUSTOM,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
     }
 
     @Override
@@ -35,6 +40,7 @@ public class EnforaProtocol extends BaseProtocol {
             @Override
             protected void addSpecificHandlers(ChannelPipeline pipeline) {
                 pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
+                pipeline.addLast("objectEncoder", new EnforaProtocolEncoder());
                 pipeline.addLast("objectDecoder", new EnforaProtocolDecoder(EnforaProtocol.this));
             }
         });
