@@ -1,6 +1,6 @@
 /*
  * Copyright 2017 Anton Tananaev (anton@traccar.org)
- *                Jose Castellanos
+ * Copyright 2017 Jose Castellanos
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,10 @@ public class EnforaProtocolEncoder extends StringProtocolEncoder {
 
         byte[] contentBytes = content.getBytes();
 
-        buf.writeShort(contentBytes.length + 6); // Byte 0 Byte 1 Length
-        buf.writeByte(0x00); // Byte 2 Api Number Sequence
-        buf.writeByte(0x00); // Byte 3 Api Number Sequence
-        buf.writeByte(0x04); // Byte 4 Command Type 4 AT Command
-        buf.writeByte(0x00); // Byte 5 API Optional Header
-        // Byte 6+m AT Command
+        buf.writeShort(contentBytes.length + 6);
+        buf.writeShort(0); // index
+        buf.writeByte(0x04); // command type
+        buf.writeByte(0); // optional header
         buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
 
         return buf;
