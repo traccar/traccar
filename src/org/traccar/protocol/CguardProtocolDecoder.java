@@ -35,13 +35,13 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_NV = new PatternBuilder()
             .text("NV:")
             .number("(dd)(dd)(dd) ")             // date (yymmdd)
-            .number("(dd)(dd)(dd):")             // time (hhmmss)
-            .number("(-?d+.d+):")                // longitude
-            .number("(-?d+.d+):")                // latitude
-            .number("(d+.?d*):")                 // speed
-            .number("(?:NAN|(d+.?d*)):")         // accuracy
-            .number("(?:NAN|(d+.?d*)):")         // course
-            .number("(?:NAN|(d+.?d*))")          // altitude
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
+            .number(":(-?d+.d+)")                // longitude
+            .number(":(-?d+.d+)")                // latitude
+            .number(":(d+.?d*)")                 // speed
+            .number(":(?:NAN|(d+.?d*))")         // accuracy
+            .number(":(?:NAN|(d+.?d*))")         // course
+            .number(":(?:NAN|(d+.?d*))").optional() // altitude
             .compile();
 
     private static final Pattern PATTERN_BC = new PatternBuilder()

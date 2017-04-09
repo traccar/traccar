@@ -14,6 +14,12 @@ public class CguardProtocolDecoderTest extends ProtocolTest {
                 "IDRO:354868050655283"));
 
         verifyPosition(decoder, text(
+                "NV:170409 031456:56.808553:60.595476:0:NAN:0"));
+
+        verifyAttributes(decoder, text(
+                "BC:170409 031456:CSQ1:64:NSQ1:17:PWR1:0"));
+
+        verifyPosition(decoder, text(
                 "NV:161007 122043:55.812730:37.733689:3.62:NAN:244.05:143.4"));
 
         verifyPosition(decoder, text(
