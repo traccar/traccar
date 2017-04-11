@@ -19,12 +19,8 @@ public class MozillaGeolocationProvider extends UniversalGeolocationProvider {
 
     private static final String URL = "https://location.services.mozilla.com/v1/geolocate";
 
-    public MozillaGeolocationProvider() {
-        this("test");
-    }
-
     public MozillaGeolocationProvider(String key) {
-        super(URL, key);
+        super(URL, key != null ? key : "test");
     }
 
 }

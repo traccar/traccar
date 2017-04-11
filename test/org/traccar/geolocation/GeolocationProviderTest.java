@@ -1,6 +1,7 @@
 package org.traccar.geolocation;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.CellTower;
@@ -8,17 +9,14 @@ import org.traccar.model.Network;
 
 public class GeolocationProviderTest extends BaseTest {
 
-    private boolean enable = false;
-
+    @Ignore
     @Test
     public void test() throws Exception {
-        if (enable) {
-            testLocationProvider();
-        }
+        testLocationProvider();
     }
 
     public void testLocationProvider() throws Exception {
-        MozillaGeolocationProvider provider = new MozillaGeolocationProvider();
+        MozillaGeolocationProvider provider = new MozillaGeolocationProvider(null);
 
         Network network = new Network(CellTower.from(208, 1, 2, 1234567));
 

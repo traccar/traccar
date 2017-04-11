@@ -44,6 +44,7 @@ import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.helper.Log;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.GeolocationProvider;
@@ -249,6 +250,7 @@ public final class Context {
 
         if (config.getBoolean("geolocation.enable")) {
             String type = config.getString("geolocation.type", "mozilla");
+            String url = config.getString("geolocation.url");
             String key = config.getString("geolocation.key");
 
             switch (type) {
@@ -258,12 +260,11 @@ public final class Context {
                 case "opencellid":
                     geolocationProvider = new OpenCellIdGeolocationProvider(key);
                     break;
+                case "unwired":
+                    geolocationProvider = new UnwiredGeolocationProvider(url, key);
+                    break;
                 default:
-                    if (key != null) {
-                        geolocationProvider = new MozillaGeolocationProvider(key);
-                    } else {
-                        geolocationProvider = new MozillaGeolocationProvider();
-                    }
+                    geolocationProvider = new MozillaGeolocationProvider(key);
                     break;
             }
         }
