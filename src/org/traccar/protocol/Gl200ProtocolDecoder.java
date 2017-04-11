@@ -303,7 +303,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,7}.d)?,")              // odometer
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .number("(dd)(dd)(dd)")  // time (hhmmss)
             .text(",")
             .number("(xxxx)")                    // count number
             .text("$").optional()
@@ -457,7 +457,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             int mnc = parser.nextInt();
             if (parser.hasNext(2)) {
                 position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(), parser.nextInt())));
-            } else {
+            }
+            if (parser.hasNext(2)) {
                 position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(16), parser.nextInt(16))));
             }
         }
