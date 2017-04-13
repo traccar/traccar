@@ -17,13 +17,14 @@ package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.ning.http.client.AsyncHttpClient;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.database.AliasesManager;
 import org.traccar.database.CalendarManager;
@@ -155,7 +156,7 @@ public final class Context {
         return velocityEngine;
     }
 
-    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = new AsyncHttpClient();
+    private static final AsyncHttpClient ASYNC_HTTP_CLIENT = new DefaultAsyncHttpClient();
 
     public static AsyncHttpClient getAsyncHttpClient() {
         return ASYNC_HTTP_CLIENT;

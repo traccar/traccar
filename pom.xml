@@ -30,22 +30,22 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.9.7</version>
+            <version>2.9.9</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.193</version>
+            <version>1.4.194</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.40</version> <!-- Version 6 required Java 8 -->
+            <version>5.1.41</version> <!-- Version 6 required Java 8 -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.4.1212.jre7</version>
+            <version>42.0.0.jre7</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP-java7</artifactId>
-            <version>2.4.11</version>
+            <version>2.4.11</version> <!-- Version 2.6 requires Java 8 -->
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -69,14 +69,14 @@
             <version>3.10.6.Final</version>
         </dependency>
         <dependency>
-            <groupId>com.ning</groupId> <!-- org.asynchttpclient starting from version 2.0 -->
+            <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
-            <version>1.9.40</version>
+            <version>2.0.31</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.22</version>
+            <version>1.7.25</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
@@ -131,12 +131,12 @@
         <dependency>
             <groupId>org.jxls</groupId>
             <artifactId>jxls</artifactId>
-            <version>2.3.0</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.jxls</groupId>
             <artifactId>jxls-poi</artifactId>
-            <version>1.0.11</version>
+            <version>1.0.12</version>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>

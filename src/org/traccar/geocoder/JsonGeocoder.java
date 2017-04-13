@@ -15,8 +15,8 @@
  */
 package org.traccar.geocoder;
 
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.Response;
+import org.asynchttpclient.AsyncCompletionHandler;
+import org.asynchttpclient.Response;
 import org.traccar.Context;
 
 import javax.json.Json;
