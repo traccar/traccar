@@ -16,7 +16,7 @@
 package org.traccar.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.asynchttpclient.BoundRequestBuilder;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import org.traccar.Context;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;

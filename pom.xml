@@ -69,9 +69,9 @@
             <version>3.10.6.Final</version>
         </dependency>
         <dependency>
-            <groupId>org.asynchttpclient</groupId>
+            <groupId>com.ning</groupId> <!-- org.asynchttpclient starting from version 2.0 and requires Java 8 -->
             <artifactId>async-http-client</artifactId>
-            <version>2.0.31</version>
+            <version>1.9.40</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -253,6 +253,36 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-bytecode-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <enforceBytecodeVersion>
+                                    <maxJdkVersion>1.7</maxJdkVersion>
+                                    <ignoreClasses>
+                                        <ignoreClass>*JDBC42*</ignoreClass>
+                                    </ignoreClasses>
+                                </enforceBytecodeVersion>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>extra-enforcer-rules</artifactId>
+                        <version>1.0-beta-6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

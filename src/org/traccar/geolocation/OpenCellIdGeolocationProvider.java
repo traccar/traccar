@@ -15,8 +15,8 @@
  */
 package org.traccar.geolocation;
 
-import org.asynchttpclient.AsyncCompletionHandler;
-import org.asynchttpclient.Response;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.Response;
 import org.traccar.Context;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
