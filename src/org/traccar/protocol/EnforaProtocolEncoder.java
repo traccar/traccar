@@ -30,13 +30,11 @@ public class EnforaProtocolEncoder extends StringProtocolEncoder {
 
         ChannelBuffer buf = ChannelBuffers.dynamicBuffer();
 
-        byte[] contentBytes = content.getBytes();
-
-        buf.writeShort(contentBytes.length + 6);
+        buf.writeShort(content.length() + 6);
         buf.writeShort(0); // index
         buf.writeByte(0x04); // command type
         buf.writeByte(0); // optional header
-        buf.writeBytes(content.getBytes(StandardCharsets.UTF_8));
+        buf.writeBytes(content.getBytes(StandardCharsets.US_ASCII));
 
         return buf;
     }
