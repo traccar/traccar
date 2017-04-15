@@ -157,10 +157,30 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeStatus(Position position, ChannelBuffer buf) {
 
-        int flags = buf.readUnsignedByte();
+        int status = buf.readUnsignedByte();
 
-        position.set(Position.KEY_IGNITION, BitUtil.check(flags, 1));
-        position.set(Position.KEY_STATUS, flags);
+        position.set(Position.KEY_STATUS, status);
+        position.set(Position.KEY_IGNITION, BitUtil.check(status, 1));
+        position.set(Position.KEY_CHARGE, BitUtil.check(status, 2));
+        position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
+
+        switch (BitUtil.between(status, 3, 6)) {
+            case 1:
+                position.set(Position.KEY_ALARM, Position.ALARM_SHOCK);
+                break;
+            case 2:
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                break;
+            case 3:
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                break;
+            case 4:
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                break;
+            default:
+                break;
+        }
+
         position.set(Position.KEY_BATTERY, buf.readUnsignedByte());
         position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
