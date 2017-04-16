@@ -86,6 +86,10 @@ public class ProtocolTest extends BaseTest {
         Assert.assertNull(decoder.decode(null, null, object));
     }
 
+    protected void verifyAttribute(BaseProtocolDecoder decoder, Object object, String key, Object expected) throws Exception {
+        Assert.assertEquals(expected, ((Position) decoder.decode(null, null, object)).getAttributes().get(key));
+    }
+
     protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
         verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
     }

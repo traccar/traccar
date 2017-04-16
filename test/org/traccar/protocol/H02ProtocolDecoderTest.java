@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class H02ProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
+
+        verifyPosition(decoder, buffer(
+                "*HQ,4109179024,V19,181519,V,3853.2587,S,06205.9175,W,000.00,000,090217,,5492932630888,8954315265044716555?,FFFFFBFF#"));
 
         verifyPosition(decoder, buffer(
                 "*HQ,8161289587,V1,181933,A,5444.3994,N,02516.3844,E,000.05,000,090317,FFFFBBFF,246,03,00002,41565#"));
@@ -181,6 +185,29 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         
         verifyPosition(decoder, binary(
                 "24971305007205201916101533335008000073206976000000effffbffff000252776566060000000000000000000049"));
+
+    }
+
+    @Test
+    public void testDecodeStatus() throws Exception {
+
+        H02ProtocolDecoder decoder = new H02ProtocolDecoder(new H02Protocol());
+
+        verifyAttribute(decoder, buffer(
+                "*HQ,2705171109,V1,213324,A,5002.5849,N,01433.7822,E,0.00,000,140613,FFFFFFFF#"),
+                Position.KEY_STATUS, 0xFFFFFFFFL);
+
+        verifyAttribute(decoder, buffer(
+                "*HQ,4109179024,V19,181519,V,3853.2587,S,06205.9175,W,000.00,000,090217,,5492932630888,8954315265044716555?,FFFFFBFF#"),
+                Position.KEY_STATUS, 0xFFFFFBFFL);
+
+        verifyAttribute(decoder, binary(
+                "2441091144271222470112142233983006114026520E000000FFFFFBFFFF0014060000000001CC00262B0F170A"),
+                Position.KEY_STATUS, 0xFFFFFBFFL);
+
+        verifyAttribute(decoder, buffer(
+                "*HQ,4210051415,V1,164549,A,0956.3869,N,08406.7068,W,000.00,000,221215,FFFFFBFF,712,01,0,0,6#"),
+                Position.KEY_STATUS, 0xFFFFFBFFL);
 
     }
 
