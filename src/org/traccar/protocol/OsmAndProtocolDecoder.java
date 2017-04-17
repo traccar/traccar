@@ -129,7 +129,11 @@ public class OsmAndProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, value);
                     break;
                 default:
-                    position.set(entry.getKey(), value);
+                    try {
+                        position.set(entry.getKey(), Double.parseDouble(value));
+                    } catch (NumberFormatException e) {
+                        position.set(entry.getKey(), value);
+                    }
                     break;
             }
         }
