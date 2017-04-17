@@ -166,7 +166,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-        } else if (type.equals("UD") || type.equals("UD2") || type.equals("AL")) {
+        } else if (type.equals("UD") || type.equals("UD2") || type.equals("UD3") || type.equals("AL")) {
 
             if (type.equals("AL")) {
                 sendResponse(channel, manufacturer, id, "AL");
