@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2017 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
             .number("#(x+)?")                    // cell info
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).(ddd),")       // time (hhmmss.sss)
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
             .expression("([AV]),")               // validity
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -91,7 +91,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 parser.next(); // base station info
 
                 DateBuilder dateBuilder = new DateBuilder()
-                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt());
+                        .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
                 position.setValid(parser.next().equals("A"));
                 position.setLatitude(parser.nextCoordinate());
