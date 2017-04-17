@@ -22,7 +22,6 @@ import org.traccar.Context;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Log;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 import java.nio.charset.StandardCharsets;
 
@@ -56,7 +55,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        boolean alternative = Context.getDeviceManager().lookupAttributeBoolean(
+        boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
                 command.getDeviceId(), "gt06.alternative", false, true);
 
         switch (command.getType()) {

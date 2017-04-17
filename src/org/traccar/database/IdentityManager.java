@@ -28,4 +28,12 @@ public interface IdentityManager {
 
     boolean isLatestPosition(Position position);
 
+    boolean lookupAttributeBoolean(long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig);
+
+    String lookupAttributeString(long deviceId, String attributeName, String defaultValue, boolean lookupConfig);
+
+    int lookupAttributeInteger(long deviceId, String attributeName, int defaultValue, boolean lookupConfig);
+
+    long lookupAttributeLong(long deviceId, String attributeName, long defaultValue, boolean lookupConfig);
+
 }

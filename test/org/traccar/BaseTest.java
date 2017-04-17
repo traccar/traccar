@@ -37,6 +37,30 @@ public class BaseTest {
                 return true;
             }
 
+            @Override
+            public boolean lookupAttributeBoolean(
+                    long deviceId, String attributeName, boolean defaultValue, boolean lookupConfig) {
+                return false;
+            }
+
+            @Override
+            public String lookupAttributeString(
+                    long deviceId, String attributeName, String defaultValue, boolean lookupConfig) {
+                return null;
+            }
+
+            @Override
+            public int lookupAttributeInteger(
+                    long deviceId, String attributeName, int defaultValue, boolean lookupConfig) {
+                return 0;
+            }
+
+            @Override
+            public long lookupAttributeLong(
+                    long deviceId, String attributeName, long defaultValue, boolean lookupConfig) {
+                return 0;
+            }
+
         });
     }
 
