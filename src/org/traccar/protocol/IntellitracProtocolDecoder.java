@@ -94,23 +94,23 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, satellites);
 
         position.set(Position.KEY_INDEX, parser.nextLong());
-        position.set(Position.KEY_INPUT, parser.next());
-        position.set(Position.KEY_OUTPUT, parser.next());
+        position.set(Position.KEY_INPUT, parser.nextInt());
+        position.set(Position.KEY_OUTPUT, parser.nextInt());
 
-        position.set(Position.PREFIX_ADC + 1, parser.next());
-        position.set(Position.PREFIX_ADC + 2, parser.next());
+        position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+        position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
 
         // J1939 data
-        position.set(Position.KEY_OBD_SPEED, parser.next());
-        position.set(Position.KEY_RPM, parser.next());
-        position.set("coolant", parser.next());
-        position.set(Position.KEY_FUEL_LEVEL, parser.next());
-        position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
-        position.set(Position.PREFIX_TEMP + 1, parser.next());
-        position.set(Position.KEY_CHARGE, parser.next());
-        position.set("tpl", parser.next());
-        position.set("axle", parser.next());
-        position.set(Position.KEY_OBD_ODOMETER, parser.next());
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set("coolant", parser.nextInt());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+        position.set(Position.KEY_CHARGE, parser.nextInt());
+        position.set("tpl", parser.nextInt());
+        position.set("axle", parser.nextInt());
+        position.set(Position.KEY_OBD_ODOMETER, parser.nextInt());
 
         return position;
     }

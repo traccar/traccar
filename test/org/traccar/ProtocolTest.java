@@ -184,6 +184,10 @@ public class ProtocolTest extends BaseTest {
             Assert.assertTrue(attributes.get(Position.KEY_ODOMETER) instanceof Number);
         }
 
+        if (attributes.containsKey(Position.KEY_RPM)) {
+            Assert.assertTrue(attributes.get(Position.KEY_RPM) instanceof Number);
+        }
+
         if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
             for (CellTower cellTower : position.getNetwork().getCellTowers()) {
                 checkInteger(cellTower.getMobileCountryCode(), 0, 999);

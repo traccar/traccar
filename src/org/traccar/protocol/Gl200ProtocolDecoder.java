@@ -473,16 +473,16 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        position.set(Position.KEY_RPM, parser.next());
-        position.set(Position.KEY_OBD_SPEED, parser.next());
-        position.set(Position.PREFIX_TEMP + 1, parser.next());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
-        position.set("dtcsClearedDistance", parser.next());
-        position.set("odbConnect", parser.next());
-        position.set("dtcsNumber", parser.next());
+        position.set("dtcsClearedDistance", parser.nextInt());
+        position.set("odbConnect", parser.nextInt() == 1);
+        position.set("dtcsNumber", parser.nextInt());
         position.set("dtcsCodes", parser.next());
-        position.set(Position.KEY_THROTTLE, parser.next());
-        position.set(Position.KEY_FUEL_LEVEL, parser.next());
+        position.set(Position.KEY_THROTTLE, parser.nextInt());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
         position.set(Position.KEY_OBD_ODOMETER, parser.nextInt() * 1000);
 
         decodeLocation(position, parser);
@@ -556,8 +556,8 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
         decodeStatus(position, parser);
 
-        position.set(Position.KEY_RPM, parser.next());
-        position.set(Position.KEY_FUEL_LEVEL, parser.next());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);
 

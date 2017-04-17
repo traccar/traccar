@@ -207,14 +207,14 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, parser.nextDateTime());
 
             position.set(Position.KEY_ODOMETER, parser.nextInt());
-            parser.next(); // instant fuel consumption
-            position.set(Position.KEY_FUEL_CONSUMPTION, parser.next());
-            position.set(Position.KEY_HOURS, parser.next());
-            position.set(Position.KEY_OBD_SPEED, parser.next());
-            position.set(Position.PREFIX_TEMP + 1, parser.next());
+            parser.nextDouble(); // instant fuel consumption
+            position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
+            position.set(Position.KEY_HOURS, parser.nextInt());
+            position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+            position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
             position.set(Position.KEY_THROTTLE, parser.next());
-            position.set(Position.KEY_RPM, parser.next());
-            position.set(Position.KEY_BATTERY, parser.next());
+            position.set(Position.KEY_RPM, parser.nextInt());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
             position.set(Position.KEY_DTCS, parser.next().replace(',', ' ').trim());
 
             return position;
