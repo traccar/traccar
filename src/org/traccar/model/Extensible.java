@@ -40,20 +40,44 @@ public class Extensible {
         this.attributes = attributes;
     }
 
-    public void set(String key, boolean value) {
+    public void set(String key, Boolean value) {
         attributes.put(key, value);
     }
 
-    public void set(String key, int value) {
-        attributes.put(key, value);
+    public void set(String key, Byte value) {
+        if (value != null) {
+            attributes.put(key, value.intValue());
+        }
     }
 
-    public void set(String key, long value) {
-        attributes.put(key, value);
+    public void set(String key, Short value) {
+        if (value != null) {
+            attributes.put(key, value.intValue());
+        }
     }
 
-    public void set(String key, double value) {
-        attributes.put(key, value);
+    public void set(String key, Integer value) {
+        if (value != null) {
+            attributes.put(key, value);
+        }
+    }
+
+    public void set(String key, Long value) {
+        if (value != null) {
+            attributes.put(key, value);
+        }
+    }
+
+    public void set(String key, Float value) {
+        if (value != null) {
+            attributes.put(key, value.doubleValue());
+        }
+    }
+
+    public void set(String key, Double value) {
+        if (value != null) {
+            attributes.put(key, value);
+        }
     }
 
     public void set(String key, String value) {
