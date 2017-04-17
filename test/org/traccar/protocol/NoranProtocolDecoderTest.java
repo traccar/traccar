@@ -12,7 +12,7 @@ public class NoranProtocolDecoderTest extends ProtocolTest {
 
         NoranProtocolDecoder decoder = new NoranProtocolDecoder(new NoranProtocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "0d0a2a4b57000d000080010d0a"));
 
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
@@ -30,7 +30,7 @@ public class NoranProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "34000800010c000000000080a3438e20944149bd07c24e523039423139323832000031352d30342d32362030383a34333a353300"));
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "0f0000004e52303946303431353500"));
 
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,

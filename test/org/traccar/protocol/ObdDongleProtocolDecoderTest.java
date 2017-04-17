@@ -10,7 +10,7 @@ public class ObdDongleProtocolDecoderTest extends ProtocolTest {
 
         ObdDongleProtocolDecoder decoder = new ObdDongleProtocolDecoder(new ObdDongleProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "55550003383634383637303232353131303135010009010011023402010201ABAAAA"));
 
         verifyPosition(decoder, binary(

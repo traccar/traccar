@@ -52,7 +52,7 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "359769031878322imei:359769031878322,tracker,1602160718,2,F,221811.000,A,1655.2193,S,14546.6722,E,0.00,,"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "imei:865328021049167,OBD,141118115036,,,0.0,,000,0.0%,+,0.0%,00000,,,,,"));
 
         verifyAttributes(decoder, text(
@@ -86,15 +86,15 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
                 position("2015-10-27 01:15:31.000", true, 60.33830, 25.10323));
 
         // Log on request
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "##,imei:359586015829802,A"));
 
         // Heartbeat package
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "359586015829802"));
 
         // No GPS signal
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "imei:359586015829802,tracker,000000000,13554900601,L,;"));
 
         verifyPosition(decoder, text(

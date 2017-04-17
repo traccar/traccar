@@ -14,7 +14,7 @@ public class GpsMarkerProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$GM23D863071014445404T260816142611N55441051E037325071033063C0530304#"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$GM300350123456789012T100511123300G25000001772F185200000000000000005230298#"));
 
         verifyPosition(decoder, text(

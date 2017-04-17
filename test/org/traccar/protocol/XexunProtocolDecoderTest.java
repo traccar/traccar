@@ -55,7 +55,7 @@ public class XexunProtocolDecoderTest extends ProtocolTest {
 
         decoder = new XexunProtocolDecoder(new XexunProtocol(), true);
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 ",+48606717068,,L,, imei:012207005047292,,,F:4.28V,1,52,11565,247,01,000E,1FC5"));
 
         verifyPosition(decoder, text(

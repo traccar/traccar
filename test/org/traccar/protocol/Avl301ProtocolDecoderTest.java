@@ -11,10 +11,10 @@ public class Avl301ProtocolDecoderTest extends ProtocolTest {
 
         Avl301ProtocolDecoder decoder = new Avl301ProtocolDecoder(new Avl301Protocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "244c0f086058500087335500010d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "24480d1001c3065c0d00010d0a"));
 
         verifyPosition(decoder, binary(

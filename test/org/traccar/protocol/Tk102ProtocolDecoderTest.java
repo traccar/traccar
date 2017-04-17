@@ -10,10 +10,10 @@ public class Tk102ProtocolDecoderTest extends ProtocolTest {
 
         Tk102ProtocolDecoder decoder = new Tk102ProtocolDecoder(new Tk102Protocol());
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "[\u00800000000000\u000821315452]"));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "[\u00f00000000000\u000821315452]"));
 
         verifyPosition(decoder, buffer(
@@ -22,16 +22,16 @@ public class Tk102ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, buffer(
                 "[\u00900100100001\u0036(ITV025857A2232.0729N11356.0030E000.02109110100000000)]"));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "[\u00210000000081\u0072(353327023367238,TK102-W998_01_V1.1.001_130219,255,001,255,001,0,100,100,0,internet,0000,0000,0,0,255,0,4,1,11,00)]"));
         
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "[\u004c0000001323\u004e(GSM,0,0,07410001,20120101162600,404,010,9261,130,0,2353,130,35,9263,130,33,1)]"));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "[\u00250000000082\u001d(100100000000000600-30-65535)]"));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "[\u00230000000004\u0018(062100000000000600-0-0)]"));
 
         verifyPosition(decoder, buffer(

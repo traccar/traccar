@@ -13,7 +13,7 @@ public class ProgressProtocolDecoderTest extends ProtocolTest {
 
         ProgressProtocolDecoder decoder = new ProgressProtocolDecoder(new ProgressProtocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "020037000100000003003131310f003335343836383035313339303036320f00323530303136333832383531353535010000000100000000000000e6bb97b6"));
 
         /*verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,

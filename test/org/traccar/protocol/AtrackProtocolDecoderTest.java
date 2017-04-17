@@ -24,7 +24,7 @@ public class AtrackProtocolDecoderTest extends ProtocolTest {
 
         decoder.setCustom(false);
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "fe0200014104d8f196820001"));
 
         verifyPositions(decoder, binary(

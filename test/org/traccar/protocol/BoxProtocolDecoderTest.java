@@ -11,10 +11,10 @@ public class BoxProtocolDecoderTest extends ProtocolTest {
 
         BoxProtocolDecoder decoder = new BoxProtocolDecoder(new BoxProtocol());
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "H,BT,358281002435893,081028142432,F5813D19,6D6E6DC2"));
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "H,BT,N878123,080415081234,D63E6DD9,6D6E6DC2,8944100300825505377"));
 
         verifyPosition(decoder, text(
@@ -23,10 +23,10 @@ public class BoxProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "L,081028142432,G,52.51081,-1.70849,0,203,0,16,0"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "L,080528112501,AI1,145.56"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "E,1"));
 
         verifyPosition(decoder, text(

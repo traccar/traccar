@@ -10,7 +10,7 @@ public class HomtecsProtocolDecoderTest extends ProtocolTest {
 
         HomtecsProtocolDecoder decoder = new HomtecsProtocolDecoder(new HomtecsProtocol());
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "MDS0001_R6d1821f7,170323,143601.00,04,,,,,,,,,"));
 
         verifyPosition(decoder, text(

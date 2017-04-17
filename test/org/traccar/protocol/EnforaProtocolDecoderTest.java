@@ -10,10 +10,10 @@ public class EnforaProtocolDecoderTest extends ProtocolTest {
 
         EnforaProtocolDecoder decoder = new EnforaProtocolDecoder(new EnforaProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "000A08002020202020303131303730303030353730323637"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "003B000502000000000820202020202030313130373030303035373032363720383A000000000D00508401358E640032B37700000367B00000A804"));
 
         verifyPosition(decoder, binary(

@@ -10,7 +10,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
 
         Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(new Tk103Protocol());
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "(357593060760397BP02,G,2,170304A6015.7466N01101.8460E001.609445591.048,7)"));
 
         verifyPosition(decoder, text(
@@ -25,13 +25,13 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyNotNull(decoder, text(
                 "(087073104337BZ00,740,000,3bf7,0425,3bf7,0bf5,3bf7,09e7,3bf7,cbad,3bf7,0dcf,3bf7,c7b2,01000000)"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "(087073005534BP00HSO"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "(027028258309BQ86,0,05550c21b10d1d0f431008bd114c0ea5078400010007a100423932,161117005322,01000001)"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "(027028258309BQ86,0,05470c0eb20d040f4410022911360e92077e00010007a1004237c7,161117005232,01000001)"));
 
         verifyPosition(decoder, text(
@@ -77,7 +77,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "(088048003342BR00150807A1352.9871N10030.9084E000.0110718000.0001010000L00000000)"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "(090411121854BP0000001234567890HSO"));
 
         verifyPosition(decoder, text(
@@ -141,7 +141,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "(013632651491,ZC17,040613,A,2234.0297N,11405.9101E,000.0,040137,178.48)"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "(013632651491,ZC20,040613,040137,6,42,112,0)"));
 
         verifyPosition(decoder, text(

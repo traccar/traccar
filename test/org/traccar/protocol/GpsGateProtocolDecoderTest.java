@@ -19,22 +19,22 @@ public class GpsGateProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$FRCMD,353067011068246,_SendMessage,,1918.1942,N,09906.3696,W,2246.5,000.0,295.9,150416,213147.00,1,Odometer=*70"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$FRCMD,862950025974620,_Ping,voltage=4*4F"));
 
         verifyPosition(decoder, text(
                 "$FRCMD,862950025974620,_SendMessage, ,2721.5781,S,15259.145,E,61,0.00,61,080316,092612,1,SosButton=0,voltage=4*60"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$FRLIN,,user1,8IVHF*7A"));
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$FRLIN,,354503026292842,VGZTHKT*0C"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$FRLIN,IMEI,1234123412341234,*7B"));
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$FRLIN,,saab93_device,KLRFBGIVDJ*28"));
 
         verifyPosition(decoder, text(

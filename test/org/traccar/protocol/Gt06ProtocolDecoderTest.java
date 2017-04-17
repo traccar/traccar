@@ -10,16 +10,16 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         Gt06ProtocolDecoder decoder = new Gt06ProtocolDecoder(new Gt06Protocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "787805120099abec0d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttributes(decoder, binary(
                 "7979003F940D110315102A202141494F494C2C30322C3030382E3239302C3032392E3630302C3531394A2C303430302C3030382E3433302C302C30302C4142001678EA0D0A"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "79790005840016BB1A0D0A"));
 
         verifyAttributes(decoder, binary(
@@ -43,10 +43,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, binary(
                 "787829152100000000526573746f7265206675656c20737570706c793a2053756363657373210002014077ce0d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "78780D01012345678901234500018CDD0D0A"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "78780d0103534190360660610003c3df0d0a"));
 
         verifyAttributes(decoder, binary(
@@ -80,19 +80,19 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "7878471e0e03110b0511c501c664fd074db73f0218a602e003433a002fed40433a0056e14e433a0056104e433a0056fd53433a002eed55433a007e4b57433a002ee25aff00020120f6720d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "7979005bfd0358899050927725004c0020bf984358df603b2ea3a339e54335013a5b56455253494f4e5d47543036445f32305f3630444d325f423235455f5631355f574d5b4255494c445d323031332f31322f32382031353a3234002a3b240d0a7979005bfd0358899050927725004c0020bf984358df603b2ea3a339e54335013a5b56455253494f4e5d47543036445f32305f3630444d325f423235455f5631355f574d5b4255494c445d323031332f31322f32382031353a3234002d4f9b0d0a7979005bfd0358899050927725004c0020bf984358df603b2ea3a339e54335013a5b56455253494f4e5d47543036445f32305f3630444d325f423235455f5631355f574d5b4255494c445d323031332f31322f32382031353a3234003084ff0d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "78788b818300000000534545464e2626004f04220045042626262b37393035343031353534362626262626260410041b0415041a04210415041926262b373930363433333031313526260410043d044f26262b373936303437383430363426260412043e0432043026262b373932383834373738383126262626262626262626262626262626232300020022155d0d0a"));
 
         verifyPosition(decoder, binary(
                 "787822220e0914160f07c9021a362805090a7800d8b802d402c30e00a98a0105010213f4bb0d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "787811010864717003664467100f190a0002c6d20d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "787811010123456789012345100B3201000171930D0A"));
 
     }

@@ -18,15 +18,15 @@ public class At2000ProtocolDecoderTest extends ProtocolTest {
 
         decoder = new At2000ProtocolDecoder(new At2000Protocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "01012f00000000000000000000000000003335373435343037313632373539388b57ec3a6ec7e3310a1ceb0a70fd751b8f2e7be6df1d6dcd80129f66fff0ea1c"));
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "89000000000000000000000000000000"));
 
         decoder = new At2000ProtocolDecoder(new At2000Protocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "01012f0000000000000000000000000000333537343534303731363036313936ddf189075add9a32d97b54073025963e65849a3a59940d05fd8db655fc84bc6d"));
 
         verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,
@@ -34,7 +34,7 @@ public class At2000ProtocolDecoderTest extends ProtocolTest {
 
         decoder = new At2000ProtocolDecoder(new At2000Protocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "01012f000000000000000000000000000033353734353430373136303631393637f5441a9862260117858237fe3160388490f0df7d46c09112ee087235a92101"));
 
         verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,
@@ -42,7 +42,7 @@ public class At2000ProtocolDecoderTest extends ProtocolTest {
 
         decoder = new At2000ProtocolDecoder(new At2000Protocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "01012f0000000000000000000000000000333537343534303731363035353033dd529a1eb5df9f3b6d320b38250e03306692957e8c2127d8e381a717f639b4c9"));
 
         verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,
@@ -50,7 +50,7 @@ public class At2000ProtocolDecoderTest extends ProtocolTest {
 
         decoder = new At2000ProtocolDecoder(new At2000Protocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "01012f00000000000000000000000000003335363137333036343430373439320fad981997ae8e031fe10c0ea7641903ca32c0331df467233d2a9cd886fbeef8"));
 
         verifyPositions(decoder, binary(ByteOrder.LITTLE_ENDIAN,

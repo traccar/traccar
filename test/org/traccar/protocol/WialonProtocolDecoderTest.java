@@ -10,13 +10,13 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         WialonProtocolDecoder decoder = new WialonProtocolDecoder(new WialonProtocol());
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "#L#123456789012345;test"));
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "#L#2002;NA"));
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "#P#"));
 
         verifyPosition(decoder, text(

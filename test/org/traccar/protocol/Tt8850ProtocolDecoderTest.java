@@ -22,7 +22,7 @@ public class Tt8850ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "\u0000\u0004,0017,0,GTNMR,,867844000400914,,0,41,1,2,0.0,0,1504.2,-75.569202,6.242850,20150404162835,,,,,97,20150404162836,05EF"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "\u0000\u0004,0017,0,GTPNA,,867844000400914,,0,0,1,0,,,,0,0,,,,,,99,20150404190153,0601"));
 
         verifyPosition(decoder, text(

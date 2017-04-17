@@ -10,19 +10,19 @@ public class ArknavX8ProtocolDecoderTest extends ProtocolTest {
 
         ArknavX8ProtocolDecoder decoder = new ArknavX8ProtocolDecoder(new ArknavX8Protocol());
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "351856045213782,241111"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "2R,090214235955,00,,00.04,03.76,001892024.9"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "351856040005407,240101"));
 
         verifyPosition(decoder, text(
                 "1R,110509053244,A,2457.9141N,12126.3321E,220.0,315,10.0,00000000"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "2R,110509053244,837493,,998372,,,"));
 
         verifyPosition(decoder, text(

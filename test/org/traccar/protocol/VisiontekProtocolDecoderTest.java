@@ -16,7 +16,7 @@ public class VisiontekProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$1,VMC,358072044271838,26,10,15,10,43,20,17.066418N,080.395667E,000.0,285,00.8,0074,6390,0,0,0,0,0,0,0,0,00.00,00.00,00,00,0000,12.7,4.0,24,10,0000000000000,A,0"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$1,VMC,358072044271838,25,10,15,09,19,40,00.0000000,000.0000000,000.0,000,00.0,0000,6070,0,0,0,0,0,0,0,0,00.00,00.00,00,00,0000,12.5,4.0,99,00,0000000000000,V,0"));
 
         verifyPosition(decoder, text(
@@ -26,10 +26,10 @@ public class VisiontekProtocolDecoderTest extends ProtocolTest {
                 "$1,AP09BU9397,861785006462448,20,06,14,15,03,28,17267339N,078279407E,060.0,073,0550,11,0,1,0,0,1,1,26,A,0000000000"),
                 position("2014-06-20 15:03:28.000", true, 17.44556, 78.46567));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$1,AP09BU9397,861785006462448,20,06,14,15,03,28,000000000,0000000000,000.0,000,0000,00,0,1,0,0,1,1,24,V,0000000000"));
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$1,1234567890,02,06,11,17,07,45,00000000,000000000,00.0,0,0,V"));
 
         verifyPosition(decoder, text(

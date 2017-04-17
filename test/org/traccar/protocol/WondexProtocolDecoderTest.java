@@ -54,7 +54,7 @@ public class WondexProtocolDecoderTest extends ProtocolTest {
         verifyNotNull(decoder, buffer(
                 "$ERR:GETLOCATION=1"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "d0d70b0001ca9a3b"));
 
     }

@@ -14,16 +14,16 @@ public class CityeasyProtocolDecoderTest extends ProtocolTest {
         verifyNotNull(decoder, binary(
                 "545400853575570249020100033b3430342c34352c31303638312c31313632312c33352c31303638312c31313632322c32332c31303638312c32383938332c32332c31303638312c31313632332c32312c31303638312c32333338312c31372c31303638312c32323538332c31372c31303638312c32363434312c31330000000d352e0d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "54540019357557024902010002520704100000000bbe700d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "5454001735755702490201434a01000000000c24280d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "545400153520000000000100010000000111000D0A"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "54540019357557024902000002520704300000000376390d0a"));
 
         verifyPosition(decoder, binary(

@@ -12,7 +12,7 @@ public class AdmProtocolDecoderTest extends ProtocolTest {
 
         AdmProtocolDecoder decoder = new AdmProtocolDecoder(new AdmProtocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "010042033836313331313030323639343838320501000000000000000000000000000000000000000000000000000000000000000000000000000000000000000073"));
 
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,

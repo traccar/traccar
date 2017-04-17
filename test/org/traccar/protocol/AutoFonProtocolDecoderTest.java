@@ -11,7 +11,7 @@ public class AutoFonProtocolDecoderTest extends ProtocolTest {
 
         AutoFonProtocolDecoder decoder = new AutoFonProtocolDecoder(new AutoFonProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "10556103592310314825728F"));
 
         verifyPosition(decoder, binary(
@@ -23,10 +23,10 @@ public class AutoFonProtocolDecoderTest extends ProtocolTest {
         //verifyPosition(decoder, binary(
         //        "12060000007501010B0C00089CFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000003E7FFFF02007601010B0C00269CFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000003E7FFFF4A007601010B0C01089CFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000003E7FFFF04007501010B0C01269CFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000003E7FFFF80007601010B0C02089CFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000003E7FFFFA6007501010B0C02231F5600FA000176F218C70000000000000000000000000000000000000003E7FFFF9629"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "41035151305289931441139602662095148807"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "41032125656985547543619173484002123481"));
 
         verifyPosition(decoder, binary(

@@ -12,7 +12,7 @@ public class NavigilProtocolDecoderTest extends ProtocolTest {
 
         NavigilProtocolDecoder decoder = new NavigilProtocolDecoder(new NavigilProtocol());
 
-        verifyNothing(decoder, binary(ByteOrder.LITTLE_ENDIAN,
+        verifyNull(decoder, binary(ByteOrder.LITTLE_ENDIAN,
                 "01004300040020000000f60203080200e7cd0f510c0000003b00000000000000"));
 
         verifyPosition(decoder, binary(ByteOrder.LITTLE_ENDIAN,

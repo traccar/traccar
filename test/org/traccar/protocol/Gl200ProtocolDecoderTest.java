@@ -178,7 +178,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "+RESP:GTFRI,02010D,867844001675407,,0,0,1,2,0.0,0,28.9,8.591011,56.476397,20140915213209,0238,0001,03CB,2871,,97,20140915213459,009A"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "+RESP:GTINF,359464030073766,8938003990320469804f,18,99,100,1,0,+2.00,0,20131018084015,00EE,0103090402"));
 
         verifyPositions(decoder, text(
@@ -253,7 +253,7 @@ public class Gl200ProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "+RESP:GTVER,1A0800,860599000773978,GL300,GL300,0A03,0103,20161007041531,10F8$"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "+ACK:GTHBD,1A0401,135790246811220,,20100214093254,11F0"));
 
         verifyAttributes(decoder, text(

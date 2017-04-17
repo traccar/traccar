@@ -20,7 +20,7 @@ public class V680ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "#355488020168617##1#0000#AUT#01##1834.770100,E,5302.742800,N,0.62,0.00#310316#211537.000##"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "#353588102019155"));
 
         verifyPosition(decoder, text(
@@ -48,7 +48,7 @@ public class V680ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "#356823031236214##0#0000#AUT#1#V#01904.5491,E,6941.0085,N,000.09,248#170513#160140"));
         
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "#353588550032869##1#0000#AUT#01#72400401cd01a5#00000.0000,E,0000.0000,N,0.00,#000000#000000.000"));
 
         verifyPosition(decoder, text(

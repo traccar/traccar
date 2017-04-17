@@ -10,7 +10,7 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
 
         TrvProtocolDecoder decoder = new TrvProtocolDecoder(new TrvProtocol());
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "TRVAP00353456789012345"));
 
         verifyAttributes(decoder, text(

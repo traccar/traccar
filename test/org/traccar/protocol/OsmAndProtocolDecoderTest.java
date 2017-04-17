@@ -10,7 +10,7 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
 
         OsmAndProtocolDecoder decoder = new OsmAndProtocolDecoder(new OsmAndProtocol());
 
-        verifyNothing(decoder, request(
+        verifyNull(decoder, request(
                 "/?timestamp=1377177267&lat=60.0&lon=30.0"));
 
         verifyPosition(decoder, request(

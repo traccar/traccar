@@ -10,7 +10,7 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
 
         KhdProtocolDecoder decoder = new KhdProtocolDecoder(new KhdProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "2929b1000605162935b80d"));
 
         verifyPosition(decoder, binary(

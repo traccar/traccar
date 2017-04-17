@@ -23,7 +23,7 @@ public class UproProtocolDecoderTest extends ProtocolTest {
                 "*MG201693502000034964,AB&A0800253335360507036975710000091116&P0730000032d2a94d&B0000000000&N13&Z12&U_P\0\0\0\u0004\0\0\0\0\0\0\0\0\0\0"),
                 position("2016-11-09 08:00:25.000", true, -33.58934, -70.61626));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "*MG20113800138000,AH"));
 
         verifyPosition(decoder, buffer(

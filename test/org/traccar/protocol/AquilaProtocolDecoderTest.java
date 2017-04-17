@@ -13,7 +13,7 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$$CLIENT_1ZF,170222318,101,22.846016,75.949104,170321103506,A,0,0,244991,0,10,0.860000,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,12483,294,*3D"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$$CLIENT_1ZF,170222318,15,2_00AP,70.35.195.185,5089,internet,T1:10 S,T2:1 M,Ad1:9164061023,Ad2:9164061023,TOF:0 S,,OSC:75 KM,OST:0 S,GPS:YES,Ignition:ON,*75"));
 
         verifyPosition(decoder, text(
@@ -28,7 +28,7 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$$CLIENT_1DT,151028368,1,19.108438,72.925308,160628154920,A,22,0,0,131,3503,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,*1D"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$$CLIENT_1DT,160319372,1,28.549541,77.249802,160628140743,A,23,0,-65025,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,*0D"));
 
         verifyPosition(decoder, text(

@@ -10,7 +10,7 @@ public class GlobalSatProtocolDecoderTest extends ProtocolTest {
 
         GlobalSatProtocolDecoder decoder = new GlobalSatProtocolDecoder(new GlobalSatProtocol());
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "GSh,131826789036289,3,M,ea04*3d"));
 
         decoder.setFormat0("SORPZAB27GHKLMN*U!");

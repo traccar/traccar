@@ -37,7 +37,7 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "*GS02,358696043774648,GPS:230040;A;S1.166829;E36.934287;0;0;170116,STT:20;0,MGR:32755204,ADC:0;11.2;1;28.3;2;4.1,GFS:0;0"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "*GS02,358696043774648"));
 
         verifyPositions(decoder, text(
@@ -49,7 +49,7 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "*GS16,351535059439208,083515281015,,GPS:A;9;N31.959502;E35.908316;;108;890;1.05;1.79,GSM:1;4;416;3;AF0;A3A6;-59;416;3;AF0;A3A3;-50;416;3;AF0;A3A4;-56;416;3;AF0;A3A5;-62;416;3;AF0;B195;-76,OBD:04410C194603410D2303411C0103410583037F011203411115"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "*GS16,351535058709775"));
         
         verifyPositions(decoder, text(

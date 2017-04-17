@@ -31,7 +31,7 @@ public class MeiligaoProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "242400680790209818ffff99553038333235382e3030302c412c303131352e393338302c532c30333634382e313430392c452c302e30302c3331352e35352c3132303131367c302e37347c313930322e337c303430307c303030302c303030307c302e30f41b0d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "24240011671440258855405000b24d0d0a"));
 
         verifyPosition(decoder, binary(
@@ -45,10 +45,10 @@ public class MeiligaoProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "24240076220720151fffff99660012b3ab00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007c3135303634382c3233303731352c313931352e37323835362c4e2c30373235322e35333034342c456dd00d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "24240000123456FFFFFFFF50008B9B0D0A"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "24240011300600000046090002849a0d0a"));
         
         verifyPosition(decoder, binary(
@@ -87,7 +87,7 @@ public class MeiligaoProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "2424000026016100901fff99553136353835332c412c343130392e36303231322c4e2c3833382e35393131392c572c332e3838332c31322e30302c3034303731332c2c2a34467c322e357c3131307c000600007c0000010f7c303242302c3042333697740d0a"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "2424000067622010053562aa0000010001ae4f00000007800000003039353135362e3030302c412c323632332e383936362c4e2c30353030352e303638302c452c32342e352c3234312e302c323231303133599c0d0a"));
 
         verifyPosition(decoder, binary(

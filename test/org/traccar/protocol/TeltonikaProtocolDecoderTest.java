@@ -10,7 +10,7 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
 
         TeltonikaProtocolDecoder decoder = new TeltonikaProtocolDecoder(new TeltonikaProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "000F313233343536373839303132333435"));
 
         verifyPositions(decoder, false, binary(

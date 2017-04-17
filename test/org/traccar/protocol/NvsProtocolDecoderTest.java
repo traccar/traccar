@@ -10,10 +10,10 @@ public class NvsProtocolDecoderTest extends ProtocolTest {
 
         NvsProtocolDecoder decoder = new NvsProtocolDecoder(new NvsProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "0012333537303430303630303137383234312e38"));
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "0012313233343536373839303132333435312E31"));
 
         verifyPositions(decoder, binary(

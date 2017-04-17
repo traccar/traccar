@@ -22,10 +22,10 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "STX,865067021328417,$GPRMC,064721.000,A,4241.2793,N,02321.9762,E,6.74,346.90,300316,,,1*CA,F,Nil-Alarms,imei:865067021328417,9,559.8,Battery=82%,0,284,03,047E,2B5F;99"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "0147$MGV002,354550050292669,GVT900,S,141215,031804,A,,S,,E,00,04,00,5.17,0.000,193.05,117.1,0.0,510,10,041B,0A5E,,0000,0000,22,12,0, , ,,1-1,98,Timer;!"));
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "0137$MGV002,354550050292669,GVT900,R,141215,031804,A,,S,,E,00,03,00,3.67,0.000,0.00,117.1,0.0,510,10,,,,0000,0000,22,12,0, , ,,1-1,98,PW ON;!"));
 
         verifyPosition(decoder, text(

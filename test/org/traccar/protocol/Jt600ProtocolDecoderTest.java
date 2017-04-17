@@ -29,7 +29,7 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, buffer(
                 "(3301210003,U03,040812,185302,T,22.564025,N,113.242329,E,5,152,9,32%,00000000000011,10133,5173,22,100,1)"));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "(3301210003,U04)"));
 
         verifyPosition(decoder, buffer(
@@ -41,7 +41,7 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, buffer(
                 "(3460311327,U01,010100,000024,F,0.000000,N,0.000000,E,0.00,0,0,100%,00000001000000,263,1,18,0,0,33)"));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "(3460311327,@JT)"));
 
         verifyPosition(decoder, buffer(
@@ -73,7 +73,7 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, buffer(
                 "(3330104377,U01,010100,010228,F,00.000000,N,000.000000,E,0,0,0,0%,00001000000000,741,14,22,0,206)"));
 
-        verifyNothing(decoder, buffer(
+        verifyNull(decoder, buffer(
                 "(6221107674,2,U09,129,2,A,280513113036,E,02711.0500,S,1721.0876,A,030613171243,E,02756.7618,S,2300.0325,3491,538200,14400,1)"));
 
         verifyPosition(decoder, buffer(

@@ -10,7 +10,7 @@ public class CarTrackProtocolDecoderTest extends ProtocolTest {
 
         CarTrackProtocolDecoder decoder = new CarTrackProtocolDecoder(new CarTrackProtocol());
 
-        verifyNothing(decoder, text(
+        verifyNull(decoder, text(
                 "$$020040????????&A0000"));
 
         verifyPosition(decoder, text(

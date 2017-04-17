@@ -10,7 +10,7 @@ public class M2mProtocolDecoderTest extends ProtocolTest {
 
         M2mProtocolDecoder decoder = new M2mProtocolDecoder(new M2mProtocol());
 
-        verifyNothing(decoder, binary(
+        verifyNull(decoder, binary(
                 "235A3C2A2624215C287D70212A21254C7C6421220B0B0B"));
 
         verifyPosition(decoder, binary(
