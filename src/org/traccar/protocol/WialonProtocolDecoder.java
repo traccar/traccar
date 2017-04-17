@@ -116,7 +116,11 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String param : values) {
                 Matcher paramParser = Pattern.compile("(.*):[1-3]:(.*)").matcher(param);
                 if (paramParser.matches()) {
-                    position.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                    try {
+                        position.set(paramParser.group(1).toLowerCase(), Double.parseDouble(paramParser.group(2)));
+                    } catch (NumberFormatException e) {
+                        position.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                    }
                 }
             }
         }

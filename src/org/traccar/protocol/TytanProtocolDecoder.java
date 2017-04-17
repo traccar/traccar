@@ -100,11 +100,11 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     int fuel = buf.readUnsignedShort();
                     int fuelFormat = fuel >> 14;
                     if (fuelFormat == 1) {
-                        position.set(Position.KEY_FUEL_LEVEL, (fuel & 0x3fff) * 0.4 + "%");
+                        position.set("fuelValue", (fuel & 0x3fff) * 0.4 + "%");
                     } else if (fuelFormat == 2) {
-                        position.set(Position.KEY_FUEL_LEVEL, (fuel & 0x3fff) * 0.5 + " l");
+                        position.set("fuelValue", (fuel & 0x3fff) * 0.5 + " l");
                     } else if (fuelFormat == 3) {
-                        position.set(Position.KEY_FUEL_LEVEL, (fuel & 0x3fff) * -0.5 + " l");
+                        position.set("fuelValue", (fuel & 0x3fff) * -0.5 + " l");
                     }
                     break;
                 case 108:
