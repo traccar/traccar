@@ -26,7 +26,6 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
-import org.traccar.helper.Log;
 import org.traccar.model.Position;
 
 import java.io.IOException;
