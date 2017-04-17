@@ -277,12 +277,9 @@ public final class Context {
 
         connectionManager = new ConnectionManager();
 
-        if (config.getBoolean("event.geofenceHandler")) {
+        if (config.getBoolean("event.enable")) {
             geofenceManager = new GeofenceManager(dataManager);
             calendarManager = new CalendarManager(dataManager);
-        }
-
-        if (config.getBoolean("event.enable")) {
             notificationManager = new NotificationManager(dataManager);
             Properties velocityProperties = new Properties();
             velocityProperties.setProperty("file.resource.loader.path",
