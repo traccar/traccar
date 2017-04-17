@@ -18,14 +18,6 @@
     <entry key='logger.file'>./logs/tracker-server.log</entry>
 
     <entry key='event.enable'>true</entry>
-    <entry key='event.overspeedHandler'>true</entry>
-    <entry key='event.overspeed.notRepeat'>true</entry>
-    <entry key='event.motionHandler'>true</entry>
-    <entry key='event.geofenceHandler'>true</entry>
-    <entry key='event.alertHandler'>true</entry>
-    <entry key='event.ignitionHandler'>true</entry>
-    <entry key='event.statusHandler'>true</entry>
-    <entry key='event.maintenanceHandler'>true</entry>
 
     <!-- DATABASE CONFIG -->
 
